@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { ColumnSettings } from './data-table';
-import { completeSavedColumnSettings, getFilteredAdditionalFields } from './utils';
+import { addMissingDefaultColumns, getFilteredAdditionalFields } from './utils';
 
 // Defaults of a table that gained two columns after the user saved: `af` (hidden, needs an
 // additional field) right after `sf`, and `ac` (visible) at the end.
@@ -27,9 +27,9 @@ const pinnedDefaultColumnSettings: ColumnSettings[] = [
   { id: 'actions', visible: true, index: 4, pinningPosition: 'end' },
 ];
 
-describe('completeSavedColumnSettings', () => {
+describe('addMissingDefaultColumns', () => {
   it('gives a column the saved settings do not know its default visibility', () => {
-    const { columnVisibility } = completeSavedColumnSettings({
+    const { columnVisibility } = addMissingDefaultColumns({
       columnOrder: savedOrder,
       columnVisibility: savedVisibility,
       defaultColumnSettings,
@@ -40,7 +40,7 @@ describe('completeSavedColumnSettings', () => {
   });
 
   it('places a new column right after the column that precedes it in the defaults', () => {
-    const { columnOrder } = completeSavedColumnSettings({
+    const { columnOrder } = addMissingDefaultColumns({
       columnOrder: savedOrder,
       columnVisibility: savedVisibility,
       defaultColumnSettings,
@@ -51,7 +51,7 @@ describe('completeSavedColumnSettings', () => {
   });
 
   it('keeps everything the user saved', () => {
-    const { columnOrder, columnVisibility } = completeSavedColumnSettings({
+    const { columnOrder, columnVisibility } = addMissingDefaultColumns({
       columnOrder: savedOrder,
       columnVisibility: savedVisibility,
       defaultColumnSettings,
@@ -62,7 +62,7 @@ describe('completeSavedColumnSettings', () => {
   });
 
   it('places a new column first when no column before it is known', () => {
-    const { columnOrder } = completeSavedColumnSettings({
+    const { columnOrder } = addMissingDefaultColumns({
       columnOrder: ['type', 'sf', 'af', 'calls', 'ac'],
       columnVisibility: {},
       defaultColumnSettings,
@@ -72,14 +72,14 @@ describe('completeSavedColumnSettings', () => {
   });
 
   it('returns the defaults when nothing was saved', () => {
-    const { columnOrder, columnVisibility } = completeSavedColumnSettings({ defaultColumnSettings });
+    const { columnOrder, columnVisibility } = addMissingDefaultColumns({ defaultColumnSettings });
 
     expect(columnOrder).toEqual(['name', 'type', 'sf', 'af', 'calls', 'ac']);
     expect(columnVisibility).toEqual({ name: true, type: true, sf: true, af: false, calls: false, ac: true });
   });
 
   it('keeps a saved column that is no longer in the defaults', () => {
-    const { columnOrder, columnVisibility } = completeSavedColumnSettings({
+    const { columnOrder, columnVisibility } = addMissingDefaultColumns({
       columnOrder: ['removed', ...savedOrder],
       columnVisibility: { ...savedVisibility, removed: true },
       defaultColumnSettings,
@@ -91,13 +91,13 @@ describe('completeSavedColumnSettings', () => {
 
   it('does not reorder the default settings it is given', () => {
     const shuffled = [defaultColumnSettings[2], defaultColumnSettings[0], defaultColumnSettings[1]];
-    completeSavedColumnSettings({ columnOrder: [], columnVisibility: {}, defaultColumnSettings: shuffled });
+    addMissingDefaultColumns({ columnOrder: [], columnVisibility: {}, defaultColumnSettings: shuffled });
 
     expect(shuffled.map(setting => setting.id)).toEqual(['sf', 'name', 'type']);
   });
 
   it('does not request the additional fields of a new column that is hidden by default', () => {
-    const { columnVisibility } = completeSavedColumnSettings({
+    const { columnVisibility } = addMissingDefaultColumns({
       columnOrder: savedOrder,
       columnVisibility: savedVisibility,
       defaultColumnSettings,
@@ -112,7 +112,7 @@ describe('completeSavedColumnSettings', () => {
     const withVisibleAf = defaultColumnSettings.map(setting =>
       setting.id === 'af' ? { ...setting, visible: true } : setting,
     );
-    const { columnVisibility } = completeSavedColumnSettings({
+    const { columnVisibility } = addMissingDefaultColumns({
       columnOrder: savedOrder,
       columnVisibility: savedVisibility,
       defaultColumnSettings: withVisibleAf,
@@ -124,7 +124,7 @@ describe('completeSavedColumnSettings', () => {
   });
 
   it('pins a new column on its default side, right after the pinned column that precedes it', () => {
-    const { columnPinning } = completeSavedColumnSettings({
+    const { columnPinning } = addMissingDefaultColumns({
       columnOrder: ['row-info', 'symbol', 'actions'],
       columnPinning: { start: ['row-info'], end: ['actions'] },
       columnVisibility: {},
@@ -135,7 +135,7 @@ describe('completeSavedColumnSettings', () => {
   });
 
   it('keeps the pinning the user saved for the columns they knew', () => {
-    const { columnPinning } = completeSavedColumnSettings({
+    const { columnPinning } = addMissingDefaultColumns({
       columnOrder: ['row-info', 'symbol', 'export', 'actions'],
       columnPinning: { start: ['row-info', 'symbol'], end: ['actions'] },
       columnVisibility: {},
@@ -147,7 +147,9 @@ describe('completeSavedColumnSettings', () => {
   });
 
   it('returns the default pinning when nothing was saved', () => {
-    const { columnPinning } = completeSavedColumnSettings({ defaultColumnSettings: pinnedDefaultColumnSettings });
+    const { columnPinning } = addMissingDefaultColumns({
+      defaultColumnSettings: pinnedDefaultColumnSettings,
+    });
 
     expect(columnPinning).toEqual({ start: ['row-info', 'igv'], end: ['export', 'actions'] });
   });

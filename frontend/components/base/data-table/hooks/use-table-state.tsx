@@ -9,7 +9,7 @@ import { userPreferenceApi } from '@/utils/api';
 
 import type { AppFeatures, ColumnSettings, ColumnVisiblity, LoadingStates } from '../data-table';
 import type { TableObserverColumn, TableObserverProps } from '../type/data-table-type';
-import { completeSavedColumnSettings, getFilteredAdditionalFields } from '../utils';
+import { addMissingDefaultColumns, getFilteredAdditionalFields } from '../utils';
 
 export enum DataTableState {
   PENDING,
@@ -125,7 +125,7 @@ export function useTableGetPreferenceEffect({
     }
     if (tableUserPreference.data) {
       const tablePreference = tableUserPreference.data.content as TableObserverProps;
-      const { columnOrder, columnPinning, columnVisibility } = completeSavedColumnSettings({
+      const { columnOrder, columnPinning, columnVisibility } = addMissingDefaultColumns({
         columnOrder: tablePreference.columnOrder,
         columnPinning: normalizeColumnPinning(tablePreference.columnPinning),
         columnVisibility: tablePreference.columnVisibility,

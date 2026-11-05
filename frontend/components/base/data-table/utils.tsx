@@ -22,14 +22,14 @@ export const getFilteredAdditionalFields = ({
   return filteredAdditionalFields;
 };
 
-type CompleteSavedColumnSettingsProps = {
+type AddMissingDefaultColumnsProps = {
   columnOrder?: string[];
   columnPinning?: ColumnPinningState;
   columnVisibility?: Record<string, boolean>;
   defaultColumnSettings: ColumnSettings[];
 };
 
-type CompletedColumnSettings = {
+type ColumnSettingsWithDefaults = {
   columnOrder: string[];
   columnPinning: ColumnPinningState;
   columnVisibility: Record<string, boolean>;
@@ -43,40 +43,44 @@ const insertAfterClosestKnownDefault = (ids: string[], defaults: ColumnSettings[
   ids.splice(previous ? ids.indexOf(previous.id) + 1 : 0, 0, defaults[position].id);
 };
 
-export const completeSavedColumnSettings = ({
+export const addMissingDefaultColumns = ({
   columnOrder,
   columnPinning,
   columnVisibility,
   defaultColumnSettings,
-}: CompleteSavedColumnSettingsProps): CompletedColumnSettings => {
+}: AddMissingDefaultColumnsProps): ColumnSettingsWithDefaults => {
   const defaults = [...defaultColumnSettings].sort((a, b) => a.index - b.index);
   const savedOrder = columnOrder ?? [];
 
-  const completedOrder = [...savedOrder];
+  const orderWithDefaults = [...savedOrder];
   defaults.forEach((setting, position) => {
-    if (!completedOrder.includes(setting.id)) {
-      insertAfterClosestKnownDefault(completedOrder, defaults, position);
+    if (!orderWithDefaults.includes(setting.id)) {
+      insertAfterClosestKnownDefault(orderWithDefaults, defaults, position);
     }
   });
 
-  const completedPinning: ColumnPinningState = {
+  const pinningWithDefaults: ColumnPinningState = {
     start: [...(columnPinning?.start ?? [])],
     end: [...(columnPinning?.end ?? [])],
   };
   defaults.forEach((setting, position) => {
     const side = setting.pinningPosition;
-    if (!side || savedOrder.includes(setting.id) || completedPinning[side].includes(setting.id)) return;
-    insertAfterClosestKnownDefault(completedPinning[side], defaults, position);
+    if (!side || savedOrder.includes(setting.id) || pinningWithDefaults[side].includes(setting.id)) return;
+    insertAfterClosestKnownDefault(pinningWithDefaults[side], defaults, position);
   });
 
-  const completedVisibility = { ...(columnVisibility ?? {}) };
+  const visibilityWithDefaults = { ...(columnVisibility ?? {}) };
   defaults.forEach(setting => {
-    if (!(setting.id in completedVisibility)) {
-      completedVisibility[setting.id] = setting.visible;
+    if (!(setting.id in visibilityWithDefaults)) {
+      visibilityWithDefaults[setting.id] = setting.visible;
     }
   });
 
-  return { columnOrder: completedOrder, columnPinning: completedPinning, columnVisibility: completedVisibility };
+  return {
+    columnOrder: orderWithDefaults,
+    columnPinning: pinningWithDefaults,
+    columnVisibility: visibilityWithDefaults,
+  };
 };
 
 type UpdateAdditionalFieldProps = {
