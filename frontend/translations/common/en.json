@@ -1487,11 +1487,9 @@
       }
     },
     "clinical_trials": {
-      "title_count_one": "Previous enrollment ({{count}} protocol)",
-      "title_count_other": "Previous enrollment ({{count}} protocols)",
+      "title": "Previous enrollment",
       "day_value": "Day {{day}}",
       "initial_badge": "Initial treatment",
-      "footer": "Protocols the patient was enrolled on, from the medical therapy records. Treatment that only followed a protocol is not listed.",
       "columns": {
         "protocol": "Protocol",
         "start": "Start",
