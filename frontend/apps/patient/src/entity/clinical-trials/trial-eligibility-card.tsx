@@ -48,14 +48,16 @@ function TrialEligibilityCard({ assessment, canReadPhi }: TrialEligibilityCardPr
     <div className="flex flex-col gap-3 border-b py-4 last:border-b-0 lg:px-4">
       <div className="text-lg font-semibold text-card-foreground lg:text-xl">{protocolName}</div>
       <div className="flex flex-col gap-4">
-        <div className="grid grid-cols-2 items-center gap-x-4 gap-y-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 items-center gap-2 lg:grid-cols-4">
           <div className="order-1">
             <Badge variant={badgeVariant}>{verdictLabel}</Badge>
           </div>
-          <div className="order-3 flex items-center gap-2 lg:order-2">
+          <div className="order-3 flex items-center gap-3 lg:order-2 lg:w-[150px] lg:gap-2">
             <ConfidenceGauge percent={percent} size={isMobile ? 32 : 24} />
             <div className="flex items-baseline gap-1">
-              {percent != null && <span className="text-sm font-bold text-card-foreground">{percent}%</span>}
+              {percent != null && (
+                <span className="text-base font-bold text-card-foreground lg:text-sm">{percent}%</span>
+              )}
               <span className="text-xs text-muted-foreground">
                 {t('patient_entity.clinical_trials.trial_eligibilities.confidence')}
               </span>
@@ -105,7 +107,7 @@ function TrialEligibilityCard({ assessment, canReadPhi }: TrialEligibilityCardPr
           </div>
         ) : (
           <div className="inline-flex items-center gap-2 text-xs text-muted-foreground">
-            <Lock className="size-4" aria-hidden />
+            <Lock className="size-4 opacity-50" aria-hidden />
             {t('patient_entity.clinical_trials.trial_eligibilities.phi_restricted')}
           </div>
         )}

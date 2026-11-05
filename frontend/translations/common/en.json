@@ -1505,7 +1505,7 @@
         "date_tooltip": "Latest assessment",
         "reasoning_label": "Reasoning:",
         "view_in_brim": "Open in BRIM",
-        "phi_restricted": "Reasoning restricted to users with PHI access",
+        "phi_restricted": "Reasoning restricted outside your organization",
         "verdict": {
           "eligible": "Eligible",
           "ineligible_modifiable": "Ineligible modifiable",
