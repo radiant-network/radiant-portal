@@ -136,27 +136,18 @@ keyed as (
     -- reviewed.
     select
         published.*,
-        md5(concat(
-            coalesce(cast(organization_name as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(research_id as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(protocol_name_and_arm as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(protocol_name as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(protocol_arm as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(chemotherapy_type as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(age_at_regimen_start_days as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(age_at_regimen_stop_days as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(chemotherapy_agents as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(is_initial_treatment as string), concat(char(0), 'NULL', char(0)))
-        )) as pcx_row_uid
+        {{ pcx_row_uid([
+            'organization_name',
+            'research_id',
+            'protocol_name_and_arm',
+            'protocol_name',
+            'protocol_arm',
+            'chemotherapy_type',
+            'age_at_regimen_start_days',
+            'age_at_regimen_stop_days',
+            'chemotherapy_agents',
+            'is_initial_treatment',
+        ]) }} as pcx_row_uid
     from published
 ),
 
@@ -164,25 +155,13 @@ prov as (
     -- Field provenance, pivoted to one row per release row. `!` marks a
     -- reviewer-accepted OVERRIDE (the value differs from what the curator
     -- typed); no marker means corroborated, value unchanged.
-    select
-        pcx_row_uid,
-        max(case when field = 'age_at_regimen_start_days' then accepted_value end)
-            as ov_age_at_regimen_start_days,
-        max(case when field = 'age_at_regimen_stop_days' then accepted_value end)
-            as ov_age_at_regimen_stop_days,
-        max(case when field = 'chemotherapy_agents' then accepted_value end)
-            as ov_chemotherapy_agents,
-        max(case when field = 'chemotherapy_type' then accepted_value end)
-            as ov_chemotherapy_type,
-        max(case when field = 'protocol_name' then accepted_value end)
-            as ov_protocol_name,
-        group_concat(
-            concat(field, '=', source, if(kind = 'override', '!', ''))
-            order by field separator ';'
-        ) as field_provenance
-    from {{ source('radiant_prov', 'pcx_30_field_provenance') }}
-    where grain = 'medical_therapy'
-    group by pcx_row_uid
+    {{ pcx_30_field_provenance_pivot('medical_therapy', [
+        'age_at_regimen_start_days',
+        'age_at_regimen_stop_days',
+        'chemotherapy_agents',
+        'chemotherapy_type',
+        'protocol_name',
+    ]) }}
 )
 
 -- Column order is the base table's, unchanged; field_provenance is appended

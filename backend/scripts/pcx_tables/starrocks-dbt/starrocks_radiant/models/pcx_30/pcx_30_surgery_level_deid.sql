@@ -85,17 +85,13 @@ keyed as (
     -- reviewed.
     select
         published.*,
-        md5(concat(
-            coalesce(cast(organization_name as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(research_id as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(age_at_surgery_days as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(extent_of_tumor_resection as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(is_initial_treatment as string), concat(char(0), 'NULL', char(0)))
-        )) as pcx_row_uid
+        {{ pcx_row_uid([
+            'organization_name',
+            'research_id',
+            'age_at_surgery_days',
+            'extent_of_tumor_resection',
+            'is_initial_treatment',
+        ]) }} as pcx_row_uid
     from published
 ),
 
@@ -103,19 +99,10 @@ prov as (
     -- Field provenance, pivoted to one row per release row. `!` marks a
     -- reviewer-accepted OVERRIDE (the value differs from what the curator
     -- typed); no marker means corroborated, value unchanged.
-    select
-        pcx_row_uid,
-        max(case when field = 'age_at_surgery_days' then accepted_value end)
-            as ov_age_at_surgery_days,
-        max(case when field = 'extent_of_tumor_resection' then accepted_value end)
-            as ov_extent_of_tumor_resection,
-        group_concat(
-            concat(field, '=', source, if(kind = 'override', '!', ''))
-            order by field separator ';'
-        ) as field_provenance
-    from {{ source('radiant_prov', 'pcx_30_field_provenance') }}
-    where grain = 'surgery'
-    group by pcx_row_uid
+    {{ pcx_30_field_provenance_pivot('surgery', [
+        'age_at_surgery_days',
+        'extent_of_tumor_resection',
+    ]) }}
 )
 
 -- Column order is the base table's, unchanged; field_provenance is appended

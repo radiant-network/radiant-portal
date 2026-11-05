@@ -430,31 +430,20 @@ keyed as (
     -- reviewed.
     select
         published.*,
-        md5(concat(
-            coalesce(cast(organization_name as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(research_id as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(event_type as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(age_at_event_days as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(metastasis as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(metastasis_location as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(metastasis_location_other as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(cns_diagnosis_category as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(cns_integrated_diagnosis as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(cns_integrated_diagnosis_source as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(tumor_locations as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(tumor_location_other as string), concat(char(0), 'NULL', char(0)))
-        )) as pcx_row_uid
+        {{ pcx_row_uid([
+            'organization_name',
+            'research_id',
+            'event_type',
+            'age_at_event_days',
+            'metastasis',
+            'metastasis_location',
+            'metastasis_location_other',
+            'cns_diagnosis_category',
+            'cns_integrated_diagnosis',
+            'cns_integrated_diagnosis_source',
+            'tumor_locations',
+            'tumor_location_other',
+        ]) }} as pcx_row_uid
     from published
 ),
 
@@ -462,23 +451,12 @@ prov as (
     -- Field provenance, pivoted to one row per release row. `!` marks a
     -- reviewer-accepted OVERRIDE (the value differs from what the curator
     -- typed); no marker means corroborated, value unchanged.
-    select
-        pcx_row_uid,
-        max(case when field = 'cns_diagnosis_category' then accepted_value end)
-            as ov_cns_diagnosis_category,
-        max(case when field = 'cns_integrated_diagnosis' then accepted_value end)
-            as ov_cns_integrated_diagnosis,
-        max(case when field = 'metastasis' then accepted_value end)
-            as ov_metastasis,
-        max(case when field = 'tumor_locations' then accepted_value end)
-            as ov_tumor_locations,
-        group_concat(
-            concat(field, '=', source, if(kind = 'override', '!', ''))
-            order by field separator ';'
-        ) as field_provenance
-    from {{ source('radiant_prov', 'pcx_30_field_provenance') }}
-    where grain = 'event'
-    group by pcx_row_uid
+    {{ pcx_30_field_provenance_pivot('event', [
+        'cns_diagnosis_category',
+        'cns_integrated_diagnosis',
+        'metastasis',
+        'tumor_locations',
+    ]) }}
 )
 
 -- Column order is the base table's, unchanged; field_provenance is appended

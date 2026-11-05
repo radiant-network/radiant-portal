@@ -95,33 +95,21 @@ keyed as (
     -- reviewed.
     select
         published.*,
-        md5(concat(
-            coalesce(cast(organization_name as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(research_id as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(age_at_radiation_start_days as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(age_at_radiation_stop_days as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(radiation_site as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(radiation_site_other as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(radiation_type as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(radiation_type_other as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(total_radiation_dose as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(total_radiation_dose_unit as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(total_radiation_dose_focal as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(total_radiation_dose_focal_unit as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(is_initial_treatment as string), concat(char(0), 'NULL', char(0)))
-        )) as pcx_row_uid
+        {{ pcx_row_uid([
+            'organization_name',
+            'research_id',
+            'age_at_radiation_start_days',
+            'age_at_radiation_stop_days',
+            'radiation_site',
+            'radiation_site_other',
+            'radiation_type',
+            'radiation_type_other',
+            'total_radiation_dose',
+            'total_radiation_dose_unit',
+            'total_radiation_dose_focal',
+            'total_radiation_dose_focal_unit',
+            'is_initial_treatment',
+        ]) }} as pcx_row_uid
     from published
 ),
 
@@ -129,27 +117,14 @@ prov as (
     -- Field provenance, pivoted to one row per release row. `!` marks a
     -- reviewer-accepted OVERRIDE (the value differs from what the curator
     -- typed); no marker means corroborated, value unchanged.
-    select
-        pcx_row_uid,
-        max(case when field = 'age_at_radiation_start_days' then accepted_value end)
-            as ov_age_at_radiation_start_days,
-        max(case when field = 'age_at_radiation_stop_days' then accepted_value end)
-            as ov_age_at_radiation_stop_days,
-        max(case when field = 'radiation_site' then accepted_value end)
-            as ov_radiation_site,
-        max(case when field = 'radiation_type' then accepted_value end)
-            as ov_radiation_type,
-        max(case when field = 'total_radiation_dose' then accepted_value end)
-            as ov_total_radiation_dose,
-        max(case when field = 'total_radiation_dose_focal' then accepted_value end)
-            as ov_total_radiation_dose_focal,
-        group_concat(
-            concat(field, '=', source, if(kind = 'override', '!', ''))
-            order by field separator ';'
-        ) as field_provenance
-    from {{ source('radiant_prov', 'pcx_30_field_provenance') }}
-    where grain = 'radiation'
-    group by pcx_row_uid
+    {{ pcx_30_field_provenance_pivot('radiation', [
+        'age_at_radiation_start_days',
+        'age_at_radiation_stop_days',
+        'radiation_site',
+        'radiation_type',
+        'total_radiation_dose',
+        'total_radiation_dose_focal',
+    ]) }}
 )
 
 -- Column order is the base table's, unchanged; field_provenance is appended

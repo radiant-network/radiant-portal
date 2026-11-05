@@ -42,7 +42,22 @@ with pt_roster as (
 
 initial_events as (
     select * from {{ ref('int_pcx_30_initial_events') }}
-)
+),
+
+-- REVIEWER OVERRIDES (added 2026-11-05) -- applies the same reviewer-accepted
+-- values as pcx_30_radiation_level_deid, so a view-backed consumer no longer
+-- sees the curator's original where a reviewer accepted a correction. One
+-- override lands here today: C72570's total_radiation_dose_focal, 5580 -> 5400.
+-- Provenance DETAIL is not exposed here; the release table carries a
+-- `field_provenance` column and whether the view layer should too is an open
+-- decision, so this moves the VALUES only and adds no column.
+--
+-- The paired calendar dates ARE re-derived from an accepted age -- they exist
+-- only in this view and are a pure projection of it. `is_initial_treatment`
+-- deliberately does NOT cascade: the deid model does not cascade either, and
+-- view-vs-table agreement on a shared column matters more than the internal
+-- coherence of a derived one.
+published as (
 
 select distinct
     -- pcx_30_organization_override wins where it carries the patient; see the seed's
@@ -50,15 +65,24 @@ select distinct
     coalesce(ovr.organization_name, pt_roster.organization_name) as organization_name,
     coalesce(ovr.organization_code, org.code) as organization_code,
 
+    -- NOT EMITTED -- the provenance key must be computed over the DEID table's
+    -- values, and the deid model keys on the RAW roster organization name, not
+    -- the pcx_30_organization_override one. Using the coalesced name above would
+    -- move the hash and the join would silently miss: measured on C7617267
+    -- (SCH-DEMO), whose 2 radiation rows were exactly the ones that failed to
+    -- match before this column existed.
+    pt_roster.organization_name as uid_organization_name,
+    -- NOT EMITTED -- needed to re-derive the dates from an accepted age.
+    dob as uid_dob,
+
     -- identifier pair
     -- (qualified: initial_events also exposes research_id / organization_name)
     pt_roster.mrn,
     pt_roster.research_id,
 
-    -- timing pairs
-    date_add(dob, interval cast(age_at_radiation_start as int) day) as radiation_start_date,
+    -- timing pairs (the calendar dates are projected in the final select, from
+    -- the accepted age where one exists)
     age_at_radiation_start as age_at_radiation_start_days,
-    date_add(dob, interval cast(age_at_radiation_stop as int) day) as radiation_stop_date,
     age_at_radiation_stop as age_at_radiation_stop_days,
 
     -- identical in both builds
@@ -81,3 +105,67 @@ left join {{ ref('pcx_30_organization_override') }} ovr
     on ovr.research_id = pt_roster.research_id
 left join initial_events on pt_roster.research_id = initial_events.research_id
 where radiation = 'Yes'
+
+),
+
+keyed as (
+    select
+        published.*,
+        {{ pcx_row_uid([
+            'uid_organization_name',
+            'research_id',
+            'age_at_radiation_start_days',
+            'age_at_radiation_stop_days',
+            'radiation_site',
+            'radiation_site_other',
+            'radiation_type',
+            'radiation_type_other',
+            'total_radiation_dose',
+            'total_radiation_dose_unit',
+            'total_radiation_dose_focal',
+            'total_radiation_dose_focal_unit',
+            'is_initial_treatment',
+        ]) }} as pcx_row_uid
+    from published
+),
+
+prov as (
+    {{ pcx_30_field_provenance_pivot('radiation', [
+        'age_at_radiation_start_days',
+        'age_at_radiation_stop_days',
+        'radiation_site',
+        'radiation_type',
+        'total_radiation_dose',
+        'total_radiation_dose_focal',
+    ]) }}
+)
+
+-- Column list and order UNCHANGED from the pre-override view.
+select
+    keyed.organization_name,
+    keyed.organization_code,
+    keyed.mrn,
+    keyed.research_id,
+    date_add(keyed.uid_dob, interval cast(coalesce(
+        prov.ov_age_at_radiation_start_days,
+        keyed.age_at_radiation_start_days) as int) day) as radiation_start_date,
+    coalesce(prov.ov_age_at_radiation_start_days,
+             keyed.age_at_radiation_start_days) as age_at_radiation_start_days,
+    date_add(keyed.uid_dob, interval cast(coalesce(
+        prov.ov_age_at_radiation_stop_days,
+        keyed.age_at_radiation_stop_days) as int) day) as radiation_stop_date,
+    coalesce(prov.ov_age_at_radiation_stop_days,
+             keyed.age_at_radiation_stop_days) as age_at_radiation_stop_days,
+    coalesce(prov.ov_radiation_site, keyed.radiation_site) as radiation_site,
+    keyed.radiation_site_other,
+    coalesce(prov.ov_radiation_type, keyed.radiation_type) as radiation_type,
+    keyed.radiation_type_other,
+    coalesce(prov.ov_total_radiation_dose, keyed.total_radiation_dose)
+        as total_radiation_dose,
+    keyed.total_radiation_dose_unit,
+    coalesce(prov.ov_total_radiation_dose_focal, keyed.total_radiation_dose_focal)
+        as total_radiation_dose_focal,
+    keyed.total_radiation_dose_focal_unit,
+    keyed.is_initial_treatment
+from keyed
+left join prov on prov.pcx_row_uid = keyed.pcx_row_uid

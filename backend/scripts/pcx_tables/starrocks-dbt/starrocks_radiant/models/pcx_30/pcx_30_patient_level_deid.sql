@@ -83,13 +83,11 @@ keyed as (
     -- reviewed.
     select
         published.*,
-        md5(concat(
-            coalesce(cast(research_id as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(age_at_vital_status_days as string), concat(char(0), 'NULL', char(0))),
-            '|#|',
-            coalesce(cast(vital_status as string), concat(char(0), 'NULL', char(0)))
-        )) as pcx_row_uid
+        {{ pcx_row_uid([
+            'research_id',
+            'age_at_vital_status_days',
+            'vital_status',
+        ]) }} as pcx_row_uid
     from published
 ),
 
@@ -97,19 +95,10 @@ prov as (
     -- Field provenance, pivoted to one row per release row. `!` marks a
     -- reviewer-accepted OVERRIDE (the value differs from what the curator
     -- typed); no marker means corroborated, value unchanged.
-    select
-        pcx_row_uid,
-        max(case when field = 'age_at_vital_status_days' then accepted_value end)
-            as ov_age_at_vital_status_days,
-        max(case when field = 'vital_status' then accepted_value end)
-            as ov_vital_status,
-        group_concat(
-            concat(field, '=', source, if(kind = 'override', '!', ''))
-            order by field separator ';'
-        ) as field_provenance
-    from {{ source('radiant_prov', 'pcx_30_field_provenance') }}
-    where grain = 'patient'
-    group by pcx_row_uid
+    {{ pcx_30_field_provenance_pivot('patient', [
+        'age_at_vital_status_days',
+        'vital_status',
+    ]) }}
 )
 
 -- Column order is the base table's, unchanged; field_provenance is appended
