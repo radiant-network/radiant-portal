@@ -43,6 +43,7 @@ function CNVTab({ seqId, caseEntity }: CNVTabProps) {
   return (
     <QueryBuilder
       appId={appId}
+      swrId={`${seqId}-${taskId}`}
       fetcher={{
         list: async (params: IListInput) => {
           if (taskId === undefined) return [];

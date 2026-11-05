@@ -52,6 +52,7 @@ const queryBar = tv({
 type QueryBarProps = {
   index: number;
   sqon: ISyntheticSqon;
+  swrId?: string;
 };
 
 /**
@@ -85,7 +86,7 @@ function factory(uuid: string, content: TSyntheticSqonContentValue, aggregations
  * | [] Q1 | Loremp Ipsum = [1,2, 3 >][X]      | 389K | [copy] [trash]  |
  * └───────└──────────────────────────────────────────┘─────────────────┘
  */
-function QueryBar({ index, sqon }: QueryBarProps) {
+function QueryBar({ index, sqon, swrId }: QueryBarProps) {
   const { t } = useI18n();
   const dispatch = useQBDispatch();
   const sqonsCount = useQBSqonsCount();
@@ -118,8 +119,9 @@ function QueryBar({ index, sqon }: QueryBarProps) {
   /**
    * Fetcher
    */
+  const countKey = swrId !== undefined ? `${swrId}:${JSON.stringify(sqon)}-count` : `${JSON.stringify(sqon)}-count`;
   const fetchTotal = useSWR<Count>(
-    `${JSON.stringify(sqon)}-count`,
+    countKey,
     () =>
       fetcher.count({
         countBody: {
