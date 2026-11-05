@@ -140,6 +140,7 @@ export default function App() {
                   <TabsListItem disabled value={CaseEntityTabs.Variants}>
                     <AudioWaveform />
                     {t('case_entity.variants.title')}
+                    <span className="sr-only">{t('case_entity.details.no_variants')}</span>
                   </TabsListItem>
                 </TooltipTrigger>
                 <TooltipContent>{t('case_entity.details.no_variants')}</TooltipContent>

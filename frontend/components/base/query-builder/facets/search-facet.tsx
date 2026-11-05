@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import parse from 'html-react-parser';
 import { InfoIcon } from 'lucide-react';
 
@@ -28,6 +28,7 @@ const MAX_API_CALLS = 2;
 
 export function SearchFacet({ search }: SearchFilterProps) {
   const { t } = useI18n();
+  const descriptionId = useId();
   const { tenant } = useTenant();
   const dispatch = useQBDispatch();
   const activeQuery = useQBActiveQuery();
@@ -175,9 +176,12 @@ export function SearchFacet({ search }: SearchFilterProps) {
             {t(`common.facets.labels.${translation_key}_tooltip`)}
           </TooltipContent>
         </Tooltip>
-        <span className="sr-only">{t(`common.facets.labels.${translation_key}_tooltip`)}</span>
+        <span id={descriptionId} hidden>
+          {t(`common.facets.labels.${translation_key}_tooltip`)}
+        </span>
       </div>
       <MultiSelector
+        inputProps={{ 'aria-describedby': descriptionId }}
         value={selectedValues}
         defaultOptions={selectedOptions}
         onChange={handleChange}

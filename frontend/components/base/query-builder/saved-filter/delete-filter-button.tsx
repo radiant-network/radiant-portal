@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useId } from 'react';
 import { TrashIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -47,6 +47,7 @@ export function openDeleteSavedFilterAlert(
 
 function DeleteFilterButton() {
   const { t } = useI18n();
+  const reasonId = useId();
   const dispatchSavedFilter = useSavedFiltersDispatch();
   const dispatchQB = useQBDispatch();
   const { selectedSavedFilter, savedFilterType } = useSavedFiltersContext();
@@ -78,12 +79,18 @@ function DeleteFilterButton() {
             size="sm"
             disabled={!selectedSavedFilter}
             aria-label={t('a11y.saved_filter.delete')}
+            aria-describedby={!selectedSavedFilter ? reasonId : undefined}
             onClick={() => {
               openDeleteSavedFilterAlert(selectedSavedFilter, fetchFilters, t);
             }}
           >
             <TrashIcon />
           </Button>
+          {!selectedSavedFilter && (
+            <span id={reasonId} hidden>
+              {t('common.saved_filter.no_filter_selected')}
+            </span>
+          )}
         </span>
       </TooltipTrigger>
       <TooltipContent>{getTooltipContent()}</TooltipContent>
