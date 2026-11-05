@@ -2218,6 +2218,10 @@
       "chrm_hidden_reads": {
         "title": "Reads hidden on chrM",
         "description": "Some tracks are very deep on chrM. To keep IGV responsive, their reads show only in views of {{window}} bp or less. Zoom in to see them."
+      },
+      "failed_tracks": {
+        "title_one": "A track could not be loaded",
+        "title_other": "{{count}} tracks could not be loaded"
       }
     },
     "interpretation_form": {
