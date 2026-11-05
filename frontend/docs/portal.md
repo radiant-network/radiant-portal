@@ -22,9 +22,9 @@ npm run dev:qlin        # THEME=qlin
 ```
 config/
   <theme>/
-    bundle.ts          # what the build compiles: apps, landing, extra routes — read at build time, in Node
+    bundle.ts          # what the build compiles: apps, home, landing, extra routes — read at build time, in Node
     portal-config.ts   # PortalConfig: facets, saved filters, name — read at runtime, in the browser
-  catalog.ts           # APP_NAMES, LandingName, ExtraName, BundleDefinition — imports nothing
+  catalog.ts           # APP_NAMES, HOME_PATHS, LandingName, ExtraName, BundleDefinition — imports nothing
   themes.ts            # THEMES, aggregating every bundle.ts
   routes.module.ts     # APP_ROUTES, LANDING_PAGES, EXTRA_ROUTES, shared groups
 ```
@@ -39,13 +39,15 @@ The two files stay separate because they have different readers. `bundle.ts` is 
 // config/kf/bundle.ts
 export const kfBundle = {
   apps: ['VARIANT', 'CASE', 'FILE_ARCHIVE', 'ANALYSIS', 'ADMIN', 'PATIENT', 'STUDY', 'COMMUNITY'],
+  home: 'CASE',
   landing: 'KIDSFIRST',
   extras: [],
 } satisfies BundleDefinition;
 ```
 
 - `apps` — the apps mounted under the `:tenant` layout.
-- `landing` — optional public page served at `/landing`; each theme ships at most one.
+- `home` — the app `/:tenant` redirects to (path from `HOME_PATHS` in `catalog.ts`); the query string is kept. It must be one of `apps`, otherwise the build fails.
+- `landing` — optional public page served at `/landing`, outside `:tenant` and without auth; each theme ships at most one. Not to be confused with `home`.
 - `extras` — other theme-specific routes outside `:tenant` (yac proxy).
 
 A typo in any of them fails `tsc` in that file.
@@ -95,6 +97,10 @@ Groups every theme ships also live here:
 ```ts
 const theme: BundleDefinition = THEMES[(process.env.THEME ?? 'radiant') as ThemeName];
 
+if (!theme.apps.includes(theme.home)) {
+  throw new Error(`Home app "${theme.home}" is not in the apps of theme "${process.env.THEME ?? 'radiant'}"`);
+}
+
 export default [
   route('health-check', './routes/health-check.tsx'),
   route(':tenant', './layout/protected-layout.tsx', [
@@ -130,7 +136,7 @@ grep -rl "patient-exploration\|study-exploration" build/client/assets/ || echo c
 2. `cp -r translations/portals/radiant translations/portals/<name>`
 3. `cp -r portals/radiant/public/radiant portals/radiant/public/<name>`
 4. Create `portals/radiant/config/<name>/portal-config.ts` exporting `<name>Config: PortalConfig`
-5. Create `portals/radiant/config/<name>/bundle.ts` exporting `<name>Bundle` (its `apps`, optional `landing`, `extras`), and register it in `THEMES` (`config/themes.ts`)
+5. Create `portals/radiant/config/<name>/bundle.ts` exporting `<name>Bundle` (its `apps`, `home`, optional `landing`, `extras`), and register it in `THEMES` (`config/themes.ts`)
 6. Register `<name>Config` in `portals/radiant/vite.config.mts` (`configs`)
 7. Add `dev:<name>`, `build:<name>`, `start:<name>` scripts in `portals/radiant/package.json`
 

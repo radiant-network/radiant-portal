@@ -6,6 +6,10 @@ import { type ThemeName, THEMES } from '../config/themes';
 
 const theme: BundleDefinition = THEMES[(process.env.THEME ?? 'radiant') as ThemeName];
 
+if (!theme.apps.includes(theme.home)) {
+  throw new Error(`Home app "${theme.home}" is not in the apps of theme "${process.env.THEME ?? 'radiant'}"`);
+}
+
 export default [
   route('health-check', './routes/health-check.tsx'),
   route(':tenant', './layout/protected-layout.tsx', [
