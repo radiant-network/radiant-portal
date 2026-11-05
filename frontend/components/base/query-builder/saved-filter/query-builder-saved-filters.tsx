@@ -27,7 +27,7 @@ function QueryBuilderSavedFilters({ renderTitle = title => title }: QueryBuilder
   });
 
   return (
-    <div id="query-saved-filters" className="flex flex-1">
+    <div id="query-saved-filters" className="flex flex-1 min-w-0">
       <div className="flex items-center gap-4 whitespace-nowrap text-ellipsis overflow-hidden py-4 pr-4 pl-1 -ml-1">
         {renderTitle(
           <div className="text-ellipsis overflow-hidden text-base">
@@ -35,14 +35,14 @@ function QueryBuilderSavedFilters({ renderTitle = title => title }: QueryBuilder
           </div>,
         )}
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- only stops click propagation */}
-        <div className="relative z-10 flex items-center" onClick={e => e.stopPropagation()}>
+        <div className="relative z-10 flex shrink-0 items-center" onClick={e => e.stopPropagation()}>
           <div className="flex whitespace-nowrap">
             <UpdateFilterButton />
             <DiscardFilterButton />
           </div>
         </div>
       </div>
-      <div className={'flex ml-auto py-4'}>
+      <div className={'flex shrink-0 ml-auto py-4'}>
         {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- only stops click propagation */}
         <div className="relative z-10 flex gap-4 items-center" onClick={e => e.stopPropagation()}>
           <div className="flex whitespace-nowrap">
