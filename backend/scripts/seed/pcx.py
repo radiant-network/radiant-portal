@@ -205,7 +205,7 @@ def build(deid_dir, organizations, pins=None, extra_dir=None):
                     row.append(r[c])
             rows.append(row)
         tables[table] = (cols, rows)
-    add_surgery_evidence(tables["v_pcx_30_surgery_level_combined"], data["surgery_level"])
+    add_surgery_brim(tables["v_pcx_30_surgery_level_combined"], data["surgery_level"])
     tables["v_pcx_30_pnoc035_eligibility_combined"] = (ELIGIBILITY_COLS, eligibility(deid_dir, patients, codes))
     return patients, data, tables
 
@@ -250,18 +250,18 @@ def eligibility(deid_dir, patients, codes):
 
 
 # The surgeries with a BRIM evidence link, by (research id, age at surgery): the deid CSV does not carry it.
-SURGERY_EVIDENCE = {("C7617267", "1182")}
+SURGERY_BRIM = {("C7617267", "1182")}
 
 
-def add_surgery_evidence(table, rows):
+def add_surgery_brim(table, rows):
     cols, out = table
-    if any(c == "evidence_url" for c, _ in cols):
+    if any(c == "brim_url" for c, _ in cols):
         return
-    cols.append(("evidence_url", "VARCHAR(512)"))
+    cols.append(("brim_url", "VARCHAR(512)"))
     for row, r in zip(out, rows):
         rid = r["research_id"]
         row.append(f"{BRIM}/overview/project/54/visualize_variable/?var_ids=3608&patient_id={h('brim', rid) % 1_000_000}"
-                   if (rid, r["age_at_surgery_days"]) in SURGERY_EVIDENCE else None)
+                   if (rid, r["age_at_surgery_days"]) in SURGERY_BRIM else None)
 
 
 def read_csv_header(path):

@@ -617,10 +617,10 @@ func pcxSurgeries(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]
 		SurgeryDate            *types.DateISO8601
 		ExtentOfTumorResection *string
 		IsInitialTreatment     *string
-		EvidenceURL            *string `gorm:"column:evidence_url"`
+		BrimURL                *string `gorm:"column:brim_url"`
 	}
 	tx := pcxView(ctx, db, types.PcxSurgeryLevelTable, id).
-		Select(pcxDayDate("age_at_surgery_days", "surgery_date", "surgery") + ", extent_of_tumor_resection, is_initial_treatment, evidence_url").
+		Select(pcxDayDate("age_at_surgery_days", "surgery_date", "surgery") + ", extent_of_tumor_resection, is_initial_treatment, brim_url").
 		Order(pcxOrderByDay("age_at_surgery_days"))
 	if err := tx.Find(&rows).Error; err != nil {
 		return nil, fmt.Errorf("error fetching patient surgeries: %w", err)
@@ -629,7 +629,7 @@ func pcxSurgeries(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]
 	for i, row := range rows {
 		surgeries[i] = types.PatientSurgery{PatientDayDate: dayDate(row.SurgeryDay, row.SurgeryDate),
 			ExtentOfTumorResection: row.ExtentOfTumorResection, IsInitialTreatment: pcxYesNo(row.IsInitialTreatment),
-			EvidenceURL: row.EvidenceURL}
+			EvidenceURL: row.BrimURL}
 	}
 	return surgeries, nil
 }
