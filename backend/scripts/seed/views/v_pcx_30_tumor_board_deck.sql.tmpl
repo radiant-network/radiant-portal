@@ -1,0 +1,17 @@
+/*
+   {{.TenantCode}}_tenant.v_pcx_30_tumor_board_deck  (VIEW, the tumor board presentation deck of each PCX patient)
+
+   Built like v_pcx_30_tumor_board_session. The deck's S3 URL is PHI, NULL without PHI access.
+ */
+CREATE OR REPLACE VIEW {{.TenantCode}}_tenant.v_pcx_30_tumor_board_deck AS
+SELECT d.organization_code,
+       d.patient_id_type,
+       d.patient_id,
+       CASE WHEN d.can_read_phi THEN t.deck_url END AS deck_url,
+       d.can_read_phi
+FROM {{.TenantCode}}_tenant.v_pcx_30_demographics_combined d
+JOIN radiant_data_dev.v_pcx_30_demographics_combined src
+  ON src.organization_code = d.organization_code
+ AND d.patient_id = CASE d.patient_id_type WHEN 'mrn' THEN src.mrn ELSE src.research_id END
+JOIN radiant_data_dev.tumor_board_deck t
+  ON t.research_id = src.research_id
