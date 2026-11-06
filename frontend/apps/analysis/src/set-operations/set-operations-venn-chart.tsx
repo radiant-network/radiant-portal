@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useId, useMemo, useState } from 'react';
 import { Undo2 } from 'lucide-react';
 
 import VennChart from '@/components/base/charts/venn-charts/venn-chart';
@@ -51,6 +51,7 @@ function SetOperationsVennChart({
   setTypesList,
 }: SetOperationsVennChartProps) {
   const { t } = useI18n();
+  const compareDisabledReasonId = useId();
 
   const [setType, setSetType] = useState<string>(defaultSetType);
   const [selectedSets, setSelectedSets] = useState<string[]>(defaultSelectedSets);
@@ -168,10 +169,19 @@ function SetOperationsVennChart({
           <Tooltip>
             <TooltipTrigger asChild>
               <span>
-                <Button onClick={handleCompare} disabled={compareDisabled}>
+                <Button
+                  onClick={handleCompare}
+                  disabled={compareDisabled}
+                  aria-describedby={compareDisabled ? compareDisabledReasonId : undefined}
+                >
                   <AndOrIcon />
                   {t('analysis.set_operations.filters.compare')}
                 </Button>
+                {compareDisabled && (
+                  <span id={compareDisabledReasonId} hidden>
+                    {t('analysis.set_operations.filters.compare_disabled_tooltip')}
+                  </span>
+                )}
               </span>
             </TooltipTrigger>
             {compareDisabled && (

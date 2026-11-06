@@ -21,6 +21,7 @@ function TooltipHeader({ tooltip, children, iconOnly = false }: TooltipHeaderPro
       >
         <span>
           {children}
+          {tooltip && <span className="sr-only">{tooltip}</span>}
           {iconOnly && (
             <span className="absolute inset-0 -z-10 after:content-['\00a0\00a0\00a0'] after:absolute after:inset-0 after:underline after:decoration-dotted after:underline-offset-4" />
           )}

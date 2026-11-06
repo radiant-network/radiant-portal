@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
-import { getColumnPosition, getUrlLink, oneMinute, stringToRegExp } from 'pom/shared/Utils';
+import { getColumnPosition, getUrlLink, oneMinute, hasVisibleText } from 'pom/shared/Utils';
 
 const selectors = {
   tableId: '[id="overlapping-genes-table"]',
@@ -189,9 +189,7 @@ export const OverlappingGenesModal = {
     shouldMatchDefaultColumnVisibility() {
       tableColumns.forEach(column => {
         const expectedExist = column.isVisibleByDefault ? 'exist' : 'not.exist';
-        cy.get(`${CommonSelectors.tableHead(selectors.tableId)} ${selectors.tableHeadRow}`)
-          .contains(stringToRegExp(column.name, true /*exact*/))
-          .should(expectedExist);
+        cy.get(`${CommonSelectors.tableHead(selectors.tableId)} ${selectors.tableHeadRow}`).should($head => expect(hasVisibleText($head, column.name, true)).to.eq(expectedExist === 'exist'));
       });
     },
     /**
@@ -217,7 +215,9 @@ export const OverlappingGenesModal = {
      */
     shouldShowAllColumns() {
       tableColumns.forEach(column => {
-        cy.get(selectors.leafHeadCell()).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
+        cy.get(selectors.leafHeadCell())
+          .eq(column.position)
+          .should($cell => expect(hasVisibleText($cell, column.name, true)).to.be.true);
       });
     },
     /**

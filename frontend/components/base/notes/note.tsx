@@ -151,7 +151,10 @@ function Note({
             {created_at !== updated_at && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="ml-1 cursor-default text-muted-foreground/70">{t('notes.variant.edited')}</span>
+                  <span className="ml-1 cursor-default text-muted-foreground/70">
+                    {t('notes.variant.edited')}
+                    <span className="sr-only">{formatRelativeByCurrentTime(t, updated_at)}</span>
+                  </span>
                 </TooltipTrigger>
                 <TooltipContent>{formatRelativeByCurrentTime(t, updated_at)}</TooltipContent>
               </Tooltip>

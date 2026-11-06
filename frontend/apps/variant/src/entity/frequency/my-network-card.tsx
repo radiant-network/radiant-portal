@@ -90,6 +90,9 @@ function MyNetworkCard() {
                 <TooltipTrigger asChild>
                   <span className="font-semibold underline decoration-dotted decoration-auto">
                     {t('variant_entity.frequency.my_network.global_frequencies.all_patients')}
+                    <span className="sr-only">
+                      {t('variant_entity.frequency.my_network.global_frequencies.all_patients_tooltip')}
+                    </span>
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -106,6 +109,9 @@ function MyNetworkCard() {
                 <TooltipTrigger asChild>
                   <span className="font-semibold underline decoration-dotted decoration-auto">
                     {t('variant_entity.frequency.my_network.global_frequencies.affected')}
+                    <span className="sr-only">
+                      {t('variant_entity.frequency.my_network.global_frequencies.affected_tooltip')}
+                    </span>
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -122,6 +128,9 @@ function MyNetworkCard() {
                 <TooltipTrigger asChild>
                   <span className="font-semibold underline decoration-dotted decoration-auto">
                     {t('variant_entity.frequency.my_network.global_frequencies.non_affected')}
+                    <span className="sr-only">
+                      {t('variant_entity.frequency.my_network.global_frequencies.non_affected_tooltip')}
+                    </span>
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>

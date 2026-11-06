@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
 import { CommonTexts } from 'pom/shared/Texts';
-import { getUrlLink, sizeToBytes, stringToRegExp } from 'pom/shared/Utils';
+import { getUrlLink, sizeToBytes, hasVisibleText } from 'pom/shared/Utils';
 import { getColumnName, getColumnPosition } from 'pom/shared/Utils';
 
 const selectors = {
@@ -261,7 +261,7 @@ export const CaseEntity_Files = {
      * @param columnID The ID of the column to check.
      */
     shouldDisplayColumn(columnID: string) {
-      cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('exist');
+      cy.get(CommonSelectors.tableHead()).should($head => expect(hasVisibleText($head, getColumnName(tableColumns, columnID))).to.be.true);
     },
     /**
      * Checks that the tab is active.
@@ -313,7 +313,7 @@ export const CaseEntity_Files = {
         if (column.name.startsWith('[')) {
           cy.get(CommonSelectors.tableHead()).find(column.name).should(expectedExist);
         } else {
-          cy.get(CommonSelectors.tableHead()).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
+          cy.get(CommonSelectors.tableHead()).should($head => expect(hasVisibleText($head, column.name, true)).to.eq(expectedExist === 'exist'));
         }
       });
     },
@@ -341,7 +341,7 @@ export const CaseEntity_Files = {
      * @param columnID The ID of the column to check.
      */
     shouldNotDisplayColumn(columnID: string) {
-      cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('not.exist');
+      cy.get(CommonSelectors.tableHead()).should($head => expect(hasVisibleText($head, getColumnName(tableColumns, columnID))).to.be.false);
     },
     /**
      * Validates that a specific column is pinned to the left side.
@@ -380,7 +380,9 @@ export const CaseEntity_Files = {
         if (column.name.startsWith('[')) {
           cy.get(CommonSelectors.tableHeadCell()).eq(column.position).find(column.name).should('exist');
         } else {
-          cy.get(CommonSelectors.tableHeadCell()).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
+          cy.get(CommonSelectors.tableHeadCell())
+            .eq(column.position)
+            .should($cell => expect(hasVisibleText($cell, column.name, true)).to.be.true);
         }
       });
     },

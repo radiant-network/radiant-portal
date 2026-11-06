@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from '../shared/Selectors';
-import { getClass, getColumnName, getColumnPosition, getTableResultsCount, getTier, getUrlLink, shouldHaveTableResultsCount, stringToRegExp } from '../shared/Utils';
+import { getClass, getColumnName, getColumnPosition, getTableResultsCount, getTier, getUrlLink, shouldHaveTableResultsCount, hasVisibleText } from '../shared/Utils';
 
 const tableGermlineSNVColumns = [
   {
@@ -797,7 +797,7 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
      * @param columnID The ID of the column to check.
      */
     shouldDisplayColumn(columnID: string) {
-      cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('exist');
+      cy.get(CommonSelectors.tableHead()).should($head => expect(hasVisibleText($head, getColumnName(tableColumns, columnID))).to.be.true);
     },
     /**
      * Checks that custom query is not implemented for this page.
@@ -864,7 +864,7 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
         if (column.name.startsWith('[')) {
           cy.get(CommonSelectors.tableHead()).find(column.name).should(expectedExist);
         } else {
-          cy.get(CommonSelectors.tableHead()).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
+          cy.get(CommonSelectors.tableHead()).should($head => expect(hasVisibleText($head, column.name, true)).to.eq(expectedExist === 'exist'));
         }
       });
     },
@@ -892,7 +892,7 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
      * @param columnID The ID of the column to check.
      */
     shouldNotDisplayColumn(columnID: string) {
-      cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('not.exist');
+      cy.get(CommonSelectors.tableHead()).should($head => expect(hasVisibleText($head, getColumnName(tableColumns, columnID))).to.be.false);
     },
     /**
      * Validates that a specific column is pinned to the left side.
@@ -989,7 +989,9 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
         if (column.name.startsWith('[')) {
           cy.get(CommonSelectors.tableHeadCell()).eq(column.position).find(column.name).should('exist');
         } else {
-          cy.get(CommonSelectors.tableHeadCell()).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
+          cy.get(CommonSelectors.tableHeadCell())
+            .eq(column.position)
+            .should($cell => expect(hasVisibleText($cell, column.name, true)).to.be.true);
         }
       });
     },

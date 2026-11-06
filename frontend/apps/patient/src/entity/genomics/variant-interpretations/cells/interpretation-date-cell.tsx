@@ -16,6 +16,7 @@ function InterpretationDateCell({ date }: InterpretationDateCellProps) {
       <TooltipTrigger asChild>
         <div>
           <DateCell date={date} />
+          <span className="sr-only">{t('patient_entity.genomics.interpretations.date_tooltip')}</span>
         </div>
       </TooltipTrigger>
       <TooltipContent>{t('patient_entity.genomics.interpretations.date_tooltip')}</TooltipContent>

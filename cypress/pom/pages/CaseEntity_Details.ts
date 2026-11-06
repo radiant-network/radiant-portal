@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
-import { getColumnPosition, getStatusColor, stringToRegExp } from 'pom/shared/Utils';
+import { getColumnPosition, getStatusColor, hasVisibleText } from 'pom/shared/Utils';
 
 const selectors = {
   tab: '[data-cy="details-tab"]',
@@ -243,7 +243,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
       if (column.name.startsWith('[')) {
         cy.get(CommonSelectors.tableHead(tableId)).find(column.name).should(expectedExist);
       } else {
-        cy.get(CommonSelectors.tableHead(tableId)).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
+        cy.get(CommonSelectors.tableHead(tableId)).should($head => expect(hasVisibleText($head, column.name, true)).to.eq(expectedExist === 'exist'));
       }
     });
   },
@@ -273,7 +273,9 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
       if (column.name.startsWith('[')) {
         cy.get(CommonSelectors.tableHeadCell(tableId)).eq(column.position).find(column.name).should('exist');
       } else {
-        cy.get(CommonSelectors.tableHeadCell(tableId)).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
+        cy.get(CommonSelectors.tableHeadCell(tableId))
+          .eq(column.position)
+          .should($cell => expect(hasVisibleText($cell, column.name, true)).to.be.true);
       }
     });
   },

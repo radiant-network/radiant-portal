@@ -1,5 +1,5 @@
 /* eslint-disable complexity */
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { FlipVertical2, Triangle, Users } from 'lucide-react';
 
 import PedigreeFemaleNotAffectedIcon from '@/components/base/icons/pedigree-female-not-affected-icon';
@@ -87,6 +87,7 @@ const SliderOccurrenceDetailsCard = ({
   somatic = false,
 }: SliderOccurrenceDetailsCardProps) => {
   const { t } = useI18n();
+  const igvDisabledReasonId = useId();
   const [igvOpen, setIGVOpen] = useState<boolean>(false);
 
   const filterValue = getFilterValue(filter, t);
@@ -116,10 +117,13 @@ const SliderOccurrenceDetailsCard = ({
       <Tooltip>
         <TooltipTrigger asChild>
           <span className="inline-block">
-            <Button variant="outline" size="xs" disabled>
+            <Button variant="outline" size="xs" disabled aria-describedby={igvDisabledReasonId}>
               <FlipVertical2 />
               {t('preview_sheet.occurrence_details.actions.view_in_igv')}
             </Button>
+            <span id={igvDisabledReasonId} hidden>
+              {t('variant.actions.open_in_igv_disabled_tooltip')}
+            </span>
           </span>
         </TooltipTrigger>
         <TooltipContent>{t('variant.actions.open_in_igv_disabled_tooltip')}</TooltipContent>
@@ -158,6 +162,11 @@ const SliderOccurrenceDetailsCard = ({
               <span className="inline-flex gap-1 items-center">
                 {t('preview_sheet.occurrence_details.sections.family.father_genotype')}{' '}
                 <PedigreeMaleNotAffectedIcon size={13} />
+                <span className="sr-only">
+                  {father_calls && father_calls[0] > 0
+                    ? t('preview_sheet.occurrence_details.sections.family.affected_tooltip')
+                    : t('preview_sheet.occurrence_details.sections.family.not_affected_tooltip')}
+                </span>
               </span>
             </TooltipTrigger>
             <TooltipContent>
@@ -177,6 +186,11 @@ const SliderOccurrenceDetailsCard = ({
               <span className="inline-flex gap-1 items-center">
                 {t('preview_sheet.occurrence_details.sections.family.mother_genotype')}{' '}
                 <PedigreeFemaleNotAffectedIcon size={13} />
+                <span className="sr-only">
+                  {mother_calls && mother_calls[0] > 0
+                    ? t('preview_sheet.occurrence_details.sections.family.affected_tooltip')
+                    : t('preview_sheet.occurrence_details.sections.family.not_affected_tooltip')}
+                </span>
               </span>
             </TooltipTrigger>
             <TooltipContent>
