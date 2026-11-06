@@ -1535,9 +1535,7 @@
         "age_day_capped": "90+ a · Jour {{day}}"
       },
       "lab_tile": {
-        "no_result": "Aucun résultat au dossier",
         "reported": "rapporté {{reported}}",
-        "unverified": "unité non reconnue — pas de normalisation",
         "aria_empty": "{{label}} : aucun résultat au dossier",
         "aria_value": "{{label}} : {{value}} {{unit}}"
       },

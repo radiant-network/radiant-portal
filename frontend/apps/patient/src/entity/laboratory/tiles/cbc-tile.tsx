@@ -1,5 +1,4 @@
 import type { PatientLabResult } from '@/api/api';
-import { useI18n } from '@/components/hooks/i18n';
 
 import LabDate from '../dates/lab-date';
 import LabUnit, { labUnitLabel } from '../units/lab-unit';
@@ -46,8 +45,6 @@ type CbcTileProps = {
 };
 
 function CbcTile({ result, day, date, label, normaliseAsCount }: CbcTileProps) {
-  const { t } = useI18n();
-
   if (!result || result.value == null) {
     return <LabTile label={label} />;
   }
@@ -68,16 +65,7 @@ function CbcTile({ result, day, date, label, normaliseAsCount }: CbcTileProps) {
 
   const n = normaliseCount(result.value, result.unit);
   if (n.kind === 'unverified') {
-    return (
-      <LabTile
-        label={label}
-        value={n.value}
-        unit={n.unit}
-        unitLabel={n.unit}
-        flagText={t('patient_entity.laboratory.lab_tile.unverified')}
-        meta={meta}
-      />
-    );
+    return <LabTile label={label} value={n.value} unit={n.unit} unitLabel={n.unit} meta={meta} />;
   }
 
   return (
