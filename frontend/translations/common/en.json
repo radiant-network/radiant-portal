@@ -1513,6 +1513,20 @@
         }
       }
     },
+    "tumor_board": {
+      "title": "Tumor board sessions",
+      "date_tooltip": "Date of the Tumor Board",
+      "create_presentation": "Create Presentation",
+      "columns": {
+        "date": "Date",
+        "reason": "Reason",
+        "diagnosis": "Diagnosis",
+        "consensus": "Consensus",
+        "recommendations": "Recommendations",
+        "status": "Status",
+        "report": "Report"
+      }
+    },
     "laboratory": {
       "date": {
         "no_date_on_file": "No date on file",

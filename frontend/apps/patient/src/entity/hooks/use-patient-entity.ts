@@ -11,6 +11,7 @@ import {
   fetchPatientLaboratory,
   fetchPatientTreatments,
   fetchPatientTrialEligibilities,
+  fetchPatientTumorBoard,
 } from '../../api/patient';
 
 type PatientEntityInput = {
@@ -41,3 +42,4 @@ export const usePatientExternalRecords = () =>
   usePatientEntity('patient-external-records', fetchPatientExternalRecords);
 export const usePatientTrialEligibilities = () =>
   usePatientEntity('patient-trial-eligibilities', fetchPatientTrialEligibilities);
+export const usePatientTumorBoard = () => usePatientEntity('patient-tumor-board', fetchPatientTumorBoard);

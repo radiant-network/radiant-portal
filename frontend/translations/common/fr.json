@@ -1514,6 +1514,20 @@
         }
       }
     },
+    "tumor_board": {
+      "title": "Séances de tumor board",
+      "date_tooltip": "Date du Tumor Board",
+      "create_presentation": "Créer la présentation",
+      "columns": {
+        "date": "Date",
+        "reason": "Motif",
+        "diagnosis": "Diagnostic",
+        "consensus": "Consensus",
+        "recommendations": "Recommandations",
+        "status": "Statut",
+        "report": "Rapport"
+      }
+    },
     "laboratory": {
       "date": {
         "no_date_on_file": "Aucune date au dossier",
