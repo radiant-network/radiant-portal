@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { TriangleAlert } from 'lucide-react';
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
@@ -11,12 +10,11 @@ type LabTileProps = {
   unit?: ReactNode;
   unitLabel?: string;
   reported?: string;
-  flagText?: string;
   meta?: ReactNode;
   tooltip?: string;
 };
 
-function LabTile({ label, value, unit, unitLabel, reported, flagText, meta, tooltip }: LabTileProps) {
+function LabTile({ label, value, unit, unitLabel, reported, meta, tooltip }: LabTileProps) {
   const { t } = useI18n();
   const isEmpty = value == null || value === '';
   const ariaValue = isEmpty
@@ -49,15 +47,7 @@ function LabTile({ label, value, unit, unitLabel, reported, flagText, meta, tool
           {t('patient_entity.laboratory.lab_tile.reported', { reported })}
         </div>
       ) : null}
-      {flagText ? (
-        <div className="inline-flex items-center gap-1 text-xs text-amber-foreground">
-          <TriangleAlert className="size-3" aria-hidden />
-          {flagText}
-        </div>
-      ) : null}
-      <div className="text-xs text-muted-foreground">
-        {isEmpty ? t('patient_entity.laboratory.lab_tile.no_result') : meta}
-      </div>
+      {!isEmpty && meta ? <div className="text-xs text-muted-foreground">{meta}</div> : null}
     </div>
   );
 

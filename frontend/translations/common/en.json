@@ -1537,9 +1537,7 @@
         "age_day_capped": "90+y · Day {{day}}"
       },
       "lab_tile": {
-        "no_result": "No result on file",
         "reported": "reported {{reported}}",
-        "unverified": "unrecognised unit — not normalised",
         "aria_empty": "{{label}}: no result on file",
         "aria_value": "{{label}}: {{value}} {{unit}}"
       },
