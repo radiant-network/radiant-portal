@@ -151,11 +151,42 @@ export const getColumnPosition = (tableHead: string, columns: any, columnID: str
     } else if (columnName == '') {
       position = columns.find((col: { id: string }) => col.id === columnID)?.position;
     } else {
-      position = Array.from($cells).findIndex($cell => $cell.textContent?.match(stringToRegExp(columnName, true)));
+      position = Array.from($cells).findIndex($cell => getVisibleText($cell).match(stringToRegExp(columnName, true)));
     }
 
     return position;
   });
+};
+
+/**
+ * Returns the text content of an element without its screen-reader-only copies (`.sr-only`), such as a tooltip exposed to screen readers.
+ * @param el The element.
+ * @returns The text content shown on screen.
+ */
+export const getVisibleText = (el: Element): string => {
+  if (el.closest('.sr-only')) {
+    return '';
+  }
+  const clone = el.cloneNode(true) as Element;
+  clone.querySelectorAll('.sr-only').forEach(srOnly => srOnly.remove());
+  return clone.textContent || '';
+};
+
+/**
+ * Checks if one of the elements, or one of their descendants, shows the given text.
+ * Same match as `contains(stringToRegExp(text, exact))`, ignoring the `.sr-only` text.
+ * @param $elements The elements to search in.
+ * @param text The text to find.
+ * @param exact If true, the whole text of the element must match (default: false).
+ * @returns True if the text is found.
+ */
+export const hasVisibleText = ($elements: JQuery<HTMLElement>, text: string, exact: boolean = false): boolean => {
+  const regExp = stringToRegExp(text, exact);
+  return $elements
+    .find('*')
+    .addBack()
+    .toArray()
+    .some(el => regExp.test(getVisibleText(el).replace(/\s+/g, ' ')));
 };
 
 /**
