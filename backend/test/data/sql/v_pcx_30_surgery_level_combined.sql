@@ -9,6 +9,6 @@ create table v_pcx_30_surgery_level_combined
     age_at_surgery_days varchar(1000) NULL,
     extent_of_tumor_resection varchar(256) NULL,
     is_initial_treatment varchar(64) NULL,
-    evidence_url varchar(1024) NULL,
+    brim_url varchar(1024) NULL,
     can_read_phi boolean NULL
 );
