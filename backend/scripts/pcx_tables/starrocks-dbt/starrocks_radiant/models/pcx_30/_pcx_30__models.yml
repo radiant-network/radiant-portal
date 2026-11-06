@@ -186,6 +186,26 @@ models:
       - name: research_id
         data_tests:
           - not_null
+      - name: field_provenance
+        description: >
+          Semicolon-separated `field=source` list naming the values in this row
+          that an independent automated source produced, with `!` marking one a
+          clinical reviewer accepted IN PLACE OF the curated value. No marker
+          means the automated source independently produced the value the
+          curator had already recorded, so nothing about the value changed.
+          NULL where the whole row is exactly as curated. Built by joining
+          `source('radiant_prov', 'pcx_30_field_provenance')` on a recomputed
+          `pcx_row_uid`; decision detail is in `pcx_30_promotion_decisions`.
+      - name: field_provenance
+        description: >
+          Semicolon-separated `field=source` list naming the values in this row
+          that an independent automated source produced, with `!` marking one a
+          clinical reviewer accepted IN PLACE OF the curated value. No marker
+          means the automated source independently produced the value the
+          curator had already recorded, so nothing about the value changed.
+          NULL where the whole row is exactly as curated. Built by joining
+          `source('radiant_prov', 'pcx_30_field_provenance')` on a recomputed
+          `pcx_row_uid`; decision detail is in `pcx_30_promotion_decisions`.
 
   - name: pcx_30_medical_therapy_level_deid
     description: >
@@ -198,6 +218,16 @@ models:
       - name: research_id
         data_tests:
           - not_null
+      - name: field_provenance
+        description: >
+          Semicolon-separated `field=source` list naming the values in this row
+          that an independent automated source produced, with `!` marking one a
+          clinical reviewer accepted IN PLACE OF the curated value. No marker
+          means the automated source independently produced the value the
+          curator had already recorded, so nothing about the value changed.
+          NULL where the whole row is exactly as curated. Built by joining
+          `source('radiant_prov', 'pcx_30_field_provenance')` on a recomputed
+          `pcx_row_uid`; decision detail is in `pcx_30_promotion_decisions`.
 
   - name: pcx_30_radiation_level_deid
     description: >
@@ -209,6 +239,16 @@ models:
       - name: research_id
         data_tests:
           - not_null
+      - name: field_provenance
+        description: >
+          Semicolon-separated `field=source` list naming the values in this row
+          that an independent automated source produced, with `!` marking one a
+          clinical reviewer accepted IN PLACE OF the curated value. No marker
+          means the automated source independently produced the value the
+          curator had already recorded, so nothing about the value changed.
+          NULL where the whole row is exactly as curated. Built by joining
+          `source('radiant_prov', 'pcx_30_field_provenance')` on a recomputed
+          `pcx_row_uid`; decision detail is in `pcx_30_promotion_decisions`.
 
   - name: pcx_30_surgery_level_deid
     description: >
@@ -220,6 +260,16 @@ models:
       - name: research_id
         data_tests:
           - not_null
+      - name: field_provenance
+        description: >
+          Semicolon-separated `field=source` list naming the values in this row
+          that an independent automated source produced, with `!` marking one a
+          clinical reviewer accepted IN PLACE OF the curated value. No marker
+          means the automated source independently produced the value the
+          curator had already recorded, so nothing about the value changed.
+          NULL where the whole row is exactly as curated. Built by joining
+          `source('radiant_prov', 'pcx_30_field_provenance')` on a recomputed
+          `pcx_row_uid`; decision detail is in `pcx_30_promotion_decisions`.
 
   - name: pcx_30_demographics_deid
     description: >

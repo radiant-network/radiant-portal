@@ -62,7 +62,27 @@ pt_roster as (
 
 initial_events as (
     select * from {{ ref('int_pcx_30_initial_events') }}
-)
+),
+
+-- FIELD PROVENANCE AND REVIEWER OVERRIDES (added 2026-11-05)
+-- -----------------------------------------------------------------------
+-- `field_provenance` records, per row, which values an independent automated
+-- source produced: `field=source`, with `!` marking a value a clinical
+-- reviewer accepted IN PLACE OF the curator's. The rule is "provenance only,
+-- UNLESS a reviewer accepts an overriding value" (owner, 2026-11-05).
+-- Detail -- who decided, when, the original value, the case id -- lives in
+-- `pcx_30_field_provenance` and `pcx_30_promotion_decisions`, deliberately NOT
+-- in more columns here.
+--
+-- KNOWN INCONSISTENCY -- `protocol_name_and_arm` is NOT overridden.
+-- It and `protocol_name` both derive from `protocol_clean` above, and the
+-- reviewer accepted a value for `protocol_name` only. On the 3 rows where
+-- `protocol_name` is overridden, `protocol_name_and_arm` still carries the
+-- curator's original, so the two columns disagree. Rewriting the sibling would
+-- be inventing a decision nobody made; it is left, recorded, and flagged for
+-- the reviewer. Read `field_provenance` before assuming the two agree.
+
+published as (
 
 select distinct
     pt_roster.organization_name,
@@ -99,3 +119,64 @@ from treatment
 inner join pt_roster on treatment.subject = pt_roster.research_id
 left join initial_events on pt_roster.research_id = initial_events.research_id
 where treatment.chemotherapy = 'Yes'
+
+)
+,
+
+keyed as (
+    -- pcx_row_uid -- md5 over every base column in DDL order, '|#|'-joined,
+    -- with a NUL-wrapped NULL sentinel so a NULL and the literal 'NULL' hash
+    -- differently. Reproduces promote_to_pcx30._uid EXACTLY: verified
+    -- 2026-11-05 against all five live release tables, 38,488 of 38,488 rows.
+    -- It is the only join key these tables have -- the models are
+    -- `select distinct` with no row identity of their own -- and being
+    -- content-addressed is the right failure mode: if an upstream value moves,
+    -- the uid moves, the provenance join misses, and a stamp measured against
+    -- the old value stops applying rather than being applied to a value nobody
+    -- reviewed.
+    select
+        published.*,
+        {{ pcx_row_uid([
+            'organization_name',
+            'research_id',
+            'protocol_name_and_arm',
+            'protocol_name',
+            'protocol_arm',
+            'chemotherapy_type',
+            'age_at_regimen_start_days',
+            'age_at_regimen_stop_days',
+            'chemotherapy_agents',
+            'is_initial_treatment',
+        ]) }} as pcx_row_uid
+    from published
+),
+
+prov as (
+    -- Field provenance, pivoted to one row per release row. `!` marks a
+    -- reviewer-accepted OVERRIDE (the value differs from what the curator
+    -- typed); no marker means corroborated, value unchanged.
+    {{ pcx_30_field_provenance_pivot('medical_therapy', [
+        'age_at_regimen_start_days',
+        'age_at_regimen_stop_days',
+        'chemotherapy_agents',
+        'chemotherapy_type',
+        'protocol_name',
+    ]) }}
+)
+
+-- Column order is the base table's, unchanged; field_provenance is appended
+-- LAST so a positional consumer (the CSV exports) sees only an added column.
+select
+    keyed.organization_name,
+    keyed.research_id,
+    keyed.protocol_name_and_arm,
+    coalesce(prov.ov_protocol_name, keyed.protocol_name) as protocol_name,
+    keyed.protocol_arm,
+    coalesce(prov.ov_chemotherapy_type, keyed.chemotherapy_type) as chemotherapy_type,
+    coalesce(prov.ov_age_at_regimen_start_days, keyed.age_at_regimen_start_days) as age_at_regimen_start_days,
+    coalesce(prov.ov_age_at_regimen_stop_days, keyed.age_at_regimen_stop_days) as age_at_regimen_stop_days,
+    coalesce(prov.ov_chemotherapy_agents, keyed.chemotherapy_agents) as chemotherapy_agents,
+    keyed.is_initial_treatment,
+    prov.field_provenance
+from keyed
+left join prov on prov.pcx_row_uid = keyed.pcx_row_uid

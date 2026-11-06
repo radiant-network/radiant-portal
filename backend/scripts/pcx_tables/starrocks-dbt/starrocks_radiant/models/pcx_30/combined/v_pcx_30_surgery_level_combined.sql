@@ -44,7 +44,15 @@ with pt_roster as (
 
 initial_events as (
     select * from {{ ref('int_pcx_30_initial_events') }}
-)
+),
+
+-- REVIEWER OVERRIDES (added 2026-11-05) -- applies the same reviewer-accepted
+-- values as pcx_30_surgery_level_deid. This grain has NO overrides today (only
+-- corroborations), so it is currently value-neutral; it is wired now so the next
+-- accepted decision needs no schema change. `surgery_date` is re-derived from an
+-- accepted age (view-only, a pure projection of it); `is_initial_treatment`
+-- deliberately does not cascade, matching the deid model.
+published as (
 
 select distinct
     -- pcx_30_organization_override wins where it carries the patient; see the seed's
@@ -52,13 +60,19 @@ select distinct
     coalesce(ovr.organization_name, pt_roster.organization_name) as organization_name,
     coalesce(ovr.organization_code, org.code) as organization_code,
 
+    -- NOT EMITTED -- the provenance key is computed over the DEID values, and
+    -- the deid model keys on the RAW roster organization name, not the
+    -- pcx_30_organization_override one (measured on C7617267, SCH-DEMO).
+    pt_roster.organization_name as uid_organization_name,
+    -- NOT EMITTED -- needed to re-derive surgery_date from an accepted age.
+    dob as uid_dob,
+
     -- identifier pair
     -- (qualified: initial_events also exposes research_id / organization_name)
     pt_roster.mrn,
     pt_roster.research_id,
 
-    -- timing pair
-    date_add(dob, interval cast(age_at_surgery as int) day) as surgery_date,
+    -- timing pair (the calendar date is projected in the final select)
     age_at_surgery as age_at_surgery_days,
 
     -- identical in both builds
@@ -74,3 +88,42 @@ left join {{ ref('pcx_30_organization_override') }} ovr
     on ovr.research_id = pt_roster.research_id
 left join initial_events on pt_roster.research_id = initial_events.research_id
 where surgery = 'Yes'
+
+),
+
+keyed as (
+    select
+        published.*,
+        {{ pcx_row_uid([
+            'uid_organization_name',
+            'research_id',
+            'age_at_surgery_days',
+            'extent_of_tumor_resection',
+            'is_initial_treatment',
+        ]) }} as pcx_row_uid
+    from published
+),
+
+prov as (
+    {{ pcx_30_field_provenance_pivot('surgery', [
+        'age_at_surgery_days',
+        'extent_of_tumor_resection',
+    ]) }}
+)
+
+-- Column list and order UNCHANGED from the pre-override view.
+select
+    keyed.organization_name,
+    keyed.organization_code,
+    keyed.mrn,
+    keyed.research_id,
+    date_add(keyed.uid_dob, interval cast(coalesce(
+        prov.ov_age_at_surgery_days,
+        keyed.age_at_surgery_days) as int) day) as surgery_date,
+    coalesce(prov.ov_age_at_surgery_days, keyed.age_at_surgery_days)
+        as age_at_surgery_days,
+    coalesce(prov.ov_extent_of_tumor_resection, keyed.extent_of_tumor_resection)
+        as extent_of_tumor_resection,
+    keyed.is_initial_treatment
+from keyed
+left join prov on prov.pcx_row_uid = keyed.pcx_row_uid

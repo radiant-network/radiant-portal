@@ -381,7 +381,17 @@ prelim as (
             and pt_roster.diagnosis_type_cohort = 'Not Applicable'
     ) first_initial
     where rn = 1
-)
+),
+
+-- REVIEWER OVERRIDES (added 2026-11-05) -- applies the same reviewer-accepted
+-- values as pcx_30_event_level_deid, so a view-backed consumer no longer sees
+-- the curator's original where a reviewer accepted a correction. This grain has
+-- NO overrides today (only corroborations), so it is currently value-neutral;
+-- it is wired now so the next accepted decision needs no schema change.
+--
+-- `age_at_event_days` is NOT in this grain's overridable set, so `event_date`
+-- needs no re-projection and `dob` is not carried past the published CTE.
+published as (
 
 select
     -- pcx_30_organization_override wins where it carries the patient; see the seed's
@@ -389,6 +399,14 @@ select
     -- HERE, outside the aggregation CTEs, which group by the raw organization_name.
     coalesce(ovr.organization_name, prelim.organization_name) as organization_name,
     coalesce(ovr.organization_code, org.code) as organization_code,
+
+    -- NOT EMITTED -- the provenance key must be computed over the DEID table's
+    -- values, and the deid model keys on the RAW organization name, not the
+    -- pcx_30_organization_override one. Using the coalesced name above would move
+    -- the hash and the join would silently miss: measured on C7617267
+    -- (SCH-DEMO), whose 3 event rows were exactly the ones that failed to match
+    -- before this column existed.
+    prelim.organization_name as uid_organization_name,
 
     -- identifier pair
     -- (qualified: the override join also exposes research_id, so a bare reference
@@ -416,3 +434,56 @@ left join {{ ref('pcx_30_organization_ref') }} org
     on org.name = prelim.organization_name
 left join {{ ref('pcx_30_organization_override') }} ovr
     on ovr.research_id = prelim.research_id
+
+),
+
+keyed as (
+    select
+        published.*,
+        {{ pcx_row_uid([
+            'uid_organization_name',
+            'research_id',
+            'event_type',
+            'age_at_event_days',
+            'metastasis',
+            'metastasis_location',
+            'metastasis_location_other',
+            'cns_diagnosis_category',
+            'cns_integrated_diagnosis',
+            'cns_integrated_diagnosis_source',
+            'tumor_locations',
+            'tumor_location_other',
+        ]) }} as pcx_row_uid
+    from published
+),
+
+prov as (
+    {{ pcx_30_field_provenance_pivot('event', [
+        'cns_diagnosis_category',
+        'cns_integrated_diagnosis',
+        'metastasis',
+        'tumor_locations',
+    ]) }}
+)
+
+-- Column list and order UNCHANGED from the pre-override view.
+select
+    keyed.organization_name,
+    keyed.organization_code,
+    keyed.mrn,
+    keyed.research_id,
+    keyed.event_type,
+    keyed.event_date,
+    keyed.age_at_event_days,
+    coalesce(prov.ov_metastasis, keyed.metastasis) as metastasis,
+    keyed.metastasis_location,
+    keyed.metastasis_location_other,
+    coalesce(prov.ov_cns_diagnosis_category, keyed.cns_diagnosis_category)
+        as cns_diagnosis_category,
+    coalesce(prov.ov_cns_integrated_diagnosis, keyed.cns_integrated_diagnosis)
+        as cns_integrated_diagnosis,
+    keyed.cns_integrated_diagnosis_source,
+    coalesce(prov.ov_tumor_locations, keyed.tumor_locations) as tumor_locations,
+    keyed.tumor_location_other
+from keyed
+left join prov on prov.pcx_row_uid = keyed.pcx_row_uid

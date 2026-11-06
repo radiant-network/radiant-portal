@@ -9,14 +9,17 @@
 -- EXACTLY -- same relation name, same five columns in the same order, same types --
 -- so the two read views and any direct consumer see no change.
 --
--- The 74 authored rows live in the seed pcx_30_data_dictionary_src; this model adds
--- the one derived column and the NULL coercion. Edit the SEED to change content, not
--- this file.
+-- The authored rows live in the seed pcx_30_data_dictionary_src (79 as of
+-- 2026-11-05, when the five field_provenance rows were added); this model adds the
+-- one derived column and the NULL coercion. Edit the SEED to change content, not
+-- this file. Note this model is a TABLE, so `dbt seed` alone does NOT reach the two
+-- read views -- a seed edit must be followed by `dbt run --select
+-- pcx_30_data_dictionary+`, or the views keep serving the previous row set.
 --
 -- table_name IS DERIVED, deliberately. It is always source_file minus the '.csv'
--- suffix -- verified on all 74 rows before the conversion -- so deriving it here
--- means the two columns cannot drift apart the way two hand-maintained columns
--- could.
+-- suffix -- verified on all 74 rows as they stood at the conversion -- so deriving
+-- it here means the two columns cannot drift apart the way two hand-maintained
+-- columns could.
 --
 -- field_name: the seed carries an EMPTY STRING for the 7 table-level rows, and
 -- `field_name IS NULL` is the published signal for "this row describes the table,

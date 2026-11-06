@@ -60,13 +60,52 @@ pt_roster as (
 
 initial_events as (
     select * from {{ ref('int_pcx_30_initial_events') }}
-)
+),
+
+-- REVIEWER OVERRIDES (added 2026-11-05)
+-- -----------------------------------------------------------------------
+-- This view now applies the SAME reviewer-accepted overrides as
+-- pcx_30_medical_therapy_level_deid, so a consumer of either sees the value the
+-- clinical reviewer accepted. Before this, the two DISAGREED: the view is a
+-- parallel rebuild from `treatment` rather than a read of the release table, so
+-- the override applied in the deid model's final select never reached here, and
+-- all 8 accepted corrections were invisible to every view-backed consumer
+-- (measured 2026-11-05).
+--
+-- Provenance DETAIL is deliberately not exposed here. The release tables carry
+-- a `field_provenance` column; whether the view layer should too is an open
+-- decision, so this change moves the VALUES only and adds no column.
+--
+-- KNOWN GAP -- derived columns do NOT cascade. `is_initial_treatment` is
+-- computed from the raw `age_at_chemo_start`, so on the one row where
+-- `age_at_regimen_start_days` is overridden it still reflects the curator's
+-- original age. Left deliberately: the deid model does not cascade either, and
+-- view-vs-table agreement on a shared column matters more than internal
+-- coherence of a derived one. The paired CALENDAR DATES are different -- they
+-- exist only in this view and are a pure projection of the age, so they ARE
+-- re-derived from the accepted value below, which is applying the reviewer's
+-- decision rather than inventing one.
+--
+-- KNOWN GAP -- `protocol_name_and_arm` is not overridden, matching the deid
+-- model; see its header for why.
+
+published as (
 
 select distinct
     -- pcx_30_organization_override wins where it carries the patient; see the seed's
     -- description in seeds/_pcx_30__seeds.yml. Empty seed = byte-identical.
     coalesce(ovr.organization_name, pt_roster.organization_name) as organization_name,
     coalesce(ovr.organization_code, org.code) as organization_code,
+
+    -- NOT EMITTED -- carried for the provenance key only. `pcx_row_uid` must be
+    -- computed over the DEID table's values, and the deid model keys on the raw
+    -- roster organization name, NOT the pcx_30_organization_override one. Using
+    -- the coalesced name above would move the hash and the join would silently
+    -- miss: measured on C7617267 (SCH-DEMO), whose 2 therapy rows were exactly
+    -- the rows that failed to match before this column existed.
+    pt_roster.organization_name as uid_organization_name,
+    -- NOT EMITTED -- needed to re-derive the calendar dates from an accepted age.
+    dob as uid_dob,
 
     -- identifier pair
     -- (qualified: initial_events also exposes research_id / organization_name)
@@ -109,3 +148,62 @@ left join {{ ref('pcx_30_organization_override') }} ovr
     on ovr.research_id = pt_roster.research_id
 left join initial_events on pt_roster.research_id = initial_events.research_id
 where chemotherapy = 'Yes'
+
+),
+
+keyed as (
+    select
+        published.*,
+        {{ pcx_row_uid([
+            'uid_organization_name',
+            'research_id',
+            'protocol_name_and_arm',
+            'protocol_name',
+            'protocol_arm',
+            'chemotherapy_type',
+            'age_at_regimen_start_days',
+            'age_at_regimen_stop_days',
+            'chemotherapy_agents',
+            'is_initial_treatment',
+        ]) }} as pcx_row_uid
+    from published
+),
+
+prov as (
+    {{ pcx_30_field_provenance_pivot('medical_therapy', [
+        'age_at_regimen_start_days',
+        'age_at_regimen_stop_days',
+        'chemotherapy_agents',
+        'chemotherapy_type',
+        'protocol_name',
+    ]) }}
+)
+
+-- Column list and order are UNCHANGED from the pre-override view; only the
+-- values of the five overridable columns (and the two dates projected from the
+-- overridable ages) can differ, and only on a row a reviewer decided.
+select
+    keyed.organization_name,
+    keyed.organization_code,
+    keyed.mrn,
+    keyed.research_id,
+    keyed.protocol_name_and_arm,
+    coalesce(prov.ov_protocol_name, keyed.protocol_name) as protocol_name,
+    keyed.protocol_arm,
+    coalesce(prov.ov_chemotherapy_type, keyed.chemotherapy_type)
+        as chemotherapy_type,
+    date_add(keyed.uid_dob, interval cast(coalesce(
+        prov.ov_age_at_regimen_start_days,
+        keyed.age_at_regimen_start_days) as int) day) as regimen_start_date,
+    coalesce(prov.ov_age_at_regimen_start_days, keyed.age_at_regimen_start_days)
+        as age_at_regimen_start_days,
+    date_add(keyed.uid_dob, interval cast(coalesce(
+        prov.ov_age_at_regimen_stop_days,
+        keyed.age_at_regimen_stop_days) as int) day) as regimen_stop_date,
+    coalesce(prov.ov_age_at_regimen_stop_days, keyed.age_at_regimen_stop_days)
+        as age_at_regimen_stop_days,
+    coalesce(prov.ov_chemotherapy_agents, keyed.chemotherapy_agents)
+        as chemotherapy_agents,
+    keyed.is_initial_treatment
+from keyed
+left join prov on prov.pcx_row_uid = keyed.pcx_row_uid

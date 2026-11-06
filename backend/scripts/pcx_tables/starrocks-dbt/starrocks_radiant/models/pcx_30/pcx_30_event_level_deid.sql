@@ -87,9 +87,24 @@ dx as (
         -- 'N/A' is a literal value, not NULL, on 52% of cohort diagnosis rows
         -- (caveat 4), so it must never be matched against a real sample_id
         and diagnosis.sample_subject_name <> 'N/A'
-)
+),
 
 -- Initial CNS Tumor: one row per patient, specimens collapsed, group upgraded whole.
+
+-- FIELD PROVENANCE AND REVIEWER OVERRIDES (added 2026-11-05)
+-- -----------------------------------------------------------------------
+-- `field_provenance` records, per row, which values an independent automated
+-- source produced: `field=source`, with `!` marking a value a clinical
+-- reviewer accepted IN PLACE OF the curator's. The rule is "provenance only,
+-- UNLESS a reviewer accepts an overriding value" (owner, 2026-11-05).
+-- Detail -- who decided, when, the original value, the case id -- lives in
+-- `pcx_30_field_provenance` and `pcx_30_promotion_decisions`, deliberately NOT
+-- in more columns here.
+--
+-- `published` wraps the WHOLE three-arm union, not its last arm, so the row
+-- key is computed once over the union's output.
+
+published as (
 select distinct
     organization_name,
     research_id,
@@ -398,3 +413,67 @@ from (
         and pt_roster.diagnosis_type_cohort = 'Not Applicable'
 ) first_initial
 where rn = 1
+
+)
+,
+
+keyed as (
+    -- pcx_row_uid -- md5 over every base column in DDL order, '|#|'-joined,
+    -- with a NUL-wrapped NULL sentinel so a NULL and the literal 'NULL' hash
+    -- differently. Reproduces promote_to_pcx30._uid EXACTLY: verified
+    -- 2026-11-05 against all five live release tables, 38,488 of 38,488 rows.
+    -- It is the only join key these tables have -- the models are
+    -- `select distinct` with no row identity of their own -- and being
+    -- content-addressed is the right failure mode: if an upstream value moves,
+    -- the uid moves, the provenance join misses, and a stamp measured against
+    -- the old value stops applying rather than being applied to a value nobody
+    -- reviewed.
+    select
+        published.*,
+        {{ pcx_row_uid([
+            'organization_name',
+            'research_id',
+            'event_type',
+            'age_at_event_days',
+            'metastasis',
+            'metastasis_location',
+            'metastasis_location_other',
+            'cns_diagnosis_category',
+            'cns_integrated_diagnosis',
+            'cns_integrated_diagnosis_source',
+            'tumor_locations',
+            'tumor_location_other',
+        ]) }} as pcx_row_uid
+    from published
+),
+
+prov as (
+    -- Field provenance, pivoted to one row per release row. `!` marks a
+    -- reviewer-accepted OVERRIDE (the value differs from what the curator
+    -- typed); no marker means corroborated, value unchanged.
+    {{ pcx_30_field_provenance_pivot('event', [
+        'cns_diagnosis_category',
+        'cns_integrated_diagnosis',
+        'metastasis',
+        'tumor_locations',
+    ]) }}
+)
+
+-- Column order is the base table's, unchanged; field_provenance is appended
+-- LAST so a positional consumer (the CSV exports) sees only an added column.
+select
+    keyed.organization_name,
+    keyed.research_id,
+    keyed.event_type,
+    keyed.age_at_event_days,
+    coalesce(prov.ov_metastasis, keyed.metastasis) as metastasis,
+    keyed.metastasis_location,
+    keyed.metastasis_location_other,
+    coalesce(prov.ov_cns_diagnosis_category, keyed.cns_diagnosis_category) as cns_diagnosis_category,
+    coalesce(prov.ov_cns_integrated_diagnosis, keyed.cns_integrated_diagnosis) as cns_integrated_diagnosis,
+    keyed.cns_integrated_diagnosis_source,
+    coalesce(prov.ov_tumor_locations, keyed.tumor_locations) as tumor_locations,
+    keyed.tumor_location_other,
+    prov.field_provenance
+from keyed
+left join prov on prov.pcx_row_uid = keyed.pcx_row_uid
