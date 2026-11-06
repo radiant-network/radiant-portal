@@ -64,7 +64,11 @@ function ClinicalTrialsTab({ patient }: ClinicalTrialsTabProps) {
           )}
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
-          <DisplayTable data={rows} columns={columns} loading={isLoading} fullHeight />
+          {!isLoading && rows.length === 0 ? (
+            <Empty size="inline" showIcon={false} description={t('patient_entity.clinical_trials.empty')} />
+          ) : (
+            <DisplayTable data={rows} columns={columns} loading={isLoading} fullHeight />
+          )}
         </CardContent>
       </Card>
     </div>
