@@ -18,6 +18,25 @@ const getName = (url = '', parallel = '') => {
   }
 };
 
+const BUILD_POLL_INTERVAL_MS = 20000;
+const BUILD_WAIT_TIMEOUT_MS = 30 * 60 * 1000;
+
+// A Ferlease run starts while its image is still being built and rolled out.
+const waitForDeployedBuild = async (baseUrl: string, sha: string) => {
+  const url = new URL("version.txt", baseUrl).toString();
+  const deadline = Date.now() + BUILD_WAIT_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    // Without the file, the portal redirects to its login page.
+    const deployed = await fetch(url, { cache: "no-store", redirect: "manual" })
+      .then(response => (response.ok ? response.text() : ""))
+      .catch(() => "");
+    if (deployed.trim() === sha) return;
+    console.log(`Waiting for build ${sha.slice(0, 7)} on ${baseUrl}`);
+    await new Promise(resolve => setTimeout(resolve, BUILD_POLL_INTERVAL_MS));
+  }
+  throw new Error(`Build ${sha} not served by ${baseUrl} after ${BUILD_WAIT_TIMEOUT_MS / 60000} min`);
+};
+
 export default defineConfig({
   projectId: "g1apb2",
   chromeWebSecurity: true,
@@ -66,6 +85,10 @@ export default defineConfig({
           fs.writeFileSync(cachedDataPath, JSON.stringify(data, null, 2));
           return null;
         },
+      });
+      on("before:run", async () => {
+        const buildSha = process.env.FERLEASE_BUILD_SHA;
+        if (buildSha) await waitForDeployedBuild(config.baseUrl ?? "", buildSha);
       });
       return require("./cypress/plugins/index.ts")(on, config);
     },
