@@ -16,7 +16,7 @@ Every response is already filtered by the caller's PHI access: the API reads the
 
 ## Endpoints
 
-Nine read-only routes (plus a tentative tenth for the tumor board report), all gated by `can_search_case`, sit next to the existing `/patients/batch` ingestion routes.
+The read-only routes below are all gated by `can_search_case`, sit next to the existing `/patients/batch` ingestion routes.
 
 | Method and path | Request | Response | Operation id |
 | --- | --- | --- | --- |
@@ -31,7 +31,9 @@ Nine read-only routes (plus a tentative tenth for the tumor board report), all g
 | `GET /{tenant}/patients/{patient_key}/genomics` | path `patient_key` | `PatientGenomics` | `patientGenomics` |
 | `GET /{tenant}/patients/{patient_key}/external_records` | path `patient_key` | `PatientExternalRecords`: sidebar External Records card, the organizations linked through TEFCA or Carequality and the documents retrieved from them | `patientExternalRecords` |
 | `GET /{tenant}/patients/{patient_key}/trial_eligibilities` | path `patient_key` | `PatientTrialEligibilities`: Clinical Trials tab, the eligibility verdicts BRIM extracted from the patient's notes, each named by its BRIM `variable_name` (PNOC035 so far); `reasoning` and `brim_url` are PHI | `patientTrialEligibilities` |
-| `GET /{tenant}/patients/{patient_key}/tumor-board/{report_id}/download` (tentative) | path `patient_key`, `report_id` | `{ url, expires_at }`: presigned S3 URL, only after the entity check passes | `patientTumorBoardReportDownload` |
+| `GET /{tenant}/patients/{patient_key}/tumor_board` | path `patient_key` | `PatientTumorBoard`: Tumor Board tab, the sessions (most recent first; `date` and the report are PHI, `recommendations` split on semicolons) and `has_deck` | `patientTumorBoard` |
+| `GET /{tenant}/patients/{patient_key}/tumor_board/deck/download_url` | path `patient_key` | `PreSignedURL` `{ url, expires_at }` of the patient's presentation deck; 404 without a deck or PHI access | `patientTumorBoardDeckDownloadUrl` |
+| `GET /{tenant}/patients/{patient_key}/tumor_board/sessions/{session_id}/download_url` | path `patient_key`, `session_id` | `PreSignedURL` of a session's report; 404 without a report or PHI access | `patientTumorBoardReportDownloadUrl` |
 
 **One endpoint per tab.** Every secured view re-runs its grant lookups on each read (~200 ms for one patient), and the list view joins eight of them (~1.2 s even for one row). So no patient page endpoint reads the list view: each resolves `patient_key` through `v_pcx_30_patient_key`, then reads its views concurrently. The entity endpoint serves the header, sidebar and overview from demographics, vital status, events and treatment summary, the diagnosis picked from the events as the list view does; each other tab has its own endpoint, fetched the first time the tab is opened.
 

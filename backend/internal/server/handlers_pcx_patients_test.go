@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -369,6 +370,10 @@ type pcxPatientTabsReaderMock struct {
 	genomics   *types.PatientGenomics
 	external   *types.PatientExternalRecords
 	trials     *types.PatientTrialEligibilities
+	tumorBoard *types.PatientTumorBoard
+	deckURL    *string
+	reportURL  *string
+	sessionID  int
 	err        error
 	key        string
 }
@@ -403,7 +408,22 @@ func (m *pcxPatientTabsReaderMock) GetPatientTrialEligibilities(_ context.Contex
 	return m.trials, m.err
 }
 
-var patientTabs = []string{"treatments", "laboratory", "imaging", "genomics", "external_records", "trial_eligibilities"}
+func (m *pcxPatientTabsReaderMock) GetPatientTumorBoard(_ context.Context, patientKey string) (*types.PatientTumorBoard, error) {
+	m.key = patientKey
+	return m.tumorBoard, m.err
+}
+
+func (m *pcxPatientTabsReaderMock) GetPatientTumorBoardDeckURL(_ context.Context, patientKey string) (*string, error) {
+	m.key = patientKey
+	return m.deckURL, m.err
+}
+
+func (m *pcxPatientTabsReaderMock) GetPatientTumorBoardReportURL(_ context.Context, patientKey string, sessionID int) (*string, error) {
+	m.key, m.sessionID = patientKey, sessionID
+	return m.reportURL, m.err
+}
+
+var patientTabs = []string{"treatments", "laboratory", "imaging", "genomics", "external_records", "trial_eligibilities", "tumor_board"}
 
 func getPatientTab(repo *pcxPatientTabsReaderMock, tab, key string) *httptest.ResponseRecorder {
 	router := gin.Default()
@@ -413,6 +433,10 @@ func getPatientTab(repo *pcxPatientTabsReaderMock, tab, key string) *httptest.Re
 	router.GET("/:tenant/patients/:patient_key/genomics", PatientGenomicsHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/external_records", PatientExternalRecordsHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/trial_eligibilities", PatientTrialEligibilitiesHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/tumor_board", PatientTumorBoardHandler(repo))
+	presigner := testutils.NewMockS3PreSigner()
+	router.GET("/:tenant/patients/:patient_key/tumor_board/deck/download_url", PatientTumorBoardDeckDownloadURLHandler(repo, presigner))
+	router.GET("/:tenant/patients/:patient_key/tumor_board/sessions/:session_id/download_url", PatientTumorBoardReportDownloadURLHandler(repo, presigner))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/"+key+"/"+tab, nil))
 	return w
@@ -491,6 +515,64 @@ func Test_PatientGenomicsHandler_ReturnsCasesAndInterpretations(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, testPatientKey, repo.key)
 	assert.JSONEq(t, `{"cases": [], "interpretations": []}`, w.Body.String())
+}
+
+func Test_PatientTumorBoardHandler_ReturnsTheSessions(t *testing.T) {
+	status := "Signed"
+	repo := &pcxPatientTabsReaderMock{tumorBoard: &types.PatientTumorBoard{HasDeck: true, Sessions: []types.PatientTumorBoardSession{
+		{SessionID: 1, Status: &status, Recommendations: []string{"LP184", "DFMO"}, HasReport: true}}}}
+
+	w := getPatientTab(repo, "tumor_board", testPatientKey)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, testPatientKey, repo.key)
+	assert.JSONEq(t, `{"has_deck": true, "sessions": [{"session_id": 1, "day": null, "date": null, "reason": null, "diagnosis": null,
+		"consensus": null, "recommendations": ["LP184", "DFMO"], "status": "Signed", "has_report": true}]}`, w.Body.String())
+}
+
+func Test_PatientTumorBoardDownloadURLHandlers_PresignTheURL(t *testing.T) {
+	deck, report := "s3://bucket/deck.pptx", "s3://bucket/report.pdf"
+	repo := &pcxPatientTabsReaderMock{deckURL: &deck, reportURL: &report}
+
+	w := getPatientTab(repo, "tumor_board/deck/download_url", testPatientKey)
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"url": "presigned.s3://bucket/deck.pptx", "expires_at": 1234567890}`, w.Body.String())
+
+	w = getPatientTab(repo, "tumor_board/sessions/7/download_url", testPatientKey)
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, 7, repo.sessionID)
+	assert.JSONEq(t, `{"url": "presigned.s3://bucket/report.pdf", "expires_at": 1234567890}`, w.Body.String())
+}
+
+func Test_PatientTumorBoardDownloadURLHandlers_NoURL_404(t *testing.T) {
+	for _, path := range []string{"tumor_board/deck/download_url", "tumor_board/sessions/1/download_url"} {
+		w := getPatientTab(&pcxPatientTabsReaderMock{}, path, testPatientKey)
+
+		assert.Equal(t, http.StatusNotFound, w.Code, path)
+	}
+}
+
+func Test_PatientTumorBoardDownloadURLHandlers_MalformedPath_404WithoutQuery(t *testing.T) {
+	for _, c := range []struct{ key, path string }{
+		{"MRN-0002", "tumor_board/deck/download_url"},
+		{"MRN-0002", "tumor_board/sessions/1/download_url"},
+		{testPatientKey, "tumor_board/sessions/abc/download_url"},
+	} {
+		repo := &pcxPatientTabsReaderMock{}
+
+		w := getPatientTab(repo, c.path, c.key)
+
+		assert.Equal(t, http.StatusNotFound, w.Code, c.path)
+		assert.Empty(t, repo.key, c.path)
+	}
+}
+
+func Test_PatientTumorBoardDownloadURLHandlers_RepositoryError_500(t *testing.T) {
+	for _, path := range []string{"tumor_board/deck/download_url", "tumor_board/sessions/1/download_url"} {
+		w := getPatientTab(&pcxPatientTabsReaderMock{err: errors.New("boom")}, path, testPatientKey)
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code, path)
+	}
 }
 
 func Test_PatientTabHandlers_UnknownKey_404(t *testing.T) {

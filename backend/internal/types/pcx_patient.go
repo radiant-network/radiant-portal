@@ -304,6 +304,28 @@ type PatientTrialEligibility struct {
 	LoadedAt         time.Time `json:"loaded_at" validate:"required"`                                       // When the BRIM export was loaded, not a clinical date
 }
 
+// PatientTumorBoard - Tumor board tab
+// @Description Tumor board sessions of a patient, and whether the caller can download the patient's presentation deck
+// @Name PatientTumorBoard
+type PatientTumorBoard struct {
+	Sessions []PatientTumorBoardSession `json:"sessions" validate:"required"` // Most recent first
+	HasDeck  bool                       `json:"has_deck" validate:"required"` // false without PHI access
+}
+
+// PatientTumorBoardSession - Tumor board session of a patient
+// @Description Tumor board session of a patient. The date is PHI, like every date of the patient view.
+// @Name PatientTumorBoardSession
+type PatientTumorBoardSession struct {
+	PatientDayDate
+	SessionID       int      `json:"session_id" validate:"required"`
+	Reason          *string  `json:"reason" example:"Progression Review"`
+	Diagnosis       *string  `json:"diagnosis" example:"AT/RT, SHH subtype"`
+	Consensus       *string  `json:"consensus"`
+	Recommendations []string `json:"recommendations" validate:"required"`
+	Status          *string  `json:"status" example:"Signed"`
+	HasReport       bool     `json:"has_report" validate:"required"` // false without PHI access
+}
+
 // PatientImagingSession - Imaging session of a patient
 // @Description Imaging session of a patient
 // @Name PatientImagingSession

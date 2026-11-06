@@ -12,6 +12,9 @@ Method | HTTP request | Description
 [**patient_laboratory**](PatientsApi.md#patient_laboratory) | **GET** /{tenant}/patients/{patient_key}/laboratory | Get PatientLaboratory of a patient
 [**patient_treatments**](PatientsApi.md#patient_treatments) | **GET** /{tenant}/patients/{patient_key}/treatments | Get PatientTreatments of a patient
 [**patient_trial_eligibilities**](PatientsApi.md#patient_trial_eligibilities) | **GET** /{tenant}/patients/{patient_key}/trial_eligibilities | Get PatientTrialEligibilities of a patient
+[**patient_tumor_board**](PatientsApi.md#patient_tumor_board) | **GET** /{tenant}/patients/{patient_key}/tumor_board | Get PatientTumorBoard of a patient
+[**patient_tumor_board_deck_download_url**](PatientsApi.md#patient_tumor_board_deck_download_url) | **GET** /{tenant}/patients/{patient_key}/tumor_board/deck/download_url | Get a presigned URL to download the tumor board deck of a patient
+[**patient_tumor_board_report_download_url**](PatientsApi.md#patient_tumor_board_report_download_url) | **GET** /{tenant}/patients/{patient_key}/tumor_board/sessions/{session_id}/download_url | Get a presigned URL to download the report of a tumor board session
 [**patients_filters**](PatientsApi.md#patients_filters) | **GET** /{tenant}/patients/filters | Get PatientFilters patient list filters
 [**patients_statistics**](PatientsApi.md#patients_statistics) | **GET** /{tenant}/patients/statistics | Get PatientStatistics cohort analytics
 [**post_patient_batch**](PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
@@ -670,6 +673,260 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**PatientTrialEligibilities**](PatientTrialEligibilities.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **patient_tumor_board**
+> PatientTumorBoard patient_tumor_board(tenant, patient_key)
+
+Get PatientTumorBoard of a patient
+
+Retrieve PatientTumorBoard, the tumor board sessions of the patient and whether the caller can download its presentation deck, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.patient_tumor_board import PatientTumorBoard
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.PatientsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    patient_key = 'patient_key_example' # str | Patient key
+
+    try:
+        # Get PatientTumorBoard of a patient
+        api_response = api_instance.patient_tumor_board(tenant, patient_key)
+        print("The response of PatientsApi->patient_tumor_board:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling PatientsApi->patient_tumor_board: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **patient_key** | **str**| Patient key | 
+
+### Return type
+
+[**PatientTumorBoard**](PatientTumorBoard.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **patient_tumor_board_deck_download_url**
+> UtilsPreSignedURL patient_tumor_board_deck_download_url(tenant, patient_key)
+
+Get a presigned URL to download the tumor board deck of a patient
+
+Retrieve a presigned URL of the patient's tumor board presentation deck. 404 for an unknown or malformed key, a patient without a deck, or a caller without PHI access to the patient.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.utils_pre_signed_url import UtilsPreSignedURL
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.PatientsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    patient_key = 'patient_key_example' # str | Patient key
+
+    try:
+        # Get a presigned URL to download the tumor board deck of a patient
+        api_response = api_instance.patient_tumor_board_deck_download_url(tenant, patient_key)
+        print("The response of PatientsApi->patient_tumor_board_deck_download_url:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling PatientsApi->patient_tumor_board_deck_download_url: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **patient_key** | **str**| Patient key | 
+
+### Return type
+
+[**UtilsPreSignedURL**](UtilsPreSignedURL.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **patient_tumor_board_report_download_url**
+> UtilsPreSignedURL patient_tumor_board_report_download_url(tenant, patient_key, session_id)
+
+Get a presigned URL to download the report of a tumor board session
+
+Retrieve a presigned URL of the report of one of the patient's tumor board sessions. 404 for an unknown or malformed key or session, a session without a report, or a caller without PHI access to the patient.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.utils_pre_signed_url import UtilsPreSignedURL
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.PatientsApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    patient_key = 'patient_key_example' # str | Patient key
+    session_id = 56 # int | Tumor board session id
+
+    try:
+        # Get a presigned URL to download the report of a tumor board session
+        api_response = api_instance.patient_tumor_board_report_download_url(tenant, patient_key, session_id)
+        print("The response of PatientsApi->patient_tumor_board_report_download_url:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling PatientsApi->patient_tumor_board_report_download_url: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **patient_key** | **str**| Patient key | 
+ **session_id** | **int**| Tumor board session id | 
+
+### Return type
+
+[**UtilsPreSignedURL**](UtilsPreSignedURL.md)
 
 ### Authorization
 
