@@ -15,7 +15,7 @@ function PrimaryConditionCell({ mondoId, name }: PrimaryConditionCellProps) {
   if (!code) return <span className="text-xs">{label}</span>;
 
   return (
-    <AnchorLinkCell href={`http://purl.obolibrary.org/obo/MONDO_${code}`} target="_blank" rel="noreferrer">
+    <AnchorLinkCell href={`http://purl.obolibrary.org/obo/MONDO_${code}`} target="_blank" rel="noopener noreferrer">
       {label}
     </AnchorLinkCell>
   );
