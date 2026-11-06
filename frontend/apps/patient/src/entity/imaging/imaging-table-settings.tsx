@@ -3,6 +3,7 @@ import type { TFunction } from 'i18next';
 import type { PatientImagingSession } from '@/api/api';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import { createAppColumnHelper, type TableColumnDef } from '@/components/base/data-table/data-table';
+import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
 import ImagingViewerCell from './cells/imaging-viewer-cell';
 
@@ -24,6 +25,14 @@ function getImagingColumns(t: TFunction<string, undefined>) {
     columnHelper.accessor('imaging_modality', {
       cell: info => info.getValue() || <EmptyCell />,
       header: t('patient_entity.imaging.columns.modality'),
+    }),
+    columnHelper.accessor('anatomical_site', {
+      cell: info => info.getValue() || <EmptyCell />,
+      header: () => (
+        <TooltipHeader tooltip={t('patient_entity.imaging.columns.body_part_tooltip')}>
+          {t('patient_entity.imaging.columns.body_part')}
+        </TooltipHeader>
+      ),
     }),
     columnHelper.display({
       id: 'viewer',
