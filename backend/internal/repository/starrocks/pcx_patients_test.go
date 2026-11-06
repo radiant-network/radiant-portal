@@ -565,7 +565,29 @@ func Test_GetPcxPatientExternalRecords_PatientWithoutExchangeHasNoOrganization(t
 	})
 }
 
-func Test_GetPcxPatientProcessingReportURL_VisibleWithoutPhiAccess(t *testing.T) {
+func Test_PcxOrgsForPatientKey_OrganizationOfThePatient(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		orgs, err := repo.OrgsForPatientKey(t.Context(), pcxPatientKey("4"))
+
+		require.NoError(t, err)
+		assert.Equal(t, []string{"BCH"}, orgs)
+	})
+}
+
+func Test_PcxOrgsForPatientKey_UnknownKeyHasNone(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		orgs, err := repo.OrgsForPatientKey(t.Context(), pcxPatientKey("999"))
+
+		require.NoError(t, err)
+		assert.Empty(t, orgs)
+	})
+}
+
+func Test_GetPcxPatientProcessingReportURL_OnlyWhatTheCallerCanSee(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
 		report := func(key string) *string {
@@ -576,9 +598,9 @@ func Test_GetPcxPatientProcessingReportURL_VisibleWithoutPhiAccess(t *testing.T)
 
 		require.NotNil(t, report("2"))
 		assert.Equal(t, "s3://bucket/processing_report/records.html", *report("2"))
-		require.NotNil(t, report("4"), "not masked without PHI access")
-		assert.Equal(t, "s3://bucket/processing_report/c100004.html", *report("4"))
-		assert.True(t, getPcxPatient(t, env, pcxPatientKey("4")).HasProcessingReport)
+		assert.True(t, getPcxPatient(t, env, pcxPatientKey("2")).HasProcessingReport)
+		assert.Nil(t, report("4"), "report masked without PHI access")
+		assert.False(t, getPcxPatient(t, env, pcxPatientKey("4")).HasProcessingReport)
 		assert.Nil(t, report("1"), "patient without a report")
 		assert.Nil(t, report("5"), "NULL report URL")
 		assert.Nil(t, report("999"), "unknown key")

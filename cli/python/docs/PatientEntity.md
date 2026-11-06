@@ -18,7 +18,7 @@ Name | Type | Description | Notes
 **family_name** | **str** | Placeholder when can_read_phi is false | 
 **gender** | **str** |  | 
 **given_name** | **str** | Placeholder when can_read_phi is false | 
-**has_processing_report** | **bool** | A CHARM processing report can be opened | 
+**has_processing_report** | **bool** | A CHARM processing report can be opened; false without PHI access | 
 **initial_diagnosis_evidence_url** | **str** | BRIM link, format to be defined | [optional] 
 **initial_tumor_resections** | **List[str]** | Extent of tumor resection of each initial treatment surgery | 
 **key_dates** | [**PatientKeyDates**](PatientKeyDates.md) |  | 

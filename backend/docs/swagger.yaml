@@ -3245,7 +3245,8 @@ components:
           description: Placeholder when can_read_phi is false
           type: string
         has_processing_report:
-          description: A CHARM processing report can be opened
+          description: A CHARM processing report can be opened; false without PHI
+            access
           type: boolean
         initial_diagnosis_evidence_url:
           description: BRIM link, format to be defined
@@ -10867,8 +10868,9 @@ paths:
   /{tenant}/patients/{patient_key}/processing_report/download_url:
     get:
       description: Retrieve a presigned URL of the CHARM processing report (a self-contained
-        HTML page) of the patient. 404 for an unknown or malformed key or a patient
-        without a report.
+        HTML page) of the patient. Requires can_read_pii at the patient's organization
+        (403 otherwise, and for an unknown or malformed key). 404 for a patient without
+        a report, or one the view masks.
       operationId: patientProcessingReportDownloadUrl
       parameters:
       - description: Tenant code
@@ -11116,8 +11118,9 @@ paths:
   /{tenant}/patients/{patient_key}/tumor_board/deck/download_url:
     get:
       description: Retrieve a presigned URL of the patient's tumor board presentation
-        deck. 404 for an unknown or malformed key, a patient without a deck, or a
-        caller without PHI access to the patient.
+        deck. Requires can_read_pii at the patient's organization (403 otherwise,
+        and for an unknown or malformed key). 404 for a patient without a deck, or
+        one the view masks.
       operationId: patientTumorBoardDeckDownloadUrl
       parameters:
       - description: Tenant code
@@ -11178,8 +11181,9 @@ paths:
   /{tenant}/patients/{patient_key}/tumor_board/sessions/{session_id}/download_url:
     get:
       description: Retrieve a presigned URL of the report of one of the patient's
-        tumor board sessions. 404 for an unknown or malformed key or session, a session
-        without a report, or a caller without PHI access to the patient.
+        tumor board sessions. Requires can_read_pii at the patient's organization
+        (403 otherwise, and for an unknown or malformed key). 404 for an unknown or
+        malformed session, a session without a report, or one the view masks.
       operationId: patientTumorBoardReportDownloadUrl
       parameters:
       - description: Tenant code

@@ -249,6 +249,15 @@ func (r *PcxPatientsRepository) patientIdentifier(ctx context.Context, patientKe
 	return &pcxPatientIdentifier{rows[0].OrganizationCode, rows[0].PatientIDType, rows[0].PatientID}, nil
 }
 
+// OrgsForPatientKey returns the organization of the patient, none for an unknown key.
+func (r *PcxPatientsRepository) OrgsForPatientKey(ctx context.Context, patientKey string) ([]string, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return []string{}, err
+	}
+	return []string{id.organizationCode}, nil
+}
+
 func (r *PcxPatientsRepository) GetPatientTreatments(ctx context.Context, patientKey string) (*types.PatientTreatments, error) {
 	id, err := r.patientIdentifier(ctx, patientKey)
 	if err != nil || id == nil {
@@ -438,7 +447,7 @@ func pcxTumorBoardDeckURL(ctx context.Context, db *gorm.DB, id pcxPatientIdentif
 }
 
 // GetPatientProcessingReportURL returns the S3 URL of the patient's CHARM processing report, nil
-// for an unknown key or without a report.
+// for an unknown key, without a report or without PHI access.
 func (r *PcxPatientsRepository) GetPatientProcessingReportURL(ctx context.Context, patientKey string) (*string, error) {
 	id, err := r.patientIdentifier(ctx, patientKey)
 	if err != nil || id == nil {

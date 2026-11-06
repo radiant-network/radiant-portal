@@ -43,7 +43,7 @@ class PatientEntity(BaseModel):
     family_name: StrictStr = Field(description="Placeholder when can_read_phi is false")
     gender: StrictStr
     given_name: StrictStr = Field(description="Placeholder when can_read_phi is false")
-    has_processing_report: StrictBool = Field(description="A CHARM processing report can be opened")
+    has_processing_report: StrictBool = Field(description="A CHARM processing report can be opened; false without PHI access")
     initial_diagnosis_evidence_url: Optional[StrictStr] = Field(default=None, description="BRIM link, format to be defined")
     initial_tumor_resections: List[StrictStr] = Field(description="Extent of tumor resection of each initial treatment surgery")
     key_dates: PatientKeyDates
