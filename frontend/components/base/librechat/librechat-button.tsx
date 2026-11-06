@@ -78,7 +78,7 @@ function LibrechatButton({ className, demoMode = false, caseId, patientId, ...bu
         <TooltipContent side="left">{t('librechat.david.tooltip')}</TooltipContent>
       </Tooltip>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent size="lg" className="h-[85vh] grid-rows-[auto_1fr]">
+        <DialogContent size="xl" className="h-[85vh] grid-rows-[auto_1fr]">
           <DialogHeader className="flex-row items-center gap-2 space-y-0 px-4 py-3 pr-10 w-full">
             <DialogTitle className="leading-none">
               <img src={davidLogo} alt={t('librechat.david.title')} className="h-5 dark:hidden" />
