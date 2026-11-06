@@ -1599,7 +1599,9 @@
     }
   },
   "timeline": {
+    "collapse_all": "Tout replier",
     "evidence": "Preuve",
+    "expand_all": "Tout déplier",
     "initial_treatment": "Traitement initial",
     "marker": {
       "day": "Jour {{day}}",

@@ -2,6 +2,7 @@ import { type ComponentProps, useCallback, useEffect, useMemo, useState } from '
 import { Search } from 'lucide-react';
 
 import Empty from '@/components/base/empties/empty';
+import { Button } from '@/components/base/shadcn/button';
 import { Toggle } from '@/components/base/shadcn/toggle';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
@@ -14,18 +15,16 @@ import TimelineBadge, { type TimelineBadgeType } from './timeline-badge';
 
 type TypeKind = 'event' | 'surgery' | 'radiation' | 'chemotherapy';
 
-type EventPropsWithDefault = ComponentProps<typeof Event> & { defaultOpen?: boolean };
-
 type TimelineProps = {
   title?: string;
   description?: string;
-  events?: EventPropsWithDefault[];
+  events?: ComponentProps<typeof Event>[];
   surgeries?: ComponentProps<typeof Surgery>[];
   radiations?: ComponentProps<typeof Radiation>[];
   chemotherapies?: ComponentProps<typeof Chemotherapy>[];
 };
 
-type EventItem = { kind: 'event'; day: number | undefined; props: EventPropsWithDefault };
+type EventItem = { kind: 'event'; day: number | undefined; props: ComponentProps<typeof Event> };
 type SurgeryItem = { kind: 'surgery'; day: number | undefined; props: ComponentProps<typeof Surgery> };
 type RadiationItem = { kind: 'radiation'; day: number | undefined; props: ComponentProps<typeof Radiation> };
 type ChemoItem = { kind: 'chemotherapy'; day: number | undefined; props: ComponentProps<typeof Chemotherapy> };
@@ -112,7 +111,7 @@ function Timeline({
   useEffect(() => {
     const initial = new Set<number>();
     for (const group of groups) {
-      if (group.event?.props.defaultOpen) initial.add(group.event.eventIndex);
+      if (group.event) initial.add(group.event.eventIndex);
     }
     setOpenEventIndices(initial);
   }, [groups]);
@@ -125,6 +124,20 @@ function Timeline({
       return next;
     });
   }, []);
+
+  const collapsibleEventIndices = useMemo(
+    () => groups.filter(g => g.event && g.treatments.length > 0).map(g => g.event!.eventIndex),
+    [groups],
+  );
+  const allExpanded =
+    collapsibleEventIndices.length > 0 && collapsibleEventIndices.every(idx => openEventIndices.has(idx));
+
+  const toggleAll = useCallback(() => {
+    setOpenEventIndices(prev => {
+      const everyOpen = collapsibleEventIndices.every(idx => prev.has(idx));
+      return everyOpen ? new Set() : new Set(collapsibleEventIndices);
+    });
+  }, [collapsibleEventIndices]);
 
   const counts = useMemo(() => {
     const perKind: Record<TypeKind, number> = { event: 0, surgery: 0, radiation: 0, chemotherapy: 0 };
@@ -216,6 +229,11 @@ function Timeline({
                 </Toggle>
               );
             })}
+            {isAllActive && collapsibleEventIndices.length > 0 && (
+              <Button type="button" variant="link" size="sm" onClick={toggleAll} className="ml-auto h-7 px-2">
+                {t(allExpanded ? 'timeline.collapse_all' : 'timeline.expand_all')}
+              </Button>
+            )}
           </div>
           <div role="status" aria-live="polite" className="sr-only">
             {t('a11y.timeline.results_count', { count: visible.length })}
