@@ -42,8 +42,12 @@
 -- guards it, as in the peer views. pcx_30_organization_ref.name is unique across its
 -- 42 rows, so that LEFT JOIN cannot fan out.
 --
--- NOTE on flywheel_url: the chop.flywheel.io host is correct for EVERY row regardless
--- of contributing institution -- CHOP hosts all images for all sites.
+-- NOTE on flywheel_url: the chop.flywheel.io host is correct for every DERIVED row
+-- regardless of contributing institution -- CHOP hosts all images for all sites.
+-- The value is no longer purely derived, though: pcx_30_imaging_link may override it
+-- per session (DEMO-ONLY, Nov 2026), so "project id + session id reconstructs the
+-- URL" does not hold for an overridden row. clinical_report_url comes from the same table
+-- and has no derived fallback. Empty table = byte-identical to the pre-override view.
 --
 -- PHASE 3: the cohort roster is now a ref to int_pcx_30_cohort_roster, shared with
 -- every other pcx_30 object. The COHORT FILTER note above is why that matters here
@@ -78,16 +82,21 @@ select distinct
     -- identical in both builds
     imaging_sessions.anatomical_site,
     imaging_sessions.imaging_modality,
-    concat(
+    coalesce(img_link.flywheel_url, concat(
         'https://chop.flywheel.io/#/projects/',
         imaging_sessions.flywheel_project_id,
         '/sessions/',
         imaging_sessions.session_id
-    ) as flywheel_url
+    )) as flywheel_url,
+    img_link.clinical_report_url
 from {{ source('dwh_source', 'imaging_sessions') }} imaging_sessions
 inner join pt_roster on imaging_sessions.subject = pt_roster.research_id
 left join {{ ref('pcx_30_organization_ref') }} org
     on org.name = pt_roster.organization_name
 left join {{ ref('pcx_30_organization_override') }} ovr
     on ovr.research_id = pt_roster.research_id
+-- session_id is unique in this view, so this join cannot fan out and both values are
+-- functionally determined by it -- the `select distinct` above is unaffected.
+left join {{ source('dwh_source', 'pcx_30_imaging_link') }} img_link
+    on img_link.session_id = imaging_sessions.session_id
 where imaging_sessions.imaging_modality = 'MRI'

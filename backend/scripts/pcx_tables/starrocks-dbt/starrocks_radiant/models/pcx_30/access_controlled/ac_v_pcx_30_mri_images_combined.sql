@@ -14,10 +14,15 @@
 -- domain has NO -1 unknown-date sentinel, so unlike surgery_date and event_date the
 -- masked date here is either a real date or NULL -- never dob-minus-one-day.
 --
--- flywheel_url and the flywheel_* ids are projected unguarded. They are Flywheel
--- PACS identifiers, and reaching the images behind them requires separate Flywheel
--- authorization -- the URL is a pointer, not the image. Worth re-confirming against
--- your access policy if that assumption ever changes.
+-- flywheel_url, clinical_report_url and the flywheel_* ids are projected unguarded. They
+-- are Flywheel PACS identifiers, and reaching the images behind them requires
+-- separate Flywheel authorization -- the URL is a pointer, not the image. Worth
+-- re-confirming against your access policy if that assumption ever changes.
+--
+-- clinical_report_url (and any override of flywheel_url) comes from pcx_30_imaging_link,
+-- DEMO-ONLY for Nov 2026. It is plain on the same reasoning as flywheel_url. A
+-- curated link that embeds a patient identifier would NOT qualify -- that is the
+-- brim_url case on the surgery and PNOC035 views, which is gated phi.
 
 {{ access_controlled_view(
     source_relation = ref('v_pcx_30_mri_images_combined'),
@@ -36,6 +41,7 @@
         ['anatomical_site',       'plain'],
         ['imaging_modality',      'plain'],
         ['flywheel_url',          'plain'],
+        ['clinical_report_url',   'plain'],
         ['can_read_phi',          'plain'],
     ]
 ) }}
