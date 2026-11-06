@@ -134,6 +134,7 @@ type PatientEntity struct {
 	Events                       []PatientEvent           `json:"events" validate:"required"`
 	InitialTumorResections       []string                 `json:"initial_tumor_resections" validate:"required"` // Extent of tumor resection of each initial treatment surgery
 	TreatmentSummary             *PatientTreatmentSummary `json:"treatment_summary"`
+	HasProcessingReport          bool                     `json:"has_processing_report" validate:"required"` // A CHARM processing report can be opened
 }
 
 // PatientTreatments - Treatments tab of the patient page

@@ -321,6 +321,7 @@ func Test_PatientEntityHandler_ReturnsThePatient(t *testing.T) {
 		},
 		Events:                 []types.PatientEvent{},
 		InitialTumorResections: []string{"Gross/Near total resection"},
+		HasProcessingReport:    true,
 	}}
 
 	w := getPatientEntity(repo, testPatientKey)
@@ -335,7 +336,8 @@ func Test_PatientEntityHandler_ReturnsThePatient(t *testing.T) {
 		"birth_date": null, "race": null, "ethnicity": null, "postal_code": null, "diagnosis_type_cohort": null, "data_type_cohort": null,
 		"key_dates": {"initial_diagnosis": {"day": null, "date": null, "source": "clinical"}, "latest_encounter": {"day": null, "date": null, "source": "registry"}},
 		"initial_diagnosis_evidence_url": null, "vital_status_at": {"day": null, "date": null},
-		"events": [], "initial_tumor_resections": ["Gross/Near total resection"], "treatment_summary": null
+		"events": [], "initial_tumor_resections": ["Gross/Near total resection"], "treatment_summary": null,
+		"has_processing_report": true
 	}`, w.Body.String())
 }
 
@@ -364,18 +366,19 @@ func Test_PatientEntityHandler_RepositoryError_500(t *testing.T) {
 }
 
 type pcxPatientTabsReaderMock struct {
-	treatments *types.PatientTreatments
-	laboratory *types.PatientLaboratory
-	imaging    *types.PatientImaging
-	genomics   *types.PatientGenomics
-	external   *types.PatientExternalRecords
-	trials     *types.PatientTrialEligibilities
-	tumorBoard *types.PatientTumorBoard
-	deckURL    *string
-	reportURL  *string
-	sessionID  int
-	err        error
-	key        string
+	treatments          *types.PatientTreatments
+	laboratory          *types.PatientLaboratory
+	imaging             *types.PatientImaging
+	genomics            *types.PatientGenomics
+	external            *types.PatientExternalRecords
+	trials              *types.PatientTrialEligibilities
+	tumorBoard          *types.PatientTumorBoard
+	deckURL             *string
+	reportURL           *string
+	processingReportURL *string
+	sessionID           int
+	err                 error
+	key                 string
 }
 
 func (m *pcxPatientTabsReaderMock) GetPatientTreatments(_ context.Context, patientKey string) (*types.PatientTreatments, error) {
@@ -401,6 +404,11 @@ func (m *pcxPatientTabsReaderMock) GetPatientGenomics(_ context.Context, patient
 func (m *pcxPatientTabsReaderMock) GetPatientExternalRecords(_ context.Context, patientKey string) (*types.PatientExternalRecords, error) {
 	m.key = patientKey
 	return m.external, m.err
+}
+
+func (m *pcxPatientTabsReaderMock) GetPatientProcessingReportURL(_ context.Context, patientKey string) (*string, error) {
+	m.key = patientKey
+	return m.processingReportURL, m.err
 }
 
 func (m *pcxPatientTabsReaderMock) GetPatientTrialEligibilities(_ context.Context, patientKey string) (*types.PatientTrialEligibilities, error) {
@@ -437,6 +445,7 @@ func getPatientTab(repo *pcxPatientTabsReaderMock, tab, key string) *httptest.Re
 	presigner := testutils.NewMockS3PreSigner()
 	router.GET("/:tenant/patients/:patient_key/tumor_board/deck/download_url", PatientTumorBoardDeckDownloadURLHandler(repo, presigner))
 	router.GET("/:tenant/patients/:patient_key/tumor_board/sessions/:session_id/download_url", PatientTumorBoardReportDownloadURLHandler(repo, presigner))
+	router.GET("/:tenant/patients/:patient_key/processing_report/download_url", PatientProcessingReportDownloadURLHandler(repo, presigner))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/"+key+"/"+tab, nil))
 	return w
@@ -544,18 +553,32 @@ func Test_PatientTumorBoardDownloadURLHandlers_PresignTheURL(t *testing.T) {
 	assert.JSONEq(t, `{"url": "presigned.s3://bucket/report.pdf", "expires_at": 1234567890}`, w.Body.String())
 }
 
-func Test_PatientTumorBoardDownloadURLHandlers_NoURL_404(t *testing.T) {
-	for _, path := range []string{"tumor_board/deck/download_url", "tumor_board/sessions/1/download_url"} {
+func Test_PatientProcessingReportDownloadURLHandler_PresignsTheURL(t *testing.T) {
+	report := "s3://bucket/processing_report/records.html"
+	repo := &pcxPatientTabsReaderMock{processingReportURL: &report}
+
+	w := getPatientTab(repo, "processing_report/download_url", testPatientKey)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, testPatientKey, repo.key)
+	assert.JSONEq(t, `{"url": "presigned.s3://bucket/processing_report/records.html", "expires_at": 1234567890}`, w.Body.String())
+}
+
+var downloadURLPaths = []string{"tumor_board/deck/download_url", "tumor_board/sessions/1/download_url", "processing_report/download_url"}
+
+func Test_PatientDownloadURLHandlers_NoURL_404(t *testing.T) {
+	for _, path := range downloadURLPaths {
 		w := getPatientTab(&pcxPatientTabsReaderMock{}, path, testPatientKey)
 
 		assert.Equal(t, http.StatusNotFound, w.Code, path)
 	}
 }
 
-func Test_PatientTumorBoardDownloadURLHandlers_MalformedPath_404WithoutQuery(t *testing.T) {
+func Test_PatientDownloadURLHandlers_MalformedPath_404WithoutQuery(t *testing.T) {
 	for _, c := range []struct{ key, path string }{
 		{"MRN-0002", "tumor_board/deck/download_url"},
 		{"MRN-0002", "tumor_board/sessions/1/download_url"},
+		{"MRN-0002", "processing_report/download_url"},
 		{testPatientKey, "tumor_board/sessions/abc/download_url"},
 	} {
 		repo := &pcxPatientTabsReaderMock{}
@@ -567,8 +590,8 @@ func Test_PatientTumorBoardDownloadURLHandlers_MalformedPath_404WithoutQuery(t *
 	}
 }
 
-func Test_PatientTumorBoardDownloadURLHandlers_RepositoryError_500(t *testing.T) {
-	for _, path := range []string{"tumor_board/deck/download_url", "tumor_board/sessions/1/download_url"} {
+func Test_PatientDownloadURLHandlers_RepositoryError_500(t *testing.T) {
+	for _, path := range downloadURLPaths {
 		w := getPatientTab(&pcxPatientTabsReaderMock{err: errors.New("boom")}, path, testPatientKey)
 
 		assert.Equal(t, http.StatusInternalServerError, w.Code, path)

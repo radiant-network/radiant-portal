@@ -33,6 +33,7 @@ var patientViewRoutes = []string{
 	"GET /:tenant/patients/:patient_key/tumor_board",
 	"GET /:tenant/patients/:patient_key/tumor_board/deck/download_url",
 	"GET /:tenant/patients/:patient_key/tumor_board/sessions/:session_id/download_url",
+	"GET /:tenant/patients/:patient_key/processing_report/download_url",
 }
 
 func registeredRoutes(router *gin.Engine) map[string]bool {
@@ -207,6 +208,8 @@ func getPatientIntegration(t *testing.T, env *testutils.Env, path string) *httpt
 	router.GET("/:tenant/patients/:patient_key/imaging", server.PatientImagingHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/genomics", server.PatientGenomicsHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/external_records", server.PatientExternalRecordsHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/processing_report/download_url",
+		server.PatientProcessingReportDownloadURLHandler(repo, testutils.NewMockS3PreSigner()))
 	router.GET("/:tenant/patients/:patient_key/trial_eligibilities", server.PatientTrialEligibilitiesHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/tumor_board", server.PatientTumorBoardHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/tumor_board/sessions/:session_id/download_url",
@@ -225,6 +228,16 @@ func Test_PatientEntity_ReturnsThePatientPage(t *testing.T) {
 		require.NoError(t, json.Unmarshal(w.Body.Bytes(), &patient))
 		assert.Equal(t, "MRN-0001", patient.PatientID)
 		assert.NotNil(t, patient.Events)
+		assert.True(t, patient.HasProcessingReport)
+	})
+}
+
+func Test_PatientProcessingReport_PresignsTheURL(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		w := getPatientIntegration(t, env, "00000000-0000-4000-8000-000000000002/processing_report/download_url")
+
+		require.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `{"url": "presigned.s3://bucket/processing_report/records.html", "expires_at": 1234567890}`, w.Body.String())
 	})
 }
 
@@ -256,6 +269,7 @@ func Test_PatientExternalRecords_ReturnsTheOrganizationsOfThePatient(t *testing.
 		require.Equal(t, http.StatusOK, w.Code)
 		assert.JSONEq(t, `{"organization_count": 1, "document_count": 3, "document_class_count": 1, "organizations": [{"name": "Tower Health",
 			"network": "tefca", "document_count": 3, "document_classes": [{"name": "Lab", "document_count": 3, "types": []}]}]}`, w.Body.String())
+
 	})
 }
 

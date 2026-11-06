@@ -216,6 +216,11 @@ func (r *PcxPatientsRepository) GetPatient(ctx context.Context, patientKey strin
 		patient.InitialTumorResections, err = pcxInitialTumorResections(gctx, db, *id)
 		return err
 	})
+	g.Go(func() (err error) {
+		reportURL, err := pcxProcessingReportURL(gctx, db, *id)
+		patient.HasProcessingReport = reportURL != nil
+		return err
+	})
 	if err := g.Wait(); err != nil {
 		return nil, err
 	}
@@ -425,6 +430,28 @@ func pcxTumorBoardDeckURL(ctx context.Context, db *gorm.DB, id pcxPatientIdentif
 	tx := pcxView(ctx, db, types.PcxTumorBoardDeckTable, id).Where("deck_url IS NOT NULL").Limit(1).Pluck("deck_url", &urls)
 	if tx.Error != nil {
 		return nil, fmt.Errorf("error fetching tumor board deck: %w", tx.Error)
+	}
+	if len(urls) == 0 {
+		return nil, nil
+	}
+	return &urls[0], nil
+}
+
+// GetPatientProcessingReportURL returns the S3 URL of the patient's CHARM processing report, nil
+// for an unknown key or without a report.
+func (r *PcxPatientsRepository) GetPatientProcessingReportURL(ctx context.Context, patientKey string) (*string, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	return pcxProcessingReportURL(ctx, r.db.WithContext(ctx), *id)
+}
+
+func pcxProcessingReportURL(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) (*string, error) {
+	var urls []string
+	tx := pcxView(ctx, db, types.PcxProcessingReportTable, id).Where("report_url IS NOT NULL").Limit(1).Pluck("report_url", &urls)
+	if tx.Error != nil {
+		return nil, fmt.Errorf("error fetching processing report: %w", tx.Error)
 	}
 	if len(urls) == 0 {
 		return nil, nil
