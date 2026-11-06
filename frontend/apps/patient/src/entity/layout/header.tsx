@@ -80,7 +80,7 @@ function Header({ patient, isLoading }: HeaderProps) {
       description={description}
       badges={badges}
       backLink={{ label: t('main_navbar.links.patients'), to: `/patient?tab=${PatientExplorationTabs.PatientList}` }}
-      statuses={patient?.patient_id ? [<LibrechatButton key="librechat" patientId={patient.patient_id} />] : []}
+      statuses={patient?.patient_key ? [<LibrechatButton key="librechat" patientKey={patient.patient_key} />] : []}
     />
   );
 }

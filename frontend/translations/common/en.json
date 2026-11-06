@@ -3093,7 +3093,8 @@
       "resume_history": "Resume history",
       "tooltip": "Ask D.A.V.I.D anything about your patients, cases, and files, starting from what's on screen",
       "prompt_case": "Context: case {{caseId}} (tenant {{tenant}}). Load this case's context and give a brief clinical summary (family structure, HPO phenotypes). Then wait for the user's questions.",
-      "prompt_patient": "Context: patient {{patientId}} (tenant {{tenant}}). Load this patient's context and give a brief clinical summary. Then wait for the user's questions."
+      "prompt_patient": "Context: patient key {{patientKey}} (tenant {{tenant}}). Load this patient's clinical context and give a brief clinical summary. Then wait for the user's questions.",
+      "prompt_cohort": "Context: the patient cohort of tenant {{tenant}}. In two sentences, say what you can answer about this cohort. Then wait for the user's questions."
     }
   }
 }

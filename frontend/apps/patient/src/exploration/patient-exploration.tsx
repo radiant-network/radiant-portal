@@ -107,7 +107,7 @@ function PatientExploration() {
           isLoading={isLoading}
           title={t('patient_exploration.title', { total: data?.count ?? 0 })}
           description={t('patient_exploration.description')}
-          statuses={[<LibrechatButton key="librechat" />]}
+          statuses={[<LibrechatButton key="librechat" cohort />]}
         />
       </div>
       <main className={cn('bg-muted h-screen', chatExpanded ? 'overflow-hidden' : 'overflow-auto')}>

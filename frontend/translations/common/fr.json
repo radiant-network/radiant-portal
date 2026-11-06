@@ -3094,7 +3094,8 @@
       "resume_history": "Reprendre l'historique",
       "tooltip": "Posez à D.A.V.I.D n'importe quelle question sur vos patients, cas et fichiers, à partir de ce qui est à l'écran",
       "prompt_case": "Contexte : cas {{caseId}} (tenant {{tenant}}). Charge le contexte de ce cas et présente un bref résumé clinique (structure familiale, phénotypes HPO). Ensuite, attends les questions de l'utilisateur.",
-      "prompt_patient": "Contexte : patient {{patientId}} (tenant {{tenant}}). Charge le contexte de ce patient et présente un bref résumé clinique. Ensuite, attends les questions de l'utilisateur."
+      "prompt_patient": "Contexte : clé patient {{patientKey}} (tenant {{tenant}}). Charge le contexte clinique de ce patient et présente un bref résumé clinique. Ensuite, attends les questions de l'utilisateur.",
+      "prompt_cohort": "Contexte : la cohorte de patients du tenant {{tenant}}. En deux phrases, dis ce que tu peux répondre sur cette cohorte. Ensuite, attends les questions de l'utilisateur."
     }
   }
 }
