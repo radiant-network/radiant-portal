@@ -1485,6 +1485,8 @@
       "columns": {
         "date": "Date",
         "modality": "Modality",
+        "body_part": "Body Part",
+        "body_part_tooltip": "Body Part Examined",
         "viewer": "Viewer"
       }
     },

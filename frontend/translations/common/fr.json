@@ -1486,6 +1486,8 @@
       "columns": {
         "date": "Date",
         "modality": "Modalité",
+        "body_part": "Partie du corps",
+        "body_part_tooltip": "Partie du corps examinée",
         "viewer": "Visionneuse"
       }
     },
