@@ -37,8 +37,8 @@ function Event({
 
   const ChevronIcon = open ? ChevronDown : ChevronRight;
 
-  const header = (
-    <div className="flex items-center gap-2 text-base font-semibold">
+  const titleContent = (
+    <>
       <span>{type}</span>
       {cnsIntegratedDiagnosis && (
         <>
@@ -47,20 +47,37 @@ function Event({
         </>
       )}
       {collapsible && <ChevronIcon className="size-4 text-muted-foreground" aria-hidden />}
+    </>
+  );
+
+  const header = (
+    <div className="flex items-center gap-2 text-base font-semibold">
+      {collapsible ? (
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-expanded={open}
+          className="flex items-center gap-2 cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+        >
+          {titleContent}
+        </button>
+      ) : (
+        titleContent
+      )}
       {evidenceHref && (
-        <AnchorLink href={evidenceHref} external size="xs">
+        <AnchorLink href={evidenceHref} external size="xs" target="_blank" rel="noopener noreferrer">
           {t('timeline.evidence')}
         </AnchorLink>
       )}
     </div>
   );
 
-  const row = (
+  return (
     <TimelineRow
-      badge={<TimelineBadge type="event" className={collapsible ? 'cursor-pointer' : undefined} />}
+      badge={<TimelineBadge type="event" />}
       marker={<TimeMarker type="event" startDay={startDay} years={years} />}
       showLine={showLine}
-      className={collapsible ? 'bg-muted-subdued cursor-pointer' : 'bg-muted-subdued'}
+      className="bg-muted-subdued"
     >
       {header}
       {description && description.length > 0 && (
@@ -71,19 +88,6 @@ function Event({
         </div>
       )}
     </TimelineRow>
-  );
-
-  if (!collapsible) return row;
-
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      aria-expanded={open}
-      className="block w-full cursor-pointer text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
-    >
-      {row}
-    </button>
   );
 }
 

@@ -10,7 +10,7 @@ function GeneOmimLinkCell({ symbol }: GeneOmimLinkCellProps) {
   if (!symbol) return <EmptyCell />;
 
   return (
-    <AnchorLinkCell href={getOmimOrgUrl({ symbol })} target="_blank" rel="noreferrer">
+    <AnchorLinkCell href={getOmimOrgUrl({ symbol })} target="_blank" rel="noopener noreferrer">
       {symbol}
     </AnchorLinkCell>
   );

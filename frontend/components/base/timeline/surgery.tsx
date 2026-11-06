@@ -36,7 +36,7 @@ function Surgery({
         <span>{extentOfTumorResection}</span>
         {isInitialTreatment && <Badge variant="secondary">{t('timeline.initial_treatment')}</Badge>}
         {evidenceHref && (
-          <AnchorLink href={evidenceHref} external size="xs">
+          <AnchorLink href={evidenceHref} external size="xs" target="_blank" rel="noopener noreferrer">
             {t('timeline.evidence')}
           </AnchorLink>
         )}
