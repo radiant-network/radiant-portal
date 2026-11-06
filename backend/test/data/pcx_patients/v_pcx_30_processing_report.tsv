@@ -1,0 +1,4 @@
+organization_code	patient_id_type	patient_id	report_url
+CHOP	mrn	MRN-0001	s3://bucket/processing_report/records.html
+BCH	research_id	C100004	s3://bucket/processing_report/c100004.html
+CHOP	research_id	C100005	NULL

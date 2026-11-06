@@ -3244,6 +3244,9 @@ components:
         given_name:
           description: Placeholder when can_read_phi is false
           type: string
+        has_processing_report:
+          description: A CHARM processing report can be opened
+          type: boolean
         initial_diagnosis_evidence_url:
           description: BRIM link, format to be defined
           type: string
@@ -3293,6 +3296,7 @@ components:
       - family_name
       - gender
       - given_name
+      - has_processing_report
       - initial_tumor_resections
       - key_dates
       - organization_code
@@ -10858,6 +10862,68 @@ paths:
       security:
       - bearerauth: []
       summary: Get PatientLaboratory of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/processing_report/download_url:
+    get:
+      description: Retrieve a presigned URL of the CHARM processing report (a self-contained
+        HTML page) of the patient. 404 for an unknown or malformed key or a patient
+        without a report.
+      operationId: patientProcessingReportDownloadUrl
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/utils.PreSignedURL'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get a presigned URL to open the processing report of a patient
       tags:
       - patients
   /{tenant}/patients/{patient_key}/treatments:

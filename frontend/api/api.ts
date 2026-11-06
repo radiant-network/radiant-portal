@@ -6410,6 +6410,12 @@ export interface PatientEntity {
      */
     'given_name': string;
     /**
+     * A CHARM processing report can be opened
+     * @type {boolean}
+     * @memberof PatientEntity
+     */
+    'has_processing_report': boolean;
+    /**
      * BRIM link, format to be defined
      * @type {string}
      * @memberof PatientEntity
@@ -18187,6 +18193,48 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
+         * Retrieve a presigned URL of the CHARM processing report (a self-contained HTML page) of the patient. 404 for an unknown or malformed key or a patient without a report.
+         * @summary Get a presigned URL to open the processing report of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientProcessingReportDownloadUrl: async (tenant: string, patientKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patientProcessingReportDownloadUrl', 'tenant', tenant)
+            // verify required parameter 'patientKey' is not null or undefined
+            assertParamExists('patientProcessingReportDownloadUrl', 'patientKey', patientKey)
+            const localVarPath = `/{tenant}/patients/{patient_key}/processing_report/download_url`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"patient_key"}}`, encodeURIComponent(String(patientKey)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve PatientTreatments, the treatments tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
          * @summary Get PatientTreatments of a patient
          * @param {string} tenant Tenant code
@@ -18714,6 +18762,20 @@ export const PatientsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve a presigned URL of the CHARM processing report (a self-contained HTML page) of the patient. 404 for an unknown or malformed key or a patient without a report.
+         * @summary Get a presigned URL to open the processing report of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientProcessingReportDownloadUrl(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UtilsPreSignedURL>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientProcessingReportDownloadUrl(tenant, patientKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientProcessingReportDownloadUrl']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve PatientTreatments, the treatments tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
          * @summary Get PatientTreatments of a patient
          * @param {string} tenant Tenant code
@@ -18932,6 +18994,17 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.patientLaboratory(tenant, patientKey, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve a presigned URL of the CHARM processing report (a self-contained HTML page) of the patient. 404 for an unknown or malformed key or a patient without a report.
+         * @summary Get a presigned URL to open the processing report of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientProcessingReportDownloadUrl(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): AxiosPromise<UtilsPreSignedURL> {
+            return localVarFp.patientProcessingReportDownloadUrl(tenant, patientKey, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve PatientTreatments, the treatments tab of the patient page, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
          * @summary Get PatientTreatments of a patient
          * @param {string} tenant Tenant code
@@ -19129,6 +19202,19 @@ export class PatientsApi extends BaseAPI {
      */
     public patientLaboratory(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
         return PatientsApiFp(this.configuration).patientLaboratory(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve a presigned URL of the CHARM processing report (a self-contained HTML page) of the patient. 404 for an unknown or malformed key or a patient without a report.
+     * @summary Get a presigned URL to open the processing report of a patient
+     * @param {string} tenant Tenant code
+     * @param {string} patientKey Patient key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientProcessingReportDownloadUrl(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientProcessingReportDownloadUrl(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

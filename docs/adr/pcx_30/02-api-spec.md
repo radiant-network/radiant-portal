@@ -25,6 +25,7 @@ The read-only routes below are all gated by `can_search_case`, sit next to the e
 | `GET /{tenant}/patients/filters` | none | `PatientFilters` | `patientsFilters` |
 | `GET /{tenant}/patients/statistics` | none | `PatientStatistics` | `patientsStatistics` |
 | `GET /{tenant}/patients/{patient_key}` | path `patient_key` | `PatientEntity`: header, sidebar and overview | `patientEntity` |
+| `GET /{tenant}/patients/{patient_key}/processing_report/download_url` | path `patient_key` | `PreSignedURL` of the patient's CHARM processing report (a self-contained HTML page, not PHI; the entity's `has_processing_report` tells whether there is one); 404 without a report | `patientProcessingReportDownloadUrl` |
 | `GET /{tenant}/patients/{patient_key}/treatments` | path `patient_key` | `PatientTreatments`: treatments and timeline tabs | `patientTreatments` |
 | `GET /{tenant}/patients/{patient_key}/laboratory` | path `patient_key` | `PatientLaboratory` | `patientLaboratory` |
 | `GET /{tenant}/patients/{patient_key}/imaging` | path `patient_key` | `PatientImaging` | `patientImaging` |

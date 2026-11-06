@@ -91,3 +91,6 @@ var PcxPnoc035EligibilityTable = Table{Name: "v_pcx_30_pnoc035_eligibility_combi
 // Radiant's own views over the tumor board tables (scripts/seed/views).
 var PcxTumorBoardSessionTable = Table{Name: "v_pcx_30_tumor_board_session", Alias: "tbs", PerTenant: true}
 var PcxTumorBoardDeckTable = Table{Name: "v_pcx_30_tumor_board_deck", Alias: "tbd", PerTenant: true}
+
+// Radiant's own view over the CHARM processing report of each patient (scripts/seed/views).
+var PcxProcessingReportTable = Table{Name: "v_pcx_30_processing_report", Alias: "pr", PerTenant: true}

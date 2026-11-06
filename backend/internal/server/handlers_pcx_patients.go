@@ -294,6 +294,32 @@ type pcxPatientExternalRecordsReader interface {
 	GetPatientExternalRecords(ctx context.Context, patientKey string) (*types.PatientExternalRecords, error)
 }
 
+// PatientProcessingReportDownloadURLHandler handles the download of the CHARM processing report of a PCX patient
+// @Summary Get a presigned URL to open the processing report of a patient
+// @Id patientProcessingReportDownloadUrl
+// @Description Retrieve a presigned URL of the CHARM processing report (a self-contained HTML page) of the patient. 404 for an unknown or malformed key or a patient without a report.
+// @Tags patients
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param patient_key path string true "Patient key" format(uuid)
+// @Produce json
+// @Success 200 {object} utils.PreSignedURL
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/patients/{patient_key}/processing_report/download_url [get]
+func PatientProcessingReportDownloadURLHandler(repo pcxPatientProcessingReportReader, presigner utils.PreSigner) gin.HandlerFunc {
+	return patientDownloadURLHandler(presigner, "processing report", func(c *gin.Context, key string) (*string, error) {
+		return repo.GetPatientProcessingReportURL(c.Request.Context(), key)
+	})
+}
+
+type pcxPatientProcessingReportReader interface {
+	GetPatientProcessingReportURL(ctx context.Context, patientKey string) (*string, error)
+}
+
 // PatientTrialEligibilitiesHandler handles retrieving the clinical trial eligibility verdicts of a PCX patient
 // @Summary Get types.PatientTrialEligibilities of a patient
 // @Id patientTrialEligibilities

@@ -170,6 +170,7 @@ Class | Method | HTTP request | Description
 *PatientsApi* | [**patient_genomics**](docs/PatientsApi.md#patient_genomics) | **GET** /{tenant}/patients/{patient_key}/genomics | Get PatientGenomics of a patient
 *PatientsApi* | [**patient_imaging**](docs/PatientsApi.md#patient_imaging) | **GET** /{tenant}/patients/{patient_key}/imaging | Get PatientImaging of a patient
 *PatientsApi* | [**patient_laboratory**](docs/PatientsApi.md#patient_laboratory) | **GET** /{tenant}/patients/{patient_key}/laboratory | Get PatientLaboratory of a patient
+*PatientsApi* | [**patient_processing_report_download_url**](docs/PatientsApi.md#patient_processing_report_download_url) | **GET** /{tenant}/patients/{patient_key}/processing_report/download_url | Get a presigned URL to open the processing report of a patient
 *PatientsApi* | [**patient_treatments**](docs/PatientsApi.md#patient_treatments) | **GET** /{tenant}/patients/{patient_key}/treatments | Get PatientTreatments of a patient
 *PatientsApi* | [**patient_trial_eligibilities**](docs/PatientsApi.md#patient_trial_eligibilities) | **GET** /{tenant}/patients/{patient_key}/trial_eligibilities | Get PatientTrialEligibilities of a patient
 *PatientsApi* | [**patient_tumor_board**](docs/PatientsApi.md#patient_tumor_board) | **GET** /{tenant}/patients/{patient_key}/tumor_board | Get PatientTumorBoard of a patient

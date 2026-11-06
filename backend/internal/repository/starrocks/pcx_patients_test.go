@@ -465,6 +465,7 @@ func Test_GetPcxPatient_EveryPartOfAPatientWithPhiAccess(t *testing.T) {
 				 "tumor_location_other": "Not Applicable", "metastasis": "Not Reported", "metastasis_locations": [], "metastasis_location_other": "Not Applicable"}
 			],
 			"initial_tumor_resections": ["Gross/Near total resection"],
+			"has_processing_report": false,
 			"treatment_summary": {
 				"initial_dx": {"day": 1000, "date": "2017-11-29"}, "first_event": {"day": 1000, "date": "2017-11-29"},
 				"first_radiation_ever": {"day": 1047, "date": "2018-01-15"}, "initial_radiation": {"day": 1047, "date": "2018-01-15"},
@@ -561,6 +562,26 @@ func Test_GetPcxPatientExternalRecords_PatientWithoutExchangeHasNoOrganization(t
 		records := getPcxPatientExternalRecords(t, env, pcxPatientKey("3"))
 
 		assertJSON(t, `{"organization_count": 0, "document_count": 0, "document_class_count": 0, "organizations": []}`, records)
+	})
+}
+
+func Test_GetPcxPatientProcessingReportURL_VisibleWithoutPhiAccess(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+		report := func(key string) *string {
+			url, err := repo.GetPatientProcessingReportURL(t.Context(), pcxPatientKey(key))
+			require.NoError(t, err)
+			return url
+		}
+
+		require.NotNil(t, report("2"))
+		assert.Equal(t, "s3://bucket/processing_report/records.html", *report("2"))
+		require.NotNil(t, report("4"), "not masked without PHI access")
+		assert.Equal(t, "s3://bucket/processing_report/c100004.html", *report("4"))
+		assert.True(t, getPcxPatient(t, env, pcxPatientKey("4")).HasProcessingReport)
+		assert.Nil(t, report("1"), "patient without a report")
+		assert.Nil(t, report("5"), "NULL report URL")
+		assert.Nil(t, report("999"), "unknown key")
 	})
 }
 
