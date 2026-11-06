@@ -4001,6 +4001,59 @@ components:
       - start
       - stop
       type: object
+    PatientTumorBoard:
+      description: Tumor board sessions of a patient, and whether the caller can download
+        the patient's presentation deck
+      properties:
+        has_deck:
+          description: false without PHI access
+          type: boolean
+        sessions:
+          description: Most recent first
+          items:
+            $ref: '#/components/schemas/PatientTumorBoardSession'
+          type: array
+          uniqueItems: false
+      required:
+      - has_deck
+      - sessions
+      type: object
+    PatientTumorBoardSession:
+      description: Tumor board session of a patient. The date is PHI, like every date
+        of the patient view.
+      properties:
+        consensus:
+          type: string
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        diagnosis:
+          example: AT/RT, SHH subtype
+          type: string
+        has_report:
+          description: false without PHI access
+          type: boolean
+        reason:
+          example: Progression Review
+          type: string
+        recommendations:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        session_id:
+          type: integer
+        status:
+          example: Signed
+          type: string
+      required:
+      - has_report
+      - recommendations
+      - session_id
+      type: object
     PatientsSearchResponse:
       properties:
         count:
@@ -10929,6 +10982,199 @@ paths:
       security:
       - bearerauth: []
       summary: Get PatientTrialEligibilities of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/tumor_board:
+    get:
+      description: Retrieve PatientTumorBoard, the tumor board sessions of the
+        patient and whether the caller can download its presentation deck, by its
+        patient_key. 404 for an unknown or malformed key, with no hint that the patient
+        exists.
+      operationId: patientTumorBoard
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientTumorBoard'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get PatientTumorBoard of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/tumor_board/deck/download_url:
+    get:
+      description: Retrieve a presigned URL of the patient's tumor board presentation
+        deck. 404 for an unknown or malformed key, a patient without a deck, or a
+        caller without PHI access to the patient.
+      operationId: patientTumorBoardDeckDownloadUrl
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/utils.PreSignedURL'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get a presigned URL to download the tumor board deck of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/tumor_board/sessions/{session_id}/download_url:
+    get:
+      description: Retrieve a presigned URL of the report of one of the patient's
+        tumor board sessions. 404 for an unknown or malformed key or session, a session
+        without a report, or a caller without PHI access to the patient.
+      operationId: patientTumorBoardReportDownloadUrl
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: Tumor board session id
+        in: path
+        name: session_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/utils.PreSignedURL'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get a presigned URL to download the report of a tumor board session
       tags:
       - patients
   /{tenant}/patients/autocomplete:

@@ -29,9 +29,10 @@ class PatientSurgery(BaseModel):
     """ # noqa: E501
     var_date: Optional[date] = Field(default=None, alias="date")
     day: Optional[StrictInt] = None
+    evidence_url: Optional[StrictStr] = Field(default=None, description="BRIM link to the source of the surgery")
     extent_of_tumor_resection: Optional[StrictStr] = None
     is_initial_treatment: Optional[StrictBool] = Field(default=None, description="null when Not Reported")
-    __properties: ClassVar[List[str]] = ["date", "day", "extent_of_tumor_resection", "is_initial_treatment"]
+    __properties: ClassVar[List[str]] = ["date", "day", "evidence_url", "extent_of_tumor_resection", "is_initial_treatment"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -86,6 +87,7 @@ class PatientSurgery(BaseModel):
         _obj = cls.model_validate({
             "date": obj.get("date"),
             "day": obj.get("day"),
+            "evidence_url": obj.get("evidence_url"),
             "extent_of_tumor_resection": obj.get("extent_of_tumor_resection"),
             "is_initial_treatment": obj.get("is_initial_treatment")
         })

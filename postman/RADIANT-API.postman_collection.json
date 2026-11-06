@@ -4759,6 +4759,101 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Tumor board",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/tumor_board",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "tumor_board"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tumor board deck download URL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/tumor_board/deck/download_url",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "tumor_board",
+                "deck",
+                "download_url"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tumor board session report download URL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/tumor_board/sessions/1/download_url",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "tumor_board",
+                "sessions",
+                "1",
+                "download_url"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     }

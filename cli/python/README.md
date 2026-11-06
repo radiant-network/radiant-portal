@@ -172,6 +172,9 @@ Class | Method | HTTP request | Description
 *PatientsApi* | [**patient_laboratory**](docs/PatientsApi.md#patient_laboratory) | **GET** /{tenant}/patients/{patient_key}/laboratory | Get PatientLaboratory of a patient
 *PatientsApi* | [**patient_treatments**](docs/PatientsApi.md#patient_treatments) | **GET** /{tenant}/patients/{patient_key}/treatments | Get PatientTreatments of a patient
 *PatientsApi* | [**patient_trial_eligibilities**](docs/PatientsApi.md#patient_trial_eligibilities) | **GET** /{tenant}/patients/{patient_key}/trial_eligibilities | Get PatientTrialEligibilities of a patient
+*PatientsApi* | [**patient_tumor_board**](docs/PatientsApi.md#patient_tumor_board) | **GET** /{tenant}/patients/{patient_key}/tumor_board | Get PatientTumorBoard of a patient
+*PatientsApi* | [**patient_tumor_board_deck_download_url**](docs/PatientsApi.md#patient_tumor_board_deck_download_url) | **GET** /{tenant}/patients/{patient_key}/tumor_board/deck/download_url | Get a presigned URL to download the tumor board deck of a patient
+*PatientsApi* | [**patient_tumor_board_report_download_url**](docs/PatientsApi.md#patient_tumor_board_report_download_url) | **GET** /{tenant}/patients/{patient_key}/tumor_board/sessions/{session_id}/download_url | Get a presigned URL to download the report of a tumor board session
 *PatientsApi* | [**patients_filters**](docs/PatientsApi.md#patients_filters) | **GET** /{tenant}/patients/filters | Get PatientFilters patient list filters
 *PatientsApi* | [**patients_statistics**](docs/PatientsApi.md#patients_statistics) | **GET** /{tenant}/patients/statistics | Get PatientStatistics cohort analytics
 *PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
@@ -348,6 +351,8 @@ Class | Method | HTTP request | Description
  - [PatientTrialEligibilities](docs/PatientTrialEligibilities.md)
  - [PatientTrialEligibility](docs/PatientTrialEligibility.md)
  - [PatientTrialEnrollment](docs/PatientTrialEnrollment.md)
+ - [PatientTumorBoard](docs/PatientTumorBoard.md)
+ - [PatientTumorBoardSession](docs/PatientTumorBoardSession.md)
  - [PatientsSearchResponse](docs/PatientsSearchResponse.md)
  - [PubmedCitation](docs/PubmedCitation.md)
  - [PubmedCitationDetails](docs/PubmedCitationDetails.md)

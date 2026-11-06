@@ -87,3 +87,7 @@ var PcxCsfTable = Table{Name: "v_csf_results_latest_by_component", Alias: "csf",
 var PcxHinExchangeTable = Table{Name: "v_pcx_30_hin_exchange", Alias: "hin", PerTenant: true}
 
 var PcxPnoc035EligibilityTable = Table{Name: "v_pcx_30_pnoc035_eligibility_combined", Alias: "pnoc035", PerTenant: true}
+
+// Radiant's own views over the tumor board tables (scripts/seed/views).
+var PcxTumorBoardSessionTable = Table{Name: "v_pcx_30_tumor_board_session", Alias: "tbs", PerTenant: true}
+var PcxTumorBoardDeckTable = Table{Name: "v_pcx_30_tumor_board_deck", Alias: "tbd", PerTenant: true}

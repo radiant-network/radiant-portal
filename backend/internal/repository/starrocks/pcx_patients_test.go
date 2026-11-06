@@ -391,6 +391,14 @@ func getPcxPatientTrialEligibilities(t *testing.T, env *testutils.Env, key strin
 	return eligibilities
 }
 
+func getPcxPatientTumorBoard(t *testing.T, env *testutils.Env, key string) *types.PatientTumorBoard {
+	t.Helper()
+	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+	board, err := repo.GetPatientTumorBoard(t.Context(), key)
+	require.NoError(t, err)
+	return board
+}
+
 func getPcxPatientGenomics(t *testing.T, env *testutils.Env, key string) *types.PatientGenomics {
 	t.Helper()
 	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
@@ -422,6 +430,7 @@ func Test_GetPcxPatientTabs_UnknownKeyIsNil(t *testing.T) {
 		assert.Nil(t, getPcxPatientGenomics(t, env, key))
 		assert.Nil(t, getPcxPatientExternalRecords(t, env, key))
 		assert.Nil(t, getPcxPatientTrialEligibilities(t, env, key))
+		assert.Nil(t, getPcxPatientTumorBoard(t, env, key))
 	})
 }
 
@@ -579,6 +588,63 @@ func Test_GetPcxPatientTrialEligibilities_PatientWithoutVerdictHasNoAssessment(t
 		eligibilities := getPcxPatientTrialEligibilities(t, env, pcxPatientKey("3"))
 
 		assertJSON(t, `{"assessments": []}`, eligibilities)
+	})
+}
+
+func Test_GetPcxPatientTumorBoard_SessionsOfAPatientWithPhiAccess(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		board := getPcxPatientTumorBoard(t, env, pcxPatientKey("1"))
+
+		assertJSON(t, `{"has_deck": true, "sessions": [
+			{"session_id": 2, "day": 3800, "date": "2025-11-04", "reason": "Progression Review", "diagnosis": "AT/RT, SHH subtype",
+			 "consensus": "Disseminated ATRT; on tazemetostat", "recommendations": ["PNOC 028", "LP184", "Temozolomide, Irinotecan and Avastin"],
+			 "status": "Signed", "has_report": false},
+			{"session_id": 1, "day": 3200, "date": "2024-03-12", "reason": "Initial Review", "diagnosis": "AT/RT, SHH subtype",
+			 "consensus": "Localized ATRT", "recommendations": ["ACNS0333"], "status": "Signed", "has_report": true}]}`, board)
+	})
+}
+
+func Test_GetPcxPatientTumorBoard_SessionWithoutPhiAccess(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		board := getPcxPatientTumorBoard(t, env, pcxPatientKey("4"))
+
+		assertJSON(t, `{"has_deck": false, "sessions": [{"session_id": 3, "day": 1500, "date": null, "reason": "Progression Review",
+			"diagnosis": "Medulloblastoma", "consensus": null, "recommendations": [], "status": "Draft", "has_report": false}]}`, board)
+	})
+}
+
+func Test_GetPcxPatientTumorBoard_PatientWithoutSession(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		board := getPcxPatientTumorBoard(t, env, pcxPatientKey("3"))
+
+		assertJSON(t, `{"has_deck": false, "sessions": []}`, board)
+	})
+}
+
+func Test_GetPcxPatientTumorBoardURLs_OnlyWhatTheCallerCanSee(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+		report := func(key string, sessionID int) *string {
+			url, err := repo.GetPatientTumorBoardReportURL(t.Context(), pcxPatientKey(key), sessionID)
+			require.NoError(t, err)
+			return url
+		}
+		deck := func(key string) *string {
+			url, err := repo.GetPatientTumorBoardDeckURL(t.Context(), pcxPatientKey(key))
+			require.NoError(t, err)
+			return url
+		}
+
+		require.NotNil(t, report("1", 1))
+		assert.Equal(t, "s3://bucket/tumor_board/report_1.pdf", *report("1", 1))
+		assert.Nil(t, report("1", 2), "session without a report")
+		assert.Nil(t, report("1", 3), "session of another patient")
+		assert.Nil(t, report("4", 3), "report masked without PHI access")
+		assert.Nil(t, report("999", 1), "unknown key")
+		require.NotNil(t, deck("1"))
+		assert.Equal(t, "s3://bucket/tumor_board/deck.pptx", *deck("1"))
+		assert.Nil(t, deck("4"), "deck masked without PHI access")
+		assert.Nil(t, deck("3"), "patient without a deck")
 	})
 }
 

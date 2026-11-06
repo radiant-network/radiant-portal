@@ -30,6 +30,9 @@ var patientViewRoutes = []string{
 	"GET /:tenant/patients/:patient_key/genomics",
 	"GET /:tenant/patients/:patient_key/external_records",
 	"GET /:tenant/patients/:patient_key/trial_eligibilities",
+	"GET /:tenant/patients/:patient_key/tumor_board",
+	"GET /:tenant/patients/:patient_key/tumor_board/deck/download_url",
+	"GET /:tenant/patients/:patient_key/tumor_board/sessions/:session_id/download_url",
 }
 
 func registeredRoutes(router *gin.Engine) map[string]bool {
@@ -205,6 +208,9 @@ func getPatientIntegration(t *testing.T, env *testutils.Env, path string) *httpt
 	router.GET("/:tenant/patients/:patient_key/genomics", server.PatientGenomicsHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/external_records", server.PatientExternalRecordsHandler(repo))
 	router.GET("/:tenant/patients/:patient_key/trial_eligibilities", server.PatientTrialEligibilitiesHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/tumor_board", server.PatientTumorBoardHandler(repo))
+	router.GET("/:tenant/patients/:patient_key/tumor_board/sessions/:session_id/download_url",
+		server.PatientTumorBoardReportDownloadURLHandler(repo, testutils.NewMockS3PreSigner()))
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/cbtn/patients/"+path, nil))
 	return w
@@ -264,9 +270,24 @@ func Test_PatientTrialEligibilities_ReturnsTheVerdictsOfThePatient(t *testing.T)
 	})
 }
 
+func Test_PatientTumorBoard_ReturnsTheSessionsAndPresignsTheirReport(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		w := getPatientIntegration(t, env, "00000000-0000-4000-8000-000000000004/tumor_board")
+
+		require.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `{"has_deck": false, "sessions": [{"session_id": 3, "day": 1500, "date": null, "reason": "Progression Review",
+			"diagnosis": "Medulloblastoma", "consensus": null, "recommendations": [], "status": "Draft", "has_report": false}]}`, w.Body.String())
+
+		w = getPatientIntegration(t, env, "00000000-0000-4000-8000-000000000001/tumor_board/sessions/1/download_url")
+
+		require.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `{"url": "presigned.s3://bucket/tumor_board/report_1.pdf", "expires_at": 1234567890}`, w.Body.String())
+	})
+}
+
 func Test_PatientTabs_UnknownKey_404(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
-		for _, tab := range []string{"treatments", "laboratory", "imaging", "genomics", "external_records", "trial_eligibilities"} {
+		for _, tab := range []string{"treatments", "laboratory", "imaging", "genomics", "external_records", "trial_eligibilities", "tumor_board"} {
 			w := getPatientIntegration(t, env, "00000000-0000-4000-8000-000000000999/"+tab)
 
 			assert.Equal(t, http.StatusNotFound, w.Code, tab)

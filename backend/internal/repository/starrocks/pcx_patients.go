@@ -340,6 +340,98 @@ func (r *PcxPatientsRepository) GetPatientTrialEligibilities(ctx context.Context
 	return &types.PatientTrialEligibilities{Assessments: assessments}, nil
 }
 
+func (r *PcxPatientsRepository) GetPatientTumorBoard(ctx context.Context, patientKey string) (*types.PatientTumorBoard, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	board := types.PatientTumorBoard{}
+	g, gctx := errgroup.WithContext(ctx)
+	db := r.db.WithContext(gctx)
+	g.Go(func() (err error) {
+		board.Sessions, err = pcxTumorBoardSessions(gctx, db, *id)
+		return err
+	})
+	g.Go(func() (err error) {
+		deckURL, err := pcxTumorBoardDeckURL(gctx, db, *id)
+		board.HasDeck = deckURL != nil
+		return err
+	})
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+	return &board, nil
+}
+
+// GetPatientTumorBoardDeckURL returns the S3 URL of the patient's deck, nil for an unknown key, without a deck or without
+// PHI access.
+func (r *PcxPatientsRepository) GetPatientTumorBoardDeckURL(ctx context.Context, patientKey string) (*string, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	return pcxTumorBoardDeckURL(ctx, r.db.WithContext(ctx), *id)
+}
+
+// GetPatientTumorBoardReportURL returns the S3 URL of a session's report, nil for an unknown key or session, without a
+// report or without PHI access.
+func (r *PcxPatientsRepository) GetPatientTumorBoardReportURL(ctx context.Context, patientKey string, sessionID int) (*string, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	var urls []string
+	tx := pcxView(ctx, r.db.WithContext(ctx), types.PcxTumorBoardSessionTable, *id).
+		Where("session_id = ? AND report_url IS NOT NULL", sessionID).Limit(1).Pluck("report_url", &urls)
+	if tx.Error != nil {
+		return nil, fmt.Errorf("error fetching tumor board report: %w", tx.Error)
+	}
+	if len(urls) == 0 {
+		return nil, nil
+	}
+	return &urls[0], nil
+}
+
+func pcxTumorBoardSessions(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]types.PatientTumorBoardSession, error) {
+	var rows []struct {
+		SessionID       int
+		BoardDay        *string
+		BoardDate       *types.DateISO8601
+		Reason          *string
+		Diagnosis       *string
+		Consensus       *string
+		Recommendations *string
+		Status          *string
+		ReportURL       *string `gorm:"column:report_url"`
+	}
+	tx := pcxView(ctx, db, types.PcxTumorBoardSessionTable, id).
+		Select("session_id, " + pcxDayDate("age_at_tumor_board_days", "tumor_board_date", "board") +
+			", reason, diagnosis, consensus, recommendations, status, report_url").
+		Order("age_at_tumor_board_days IS NULL, age_at_tumor_board_days DESC, session_id DESC")
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient tumor board sessions: %w", err)
+	}
+	sessions := make([]types.PatientTumorBoardSession, len(rows))
+	for i, row := range rows {
+		sessions[i] = types.PatientTumorBoardSession{PatientDayDate: dayDate(row.BoardDay, row.BoardDate), SessionID: row.SessionID,
+			Reason: row.Reason, Diagnosis: row.Diagnosis, Consensus: row.Consensus,
+			Recommendations: pcxList(row.Recommendations, ";"), Status: row.Status, HasReport: row.ReportURL != nil}
+	}
+	return sessions, nil
+}
+
+func pcxTumorBoardDeckURL(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) (*string, error) {
+	var urls []string
+	tx := pcxView(ctx, db, types.PcxTumorBoardDeckTable, id).Where("deck_url IS NOT NULL").Limit(1).Pluck("deck_url", &urls)
+	if tx.Error != nil {
+		return nil, fmt.Errorf("error fetching tumor board deck: %w", tx.Error)
+	}
+	if len(urls) == 0 {
+		return nil, nil
+	}
+	return &urls[0], nil
+}
+
 func (r *PcxPatientsRepository) GetPatientExternalRecords(ctx context.Context, patientKey string) (*types.PatientExternalRecords, error) {
 	id, err := r.patientIdentifier(ctx, patientKey)
 	if err != nil || id == nil {

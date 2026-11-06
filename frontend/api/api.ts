@@ -7665,6 +7665,86 @@ export interface PatientTrialEnrollment {
     'stop': PatientDayDate;
 }
 /**
+ * Tumor board sessions of a patient, and whether the caller can download the patient\'s presentation deck
+ * @export
+ * @interface PatientTumorBoard
+ */
+export interface PatientTumorBoard {
+    /**
+     * false without PHI access
+     * @type {boolean}
+     * @memberof PatientTumorBoard
+     */
+    'has_deck': boolean;
+    /**
+     * Most recent first
+     * @type {Array<PatientTumorBoardSession>}
+     * @memberof PatientTumorBoard
+     */
+    'sessions': Array<PatientTumorBoardSession>;
+}
+/**
+ * Tumor board session of a patient. The date is PHI, like every date of the patient view.
+ * @export
+ * @interface PatientTumorBoardSession
+ */
+export interface PatientTumorBoardSession {
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientTumorBoardSession
+     */
+    'consensus'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientTumorBoardSession
+     */
+    'date'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientTumorBoardSession
+     */
+    'day'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientTumorBoardSession
+     */
+    'diagnosis'?: string;
+    /**
+     * false without PHI access
+     * @type {boolean}
+     * @memberof PatientTumorBoardSession
+     */
+    'has_report': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientTumorBoardSession
+     */
+    'reason'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof PatientTumorBoardSession
+     */
+    'recommendations': Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof PatientTumorBoardSession
+     */
+    'session_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientTumorBoardSession
+     */
+    'status'?: string;
+}
+/**
  * 
  * @export
  * @interface PatientsSearchResponse
@@ -18191,6 +18271,136 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
+         * Retrieve PatientTumorBoard, the tumor board sessions of the patient and whether the caller can download its presentation deck, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientTumorBoard of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientTumorBoard: async (tenant: string, patientKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patientTumorBoard', 'tenant', tenant)
+            // verify required parameter 'patientKey' is not null or undefined
+            assertParamExists('patientTumorBoard', 'patientKey', patientKey)
+            const localVarPath = `/{tenant}/patients/{patient_key}/tumor_board`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"patient_key"}}`, encodeURIComponent(String(patientKey)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve a presigned URL of the patient\'s tumor board presentation deck. 404 for an unknown or malformed key, a patient without a deck, or a caller without PHI access to the patient.
+         * @summary Get a presigned URL to download the tumor board deck of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientTumorBoardDeckDownloadUrl: async (tenant: string, patientKey: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patientTumorBoardDeckDownloadUrl', 'tenant', tenant)
+            // verify required parameter 'patientKey' is not null or undefined
+            assertParamExists('patientTumorBoardDeckDownloadUrl', 'patientKey', patientKey)
+            const localVarPath = `/{tenant}/patients/{patient_key}/tumor_board/deck/download_url`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"patient_key"}}`, encodeURIComponent(String(patientKey)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve a presigned URL of the report of one of the patient\'s tumor board sessions. 404 for an unknown or malformed key or session, a session without a report, or a caller without PHI access to the patient.
+         * @summary Get a presigned URL to download the report of a tumor board session
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {number} sessionId Tumor board session id
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientTumorBoardReportDownloadUrl: async (tenant: string, patientKey: string, sessionId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('patientTumorBoardReportDownloadUrl', 'tenant', tenant)
+            // verify required parameter 'patientKey' is not null or undefined
+            assertParamExists('patientTumorBoardReportDownloadUrl', 'patientKey', patientKey)
+            // verify required parameter 'sessionId' is not null or undefined
+            assertParamExists('patientTumorBoardReportDownloadUrl', 'sessionId', sessionId)
+            const localVarPath = `/{tenant}/patients/{patient_key}/tumor_board/sessions/{session_id}/download_url`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"patient_key"}}`, encodeURIComponent(String(patientKey)))
+                .replace(`{${"session_id"}}`, encodeURIComponent(String(sessionId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve PatientFilters patient list filters
          * @summary Get PatientFilters patient list filters
          * @param {string} tenant Tenant code
@@ -18532,6 +18742,49 @@ export const PatientsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Retrieve PatientTumorBoard, the tumor board sessions of the patient and whether the caller can download its presentation deck, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientTumorBoard of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientTumorBoard(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PatientTumorBoard>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientTumorBoard(tenant, patientKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientTumorBoard']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Retrieve a presigned URL of the patient\'s tumor board presentation deck. 404 for an unknown or malformed key, a patient without a deck, or a caller without PHI access to the patient.
+         * @summary Get a presigned URL to download the tumor board deck of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientTumorBoardDeckDownloadUrl(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UtilsPreSignedURL>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientTumorBoardDeckDownloadUrl(tenant, patientKey, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientTumorBoardDeckDownloadUrl']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Retrieve a presigned URL of the report of one of the patient\'s tumor board sessions. 404 for an unknown or malformed key or session, a session without a report, or a caller without PHI access to the patient.
+         * @summary Get a presigned URL to download the report of a tumor board session
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {number} sessionId Tumor board session id
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async patientTumorBoardReportDownloadUrl(tenant: string, patientKey: string, sessionId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UtilsPreSignedURL>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.patientTumorBoardReportDownloadUrl(tenant, patientKey, sessionId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientTumorBoardReportDownloadUrl']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Retrieve PatientFilters patient list filters
          * @summary Get PatientFilters patient list filters
          * @param {string} tenant Tenant code
@@ -18701,6 +18954,40 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.patientTrialEligibilities(tenant, patientKey, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve PatientTumorBoard, the tumor board sessions of the patient and whether the caller can download its presentation deck, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+         * @summary Get PatientTumorBoard of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientTumorBoard(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): AxiosPromise<PatientTumorBoard> {
+            return localVarFp.patientTumorBoard(tenant, patientKey, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve a presigned URL of the patient\'s tumor board presentation deck. 404 for an unknown or malformed key, a patient without a deck, or a caller without PHI access to the patient.
+         * @summary Get a presigned URL to download the tumor board deck of a patient
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientTumorBoardDeckDownloadUrl(tenant: string, patientKey: string, options?: RawAxiosRequestConfig): AxiosPromise<UtilsPreSignedURL> {
+            return localVarFp.patientTumorBoardDeckDownloadUrl(tenant, patientKey, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve a presigned URL of the report of one of the patient\'s tumor board sessions. 404 for an unknown or malformed key or session, a session without a report, or a caller without PHI access to the patient.
+         * @summary Get a presigned URL to download the report of a tumor board session
+         * @param {string} tenant Tenant code
+         * @param {string} patientKey Patient key
+         * @param {number} sessionId Tumor board session id
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        patientTumorBoardReportDownloadUrl(tenant: string, patientKey: string, sessionId: number, options?: RawAxiosRequestConfig): AxiosPromise<UtilsPreSignedURL> {
+            return localVarFp.patientTumorBoardReportDownloadUrl(tenant, patientKey, sessionId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve PatientFilters patient list filters
          * @summary Get PatientFilters patient list filters
          * @param {string} tenant Tenant code
@@ -18868,6 +19155,46 @@ export class PatientsApi extends BaseAPI {
      */
     public patientTrialEligibilities(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
         return PatientsApiFp(this.configuration).patientTrialEligibilities(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve PatientTumorBoard, the tumor board sessions of the patient and whether the caller can download its presentation deck, by its patient_key. 404 for an unknown or malformed key, with no hint that the patient exists.
+     * @summary Get PatientTumorBoard of a patient
+     * @param {string} tenant Tenant code
+     * @param {string} patientKey Patient key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientTumorBoard(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientTumorBoard(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve a presigned URL of the patient\'s tumor board presentation deck. 404 for an unknown or malformed key, a patient without a deck, or a caller without PHI access to the patient.
+     * @summary Get a presigned URL to download the tumor board deck of a patient
+     * @param {string} tenant Tenant code
+     * @param {string} patientKey Patient key
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientTumorBoardDeckDownloadUrl(tenant: string, patientKey: string, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientTumorBoardDeckDownloadUrl(tenant, patientKey, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve a presigned URL of the report of one of the patient\'s tumor board sessions. 404 for an unknown or malformed key or session, a session without a report, or a caller without PHI access to the patient.
+     * @summary Get a presigned URL to download the report of a tumor board session
+     * @param {string} tenant Tenant code
+     * @param {string} patientKey Patient key
+     * @param {number} sessionId Tumor board session id
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof PatientsApi
+     */
+    public patientTumorBoardReportDownloadUrl(tenant: string, patientKey: string, sessionId: number, options?: RawAxiosRequestConfig) {
+        return PatientsApiFp(this.configuration).patientTumorBoardReportDownloadUrl(tenant, patientKey, sessionId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
