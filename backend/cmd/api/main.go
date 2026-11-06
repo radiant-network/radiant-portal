@@ -177,6 +177,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	orgFromCaseBody := server.OrgFromCaseBody(repoAuth)
 	orgFromNote := server.OrgFromNoteParam(repoAuth)
 	orgFromDocument := server.OrgFromDocumentParam(repoAuth)
+	orgFromPatientKey := server.OrgFromPatientKeyParam(repoPcxPatients)
 
 	casesGroup := tenantRoutes.Group("/cases")
 	casesGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchCasesHandler(repoCases, repoCaseAssignments))
@@ -345,11 +346,11 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 		patientsGroup.GET("/:patient_key/imaging", requireAction(types.ActionSearchCase), server.PatientImagingHandler(repoPcxPatients))
 		patientsGroup.GET("/:patient_key/genomics", requireAction(types.ActionSearchCase), server.PatientGenomicsHandler(repoPcxPatients))
 		patientsGroup.GET("/:patient_key/external_records", requireAction(types.ActionSearchCase), server.PatientExternalRecordsHandler(repoPcxPatients))
-		patientsGroup.GET("/:patient_key/processing_report/download_url", requireAction(types.ActionSearchCase), server.PatientProcessingReportDownloadURLHandler(repoPcxPatients, s3Presigner))
+		patientsGroup.GET("/:patient_key/processing_report/download_url", requireActionAt(types.ActionReadPII, orgFromPatientKey), server.PatientProcessingReportDownloadURLHandler(repoPcxPatients, s3Presigner))
 		patientsGroup.GET("/:patient_key/trial_eligibilities", requireAction(types.ActionSearchCase), server.PatientTrialEligibilitiesHandler(repoPcxPatients))
 		patientsGroup.GET("/:patient_key/tumor_board", requireAction(types.ActionSearchCase), server.PatientTumorBoardHandler(repoPcxPatients))
-		patientsGroup.GET("/:patient_key/tumor_board/deck/download_url", requireAction(types.ActionSearchCase), server.PatientTumorBoardDeckDownloadURLHandler(repoPcxPatients, s3Presigner))
-		patientsGroup.GET("/:patient_key/tumor_board/sessions/:session_id/download_url", requireAction(types.ActionSearchCase), server.PatientTumorBoardReportDownloadURLHandler(repoPcxPatients, s3Presigner))
+		patientsGroup.GET("/:patient_key/tumor_board/deck/download_url", requireActionAt(types.ActionReadPII, orgFromPatientKey), server.PatientTumorBoardDeckDownloadURLHandler(repoPcxPatients, s3Presigner))
+		patientsGroup.GET("/:patient_key/tumor_board/sessions/:session_id/download_url", requireActionAt(types.ActionReadPII, orgFromPatientKey), server.PatientTumorBoardReportDownloadURLHandler(repoPcxPatients, s3Presigner))
 	}
 
 	samplesGroup := tenantRoutes.Group("/samples")

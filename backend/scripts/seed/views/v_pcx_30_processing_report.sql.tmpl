@@ -1,13 +1,14 @@
 /*
    {{.TenantCode}}_tenant.v_pcx_30_processing_report  (VIEW, the CHARM processing report of each PCX patient)
 
-   Built like v_pcx_30_tumor_board_deck, but the report's S3 URL is not PHI: anyone who sees the patient sees it.
+   Built like v_pcx_30_tumor_board_deck. The report's S3 URL is PHI, NULL without PHI access.
  */
 CREATE OR REPLACE VIEW {{.TenantCode}}_tenant.v_pcx_30_processing_report AS
 SELECT d.organization_code,
        d.patient_id_type,
        d.patient_id,
-       r.report_url
+       CASE WHEN d.can_read_phi THEN r.report_url END AS report_url,
+       d.can_read_phi
 FROM {{.TenantCode}}_tenant.v_pcx_30_demographics_combined d
 JOIN radiant_data_dev.v_pcx_30_demographics_combined src
   ON src.organization_code = d.organization_code

@@ -533,7 +533,7 @@ Name | Type | Description  | Notes
 
 Get a presigned URL to open the processing report of a patient
 
-Retrieve a presigned URL of the CHARM processing report (a self-contained HTML page) of the patient. 404 for an unknown or malformed key or a patient without a report.
+Retrieve a presigned URL of the CHARM processing report (a self-contained HTML page) of the patient. Requires can_read_pii at the patient's organization (403 otherwise, and for an unknown or malformed key). 404 for a patient without a report, or one the view masks.
 
 ### Example
 
@@ -869,7 +869,7 @@ Name | Type | Description  | Notes
 
 Get a presigned URL to download the tumor board deck of a patient
 
-Retrieve a presigned URL of the patient's tumor board presentation deck. 404 for an unknown or malformed key, a patient without a deck, or a caller without PHI access to the patient.
+Retrieve a presigned URL of the patient's tumor board presentation deck. Requires can_read_pii at the patient's organization (403 otherwise, and for an unknown or malformed key). 404 for a patient without a deck, or one the view masks.
 
 ### Example
 
@@ -953,7 +953,7 @@ Name | Type | Description  | Notes
 
 Get a presigned URL to download the report of a tumor board session
 
-Retrieve a presigned URL of the report of one of the patient's tumor board sessions. 404 for an unknown or malformed key or session, a session without a report, or a caller without PHI access to the patient.
+Retrieve a presigned URL of the report of one of the patient's tumor board sessions. Requires can_read_pii at the patient's organization (403 otherwise, and for an unknown or malformed key). 404 for an unknown or malformed session, a session without a report, or one the view masks.
 
 ### Example
 
