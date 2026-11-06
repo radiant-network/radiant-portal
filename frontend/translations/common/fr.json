@@ -1371,6 +1371,7 @@
       },
       "interpretations": {
         "title": "Interprétations de variants",
+        "empty": "Aucune interprétation de variant pour ce patient.",
         "aa_tooltip": "Changement d'acide aminé",
         "date_tooltip": "Dernière date d'interprétation",
         "headers": {
@@ -1386,6 +1387,7 @@
       },
       "cases": {
         "title": "Cas génomiques",
+        "empty": "Aucun cas génomique pour ce patient.",
         "type": {
           "somatic": "Somatique",
           "germline": "Germinal solo",
@@ -1489,6 +1491,7 @@
     },
     "clinical_trials": {
       "title": "Inscriptions antérieures",
+      "empty": "Aucune inscription antérieure pour ce patient.",
       "day_value": "Jour {{day}}",
       "initial_badge": "Traitement initial",
       "columns": {

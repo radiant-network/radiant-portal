@@ -77,7 +77,9 @@ function LibrechatButton({
           <Button
             onClick={() => setOpen(true)}
             className={cn(
-              'bg-[linear-gradient(19.65deg,#1C75BC_12.636%,#00B6BE_102.78%)] text-white hover:bg-[linear-gradient(19.65deg,#00B6BE_12.636%,#1C75BC_102.78%)]',
+              'relative isolate bg-[linear-gradient(48deg,#1C75BC_-12.64%,#00B6BE_102.78%)] text-white',
+              'before:absolute before:inset-0 before:-z-10 before:rounded-[inherit] before:bg-[linear-gradient(48deg,#00B6BE_-12.64%,#1C75BC_102.78%)]',
+              'before:opacity-0 before:transition-opacity before:duration-400 before:ease-in-out hover:before:opacity-100 motion-reduce:before:transition-none',
               className,
             )}
             {...buttonProps}

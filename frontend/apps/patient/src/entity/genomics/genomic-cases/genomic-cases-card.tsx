@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import type { PatientCase } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
+import Empty from '@/components/base/empties/empty';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { useI18n } from '@/components/hooks/i18n';
 
@@ -23,16 +24,20 @@ function GenomicCasesCard({ cases, isLoading }: GenomicCasesCardProps) {
         <CardTitle>{t('patient_entity.genomics.cases.title')}</CardTitle>
       </CardHeader>
       <CardContent>
-        <DataTable
-          id="patient-genomic-cases"
-          columns={columns}
-          data={cases}
-          defaultColumnSettings={defaultSettings}
-          loadingStates={{ total: isLoading, list: isLoading }}
-          pagination={{ type: 'hidden' }}
-          total={cases.length}
-          tableIndexResultPosition="bottom"
-        />
+        {!isLoading && cases.length === 0 ? (
+          <Empty size="inline" showIcon={false} description={t('patient_entity.genomics.cases.empty')} />
+        ) : (
+          <DataTable
+            id="patient-genomic-cases"
+            columns={columns}
+            data={cases}
+            defaultColumnSettings={defaultSettings}
+            loadingStates={{ total: isLoading, list: isLoading }}
+            pagination={{ type: 'hidden' }}
+            total={cases.length}
+            tableIndexResultPosition="bottom"
+          />
+        )}
       </CardContent>
     </Card>
   );

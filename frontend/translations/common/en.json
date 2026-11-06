@@ -1370,6 +1370,7 @@
       },
       "interpretations": {
         "title": "Variant interpretations",
+        "empty": "No variant interpretation for this patient.",
         "aa_tooltip": "Amino acid change",
         "date_tooltip": "Last interpretation date",
         "headers": {
@@ -1385,6 +1386,7 @@
       },
       "cases": {
         "title": "Genomic cases",
+        "empty": "No genomic case for this patient.",
         "type": {
           "somatic": "Somatic",
           "germline": "Solo germline",
@@ -1488,6 +1490,7 @@
     },
     "clinical_trials": {
       "title": "Previous enrollment",
+      "empty": "No previous enrollment for this patient.",
       "day_value": "Day {{day}}",
       "initial_badge": "Initial treatment",
       "columns": {
