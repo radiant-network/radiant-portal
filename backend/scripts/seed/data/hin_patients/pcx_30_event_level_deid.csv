@@ -7,3 +7,7 @@ The Children's Hospital of Philadelphia,C313158,Deceased,1300,Not Applicable,Not
 The Children's Hospital of Philadelphia,C3556914,Initial CNS Tumor,410,No,Not Applicable,Not Applicable,Atypical teratoid/rhabdoid tumor,ATRT-TYR,CBTN,Cerebellum/Posterior Fossa,Not Applicable
 The Children's Hospital of Philadelphia,C6389358,Initial CNS Tumor,3100,Yes,Leptomeningeal,Not Applicable,Medulloblastoma,"Medulloblastoma, non-WNT/non-SHH",CBTN,Cerebellum/Posterior Fossa;Ventricles,Not Applicable
 The Children's Hospital of Philadelphia,C6859095,Initial CNS Tumor,2200,No,Not Applicable,Not Applicable,Medulloblastoma,"Medulloblastoma, non-WNT/non-SHH",OpenPedCan,Cerebellum/Posterior Fossa,Not Applicable
+Children's Hospital Los Angeles,C8832261,Initial CNS Tumor,1100,No,Not Applicable,Not Applicable,Atypical teratoid/rhabdoid tumor,ATRT-SHH,CBTN,Cerebellum/Posterior Fossa,Not Applicable
+Children's Hospital Los Angeles,C8832261,Recurrence,2000,Yes,Spine,Not Applicable,Atypical teratoid/rhabdoid tumor,ATRT-SHH,CBTN,Cerebellum/Posterior Fossa;Spinal Cord- Thoracic,Not Applicable
+Children's Hospital Los Angeles,C8832261,Recurrence,2700,Yes,Brain;Spine,Not Applicable,Atypical teratoid/rhabdoid tumor,ATRT-SHH,CBTN,Spinal Cord- Lumbar/Thecal Sac;Temporal Lobe,Not Applicable
+Children's Hospital Los Angeles,C8832261,Progressive,3300,Yes,Brain;Spine,Not Applicable,Atypical teratoid/rhabdoid tumor,ATRT-SHH,CBTN,Temporal Lobe;Ventricles,Not Applicable

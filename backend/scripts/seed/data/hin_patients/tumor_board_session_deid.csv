@@ -1,0 +1,2 @@
+research_id,session_id,age_at_tumor_board_days,reason,diagnosis,consensus,recommendations,status,report_url
+C8832261,1,3590,Progression Review,"AT/RT, SHH subtype","Disseminated ATRT, SHH subtype; multiple relapses; high functional status; on tazemetostat after focal proton RT","PNOC 028;LP184;DFMO;Nivolumab or Nivolumab and Ipilimumab;NK cell;Paxalisab via compassionate use;Temozolomide, Irinotecan and Avastin;Selinexor",Signed,s3://radiant-local/tumor_board/C8832261/tumor_board_report_1.pdf
