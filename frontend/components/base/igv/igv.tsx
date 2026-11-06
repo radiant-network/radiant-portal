@@ -5,17 +5,17 @@ import { toast } from 'sonner';
 import { useI18n } from '@/components/hooks/i18n';
 import { thousandNumberFormat } from '@/components/lib/number-format';
 
-import { throttleAlignmentRequests } from './alignment-request-throttle';
 import { type CaseTrack, loadCaseTracks } from './case-tracks';
+import { createPublicTrackLoader, type PublicTrack, type PublicTrackId } from './public-tracks';
 import {
   type AlignmentSettings,
   type AlignmentTrack,
-  applyChrMDensityRule,
-  CHRM,
-  countChrMSlices,
-} from './chrm-density';
-import { createPublicTrackLoader, type PublicTrack, type PublicTrackId } from './public-tracks';
+  applyReadsDensityRule,
+  loadSliceCounter,
+  type SliceCounter,
+} from './reads-density';
 import { applyReadsDisplayMode, getInitialReadsDisplayMode, withReadsDisplayMode } from './reads-display-mode';
+import { getTrackFileRequests } from './track-file-requests';
 import type { IGVContext, IGVReference } from './types';
 
 import './igv.css';
@@ -50,14 +50,28 @@ const HG38_REFERENCE: IGVReference = {
   ],
 };
 
-const CHRM_HIDDEN_READS_TOAST_ID = 'igv-chrm-hidden-reads';
+const DENSE_READS_TOAST_ID = 'igv-dense-reads';
+const DENSE_READS_TOAST_DURATION = 15_000;
+// The modal dialog turns off the pointer events of the page, toasts included.
+const TOAST_CLASS_NAME = 'pointer-events-auto';
 const FAILED_TRACKS_TOAST_ID = 'igv-failed-tracks';
 
-type ReferenceFrame = { chr: string; start: number; end: number };
+type ReferenceFrame = {
+  chr: string;
+  start: number;
+  end: number;
+  getChromosome: () => { bpLength: number } | undefined;
+};
 
 // The message lists every track that failed since the dialog opened.
 const withFailedTrackNames = (names: string[]) => (failed: string[]) =>
   names.length === 0 ? failed : [...new Set([...failed, ...names])];
+
+// The requests of these files are aborted when the browser is removed.
+const watchTrackFiles = (tracks: { url?: unknown; indexURL?: unknown }[]) =>
+  getTrackFileRequests().watch(
+    tracks.flatMap(({ url, indexURL }) => [url, indexURL]).filter(url => typeof url === 'string'),
+  );
 
 type IGVProps = {
   id?: string;
@@ -86,10 +100,10 @@ const IGV = ({
   const publicTrackRemoved = useRef(onPublicTrackRemoved);
   const caseTracksLoaded = useRef(false);
   const readsDisplayMode = useRef(getInitialReadsDisplayMode(context, locus));
-  const chrMSliceCounts = useRef(new Map<AlignmentTrack, number | undefined>());
-  const chrMSavedSettings = useRef(new Map<AlignmentTrack, AlignmentSettings>());
+  const sliceCounters = useRef(new Map<AlignmentTrack, SliceCounter | undefined>());
+  const readsSavedSettings = useRef(new Map<AlignmentTrack, AlignmentSettings>());
   const [browser, setBrowser] = useState<Browser>();
-  const [chrMHiddenReadsWindow, setChrMHiddenReadsWindow] = useState<number>();
+  const [denseReadsWindow, setDenseReadsWindow] = useState<number>();
   const [failedTrackNames, setFailedTrackNames] = useState<string[]>([]);
 
   useEffect(() => {
@@ -103,7 +117,7 @@ const IGV = ({
     let cancelled = false;
     let removeBrowser: (() => void) | undefined;
 
-    throttleAlignmentRequests();
+    const trackFileRequests = getTrackFileRequests();
     import('igv').then(async ({ default: igv }) => {
       if (cancelled) return;
       // igv.js adds its sequence track to the reference tracks.
@@ -122,8 +136,13 @@ const IGV = ({
           readsDisplayMode.current,
           view.end - view.start,
         );
-        setChrMHiddenReadsWindow(
-          applyChrMDensityRule(alignmentTracks, chrMSliceCounts.current, chrMSavedSettings.current, view),
+        setDenseReadsWindow(
+          applyReadsDensityRule(alignmentTracks, sliceCounters.current, readsSavedSettings.current, {
+            chr: view.chr,
+            start: view.start,
+            end: view.end,
+            chrLength: view.getChromosome()?.bpLength,
+          }),
         );
       });
       const loader = createPublicTrackLoader(created, name => {
@@ -139,6 +158,7 @@ const IGV = ({
       removeBrowser = () => {
         liveBrowser.current = undefined;
         publicTrackLoader.current = undefined;
+        trackFileRequests.abort();
         igv.removeBrowser(created);
       };
       setBrowser(created);
@@ -155,6 +175,7 @@ const IGV = ({
     if (!browser || tracks.length === 0 || caseTracksLoaded.current) return;
     caseTracksLoaded.current = true;
 
+    watchTrackFiles(tracks);
     const { loads, failedTrackNames: failedNames } = loadCaseTracks(
       browser,
       withReadsDisplayMode(tracks, readsDisplayMode.current),
@@ -168,20 +189,22 @@ const IGV = ({
         ? load
         : load.then(async loaded => {
             const alignmentTrack = loaded as AlignmentTrack;
-            chrMSliceCounts.current.set(alignmentTrack, await countChrMSlices(alignmentTrack));
+            sliceCounters.current.set(alignmentTrack, await loadSliceCounter(alignmentTrack));
           }),
     );
-    // A track whose count fails keeps the smallest window on chrM.
+    // A track whose index fails keeps the smallest window.
     Promise.allSettled(countedTracks).then(() => {
       if (liveBrowser.current !== browser) return;
       // The rule runs on locus change: searching the current locus applies all the counts at once.
       const [currentLocus] = [browser.currentLoci()].flat();
-      if (currentLocus.split(':')[0] === CHRM) browser.search(currentLocus);
+      browser.search(currentLocus);
     });
   }, [browser, tracks]);
 
   useEffect(() => {
-    if (browser) publicTrackLoader.current?.sync(publicTracks);
+    if (!browser) return;
+    watchTrackFiles(publicTracks);
+    publicTrackLoader.current?.sync(publicTracks);
   }, [browser, publicTracks]);
 
   useEffect(() => {
@@ -190,22 +213,31 @@ const IGV = ({
     browser.search(locus);
   }, [browser, locus]);
 
+  // A new window replaces the warning still shown instead of stacking a second one.
   useEffect(() => {
-    if (chrMHiddenReadsWindow === undefined) return;
-    // A new window replaces the warning still shown instead of stacking a second one.
-    toast.warning(t('variant.igv.chrm_hidden_reads.title'), {
-      id: CHRM_HIDDEN_READS_TOAST_ID,
-      description: t('variant.igv.chrm_hidden_reads.description', {
-        window: thousandNumberFormat(chrMHiddenReadsWindow),
+    if (denseReadsWindow === undefined) {
+      toast.dismiss(DENSE_READS_TOAST_ID);
+      return;
+    }
+    toast.warning(t('variant.igv.dense_reads_hidden.title'), {
+      id: DENSE_READS_TOAST_ID,
+      description: t('variant.igv.dense_reads_hidden.description', {
+        window: thousandNumberFormat(denseReadsWindow),
       }),
+      duration: DENSE_READS_TOAST_DURATION,
+      closeButton: true,
+      className: TOAST_CLASS_NAME,
     });
-  }, [chrMHiddenReadsWindow, t]);
+  }, [denseReadsWindow, t]);
+
+  useEffect(() => () => void toast.dismiss(DENSE_READS_TOAST_ID), []);
 
   useEffect(() => {
     if (failedTrackNames.length === 0) return;
     toast.error(t('variant.igv.failed_tracks.title', { count: failedTrackNames.length }), {
       id: FAILED_TRACKS_TOAST_ID,
       description: failedTrackNames.join(', '),
+      className: TOAST_CLASS_NAME,
     });
   }, [failedTrackNames, t]);
 
