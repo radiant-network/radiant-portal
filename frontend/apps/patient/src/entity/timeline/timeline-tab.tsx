@@ -1,14 +1,7 @@
 import { type ComponentProps, useMemo } from 'react';
 import type { TFunction } from 'i18next';
 
-import {
-  type PatientEntity,
-  type PatientEvent,
-  PatientEventEventTypeEnum,
-  type PatientRadiation,
-  type PatientSurgery,
-  type PatientTherapy,
-} from '@/api/api';
+import type { PatientEntity, PatientEvent, PatientRadiation, PatientSurgery, PatientTherapy } from '@/api/api';
 import { Card, CardContent } from '@/components/base/shadcn/card';
 import type Chemotherapy from '@/components/base/timeline/chemotherapy';
 import type Event from '@/components/base/timeline/event';
@@ -33,11 +26,7 @@ function joinNonEmpty(parts: (string | undefined)[]): string | undefined {
   return filtered.length ? filtered.join(', ') : undefined;
 }
 
-function mapEvent(
-  event: PatientEvent,
-  isInitial: boolean,
-  t: TFunction,
-): ComponentProps<typeof Event> & { defaultOpen?: boolean } {
+function mapEvent(event: PatientEvent, t: TFunction): ComponentProps<typeof Event> {
   const description: ComponentProps<typeof Event>['description'] = [];
   const tumorLocs = joinNonEmpty([...event.tumor_locations, event.tumor_location_other]);
   if (tumorLocs)
@@ -59,7 +48,6 @@ function mapEvent(
     description: description.length ? description : undefined,
     startDay: event.day,
     years: dayToYears(event.day),
-    defaultOpen: isInitial,
   };
 }
 
@@ -113,7 +101,7 @@ function TimelineTab({ patient }: TimelineTabProps) {
 
   const events = useMemo(() => {
     const list = patient?.events ?? [];
-    return list.map(e => mapEvent(e, e.event_type === PatientEventEventTypeEnum.InitialCnsTumor, t));
+    return list.map(e => mapEvent(e, t));
   }, [patient, t]);
   const surgeries = useMemo(() => (treatments?.surgeries ?? []).map(mapSurgery), [treatments]);
   const chemotherapies = useMemo(() => (treatments?.therapies ?? []).map(mapTherapy), [treatments]);

@@ -1598,7 +1598,9 @@
     }
   },
   "timeline": {
+    "collapse_all": "Collapse all",
     "evidence": "Evidence",
+    "expand_all": "Expand all",
     "initial_treatment": "Initial treatment",
     "marker": {
       "day": "Day {{day}}",
