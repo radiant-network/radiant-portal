@@ -48,7 +48,8 @@ export const Default: Story = {
             extentOfTumorResection: 'Gross/Near total resection',
             description: 'Treatment follows a protocol but subject is not enrolled',
             isInitialTreatment: true,
-            evidenceHref: '#',
+            evidenceHref:
+              'https://brim.example.org/overview/project/54/visualize_variable/?var_ids=3608&patient_id=669199',
             startDay: 820,
             years: 2.2,
           },
