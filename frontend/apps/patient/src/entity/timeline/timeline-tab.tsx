@@ -67,6 +67,7 @@ function mapSurgery(s: PatientSurgery): ComponentProps<typeof Surgery> {
   return {
     extentOfTumorResection: s.extent_of_tumor_resection ?? '—',
     isInitialTreatment: s.is_initial_treatment ?? undefined,
+    evidenceHref: s.evidence_url,
     startDay: s.day,
     years: dayToYears(s.day),
   };
