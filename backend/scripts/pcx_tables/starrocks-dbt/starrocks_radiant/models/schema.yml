@@ -54,6 +54,17 @@ sources:
           nowhere else. Both its columns identify, so its ROWS are populated out
           of band and must never be committed. DDL:
           radiant-prod/tables/pnoc035_brim_url_table.sql.
+      - name: pcx_30_surgery_brim_url
+        description: >
+          Curated BRIM UI deep links for an individual surgery, joined by
+          v_pcx_30_surgery_level_combined and read by the portal's surgery query
+          as brim_url (SJRA-2018). Same never-a-dbt-model and
+          never-commit-the-rows reasoning as pcx_30_pnoc035_brim_url; keyed on
+          (patient_mrn, age_at_surgery_days) because the grain is one link per
+          surgery rather than one per patient. That key is NOT a unique surgery
+          identifier -- 38 of 9,326 rows share a (patient, age) pair -- which is
+          accepted for the Nov 2026 demo and documented in the DDL. DDL:
+          radiant-prod/tables/surgery_brim_url_table.sql.
       - name: imaging_sessions
         description: "direct copy of d3b dwh table prod_access.imaging_sessions"
       - name: stg_cbtn_enrollment_final

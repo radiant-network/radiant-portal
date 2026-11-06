@@ -79,7 +79,18 @@ select distinct
     extent_of_tumor_resection,
     case when cast(age_at_surgery as int) between age_at_initial_dx_days
         and coalesce(age_at_first_event_days, 100000)
-    then 'yes' else 'no' end as is_initial_treatment
+    then 'yes' else 'no' end as is_initial_treatment,
+
+    -- Curated BRIM evidence link for THIS surgery, read by the portal's surgery
+    -- query as brim_url (SJRA-2018) and re-labelled evidence_url in its JSON. PHI --
+    -- it embeds BRIM's internal patient id -- so the guarded view gates it behind
+    -- can_read_phi and it is deliberately absent from pcx_30_surgery_level_deid and
+    -- the release CSVs. NULL for every surgery without a curated link. The (mrn, age)
+    -- key is not a unique surgery identifier; see
+    -- radiant-prod/tables/surgery_brim_url_table.sql for the measurement and why it
+    -- is accepted for the Nov 2026 demo. It is NOT part of pcx_row_uid below: the uid
+    -- must stay byte-identical with the deid model and promote_to_pcx30._uid.
+    brim_link.brim_url
 from {{ source('dwh_source', 'treatment') }} treatment
 inner join pt_roster on treatment.subject = pt_roster.research_id
 left join {{ ref('pcx_30_organization_ref') }} org
@@ -87,6 +98,9 @@ left join {{ ref('pcx_30_organization_ref') }} org
 left join {{ ref('pcx_30_organization_override') }} ovr
     on ovr.research_id = pt_roster.research_id
 left join initial_events on pt_roster.research_id = initial_events.research_id
+left join {{ source('dwh_source', 'pcx_30_surgery_brim_url') }} brim_link
+    on brim_link.patient_mrn = pt_roster.mrn
+   and brim_link.age_at_surgery_days = treatment.age_at_surgery
 where surgery = 'Yes'
 
 ),
@@ -111,7 +125,8 @@ prov as (
     ]) }}
 )
 
--- Column list and order UNCHANGED from the pre-override view.
+-- Column order UNCHANGED from the pre-override view; brim_url is APPENDED at the end
+-- (2026-11-05), so no existing column moves.
 select
     keyed.organization_name,
     keyed.organization_code,
@@ -124,6 +139,7 @@ select
         as age_at_surgery_days,
     coalesce(prov.ov_extent_of_tumor_resection, keyed.extent_of_tumor_resection)
         as extent_of_tumor_resection,
-    keyed.is_initial_treatment
+    keyed.is_initial_treatment,
+    keyed.brim_url
 from keyed
 left join prov on prov.pcx_row_uid = keyed.pcx_row_uid
