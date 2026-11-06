@@ -8,6 +8,7 @@ import type {
   PatientsSearchResponse,
   PatientTreatments,
   PatientTrialEligibilities,
+  PatientTumorBoard,
 } from '@/api/api';
 import { patientsApi } from '@/utils/api';
 
@@ -55,6 +56,25 @@ export async function fetchPatientTrialEligibilities(
 ): Promise<PatientTrialEligibilities> {
   const response = await patientsApi.patientTrialEligibilities(tenant, patientKey);
   return response.data;
+}
+
+export async function fetchPatientTumorBoard(tenant: string, patientKey: string): Promise<PatientTumorBoard> {
+  const response = await patientsApi.patientTumorBoard(tenant, patientKey);
+  return response.data;
+}
+
+export async function fetchPatientTumorBoardDeckUrl(tenant: string, patientKey: string): Promise<string | undefined> {
+  const response = await patientsApi.patientTumorBoardDeckDownloadUrl(tenant, patientKey);
+  return response.data.url;
+}
+
+export async function fetchPatientTumorBoardReportUrl(
+  tenant: string,
+  patientKey: string,
+  sessionId: number,
+): Promise<string | undefined> {
+  const response = await patientsApi.patientTumorBoardReportDownloadUrl(tenant, patientKey, sessionId);
+  return response.data.url;
 }
 
 const MOCK_LATENCY_MS = 300;
