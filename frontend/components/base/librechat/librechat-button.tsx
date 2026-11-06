@@ -10,10 +10,14 @@ import { useRuntimeConfig } from '@/components/hooks/use-runtime-config';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { cn } from '@/components/lib/utils';
 
+import { buildNewChatUrl, type LibrechatContext } from './librechat-url';
+
+// What the button is opened from; each context has its own D.A.V.I.D agent. None: history only.
 type EntityContext =
-  | { caseId: string | number; patientId?: never }
-  | { patientId: string | number; caseId?: never }
-  | { caseId?: never; patientId?: never };
+  | { caseId: string | number; patientKey?: never; cohort?: never }
+  | { patientKey: string; caseId?: never; cohort?: never }
+  | { cohort: true; caseId?: never; patientKey?: never }
+  | { caseId?: never; patientKey?: never; cohort?: never };
 
 type LibrechatButtonProps = Omit<ButtonProps, 'onClick' | 'children' | 'asChild'> & {
   demoMode?: boolean;
@@ -21,32 +25,39 @@ type LibrechatButtonProps = Omit<ButtonProps, 'onClick' | 'children' | 'asChild'
 
 type LibrechatMode = 'new' | 'resume';
 
-// LibreChat model spec (librechat.yaml) holding the clinical instructions and the Radiant MCP tools
-const LIBRECHAT_MODEL_SPEC = 'radiant-clinical';
+function toContext(caseId?: string | number, patientKey?: string, cohort?: boolean): LibrechatContext | null {
+  if (caseId != null) return { kind: 'case', caseId };
+  if (patientKey) return { kind: 'patient', patientKey };
+  if (cohort) return { kind: 'cohort' };
+  return null;
+}
 
-function LibrechatButton({ className, demoMode = false, caseId, patientId, ...buttonProps }: LibrechatButtonProps) {
+function LibrechatButton({
+  className,
+  demoMode = false,
+  caseId,
+  patientKey,
+  cohort,
+  ...buttonProps
+}: LibrechatButtonProps) {
   const { t } = useI18n();
   const { librechatDavidUrl } = useRuntimeConfig();
   const { tenant } = useTenant();
-  const hasEntityContext = caseId != null || patientId != null;
+  const context = toContext(caseId, patientKey, cohort);
+  const hasEntityContext = context != null;
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<LibrechatMode | null>(hasEntityContext ? null : 'resume');
 
   if (!librechatDavidUrl && !demoMode) return null;
 
   let newChatUrl = '';
-  if (librechatDavidUrl) {
-    // LibreChat reads the query params on /c/new only: its root redirects there and drops them
-    const url = new URL('c/new', librechatDavidUrl.replace(/\/?$/, '/'));
-    url.searchParams.set('spec', LIBRECHAT_MODEL_SPEC);
-    let prompt = '';
-    if (caseId != null) prompt = t('librechat.david.prompt_case', { caseId, tenant });
-    else if (patientId != null) prompt = t('librechat.david.prompt_patient', { patientId, tenant });
-    if (prompt) {
-      url.searchParams.set('prompt', prompt);
-      url.searchParams.set('submit', 'true');
-    }
-    newChatUrl = url.toString();
+  if (librechatDavidUrl && context) {
+    let prompt: string;
+    if (context.kind === 'case') prompt = t('librechat.david.prompt_case', { caseId: context.caseId, tenant });
+    else if (context.kind === 'patient')
+      prompt = t('librechat.david.prompt_patient', { patientKey: context.patientKey, tenant });
+    else prompt = t('librechat.david.prompt_cohort', { tenant });
+    newChatUrl = buildNewChatUrl(librechatDavidUrl, context, prompt);
   }
 
   let activeUrl = librechatDavidUrl;
