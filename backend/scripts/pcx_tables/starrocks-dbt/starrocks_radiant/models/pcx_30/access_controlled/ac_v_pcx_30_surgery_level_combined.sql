@@ -15,6 +15,14 @@
 -- dob minus one day rather than NULL. A granted caller therefore sees a plausible-
 -- looking but meaningless date on those rows. Inherited verbatim and not corrected
 -- here -- see the upstream view's header.
+--
+-- brim_url IS phi, for the same reason it is on the PNOC035 eligibility view: the
+-- deep link embeds BRIM's internal patient id and resolves in the BRIM UI to the
+-- named patient, so it is a re-identification vector rather than a reference. It is
+-- also absent from pcx_30_surgery_level_deid and the exported release CSVs. An
+-- un-granted caller sees NULL, not a broken link. The column name is the one the
+-- portal's surgery query selects (SJRA-2018, renamed to brim_url in 2fdcc84b2 to
+-- match what prd already exposed); the API re-labels it evidence_url in its JSON.
 
 {{ access_controlled_view(
     source_relation = ref('v_pcx_30_surgery_level_combined'),
@@ -27,6 +35,7 @@
         ['age_at_surgery_days',       'plain'],
         ['extent_of_tumor_resection', 'plain'],
         ['is_initial_treatment',      'plain'],
+        ['brim_url',                  'phi'],
         ['can_read_phi',              'plain'],
     ]
 ) }}
