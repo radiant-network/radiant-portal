@@ -20,7 +20,7 @@ axiosClient.interceptors.response.use(
       return axiosClient(originalRequest);
     }
 
-    if (error.response.status === HttpStatusCode.Unauthorized && !originalRequest._retry) {
+    if (error.response?.status === HttpStatusCode.Unauthorized && !originalRequest._retry) {
       originalRequest._retry = true;
 
       try {
