@@ -65,6 +65,17 @@ sources:
           identifier -- 38 of 9,326 rows share a (patient, age) pair -- which is
           accepted for the Nov 2026 demo and documented in the DDL. DDL:
           radiant-prod/tables/surgery_brim_url_table.sql.
+      - name: pcx_30_imaging_link
+        description: >
+          Curated per-session imaging links, joined by
+          v_pcx_30_mri_images_combined. Same never-a-dbt-model and
+          never-commit-the-rows reasoning as its two siblings above. Keyed on
+          session_id, which IS unique in that view (47,167 rows over 47,167
+          distinct ids, measured 2026-11-06), so a row decorates exactly one
+          session. flywheel_url OVERRIDES the view's derived Flywheel deep link;
+          clinical_report_url is a second link the view has no other source for. Both
+          are projected plain, matching flywheel_url. DEMO-ONLY (Nov 2026). DDL:
+          radiant-prod/tables/imaging_link_table.sql.
       - name: imaging_sessions
         description: "direct copy of d3b dwh table prod_access.imaging_sessions"
       - name: stg_cbtn_enrollment_final
