@@ -74,13 +74,34 @@ initial_events as (
 -- `pcx_30_field_provenance` and `pcx_30_promotion_decisions`, deliberately NOT
 -- in more columns here.
 --
--- KNOWN INCONSISTENCY -- `protocol_name_and_arm` is NOT overridden.
--- It and `protocol_name` both derive from `protocol_clean` above, and the
--- reviewer accepted a value for `protocol_name` only. On the 3 rows where
--- `protocol_name` is overridden, `protocol_name_and_arm` still carries the
--- curator's original, so the two columns disagree. Rewriting the sibling would
--- be inventing a decision nobody made; it is left, recorded, and flagged for
--- the reviewer. Read `field_provenance` before assuming the two agree.
+-- `protocol_name_and_arm` IS RECOMPOSED on an overridden row (2026-11-06).
+-- It is the PARENT of `protocol_name` / `protocol_arm` -- both are derived from
+-- it by splitting on the first colon -- so overriding the name alone left the
+-- parent carrying the curator's original and the row self-contradicting: all 3
+-- affected rows read `protocol_name_and_arm = 'Not Applicable'` beside a real
+-- `protocol_name` of 17ST011 / MEMMAT / SJMB12.
+--
+-- The fix is the INVERSE of the split, not a new judgment: the arm is unchanged
+-- and the name is the reviewer's accepted value, so recomposing the parent from
+-- its own two parts asserts nothing nobody decided. Measured before applying it:
+--   * `concat(protocol_name, ': ', protocol_arm)` reproduces
+--     `protocol_name_and_arm` EXACTLY on all 1,187 colon-bearing rows (0 differ),
+--     so the ': ' separator is the source's own spelling, not an imposed one;
+--   * 0 rows have a colon AND `protocol_arm = 'Not Applicable'`, so the two
+--     branches below partition cleanly and an arm whose literal text is
+--     'Not Applicable' cannot be confused with "there is no arm";
+--   * on the 4,489 colon-free rows `protocol_name` already equals
+--     `protocol_name_and_arm` on 4,486 -- the 3 exceptions ARE these overrides.
+--
+-- Applied ONLY where an override exists. Unconditional recomposition measures
+-- byte-identical today, but it would make this column a projection of its own
+-- children forever, so a future upstream value spelled 'FOO:BAR' would be
+-- silently respaced. Gating on the override keeps every unreviewed row exactly
+-- as the curator wrote it.
+--
+-- NOT given its own provenance token: no reviewer decided this column, and
+-- `field_provenance` already carries `protocol_name=curated_view!` on the row,
+-- which is the signal that the pair was recomposed.
 
 published as (
 
@@ -169,7 +190,12 @@ prov as (
 select
     keyed.organization_name,
     keyed.research_id,
-    keyed.protocol_name_and_arm,
+    -- recomposed from its own parts ONLY on an overridden row; see the header
+    case
+        when prov.ov_protocol_name is null then keyed.protocol_name_and_arm
+        when keyed.protocol_arm = 'Not Applicable' then prov.ov_protocol_name
+        else concat(prov.ov_protocol_name, ': ', keyed.protocol_arm)
+    end as protocol_name_and_arm,
     coalesce(prov.ov_protocol_name, keyed.protocol_name) as protocol_name,
     keyed.protocol_arm,
     coalesce(prov.ov_chemotherapy_type, keyed.chemotherapy_type) as chemotherapy_type,

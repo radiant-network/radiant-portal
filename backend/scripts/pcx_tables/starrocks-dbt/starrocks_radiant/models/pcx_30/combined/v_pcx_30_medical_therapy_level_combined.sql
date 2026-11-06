@@ -86,8 +86,12 @@ initial_events as (
 -- re-derived from the accepted value below, which is applying the reviewer's
 -- decision rather than inventing one.
 --
--- KNOWN GAP -- `protocol_name_and_arm` is not overridden, matching the deid
--- model; see its header for why.
+-- `protocol_name_and_arm` IS RECOMPOSED on an overridden row, matching the deid
+-- model exactly -- see its header for the measurements. It is the PARENT of
+-- protocol_name / protocol_arm (both split off it at the first colon), so
+-- overriding the name alone left the parent reading 'Not Applicable' beside a
+-- real protocol. Recomposing from the row's own two parts is the inverse of the
+-- split, not a new judgment. Applied ONLY where an override exists.
 
 published as (
 
@@ -187,7 +191,12 @@ select
     keyed.organization_code,
     keyed.mrn,
     keyed.research_id,
-    keyed.protocol_name_and_arm,
+    -- recomposed from its own parts ONLY on an overridden row; see the header
+    case
+        when prov.ov_protocol_name is null then keyed.protocol_name_and_arm
+        when keyed.protocol_arm = 'Not Applicable' then prov.ov_protocol_name
+        else concat(prov.ov_protocol_name, ': ', keyed.protocol_arm)
+    end as protocol_name_and_arm,
     coalesce(prov.ov_protocol_name, keyed.protocol_name) as protocol_name,
     keyed.protocol_arm,
     coalesce(prov.ov_chemotherapy_type, keyed.chemotherapy_type)
