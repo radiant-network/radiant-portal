@@ -14,7 +14,7 @@ describe('Case Entity - Variants - Germline - CNV - IGV - From table', () => {
   it('Information displayed', () => {
     setupTest();
     IGV.validations.shouldHaveTitle();
-    IGV.validations.shouldHaveTracks();
+    IGV.validations.shouldHaveTracks('cnv');
     IGV.validations.shouldNotHaveErrorMessage();
   });
 
