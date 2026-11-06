@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import davidLogo from '@assets/logo/david.svg';
-import davidLogoDark from '@assets/logo/david-dark.svg';
 import { ArrowUpRight, SparklesIcon } from 'lucide-react';
 
 import { Badge } from '@/components/base/shadcn/badge';
@@ -12,9 +10,11 @@ import { useRuntimeConfig } from '@/components/hooks/use-runtime-config';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { cn } from '@/components/lib/utils';
 
+// What the button is opened from; each context has its own D.A.V.I.D agent. None: history only.
+import davidLogo from './david.svg';
+import davidLogoDark from './david-dark.svg';
 import { buildNewChatUrl, type LibrechatContext } from './librechat-url';
 
-// What the button is opened from; each context has its own D.A.V.I.D agent. None: history only.
 type EntityContext =
   | { caseId: string | number; patientKey?: never; cohort?: never }
   | { patientKey: string; caseId?: never; cohort?: never }
