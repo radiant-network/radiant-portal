@@ -172,7 +172,7 @@ def build(deid_dir, organizations, pins=None, extra_dir=None):
         for r in rows:
             p = patients[r["research_id"]]
             p.ages += [a for c, v in r.items() if c.startswith("age_at") and (a := age(v)) is not None]
-    sessions = read_tumor_board(extra_dir, "session", patients)
+    sessions = read_extra(extra_dir, "tumor_board_session", patients)
     for r in sessions:
         patients[r["research_id"]].ages.append(age(r["age_at_tumor_board_days"]))
     pins = pins or {}
@@ -215,21 +215,25 @@ def build(deid_dir, organizations, pins=None, extra_dir=None):
          int(r["age_at_tumor_board_days"]), r["reason"], r["diagnosis"], r["consensus"], r["recommendations"], r["status"], r["report_url"]]
         for r in sessions])
     tables["tumor_board_deck"] = (TUMOR_BOARD_DECK_COLS, [[r["research_id"], r["deck_url"]]
-                                                          for r in read_tumor_board(extra_dir, "deck", patients)])
+                                                          for r in read_extra(extra_dir, "tumor_board_deck", patients)])
+    tables["processing_report"] = (PROCESSING_REPORT_COLS, [[r["research_id"], r["report_url"]]
+                                                            for r in read_extra(extra_dir, "processing_report", patients)])
     return patients, data, tables
 
 
 # Radiant's own tables (scripts/seed/views), keyed on research_id like the HIN ones. Loaded by hand in QA and PRD
-# (one patient so far); locally from the extra patients' CSVs.
+# (one patient so far); locally from the extra patients' CSVs. processing_report holds the patient's CHARM processing
+# report.
 TUMOR_BOARD_SESSION_COLS = [("research_id", "VARCHAR(256)"), ("session_id", "INT"), ("tumor_board_date", "DATE"),
                             ("age_at_tumor_board_days", "INT"), ("reason", S), ("diagnosis", S), ("consensus", S),
                             ("recommendations", S), ("status", "VARCHAR(128)"), ("report_url", "VARCHAR(1024)")]
 TUMOR_BOARD_DECK_COLS = [("research_id", "VARCHAR(256)"), ("deck_url", "VARCHAR(1024)")]
+PROCESSING_REPORT_COLS = [("research_id", "VARCHAR(256)"), ("report_url", "VARCHAR(1024)")]
 
 
-def read_tumor_board(extra_dir, name, patients):
-    """The tumor board rows of extra_dir, nothing without it. recommendations are separated by semicolons."""
-    path = os.path.join(extra_dir, f"tumor_board_{name}_deid.csv") if extra_dir else None
+def read_extra(extra_dir, name, patients):
+    """The <name>_deid.csv rows of extra_dir, nothing without it. Tumor board recommendations are separated by semicolons."""
+    path = os.path.join(extra_dir, f"{name}_deid.csv") if extra_dir else None
     if not path or not os.path.exists(path):
         return []
     rows = read_csv(path)
