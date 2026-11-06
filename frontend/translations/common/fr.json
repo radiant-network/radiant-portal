@@ -2244,6 +2244,22 @@
       "failed_tracks": {
         "title_one": "Une piste n'a pas pu être chargée",
         "title_other": "{{count}} pistes n'ont pas pu être chargées"
+      },
+      "public_tracks": {
+        "menu": "Pistes",
+        "clinvar": "ClinVar",
+        "dgv": "DGV",
+        "clinvar_sv": "SV ClinVar",
+        "clingen_region_haploinsufficiency": "Haploinsuffisance des régions ClinGen",
+        "clingen_region_triplosensitivity": "Triplosensibilité des régions ClinGen",
+        "gnomad_sv": "SV gnomAD v4.1",
+        "gnomad_cnv": "CNV gnomAD v4.1",
+        "clingen_gene_haploinsufficiency": "Haploinsuffisance des gènes ClinGen",
+        "clingen_gene_triplosensitivity": "Triplosensibilité des gènes ClinGen",
+        "segmental_duplications": "Duplications segmentaires",
+        "repeat_masker": "RepeatMasker",
+        "simple_repeats": "Répétitions simples",
+        "self_chain": "Self chain"
       }
     },
     "interpretation_form": {
