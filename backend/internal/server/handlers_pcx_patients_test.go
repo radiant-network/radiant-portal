@@ -16,21 +16,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_PcxPatientHandlers_NotImplementedYet(t *testing.T) {
-	handlers := map[string]gin.HandlerFunc{
-		"statistics": PatientsStatisticsHandler(),
-	}
-	for name, handler := range handlers {
-		router := gin.Default()
-		router.GET("/", handler)
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/", nil))
-
-		assert.Equal(t, http.StatusNotImplemented, w.Code, name)
-		assert.JSONEq(t, `{"status":501,"message":"Not Implemented"}`, w.Body.String(), name)
-	}
-}
-
 type pcxPatientsSearcherMock struct {
 	patients []types.PatientListItem
 	count    int64

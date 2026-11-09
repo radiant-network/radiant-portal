@@ -23,7 +23,7 @@ The read-only routes below are all gated by `can_search_case`, sit next to the e
 | `POST /{tenant}/patients/search` | `ListBodyWithCriteria` | `PatientsSearchResponse` = `{ list: PatientListItem[], count }` | `searchPatients` |
 | `GET /{tenant}/patients/autocomplete?prefix=&limit=` | query prefix (min. 1 character), limit (default 10) | `AutocompleteResult[]` = `[{ type, value }]`, the type shared with the case list | `autocompletePatients` |
 | `GET /{tenant}/patients/filters` | none | `PatientFilters` | `patientsFilters` |
-| `GET /{tenant}/patients/statistics` | none | `PatientStatistics` | `patientsStatistics` |
+| ~~`GET /{tenant}/patients/statistics`~~ | none | ~~`PatientStatistics`~~ | ~~`patientsStatistics`~~ (cancelled 2026-11-09) |
 | `GET /{tenant}/patients/{patient_key}` | path `patient_key` | `PatientEntity`: header, sidebar and overview | `patientEntity` |
 | `GET /{tenant}/patients/{patient_key}/processing_report/download_url` | path `patient_key` | `PreSignedURL` of the patient's CHARM processing report (a self-contained HTML page, PHI like the tumor board files; the entity's `has_processing_report` tells whether the caller can open one); 404 without a report or PHI access; gated by `can_read_pii` at the patient's organization (403 otherwise) | `patientProcessingReportDownloadUrl` |
 | `GET /{tenant}/patients/{patient_key}/treatments` | path `patient_key` | `PatientTreatments`: treatments and timeline tabs | `patientTreatments` |
@@ -74,7 +74,7 @@ There is no free-text search, as in the case list: the box only suggests, and a 
 
 **Filters.** Values only (`FiltersValue`: key, label), like the case filters, with no per-value counts, among the patients the caller can see. `age_at_initial_dx_group` always returns every group, in age order, even when no patient falls in it. Yes/no filters have the keys `true` and `false` (labels `Yes` and `No`) and become a boolean criterion: `{"field": "got_radiation_ever", "value": [true]}`. Protocol and molecular subtype have no data source yet.
 
-**Statistics.** Computed on the whole cohort the user can see, not on the current filters, as in the prototype. `by_protocol` groups on `protocol_name` (not name and arm), for the "Patients per treatment protocol" chart.
+**Statistics.** Cancelled 2026-11-09, the endpoint was removed. Was: computed on the whole cohort the user can see, not on the current filters, as in the prototype. `by_protocol` groups on `protocol_name` (not name and arm), for the "Patients per treatment protocol" chart.
 
 **Entity.** About 9 queries on the secured views filtered by `organization_code`, `patient_id_type`, `patient_id`, plus the portal cases when `radiant_patient_id` is set (as proband or family member). Returns 404 for a malformed key or one that matches no row of the list view.
 

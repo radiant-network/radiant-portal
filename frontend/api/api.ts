@@ -7141,37 +7141,6 @@ export const PatientListItemVitalStatusEnum = {
 export type PatientListItemVitalStatusEnum = typeof PatientListItemVitalStatusEnum[keyof typeof PatientListItemVitalStatusEnum];
 
 /**
- * Alive and deceased patients of one organization
- * @export
- * @interface PatientOrganizationVitalCount
- */
-export interface PatientOrganizationVitalCount {
-    /**
-     * 
-     * @type {number}
-     * @memberof PatientOrganizationVitalCount
-     */
-    'alive': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof PatientOrganizationVitalCount
-     */
-    'deceased': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof PatientOrganizationVitalCount
-     */
-    'organization_code': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof PatientOrganizationVitalCount
-     */
-    'organization_name': string;
-}
-/**
  * Lansky or Karnofsky score. The date is when the result was released, not when it was assessed.
  * @export
  * @interface PatientPerformanceScore
@@ -7284,61 +7253,6 @@ export interface PatientRadiation {
     'type_other'?: string;
 }
 /**
- * Statistics on every patient the caller can see, regardless of the list filters
- * @export
- * @interface PatientStatistics
- */
-export interface PatientStatistics {
-    /**
-     * Keys 0-4, 5-9, 10-14, 15-19, 20+
-     * @type {Array<Aggregation>}
-     * @memberof PatientStatistics
-     */
-    'by_age_bucket': Array<Aggregation>;
-    /**
-     * 
-     * @type {Array<Aggregation>}
-     * @memberof PatientStatistics
-     */
-    'by_diagnosis': Array<Aggregation>;
-    /**
-     * 
-     * @type {Array<PatientOrganizationVitalCount>}
-     * @memberof PatientStatistics
-     */
-    'by_organization': Array<PatientOrganizationVitalCount>;
-    /**
-     * Patients per protocol_name, a patient counted once per protocol
-     * @type {Array<Aggregation>}
-     * @memberof PatientStatistics
-     */
-    'by_protocol': Array<Aggregation>;
-    /**
-     * 
-     * @type {number}
-     * @memberof PatientStatistics
-     */
-    'imaging_count': number;
-    /**
-     * Input of the Kaplan-Meier
-     * @type {Array<PatientSurvival>}
-     * @memberof PatientStatistics
-     */
-    'survival': Array<PatientSurvival>;
-    /**
-     * 
-     * @type {number}
-     * @memberof PatientStatistics
-     */
-    'total': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof PatientStatistics
-     */
-    'with_cases_count': number;
-}
-/**
  * Surgery of a patient
  * @export
  * @interface PatientSurgery
@@ -7374,37 +7288,6 @@ export interface PatientSurgery {
      * @memberof PatientSurgery
      */
     'is_initial_treatment'?: boolean;
-}
-/**
- * Survival time of one patient, for the Kaplan-Meier
- * @export
- * @interface PatientSurvival
- */
-export interface PatientSurvival {
-    /**
-     * 
-     * @type {string}
-     * @memberof PatientSurvival
-     */
-    'cns_integrated_diagnosis'?: string;
-    /**
-     * 
-     * @type {number}
-     * @memberof PatientSurvival
-     */
-    'days': number;
-    /**
-     * true when deceased
-     * @type {boolean}
-     * @memberof PatientSurvival
-     */
-    'event': boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof PatientSurvival
-     */
-    'organization_code': string;
 }
 /**
  * Medical therapy of a patient
@@ -18493,44 +18376,6 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * Retrieve PatientStatistics on every PCX patient the caller can see, regardless of the list filters
-         * @summary Get PatientStatistics cohort analytics
-         * @param {string} tenant Tenant code
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        patientsStatistics: async (tenant: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'tenant' is not null or undefined
-            assertParamExists('patientsStatistics', 'tenant', tenant)
-            const localVarPath = `/{tenant}/patients/statistics`
-                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerauth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Create a new patient batch
          * @summary Create a new patient batch
          * @param {string} tenant Tenant code
@@ -18866,19 +18711,6 @@ export const PatientsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Retrieve PatientStatistics on every PCX patient the caller can see, regardless of the list filters
-         * @summary Get PatientStatistics cohort analytics
-         * @param {string} tenant Tenant code
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async patientsStatistics(tenant: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PatientStatistics>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.patientsStatistics(tenant, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['PatientsApi.patientsStatistics']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
          * Create a new patient batch
          * @summary Create a new patient batch
          * @param {string} tenant Tenant code
@@ -19075,16 +18907,6 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
          */
         patientsFilters(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<PatientFilters> {
             return localVarFp.patientsFilters(tenant, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Retrieve PatientStatistics on every PCX patient the caller can see, regardless of the list filters
-         * @summary Get PatientStatistics cohort analytics
-         * @param {string} tenant Tenant code
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        patientsStatistics(tenant: string, options?: RawAxiosRequestConfig): AxiosPromise<PatientStatistics> {
-            return localVarFp.patientsStatistics(tenant, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new patient batch
@@ -19299,18 +19121,6 @@ export class PatientsApi extends BaseAPI {
      */
     public patientsFilters(tenant: string, options?: RawAxiosRequestConfig) {
         return PatientsApiFp(this.configuration).patientsFilters(tenant, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Retrieve PatientStatistics on every PCX patient the caller can see, regardless of the list filters
-     * @summary Get PatientStatistics cohort analytics
-     * @param {string} tenant Tenant code
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof PatientsApi
-     */
-    public patientsStatistics(tenant: string, options?: RawAxiosRequestConfig) {
-        return PatientsApiFp(this.configuration).patientsStatistics(tenant, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
