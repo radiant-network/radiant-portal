@@ -993,7 +993,7 @@ func Test_ProcessBatch_Sample_All_Codes(t *testing.T) {
 			},
 			{
 				Code:    "SAMPLE-006",
-				Message: "Invalid field type_code for sample (CCMG / ABCD1). Reason: \"dna!\" is not a valid type code. Valid values [blood, buccal_swab, buffy_coat, dna, not_reported, rna, saliva, solid_tissue].",
+				Message: "Invalid field type_code for sample (CCMG / ABCD1). Reason: \"dna!\" is not a valid type code. Valid values [blood, brain, buccal_swab, buffy_coat, dna, not_reported, rna, saliva, solid_tissue, spinal_cord].",
 				Path:    "sample[2].type_code",
 			},
 			{
