@@ -136,12 +136,9 @@ docs/PatientKeyDates.md
 docs/PatientLabResult.md
 docs/PatientLaboratory.md
 docs/PatientListItem.md
-docs/PatientOrganizationVitalCount.md
 docs/PatientPerformanceScore.md
 docs/PatientRadiation.md
-docs/PatientStatistics.md
 docs/PatientSurgery.md
-docs/PatientSurvival.md
 docs/PatientTherapy.md
 docs/PatientTreatmentSummary.md
 docs/PatientTreatments.md
@@ -365,12 +362,9 @@ radiant_python/models/patient_key_dates.py
 radiant_python/models/patient_lab_result.py
 radiant_python/models/patient_laboratory.py
 radiant_python/models/patient_list_item.py
-radiant_python/models/patient_organization_vital_count.py
 radiant_python/models/patient_performance_score.py
 radiant_python/models/patient_radiation.py
-radiant_python/models/patient_statistics.py
 radiant_python/models/patient_surgery.py
-radiant_python/models/patient_survival.py
 radiant_python/models/patient_therapy.py
 radiant_python/models/patient_treatment_summary.py
 radiant_python/models/patient_treatments.py
