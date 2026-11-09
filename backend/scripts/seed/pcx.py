@@ -10,6 +10,7 @@ import csv, datetime as dt, hashlib, os, re
 TODAY = dt.date(2026, 10, 1)
 FIRST_DIGITAL_MRI = dt.date(2010, 1, 1)
 FLYWHEEL = "https://flywheel.example.org"
+CLINICAL_REPORTS = "https://reports.example.org"
 
 FIRST_F = ["Olivia", "Emma", "Sophia", "Isabella", "Harper", "Amelia", "Evelyn", "Abigail", "Ella", "Scarlett", "Grace", "Lily", "Aria",
            "Zoe", "Nora", "Maya", "Leah", "Hannah", "Chloe", "Layla", "Riley", "Stella", "Hazel", "Violet"]
@@ -324,7 +325,8 @@ def timeline(p, data):
 
 def mri(p, t):
     """Pre-op, post-op, end of radiation, before each relapse, then surveillance: every 3 months for 2 years,
-    6 months up to 5 years, yearly after. Flywheel only holds digital studies (2010 onward)."""
+    6 months up to 5 years, yearly after. Flywheel only holds digital studies (2010 onward). One session in three gets a
+    clinical report link, NULL elsewhere as in PRD where only curated sessions have one."""
     dx, end = t["dx"], t["end"]
     ages = {dx - 1, dx + 2} | {b + 30 for a, b in t["radiations"] if b is not None}
     ages |= {a - 2 for et, a in t["events"] if et in ("Recurrence", "Progressive", "Second Malignancy")}
@@ -346,7 +348,8 @@ def mri(p, t):
         minutes = h("time", sid) % 600 + 7 * 60
         name = f"{a}d_{'B_brain' if site == 'brain' else 'S_spine'}_{minutes // 60:02d}h{minutes % 60:02d}m"
         rows.append([p.org_name, p.org, p.mrn, p.rid, subject, project, f"PCX30_{p.org}", sid, name, p.date(a), str(a), site, "MRI",
-                     f"{FLYWHEEL}/#/projects/{project}/sessions/{sid}"])
+                     f"{FLYWHEEL}/#/projects/{project}/sessions/{sid}",
+                     f"{CLINICAL_REPORTS}/imaging/{sid}.pdf" if h("report", sid) % 3 == 0 else None])
     return rows
 
 
@@ -358,7 +361,7 @@ def oid(*key):
 MRI_COLS = IDENT + [("flywheel_subject_id", "VARCHAR(128)"), ("flywheel_project_id", "VARCHAR(128)"), ("flywheel_project_name", "VARCHAR(128)"),
                     ("session_id", "VARCHAR(128)"), ("session_name", "VARCHAR(128)"), ("session_date", "DATETIME"),
                     ("age_at_session_days", "VARCHAR(128)"), ("anatomical_site", "VARCHAR(128)"), ("imaging_modality", "VARCHAR(128)"),
-                    ("flywheel_url", S)]
+                    ("flywheel_url", S), ("clinical_report_url", "VARCHAR(1024)")]
 
 
 LAB_IDENT = [("organization_name", S), ("organization_code", "VARCHAR(64)"), ("mrn", L), ("research_id", L)]

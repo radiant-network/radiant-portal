@@ -484,7 +484,7 @@ func Test_PatientImagingHandler_ReturnsTheSessions(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, testPatientKey, repo.key)
 	assert.JSONEq(t, `{"sessions": [{"day": null, "date": null, "session_id": "ses-1", "session_name": "MRI Brain",
-		"anatomical_site": null, "imaging_modality": null, "flywheel_url": null}]}`, w.Body.String())
+		"anatomical_site": null, "imaging_modality": null, "flywheel_url": null, "clinical_report_url": null}]}`, w.Body.String())
 }
 
 func Test_PatientExternalRecordsHandler_ReturnsTheOrganizations(t *testing.T) {

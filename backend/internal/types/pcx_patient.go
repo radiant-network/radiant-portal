@@ -332,11 +332,12 @@ type PatientTumorBoardSession struct {
 // @Name PatientImagingSession
 type PatientImagingSession struct {
 	PatientDayDate
-	SessionID       string  `json:"session_id" validate:"required"`
-	SessionName     string  `json:"session_name" validate:"required"`
-	AnatomicalSite  *string `json:"anatomical_site"`
-	ImagingModality *string `json:"imaging_modality"`
-	FlywheelURL     *string `json:"flywheel_url"`
+	SessionID         string  `json:"session_id" validate:"required"`
+	SessionName       string  `json:"session_name" validate:"required"`
+	AnatomicalSite    *string `json:"anatomical_site"`
+	ImagingModality   *string `json:"imaging_modality"`
+	FlywheelURL       *string `json:"flywheel_url"`
+	ClinicalReportURL *string `json:"clinical_report_url"`
 }
 
 // PatientTreatmentSummary - Initial treatment summary of a patient
