@@ -6,9 +6,6 @@
 # PCX 3.0 view scripts, maintained by the RADIANT-Timeline-Abstraction team (source of truth for the PCX data).
 /backend/scripts/pcx_tables/ @calkinsh
 
-# End-to-end tests.
-/cypress/ @kstonge
-
 # Frontend monorepo.
 /frontend/ @lflangis @AltefrohneGaelle
 
