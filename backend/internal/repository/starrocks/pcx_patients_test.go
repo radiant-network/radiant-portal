@@ -522,9 +522,11 @@ func Test_GetPcxPatientImaging_SessionsOfAPatientWithPhiAccess(t *testing.T) {
 		assertJSON(t, `{
 			"sessions": [
 				{"day": 999, "date": "2017-11-28", "session_id": "ses-1", "session_name": "MRI Brain", "anatomical_site": "Brain",
-				 "imaging_modality": "MR", "flywheel_url": "https://flywheel.example/ses-1"},
+				 "imaging_modality": "MR", "flywheel_url": "https://flywheel.example/ses-1",
+				 "clinical_report_url": null},
 				{"day": 1525, "date": "2019-02-01", "session_id": "ses-2", "session_name": "MRI Brain w/wo", "anatomical_site": "Brain",
-				 "imaging_modality": "MR", "flywheel_url": "https://flywheel.example/ses-2"}
+				 "imaging_modality": "MR", "flywheel_url": "https://flywheel.example/ses-2",
+				 "clinical_report_url": "https://reports.example/ses-2.pdf"}
 			]
 		}`, imaging)
 	})

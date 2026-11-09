@@ -857,17 +857,18 @@ func pcxTherapies(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]
 
 func pcxImaging(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]types.PatientImagingSession, error) {
 	var rows []struct {
-		SessionDay      *string
-		SessionDate     *types.DateISO8601
-		SessionID       string
-		SessionName     string
-		AnatomicalSite  *string
-		ImagingModality *string
-		FlywheelURL     *string `gorm:"column:flywheel_url"`
+		SessionDay        *string
+		SessionDate       *types.DateISO8601
+		SessionID         string
+		SessionName       string
+		AnatomicalSite    *string
+		ImagingModality   *string
+		FlywheelURL       *string `gorm:"column:flywheel_url"`
+		ClinicalReportURL *string `gorm:"column:clinical_report_url"`
 	}
 	tx := pcxView(ctx, db, types.PcxMriImagesTable, id).
 		Select(pcxDayDate("age_at_session_days", "session_date", "session") + ", session_id, session_name, anatomical_site, " +
-			"imaging_modality, flywheel_url").
+			"imaging_modality, flywheel_url, clinical_report_url").
 		Order(pcxOrderByDay("age_at_session_days") + ", session_id")
 	if err := tx.Find(&rows).Error; err != nil {
 		return nil, fmt.Errorf("error fetching patient imaging: %w", err)
@@ -876,7 +877,8 @@ func pcxImaging(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]ty
 	for i, row := range rows {
 		sessions[i] = types.PatientImagingSession{PatientDayDate: dayDate(row.SessionDay, row.SessionDate),
 			SessionID: row.SessionID, SessionName: row.SessionName, AnatomicalSite: row.AnatomicalSite,
-			ImagingModality: row.ImagingModality, FlywheelURL: row.FlywheelURL}
+			ImagingModality: row.ImagingModality, FlywheelURL: row.FlywheelURL,
+			ClinicalReportURL: row.ClinicalReportURL}
 	}
 	return sessions, nil
 }

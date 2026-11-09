@@ -24,7 +24,8 @@
 
    VISIBLE TO ALL CALLERS (accepted, non-PHI): flywheel_subject_id,
    flywheel_project_id, flywheel_project_name, session_id, session_name,
-   flywheel_url, age_at_session_days, anatomical_site, imaging_modality.
+   flywheel_url, clinical_report_url, age_at_session_days, anatomical_site,
+   imaging_modality.
    session_name embeds age-in-days + time-of-day (e.g. '5766d_B_brain_18h40m')
    but no calendar date, so it is de-identified alone; only session_date turns it
    into a precise timestamp, and that is gated.
@@ -92,6 +93,7 @@ SELECT s.organization_name,
        s.anatomical_site,
        s.imaging_modality,
        s.flywheel_url,
+       s.clinical_report_url,
        s.can_read_phi
 FROM (SELECT src.*,
              p.id AS radiant_patient_id,

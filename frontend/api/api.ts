@@ -6776,6 +6776,12 @@ export interface PatientImagingSession {
      * @type {string}
      * @memberof PatientImagingSession
      */
+    'clinical_report_url'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatientImagingSession
+     */
     'date'?: string;
     /**
      * 
