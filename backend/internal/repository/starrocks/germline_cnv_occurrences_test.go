@@ -1042,6 +1042,42 @@ func Test_GermlineCNV_CountOccurrences_FilterByParentalOrigin(t *testing.T) {
 	})
 }
 
+func Test_GermlineCNV_GetOccurrences_FilterByParentalOrigin(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: "in", Content: types.LeafContent{Field: "parental_origin", Value: []interface{}{"MOTHER"}}}},
+			Op:      "and",
+		}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "CNV4", occurrences[0].Name)
+		}
+	})
+}
+
+func Test_GermlineCNV_CountOccurrences_FilterByTransmissionMode(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: "in", Content: types.LeafContent{Field: "transmission_mode", Value: []interface{}{"denovo"}}}},
+			Op:      "and",
+		}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
+		require.NoError(t, err)
+
+		count, err := repo.CountOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		assert.Equal(t, int64(1), count.Count)
+	})
+}
+
 func Test_GermlineCNV_AggregateOccurrences_ByTransmissionMode(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
