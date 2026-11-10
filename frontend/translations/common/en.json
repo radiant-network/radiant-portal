@@ -1431,6 +1431,13 @@
           "title": "No connection found",
           "description": "Health information exchange not linked"
         }
+      },
+      "clinical_note_extraction": {
+        "title": "Clinical note extraction",
+        "description": "Process this patient's clinical notes and extract the findings into structured FHIR data.",
+        "run": "Run extraction",
+        "iframe_title": "Clinical note extraction output",
+        "open_in_new_tab": "Open in new tab"
       }
     },
     "timeline": {

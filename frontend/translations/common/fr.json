@@ -1432,6 +1432,13 @@
           "title": "Aucune connexion trouvée",
           "description": "Échange d'information clinique non lié"
         }
+      },
+      "clinical_note_extraction": {
+        "title": "Extraction de notes cliniques",
+        "description": "Traite les notes cliniques de ce patient et extrait les observations sous forme de données FHIR structurées.",
+        "run": "Lancer l'extraction",
+        "iframe_title": "Résultat de l'extraction des notes cliniques",
+        "open_in_new_tab": "Ouvrir dans un nouvel onglet"
       }
     },
     "timeline": {
