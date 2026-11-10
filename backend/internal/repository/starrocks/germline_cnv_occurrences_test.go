@@ -8,6 +8,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -926,6 +927,7 @@ func Test_GermlineCNV_DefaultFields_Exclude_GnomadAF_And_AC(t *testing.T) {
 // The `simple` fixture holds the slivar set of seq 70 (case 70's proband) under CNV annotation task
 // 86 (CNV1 de novo, CNV4 inherited from the mother), next to one DRAGEN row of alignment task 91020,
 // a task the cases_tasks integration test inserts in Postgres. Alignment task 71 of seq 70 has no rows.
+// Seq 71 (a parent) has one DRAGEN row under each of alignment tasks 72 and 91022, and none under 86.
 
 func Test_GermlineCNV_GetOccurrences_SlivarSet_ReturnsInheritanceAndParentCalls(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
@@ -945,10 +947,10 @@ func Test_GermlineCNV_GetOccurrences_SlivarSet_ReturnsInheritanceAndParentCalls(
 		assert.Equal(t, types.JsonArray[int]{0, 0}, denovo.MotherCalls)
 		assert.Equal(t, 2, *denovo.MotherCN)
 		assert.Equal(t, 11, *denovo.MotherBC)
-		assert.Equal(t, types.JsonArray[int]{0, 0}, denovo.MotherPE)
+		assert.Equal(t, types.JsonArray[*int]{utils.IntPtr(0), utils.IntPtr(0)}, denovo.MotherPE)
 		assert.InDelta(t, 1.01, *denovo.MotherSM, 0.001)
 		assert.Empty(t, denovo.MotherName)
-		assert.Equal(t, types.JsonArray[int]{0, 1}, denovo.FatherPE)
+		assert.Equal(t, types.JsonArray[*int]{utils.IntPtr(0), utils.IntPtr(1)}, denovo.FatherPE)
 		assert.Equal(t, 9, *denovo.FatherBC)
 
 		maternal := occurrences[1]
@@ -984,6 +986,23 @@ func Test_GermlineCNV_GetOccurrences_AlignmentSet_InheritanceFieldsEmpty(t *test
 		assert.Nil(t, o.FatherCalls)
 		assert.Nil(t, o.FatherCN)
 		assert.Empty(t, o.FatherName)
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_PENullElement_KeptAsNull(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 71, 91022, query)
+
+		require.NoError(t, err)
+		require.Len(t, occurrences, 1)
+		o := occurrences[0]
+		assert.Equal(t, types.JsonArray[*int]{nil, utils.IntPtr(3)}, o.PE)
+		assert.Equal(t, types.JsonArray[*int]{nil, utils.IntPtr(2)}, o.MotherPE)
+		assert.Equal(t, types.JsonArray[*int]{utils.IntPtr(4), nil}, o.FatherPE)
 	})
 }
 
@@ -1081,6 +1100,17 @@ func Test_GermlineCNV_TaskIDsWithOccurrences_ReturnsTasksWithRowsForTheSequencin
 
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []int{86, 91020}, ids)
+	})
+}
+
+func Test_GermlineCNV_TaskIDsWithOccurrences_ParentSequencing_ExcludesCNVAnnotationTask(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		ids, err := repo.TaskIDsWithOccurrences(t.Context(), 71, []int{86, 72, 91022})
+
+		require.NoError(t, err)
+		assert.ElementsMatch(t, []int{72, 91022}, ids)
 	})
 }
 

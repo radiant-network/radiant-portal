@@ -80,26 +80,26 @@ func (e *emptyTaskRepo) ListTasksByCaseAndSequencing(context.Context, int, int, 
 	return nil, nil
 }
 
-// probandCNVTaskRepo returns what the task repository lists for germline_cnv on a proband's
-// sequencing: an annotation task (newest) and two alignment tasks.
-type probandCNVTaskRepo struct {
+// cnvTaskRepo returns what the task repository lists for germline_cnv: an annotation task (newest)
+// and two alignment tasks.
+type cnvTaskRepo struct {
 	MockRepository
-	isProband bool
 }
 
-func (p *probandCNVTaskRepo) ListTasksByCaseAndSequencing(context.Context, int, int, types.TaskSelector) ([]types.TaskOccurrenceType, error) {
+func (p *cnvTaskRepo) ListTasksByCaseAndSequencing(context.Context, int, int, types.TaskSelector) ([]types.TaskOccurrenceType, error) {
 	return []types.TaskOccurrenceType{
 		{ID: 86, TaskTypeCode: types.RadiantGermlineCNVAnnotationTask, TaskTypeName: "RADIANT Germline CNV Annotation",
-			PipelineVersion: "1.0.0", CreatedOn: mockTaskFixedTime.Add(48 * time.Hour), SequencingIsProband: p.isProband},
+			PipelineVersion: "1.0.0", CreatedOn: mockTaskFixedTime.Add(48 * time.Hour)},
 		{ID: 81, TaskTypeCode: types.AlignmentGermlineVariantCallingTaskTypeCode, TaskTypeName: "Genome Alignment and Germline Variant Calling",
-			PipelineVersion: "4.4.4", CreatedOn: mockTaskFixedTime.Add(24 * time.Hour), SequencingIsProband: p.isProband},
+			PipelineVersion: "4.4.4", CreatedOn: mockTaskFixedTime.Add(24 * time.Hour)},
 		{ID: 80, TaskTypeCode: types.AlignmentGermlineVariantCallingTaskTypeCode, TaskTypeName: "Genome Alignment and Germline Variant Calling",
-			PipelineVersion: "4.4.4", CreatedOn: mockTaskFixedTime, SequencingIsProband: p.isProband},
+			PipelineVersion: "4.4.4", CreatedOn: mockTaskFixedTime},
 	}, nil
 }
 
 type stubCNVTaskRows struct {
 	withRows []int
+	allRows  bool
 	err      error
 	called   bool
 	gotSeqId int
@@ -110,10 +110,13 @@ func (s *stubCNVTaskRows) TaskIDsWithOccurrences(_ context.Context, seqId int, t
 	s.called = true
 	s.gotSeqId = seqId
 	s.gotIds = taskIds
+	if s.allRows {
+		return taskIds, s.err
+	}
 	return s.withRows, s.err
 }
 
-func probandCNVTasksRequest(repo caseTasksReader, rows *stubCNVTaskRows, dataType string) *httptest.ResponseRecorder {
+func cnvTasksRequest(repo caseTasksReader, rows *stubCNVTaskRows, dataType string) *httptest.ResponseRecorder {
 	router := gin.Default()
 	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", CaseOccurrenceTasksHandler(repo, rows))
 	req, _ := http.NewRequest("GET", "/radiant/cases/70/70/tasks_with_occurrences?data_type="+dataType, nil)
@@ -131,7 +134,7 @@ func probandCNVTasksRequest(repo caseTasksReader, rows *stubCNVTaskRows, dataTyp
 func caseOccurrenceTasksRequest(caseId string, seqId string, dataType string) *httptest.ResponseRecorder {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", CaseOccurrenceTasksHandler(repo, &stubCNVTaskRows{}))
+	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", CaseOccurrenceTasksHandler(repo, &stubCNVTaskRows{allRows: true}))
 
 	url := fmt.Sprintf("/radiant/cases/%s/%s/tasks_with_occurrences", caseId, seqId)
 	if dataType != "" {
@@ -230,9 +233,9 @@ func Test_CaseOccurrenceTasksHandler_InvalidDataType_Returns400(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func Test_CaseOccurrenceTasksHandler_GermlineCNV_ProbandKeepsTasksWithRows(t *testing.T) {
+func Test_CaseOccurrenceTasksHandler_GermlineCNV_KeepsTasksWithRows(t *testing.T) {
 	rows := &stubCNVTaskRows{withRows: []int{86, 80}}
-	w := probandCNVTasksRequest(&probandCNVTaskRepo{isProband: true}, rows, "germline_cnv")
+	w := cnvTasksRequest(&cnvTaskRepo{}, rows, "germline_cnv")
 
 	expected := `[
 		{"id":86,"task_type_code":"radiant_germline_cnv_annotation","task_type_name":"RADIANT Germline CNV Annotation","pipeline_version":"1.0.0","created_on":"2024-01-03T00:00:00Z"},
@@ -244,16 +247,16 @@ func Test_CaseOccurrenceTasksHandler_GermlineCNV_ProbandKeepsTasksWithRows(t *te
 	assert.ElementsMatch(t, []int{86, 81, 80}, rows.gotIds)
 }
 
-func Test_CaseOccurrenceTasksHandler_GermlineCNV_ProbandWithNoDragenRows_ReturnsAnnotationTaskOnly(t *testing.T) {
-	w := probandCNVTasksRequest(&probandCNVTaskRepo{isProband: true}, &stubCNVTaskRows{withRows: []int{86}}, "germline_cnv")
+func Test_CaseOccurrenceTasksHandler_GermlineCNV_NoDragenRows_ReturnsAnnotationTaskOnly(t *testing.T) {
+	w := cnvTasksRequest(&cnvTaskRepo{}, &stubCNVTaskRows{withRows: []int{86}}, "germline_cnv")
 
 	expected := `[{"id":86,"task_type_code":"radiant_germline_cnv_annotation","task_type_name":"RADIANT Germline CNV Annotation","pipeline_version":"1.0.0","created_on":"2024-01-03T00:00:00Z"}]`
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
 }
 
-func Test_CaseOccurrenceTasksHandler_GermlineCNV_ProbandAnnotationTaskNotLoaded_ReturnsAlignmentTasksOnly(t *testing.T) {
-	w := probandCNVTasksRequest(&probandCNVTaskRepo{isProband: true}, &stubCNVTaskRows{withRows: []int{81, 80}}, "germline_cnv")
+func Test_CaseOccurrenceTasksHandler_GermlineCNV_AnnotationTaskNotLoaded_ReturnsAlignmentTasksOnly(t *testing.T) {
+	w := cnvTasksRequest(&cnvTaskRepo{}, &stubCNVTaskRows{withRows: []int{81, 80}}, "germline_cnv")
 
 	expected := `[
 		{"id":81,"task_type_code":"alignment_germline_variant_calling","task_type_name":"Genome Alignment and Germline Variant Calling","pipeline_version":"4.4.4","created_on":"2024-01-02T00:00:00Z"},
@@ -263,31 +266,39 @@ func Test_CaseOccurrenceTasksHandler_GermlineCNV_ProbandAnnotationTaskNotLoaded_
 	assert.JSONEq(t, expected, w.Body.String())
 }
 
-func Test_CaseOccurrenceTasksHandler_GermlineCNV_ProbandWithNoRows_ReturnsEmptyArray(t *testing.T) {
-	w := probandCNVTasksRequest(&probandCNVTaskRepo{isProband: true}, &stubCNVTaskRows{}, "germline_cnv")
+func Test_CaseOccurrenceTasksHandler_GermlineCNV_NoRows_ReturnsEmptyArray(t *testing.T) {
+	w := cnvTasksRequest(&cnvTaskRepo{}, &stubCNVTaskRows{}, "germline_cnv")
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, "[]", w.Body.String())
 }
 
-func Test_CaseOccurrenceTasksHandler_GermlineCNV_NotProband_SkipsRowCheck(t *testing.T) {
+func Test_CaseOccurrenceTasksHandler_GermlineSNV_SkipsRowCheck(t *testing.T) {
 	rows := &stubCNVTaskRows{}
-	w := probandCNVTasksRequest(&probandCNVTaskRepo{isProband: false}, rows, "germline_cnv")
+	w := cnvTasksRequest(&cnvTaskRepo{}, rows, "germline_snv")
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.False(t, rows.called)
+	assert.Contains(t, w.Body.String(), `"id":86`)
 	assert.Contains(t, w.Body.String(), `"id":81`)
 	assert.Contains(t, w.Body.String(), `"id":80`)
 }
 
 func Test_CaseOccurrenceTasksHandler_GermlineCNV_RowCheckError_Returns500(t *testing.T) {
-	w := probandCNVTasksRequest(&probandCNVTaskRepo{isProband: true}, &stubCNVTaskRows{err: fmt.Errorf("starrocks down")}, "germline_cnv")
+	w := cnvTasksRequest(&cnvTaskRepo{}, &stubCNVTaskRows{err: fmt.Errorf("starrocks down")}, "germline_cnv")
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
-func Test_CaseOccurrenceTasksHandler_GermlineCNV_SequencingIsProbandNotSerialized(t *testing.T) {
-	w := probandCNVTasksRequest(&probandCNVTaskRepo{isProband: false}, &stubCNVTaskRows{}, "germline_cnv")
+func Test_CaseOccurrenceTasksHandler_GermlineCNV_NoTasks_SkipsRowCheck(t *testing.T) {
+	rows := &stubCNVTaskRows{}
+	router := gin.Default()
+	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", CaseOccurrenceTasksHandler(&emptyTaskRepo{}, rows))
+	req, _ := http.NewRequest("GET", "/radiant/cases/70/70/tasks_with_occurrences?data_type=germline_cnv", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
 
-	assert.NotContains(t, w.Body.String(), "proband")
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "[]", w.Body.String())
+	assert.False(t, rows.called)
 }

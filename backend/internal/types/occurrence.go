@@ -50,11 +50,22 @@ const (
 type TaskSelector struct {
 	TaskTypeCode  string
 	SomaticCohort SomaticCohort
-	// ProbandTaskTypeCode is a second task type, listed only when the sequencing is the case's
-	// proband's: the germline CNV annotation task is attached to every family member's sequencing,
-	// but only the proband's records are loaded (RAD-169). The tasks handler checks the proband's tasks
-	// against the germline CNV table, so a new user of this field must change that check too.
-	ProbandTaskTypeCode string
+	// ExtraTaskTypeCode is a second task type listed with TaskTypeCode, or "" for none.
+	ExtraTaskTypeCode string
+	// RequiresGermlineCNVRows keeps only the tasks that have germline CNV rows for the sequencing.
+	// The task list alone cannot tell which CNV set the ETL loaded (RAD-169): the CNV annotation task
+	// is attached to every family member's sequencing, but its slivar rows are loaded under the
+	// proband's sequencing only, and the proband's alignment task is not loaded when a slivar VCF
+	// arrives with it.
+	RequiresGermlineCNVRows bool
+}
+
+// TaskTypeCodes returns the task types the selector lists.
+func (s TaskSelector) TaskTypeCodes() []string {
+	if s.ExtraTaskTypeCode == "" {
+		return []string{s.TaskTypeCode}
+	}
+	return []string{s.TaskTypeCode, s.ExtraTaskTypeCode}
 }
 
 // TaskSelector returns the criteria selecting the tasks that produce occurrences of this type.
@@ -65,9 +76,10 @@ func (o OccurrenceType) TaskSelector() (TaskSelector, error) {
 		return TaskSelector{TaskTypeCode: RadiantGermlineAnnotationTask, SomaticCohort: SomaticCohortNone}, nil
 	case OccurrenceTypeGermlineCNV:
 		return TaskSelector{
-			TaskTypeCode:        AlignmentGermlineVariantCallingTaskTypeCode,
-			SomaticCohort:       SomaticCohortNone,
-			ProbandTaskTypeCode: RadiantGermlineCNVAnnotationTask,
+			TaskTypeCode:            AlignmentGermlineVariantCallingTaskTypeCode,
+			SomaticCohort:           SomaticCohortNone,
+			ExtraTaskTypeCode:       RadiantGermlineCNVAnnotationTask,
+			RequiresGermlineCNVRows: true,
 		}, nil
 	case OccurrenceTypeSomaticSNV, OccurrenceTypeSomaticSNVTumorNormal:
 		return TaskSelector{TaskTypeCode: RadiantSomaticAnnotationTask, SomaticCohort: SomaticCohortTumorNormal}, nil

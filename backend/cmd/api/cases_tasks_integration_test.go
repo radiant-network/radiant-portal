@@ -130,8 +130,8 @@ func Test_CaseOccurrenceTasksEndpoint_InvalidDataType_Returns400(t *testing.T) {
 // RAD-169. Case 70 has proband 3: seq 70 is the proband's (sample 1), seq 71 a parent's (sample 2).
 // CNV annotation task 86 is attached to case 70 on seqs 70, 71 and 72; alignment task 71 is on
 // seq 70 and 72 on seq 71. StarRocks `simple` holds the slivar rows of task 86 on seq 70, one
-// DRAGEN row of task 91020 on seq 70 (inserted in Postgres by the test that needs it), and none
-// for alignment task 71.
+// DRAGEN row of task 91020 on seq 70, one DRAGEN row of tasks 72 and 91022 on seq 71 (91020 and
+// 91022 are inserted in Postgres by the tests that need them), and none for alignment task 71.
 
 const (
 	alignmentTaskTypeName = "Genome Alignment and Germline Variant Calling"
@@ -220,6 +220,7 @@ func Test_CaseOccurrenceTasksEndpoint_GermlineCNV_ProbandNewAlignmentTaskAfterSl
 func Test_CaseOccurrenceTasksEndpoint_GermlineCNV_ParentWithTwoAlignmentTasks_ReturnsBoth(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		// The copy step keys on task_id: a re-alignment keeps the old DRAGEN set next to the new one.
+		// Task 86 is attached to seq 71 too, but has no rows there: it is not listed.
 		require.NoError(t, env.Postgres.Exec(`
 			INSERT INTO task (id, task_type_code, pipeline_name, pipeline_version, genome_build, created_on, tenant_code)
 				VALUES (91022, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-06-01 00:00:00', 'radiant');

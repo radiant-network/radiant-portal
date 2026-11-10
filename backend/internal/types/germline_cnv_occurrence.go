@@ -20,7 +20,7 @@ type GermlineCNVOccurrence struct {
 	Filter                   string             `json:"filter,omitempty"`
 	BC                       *int               `json:"bc,omitempty"`
 	CN                       *int               `json:"cn,omitempty"`
-	PE                       JsonArray[int]     `json:"pe,omitempty"`
+	PE                       JsonArray[*int]    `json:"pe,omitempty"`
 	SM                       *float32           `json:"sm,omitempty"`
 	SVType                   string             `json:"svtype,omitempty" gorm:"column:svtype"`
 	SVLen                    *int               `json:"svlen,omitempty" gorm:"column:svlen"`
@@ -39,13 +39,13 @@ type GermlineCNVOccurrence struct {
 	MotherCalls              JsonArray[int]     `json:"mother_calls,omitempty"`
 	MotherCN                 *int               `json:"mother_cn,omitempty" gorm:"column:mother_cn"`
 	MotherBC                 *int               `json:"mother_bc,omitempty" gorm:"column:mother_bc"`
-	MotherPE                 JsonArray[int]     `json:"mother_pe,omitempty" gorm:"column:mother_pe"`
+	MotherPE                 JsonArray[*int]    `json:"mother_pe,omitempty" gorm:"column:mother_pe"`
 	MotherSM                 *float32           `json:"mother_sm,omitempty" gorm:"column:mother_sm"`
 	MotherName               string             `json:"mother_name,omitempty"`
 	FatherCalls              JsonArray[int]     `json:"father_calls,omitempty"`
 	FatherCN                 *int               `json:"father_cn,omitempty" gorm:"column:father_cn"`
 	FatherBC                 *int               `json:"father_bc,omitempty" gorm:"column:father_bc"`
-	FatherPE                 JsonArray[int]     `json:"father_pe,omitempty" gorm:"column:father_pe"`
+	FatherPE                 JsonArray[*int]    `json:"father_pe,omitempty" gorm:"column:father_pe"`
 	FatherSM                 *float32           `json:"father_sm,omitempty" gorm:"column:father_sm"`
 	FatherName               string             `json:"father_name,omitempty"`
 	GermlinePcWgs            *int               `json:"germline_pc_wgs,omitempty"`

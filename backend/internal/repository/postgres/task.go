@@ -172,20 +172,7 @@ func (r *TaskRepository) ListTasksByCaseAndSequencing(ctx context.Context, caseI
 	tx = joinTaskWithTaskType(tx)
 	tx = tx.Scopes(WithTenantOn(ctx, types.TaskTable.Alias)) // task_context has no tenant_code; scope the joined task
 	tx = tx.Select("id, task_type_code, name_en AS task_type_name, pipeline_name, pipeline_version, genome_build, created_on")
-	tx = tx.Where("sequencing_experiment_id = ? AND (case_id = ? OR case_id IS NULL)", seqId, caseId)
-
-	isProband := false
-	if selector.ProbandTaskTypeCode != "" {
-		var err error
-		if isProband, err = r.isProbandSequencing(ctx, caseId, seqId); err != nil {
-			return nil, err
-		}
-	}
-	if isProband {
-		tx = tx.Where("task_type_code IN ?", []string{selector.TaskTypeCode, selector.ProbandTaskTypeCode})
-	} else {
-		tx = tx.Where("task_type_code = ?", selector.TaskTypeCode)
-	}
+	tx = tx.Where("sequencing_experiment_id = ? AND (case_id = ? OR case_id IS NULL) AND task_type_code IN ?", seqId, caseId, selector.TaskTypeCodes())
 
 	if selector.SomaticCohort != types.SomaticCohortNone {
 		predicate, err := somaticCohortPredicate(selector.SomaticCohort)
@@ -202,28 +189,5 @@ func (r *TaskRepository) ListTasksByCaseAndSequencing(ctx context.Context, caseI
 		return nil, fmt.Errorf("error listing tasks for case %d / seq %d / type %s / cohort %s: %w",
 			caseId, seqId, selector.TaskTypeCode, selector.SomaticCohort, err)
 	}
-	for i := range tasks {
-		tasks[i].SequencingIsProband = isProband
-	}
 	return tasks, nil
-}
-
-// isProbandSequencing tells whether the sequencing reads a sample of the case's proband, by the rule
-// of the ETL's staging view (radiant-portal-pipeline, staging_external_sequencing_experiment): the
-// sample's patient has the proband role in the case's family, or has no family row in the case. The
-// ETL decides which CNV set is loaded, so the portal must not use cases.proband_id here: the two
-// rules differ for a member with no family row. A fetus sample carries its mother's patient_id.
-func (r *TaskRepository) isProbandSequencing(ctx context.Context, caseId int, seqId int) (bool, error) {
-	var count int64
-	err := r.db.WithContext(ctx).
-		Table(fmt.Sprintf("%s se", types.SequencingExperimentTable.Name)).
-		Joins(fmt.Sprintf("JOIN %s s ON s.id = se.sample_id", types.SampleTable.Name)).
-		Joins(fmt.Sprintf("LEFT JOIN %s f ON f.family_member_id = s.patient_id AND f.case_id = ?", types.FamilyTable.Name), caseId).
-		Where("se.id = ? AND COALESCE(f.relationship_to_proband_code, 'proband') = 'proband'", seqId).
-		Scopes(WithTenantOn(ctx, "se")).
-		Count(&count).Error
-	if err != nil {
-		return false, fmt.Errorf("error checking whether seq %d is the proband's of case %d: %w", seqId, caseId, err)
-	}
-	return count > 0, nil
 }

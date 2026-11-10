@@ -408,14 +408,13 @@ func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc 
 // types: somatic_snv_tn and somatic_snv_to share one task_type_code and are told apart by
 // the tumor/normal makeup of the task, which no client can compute.
 //
-// germline_cnv lists the alignment task and, on the case's proband's sequencing, the CNV
-// annotation task (RAD-169). On the proband's sequencing, a task is listed only when it has CNV
-// rows for it: the ETL loads the slivar set instead of the DRAGEN set when both arrive together,
-// never loads a new alignment task that comes after the slivar VCF, and loads the slivar set only
-// after the annotation task is registered (or never, when it has no slivar VCF).
+// germline_cnv lists the alignment and CNV annotation tasks that have CNV rows for the sequencing
+// (RAD-169). The rows, not the task list, tell which set the ETL loaded: the slivar rows sit under
+// the proband's sequencing only, the proband's alignment task is not loaded when a slivar VCF comes
+// with it, and the slivar set is loaded only after the annotation task is registered.
 // @Summary List tasks producing occurrences of a given type for a (case, sequencing) pair
 // @Id caseTasksWithOccurrences
-// @Description Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the alignment task and, for the case's proband's sequencing, the germline CNV annotation task; on the proband's sequencing, a task is returned only when it has CNV occurrences.
+// @Description Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the alignment and germline CNV annotation tasks that have CNV occurrences for the sequencing.
 // @Tags cases
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
@@ -454,10 +453,12 @@ func CaseOccurrenceTasksHandler(repo caseTasksReader, cnvRows germlineCNVTaskRow
 			HandleError(c, err)
 			return
 		}
-		tasks, err = dropProbandTasksWithoutCNV(c.Request.Context(), cnvRows, seqId, tasks)
-		if err != nil {
-			HandleError(c, err)
-			return
+		if selector.RequiresGermlineCNVRows {
+			tasks, err = keepTasksWithGermlineCNV(c.Request.Context(), cnvRows, seqId, tasks)
+			if err != nil {
+				HandleError(c, err)
+				return
+			}
 		}
 		if tasks == nil {
 			tasks = []types.TaskOccurrenceType{}
@@ -466,19 +467,15 @@ func CaseOccurrenceTasksHandler(repo caseTasksReader, cnvRows germlineCNVTaskRow
 	}
 }
 
-// dropProbandTasksWithoutCNV relies on SequencingIsProband being set only by a selector with a
-// ProbandTaskTypeCode, which only germline_cnv has.
-func dropProbandTasksWithoutCNV(ctx context.Context, cnvRows germlineCNVTaskRowsReader, seqId int, tasks []types.TaskOccurrenceType) ([]types.TaskOccurrenceType, error) {
-	var probandIds []int
-	for _, t := range tasks {
-		if t.SequencingIsProband {
-			probandIds = append(probandIds, t.ID)
-		}
-	}
-	if len(probandIds) == 0 {
+func keepTasksWithGermlineCNV(ctx context.Context, cnvRows germlineCNVTaskRowsReader, seqId int, tasks []types.TaskOccurrenceType) ([]types.TaskOccurrenceType, error) {
+	if len(tasks) == 0 {
 		return tasks, nil
 	}
-	withRows, err := cnvRows.TaskIDsWithOccurrences(ctx, seqId, probandIds)
+	ids := make([]int, len(tasks))
+	for i, t := range tasks {
+		ids[i] = t.ID
+	}
+	withRows, err := cnvRows.TaskIDsWithOccurrences(ctx, seqId, ids)
 	if err != nil {
 		return nil, fmt.Errorf("error checking germline CNV rows of seq %d: %w", seqId, err)
 	}
@@ -488,10 +485,9 @@ func dropProbandTasksWithoutCNV(ctx context.Context, cnvRows germlineCNVTaskRows
 	}
 	var kept []types.TaskOccurrenceType
 	for _, t := range tasks {
-		if t.SequencingIsProband && !keep[t.ID] {
-			continue
+		if keep[t.ID] {
+			kept = append(kept, t)
 		}
-		kept = append(kept, t)
 	}
 	return kept, nil
 }
