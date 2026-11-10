@@ -408,10 +408,11 @@ func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc 
 // types: somatic_snv_tn and somatic_snv_to share one task_type_code and are told apart by
 // the tumor/normal makeup of the task, which no client can compute.
 //
-// germline_cnv lists the alignment and CNV annotation tasks that have CNV rows for the sequencing
-// (RAD-169). The rows, not the task list, tell which set the ETL loaded: the slivar rows sit under
-// the proband's sequencing only, the proband's alignment task is not loaded when a slivar VCF comes
-// with it, and the slivar set is loaded only after the annotation task is registered.
+// germline_cnv lists the alignment and CNV annotation tasks that have CNV rows for the sequencing:
+// the task list cannot tell which sets the ETL loaded. The annotation task is attached to
+// every family member's sequencing, but its slivar rows are under the proband's only. The proband's
+// alignment task has rows only if the ETL loaded it before the slivar VCF arrived: from then on the
+// ETL leaves it out of staging, and keeps the rows it already loaded.
 // @Summary List tasks producing occurrences of a given type for a (case, sequencing) pair
 // @Id caseTasksWithOccurrences
 // @Description Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the alignment and germline CNV annotation tasks that have CNV occurrences for the sequencing.

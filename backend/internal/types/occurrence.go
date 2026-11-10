@@ -52,11 +52,8 @@ type TaskSelector struct {
 	SomaticCohort SomaticCohort
 	// ExtraTaskTypeCode is a second task type listed with TaskTypeCode, or "" for none.
 	ExtraTaskTypeCode string
-	// RequiresGermlineCNVRows keeps only the tasks that have germline CNV rows for the sequencing.
-	// The task list alone cannot tell which CNV set the ETL loaded (RAD-169): the CNV annotation task
-	// is attached to every family member's sequencing, but its slivar rows are loaded under the
-	// proband's sequencing only, and the proband's alignment task is not loaded when a slivar VCF
-	// arrives with it.
+	// RequiresGermlineCNVRows keeps only the tasks that have germline CNV rows for the sequencing
+	// (see CaseOccurrenceTasksHandler for why the task list alone cannot tell).
 	RequiresGermlineCNVRows bool
 }
 

@@ -127,7 +127,7 @@ func Test_CaseOccurrenceTasksEndpoint_InvalidDataType_Returns400(t *testing.T) {
 	})
 }
 
-// RAD-169. Case 70 has proband 3: seq 70 is the proband's (sample 1), seq 71 a parent's (sample 2).
+// Case 70 has proband 3: seq 70 is the proband's (sample 1), seq 71 a parent's (sample 2).
 // CNV annotation task 86 is attached to case 70 on seqs 70, 71 and 72; alignment task 71 is on
 // seq 70 and 72 on seq 71. StarRocks `simple` holds the slivar rows of task 86 on seq 70, one
 // DRAGEN row of task 91020 on seq 70, one DRAGEN row of tasks 72 and 91022 on seq 71 (91020 and

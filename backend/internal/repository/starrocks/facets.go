@@ -116,7 +116,7 @@ func NewFacetsRepository() *FacetsRepository {
 		},
 	}
 
-	// Germline CNV values that differ from the shared dictionary: the cnv-post-processing tags (RAD-169) share the
+	// Germline CNV values that differ from the shared dictionary: the cnv-post-processing tags share the
 	// field name transmission_mode with the germline SNV modes, but none of the values, except x_linked_recessive.
 	germlineCNVDictionary := map[string]Facet{
 		"transmission_mode": {
