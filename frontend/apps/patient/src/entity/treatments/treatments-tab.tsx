@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import DisplayTable from '@/components/base/data-table/display-table';
+import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
@@ -8,7 +8,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { usePatientTreatments } from '../hooks/use-patient-entity';
 
 import { toTreatmentRows } from './treatment-rows';
-import { getTreatmentsColumns } from './treatments-table-settings';
+import { defaultTreatmentsSettings, getTreatmentsColumns } from './treatments-table-settings';
 
 function TreatmentsTab() {
   const { t } = useI18n();
@@ -26,8 +26,17 @@ function TreatmentsTab() {
           <CardTitle>{t('patient_entity.treatments.title_count', { count: rows.length })}</CardTitle>
         )}
       </CardHeader>
-      <CardContent className="flex flex-col gap-2">
-        <DisplayTable data={rows} columns={columns} loading={isLoading} fullHeight />
+      <CardContent>
+        <DataTable
+          id="patient-treatments"
+          columns={columns}
+          data={rows}
+          defaultColumnSettings={defaultTreatmentsSettings}
+          pagination={{ type: 'locale', state: { pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE } }}
+          total={rows.length}
+          loadingStates={{ total: isLoading, list: isLoading }}
+          tableIndexResultPosition="bottom"
+        />
       </CardContent>
     </Card>
   );
