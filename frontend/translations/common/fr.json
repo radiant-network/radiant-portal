@@ -778,7 +778,6 @@
         "default": "Enregistrer le filtre"
       },
       "discard_tooltip": "Annuler les modifications non enregistrées",
-      "no_discard_tooltip": "Aucune modification à annuler",
       "no_saved_filters": "Vous n'avez aucun filtre enregistré",
       "untitled_filter": "Filtre sans titre",
       "notifications": {
