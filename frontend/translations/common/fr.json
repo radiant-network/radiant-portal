@@ -1496,7 +1496,8 @@
         "body_part": "Partie du corps",
         "body_part_tooltip": "Partie du corps examinée",
         "viewer": "Visionneuse"
-      }
+      },
+      "livai_report": "Rapport LivAI"
     },
     "clinical_trials": {
       "title": "Inscriptions antérieures",
