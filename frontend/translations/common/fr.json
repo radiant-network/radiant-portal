@@ -1421,7 +1421,7 @@
         "organizations": "Organisations",
         "documents": "Documents",
         "document_types": "Types de document",
-        "view_details": "Voir le détail",
+        "view_external_records": "Voir les dossiers externes",
         "networks": "TEFCA / Carequality",
         "header_summary": "{{orgs}} organisations · {{docs}} documents",
         "network": {
@@ -1429,7 +1429,7 @@
           "carequality": "Carequality"
         },
         "not_connected": {
-          "description": "TEFCA n'est pas encore lié pour ce patient."
+          "description": "Les dossiers externes ne sont pas encore liés pour ce patient."
         }
       },
       "clinical_note_extraction": {
