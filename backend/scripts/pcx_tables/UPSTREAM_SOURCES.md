@@ -327,7 +327,76 @@ Compare against `is not null AND <> ''`.
 
 ## 4. Current state and how to check staleness
 
-**Latest refresh: 2026-10-21.** All six warehouse tables loaded clean — every final
+### Latest load: 2026-11-10 — a SURGICAL SINGLE-PATIENT PATCH, not a refresh
+
+**`radiant_data_dev` is deliberately at a HAND-MERGED VINTAGE: the 2026-10-21 extracts
+for every patient except `C7617267`, whose rows come from 2026-11-10.** Loaded at stamp
+`20261110c76`; the merged CSVs are in `~/radiant_extracts` beside the two real vintages.
+This is a known, bounded divergence from upstream — not drift — and the full refresh is
+deferred until after the November 2026 demo.
+
+| table | 10-21 | loaded | delta | why |
+|---|---|---|---|---|
+| `treatment` | 43,087 | **43,090** | +3 | C7617267's corrected rows, 6 → 9 |
+| `diagnosis` | 21,085 | **21,088** | +3 | C7617267's corrected rows, 3 → 6 |
+| `updates` | 29,548 | **29,548** | 0 | one of C7617267's follow-up visits replaced |
+| `participants`, `imaging_sessions`, `stg_cbtn_enrollment_final` | — | unchanged | 0 | byte-identical for this patient; loaded verbatim from 10-21 to keep one vintage |
+
+**Why surgical rather than a full refresh.** A full refresh admits 15 new patients, and
+every new patient needs a `pcx_30_patient_key` minted (§ `fill_patient_keys.py`) — a
+one-way door this close to a live demo. Holding the cohort at 6,957 means no key is
+minted and no portal URL changes. Rebuilt with
+`dbt run --select source:dwh_source.{treatment,diagnosis,updates}+ --exclude
+radiant_patient_mrn_list int_pcx_30_fhir_patient_attributes cbc_latest_results
+csf_tumor_analysis_latest csf_results_latest_by_component lansky_karnofsky_latest`
+— 29 models, PASS=29. **The six excluded models are TABLE models that read the Iceberg
+FHIR catalog**, which has moved independently since October; rebuilding them would have
+mixed an unrelated and unmeasured change into a one-patient patch. `dbt run`, never
+`dbt build` — `build` would also run `dbt seed` and overwrite the live seed tables from
+the running tree.
+
+**What the patch changed, measured.** Whole-row digests over all 7 `_deid` tables and 7
+combined views, **excluding C7617267**, are byte-identical before and after on 13 of 14
+relations. The 14th, `pcx_30_treatment_summary_deid`, changed on exactly one row:
+`C17466.age_at_first_chemo_ever_days` NULL → 5696. **That is a pre-existing drift this
+rebuild CLOSED, not damage it caused** — `medical_therapy` already carried the reviewer's
+accepted 5696 and `v_pcx_30_treatment_summary_combined` already served it; only the
+`treatment_summary` TABLE was stale, because the 2026-11-05 provenance publication
+rebuilt the five override grains and not the sixth relation that derives from them.
+**Lesson for the next override publication: rebuild `pcx_30_treatment_summary_deid` too,
+or any derived column downstream of an overridden value stays stale while the view
+disagrees with the table.**
+
+Published counts after the patch: `event_level` **13,278** (+3) · `medical_therapy`
+**5,679** (+3) · `surgery` 9,326 · `radiation` 3,279 · `demographics` 6,957 ·
+`patient_level` 6,932 · `treatment_summary` 6,957. Every grain's `_deid` table, base view
+and `cbtn_tenant` view return the SAME count. All 8 reviewer overrides still apply (7
+medical_therapy + 1 radiation). Three provenance-bearing rows lost their stamps — 2
+event, 1 radiation, all C7617267's, all on rows whose values moved — which is the
+content-hash design working; the radiation BRIM corroboration needs re-measuring against
+the corrected course.
+
+**Rollback for this patch.** Ten `*_bak_20261110` CTAS copies (3 source + 7 `_deid`), all
+count-verified at creation, plus the `20261021` extracts still on disk — so the cluster
+can be returned to the pre-patch state either by `--load --stamp 20261021` + `dbt run` or
+by swapping the backups. **Those ten tables have a retention decision attached to them:
+see `BACKUP_ARTIFACT_POLICY.md`, which inventories every backup and scratch artifact on
+the cluster and on local disk, and proposes the retention classes. They stay until the
+demo passes and the post-demo full refresh verifies.**
+
+**The full refresh is already measured, so the post-demo decision is made, not re-derived.**
+Against the 2026-11-10 upstream vintage: **290 patients** have moving source rows, **244
+of them already in the published cohort**; **15 patients JOIN** the cohort (6,957 →
+6,972), **0 LEAVE**, **0 `diagnosis_type_cohort` label flips**, and **none of the 8
+reviewer overrides** sits on a patient whose rows move. 13 of 284 provenance-bearing
+patients would see stamps orphan. `C81918` loses its `updates` rows upstream but stays in
+the cohort. The cohort simulation that produced those figures reproduces the live 6,957
+exactly from the 10-21 extracts, which is what makes it trustworthy — reproduce it before
+trusting it again, since both vintages are still on disk.
+
+### Previous refresh: 2026-10-21
+
+All six warehouse tables loaded clean — every final
 count matched its extract and its preflight figure exactly:
 
 | table | was (10-19) | now | delta |
@@ -638,12 +707,27 @@ from cols full outer join doc
   on doc.table_name=cols.table_name and doc.field_name=cols.column_name
 where doc.field_name is null or cols.column_name is null;
 
--- b. the initial-treatment flag reached every object that should carry it. Expect 9
---    as of 2026-10-21 (was 12 before the identified twins were retired -- see §1).
---    The 9 = 3 treatment grains (radiation / medical_therapy / surgery) x 3 objects
---    (_deid table, radiant_data_dev view, cbtn_tenant view). treatment_summary
---    DERIVES had_initial_* from these and does not carry the raw flag itself.
-select count(*) from information_schema.columns where column_name='is_initial_treatment';
+-- b. the initial-treatment flag reached every object that should carry it. The
+--    CANONICAL answer is 9 = 3 treatment grains (radiation / medical_therapy /
+--    surgery) x 3 objects (_deid table, radiant_data_dev view, cbtn_tenant view).
+--    treatment_summary DERIVES had_initial_* from these and does not carry the raw
+--    flag itself.
+--
+--    AS WRITTEN THIS QUERY DOES NOT RETURN 9, AND THAT IS THE QUERY'S FAULT, NOT A
+--    DEFECT. It is unscoped -- no table_schema filter, no table_name filter -- so it
+--    counts every scratch copy of a treatment grain anywhere on the cluster. Measured
+--    2026-11-10: it returns 21, being the canonical 9 plus 3 `_composite`, 3
+--    `_all_cbtn` (the redundant preview tables the expansion plan's §7 says to drop),
+--    3 `_promo` (promotion harness) and 3 `_bak_20261110`. So the figure drifts with
+--    SCRATCH, not with correctness, and it will keep drifting. Scope it before
+--    believing it:
+select count(*) from information_schema.columns
+where column_name='is_initial_treatment'
+  and table_schema in ('radiant_data_dev', 'cbtn_tenant')
+  and table_name in ('pcx_30_radiation_level_deid', 'pcx_30_medical_therapy_level_deid',
+                     'pcx_30_surgery_level_deid', 'v_pcx_30_radiation_level_combined',
+                     'v_pcx_30_medical_therapy_level_combined',
+                     'v_pcx_30_surgery_level_combined');
 
 -- c. treatment_summary agrees with the per-row flags it derives from. Expect 0 and 0.
 with r as (select research_id, max(case when is_initial_treatment='yes' then 1 else 0 end) f
@@ -684,22 +768,39 @@ varchar), so it has nothing to assert. Second, scope the sweep to the pcx_30 vie
 views such as `patient`, `document`, `task`, `cases`, `sequencing_experiment`) which DO
 return dates to an ungranted caller and are governed separately — not a pcx_30 finding.
 
-**Re-baselined 2026-10-21** (post-refresh of all six warehouse sources, post-`dbt run`
-at 10:49). Expected row counts after a clean rebuild:
+**Re-baselined 2026-11-10** (post the surgical single-patient patch, post-`dbt run`).
+Expected row counts after a clean rebuild:
 
-| object | rows | was (10-02) |
+| object | rows | was (10-21, pre-expansion) |
 |---|---|---|
-| `pcx_30_event_level` / `_deid` | **1,869** | 1,856 |
-| `pcx_30_surgery_level` / `_deid` | **1,289** | 1,285 |
-| `pcx_30_medical_therapy_level` / `_deid` | **1,283** | 1,267 |
-| `pcx_30_radiation_level` / `_deid` | **786** | 776 |
-| `pcx_30_demographics`, `pcx_30_patient_level`, `pcx_30_treatment_summary_deid` | **970** each | 966 |
-| `pcx_30_data_dictionary` | 74 | 74 |
-| `radiant_patient_mrn_list` | **2,990** | 2,804 |
+| `pcx_30_event_level_deid` | **13,278** | 1,869 |
+| `pcx_30_surgery_level_deid` | **9,326** | 1,289 |
+| `pcx_30_medical_therapy_level_deid` | **5,679** | 1,283 |
+| `pcx_30_radiation_level_deid` | **3,279** | 786 |
+| `pcx_30_demographics_deid`, `pcx_30_treatment_summary_deid` | **6,957** each | 970 |
+| `pcx_30_patient_level_deid` | **6,932** | 970 |
+| `pcx_30_data_dictionary` | 79 | 74 |
+| `radiant_patient_mrn_list` | **7,452** | 2,990 |
+
+⚠ **The 10-21 column is kept only so an older artefact can be dated. Do NOT check against
+it** — every figure in it predates the 2026-11-04 all-CBTN expansion (970 → 6,957
+patients), so an operator validating a healthy rebuild against those numbers would read a
+7x discrepancy as a failure. The same trap applies to the identified-twin names
+(`pcx_30_event_level` without `_deid`): those twins were retired, so only the `_deid`
+relations exist now.
 
 Treat these as a **floor-and-shape** baseline, not an equality assertion. §4 records a
 refresh in which the patient grain grew by 3 net while 3 patients *left* the cohort, so a
 matching count does not prove a matching population.
+
+**A row count cannot prove the population, and a digest can.** The strongest check — and
+the one the 2026-11-10 patch was gated on — is a whole-row digest per relation with the
+intentionally-changed patient EXCLUDED, compared against the same digest taken before the
+load. It is order-independent, PHI-free (only hashes leave the database), and catches a
+value change, a row add and a row drop that every count check above would miss. Build the
+per-row hash with the `pcx_row_uid` shape (`'|#|'` separator, NUL-wrapped NULL sentinel)
+so a real NULL and the literal string `'NULL'` hash differently, sort the per-row hashes,
+and hash the sorted list.
 
 Row counts alone will NOT catch a reverted event-level build: running the archived
 `event_level_fields_prod.sql` yields the same row count, but with 11 columns instead of 12
@@ -707,7 +808,8 @@ and the OpenPedCan rows silently back to `%NOS or NEC%`. Check the shape and the
 provenance split, not just the count:
 
 ```sql
--- expect 12 columns, and (2026-10-21) 1,626 CBTN / 243 OpenPedCan
+-- expect 13 columns (the 13th is field_provenance, added 2026-11-05 -- it was 12
+-- before that), and (2026-11-10) 13,031 CBTN / 247 OpenPedCan
 select count(*) from information_schema.columns
 where table_schema='radiant_data_dev' and table_name='pcx_30_event_level_deid';
 select cns_integrated_diagnosis_source, count(*)
