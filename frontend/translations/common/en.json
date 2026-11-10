@@ -1494,7 +1494,8 @@
         "body_part": "Body Part",
         "body_part_tooltip": "Body Part Examined",
         "viewer": "Viewer"
-      }
+      },
+      "livai_report": "LivAI Report"
     },
     "clinical_trials": {
       "title": "Previous enrollment",
