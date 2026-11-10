@@ -2262,9 +2262,9 @@
     "canonical_transcript": "Canonical transcript",
     "igv": {
       "title": "Alignement et variant",
-      "chrm_hidden_reads": {
-        "title": "Lectures masquées sur chrM",
-        "description": "Certaines pistes sont très profondes sur chrM. Pour qu'IGV reste réactif, leurs lectures s'affichent seulement dans les vues de {{window}} pb ou moins. Zoomez pour les voir."
+      "dense_reads_hidden": {
+        "title": "Lectures masquées dans une région dense",
+        "description": "Certaines pistes sont très profondes ici. Pour qu'IGV reste réactif, leurs lectures s'affichent seulement dans les vues de {{window}} pb ou moins. Zoomez pour les voir."
       },
       "failed_tracks": {
         "title_one": "Une piste n'a pas pu être chargée",
