@@ -1420,7 +1420,7 @@
         "organizations": "Organizations",
         "documents": "Documents",
         "document_types": "Document types",
-        "view_details": "View details",
+        "view_external_records": "View external records",
         "networks": "TEFCA / Carequality",
         "header_summary": "{{orgs}} organizations · {{docs}} documents",
         "network": {

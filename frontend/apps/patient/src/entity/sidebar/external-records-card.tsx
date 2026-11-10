@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { Unplug } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
+import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
 
+import carequalityLogo from '../../assets/carequality.png';
 import tefcaLogo from '../../assets/tefca.png';
 import { usePatientExternalRecords } from '../hooks/use-patient-entity';
 
@@ -21,10 +23,19 @@ function ExternalRecordsCard() {
   return (
     <Card>
       <CardHeader bordered>
-        <CardTitle>{t('patient_entity.sidebar.external_records.title')}</CardTitle>
-        <CardAction>
-          <img src={tefcaLogo} alt="TEFCA" className="h-5 w-auto" />
-        </CardAction>
+        <CardTitle className="flex items-center gap-3">
+          <img
+            src={tefcaLogo}
+            alt={t('patient_entity.sidebar.external_records.network.tefca')}
+            className="h-5 w-auto"
+          />
+          <Separator orientation="vertical" className="h-5" />
+          <img
+            src={carequalityLogo}
+            alt={t('patient_entity.sidebar.external_records.network.carequality')}
+            className="h-5 w-auto"
+          />
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col">
         <CardBody isLoading={isLoading} data={data} onViewDetails={() => setModalOpen(true)} />
@@ -84,7 +95,7 @@ function CardBody({ isLoading, data, onViewDetails }: CardBodyProps) {
       <CountRow label={t('patient_entity.sidebar.external_records.documents')} value={data.document_count} />
       <CountRow label={t('patient_entity.sidebar.external_records.document_types')} value={data.document_class_count} />
       <Button variant="outline" size="sm" className="mt-3 w-full" onClick={onViewDetails}>
-        {t('patient_entity.sidebar.external_records.view_details')}
+        {t('patient_entity.sidebar.external_records.view_external_records')}
       </Button>
     </>
   );
