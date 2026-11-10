@@ -45,6 +45,8 @@ describe('Case Entity - Variants - Germline - SNV - Query builder - One pill', (
     CaseEntity_Variants_QueryBuilder.snv.validations.shouldHaveQueryCountTotal(2);
     CaseEntity_Variants_QueryBuilder.snv.validations.shouldBeEmptyQuery();
     CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowClearAll(true /*shouldExist*/);
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowLabelsSwitch(true /*shouldExist*/);
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowQuerySelectCheckboxes(false /*shouldShow*/);
   });
 
   it('Duplicate a query', () => {

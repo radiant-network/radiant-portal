@@ -11,7 +11,7 @@ import {
   useQBDispatch,
   useQBSettings,
 } from '@/components/base/query-builder/hooks/use-query-builder';
-import { hasEmptyQuery } from '@/components/base/query-builder/libs/sqon';
+import { hasEmptyQuery, isSqonEmpty } from '@/components/base/query-builder/libs/sqon';
 import QueryBar from '@/components/base/query-builder/query-bar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
@@ -139,7 +139,7 @@ function QueriesBarCard({ appId, swrId }: QueriesBarCardProps) {
             />
           </div>
           <AccordionContent className="py-4 px-6 space-y-4">
-            <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-auto">
+            <div className="flex flex-col gap-3 max-h-[30vh] overflow-y-auto">
               {sqons.map((sqon, index) => (
                 <QueryBar key={sqon.id} index={index} sqon={sqon} swrId={swrId} />
               ))}
@@ -185,15 +185,17 @@ function QueriesBarCard({ appId, swrId }: QueriesBarCardProps) {
                     </Button>
 
                     {/* Toggle labelsEnabled Settings */}
-                    <div className="flex items-center gap-1.5">
-                      <Switch
-                        data-cy="labels-switch"
-                        size="sm"
-                        checked={settings.labelsEnabled}
-                        onCheckedChange={handleLabelsCheckedChange}
-                      />
-                      {t('common.toolbar.labels')}
-                    </div>
+                    {sqons.some(sqon => !isSqonEmpty(sqon)) && (
+                      <div className="flex items-center gap-1.5">
+                        <Switch
+                          data-cy="labels-switch"
+                          size="sm"
+                          checked={settings.labelsEnabled}
+                          onCheckedChange={handleLabelsCheckedChange}
+                        />
+                        {t('common.toolbar.labels')}
+                      </div>
+                    )}
                   </>
                 )}
               </div>

@@ -153,6 +153,7 @@ function Sidebar({
   variant = 'sidebar',
   collapsible = 'offcanvas',
   brand = false,
+  disableMobileSheet = false,
   className,
   children,
   ...props
@@ -161,6 +162,7 @@ function Sidebar({
   variant?: 'sidebar' | 'floating' | 'inset';
   collapsible?: 'offcanvas' | 'icon' | 'none';
   brand?: boolean;
+  disableMobileSheet?: boolean;
 }) {
   const { t } = useI18n();
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
@@ -180,7 +182,7 @@ function Sidebar({
     );
   }
 
-  if (isMobile) {
+  if (isMobile && !disableMobileSheet) {
     return (
       <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
         <SheetContent
@@ -209,7 +211,11 @@ function Sidebar({
 
   return (
     <div
-      className={cn('group peer hidden text-sidebar-foreground md:block', sidebarVariants({ brand }))}
+      className={cn(
+        'group peer text-sidebar-foreground',
+        disableMobileSheet ? 'block' : 'hidden md:block',
+        sidebarVariants({ brand }),
+      )}
       data-state={state}
       data-collapsible={state === 'collapsed' ? collapsible : ''}
       data-variant={variant}

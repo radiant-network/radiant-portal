@@ -45,6 +45,8 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Query builder - One pill
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHaveQueryCountTotal(2);
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldBeEmptyQuery();
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowClearAll(true /*shouldExist*/);
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowLabelsSwitch(true /*shouldExist*/);
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowQuerySelectCheckboxes(false /*shouldShow*/);
   });
 
   it('Duplicate a query', () => {

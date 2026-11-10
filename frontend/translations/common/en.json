@@ -779,7 +779,6 @@
         "default": "Save filter"
       },
       "discard_tooltip": "Discard unsaved changes",
-      "no_discard_tooltip": "No changes to discard",
       "no_saved_filters": "You have no saved filters",
       "untitled_filter": "Untitled filter",
       "notifications": {

@@ -13,6 +13,7 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Query builder - Two quer
 
   it('Select the active query', () => {
     setupTest();
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowQuerySelectCheckboxes(true /*shouldShow*/);
     CaseEntity_Variants_QueryBuilder.somatic.actions.setActiveQuery(0);
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHaveChromosomePill();
 
