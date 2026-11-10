@@ -3900,8 +3900,8 @@ components:
       - verdict
       type: object
     PatientTrialEnrollment:
-      description: Treatment protocol arm the patient was enrolled on, its medical
-        therapies merged
+      description: Enrollment of the patient on a treatment protocol, one per medical
+        therapy record
       properties:
         chemotherapy_agents:
           items:
