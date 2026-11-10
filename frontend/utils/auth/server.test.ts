@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.hoisted(() => {
   process.env.SESSION_SECRET = 'test-secret';
@@ -25,7 +25,7 @@ vi.mock('remix-auth', () => ({
 
 import { createCookieSessionStorage } from 'react-router';
 
-import { ensureFreshAccessToken, requireAuth } from './server';
+import { ensureFreshAccessToken, logout, requireAuth } from './server';
 
 const jwt = (expiresIn: number) => {
   const encode = (part: object) => Buffer.from(JSON.stringify(part)).toString('base64url');
@@ -192,5 +192,36 @@ describe('requireAuth', () => {
       user: { sub: 'u1' },
     });
     await expect(requireAuth(request)).resolves.toBe(true);
+  });
+});
+
+describe('logout', () => {
+  const fetchMock = vi.fn();
+  const originalFetch = globalThis.fetch;
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+  });
+
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+  });
+
+  it('still clears the session when Keycloak is unreachable', async () => {
+    fetchMock.mockRejectedValueOnce(new Error('ECONNREFUSED'));
+    const request = await buildRequest({ user: { sub: 'u1' }, accessToken: jwt(300), refreshToken: jwt(3600) });
+    const response = await logout(request);
+    expect(response.status).toBe(302);
+    expect(response.headers.get('location')).toBe('/');
+    const setCookie = response.headers.getSetCookie();
+    expect(setCookie.some(c => c.startsWith('session.user=') && /max-age=0|expires=/i.test(c))).toBe(true);
+  });
+
+  it('skips the Keycloak call when there is no refresh token', async () => {
+    const request = await buildRequest({ user: { sub: 'u1' } });
+    const response = await logout(request);
+    expect(response.status).toBe(302);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

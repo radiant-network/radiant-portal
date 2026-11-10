@@ -170,18 +170,27 @@ export const login = async (request: Request): Promise<Response> => {
 
 export const logout = async (request: Request) => {
   const refreshTokenSession = await getRefreshTokenSessionStorage(request);
+  const refreshToken = refreshTokenSession.get('token');
 
-  await fetch(getKeycloakOauth2Url('logout'), {
-    method: 'POST',
-    body: new URLSearchParams({
-      refresh_token: refreshTokenSession.get('token'),
-      client_id: process.env.KEYCLOAK_CLIENT!,
-      client_secret: process.env.KEYCLOAK_CLIENT_SECRET!,
-    }).toString(),
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-  });
+  // A Keycloak outage must not prevent us from clearing the local session: the user still
+  // needs to land on sign-in rather than the generic error page.
+  if (refreshToken) {
+    try {
+      await fetch(getKeycloakOauth2Url('logout'), {
+        method: 'POST',
+        body: new URLSearchParams({
+          refresh_token: refreshToken,
+          client_id: process.env.KEYCLOAK_CLIENT!,
+          client_secret: process.env.KEYCLOAK_CLIENT_SECRET!,
+        }).toString(),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+    } catch {
+      // ignore: local session cleanup below is the one guarantee this function makes
+    }
+  }
 
   return await clearSession(request);
 };

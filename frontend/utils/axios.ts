@@ -1,5 +1,7 @@
 import axios, { HttpStatusCode } from 'axios';
 
+import { redirectToLogout, resetAuthRedirectAttempts } from './auth-redirect';
+
 export const axiosClient = axios.create({
   baseURL: '/api',
   headers: {
@@ -10,14 +12,21 @@ export const axiosClient = axios.create({
 let refreshTokenPromise: Promise<any> | null = null;
 
 axiosClient.interceptors.response.use(
-  response => response,
+  response => {
+    resetAuthRedirectAttempts();
+    return response;
+  },
   async error => {
     const originalRequest = error.config;
 
     if (refreshTokenPromise) {
-      await refreshTokenPromise;
-
-      return axiosClient(originalRequest);
+      try {
+        await refreshTokenPromise;
+        return axiosClient(originalRequest);
+      } catch {
+        if (redirectToLogout()) return new Promise(() => {});
+        return Promise.reject(error);
+      }
     }
 
     if (error.response?.status === HttpStatusCode.Unauthorized && !originalRequest._retry) {
@@ -31,10 +40,9 @@ axiosClient.interceptors.response.use(
         await refreshTokenPromise;
 
         return axiosClient(originalRequest);
-      } catch (refreshError) {
-        const returnTo = `${window.location.pathname}${window.location.search}`;
-        window.location.href = `/auth/logout?returnTo=${encodeURIComponent(returnTo)}`;
-        return Promise.reject(refreshError);
+      } catch {
+        if (redirectToLogout()) return new Promise(() => {});
+        return Promise.reject(error);
       }
     }
     return Promise.reject(error);
