@@ -13,6 +13,7 @@ describe('Case Entity - Variants - Germline - CNV - Query builder - Two queries'
 
   it('Select the active query', () => {
     setupTest();
+    CaseEntity_Variants_QueryBuilder.cnv.validations.shouldShowQuerySelectCheckboxes(true /*shouldShow*/);
     CaseEntity_Variants_QueryBuilder.cnv.actions.setActiveQuery(0);
     CaseEntity_Variants_QueryBuilder.cnv.validations.shouldHaveChromosomePill();
 
