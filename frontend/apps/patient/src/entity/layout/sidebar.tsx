@@ -1,5 +1,6 @@
 import type { PatientEntity } from '@/api/api';
 
+import ClinicalNoteExtractionCard from '../sidebar/clinical-note-extraction-card';
 import ExternalRecordsCard from '../sidebar/external-records-card';
 import KeyDatesCard from '../sidebar/key-dates-card';
 
@@ -17,6 +18,7 @@ function Sidebar({ patient, isLoading }: SidebarProps) {
         isLoading={isLoading}
       />
       <ExternalRecordsCard />
+      {patient?.has_processing_report && <ClinicalNoteExtractionCard patientKey={patient.patient_key} />}
     </aside>
   );
 }
