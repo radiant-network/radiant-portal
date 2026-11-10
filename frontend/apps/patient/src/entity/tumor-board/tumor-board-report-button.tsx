@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Download } from 'lucide-react';
 
-import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,21 +17,21 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { usePatientIdFromParam } from '@/utils/helper';
 
-import { fetchPatientTumorBoardReportUrl } from '../../../api/patient';
+import { fetchPatientTumorBoardReportUrl } from '../../api/patient';
 
-type TumorBoardReportCellProps = {
+type TumorBoardReportButtonProps = {
   sessionId: number;
   hasReport: boolean;
 };
 
-function TumorBoardReportCell({ sessionId, hasReport }: TumorBoardReportCellProps) {
+function TumorBoardReportButton({ sessionId, hasReport }: TumorBoardReportButtonProps) {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const patientKey = usePatientIdFromParam();
   const [isDownloading, setIsDownloading] = useState(false);
   const [showError, setShowError] = useState(false);
 
-  if (!hasReport) return <EmptyCell />;
+  if (!hasReport) return null;
 
   const handleDownload = async () => {
     setIsDownloading(true);
@@ -98,4 +97,4 @@ function TumorBoardReportCell({ sessionId, hasReport }: TumorBoardReportCellProp
   );
 }
 
-export default TumorBoardReportCell;
+export default TumorBoardReportButton;

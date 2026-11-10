@@ -1527,17 +1527,10 @@
     },
     "tumor_board": {
       "title": "Tumor board sessions",
-      "date_tooltip": "Date of the Tumor Board",
       "create_presentation": "Create Presentation",
-      "columns": {
-        "date": "Date",
-        "reason": "Reason",
-        "diagnosis": "Diagnosis",
-        "consensus": "Consensus",
-        "recommendations": "Recommendations",
-        "status": "Status",
-        "report": "Report"
-      }
+      "consensus": "Consensus",
+      "recommendations": "Recommendations",
+      "empty": "No tumor board session for this patient."
     },
     "laboratory": {
       "date": {
