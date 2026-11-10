@@ -1428,7 +1428,7 @@
           "carequality": "Carequality"
         },
         "not_connected": {
-          "description": "TEFCA has not yet been linked for this patient."
+          "description": "External records have not yet been linked for this patient."
         }
       },
       "clinical_note_extraction": {

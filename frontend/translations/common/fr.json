@@ -1429,7 +1429,7 @@
           "carequality": "Carequality"
         },
         "not_connected": {
-          "description": "TEFCA n'est pas encore lié pour ce patient."
+          "description": "Les dossiers externes ne sont pas encore liés pour ce patient."
         }
       },
       "clinical_note_extraction": {
