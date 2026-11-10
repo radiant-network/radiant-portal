@@ -672,6 +672,7 @@
       "covgene": "Rapport de couverture par gène",
       "qcrun": "Rapport de QC de séquençage",
       "exomiser": "Rapport Exomiser",
+      "exomiser_cnv": "Rapport Exomiser CNV",
       "clinical_report": "Rapport clinique",
       "aggqc": "Rapport de contrôle qualité agrégé",
       "chrmr": "Rapport mitochondrial",

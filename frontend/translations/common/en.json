@@ -672,6 +672,7 @@
       "covgene": "Coverage by Gene Report",
       "qcrun": "Sequencing Run QC Report",
       "exomiser": "Exomiser Report",
+      "exomiser_cnv": "Exomiser CNV Report",
       "clinical_report": "Clinical Report",
       "aggqc": "Aggregate Quality Control Report",
       "chrmr": "Mitochondrial Report",
