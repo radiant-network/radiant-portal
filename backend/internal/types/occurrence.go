@@ -50,6 +50,11 @@ const (
 type TaskSelector struct {
 	TaskTypeCode  string
 	SomaticCohort SomaticCohort
+	// ProbandTaskTypeCode is a second task type, listed only when the sequencing is the case's
+	// proband's: the germline CNV annotation task is attached to every family member's sequencing,
+	// but only the proband's records are loaded (RAD-169). The tasks handler checks the proband's tasks
+	// against the germline CNV table, so a new user of this field must change that check too.
+	ProbandTaskTypeCode string
 }
 
 // TaskSelector returns the criteria selecting the tasks that produce occurrences of this type.
@@ -59,7 +64,11 @@ func (o OccurrenceType) TaskSelector() (TaskSelector, error) {
 	case OccurrenceTypeGermlineSNV:
 		return TaskSelector{TaskTypeCode: RadiantGermlineAnnotationTask, SomaticCohort: SomaticCohortNone}, nil
 	case OccurrenceTypeGermlineCNV:
-		return TaskSelector{TaskTypeCode: AlignmentGermlineVariantCallingTaskTypeCode, SomaticCohort: SomaticCohortNone}, nil
+		return TaskSelector{
+			TaskTypeCode:        AlignmentGermlineVariantCallingTaskTypeCode,
+			SomaticCohort:       SomaticCohortNone,
+			ProbandTaskTypeCode: RadiantGermlineCNVAnnotationTask,
+		}, nil
 	case OccurrenceTypeSomaticSNV, OccurrenceTypeSomaticSNVTumorNormal:
 		return TaskSelector{TaskTypeCode: RadiantSomaticAnnotationTask, SomaticCohort: SomaticCohortTumorNormal}, nil
 	case OccurrenceTypeSomaticSNVTumorOnly:

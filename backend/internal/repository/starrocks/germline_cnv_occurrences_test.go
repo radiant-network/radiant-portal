@@ -922,3 +922,197 @@ func Test_GermlineCNV_DefaultFields_Exclude_GnomadAF_And_AC(t *testing.T) {
 	assert.NotContains(t, names, "gnomad_af")
 	assert.NotContains(t, names, "gnomad_ac")
 }
+
+// The `simple` fixture holds the slivar set of seq 70 (case 70's proband) under CNV annotation task
+// 86 (CNV1 de novo, CNV4 inherited from the mother), next to one DRAGEN row of alignment task 91020,
+// a task the cases_tasks integration test inserts in Postgres. Alignment task 71 of seq 70 has no rows.
+
+func Test_GermlineCNV_GetOccurrences_SlivarSet_ReturnsInheritanceAndParentCalls(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sort := []types.SortBody{{Field: "start", Order: "asc"}}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, sort)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		require.Len(t, occurrences, 2)
+		denovo := occurrences[0]
+		assert.Equal(t, "CNV1", denovo.Name)
+		assert.Equal(t, "denovo", denovo.TransmissionMode)
+		assert.Equal(t, "DENOVO", denovo.ParentalOrigin)
+		assert.Equal(t, types.JsonArray[int]{0, 0}, denovo.MotherCalls)
+		assert.Equal(t, 2, *denovo.MotherCN)
+		assert.Equal(t, 11, *denovo.MotherBC)
+		assert.Equal(t, types.JsonArray[int]{0, 0}, denovo.MotherPE)
+		assert.InDelta(t, 1.01, *denovo.MotherSM, 0.001)
+		assert.Empty(t, denovo.MotherName)
+		assert.Equal(t, types.JsonArray[int]{0, 1}, denovo.FatherPE)
+		assert.Equal(t, 9, *denovo.FatherBC)
+
+		maternal := occurrences[1]
+		assert.Equal(t, "inherited_maternal", maternal.TransmissionMode)
+		assert.Equal(t, "MOTHER", maternal.ParentalOrigin)
+		assert.Equal(t, types.JsonArray[int]{0, 1}, maternal.MotherCalls)
+		assert.Equal(t, 3, *maternal.MotherCN)
+		assert.Equal(t, "CNV2", maternal.MotherName)
+		assert.Equal(t, types.JsonArray[int]{0, 0}, maternal.FatherCalls)
+		assert.Empty(t, maternal.FatherName)
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_AlignmentSet_InheritanceFieldsEmpty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 1, query)
+
+		require.NoError(t, err)
+		require.Len(t, occurrences, 1)
+		o := occurrences[0]
+		assert.Empty(t, o.TransmissionMode)
+		assert.Empty(t, o.ParentalOrigin)
+		assert.Nil(t, o.MotherCalls)
+		assert.Nil(t, o.MotherCN)
+		assert.Nil(t, o.MotherBC)
+		assert.Nil(t, o.MotherPE)
+		assert.Nil(t, o.MotherSM)
+		assert.Empty(t, o.MotherName)
+		assert.Nil(t, o.FatherCalls)
+		assert.Nil(t, o.FatherCN)
+		assert.Empty(t, o.FatherName)
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_FilterByTransmissionMode(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: "in", Content: types.LeafContent{Field: "transmission_mode", Value: []interface{}{"denovo"}}}},
+			Op:      "and",
+		}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "CNV1", occurrences[0].Name)
+		}
+	})
+}
+
+func Test_GermlineCNV_CountOccurrences_FilterByParentalOrigin(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: "in", Content: types.LeafContent{Field: "parental_origin", Value: []interface{}{"MOTHER"}}}},
+			Op:      "and",
+		}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
+		require.NoError(t, err)
+
+		count, err := repo.CountOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		assert.Equal(t, int64(1), count.Count)
+	})
+}
+
+func Test_GermlineCNV_AggregateOccurrences_ByTransmissionMode(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("transmission_mode", nil, GermlineCnvQueryConfigForTest.AllFields)
+		require.NoError(t, err)
+
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		buckets := map[string]int64{}
+		for _, a := range aggregate {
+			buckets[a.Bucket] = a.Count
+		}
+		assert.Equal(t, map[string]int64{"denovo": 1, "inherited_maternal": 1}, buckets)
+	})
+}
+
+func Test_GermlineCNV_AggregateOccurrences_ByParentalOrigin(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("parental_origin", nil, GermlineCnvQueryConfigForTest.AllFields)
+		require.NoError(t, err)
+
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		buckets := map[string]int64{}
+		for _, a := range aggregate {
+			buckets[a.Bucket] = a.Count
+		}
+		assert.Equal(t, map[string]int64{"DENOVO": 1, "MOTHER": 1}, buckets)
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_SortByMotherCN(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sort := []types.SortBody{{Field: "mother_cn", Order: "desc"}}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, sort)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		require.Len(t, occurrences, 2)
+		assert.Equal(t, "CNV4", occurrences[0].Name)
+		assert.Equal(t, "CNV1", occurrences[1].Name)
+	})
+}
+
+func Test_GermlineCNV_TaskIDsWithOccurrences_ReturnsTasksWithRowsForTheSequencing(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		ids, err := repo.TaskIDsWithOccurrences(t.Context(), 70, []int{71, 86, 91020, 999})
+
+		require.NoError(t, err)
+		assert.ElementsMatch(t, []int{86, 91020}, ids)
+	})
+}
+
+func Test_GermlineCNV_TaskIDsWithOccurrences_IgnoresRowsOfOtherSequencing(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		ids, err := repo.TaskIDsWithOccurrences(t.Context(), 1, []int{1, 86})
+
+		require.NoError(t, err)
+		assert.Equal(t, []int{1}, ids)
+	})
+}
+
+func Test_GermlineCNV_TaskIDsWithOccurrences_SequencingWithNoRows_ReturnsEmpty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		ids, err := repo.TaskIDsWithOccurrences(t.Context(), 70, []int{71})
+
+		require.NoError(t, err)
+		assert.Empty(t, ids)
+	})
+}
+
+func Test_GermlineCNV_TaskIDsWithOccurrences_NoTaskIds_SkipsQuery(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		ids, err := repo.TaskIDsWithOccurrences(t.Context(), 1, nil)
+
+		require.NoError(t, err)
+		assert.Empty(t, ids)
+	})
+}

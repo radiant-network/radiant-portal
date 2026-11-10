@@ -16,6 +16,12 @@ Name | Type | Description | Notes
 **cnv_id** | **str** |  | 
 **cytoband** | **List[str]** |  | [optional] 
 **end** | **int** |  | 
+**father_bc** | **int** |  | [optional] 
+**father_calls** | **List[int]** |  | [optional] 
+**father_cn** | **int** |  | [optional] 
+**father_name** | **str** |  | [optional] 
+**father_pe** | **List[int]** |  | [optional] 
+**father_sm** | **float** |  | [optional] 
 **filter** | **str** |  | [optional] 
 **flag_type** | [**OccurrenceFlagType**](OccurrenceFlagType.md) |  | [optional] 
 **germline_pc_wgs** | **int** |  | [optional] 
@@ -43,9 +49,16 @@ Name | Type | Description | Notes
 **gnomad_sn** | **int** |  | [optional] 
 **has_note** | **bool** |  | 
 **length** | **int** |  | 
+**mother_bc** | **int** |  | [optional] 
+**mother_calls** | **List[int]** |  | [optional] 
+**mother_cn** | **int** |  | [optional] 
+**mother_name** | **str** |  | [optional] 
+**mother_pe** | **List[int]** |  | [optional] 
+**mother_sm** | **float** |  | [optional] 
 **name** | **str** |  | 
 **nb_genes** | **int** |  | [optional] 
 **nb_snv** | **int** |  | [optional] 
+**parental_origin** | **str** |  | [optional] 
 **pe** | **List[int]** |  | [optional] 
 **quality** | **float** |  | [optional] 
 **reflen** | **int** |  | [optional] 
@@ -56,6 +69,7 @@ Name | Type | Description | Notes
 **svtype** | **str** |  | [optional] 
 **symbol** | **List[str]** |  | [optional] 
 **task_id** | **int** |  | 
+**transmission_mode** | **str** |  | [optional] 
 **type** | **str** |  | 
 
 ## Example

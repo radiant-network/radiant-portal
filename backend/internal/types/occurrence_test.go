@@ -13,11 +13,15 @@ func Test_OccurrenceType_TaskSelector_GermlineSNV_ResolvesGermlineAnnotationWith
 	assert.Equal(t, TaskSelector{TaskTypeCode: RadiantGermlineAnnotationTask, SomaticCohort: SomaticCohortNone}, selector)
 }
 
-func Test_OccurrenceType_TaskSelector_GermlineCNV_ResolvesGermlineAlignmentWithNoCohort(t *testing.T) {
+func Test_OccurrenceType_TaskSelector_GermlineCNV_ResolvesAlignmentPlusProbandCNVAnnotation(t *testing.T) {
 	selector, err := OccurrenceTypeGermlineCNV.TaskSelector()
 
 	assert.NoError(t, err)
-	assert.Equal(t, TaskSelector{TaskTypeCode: AlignmentGermlineVariantCallingTaskTypeCode, SomaticCohort: SomaticCohortNone}, selector)
+	assert.Equal(t, TaskSelector{
+		TaskTypeCode:        AlignmentGermlineVariantCallingTaskTypeCode,
+		SomaticCohort:       SomaticCohortNone,
+		ProbandTaskTypeCode: RadiantGermlineCNVAnnotationTask,
+	}, selector)
 }
 
 // somatic_snv is the deprecated spelling of somatic_snv_tn: it must narrow to tumor-normal,

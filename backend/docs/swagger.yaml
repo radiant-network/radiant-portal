@@ -2065,6 +2065,24 @@ components:
           uniqueItems: false
         end:
           type: integer
+        father_bc:
+          type: integer
+        father_calls:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        father_cn:
+          type: integer
+        father_name:
+          type: string
+        father_pe:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        father_sm:
+          type: number
         filter:
           type: string
         flag_type:
@@ -2119,12 +2137,32 @@ components:
           type: boolean
         length:
           type: integer
+        mother_bc:
+          type: integer
+        mother_calls:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        mother_cn:
+          type: integer
+        mother_name:
+          type: string
+        mother_pe:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        mother_sm:
+          type: number
         name:
           type: string
         nb_genes:
           type: integer
         nb_snv:
           type: integer
+        parental_origin:
+          type: string
         pe:
           items:
             type: integer
@@ -2151,6 +2189,8 @@ components:
           uniqueItems: false
         task_id:
           type: integer
+        transmission_mode:
+          type: string
         type:
           type: string
       required:
@@ -5947,7 +5987,10 @@ paths:
     get:
       description: Return tasks attached to the given case and sequencing experiment
         whose task type produces occurrences of the requested occurrence type. Sorted
-        by created_on DESC. Returns an empty list (200) when no task matches.
+        by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv
+        returns the alignment task and, for the case's proband's sequencing, the germline
+        CNV annotation task; on the proband's sequencing, a task is returned only
+        when it has CNV occurrences.
       operationId: caseTasksWithOccurrences
       parameters:
       - description: Tenant code

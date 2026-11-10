@@ -29,6 +29,9 @@ type TaskOccurrenceType struct {
 	PipelineVersion string    `json:"pipeline_version" validate:"required"`
 	GenomeBuild     string    `json:"genome_build,omitempty"`
 	CreatedOn       time.Time `json:"created_on" validate:"required"`
+	// SequencingIsProband is set when the selector has a ProbandTaskTypeCode; it tells the caller
+	// the sequencing is the case's proband's. Not part of the API response.
+	SequencingIsProband bool `json:"-" gorm:"-"`
 }
 
 type Task struct {

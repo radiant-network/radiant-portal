@@ -44,6 +44,10 @@ type caseTasksReader interface {
 	ListTasksByCaseAndSequencing(ctx context.Context, caseId int, seqId int, selector types.TaskSelector) ([]types.TaskOccurrenceType, error)
 }
 
+type germlineCNVTaskRowsReader interface {
+	TaskIDsWithOccurrences(ctx context.Context, seqId int, taskIds []int) ([]int, error)
+}
+
 type casePatcher interface {
 	PatchCase(ctx context.Context, caseId int, c *types.Case) (bool, error)
 }
@@ -403,9 +407,15 @@ func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc 
 // need to pass the occurrence type. That resolution is more than a lookup for the somatic
 // types: somatic_snv_tn and somatic_snv_to share one task_type_code and are told apart by
 // the tumor/normal makeup of the task, which no client can compute.
+//
+// germline_cnv lists the alignment task and, on the case's proband's sequencing, the CNV
+// annotation task (RAD-169). On the proband's sequencing, a task is listed only when it has CNV
+// rows for it: the ETL loads the slivar set instead of the DRAGEN set when both arrive together,
+// never loads a new alignment task that comes after the slivar VCF, and loads the slivar set only
+// after the annotation task is registered (or never, when it has no slivar VCF).
 // @Summary List tasks producing occurrences of a given type for a (case, sequencing) pair
 // @Id caseTasksWithOccurrences
-// @Description Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+// @Description Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the alignment task and, for the case's proband's sequencing, the germline CNV annotation task; on the proband's sequencing, a task is returned only when it has CNV occurrences.
 // @Tags cases
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
@@ -421,7 +431,7 @@ func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc 
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences [get]
-func CaseOccurrenceTasksHandler(repo caseTasksReader) gin.HandlerFunc {
+func CaseOccurrenceTasksHandler(repo caseTasksReader, cnvRows germlineCNVTaskRowsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, err := strconv.Atoi(c.Param("case_id"))
 		if err != nil {
@@ -444,11 +454,46 @@ func CaseOccurrenceTasksHandler(repo caseTasksReader) gin.HandlerFunc {
 			HandleError(c, err)
 			return
 		}
+		tasks, err = dropProbandTasksWithoutCNV(c.Request.Context(), cnvRows, seqId, tasks)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
 		if tasks == nil {
 			tasks = []types.TaskOccurrenceType{}
 		}
 		c.JSON(http.StatusOK, tasks)
 	}
+}
+
+// dropProbandTasksWithoutCNV relies on SequencingIsProband being set only by a selector with a
+// ProbandTaskTypeCode, which only germline_cnv has.
+func dropProbandTasksWithoutCNV(ctx context.Context, cnvRows germlineCNVTaskRowsReader, seqId int, tasks []types.TaskOccurrenceType) ([]types.TaskOccurrenceType, error) {
+	var probandIds []int
+	for _, t := range tasks {
+		if t.SequencingIsProband {
+			probandIds = append(probandIds, t.ID)
+		}
+	}
+	if len(probandIds) == 0 {
+		return tasks, nil
+	}
+	withRows, err := cnvRows.TaskIDsWithOccurrences(ctx, seqId, probandIds)
+	if err != nil {
+		return nil, fmt.Errorf("error checking germline CNV rows of seq %d: %w", seqId, err)
+	}
+	keep := make(map[int]bool, len(withRows))
+	for _, id := range withRows {
+		keep[id] = true
+	}
+	var kept []types.TaskOccurrenceType
+	for _, t := range tasks {
+		if t.SequencingIsProband && !keep[t.ID] {
+			continue
+		}
+		kept = append(kept, t)
+	}
+	return kept, nil
 }
 
 // CaseEntityDocumentsFiltersHandler handles retrieving documents filters for a specific case

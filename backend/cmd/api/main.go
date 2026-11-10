@@ -188,7 +188,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	casesGroup.PUT("/:case_id/assignments", requireActionAt(types.ActionEditCase, orgFromCase), server.PutCaseAssignmentsHandler(repoCaseAssignments))
 	casesGroup.POST("/:case_id/documents/search", requireAction(types.ActionSearchCase), server.CaseEntityDocumentsSearchHandler(repoDocuments))
 	casesGroup.GET("/:case_id/documents/filters", requireAction(types.ActionSearchCase), server.CaseEntityDocumentsFiltersHandler(repoDocuments))
-	casesGroup.GET("/:case_id/:seq_id/tasks_with_occurrences", requireAction(types.ActionSearchCase), server.CaseOccurrenceTasksHandler(repoTasks))
+	casesGroup.GET("/:case_id/:seq_id/tasks_with_occurrences", requireAction(types.ActionSearchCase), server.CaseOccurrenceTasksHandler(repoTasks, repoGermlineCNVOccurrences))
 	casesGroup.PATCH("/:case_id", requireActionAt(types.ActionEditCase, orgFromCase), server.PatchCaseHandler(repoCasesWrite))
 
 	genePanelsGroup := tenantRoutes.Group("/gene_panels")

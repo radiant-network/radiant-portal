@@ -3945,6 +3945,42 @@ export interface GermlineCNVOccurrence {
     'end': number;
     /**
      * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'father_bc'?: number;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof GermlineCNVOccurrence
+     */
+    'father_calls'?: Array<number>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'father_cn'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
+    'father_name'?: string;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof GermlineCNVOccurrence
+     */
+    'father_pe'?: Array<number>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'father_sm'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof GermlineCNVOccurrence
      */
@@ -4107,6 +4143,42 @@ export interface GermlineCNVOccurrence {
     'length': number;
     /**
      * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'mother_bc'?: number;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof GermlineCNVOccurrence
+     */
+    'mother_calls'?: Array<number>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'mother_cn'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
+    'mother_name'?: string;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof GermlineCNVOccurrence
+     */
+    'mother_pe'?: Array<number>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'mother_sm'?: number;
+    /**
+     * 
      * @type {string}
      * @memberof GermlineCNVOccurrence
      */
@@ -4123,6 +4195,12 @@ export interface GermlineCNVOccurrence {
      * @memberof GermlineCNVOccurrence
      */
     'nb_snv'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
+    'parental_origin'?: string;
     /**
      * 
      * @type {Array<number>}
@@ -4183,6 +4261,12 @@ export interface GermlineCNVOccurrence {
      * @memberof GermlineCNVOccurrence
      */
     'task_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
+    'transmission_mode'?: string;
     /**
      * 
      * @type {string}
@@ -11514,7 +11598,7 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the alignment task and, for the case\'s proband\'s sequencing, the germline CNV annotation task; on the proband\'s sequencing, a task is returned only when it has CNV occurrences.
          * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -12066,7 +12150,7 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the alignment task and, for the case\'s proband\'s sequencing, the germline CNV annotation task; on the proband\'s sequencing, a task is returned only when it has CNV occurrences.
          * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -12272,7 +12356,7 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.caseEntityDocumentsSearch(tenant, caseId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
         /**
-         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the alignment task and, for the case\'s proband\'s sequencing, the germline CNV annotation task; on the proband\'s sequencing, a task is returned only when it has CNV occurrences.
          * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -12456,7 +12540,7 @@ export class CasesApi extends BaseAPI {
     }
 
     /**
-     * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+     * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the alignment task and, for the case\'s proband\'s sequencing, the germline CNV annotation task; on the proband\'s sequencing, a task is returned only when it has CNV occurrences.
      * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
      * @param {string} tenant Tenant code
      * @param {number} caseId Case ID

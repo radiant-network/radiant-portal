@@ -364,7 +364,7 @@ Name | Type | Description  | Notes
 
 List tasks producing occurrences of a given type for a (case, sequencing) pair
 
-Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the alignment task and, for the case's proband's sequencing, the germline CNV annotation task; on the proband's sequencing, a task is returned only when it has CNV occurrences.
 
 ### Example
 
