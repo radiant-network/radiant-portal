@@ -41,7 +41,7 @@ class GermlineCNVOccurrence(BaseModel):
     father_calls: Optional[List[StrictInt]] = None
     father_cn: Optional[StrictInt] = None
     father_name: Optional[StrictStr] = None
-    father_pe: Optional[List[StrictInt]] = None
+    father_pe: Optional[List[Optional[StrictInt]]] = None
     father_sm: Optional[Union[StrictFloat, StrictInt]] = None
     filter: Optional[StrictStr] = None
     flag_type: Optional[OccurrenceFlagType] = None
@@ -74,13 +74,13 @@ class GermlineCNVOccurrence(BaseModel):
     mother_calls: Optional[List[StrictInt]] = None
     mother_cn: Optional[StrictInt] = None
     mother_name: Optional[StrictStr] = None
-    mother_pe: Optional[List[StrictInt]] = None
+    mother_pe: Optional[List[Optional[StrictInt]]] = None
     mother_sm: Optional[Union[StrictFloat, StrictInt]] = None
     name: StrictStr
     nb_genes: Optional[StrictInt] = None
     nb_snv: Optional[StrictInt] = None
     parental_origin: Optional[StrictStr] = None
-    pe: Optional[List[StrictInt]] = None
+    pe: Optional[List[Optional[StrictInt]]] = None
     quality: Optional[Union[StrictFloat, StrictInt]] = None
     reflen: Optional[StrictInt] = None
     seq_id: StrictInt

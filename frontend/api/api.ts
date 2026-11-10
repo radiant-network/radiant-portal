@@ -3969,10 +3969,10 @@ export interface GermlineCNVOccurrence {
     'father_name'?: string;
     /**
      * 
-     * @type {Array<number>}
+     * @type {Array<number | null>}
      * @memberof GermlineCNVOccurrence
      */
-    'father_pe'?: Array<number>;
+    'father_pe'?: Array<number | null>;
     /**
      * 
      * @type {number}
@@ -4167,10 +4167,10 @@ export interface GermlineCNVOccurrence {
     'mother_name'?: string;
     /**
      * 
-     * @type {Array<number>}
+     * @type {Array<number | null>}
      * @memberof GermlineCNVOccurrence
      */
-    'mother_pe'?: Array<number>;
+    'mother_pe'?: Array<number | null>;
     /**
      * 
      * @type {number}
@@ -4203,10 +4203,10 @@ export interface GermlineCNVOccurrence {
     'parental_origin'?: string;
     /**
      * 
-     * @type {Array<number>}
+     * @type {Array<number | null>}
      * @memberof GermlineCNVOccurrence
      */
-    'pe'?: Array<number>;
+    'pe'?: Array<number | null>;
     /**
      * 
      * @type {number}
@@ -8627,10 +8627,10 @@ export interface SomaticCNVOccurrence {
     'nb_snv'?: number;
     /**
      * 
-     * @type {Array<number>}
+     * @type {Array<number | null>}
      * @memberof SomaticCNVOccurrence
      */
-    'pe'?: Array<number>;
+    'pe'?: Array<number | null>;
     /**
      * 
      * @type {number}

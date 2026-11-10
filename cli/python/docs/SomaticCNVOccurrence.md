@@ -35,7 +35,7 @@ Name | Type | Description | Notes
 **name** | **str** |  | 
 **nb_genes** | **int** |  | [optional] 
 **nb_snv** | **int** | Counts somatic SNVs, unlike germline CNV&#39;s identically named column, which counts germline ones. Never pool or compare the two. | [optional] 
-**pe** | **List[int]** |  | [optional] 
+**pe** | **List[Optional[int]]** |  | [optional] 
 **quality** | **float** |  | [optional] 
 **reflen** | **int** |  | [optional] 
 **sd** | **float** |  | [optional] 

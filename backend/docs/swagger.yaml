@@ -2078,7 +2078,9 @@ components:
           type: string
         father_pe:
           items:
-            type: integer
+            type:
+            - integer
+            - "null"
           type: array
           uniqueItems: false
         father_sm:
@@ -2150,7 +2152,9 @@ components:
           type: string
         mother_pe:
           items:
-            type: integer
+            type:
+            - integer
+            - "null"
           type: array
           uniqueItems: false
         mother_sm:
@@ -2165,7 +2169,9 @@ components:
           type: string
         pe:
           items:
-            type: integer
+            type:
+            - integer
+            - "null"
           type: array
           uniqueItems: false
         quality:
@@ -4486,7 +4492,9 @@ components:
           type: integer
         pe:
           items:
-            type: integer
+            type:
+            - integer
+            - "null"
           type: array
           uniqueItems: false
         quality:

@@ -56,7 +56,7 @@ class SomaticCNVOccurrence(BaseModel):
     name: StrictStr
     nb_genes: Optional[StrictInt] = None
     nb_snv: Optional[StrictInt] = Field(default=None, description="Counts somatic SNVs, unlike germline CNV's identically named column, which counts germline ones. Never pool or compare the two.")
-    pe: Optional[List[StrictInt]] = None
+    pe: Optional[List[Optional[StrictInt]]] = None
     quality: Optional[Union[StrictFloat, StrictInt]] = None
     reflen: Optional[StrictInt] = None
     sd: Optional[Union[StrictFloat, StrictInt]] = None
