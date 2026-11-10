@@ -1428,8 +1428,7 @@
           "carequality": "Carequality"
         },
         "not_connected": {
-          "title": "No connection found",
-          "description": "Health information exchange not linked"
+          "description": "TEFCA has not yet been linked for this patient."
         }
       }
     },

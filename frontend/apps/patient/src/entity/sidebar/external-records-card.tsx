@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Unlink } from 'lucide-react';
+import { Unplug } from 'lucide-react';
 
-import Empty from '@/components/base/empties/empty';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
@@ -64,13 +63,14 @@ function CardBody({ isLoading, data, onViewDetails }: CardBodyProps) {
 
   if (!data || data.organizations.length === 0) {
     return (
-      <Empty
-        size="mini"
-        iconType="custom"
-        icon={Unlink}
-        title={t('patient_entity.sidebar.external_records.not_connected.title')}
-        description={t('patient_entity.sidebar.external_records.not_connected.description')}
-      />
+      <div className="flex flex-col items-center gap-4 py-6">
+        <div className="flex items-center justify-center rounded-md border p-2">
+          <Unplug className="size-6" />
+        </div>
+        <p className="text-center text-xs text-muted-foreground">
+          {t('patient_entity.sidebar.external_records.not_connected.description')}
+        </p>
+      </div>
     );
   }
 

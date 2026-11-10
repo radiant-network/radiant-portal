@@ -1429,8 +1429,7 @@
           "carequality": "Carequality"
         },
         "not_connected": {
-          "title": "Aucune connexion trouvée",
-          "description": "Échange d'information clinique non lié"
+          "description": "TEFCA n'est pas encore lié pour ce patient."
         }
       }
     },
