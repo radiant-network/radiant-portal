@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from 'react-router';
 
 import { AlertDialogProvider } from '@/components/base/dialog/alert-dialog-provider';
@@ -8,6 +9,7 @@ import { ConfigProvider, type PortalConfig } from '@/components/cores/applicatio
 import { BetaFeatureProvider } from '@/components/hooks/beta-feature-provider';
 import { detectLanguageFromRequest } from '@/components/hooks/i18n.server';
 import { I18nProvider } from '@/components/hooks/I18nProvider';
+import { redirectToLogout } from '@/utils/auth-redirect';
 
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
@@ -102,7 +104,35 @@ export default function App() {
   return <Outlet />;
 }
 
+function isUnauthorizedError(error: unknown): boolean {
+  if (isRouteErrorResponse(error) && error.status === 401) return true;
+  const status =
+    (error as { status?: number; response?: { status?: number } })?.status ??
+    (error as { response?: { status?: number } })?.response?.status;
+  return status === 401;
+}
+
+// Fires during HTML parse so a 401 reaching the SSR ErrorBoundary never lingers as a blank page
+// before hydration. No-ops on the client once hydration renders the ErrorBoundary — React does not
+// re-execute inline scripts inserted through dangerouslySetInnerHTML.
+const SSR_REDIRECT_SCRIPT = `(function(){try{var r=window.location.pathname+window.location.search;window.location.href='/auth/logout?returnTo='+encodeURIComponent(r)}catch(e){}})()`;
+
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  const unauthorized = isUnauthorizedError(error);
+  const [redirecting, setRedirecting] = useState(unauthorized);
+
+  useEffect(() => {
+    if (unauthorized) setRedirecting(redirectToLogout());
+  }, [unauthorized]);
+
+  if (unauthorized && redirecting) {
+    return (
+      <main className="pt-16 p-4 container mx-auto">
+        <script dangerouslySetInnerHTML={{ __html: SSR_REDIRECT_SCRIPT }} />
+      </main>
+    );
+  }
+
   let message = 'Oops!';
   let details = 'An unexpected error occurred.';
   let stack: string | undefined;
