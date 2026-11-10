@@ -1521,17 +1521,10 @@
     },
     "tumor_board": {
       "title": "Séances de tumor board",
-      "date_tooltip": "Date du Tumor Board",
       "create_presentation": "Créer la présentation",
-      "columns": {
-        "date": "Date",
-        "reason": "Motif",
-        "diagnosis": "Diagnostic",
-        "consensus": "Consensus",
-        "recommendations": "Recommandations",
-        "status": "Statut",
-        "report": "Rapport"
-      }
+      "consensus": "Consensus",
+      "recommendations": "Recommandations",
+      "empty": "Aucune séance de tumor board pour ce patient."
     },
     "laboratory": {
       "date": {
