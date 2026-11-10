@@ -37,7 +37,7 @@ const queryBar = tv({
   variants: {
     active: {
       true: ['border-primary/50 bg-primary/10'],
-      false: ['border-border bg-muted/35 text-muted-foreground'],
+      false: ['border-input bg-muted/35 text-muted-foreground'],
     },
   },
   defaultVariants: {
@@ -98,7 +98,7 @@ function QueryBar({ index, sqon, swrId }: QueryBarProps) {
   const backgroundColor = useMemo(
     () => ({
       'border-primary/50 bg-primary/10': active,
-      'border-border bg-muted/35 text-muted-foreground': !active,
+      'border-input bg-muted/35 text-muted-foreground': !active,
     }),
     [active],
   );
