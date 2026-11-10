@@ -25,7 +25,7 @@ from typing_extensions import Self
 
 class PatientTrialEnrollment(BaseModel):
     """
-    Treatment protocol arm the patient was enrolled on, its medical therapies merged
+    Enrollment of the patient on a treatment protocol, one per medical therapy record
     """ # noqa: E501
     chemotherapy_agents: List[StrictStr]
     is_initial_treatment: StrictBool

@@ -108,48 +108,25 @@ func pcxFocalBoost(craniospinal, primary types.PatientDose) *types.PatientDose {
 
 const pcxEnrolledOnProtocol = "treatment follows a protocol and subject is enrolled on a protocol"
 
-// pcxTrialEnrollments merges the therapies the patient was enrolled for by protocol arm, as a protocol arm spans one
-// therapy per phase. The most recent start comes first, an enrollment without a start day last.
+// pcxTrialEnrollments lists one enrollment per therapy the patient was enrolled for, as the treatments timeline does.
+// The most recent start comes first, an enrollment without a start day last.
 func pcxTrialEnrollments(therapies []types.PatientTherapy) []types.PatientTrialEnrollment {
 	enrollments := []types.PatientTrialEnrollment{}
-	byProtocolArm := map[string]int{}
 	for _, therapy := range therapies {
 		if therapy.ChemotherapyType == nil || !strings.EqualFold(strings.TrimSpace(*therapy.ChemotherapyType), pcxEnrolledOnProtocol) {
 			continue
 		}
 		name := pcxTrimmed(therapy.ProtocolName)
-		key := pcxTrimmed(therapy.ProtocolNameAndArm)
 		if name == "" {
-			name = key
+			name = pcxTrimmed(therapy.ProtocolNameAndArm)
 		}
-		if key == "" {
-			key = name
+		var arm *string
+		if a := pcxTrimmed(therapy.ProtocolArm); a != "" && !strings.EqualFold(a, "Not Applicable") {
+			arm = &a
 		}
-		initial := therapy.IsInitialTreatment != nil && *therapy.IsInitialTreatment
-		i, seen := byProtocolArm[key]
-		if !seen {
-			var arm *string
-			if a := pcxTrimmed(therapy.ProtocolArm); a != "" && !strings.EqualFold(a, "Not Applicable") {
-				arm = &a
-			}
-			byProtocolArm[key] = len(enrollments)
-			enrollments = append(enrollments, types.PatientTrialEnrollment{Start: therapy.Start, Stop: therapy.Stop, ProtocolName: name,
-				ProtocolArm: arm, ChemotherapyAgents: slices.Clone(therapy.ChemotherapyAgents), IsInitialTreatment: initial})
-			continue
-		}
-		e := &enrollments[i]
-		if therapy.Start.Day != nil && (e.Start.Day == nil || *therapy.Start.Day < *e.Start.Day) {
-			e.Start = therapy.Start
-		}
-		if therapy.Stop.Day != nil && (e.Stop.Day == nil || *therapy.Stop.Day > *e.Stop.Day) {
-			e.Stop = therapy.Stop
-		}
-		for _, agent := range therapy.ChemotherapyAgents {
-			if !slices.Contains(e.ChemotherapyAgents, agent) {
-				e.ChemotherapyAgents = append(e.ChemotherapyAgents, agent)
-			}
-		}
-		e.IsInitialTreatment = e.IsInitialTreatment || initial
+		enrollments = append(enrollments, types.PatientTrialEnrollment{Start: therapy.Start, Stop: therapy.Stop, ProtocolName: name,
+			ProtocolArm: arm, ChemotherapyAgents: slices.Clone(therapy.ChemotherapyAgents),
+			IsInitialTreatment: therapy.IsInitialTreatment != nil && *therapy.IsInitialTreatment})
 	}
 	slices.SortStableFunc(enrollments, func(a, b types.PatientTrialEnrollment) int {
 		if a.Start.Day == nil || b.Start.Day == nil {

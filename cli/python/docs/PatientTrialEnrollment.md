@@ -1,6 +1,6 @@
 # PatientTrialEnrollment
 
-Treatment protocol arm the patient was enrolled on, its medical therapies merged
+Enrollment of the patient on a treatment protocol, one per medical therapy record
 
 ## Properties
 

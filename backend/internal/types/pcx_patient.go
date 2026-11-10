@@ -239,11 +239,11 @@ type PatientTherapy struct {
 }
 
 // PatientTrialEnrollment - Treatment protocol the patient was enrolled on
-// @Description Treatment protocol arm the patient was enrolled on, its medical therapies merged
+// @Description Enrollment of the patient on a treatment protocol, one per medical therapy record
 // @Name PatientTrialEnrollment
 type PatientTrialEnrollment struct {
-	Start              PatientDayDate `json:"start" validate:"required"` // Earliest start of its therapies
-	Stop               PatientDayDate `json:"stop" validate:"required"`  // Latest stop of its therapies
+	Start              PatientDayDate `json:"start" validate:"required"`
+	Stop               PatientDayDate `json:"stop" validate:"required"`
 	ProtocolName       string         `json:"protocol_name" validate:"required"`
 	ProtocolArm        *string        `json:"protocol_arm"` // null when Not Applicable
 	ChemotherapyAgents []string       `json:"chemotherapy_agents" validate:"required"`
