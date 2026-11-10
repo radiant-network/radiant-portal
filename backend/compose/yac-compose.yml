@@ -2,9 +2,10 @@
 # Gated by the `yac` profile: a plain `docker compose up` never starts it. Use
 # `YAC_ENABLED=true make docker-run` (or `COMPOSE_PROFILES=yac docker compose up`).
 #
-# A user who enters their own OpenAI key in the chat is served by OpenAI. Without one, the LLM is
-# a local Ollama on the host (Docker on macOS has no GPU access, so a containerised Ollama is
-# CPU-only and too slow). For that: `ollama serve` and `ollama pull qwen3:14b`.
+# The chat sends no OpenAI key, so the LLM is the agent's own: by default a local Ollama on the
+# host (Docker on macOS has no GPU access, so a containerised Ollama is CPU-only and too slow).
+# For that: `ollama serve` and `ollama pull qwen3:14b`. For OpenAI instead, set
+# YAC_OPENAI_API_KEY, YAC_LLM_BASE_URL=https://api.openai.com/v1 and YAC_MODEL (see YAC.md).
 #
 # The image is built straight from the public git repo. To iterate on agent code, point
 # YAC_BUILD_CONTEXT at a local clone (path relative to this file), e.g. ../../../udi-yac.
@@ -14,7 +15,7 @@ services:
   yac-agent:
     profiles: [yac]
     build:
-      context: ${YAC_BUILD_CONTEXT:-https://github.com/hms-dbmi/udi-yac.git#udi-yac-v0.12.1}
+      context: ${YAC_BUILD_CONTEXT:-https://github.com/hms-dbmi/udi-yac.git#udi-yac-v0.12.3}
       dockerfile: packages/agent/Dockerfile
     image: radiant/yac-agent:local
     ports:
@@ -27,6 +28,8 @@ services:
       # user's own key (X-OpenAI-Key) to Ollama. Lowercase keeps it on the agent's default
       # client only: requests with a user key go to api.openai.com, the others to Ollama.
       openai_base_url: ${YAC_LLM_BASE_URL:-http://host.docker.internal:11434/v1}
+      # Blank (the default) is unset to the agent, which then needs no key for Ollama.
+      OPENAI_API_KEY: ${YAC_OPENAI_API_KEY:-}
       GPT_MODEL_NAME: ${YAC_MODEL:-qwen3:14b}
       UDI_CORS_ORIGINS: ${YAC_CORS_ORIGINS:-http://localhost:3000}
       # Keycloak auth, same realm/audience as the API and the StarRocks JWT users. The issuer is
