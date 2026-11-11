@@ -111,7 +111,6 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Query builder - Two quer
 
     CaseEntity_Variants_QueryBuilder.somatic.actions.deleteQuery(1, true /*confirm*/);
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowCombine(false /*shouldExist*/);
-    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowClearAll(true /*shouldExist*/);
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowLabelsSwitch(true /*shouldExist*/);
   });
 

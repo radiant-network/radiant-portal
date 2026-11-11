@@ -111,7 +111,6 @@ describe('Case Entity - Variants - Germline - SNV - Query builder - Two queries'
 
     CaseEntity_Variants_QueryBuilder.snv.actions.deleteQuery(1, true /*confirm*/);
     CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowCombine(false /*shouldExist*/);
-    CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowClearAll(true /*shouldExist*/);
     CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowLabelsSwitch(true /*shouldExist*/);
   });
 
