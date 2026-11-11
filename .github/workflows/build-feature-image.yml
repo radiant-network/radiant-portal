@@ -28,7 +28,6 @@ jobs:
           branch="${{ github.ref_name }}"
           release="${branch#*/}"
           release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
-          release=$(echo "$release" | sed 's/^[a-z]*-[0-9]*-//')
           namespace=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           ts=$(date +%s)
           echo "value=feature-${release}-${GITHUB_SHA:0:7}-${ts}" >> "$GITHUB_OUTPUT"
