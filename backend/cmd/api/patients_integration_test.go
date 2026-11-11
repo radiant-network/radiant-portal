@@ -22,7 +22,6 @@ var patientViewRoutes = []string{
 	"POST /:tenant/patients/search",
 	"GET /:tenant/patients/autocomplete",
 	"GET /:tenant/patients/filters",
-	"GET /:tenant/patients/statistics",
 	"GET /:tenant/patients/:patient_key",
 	"GET /:tenant/patients/:patient_key/treatments",
 	"GET /:tenant/patients/:patient_key/laboratory",

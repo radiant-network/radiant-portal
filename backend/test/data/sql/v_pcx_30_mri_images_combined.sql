@@ -15,5 +15,6 @@ create table v_pcx_30_mri_images_combined
     anatomical_site varchar(256) NULL,
     imaging_modality varchar(256) NULL,
     flywheel_url varchar(1000) NULL,
+    clinical_report_url varchar(1024) NULL,
     can_read_phi boolean NULL
 );

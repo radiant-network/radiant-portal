@@ -54,40 +54,6 @@ type PatientFilters struct {
 	GotRadiationEver       []FiltersValue `json:"got_radiation_ever" validate:"required"`      // Keys true, false; labels Yes, No
 }
 
-// PatientStatistics - Cohort analytics of the patient list
-// @Description Statistics on every patient the caller can see, regardless of the list filters
-// @Name PatientStatistics
-type PatientStatistics struct {
-	Total          int64                           `json:"total" validate:"required"`
-	ImagingCount   int64                           `json:"imaging_count" validate:"required"`
-	WithCasesCount int64                           `json:"with_cases_count" validate:"required"`
-	ByDiagnosis    []Aggregation                   `json:"by_diagnosis" validate:"required"`
-	ByAgeBucket    []Aggregation                   `json:"by_age_bucket" validate:"required"` // Keys 0-4, 5-9, 10-14, 15-19, 20+
-	ByProtocol     []Aggregation                   `json:"by_protocol" validate:"required"`   // Patients per protocol_name, a patient counted once per protocol
-	ByOrganization []PatientOrganizationVitalCount `json:"by_organization" validate:"required"`
-	Survival       []PatientSurvival               `json:"survival" validate:"required"` // Input of the Kaplan-Meier
-}
-
-// PatientOrganizationVitalCount - Vital status counts of one organization
-// @Description Alive and deceased patients of one organization
-// @Name PatientOrganizationVitalCount
-type PatientOrganizationVitalCount struct {
-	OrganizationCode string `json:"organization_code" validate:"required"`
-	OrganizationName string `json:"organization_name" validate:"required"`
-	Alive            int64  `json:"alive" validate:"required"`
-	Deceased         int64  `json:"deceased" validate:"required"`
-}
-
-// PatientSurvival - Survival of one patient
-// @Description Survival time of one patient, for the Kaplan-Meier
-// @Name PatientSurvival
-type PatientSurvival struct {
-	OrganizationCode       string  `json:"organization_code" validate:"required"`
-	CnsIntegratedDiagnosis *string `json:"cns_integrated_diagnosis"`
-	Days                   int     `json:"days" validate:"required"`
-	Event                  bool    `json:"event" validate:"required"` // true when deceased
-}
-
 // PatientDayDate - When something happened to a patient
 // @Description Age in days, and the calendar date when the caller can read PHI
 // @Name PatientDayDate
@@ -273,11 +239,11 @@ type PatientTherapy struct {
 }
 
 // PatientTrialEnrollment - Treatment protocol the patient was enrolled on
-// @Description Treatment protocol arm the patient was enrolled on, its medical therapies merged
+// @Description Enrollment of the patient on a treatment protocol, one per medical therapy record
 // @Name PatientTrialEnrollment
 type PatientTrialEnrollment struct {
-	Start              PatientDayDate `json:"start" validate:"required"` // Earliest start of its therapies
-	Stop               PatientDayDate `json:"stop" validate:"required"`  // Latest stop of its therapies
+	Start              PatientDayDate `json:"start" validate:"required"`
+	Stop               PatientDayDate `json:"stop" validate:"required"`
 	ProtocolName       string         `json:"protocol_name" validate:"required"`
 	ProtocolArm        *string        `json:"protocol_arm"` // null when Not Applicable
 	ChemotherapyAgents []string       `json:"chemotherapy_agents" validate:"required"`
@@ -332,11 +298,12 @@ type PatientTumorBoardSession struct {
 // @Name PatientImagingSession
 type PatientImagingSession struct {
 	PatientDayDate
-	SessionID       string  `json:"session_id" validate:"required"`
-	SessionName     string  `json:"session_name" validate:"required"`
-	AnatomicalSite  *string `json:"anatomical_site"`
-	ImagingModality *string `json:"imaging_modality"`
-	FlywheelURL     *string `json:"flywheel_url"`
+	SessionID         string  `json:"session_id" validate:"required"`
+	SessionName       string  `json:"session_name" validate:"required"`
+	AnatomicalSite    *string `json:"anatomical_site"`
+	ImagingModality   *string `json:"imaging_modality"`
+	FlywheelURL       *string `json:"flywheel_url"`
+	ClinicalReportURL *string `json:"clinical_report_url"`
 }
 
 // PatientTreatmentSummary - Initial treatment summary of a patient

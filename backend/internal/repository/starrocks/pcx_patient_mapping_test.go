@@ -166,20 +166,24 @@ func Test_pcxTrialEnrollments_KeepsOnlyEnrolledTherapies(t *testing.T) {
 	assert.Equal(t, []types.PatientTrialEnrollment{}, pcxTrialEnrollments([]types.PatientTherapy{followed, standard, missing}))
 }
 
-func Test_pcxTrialEnrollments_MergesTheTherapiesOfOneProtocolArm(t *testing.T) {
-	initial := enrolledTherapy("ACNS0333: Arm I", "ACNS0333", "Arm I", ptr(300), nil, "carboplatin", "vincristine")
-	initial.IsInitialTreatment = ptr(true)
+func Test_pcxTrialEnrollments_KeepsEachEnrollmentOnOneProtocolApart(t *testing.T) {
+	first := enrolledTherapy("Other", "Other", "Not Applicable", ptr(1267), ptr(1295), "carboplatin", "vincristine")
+	first.IsInitialTreatment = ptr(true)
 	enrollments := pcxTrialEnrollments([]types.PatientTherapy{
-		initial,
-		enrolledTherapy("ACNS0333: Arm I", "ACNS0333", "Arm I", ptr(100), ptr(250), "vincristine", "methotrexate"),
-		enrolledTherapy("ACNS0333: Arm I", "ACNS0333", "Arm I", nil, ptr(400)),
+		first,
+		enrolledTherapy("Other", "Other", "Not Applicable", ptr(1435), ptr(1554), "vincristine", "methotrexate"),
 	})
 
-	assert.Equal(t, []types.PatientTrialEnrollment{{
-		Start: types.PatientDayDate{Day: ptr(100)}, Stop: types.PatientDayDate{Day: ptr(400)},
-		ProtocolName: "ACNS0333", ProtocolArm: ptr("Arm I"),
-		ChemotherapyAgents: []string{"carboplatin", "vincristine", "methotrexate"}, IsInitialTreatment: true,
-	}}, enrollments)
+	assert.Equal(t, []types.PatientTrialEnrollment{
+		{
+			Start: types.PatientDayDate{Day: ptr(1435)}, Stop: types.PatientDayDate{Day: ptr(1554)},
+			ProtocolName: "Other", ChemotherapyAgents: []string{"vincristine", "methotrexate"},
+		},
+		{
+			Start: types.PatientDayDate{Day: ptr(1267)}, Stop: types.PatientDayDate{Day: ptr(1295)},
+			ProtocolName: "Other", ChemotherapyAgents: []string{"carboplatin", "vincristine"}, IsInitialTreatment: true,
+		},
+	}, enrollments)
 }
 
 func Test_pcxTrialEnrollments_KeepsTwoArmsOfOneProtocolApart(t *testing.T) {

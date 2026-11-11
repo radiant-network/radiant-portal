@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import useSWR from 'swr';
 
@@ -20,6 +20,7 @@ import {
   useConfig,
 } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
+import useIsMobile from '@/components/hooks/use-is-mobile';
 import { cn } from '@/components/lib/utils';
 import { savedFiltersApi } from '@/utils/api';
 
@@ -47,6 +48,7 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, swrId, child
   const { t } = useI18n();
   const [open, setOpen] = useState(defaultSidebarOpen);
   const config = useConfig();
+  const isMobile = useIsMobile();
   const aggregations: AggregationConfig = (config[appId] as AppsConfig).aggregations;
   const visibleAggregations = getVisibleAggregations(aggregations);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
@@ -57,6 +59,12 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, swrId, child
 
   useQueryBuilderGetPreferenceEffect({ appId, setPreference: setQbPreference });
   useSavedFilterGetPreferenceEffect({ savedFilterType, setPreference: setSavedFilterPreference });
+
+  useEffect(() => {
+    if (!isMobile) return;
+    setOpen(false);
+    setSelectedSidebarItem(null);
+  }, [isMobile]);
 
   // Fetch saved filters
   const savedFilterFetcher = useSWR<SavedFilter[]>(

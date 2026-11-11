@@ -1,4 +1,3 @@
-import { useId } from 'react';
 import { RotateCcw } from 'lucide-react';
 
 import { Button } from '@/components/base/shadcn/button';
@@ -11,45 +10,30 @@ import { useSavedFiltersContext } from './hooks/use-saved-filter';
 
 function DiscardFilterButton() {
   const { t } = useI18n();
-  const reasonId = useId();
   const dispatchQB = useQBDispatch();
   const { selectedSavedFilter, isUnsaved } = useSavedFiltersContext();
 
-  const getTooltipContent = () => {
-    if (!selectedSavedFilter || !isUnsaved) {
-      return t('common.saved_filter.no_discard_tooltip');
-    }
-    return t('common.saved_filter.discard_tooltip');
-  };
+  if (!selectedSavedFilter || !isUnsaved) return null;
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="inline-flex">
-          <Button
-            iconOnly
-            variant="ghost"
-            size="sm"
-            disabled={!selectedSavedFilter || !isUnsaved}
-            aria-label={t('a11y.saved_filter.discard')}
-            aria-describedby={!selectedSavedFilter || !isUnsaved ? reasonId : undefined}
-            onClick={() => {
-              dispatchQB({
-                type: QBActionType.LOAD_QUERIES,
-                payload: selectedSavedFilter?.queries,
-              });
-            }}
-          >
-            <RotateCcw />
-          </Button>
-          {(!selectedSavedFilter || !isUnsaved) && (
-            <span id={reasonId} hidden>
-              {t('common.saved_filter.no_discard_tooltip')}
-            </span>
-          )}
-        </span>
+        <Button
+          iconOnly
+          variant="ghost"
+          size="sm"
+          aria-label={t('a11y.saved_filter.discard')}
+          onClick={() => {
+            dispatchQB({
+              type: QBActionType.LOAD_QUERIES,
+              payload: selectedSavedFilter.queries,
+            });
+          }}
+        >
+          <RotateCcw />
+        </Button>
       </TooltipTrigger>
-      <TooltipContent>{getTooltipContent()}</TooltipContent>
+      <TooltipContent>{t('common.saved_filter.discard_tooltip')}</TooltipContent>
     </Tooltip>
   );
 }

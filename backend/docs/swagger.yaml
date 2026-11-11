@@ -3538,6 +3538,8 @@ components:
       properties:
         anatomical_site:
           type: string
+        clinical_report_url:
+          type: string
         date:
           example: "2020-01-31"
           format: date
@@ -3726,23 +3728,6 @@ components:
       - patient_key
       - vital_status
       type: object
-    PatientOrganizationVitalCount:
-      description: Alive and deceased patients of one organization
-      properties:
-        alive:
-          type: integer
-        deceased:
-          type: integer
-        organization_code:
-          type: string
-        organization_name:
-          type: string
-      required:
-      - alive
-      - deceased
-      - organization_code
-      - organization_name
-      type: object
     PatientPerformanceScore:
       description: Lansky or Karnofsky score. The date is when the result was released,
         not when it was assessed.
@@ -3798,54 +3783,6 @@ components:
       - stop
       - total_primary_dose
       type: object
-    PatientStatistics:
-      description: Statistics on every patient the caller can see, regardless of the
-        list filters
-      properties:
-        by_age_bucket:
-          description: Keys 0-4, 5-9, 10-14, 15-19, 20+
-          items:
-            $ref: '#/components/schemas/Aggregation'
-          type: array
-          uniqueItems: false
-        by_diagnosis:
-          items:
-            $ref: '#/components/schemas/Aggregation'
-          type: array
-          uniqueItems: false
-        by_organization:
-          items:
-            $ref: '#/components/schemas/PatientOrganizationVitalCount'
-          type: array
-          uniqueItems: false
-        by_protocol:
-          description: Patients per protocol_name, a patient counted once per protocol
-          items:
-            $ref: '#/components/schemas/Aggregation'
-          type: array
-          uniqueItems: false
-        imaging_count:
-          type: integer
-        survival:
-          description: Input of the Kaplan-Meier
-          items:
-            $ref: '#/components/schemas/PatientSurvival'
-          type: array
-          uniqueItems: false
-        total:
-          type: integer
-        with_cases_count:
-          type: integer
-      required:
-      - by_age_bucket
-      - by_diagnosis
-      - by_organization
-      - by_protocol
-      - imaging_count
-      - survival
-      - total
-      - with_cases_count
-      type: object
     PatientSurgery:
       description: Surgery of a patient
       properties:
@@ -3863,23 +3800,6 @@ components:
         is_initial_treatment:
           description: null when Not Reported
           type: boolean
-      type: object
-    PatientSurvival:
-      description: Survival time of one patient, for the Kaplan-Meier
-      properties:
-        cns_integrated_diagnosis:
-          type: string
-        days:
-          type: integer
-        event:
-          description: true when deceased
-          type: boolean
-        organization_code:
-          type: string
-      required:
-      - days
-      - event
-      - organization_code
       type: object
     PatientTherapy:
       description: Medical therapy of a patient
@@ -4026,8 +3946,8 @@ components:
       - verdict
       type: object
     PatientTrialEnrollment:
-      description: Treatment protocol arm the patient was enrolled on, its medical
-        therapies merged
+      description: Enrollment of the patient on a treatment protocol, one per medical
+        therapy record
       properties:
         chemotherapy_agents:
           items:
@@ -11599,54 +11519,6 @@ paths:
       security:
       - bearerauth: []
       summary: Search PCX patients
-      tags:
-      - patients
-  /{tenant}/patients/statistics:
-    get:
-      description: Retrieve PatientStatistics on every PCX patient the caller
-        can see, regardless of the list filters
-      operationId: patientsStatistics
-      parameters:
-      - description: Tenant code
-        in: path
-        name: tenant
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PatientStatistics'
-          description: OK
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Forbidden
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-          headers:
-            X-Correlation-ID:
-              description: Unique id correlating this error with the server-side log
-                entry
-              schema:
-                type: string
-      security:
-      - bearerauth: []
-      summary: Get PatientStatistics cohort analytics
       tags:
       - patients
   /{tenant}/roles:

@@ -672,6 +672,7 @@
       "covgene": "Coverage by Gene Report",
       "qcrun": "Sequencing Run QC Report",
       "exomiser": "Exomiser Report",
+      "exomiser_cnv": "Exomiser CNV Report",
       "clinical_report": "Clinical Report",
       "aggqc": "Aggregate Quality Control Report",
       "chrmr": "Mitochondrial Report",
@@ -778,7 +779,6 @@
         "default": "Save filter"
       },
       "discard_tooltip": "Discard unsaved changes",
-      "no_discard_tooltip": "No changes to discard",
       "no_saved_filters": "You have no saved filters",
       "untitled_filter": "Untitled filter",
       "notifications": {
@@ -1420,7 +1420,7 @@
         "organizations": "Organizations",
         "documents": "Documents",
         "document_types": "Document types",
-        "view_details": "View details",
+        "view_external_records": "View external records",
         "networks": "TEFCA / Carequality",
         "header_summary": "{{orgs}} organizations · {{docs}} documents",
         "network": {
@@ -1428,9 +1428,15 @@
           "carequality": "Carequality"
         },
         "not_connected": {
-          "title": "No connection found",
-          "description": "Health information exchange not linked"
+          "description": "External records have not yet been linked for this patient."
         }
+      },
+      "clinical_note_extraction": {
+        "title": "Clinical note extraction",
+        "description": "Process this patient's clinical notes and extract the findings into structured FHIR data.",
+        "run": "Run extraction",
+        "iframe_title": "Clinical note extraction output",
+        "open_in_new_tab": "Open in new tab"
       }
     },
     "timeline": {
@@ -1488,7 +1494,8 @@
         "body_part": "Body Part",
         "body_part_tooltip": "Body Part Examined",
         "viewer": "Viewer"
-      }
+      },
+      "livai_report": "LivAI Report"
     },
     "clinical_trials": {
       "title": "Previous enrollment",
@@ -1520,17 +1527,10 @@
     },
     "tumor_board": {
       "title": "Tumor board sessions",
-      "date_tooltip": "Date of the Tumor Board",
       "create_presentation": "Create Presentation",
-      "columns": {
-        "date": "Date",
-        "reason": "Reason",
-        "diagnosis": "Diagnosis",
-        "consensus": "Consensus",
-        "recommendations": "Recommendations",
-        "status": "Status",
-        "report": "Report"
-      }
+      "consensus": "Consensus",
+      "recommendations": "Recommendations",
+      "empty": "No tumor board session for this patient."
     },
     "laboratory": {
       "date": {
@@ -2255,9 +2255,9 @@
     "canonical_transcript": "Canonical transcript",
     "igv": {
       "title": "Alignment and variant",
-      "chrm_hidden_reads": {
-        "title": "Reads hidden on chrM",
-        "description": "Some tracks are very deep on chrM. To keep IGV responsive, their reads show only in views of {{window}} bp or less. Zoom in to see them."
+      "dense_reads_hidden": {
+        "title": "Reads hidden in a dense region",
+        "description": "Some tracks are very deep here. To keep IGV responsive, their reads show only in views of {{window}} bp or less. Zoom in to see them."
       },
       "failed_tracks": {
         "title_one": "A track could not be loaded",

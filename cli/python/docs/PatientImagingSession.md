@@ -7,6 +7,7 @@ Imaging session of a patient
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **anatomical_site** | **str** |  | [optional] 
+**clinical_report_url** | **str** |  | [optional] 
 **var_date** | **date** |  | [optional] 
 **day** | **int** |  | [optional] 
 **flywheel_url** | **str** |  | [optional] 

@@ -89,7 +89,14 @@ const IGVDialog = ({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {renderTrigger?.(() => setOpen(true))}
-      <DialogContent size="full" variant="stickyHeader">
+      <DialogContent
+        size="full"
+        variant="stickyHeader"
+        // The toasts of IGV sit outside the dialog: closing one must not close it.
+        onInteractOutside={event => {
+          if ((event.target as Element | null)?.closest('[data-sonner-toaster]')) event.preventDefault();
+        }}
+      >
         {/* The cached response of an earlier opening may hold expired URLs: IGV waits for the refetch. */}
         {fetchIGV.isValidating ? (
           <DialogBody className="flex items-center justify-center">

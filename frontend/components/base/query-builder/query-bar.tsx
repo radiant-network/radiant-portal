@@ -21,7 +21,6 @@ import {
   useQBContext,
   useQBDispatch,
   useQBSettings,
-  useQBSqonsCount,
 } from './hooks/use-query-builder';
 import { isBoolean, isCombinedQuery, isRange, isSearchField, isSqonEmpty } from './libs/sqon';
 import { getColorByIndex } from './libs/theme';
@@ -34,11 +33,11 @@ import SearchQueryPill from './pills/search-query-pill';
 import type { ISqonGroupFacet, ISyntheticSqon, IValueFacet, TSyntheticSqonContentValue } from './type';
 
 const queryBar = tv({
-  base: 'flex flex-1 py-2 px-3 border ',
+  base: 'flex flex-1 py-1.5 px-3 border ',
   variants: {
     active: {
-      true: ['border-primary/75 bg-primary/10'],
-      false: ['border-muted-foreground/20 bg-muted/35 text-muted-foreground'],
+      true: ['border-primary/50 bg-primary/10'],
+      false: ['border-input bg-muted/35 text-muted-foreground'],
     },
   },
   defaultVariants: {
@@ -89,17 +88,17 @@ function factory(uuid: string, content: TSyntheticSqonContentValue, aggregations
 function QueryBar({ index, sqon, swrId }: QueryBarProps) {
   const { t } = useI18n();
   const dispatch = useQBDispatch();
-  const sqonsCount = useQBSqonsCount();
-  const { activeQueryId } = useQBContext();
+  const { activeQueryId, sqons } = useQBContext();
   const { combinedQueries } = useQBSettings();
   const { fetcher } = useQBContext();
   const { selectedQueries } = useQBCache();
   const aggregations = useQBAggregations();
   const active = useMemo(() => activeQueryId === sqon.id, [activeQueryId]);
+  const nonEmptySqonsCount = useMemo(() => sqons.filter(s => !isSqonEmpty(s)).length, [sqons]);
   const backgroundColor = useMemo(
     () => ({
-      'border-primary/75 bg-primary/10': active,
-      'border-muted-foreground/20 bg-muted/35 text-muted-foreground': !active,
+      'border-primary/50 bg-primary/10': active,
+      'border-input bg-muted/35 text-muted-foreground': !active,
     }),
     [active],
   );
@@ -227,8 +226,8 @@ function QueryBar({ index, sqon, swrId }: QueryBarProps) {
         <>
           {/* selector */}
           <div
-            className={cn('flex gap-2 items-center py-4 px-4 border-l border-t border-b', backgroundColor, {
-              hidden: sqonsCount <= 1,
+            className={cn('flex gap-2 items-center px-3 border-l border-t border-b', backgroundColor, {
+              hidden: nonEmptySqonsCount < 2,
             })}
           >
             <Checkbox
@@ -242,10 +241,10 @@ function QueryBar({ index, sqon, swrId }: QueryBarProps) {
           </div>
 
           {/* query */}
-          <div className={cn('flex flex-1 justify-between py-3 px-3 border', backgroundColor)}>
-            <div className="flex flex-1 flex-wrap max-h-[30vh]">
+          <div className={cn('flex flex-1 justify-between gap-2 py-1.5 px-3 border', backgroundColor)}>
+            <div className="flex flex-1 flex-wrap gap-0.5 max-h-[30vh]">
               {sqon.content.map((content, index) => (
-                <div key={index} className="flex mt-1">
+                <div key={index} className="flex">
                   {factory(sqon.id, content, aggregations)}
                   {index < sqon.content.length - 1 && <CombinerOperator sqon={sqon} />}
                 </div>
@@ -253,25 +252,25 @@ function QueryBar({ index, sqon, swrId }: QueryBarProps) {
             </div>
 
             {/* count */}
-            <div className="flex items-center gap-1" data-cy="query-count">
+            <div className="flex items-center gap-1 text-xs" data-cy="query-count">
               {fetchTotal.isLoading ? (
                 <Spinner />
               ) : (
                 <>
-                  <VariantIcon size={14} />
-                  <span className="font-medium">{numberFormatWithAbbrv(fetchTotal.data?.count ?? 0)}</span>
+                  <VariantIcon size={16} />
+                  <span className="font-semibold">{numberFormatWithAbbrv(fetchTotal.data?.count ?? 0)}</span>
                 </>
               )}
             </div>
           </div>
 
           {/* actions */}
-          <div className={cn('flex items-center py-2 px-3 border-r border-t border-b', backgroundColor)}>
+          <div className={cn('flex items-center gap-1 px-2 border-r border-t border-b', backgroundColor)}>
             <Button
               data-cy="query-duplicate-button"
               iconOnly
               variant="ghost"
-              size="sm"
+              size="2xs"
               aria-label={t('a11y.query_bar.duplicate')}
               onClick={handleDuplicate}
             >
@@ -284,7 +283,7 @@ function QueryBar({ index, sqon, swrId }: QueryBarProps) {
                   data-cy="query-delete-button"
                   iconOnly
                   variant="ghost"
-                  size="sm"
+                  size="2xs"
                   aria-label={t('a11y.query_bar.delete')}
                 >
                   <TrashIcon />

@@ -314,7 +314,6 @@ var expectedTenantActions = map[string]string{
 	"POST /:tenant/patients/search":                                                    types.ActionSearchCase,
 	"GET /:tenant/patients/autocomplete":                                               types.ActionSearchCase,
 	"GET /:tenant/patients/filters":                                                    types.ActionSearchCase,
-	"GET /:tenant/patients/statistics":                                                 types.ActionSearchCase,
 	"GET /:tenant/patients/:patient_key":                                               types.ActionSearchCase,
 	"GET /:tenant/patients/:patient_key/treatments":                                    types.ActionSearchCase,
 	"GET /:tenant/patients/:patient_key/laboratory":                                    types.ActionSearchCase,

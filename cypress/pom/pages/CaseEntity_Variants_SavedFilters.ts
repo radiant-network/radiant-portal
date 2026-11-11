@@ -195,6 +195,15 @@ const generateSavedFiltersFunctions = (facetsActions: typeof CaseEntity_Variants
       cy.get(`${CommonSelectors.querybuilderHeader} button:has(${iconSelector})`).should(shouldBeDisabled);
       cy.get(`${CommonSelectors.querybuilderHeader} button:has(${iconSelector})`).should(shouldBeDirty, CommonSelectors.dirtyClass);
     },
+    /**
+     * Checks whether the icon is displayed in the query builder header.
+     * @param name The icon name (e.g.: discard)
+     * @param shouldExist Whether the icon should exist.
+     */
+    shouldShowIcon(name: string, shouldExist: boolean) {
+      const iconSelector = CommonSelectors[`${name}Icon` as keyof typeof CommonSelectors];
+      cy.get(`${CommonSelectors.querybuilderHeader} ${iconSelector}`).should(shouldExist ? 'exist' : 'not.exist');
+    },
   };
 
   return { actions, validations };

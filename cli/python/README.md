@@ -177,7 +177,6 @@ Class | Method | HTTP request | Description
 *PatientsApi* | [**patient_tumor_board_deck_download_url**](docs/PatientsApi.md#patient_tumor_board_deck_download_url) | **GET** /{tenant}/patients/{patient_key}/tumor_board/deck/download_url | Get a presigned URL to download the tumor board deck of a patient
 *PatientsApi* | [**patient_tumor_board_report_download_url**](docs/PatientsApi.md#patient_tumor_board_report_download_url) | **GET** /{tenant}/patients/{patient_key}/tumor_board/sessions/{session_id}/download_url | Get a presigned URL to download the report of a tumor board session
 *PatientsApi* | [**patients_filters**](docs/PatientsApi.md#patients_filters) | **GET** /{tenant}/patients/filters | Get PatientFilters patient list filters
-*PatientsApi* | [**patients_statistics**](docs/PatientsApi.md#patients_statistics) | **GET** /{tenant}/patients/statistics | Get PatientStatistics cohort analytics
 *PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
 *PatientsApi* | [**put_patient_batch**](docs/PatientsApi.md#put_patient_batch) | **PUT** /{tenant}/patients/batch | Update existing patients (batch)
 *PatientsApi* | [**search_patients**](docs/PatientsApi.md#search_patients) | **POST** /{tenant}/patients/search | Search PCX patients
@@ -340,12 +339,9 @@ Class | Method | HTTP request | Description
  - [PatientLabResult](docs/PatientLabResult.md)
  - [PatientLaboratory](docs/PatientLaboratory.md)
  - [PatientListItem](docs/PatientListItem.md)
- - [PatientOrganizationVitalCount](docs/PatientOrganizationVitalCount.md)
  - [PatientPerformanceScore](docs/PatientPerformanceScore.md)
  - [PatientRadiation](docs/PatientRadiation.md)
- - [PatientStatistics](docs/PatientStatistics.md)
  - [PatientSurgery](docs/PatientSurgery.md)
- - [PatientSurvival](docs/PatientSurvival.md)
  - [PatientTherapy](docs/PatientTherapy.md)
  - [PatientTreatmentSummary](docs/PatientTreatmentSummary.md)
  - [PatientTreatments](docs/PatientTreatments.md)

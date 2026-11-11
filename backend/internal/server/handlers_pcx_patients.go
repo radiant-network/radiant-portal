@@ -11,12 +11,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
-// The PCX patient handlers not implemented yet answer 501; each story replaces its handler body.
-
-func notImplemented(c *gin.Context) {
-	c.JSON(http.StatusNotImplemented, types.ApiError{Status: http.StatusNotImplemented, Message: "Not Implemented"})
-}
-
 // SearchPatientsHandler handles search of PCX patients
 // @Summary Search PCX patients
 // @Id searchPatients
@@ -130,24 +124,6 @@ func PatientsFiltersHandler(repo pcxPatientsFiltersReader) gin.HandlerFunc {
 
 type pcxPatientsFiltersReader interface {
 	GetPatientsFilters(ctx context.Context) (*types.PatientFilters, error)
-}
-
-// PatientsStatisticsHandler handles retrieving the cohort analytics
-// @Summary Get types.PatientStatistics cohort analytics
-// @Id patientsStatistics
-// @Description Retrieve types.PatientStatistics on every PCX patient the caller can see, regardless of the list filters
-// @Tags patients
-// @Security bearerauth
-// @Param tenant path string true "Tenant code"
-// @Produce json
-// @Success 200 {object} types.PatientStatistics
-// @Failure 401 {object} types.ApiError
-// @Failure 403 {object} types.ApiError
-// @Failure 500 {object} types.ApiError
-// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
-// @Router /{tenant}/patients/statistics [get]
-func PatientsStatisticsHandler() gin.HandlerFunc {
-	return notImplemented
 }
 
 // PatientEntityHandler handles retrieving a PCX patient by its key

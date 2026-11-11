@@ -41,8 +41,10 @@ export const IGV = {
     },
     /**
      * Validates the display of the track order.
+     * @param context The context IGV is opened from: the CNV one shows public tracks below the case tracks.
      */
-    shouldHaveTracks() {
+    shouldHaveTracks(context: 'snv' | 'cnv' = 'snv') {
+      const publicTracks = context === 'cnv' ? [CommonTexts.en.igvTrackDGV, CommonTexts.en.igvTrackClinVarSVs, CommonTexts.en.igvTrackClinGenRegionHaploinsufficiency, CommonTexts.en.igvTrackClinGenRegionTriplosensitivity] : [];
       findInIGV(CommonSelectors.igvTrack).eq(0).contains(CommonTexts.en.igvTrackRefseq).should('exist');
       findInIGV(CommonSelectors.igvTrack).eq(1).contains(CommonTexts.en.igvTrackCNVs(data.variantGermline.igv.proband, 'proband')).should('exist');
       findInIGV(CommonSelectors.igvTrack).eq(2).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.proband, 'proband')).should('exist');
@@ -50,7 +52,15 @@ export const IGV = {
       findInIGV(CommonSelectors.igvTrack).eq(4).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.mother, 'mother')).should('exist');
       findInIGV(CommonSelectors.igvTrack).eq(5).contains(CommonTexts.en.igvTrackCNVs(data.variantGermline.igv.father, 'father')).should('exist');
       findInIGV(CommonSelectors.igvTrack).eq(6).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.father, 'father')).should('exist');
-      findInIGV(CommonSelectors.igvTrack).eq(7).should('not.exist');
+      publicTracks.forEach((name, index) => {
+        findInIGV(CommonSelectors.igvTrack)
+          .eq(7 + index)
+          .contains(name)
+          .should('exist');
+      });
+      findInIGV(CommonSelectors.igvTrack)
+        .eq(7 + publicTracks.length)
+        .should('not.exist');
     },
     /**
      * Validates the window size value, which must not be the minimum value.

@@ -1,12 +1,13 @@
 import { useState } from 'react';
-import { Unlink } from 'lucide-react';
+import { Unplug } from 'lucide-react';
 
-import Empty from '@/components/base/empties/empty';
 import { Button } from '@/components/base/shadcn/button';
-import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
+import { Separator } from '@/components/base/shadcn/separator';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
 
+import carequalityLogo from '../../assets/carequality.png';
 import tefcaLogo from '../../assets/tefca.png';
 import { usePatientExternalRecords } from '../hooks/use-patient-entity';
 
@@ -22,10 +23,19 @@ function ExternalRecordsCard() {
   return (
     <Card>
       <CardHeader bordered>
-        <CardTitle>{t('patient_entity.sidebar.external_records.title')}</CardTitle>
-        <CardAction>
-          <img src={tefcaLogo} alt="TEFCA" className="h-5 w-auto" />
-        </CardAction>
+        <CardTitle className="flex items-center gap-3">
+          <img
+            src={tefcaLogo}
+            alt={t('patient_entity.sidebar.external_records.network.tefca')}
+            className="h-5 w-auto"
+          />
+          <Separator orientation="vertical" className="h-5" />
+          <img
+            src={carequalityLogo}
+            alt={t('patient_entity.sidebar.external_records.network.carequality')}
+            className="h-5 w-auto"
+          />
+        </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col">
         <CardBody isLoading={isLoading} data={data} onViewDetails={() => setModalOpen(true)} />
@@ -64,13 +74,14 @@ function CardBody({ isLoading, data, onViewDetails }: CardBodyProps) {
 
   if (!data || data.organizations.length === 0) {
     return (
-      <Empty
-        size="mini"
-        iconType="custom"
-        icon={Unlink}
-        title={t('patient_entity.sidebar.external_records.not_connected.title')}
-        description={t('patient_entity.sidebar.external_records.not_connected.description')}
-      />
+      <div className="flex flex-col items-center gap-4 py-6">
+        <div className="flex items-center justify-center rounded-md border p-2">
+          <Unplug className="size-6" />
+        </div>
+        <p className="text-center text-xs text-muted-foreground">
+          {t('patient_entity.sidebar.external_records.not_connected.description')}
+        </p>
+      </div>
     );
   }
 
@@ -84,7 +95,7 @@ function CardBody({ isLoading, data, onViewDetails }: CardBodyProps) {
       <CountRow label={t('patient_entity.sidebar.external_records.documents')} value={data.document_count} />
       <CountRow label={t('patient_entity.sidebar.external_records.document_types')} value={data.document_class_count} />
       <Button variant="outline" size="sm" className="mt-3 w-full" onClick={onViewDetails}>
-        {t('patient_entity.sidebar.external_records.view_details')}
+        {t('patient_entity.sidebar.external_records.view_external_records')}
       </Button>
     </>
   );

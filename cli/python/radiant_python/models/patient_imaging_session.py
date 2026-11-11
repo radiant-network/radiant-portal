@@ -28,13 +28,14 @@ class PatientImagingSession(BaseModel):
     Imaging session of a patient
     """ # noqa: E501
     anatomical_site: Optional[StrictStr] = None
+    clinical_report_url: Optional[StrictStr] = None
     var_date: Optional[date] = Field(default=None, alias="date")
     day: Optional[StrictInt] = None
     flywheel_url: Optional[StrictStr] = None
     imaging_modality: Optional[StrictStr] = None
     session_id: StrictStr
     session_name: StrictStr
-    __properties: ClassVar[List[str]] = ["anatomical_site", "date", "day", "flywheel_url", "imaging_modality", "session_id", "session_name"]
+    __properties: ClassVar[List[str]] = ["anatomical_site", "clinical_report_url", "date", "day", "flywheel_url", "imaging_modality", "session_id", "session_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -88,6 +89,7 @@ class PatientImagingSession(BaseModel):
 
         _obj = cls.model_validate({
             "anatomical_site": obj.get("anatomical_site"),
+            "clinical_report_url": obj.get("clinical_report_url"),
             "date": obj.get("date"),
             "day": obj.get("day"),
             "flywheel_url": obj.get("flywheel_url"),

@@ -146,7 +146,6 @@
     },
     "examplePrompts": [
       "Show event-free survival curves by diagnosis.",
-      "Compare overall survival for medulloblastoma subtypes.",
       "How many patients are there by diagnosis?",
       "How many patients come from each data source?",
       "Which sites contributed the most patients?",

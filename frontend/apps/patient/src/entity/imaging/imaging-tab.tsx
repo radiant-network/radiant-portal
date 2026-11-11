@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 
-import DisplayTable from '@/components/base/data-table/display-table';
+import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
 
 import { usePatientImaging } from '../hooks/use-patient-entity';
 
-import { getImagingColumns } from './imaging-table-settings';
+import { defaultImagingSettings, getImagingColumns } from './imaging-table-settings';
 
 function ImagingTab() {
   const { t } = useI18n();
@@ -25,8 +25,17 @@ function ImagingTab() {
           <CardTitle>{t('patient_entity.imaging.title_count', { count: rows.length })}</CardTitle>
         )}
       </CardHeader>
-      <CardContent className="flex flex-col gap-2">
-        <DisplayTable data={rows} columns={columns} loading={isLoading} fullHeight />
+      <CardContent>
+        <DataTable
+          id="patient-imaging-sessions"
+          columns={columns}
+          data={rows}
+          defaultColumnSettings={defaultImagingSettings}
+          pagination={{ type: 'locale', state: { pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE } }}
+          total={rows.length}
+          loadingStates={{ total: isLoading, list: isLoading }}
+          tableIndexResultPosition="bottom"
+        />
       </CardContent>
     </Card>
   );

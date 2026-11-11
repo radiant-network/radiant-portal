@@ -177,12 +177,9 @@ from radiant_python.models.patient_key_dates import PatientKeyDates
 from radiant_python.models.patient_lab_result import PatientLabResult
 from radiant_python.models.patient_laboratory import PatientLaboratory
 from radiant_python.models.patient_list_item import PatientListItem
-from radiant_python.models.patient_organization_vital_count import PatientOrganizationVitalCount
 from radiant_python.models.patient_performance_score import PatientPerformanceScore
 from radiant_python.models.patient_radiation import PatientRadiation
-from radiant_python.models.patient_statistics import PatientStatistics
 from radiant_python.models.patient_surgery import PatientSurgery
-from radiant_python.models.patient_survival import PatientSurvival
 from radiant_python.models.patient_therapy import PatientTherapy
 from radiant_python.models.patient_treatment_summary import PatientTreatmentSummary
 from radiant_python.models.patient_treatments import PatientTreatments

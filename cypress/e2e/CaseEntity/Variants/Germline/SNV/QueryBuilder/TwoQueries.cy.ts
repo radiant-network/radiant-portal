@@ -13,6 +13,7 @@ describe('Case Entity - Variants - Germline - SNV - Query builder - Two queries'
 
   it('Select the active query', () => {
     setupTest();
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowQuerySelectCheckboxes(true /*shouldShow*/);
     CaseEntity_Variants_QueryBuilder.snv.actions.setActiveQuery(0);
     CaseEntity_Variants_QueryBuilder.snv.validations.shouldHaveChromosomePill();
 

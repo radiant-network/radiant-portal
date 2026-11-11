@@ -16,21 +16,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_PcxPatientHandlers_NotImplementedYet(t *testing.T) {
-	handlers := map[string]gin.HandlerFunc{
-		"statistics": PatientsStatisticsHandler(),
-	}
-	for name, handler := range handlers {
-		router := gin.Default()
-		router.GET("/", handler)
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/", nil))
-
-		assert.Equal(t, http.StatusNotImplemented, w.Code, name)
-		assert.JSONEq(t, `{"status":501,"message":"Not Implemented"}`, w.Body.String(), name)
-	}
-}
-
 type pcxPatientsSearcherMock struct {
 	patients []types.PatientListItem
 	count    int64
@@ -484,7 +469,7 @@ func Test_PatientImagingHandler_ReturnsTheSessions(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, testPatientKey, repo.key)
 	assert.JSONEq(t, `{"sessions": [{"day": null, "date": null, "session_id": "ses-1", "session_name": "MRI Brain",
-		"anatomical_site": null, "imaging_modality": null, "flywheel_url": null}]}`, w.Body.String())
+		"anatomical_site": null, "imaging_modality": null, "flywheel_url": null, "clinical_report_url": null}]}`, w.Body.String())
 }
 
 func Test_PatientExternalRecordsHandler_ReturnsTheOrganizations(t *testing.T) {
