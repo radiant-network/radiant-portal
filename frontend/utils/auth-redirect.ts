@@ -58,3 +58,28 @@ const browserEnv = (): RedirectEnv => ({
 
 export const redirectToLogout = (): boolean => redirectToLogoutWith(browserEnv());
 export const resetAuthRedirectAttempts = () => resetAuthRedirectAttemptsWith(browserEnv());
+
+const EDGE_PROBE_PATH = '/health-check';
+
+/**
+ * AWS Verified Access answers requests made with an expired session by a cross-origin 303 to the IdP,
+ * which fetch/XHR only surface as a CORS network error. A same-origin probe with `redirect: 'manual'`
+ * tells that case apart from a real outage: it resolves as an opaque redirect instead of throwing.
+ */
+export const isEdgeSessionExpiredWith = async (fetchFn: typeof fetch): Promise<boolean> => {
+  try {
+    const response = await fetchFn(EDGE_PROBE_PATH, { redirect: 'manual', cache: 'no-store', credentials: 'include' });
+    return response.type === 'opaqueredirect';
+  } catch {
+    return false;
+  }
+};
+
+export const isEdgeSessionExpired = (): Promise<boolean> => isEdgeSessionExpiredWith(fetch);
+
+/**
+ * A full page load lets the browser follow the edge redirect to the IdP and back. Shares the attempt
+ * counter with redirectToLogout so a misdiagnosed outage cannot loop.
+ */
+export const reloadForEdgeReauth = (): boolean =>
+  redirectToLogoutWith({ ...browserEnv(), navigate: () => window.location.reload() });

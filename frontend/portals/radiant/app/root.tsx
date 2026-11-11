@@ -9,7 +9,7 @@ import { ConfigProvider, type PortalConfig } from '@/components/cores/applicatio
 import { BetaFeatureProvider } from '@/components/hooks/beta-feature-provider';
 import { detectLanguageFromRequest } from '@/components/hooks/i18n.server';
 import { I18nProvider } from '@/components/hooks/I18nProvider';
-import { redirectToLogout } from '@/utils/auth-redirect';
+import { isEdgeSessionExpired, redirectToLogout, reloadForEdgeReauth } from '@/utils/auth-redirect';
 
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
@@ -121,9 +121,25 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   const unauthorized = isUnauthorizedError(error);
   const [redirecting, setRedirecting] = useState(unauthorized);
 
+  // A failed client-side data request (e.g. an expired Verified Access session) surfaces as a raw
+  // fetch TypeError. Server-rendered errors never match, so hydration stays consistent.
+  const maybeEdgeExpired = !unauthorized && typeof window !== 'undefined' && error instanceof TypeError;
+  const [edgeCheckPending, setEdgeCheckPending] = useState(maybeEdgeExpired);
+
   useEffect(() => {
     if (unauthorized) setRedirecting(redirectToLogout());
   }, [unauthorized]);
+
+  useEffect(() => {
+    if (!maybeEdgeExpired) return;
+    let cancelled = false;
+    isEdgeSessionExpired().then(expired => {
+      if (!cancelled) setEdgeCheckPending(expired && reloadForEdgeReauth());
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [maybeEdgeExpired]);
 
   if (unauthorized && redirecting) {
     return (
@@ -132,6 +148,8 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
       </main>
     );
   }
+
+  if (edgeCheckPending) return <main className="pt-16 p-4 container mx-auto" />;
 
   let message = 'Oops!';
   let details = 'An unexpected error occurred.';
