@@ -1,0 +1,4 @@
+packageName: radiant_python
+packageVersion: 0.1.0
+projectName: radiant-python-cli
+generateSourceCodeOnly: false

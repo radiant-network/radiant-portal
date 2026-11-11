@@ -1,7 +1,10 @@
-# Radiant monorepo: one moon project per module. Chapter 1: the portal (backend + frontend).
+# Radiant monorepo: one moon project per module. Chapter 2: + the ETL, the MCP and the portal's Python client.
 projects:
   backend: 'backend'
   frontend: 'frontend'
+  etl: 'etl'
+  mcp: 'mcp'
+  python-client: 'clients/python'
 
 vcs:
   defaultBranch: 'main'

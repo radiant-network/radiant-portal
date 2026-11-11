@@ -1,0 +1,52 @@
+# CasePatientClinicalInformation
+
+Patient clinical information to display in Case Entity
+
+## Properties
+
+Name | Type | Description | Notes
+------------ | ------------- | ------------- | -------------
+**affected_status_code** | **str** |  | 
+**consanguinity** | [**ValueSetItem**](ValueSetItem.md) |  | [optional] 
+**date_of_birth** | **str** |  | [optional] 
+**estimated_due_date** | **str** |  | [optional] 
+**ethnicities** | [**List[ValueSetItem]**](ValueSetItem.md) |  | [optional] 
+**exams** | [**List[CaseExam]**](CaseExam.md) |  | [optional] 
+**family_history** | [**List[CaseFamilyHistory]**](CaseFamilyHistory.md) |  | [optional] 
+**fetus_id** | **int** |  | [optional] 
+**first_name** | **str** |  | [optional] 
+**jhn** | **str** |  | [optional] 
+**last_menstrual_period** | **str** |  | [optional] 
+**last_name** | **str** |  | [optional] 
+**life_status_code** | **str** |  | 
+**non_observed_phenotypes** | [**List[Term]**](Term.md) |  | [optional] 
+**notes** | **List[str]** |  | [optional] 
+**observed_phenotypes** | [**List[Term]**](Term.md) |  | [optional] 
+**organization_code** | **str** |  | [optional] 
+**organization_name** | **str** |  | [optional] 
+**patient_id** | **int** |  | [optional] 
+**patient_key** | **str** | Key of the PCX patient page, absent when the patient view is off or the caller cannot see the patient there | [optional] 
+**relationship_to_proband** | **str** |  | 
+**sex_code** | **str** |  | 
+**submitter_patient_id** | **str** |  | [optional] 
+
+## Example
+
+```python
+from radiant_python.models.case_patient_clinical_information import CasePatientClinicalInformation
+
+# TODO update the JSON string below
+json = "{}"
+# create an instance of CasePatientClinicalInformation from a JSON string
+case_patient_clinical_information_instance = CasePatientClinicalInformation.from_json(json)
+# print the JSON string representation of the object
+print(CasePatientClinicalInformation.to_json())
+
+# convert the object into a dict
+case_patient_clinical_information_dict = case_patient_clinical_information_instance.to_dict()
+# create an instance of CasePatientClinicalInformation from a dict
+case_patient_clinical_information_from_dict = CasePatientClinicalInformation.from_dict(case_patient_clinical_information_dict)
+```
+[[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
+
+

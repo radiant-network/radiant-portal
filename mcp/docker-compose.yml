@@ -1,0 +1,116 @@
+services:
+  keycloak:
+    # 26.6.0+ required: fastmcp's KeycloakAuthProvider relies on Keycloak's DCR
+    # fix for MCP clients (keycloak PR #45309), first shipped in 26.6.0.
+    image: quay.io/keycloak/keycloak:26.7
+    command: start-dev --import-realm  --http-enabled=true
+    environment:
+      KC_HEALTH_ENABLED: "true"
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: keycloak
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HTTP_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak-import:/opt/keycloak/data/import:ro
+    # The keycloak:26 image has bash (with /dev/tcp) but no curl/wget, so probe
+    # the management health port over a raw socket and match the HTTP 200 status.
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && printf 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  starrocks:
+    image: starrocks/allin1-ubuntu:4.0.16
+    ports:
+      - "9030:9030"
+      - "8030:8030"
+    volumes:
+      - ./tests/integration/tls/starrocks.jks:/data/deploy/starrocks/fe/conf/starrocks.jks:ro
+      - ./tests/integration/fe-ssl.conf:/fe-ssl.conf:ro
+    # Append SSL config to fe.conf before the entrypoint runs
+    entrypoint:
+      - bash
+      - -c
+      - |
+        cat /fe-ssl.conf >> /data/deploy/starrocks/fe/conf/fe.conf
+        exec /bin/sh -c ./entrypoint.sh
+    healthcheck:
+      test: ["CMD", "mysql", "-h", "127.0.0.1", "-P", "9030", "-u", "root", "-e", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  starrocks-init:
+    image: starrocks/allin1-ubuntu:4.0.16
+    depends_on:
+      starrocks:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+#        condition: service_healthy
+    volumes:
+      - ./tests/integration/init-starrocks.sh:/init-starrocks.sh:ro
+    entrypoint: ["bash", "/init-starrocks.sh"]
+    restart: "no"
+
+  radiant-mcp:
+    build: .
+    depends_on:
+      starrocks-init:
+        condition: service_completed_successfully
+      # KeycloakAuthProvider fetches Keycloak's JWKS at startup, so Keycloak
+      # must be serving before this container boots.
+      keycloak:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      # StarRocks connection target only — NO credentials. Every query runs
+      # under the caller's JWT identity; this component holds no StarRocks user.
+      STARROCKS_HOST: starrocks
+      STARROCKS_PORT: "9030"
+      STARROCKS_DB: test_db
+      # OAuth 2.1 / Keycloak — native KeycloakAuthProvider (pure JWT verifier).
+      # The server holds no client id/secret; it only validates tokens against
+      # the realm's JWKS. KEYCLOAK_AUDIENCE is intentionally unset: setting it
+      # would require aud=<value> on every token, which DCR-registered clients
+      # (their own client_id, no audience mapper) don't carry.
+      KEYCLOAK_REALM_URL: http://keycloak:8080/realms/radiant
+      # base_url is the server ROOT (not /mcp) — the provider derives the
+      # /mcp resource + metadata URLs from it.
+      MCP_BASE_URL: http://localhost:8000
+      # Optional: Radiant portal API base URL. When set, the Radiant API tools
+      # (cases, patients, occurrences, variants) are registered; the caller's
+      # JWT is forwarded as a Bearer token. Unset here because the compose
+      # stack has no API.
+      # RADIANT_API_URL: http://radiant-api:8090
+      # Optional: portal base URL. When set, the tools return a `portal_url`
+      # for every case, patient and variant.
+      # RADIANT_PORTAL_URL: http://localhost:3000
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 10s
+
+  test-runner:
+    image: python:3.11-slim
+    depends_on:
+      radiant-mcp:
+        condition: service_healthy
+    volumes:
+      - ./tests/integration/test-oauth-flow.sh:/test-oauth-flow.sh:ro
+    entrypoint: ["bash", "-c", "apt-get update -qq && apt-get install -y -qq curl > /dev/null 2>&1 && bash /test-oauth-flow.sh"]
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      MCP_URL: http://radiant-mcp:8000
+    profiles:
+      - test

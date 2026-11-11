@@ -1,0 +1,58 @@
+# LibreChat config for the local radiant-mcp test stack.
+# Docs: https://www.librechat.ai/docs/configuration/librechat_yaml
+version: 1.2.1
+cache: true
+
+endpoints:
+  custom:
+    # Local Ollama running on the host. LibreChat (in Docker) reaches it via
+    # host.docker.internal. Run Ollama with OLLAMA_HOST=0.0.0.0:11434 so the
+    # container can connect (default binds 127.0.0.1 only).
+    - name: "Ollama"
+      apiKey: "ollama"                        # ignored by Ollama but must be present
+      baseURL: "http://host.docker.internal:11434/v1/"
+      models:
+        # Use a tool-calling capable model, otherwise MCP tools are never invoked.
+        default: ["llama3.1:latest"]
+        fetch: true                           # auto-list installed Ollama models
+      title: true
+
+  # AWS Bedrock (Claude). Credentials, region and the model list come from .env
+  # (BEDROCK_AWS_BEARER_TOKEN / _DEFAULT_REGION / _MODELS); this block only tunes
+  # the UI and title generation. No `models:` here on purpose — pinning them in
+  # .env keeps one source of truth (a `models:` list here would override it).
+  bedrock:
+    availableRegions:
+      - "ca-central-1"
+    # Cheapest model in the list, so titling doesn't burn Sonnet/Opus tokens.
+    titleModel: "us.anthropic.claude-haiku-4-5-20251001-v1:0"
+    streamRate: 35
+
+# Recent LibreChat versions default-deny MCP server domains; allowlist ours.
+# Strict whitelist: when set, ONLY these domains are reachable by MCP servers.
+mcpSettings:
+  allowedDomains:
+    - "mcp.dev.qlin.aws.sante.quebec"
+
+mcpServers:
+  # REMOTE radiant-mcp. LibreChat forwards the logged-in user's Keycloak access
+  # token as a Bearer header. Because the token is supplied here, LibreChat does
+  # NOT run the MCP OAuth discovery/DCR flow — it hits the server's direct-JWT
+  # verifier path (KeycloakAuthProvider). The placeholder is only populated when
+  # OPENID_REUSE_TOKENS=true.
+  radiant:
+    type: streamable-http
+    # Use the trailing slash: the server redirects /mcp -> /mcp/, and LibreChat
+    # re-checks the redirect target's resolved IP against its SSRF guard (which
+    # blocks the private/internal address). Hitting /mcp/ directly avoids the redirect.
+    url: https://mcp.dev.qlin.aws.sante.quebec/mcp/
+    headers:
+      Authorization: "Bearer {{LIBRECHAT_OPENID_ACCESS_TOKEN}}"
+    # Our server advertises OAuth metadata and answers 401 with
+    # WWW-Authenticate: Bearer, which makes LibreChat's auto-detection probe
+    # misclassify it as OAuth-protected and launch the consent/redirect flow.
+    # We authenticate purely via the static header above, so opt out of OAuth.
+    requiresOAuth: false
+    # A tool call chains several statements, each bounded at 60 s by the server.
+    timeout: 180000
+    initTimeout: 10000

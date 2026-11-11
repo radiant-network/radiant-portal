@@ -1,0 +1,2138 @@
+# radiant_python.OccurrencesApi
+
+All URIs are relative to *http://localhost*
+
+Method | HTTP request | Description
+------------- | ------------- | -------------
+[**aggregate_germline_cnv_occurrences**](OccurrencesApi.md#aggregate_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate germline CNV occurrences
+[**aggregate_germline_snv_occurrences**](OccurrencesApi.md#aggregate_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate germline SNV occurrences
+[**aggregate_somatic_cnv_occurrences**](OccurrencesApi.md#aggregate_somatic_cnv_occurrences) | **POST** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate somatic CNV occurrences
+[**aggregate_somatic_snv_occurrences**](OccurrencesApi.md#aggregate_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/aggregate | Aggregate somatic SNV occurrences
+[**count_germline_cnv_occurrences**](OccurrencesApi.md#count_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/count | Count germline CNV occurrences
+[**count_germline_snv_occurrences**](OccurrencesApi.md#count_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/count | Count germline SNV occurrences
+[**count_somatic_cnv_occurrences**](OccurrencesApi.md#count_somatic_cnv_occurrences) | **POST** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/count | Count somatic CNV occurrences
+[**count_somatic_snv_occurrences**](OccurrencesApi.md#count_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/count | Count somatic SNV occurrences
+[**get_expanded_germline_snv_occurrence**](OccurrencesApi.md#get_expanded_germline_snv_occurrence) | **GET** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a germline ExpandedGermlineSNVOccurrence
+[**get_expanded_somatic_snv_occurrence**](OccurrencesApi.md#get_expanded_somatic_snv_occurrence) | **GET** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/{locus_id}/expanded | Get a somatic ExpandedSomaticSNVOccurrence
+[**get_germline_snv_dictionary**](OccurrencesApi.md#get_germline_snv_dictionary) | **GET** /{tenant}/occurrences/germline/snv/dictionary | Get germline SNV facets dictionary
+[**get_germline_snv_transcript_reports_xlsx**](OccurrencesApi.md#get_germline_snv_transcript_reports_xlsx) | **GET** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts | Download the transcript report (xlsx) of germline SNV occurrences of a case
+[**get_somatic_snv_transcript_reports_xlsx**](OccurrencesApi.md#get_somatic_snv_transcript_reports_xlsx) | **GET** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/reports/transcripts | Download the transcript report (xlsx) of somatic SNV occurrences of a case
+[**list_germline_cnv_genes_overlap**](OccurrencesApi.md#list_germline_cnv_genes_overlap) | **GET** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap | List genes overlapping a CNV with a given ID
+[**list_germline_cnv_occurrences**](OccurrencesApi.md#list_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/list | List germline CNV occurrences
+[**list_germline_snv_occurrences**](OccurrencesApi.md#list_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list | List germline SNV occurrences
+[**list_somatic_cnv_genes_overlap**](OccurrencesApi.md#list_somatic_cnv_genes_overlap) | **GET** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap | List genes overlapping a somatic CNV with a given ID
+[**list_somatic_cnv_occurrences**](OccurrencesApi.md#list_somatic_cnv_occurrences) | **POST** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/list | List somatic CNV occurrences
+[**list_somatic_snv_occurrences**](OccurrencesApi.md#list_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list | List somatic SNV occurrences
+[**statistics_germline_cnv_occurrences**](OccurrencesApi.md#statistics_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline CNV occurrences
+[**statistics_germline_snv_occurrences**](OccurrencesApi.md#statistics_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline SNV occurrences
+[**statistics_somatic_cnv_occurrences**](OccurrencesApi.md#statistics_somatic_cnv_occurrences) | **POST** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of somatic CNV occurrences
+[**statistics_somatic_snv_occurrences**](OccurrencesApi.md#statistics_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of somatic SNV occurrences
+
+
+# **aggregate_germline_cnv_occurrences**
+> List[Aggregation] aggregate_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
+
+Aggregate germline CNV occurrences
+
+Aggregate germline CNV occurrences for a given sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.aggregation import Aggregation
+from radiant_python.models.aggregation_body_with_sqon import AggregationBodyWithSqon
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    aggregation_body_with_sqon = radiant_python.AggregationBodyWithSqon() # AggregationBodyWithSqon | Aggregation Body
+    with_dictionary = False # bool | Whether to include all possible facet values (optional) (default to False)
+
+    try:
+        # Aggregate germline CNV occurrences
+        api_response = api_instance.aggregate_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
+        print("The response of OccurrencesApi->aggregate_germline_cnv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->aggregate_germline_cnv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **aggregation_body_with_sqon** | [**AggregationBodyWithSqon**](AggregationBodyWithSqon.md)| Aggregation Body | 
+ **with_dictionary** | **bool**| Whether to include all possible facet values | [optional] [default to False]
+
+### Return type
+
+[**List[Aggregation]**](Aggregation.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **aggregate_germline_snv_occurrences**
+> List[Aggregation] aggregate_germline_snv_occurrences(tenant, case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
+
+Aggregate germline SNV occurrences
+
+Aggregate germline SNV occurrences for a given sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.aggregation import Aggregation
+from radiant_python.models.aggregation_body_with_sqon import AggregationBodyWithSqon
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    aggregation_body_with_sqon = radiant_python.AggregationBodyWithSqon() # AggregationBodyWithSqon | Aggregation Body
+    with_dictionary = False # bool | Whether to include all possible facet values (optional) (default to False)
+
+    try:
+        # Aggregate germline SNV occurrences
+        api_response = api_instance.aggregate_germline_snv_occurrences(tenant, case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
+        print("The response of OccurrencesApi->aggregate_germline_snv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->aggregate_germline_snv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **aggregation_body_with_sqon** | [**AggregationBodyWithSqon**](AggregationBodyWithSqon.md)| Aggregation Body | 
+ **with_dictionary** | **bool**| Whether to include all possible facet values | [optional] [default to False]
+
+### Return type
+
+[**List[Aggregation]**](Aggregation.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **aggregate_somatic_cnv_occurrences**
+> List[Aggregation] aggregate_somatic_cnv_occurrences(tenant, case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
+
+Aggregate somatic CNV occurrences
+
+Aggregate somatic CNV occurrences for a given tumor sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.aggregation import Aggregation
+from radiant_python.models.aggregation_body_with_sqon import AggregationBodyWithSqon
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Tumor Sequence ID
+    task_id = 56 # int | Task ID
+    aggregation_body_with_sqon = radiant_python.AggregationBodyWithSqon() # AggregationBodyWithSqon | Aggregation Body
+    with_dictionary = False # bool | Whether to include all possible facet values (optional) (default to False)
+
+    try:
+        # Aggregate somatic CNV occurrences
+        api_response = api_instance.aggregate_somatic_cnv_occurrences(tenant, case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
+        print("The response of OccurrencesApi->aggregate_somatic_cnv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->aggregate_somatic_cnv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Tumor Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **aggregation_body_with_sqon** | [**AggregationBodyWithSqon**](AggregationBodyWithSqon.md)| Aggregation Body | 
+ **with_dictionary** | **bool**| Whether to include all possible facet values | [optional] [default to False]
+
+### Return type
+
+[**List[Aggregation]**](Aggregation.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **aggregate_somatic_snv_occurrences**
+> List[Aggregation] aggregate_somatic_snv_occurrences(tenant, case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
+
+Aggregate somatic SNV occurrences
+
+Aggregate somatic SNV occurrences for a given sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.aggregation import Aggregation
+from radiant_python.models.aggregation_body_with_sqon import AggregationBodyWithSqon
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    aggregation_body_with_sqon = radiant_python.AggregationBodyWithSqon() # AggregationBodyWithSqon | Aggregation Body
+    with_dictionary = False # bool | Whether to include all possible facet values (optional) (default to False)
+
+    try:
+        # Aggregate somatic SNV occurrences
+        api_response = api_instance.aggregate_somatic_snv_occurrences(tenant, case_id, seq_id, task_id, aggregation_body_with_sqon, with_dictionary=with_dictionary)
+        print("The response of OccurrencesApi->aggregate_somatic_snv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->aggregate_somatic_snv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **aggregation_body_with_sqon** | [**AggregationBodyWithSqon**](AggregationBodyWithSqon.md)| Aggregation Body | 
+ **with_dictionary** | **bool**| Whether to include all possible facet values | [optional] [default to False]
+
+### Return type
+
+[**List[Aggregation]**](Aggregation.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **count_germline_cnv_occurrences**
+> OccurrenceCount count_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
+
+Count germline CNV occurrences
+
+Counts germline CNV occurrences for a given sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
+from radiant_python.models.occurrence_count import OccurrenceCount
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    count_body_with_sqon = radiant_python.CountBodyWithSqon() # CountBodyWithSqon | Count Body
+
+    try:
+        # Count germline CNV occurrences
+        api_response = api_instance.count_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
+        print("The response of OccurrencesApi->count_germline_cnv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->count_germline_cnv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **count_body_with_sqon** | [**CountBodyWithSqon**](CountBodyWithSqon.md)| Count Body | 
+
+### Return type
+
+[**OccurrenceCount**](OccurrenceCount.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **count_germline_snv_occurrences**
+> OccurrenceCount count_germline_snv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
+
+Count germline SNV occurrences
+
+Counts germline SNV occurrences for a given sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
+from radiant_python.models.occurrence_count import OccurrenceCount
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    count_body_with_sqon = radiant_python.CountBodyWithSqon() # CountBodyWithSqon | Count Body
+
+    try:
+        # Count germline SNV occurrences
+        api_response = api_instance.count_germline_snv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
+        print("The response of OccurrencesApi->count_germline_snv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->count_germline_snv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **count_body_with_sqon** | [**CountBodyWithSqon**](CountBodyWithSqon.md)| Count Body | 
+
+### Return type
+
+[**OccurrenceCount**](OccurrenceCount.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **count_somatic_cnv_occurrences**
+> OccurrenceCount count_somatic_cnv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
+
+Count somatic CNV occurrences
+
+Counts somatic CNV occurrences for a given tumor sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
+from radiant_python.models.occurrence_count import OccurrenceCount
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Tumor Sequence ID
+    task_id = 56 # int | Task ID
+    count_body_with_sqon = radiant_python.CountBodyWithSqon() # CountBodyWithSqon | Count Body
+
+    try:
+        # Count somatic CNV occurrences
+        api_response = api_instance.count_somatic_cnv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
+        print("The response of OccurrencesApi->count_somatic_cnv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->count_somatic_cnv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Tumor Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **count_body_with_sqon** | [**CountBodyWithSqon**](CountBodyWithSqon.md)| Count Body | 
+
+### Return type
+
+[**OccurrenceCount**](OccurrenceCount.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **count_somatic_snv_occurrences**
+> OccurrenceCount count_somatic_snv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
+
+Count somatic SNV occurrences
+
+Counts somatic SNV occurrences for a given sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.count_body_with_sqon import CountBodyWithSqon
+from radiant_python.models.occurrence_count import OccurrenceCount
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    count_body_with_sqon = radiant_python.CountBodyWithSqon() # CountBodyWithSqon | Count Body
+
+    try:
+        # Count somatic SNV occurrences
+        api_response = api_instance.count_somatic_snv_occurrences(tenant, case_id, seq_id, task_id, count_body_with_sqon)
+        print("The response of OccurrencesApi->count_somatic_snv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->count_somatic_snv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **count_body_with_sqon** | [**CountBodyWithSqon**](CountBodyWithSqon.md)| Count Body | 
+
+### Return type
+
+[**OccurrenceCount**](OccurrenceCount.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_expanded_germline_snv_occurrence**
+> ExpandedGermlineSNVOccurrence get_expanded_germline_snv_occurrence(tenant, case_id, seq_id, task_id, locus_id)
+
+Get a germline ExpandedGermlineSNVOccurrence
+
+Retrieve ExpandedGermlineSNVOccurrence data for a given locus ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.expanded_germline_snv_occurrence import ExpandedGermlineSNVOccurrence
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    locus_id = 'locus_id_example' # str | Locus ID
+
+    try:
+        # Get a germline ExpandedGermlineSNVOccurrence
+        api_response = api_instance.get_expanded_germline_snv_occurrence(tenant, case_id, seq_id, task_id, locus_id)
+        print("The response of OccurrencesApi->get_expanded_germline_snv_occurrence:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->get_expanded_germline_snv_occurrence: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **locus_id** | **str**| Locus ID | 
+
+### Return type
+
+[**ExpandedGermlineSNVOccurrence**](ExpandedGermlineSNVOccurrence.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_expanded_somatic_snv_occurrence**
+> ExpandedSomaticSNVOccurrence get_expanded_somatic_snv_occurrence(tenant, case_id, seq_id, task_id, locus_id)
+
+Get a somatic ExpandedSomaticSNVOccurrence
+
+Retrieve ExpandedSomaticSNVOccurrence data for a given locus ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.expanded_somatic_snv_occurrence import ExpandedSomaticSNVOccurrence
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    locus_id = 'locus_id_example' # str | Locus ID
+
+    try:
+        # Get a somatic ExpandedSomaticSNVOccurrence
+        api_response = api_instance.get_expanded_somatic_snv_occurrence(tenant, case_id, seq_id, task_id, locus_id)
+        print("The response of OccurrencesApi->get_expanded_somatic_snv_occurrence:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->get_expanded_somatic_snv_occurrence: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **locus_id** | **str**| Locus ID | 
+
+### Return type
+
+[**ExpandedSomaticSNVOccurrence**](ExpandedSomaticSNVOccurrence.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_germline_snv_dictionary**
+> List[Facet] get_germline_snv_dictionary(tenant, facets=facets)
+
+Get germline SNV facets dictionary
+
+Retrieve germline SNV facets
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.facet import Facet
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    facets = ['facets_example'] # List[str] | One or more facets to retrieve (optional)
+
+    try:
+        # Get germline SNV facets dictionary
+        api_response = api_instance.get_germline_snv_dictionary(tenant, facets=facets)
+        print("The response of OccurrencesApi->get_germline_snv_dictionary:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->get_germline_snv_dictionary: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **facets** | [**List[str]**](str.md)| One or more facets to retrieve | [optional] 
+
+### Return type
+
+[**List[Facet]**](Facet.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_germline_snv_transcript_reports_xlsx**
+> str get_germline_snv_transcript_reports_xlsx(tenant, case_id, seq_id, task_id, locus_ids)
+
+Download the transcript report (xlsx) of germline SNV occurrences of a case
+
+Fill the tenant's germline transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    locus_ids = 'locus_ids_example' # str | Comma-separated locus ids, 1 to 100
+
+    try:
+        # Download the transcript report (xlsx) of germline SNV occurrences of a case
+        api_response = api_instance.get_germline_snv_transcript_reports_xlsx(tenant, case_id, seq_id, task_id, locus_ids)
+        print("The response of OccurrencesApi->get_germline_snv_transcript_reports_xlsx:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->get_germline_snv_transcript_reports_xlsx: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **locus_ids** | **str**| Comma-separated locus ids, 1 to 100 | 
+
+### Return type
+
+**str**
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | xlsx workbook |  * Content-Disposition - attachment; filename&#x3D;&lt;MRN&gt;_&lt;case id&gt;_&lt;UTC timestamp&gt;.xlsx <br>  |
+**400** | Zero, more than 100 or malformed locus ids |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | A locus is not an occurrence of the task |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+**503** | The tenant has no transcript report template loaded |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_somatic_snv_transcript_reports_xlsx**
+> str get_somatic_snv_transcript_reports_xlsx(tenant, case_id, seq_id, task_id, locus_ids)
+
+Download the transcript report (xlsx) of somatic SNV occurrences of a case
+
+Fill the tenant's somatic transcript report template with the report object of each locus, one sheet per locus named after its hgvsg, and return the workbook. 1 to 100 locus ids.
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Tumor sequence ID
+    task_id = 56 # int | Task ID
+    locus_ids = 'locus_ids_example' # str | Comma-separated locus ids, 1 to 100
+
+    try:
+        # Download the transcript report (xlsx) of somatic SNV occurrences of a case
+        api_response = api_instance.get_somatic_snv_transcript_reports_xlsx(tenant, case_id, seq_id, task_id, locus_ids)
+        print("The response of OccurrencesApi->get_somatic_snv_transcript_reports_xlsx:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->get_somatic_snv_transcript_reports_xlsx: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Tumor sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **locus_ids** | **str**| Comma-separated locus ids, 1 to 100 | 
+
+### Return type
+
+**str**
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | xlsx workbook |  * Content-Disposition - attachment; filename&#x3D;&lt;MRN&gt;_&lt;case id&gt;_&lt;UTC timestamp&gt;.xlsx <br>  |
+**400** | Zero, more than 100 or malformed locus ids |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | A locus is not an occurrence of the task |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+**503** | The tenant has no transcript report template loaded |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **list_germline_cnv_genes_overlap**
+> List[CNVGeneOverlap] list_germline_cnv_genes_overlap(tenant, case_id, seq_id, task_id, cnv_id)
+
+List genes overlapping a CNV with a given ID
+
+List genes overlapping a CNV with a given ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.cnv_gene_overlap import CNVGeneOverlap
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    cnv_id = 'cnv_id_example' # str | Locus ID
+
+    try:
+        # List genes overlapping a CNV with a given ID
+        api_response = api_instance.list_germline_cnv_genes_overlap(tenant, case_id, seq_id, task_id, cnv_id)
+        print("The response of OccurrencesApi->list_germline_cnv_genes_overlap:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->list_germline_cnv_genes_overlap: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **cnv_id** | **str**| Locus ID | 
+
+### Return type
+
+[**List[CNVGeneOverlap]**](CNVGeneOverlap.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **list_germline_cnv_occurrences**
+> List[GermlineCNVOccurrence] list_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, list_body_with_sqon)
+
+List germline CNV occurrences
+
+List germline CNV occurrences for a given sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.germline_cnv_occurrence import GermlineCNVOccurrence
+from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    list_body_with_sqon = radiant_python.ListBodyWithSqon() # ListBodyWithSqon | List Body
+
+    try:
+        # List germline CNV occurrences
+        api_response = api_instance.list_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, list_body_with_sqon)
+        print("The response of OccurrencesApi->list_germline_cnv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->list_germline_cnv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **list_body_with_sqon** | [**ListBodyWithSqon**](ListBodyWithSqon.md)| List Body | 
+
+### Return type
+
+[**List[GermlineCNVOccurrence]**](GermlineCNVOccurrence.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **list_germline_snv_occurrences**
+> List[GermlineSNVOccurrence] list_germline_snv_occurrences(tenant, case_id, seq_id, task_id, list_body_with_sqon)
+
+List germline SNV occurrences
+
+List germline SNV occurrences for a given sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.germline_snv_occurrence import GermlineSNVOccurrence
+from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    list_body_with_sqon = radiant_python.ListBodyWithSqon() # ListBodyWithSqon | List Body
+
+    try:
+        # List germline SNV occurrences
+        api_response = api_instance.list_germline_snv_occurrences(tenant, case_id, seq_id, task_id, list_body_with_sqon)
+        print("The response of OccurrencesApi->list_germline_snv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->list_germline_snv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **list_body_with_sqon** | [**ListBodyWithSqon**](ListBodyWithSqon.md)| List Body | 
+
+### Return type
+
+[**List[GermlineSNVOccurrence]**](GermlineSNVOccurrence.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **list_somatic_cnv_genes_overlap**
+> List[CNVGeneOverlap] list_somatic_cnv_genes_overlap(tenant, case_id, seq_id, task_id, cnv_id)
+
+List genes overlapping a somatic CNV with a given ID
+
+List genes overlapping a somatic CNV with a given ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.cnv_gene_overlap import CNVGeneOverlap
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Tumor Sequence ID
+    task_id = 56 # int | Task ID
+    cnv_id = 'cnv_id_example' # str | CNV ID
+
+    try:
+        # List genes overlapping a somatic CNV with a given ID
+        api_response = api_instance.list_somatic_cnv_genes_overlap(tenant, case_id, seq_id, task_id, cnv_id)
+        print("The response of OccurrencesApi->list_somatic_cnv_genes_overlap:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->list_somatic_cnv_genes_overlap: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Tumor Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **cnv_id** | **str**| CNV ID | 
+
+### Return type
+
+[**List[CNVGeneOverlap]**](CNVGeneOverlap.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **list_somatic_cnv_occurrences**
+> List[SomaticCNVOccurrence] list_somatic_cnv_occurrences(tenant, case_id, seq_id, task_id, list_body_with_sqon)
+
+List somatic CNV occurrences
+
+List somatic CNV occurrences for a given tumor sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
+from radiant_python.models.somatic_cnv_occurrence import SomaticCNVOccurrence
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Tumor Sequence ID
+    task_id = 56 # int | Task ID
+    list_body_with_sqon = radiant_python.ListBodyWithSqon() # ListBodyWithSqon | List Body
+
+    try:
+        # List somatic CNV occurrences
+        api_response = api_instance.list_somatic_cnv_occurrences(tenant, case_id, seq_id, task_id, list_body_with_sqon)
+        print("The response of OccurrencesApi->list_somatic_cnv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->list_somatic_cnv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Tumor Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **list_body_with_sqon** | [**ListBodyWithSqon**](ListBodyWithSqon.md)| List Body | 
+
+### Return type
+
+[**List[SomaticCNVOccurrence]**](SomaticCNVOccurrence.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **list_somatic_snv_occurrences**
+> List[SomaticSNVOccurrence] list_somatic_snv_occurrences(tenant, case_id, seq_id, task_id, list_body_with_sqon)
+
+List somatic SNV occurrences
+
+List somatic SNV occurrences for a given sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.list_body_with_sqon import ListBodyWithSqon
+from radiant_python.models.somatic_snv_occurrence import SomaticSNVOccurrence
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    list_body_with_sqon = radiant_python.ListBodyWithSqon() # ListBodyWithSqon | List Body
+
+    try:
+        # List somatic SNV occurrences
+        api_response = api_instance.list_somatic_snv_occurrences(tenant, case_id, seq_id, task_id, list_body_with_sqon)
+        print("The response of OccurrencesApi->list_somatic_snv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->list_somatic_snv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **list_body_with_sqon** | [**ListBodyWithSqon**](ListBodyWithSqon.md)| List Body | 
+
+### Return type
+
+[**List[SomaticSNVOccurrence]**](SomaticSNVOccurrence.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **statistics_germline_cnv_occurrences**
+> Statistics statistics_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, statistics_body_with_sqon)
+
+Statistics of germline CNV occurrences
+
+Return statistics about a field for a given sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.statistics import Statistics
+from radiant_python.models.statistics_body_with_sqon import StatisticsBodyWithSqon
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    statistics_body_with_sqon = radiant_python.StatisticsBodyWithSqon() # StatisticsBodyWithSqon | Statistics Body
+
+    try:
+        # Statistics of germline CNV occurrences
+        api_response = api_instance.statistics_germline_cnv_occurrences(tenant, case_id, seq_id, task_id, statistics_body_with_sqon)
+        print("The response of OccurrencesApi->statistics_germline_cnv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->statistics_germline_cnv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **statistics_body_with_sqon** | [**StatisticsBodyWithSqon**](StatisticsBodyWithSqon.md)| Statistics Body | 
+
+### Return type
+
+[**Statistics**](Statistics.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **statistics_germline_snv_occurrences**
+> Statistics statistics_germline_snv_occurrences(tenant, case_id, seq_id, task_id, statistics_body_with_sqon)
+
+Statistics of germline SNV occurrences
+
+Return statistics about a field for a given sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.statistics import Statistics
+from radiant_python.models.statistics_body_with_sqon import StatisticsBodyWithSqon
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    statistics_body_with_sqon = radiant_python.StatisticsBodyWithSqon() # StatisticsBodyWithSqon | Statistics Body
+
+    try:
+        # Statistics of germline SNV occurrences
+        api_response = api_instance.statistics_germline_snv_occurrences(tenant, case_id, seq_id, task_id, statistics_body_with_sqon)
+        print("The response of OccurrencesApi->statistics_germline_snv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->statistics_germline_snv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **statistics_body_with_sqon** | [**StatisticsBodyWithSqon**](StatisticsBodyWithSqon.md)| Statistics Body | 
+
+### Return type
+
+[**Statistics**](Statistics.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **statistics_somatic_cnv_occurrences**
+> Statistics statistics_somatic_cnv_occurrences(tenant, case_id, seq_id, task_id, statistics_body_with_sqon)
+
+Statistics of somatic CNV occurrences
+
+Return statistics about a field for a given tumor sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.statistics import Statistics
+from radiant_python.models.statistics_body_with_sqon import StatisticsBodyWithSqon
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Tumor Sequence ID
+    task_id = 56 # int | Task ID
+    statistics_body_with_sqon = radiant_python.StatisticsBodyWithSqon() # StatisticsBodyWithSqon | Statistics Body
+
+    try:
+        # Statistics of somatic CNV occurrences
+        api_response = api_instance.statistics_somatic_cnv_occurrences(tenant, case_id, seq_id, task_id, statistics_body_with_sqon)
+        print("The response of OccurrencesApi->statistics_somatic_cnv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->statistics_somatic_cnv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Tumor Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **statistics_body_with_sqon** | [**StatisticsBodyWithSqon**](StatisticsBodyWithSqon.md)| Statistics Body | 
+
+### Return type
+
+[**Statistics**](Statistics.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **statistics_somatic_snv_occurrences**
+> Statistics statistics_somatic_snv_occurrences(tenant, case_id, seq_id, task_id, statistics_body_with_sqon)
+
+Statistics of somatic SNV occurrences
+
+Return statistics about a field for a given sequence ID
+
+### Example
+
+* Bearer (JWT) Authentication (bearerauth):
+
+```python
+import radiant_python
+from radiant_python.models.statistics import Statistics
+from radiant_python.models.statistics_body_with_sqon import StatisticsBodyWithSqon
+from radiant_python.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost
+# See configuration.py for a list of all supported configuration parameters.
+configuration = radiant_python.Configuration(
+    host = "http://localhost"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization (JWT): bearerauth
+configuration = radiant_python.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+with radiant_python.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = radiant_python.OccurrencesApi(api_client)
+    tenant = 'tenant_example' # str | Tenant code
+    case_id = 56 # int | Case ID
+    seq_id = 56 # int | Sequence ID
+    task_id = 56 # int | Task ID
+    statistics_body_with_sqon = radiant_python.StatisticsBodyWithSqon() # StatisticsBodyWithSqon | Statistics Body
+
+    try:
+        # Statistics of somatic SNV occurrences
+        api_response = api_instance.statistics_somatic_snv_occurrences(tenant, case_id, seq_id, task_id, statistics_body_with_sqon)
+        print("The response of OccurrencesApi->statistics_somatic_snv_occurrences:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling OccurrencesApi->statistics_somatic_snv_occurrences: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **tenant** | **str**| Tenant code | 
+ **case_id** | **int**| Case ID | 
+ **seq_id** | **int**| Sequence ID | 
+ **task_id** | **int**| Task ID | 
+ **statistics_body_with_sqon** | [**StatisticsBodyWithSqon**](StatisticsBodyWithSqon.md)| Statistics Body | 
+
+### Return type
+
+[**Statistics**](Statistics.md)
+
+### Authorization
+
+[bearerauth](../README.md#bearerauth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | OK |  -  |
+**400** | Bad Request |  -  |
+**401** | Unauthorized |  -  |
+**403** | Forbidden |  -  |
+**404** | Not Found |  -  |
+**500** | Internal Server Error |  * X-Correlation-ID - Unique id correlating this error with the server-side log entry <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+

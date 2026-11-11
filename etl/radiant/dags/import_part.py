@@ -1,0 +1,763 @@
+import datetime
+import logging
+import os
+from collections.abc import Sequence
+from itertools import groupby
+from typing import Any
+
+from airflow.decorators import dag, task
+from airflow.models import Param
+from airflow.operators.empty import EmptyOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from airflow.utils.task_group import TaskGroup
+from airflow.utils.trigger_rule import TriggerRule
+
+from radiant.dags import DEFAULT_ARGS, IS_AWS, NAMESPACE, RADIANT_LOCK_S3_BUCKET, ECSEnv, get_namespace, load_docs_md
+from radiant.tasks.data.radiant_tables import get_iceberg_radiant_mapping
+from radiant.tasks.locking import IMPORT_MUTEX_LOCK_NAME, acquire_lock, release_lock
+from radiant.tasks.starrocks.operator import (
+    RadiantLoadExomiserOperator,
+    RadiantStarRocksOperator,
+    RadiantStarRocksPartitionSwapOperator,
+    SubmitTaskOptions,
+    SwapPartition,
+)
+from radiant.tasks.vcf.experiment import (
+    ALIGNMENT_GERMLINE_VARIANT_CALLING_TASK,
+    RADIANT_GERMLINE_ANNOTATION_TASK,
+    RADIANT_GERMLINE_CNV_ANNOTATION_TASK,
+    RADIANT_SOMATIC_ANNOTATION_TASK,
+    TUMOR_ONLY_VARIANT_CALLING_TASK,
+    build_task_from_rows,
+)
+
+if IS_AWS:
+    from radiant.dags.operators import ecs as operators
+else:
+    from radiant.dags.operators import k8s as operators
+
+LOGGER = logging.getLogger(__name__)
+
+
+PATH_TO_PYTHON_BINARY = os.getenv("RADIANT_PYTHON_PATH", "/home/airflow/.venv/radiant/bin/python")
+
+
+def tasks_output_processor(results: list[Any], descriptions: list[Sequence[Sequence] | None]) -> list[Any]:
+    column_names = [desc[0] for desc in descriptions[0]]
+    dict_rows = sorted([dict(zip(column_names, row, strict=False)) for row in results[0]], key=lambda d: d["task_id"])
+    _tasks = [
+        build_task_from_rows(list(grouped_rows)).model_dump()
+        for task_id, grouped_rows in groupby(dict_rows, key=lambda x: x["task_id"])
+    ]
+    return [_tasks]
+
+
+def build_tenant_scoped_params(tasks) -> list[dict[str, Any]]:
+    from collections import defaultdict
+
+    keys = ("seq_ids", "deleted_seq_ids", "task_ids", "deleted_task_ids")
+    ids = defaultdict(lambda: {key: set() for key in keys})
+    for t in tasks:
+        prefix = "deleted_" if t["deleted"] else ""
+        for experiment in t.get("experiments") or []:
+            if experiment:
+                bucket = ids[experiment["tenant_code"]]
+                bucket[f"{prefix}seq_ids"].add(experiment["seq_id"])
+                bucket[f"{prefix}task_ids"].add(t["task_id"])
+
+    return [
+        {
+            "tenant_code": tenant_code,
+            "parameters": {
+                "tenant_code": tenant_code,
+                **{key: sorted(values) or [-1] for key, values in bucket.items()},
+            },
+        }
+        for tenant_code, bucket in sorted(ids.items())
+    ]
+
+
+dag_params = {
+    "part": Param(
+        default=None,
+        description="Integer that represents the part that need to be processed.",
+    ),
+}
+
+std_submit_task_opts = SubmitTaskOptions(max_query_timeout=3600, poll_interval=10)
+
+cnv_submit_task_opts = SubmitTaskOptions(max_query_timeout=14400, poll_interval=10)
+
+
+@dag(
+    start_date=datetime.datetime(2021, 1, 1),
+    schedule=None,
+    catchup=False,
+    max_active_runs=1,
+    default_args=DEFAULT_ARGS,
+    tags=["radiant", "scheduled"],
+    dag_display_name="Radiant - Import for a partition",
+    dag_id=f"{NAMESPACE}-import-part",
+    params=dag_params,
+    render_template_as_native_obj=True,
+    doc_md=load_docs_md("import_part.md"),
+    template_searchpath=["/opt/airflow/dags/radiant/dags/sql"],
+)
+def import_part():
+    start = EmptyOperator(task_id="start", task_display_name="[ --- CHECKPOINT: PHASE 1 --- ] Before Setup")
+
+    @task(
+        task_id="acquire_import_lock",
+        task_display_name="[PyOp] Acquire Import Lock",
+    )
+    def acquire_import_lock():
+        from airflow.sdk import get_current_context
+
+        context = get_current_context()
+        holder = f"{context['dag'].dag_id}:{context['run_id']}"
+        acquire_lock(bucket=RADIANT_LOCK_S3_BUCKET, name=IMPORT_MUTEX_LOCK_NAME, holder=holder)
+
+    @task(
+        task_id="release_import_lock",
+        task_display_name="[PyOp] Release Import Lock",
+    )
+    def release_import_lock():
+        from airflow.sdk import get_current_context
+
+        context = get_current_context()
+        holder = f"{context['dag'].dag_id}:{context['run_id']}"
+        release_lock(bucket=RADIANT_LOCK_S3_BUCKET, name=IMPORT_MUTEX_LOCK_NAME, holder=holder)
+
+    _acquire_import_lock = acquire_import_lock()
+    _release_import_lock = release_import_lock()
+
+    fetch_sequencing_experiment_delta = RadiantStarRocksOperator(
+        task_id="fetch_sequencing_experiment_delta",
+        sql="./sql/radiant/sequencing_experiment_partition_select.sql",
+        task_display_name="[StarRocks] Get Sequencing Experiment for a partition",
+        do_xcom_push=True,
+        output_processor=tasks_output_processor,
+        parameters={"part": "{{ params.part }}"},
+    )
+
+    @task.short_circuit(task_id="sanity_check_tasks", task_display_name="[PyOp] Sanity Check Tasks")
+    def check_tasks(tasks: Any) -> Any:
+        return tasks
+
+    @task(task_id="store_tasks", task_display_name="[PyOp] Store Tasks")
+    def store_tasks(tasks: Any) -> Any:
+        from radiant.dags.operators.utils import s3_store_content
+
+        # The tasks of a part can't be passed inline to the CNV imports: ECS limits the length of the
+        # command override, and K8s passes task arguments in a single env var, which Linux caps at
+        # 128 KiB. Upload them to S3 and pass the path instead.
+        s3_path = s3_store_content(content=tasks, prefix="store_tasks")
+        if IS_AWS:
+            return [{"stored_tasks": s3_path}]
+        return s3_path
+
+    @task(task_id="cleanup_tasks_files", task_display_name="[PyOp] Cleanup tasks files")
+    def cleanup_tasks_files(s3_path: str) -> None:
+        from radiant.dags.operators.utils import s3_delete_content
+
+        s3_delete_content(s3_path)
+
+    tasks = check_tasks(fetch_sequencing_experiment_delta.output)
+    stored_tasks = store_tasks(tasks)
+
+    @task(task_id="prepare_config", task_display_name="[PyOp] Prepare Config")
+    def prepare_config(tasks: Any) -> Any:
+        from airflow.sdk import get_current_context
+
+        context = get_current_context()
+        conf = context["dag_run"].conf or {}
+        conf["tasks"] = [t for t in tasks if not t["deleted"]]
+        return conf
+
+    _prepare_config = prepare_config(tasks)
+    # Germline and somatic SNV extraction both live in this sub-DAG so that they fan out per task
+    # and fan into a single Iceberg commit — `snv_variant` and `snv_consequence` are written by
+    # both flows, so one committer per part is what keeps their commits from racing.
+    import_snv_vcf = TriggerDagRunOperator(
+        task_id="import_snv_vcf",
+        task_display_name="[DAG] Import SNV VCF into Iceberg",
+        trigger_dag_id=f"{NAMESPACE}-import-snv-vcf",
+        conf=_prepare_config,
+        reset_dag_run=True,
+        wait_for_completion=True,
+        poke_interval=2,
+    )
+
+    namespace_task = get_namespace()
+    if IS_AWS:
+        ecs_env = ECSEnv()
+        import_cnv_vcf = operators.ImportPart.get_import_cnv_vcf(
+            radiant_namespace=namespace_task,
+            ecs_env=ecs_env,
+        )
+        import_somatic_cnv_vcf = operators.ImportPart.get_import_somatic_cnv_vcf(
+            radiant_namespace=namespace_task,
+            ecs_env=ecs_env,
+        )
+
+        cleanup = operators.ImportPart.get_cleanup(ecs_env=ecs_env)
+
+    else:
+        import_cnv_vcf = operators.ImportPart.get_import_cnv_vcf(namespace_task)
+        import_somatic_cnv_vcf = operators.ImportPart.get_import_somatic_cnv_vcf(namespace_task)
+
+    @task(task_id="build_tenant_params", task_display_name="[PyOp] Per-tenant Params")
+    def prepare_tenant_scoped_params(tasks) -> list[dict[str, Any]]:
+        return build_tenant_scoped_params(tasks)
+
+    tenant_params = prepare_tenant_scoped_params(tasks)
+
+    @task(task_id="extract_tenants", task_display_name="[PyOp] Extract Tenants")
+    def extract_tenants(tasks) -> list[str]:
+        return sorted(
+            {experiment["tenant_code"] for t in tasks for experiment in t.get("experiments") or [] if experiment}
+        )
+
+    tenants = extract_tenants(tasks)
+
+    @task.short_circuit(task_id="extract_all_tenants", task_display_name="[PyOp] Extract All Tenants")
+    def extract_all_tenants() -> list[str]:
+        # Every tenant known to the platform (not just this batch). The shared consequence filter
+        # pools loci across all of these, so it reflects the current state of all tenants.
+        from airflow.sdk import get_current_context
+
+        from radiant.tasks.data.tenants import list_all_tenants
+
+        context = get_current_context()
+        return list_all_tenants(context["dag_run"].conf or {})
+
+    all_tenants = extract_all_tenants()
+
+    @task(task_id="render_pooled_sql", task_display_name="[PyOp] Render Pooled SQL")
+    def render_pooled_sql(sql_file: str, tenants: list[str]) -> str:
+        # Necessary to render SQL using tenant unions
+        import jinja2
+        from airflow.sdk import get_current_context
+
+        from radiant.dags import DAGS_DIR
+        from radiant.tasks.data.radiant_tables import get_radiant_mapping
+
+        conf = get_current_context()["dag_run"].conf or {}
+        text = (DAGS_DIR / "sql" / sql_file).read_text()
+        return jinja2.Template(text).render(
+            mapping=get_radiant_mapping(conf),
+            tenants=tenants,
+            per_tenant_mapping=lambda t: get_radiant_mapping(conf, tenant_code=t),
+        )
+
+    with TaskGroup(group_id="germline_cnv_occurrence") as tg_germline_cnv_occurrence_per_tenant:
+
+        @task.short_circuit(
+            task_id="sanity_check_cnvs",
+            task_display_name="[PyOp] Sanity Check Germline CNVs",
+            ignore_downstream_trigger_rules=False,
+            trigger_rule=TriggerRule.NONE_FAILED,
+        )
+        def sanity_check_cnvs(tasks: Any) -> Any:
+            # The proband's slivar set (CNV annotation task) loads next to the DRAGEN sets.
+            has_cnv = any(
+                t.get("task_type") in (ALIGNMENT_GERMLINE_VARIANT_CALLING_TASK, RADIANT_GERMLINE_CNV_ANNOTATION_TASK)
+                for t in tasks
+            )
+            return has_cnv
+
+        # max_active_tis_per_dagrun=1: process tenants one at a time within a dagrun
+        insert_germline_cnv_occurrences = RadiantStarRocksPartitionSwapOperator.partial(
+            task_id="insert_germline_cnv_occurrences",
+            table="{{ mapping.starrocks_germline_cnv_occurrence }}",
+            task_display_name="[StarRocks] Insert Germline CNV Occurrences Part",
+            map_index_template="{{ task.tenant_code }}",
+            swap_partition=SwapPartition(
+                partition="{{ params.part }}",
+                copy_partition_sql="./sql/radiant/germline_cnv_occurrence_copy_partition.sql",
+            ),
+            submit_task_options=cnv_submit_task_opts,
+            insert_partition_sql="./sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql",
+            max_active_tis_per_dagrun=1,
+        ).expand_kwargs(tenant_params)
+
+        # RAD-120: full recompute over every part, a patient of one part can match an interval of another.
+        aggregate_germline_cnv_variants_frequencies = RadiantStarRocksOperator.partial(
+            task_id="aggregate_germline_cnv_variant_freq",
+            task_display_name="[StarRocks] Aggregate all Germline CNV variants frequencies",
+            sql="./sql/radiant/germline_cnv_variant_frequency_insert.sql",
+            map_index_template="{{ task.tenant_code }}",
+            submit_task_options=std_submit_task_opts,
+            parameters={"tenant_code": "{{ tenant_code }}"},
+            max_active_tis_per_dagrun=1,
+        ).expand(tenant_code=tenants)
+
+        (sanity_check_cnvs(tasks) >> insert_germline_cnv_occurrences >> aggregate_germline_cnv_variants_frequencies)
+
+    with TaskGroup(group_id="somatic_cnv_occurrence") as tg_somatic_cnv_occurrence_per_tenant:
+
+        @task.short_circuit(
+            task_id="sanity_check_somatic_cnvs",
+            task_display_name="[PyOp] Sanity Check Somatic CNVs",
+            ignore_downstream_trigger_rules=False,
+            trigger_rule=TriggerRule.NONE_FAILED,  # If we have germline only, we don't want to skip somatic
+        )
+        def sanity_check_somatic_cnvs(tasks: Any) -> Any:
+            # No `not deleted` clause, unlike the SNV checks: a part holding only deleted tumor-only tasks
+            # must still run the swap, because that is what purges their rows from the partition.
+            has_somatic_cnv = any(t.get("task_type") == TUMOR_ONLY_VARIANT_CALLING_TASK for t in tasks)
+            return has_somatic_cnv
+
+        # max_active_tis_per_dagrun=1: process tenants one at a time within a dagrun
+        insert_somatic_cnv_occurrences = RadiantStarRocksPartitionSwapOperator.partial(
+            task_id="insert_somatic_cnv_occurrences",
+            table="{{ mapping.starrocks_somatic_cnv_occurrence }}",
+            task_display_name="[StarRocks] Insert Somatic CNV Occurrences Part",
+            map_index_template="{{ task.tenant_code }}",
+            swap_partition=SwapPartition(
+                partition="{{ params.part }}",
+                copy_partition_sql="./sql/radiant/somatic_cnv_occurrence_copy_partition.sql",
+            ),
+            submit_task_options=cnv_submit_task_opts,
+            insert_partition_sql="./sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql",
+            max_active_tis_per_dagrun=1,
+        ).expand_kwargs(tenant_params)
+
+        # RAD-120: full recompute over every part, a patient of one part can match an interval of another.
+        aggregate_somatic_cnv_variants_frequencies = RadiantStarRocksOperator.partial(
+            task_id="aggregate_somatic_cnv_variant_freq",
+            task_display_name="[StarRocks] Aggregate all Somatic CNV variants frequencies",
+            sql="./sql/radiant/somatic_cnv_variant_frequency_insert.sql",
+            map_index_template="{{ task.tenant_code }}",
+            submit_task_options=std_submit_task_opts,
+            parameters={"tenant_code": "{{ tenant_code }}"},
+            max_active_tis_per_dagrun=1,
+        ).expand(tenant_code=tenants)
+
+        (
+            sanity_check_somatic_cnvs(tasks)
+            >> insert_somatic_cnv_occurrences
+            >> aggregate_somatic_cnv_variants_frequencies
+        )
+
+    @task(task_id="extract_task_ids", task_display_name="[PyOp] Extract Task IDs")
+    def extract_task_ids(tasks) -> dict[str, list[Any]]:
+        return {
+            "task_ids": sorted({t["task_id"] for t in tasks if not t["deleted"]}) or [-1],
+            "deleted_task_ids": sorted({t["task_id"] for t in tasks if t["deleted"]}) or [-1],
+        }
+
+    task_ids = extract_task_ids(tasks)
+
+    # Single, shared load: all tenants' exomiser files land in one staging table, each row tagged with
+    # tenant_code (set during the broker load) so the per-tenant insert_exomiser can route them later.
+    # Global (all tenants) task ids: the copy step keeps the rows of the tasks not in this run.
+    load_exomiser = RadiantLoadExomiserOperator(
+        task_id="load_exomiser_files",
+        task_display_name="[StarRocks] Load Exomiser Files",
+        swap_partition=SwapPartition(
+            partition="{{ params.part }}",
+            copy_partition_sql="./sql/radiant/staging_exomiser_insert_partition_delta.sql",
+        ),
+        table="{{ mapping.starrocks_staging_exomiser }}",
+        parameters=task_ids,
+        tasks=tasks,
+    )
+
+    @task.short_circuit(
+        task_id="sanity_check_any_snv",
+        task_display_name="[PyOp] Sanity Check Any SNVs",
+        ignore_downstream_trigger_rules=False,
+        trigger_rule=TriggerRule.NONE_FAILED,
+    )
+    def sanity_check_any_snv(tasks: Any) -> Any:
+        has_delta_snv = any(
+            t.get("task_type") in (RADIANT_GERMLINE_ANNOTATION_TASK, RADIANT_SOMATIC_ANNOTATION_TASK)
+            and not t.get("deleted")
+            for t in tasks
+        )
+        return has_delta_snv
+
+    @task(task_id="get_tables_to_refresh", task_display_name="[PyOp] Get list of iceberg tables to refresh")
+    def get_tables_to_refresh():
+        from airflow.sdk import get_current_context
+
+        from radiant.tasks.data.open_data import list_iceberg_source_tables
+
+        context = get_current_context()
+        dag_conf = context["dag_run"].conf or {}
+
+        tables = list(get_iceberg_radiant_mapping(dag_conf).values())
+
+        # We refresh gnomad SV here because it's required for CNVs
+        tables += list_iceberg_source_tables(dag_conf, keys=["iceberg_gnomad_sv"])
+        return [{"table": v} for v in tables]
+
+    refresh_iceberg_tables = RadiantStarRocksOperator.partial(
+        task_id="refresh_iceberg_tables",
+        sql="REFRESH EXTERNAL TABLE {{ params.table }}",
+        task_display_name="[StarRocks] Refresh Iceberg Tables",
+    ).expand(params=get_tables_to_refresh())
+
+    insert_hashes = RadiantStarRocksOperator(
+        trigger_rule=TriggerRule.NONE_FAILED_MIN_ONE_SUCCESS,
+        task_id="insert_variant_hashes",
+        sql="./sql/radiant/variant_lookup_insert_hashes.sql",
+        task_display_name="[StarRocks] Insert Variants Hashes into Lookup",
+        submit_task_options=std_submit_task_opts,
+        parameters=task_ids,
+    )
+
+    overwrite_snv_tmp_variants = RadiantStarRocksOperator(
+        task_id="overwrite_snv_tmp_variant",
+        sql="./sql/radiant/snv_tmp_variant_insert.sql",
+        task_display_name="[StarRocks] Insert SNV Variants Tmp tables",
+        submit_task_options=std_submit_task_opts,
+        parameters=task_ids,
+    )
+
+    insert_exomiser_per_tenant = RadiantStarRocksPartitionSwapOperator.partial(
+        task_id="insert_exomiser",
+        table="{{ mapping.starrocks_exomiser }}",
+        task_display_name="[StarRocks] Insert Exomiser Part",
+        map_index_template="{{ task.tenant_code }}",
+        swap_partition=SwapPartition(
+            partition="{{ params.part }}",
+            copy_partition_sql="./sql/radiant/exomiser_copy_partition.sql",
+        ),
+        submit_task_options=std_submit_task_opts,
+        insert_partition_sql="./sql/radiant/exomiser_insert_partition_delta.sql",
+        trigger_rule=TriggerRule.ALL_SUCCESS,
+        max_active_tis_per_dagrun=1,
+    ).expand_kwargs(tenant_params)
+
+    # Loaded before the germline SNV occurrences, which will read the per-gene partner counts (RAD-39).
+    insert_germline_snv_comphet_per_tenant = RadiantStarRocksPartitionSwapOperator.partial(
+        task_id="insert_germline_snv_comphet",
+        table="{{ mapping.starrocks_germline_snv_comphet }}",
+        task_display_name="[StarRocks] Insert Germline SNV Compound Het Part",
+        map_index_template="{{ task.tenant_code }}",
+        swap_partition=SwapPartition(
+            partition="{{ params.part }}",
+            copy_partition_sql="./sql/radiant/germline_snv_comphet_copy_partition.sql",
+        ),
+        submit_task_options=std_submit_task_opts,
+        insert_partition_sql="./sql/radiant/germline_snv_comphet_insert_partition_delta.sql",
+        trigger_rule=TriggerRule.ALL_SUCCESS,
+        max_active_tis_per_dagrun=1,
+    ).expand_kwargs(tenant_params)
+
+    with TaskGroup(group_id="germline_snv_occurrence") as tg_germline_snv_occurrence_per_tenant:
+
+        @task.short_circuit(
+            task_id="sanity_check_delta_germline_snv",
+            task_display_name="[PyOp] Sanity Check Delta Germline SNVs",
+            ignore_downstream_trigger_rules=False,
+        )
+        def sanity_check_delta_germline_snv(tasks: Any) -> Any:
+            has_delta_snv = any(
+                t.get("task_type") == RADIANT_GERMLINE_ANNOTATION_TASK and not t.get("deleted") for t in tasks
+            )
+            return has_delta_snv
+
+        insert_germline_snv_occurrences = RadiantStarRocksPartitionSwapOperator.partial(
+            task_id="insert_germline_snv_occurrence",
+            table="{{ mapping.starrocks_germline_snv_occurrence }}",
+            task_display_name="[StarRocks] Insert Germline SNV Occurrences Part",
+            map_index_template="{{ task.tenant_code }}",
+            swap_partition=SwapPartition(
+                partition="{{ params.part }}",
+                copy_partition_sql="./sql/radiant/germline_snv_occurrence_copy_partition.sql",
+            ),
+            submit_task_options=std_submit_task_opts,
+            insert_partition_sql="./sql/radiant/germline_snv_occurrence_insert_partition_delta.sql",
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            max_active_tis_per_dagrun=1,
+        ).expand_kwargs(tenant_params)
+
+        insert_stg_germline_snv_variants_freq = RadiantStarRocksOperator.partial(
+            task_id="insert_stg_germline_snv_variant_freq",
+            sql="./sql/radiant/germline_snv_staging_variant_freq_insert.sql",
+            task_display_name="[StarRocks] Insert Stg Germline SNV Variants Freq Part",
+            map_index_template="{{ task.tenant_code }}",
+            submit_task_options=std_submit_task_opts,
+            parameters={"part": "{{ params.part }}", "tenant_code": "{{ tenant_code }}"},
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            max_active_tis_per_dagrun=1,
+        ).expand(tenant_code=tenants)
+
+        aggregate_germline_snv_variants_frequencies = RadiantStarRocksOperator.partial(
+            task_id="aggregate_germline_snv_variant_freq",
+            task_display_name="[StarRocks] Aggregate all Germline SNV variants frequencies",
+            sql="./sql/radiant/germline_snv_variant_frequency_insert.sql",
+            map_index_template="{{ task.tenant_code }}",
+            submit_task_options=std_submit_task_opts,
+            parameters={"tenant_code": "{{ tenant_code }}"},
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            max_active_tis_per_dagrun=1,
+        ).expand(tenant_code=tenants)
+
+        (
+            sanity_check_delta_germline_snv(tasks)
+            >> insert_germline_snv_occurrences
+            >> insert_stg_germline_snv_variants_freq
+            >> aggregate_germline_snv_variants_frequencies
+        )
+
+    with TaskGroup(group_id="somatic_snv_occurrence") as tg_somatic_snv_occurrence_per_tenant:
+
+        @task.short_circuit(
+            task_id="sanity_check_delta_somatic_snv",
+            task_display_name="[PyOp] Sanity Check Delta Somatic SNVs",
+            ignore_downstream_trigger_rules=False,
+            trigger_rule=TriggerRule.NONE_FAILED,  # If we have germline only, we don't want to skip somatic
+        )
+        def sanity_check_delta_somatic_snv(tasks: Any) -> Any:
+            has_delta_snv = any(
+                t.get("task_type") == RADIANT_SOMATIC_ANNOTATION_TASK and not t.get("deleted") for t in tasks
+            )
+            return has_delta_snv
+
+        insert_somatic_snv_occurrences = RadiantStarRocksPartitionSwapOperator.partial(
+            task_id="insert_somatic_snv_occurrences",
+            table="{{ mapping.starrocks_somatic_snv_occurrence }}",
+            task_display_name="[StarRocks] Insert Somatic SNV Occurrences Part",
+            map_index_template="{{ task.tenant_code }}",
+            swap_partition=SwapPartition(
+                partition="{{ params.part }}",
+                copy_partition_sql="./sql/radiant/somatic_snv_occurrence_copy_partition.sql",
+            ),
+            submit_task_options=std_submit_task_opts,
+            insert_partition_sql="./sql/radiant/somatic_snv_occurrence_insert_partition_delta.sql",
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            max_active_tis_per_dagrun=1,
+        ).expand_kwargs(tenant_params)
+
+        insert_stg_somatic_snv_variants_freq = RadiantStarRocksOperator.partial(
+            task_id="insert_stg_somatic_snv_variant_freq",
+            sql="./sql/radiant/somatic_snv_staging_variant_freq_insert.sql",
+            task_display_name="[StarRocks] Insert Stg Somatic SNV Variants Freq Part",
+            map_index_template="{{ task.tenant_code }}",
+            submit_task_options=std_submit_task_opts,
+            parameters={"part": "{{ params.part }}", "tenant_code": "{{ tenant_code }}"},
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            max_active_tis_per_dagrun=1,
+        ).expand(tenant_code=tenants)
+
+        aggregate_somatic_snv_variants_frequencies = RadiantStarRocksOperator.partial(
+            task_id="aggregate_somatic_snv_variant_freq",
+            task_display_name="[StarRocks] Aggregate all Somatic SNV variants frequencies",
+            sql="./sql/radiant/somatic_snv_variant_frequency_insert.sql",
+            map_index_template="{{ task.tenant_code }}",
+            submit_task_options=std_submit_task_opts,
+            parameters={"tenant_code": "{{ tenant_code }}"},
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            max_active_tis_per_dagrun=1,
+        ).expand(tenant_code=tenants)
+
+        (
+            sanity_check_delta_somatic_snv(tasks)
+            >> insert_somatic_snv_occurrences
+            >> insert_stg_somatic_snv_variants_freq
+            >> aggregate_somatic_snv_variants_frequencies
+        )
+
+    with TaskGroup(group_id="snv_variant") as tg_variants:
+        insert_snv_staging_variants = RadiantStarRocksOperator(
+            task_id="insert_snv_staging_variant",
+            task_display_name="[StarRocks] Insert Staging SNV Variants",
+            sql="./sql/radiant/snv_staging_variant_insert.sql",
+            submit_task_options=std_submit_task_opts,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+        )
+
+        insert_snv_variants_with_freqs = RadiantStarRocksOperator.partial(
+            task_id="insert_snv_variant",
+            task_display_name="[StarRocks] Insert SNV Variants",
+            sql="./sql/radiant/snv_variant_insert.sql",
+            map_index_template="{{ task.tenant_code }}",
+            submit_task_options=std_submit_task_opts,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            max_active_tis_per_dagrun=1,
+        ).expand(tenant_code=tenants)
+
+        @task(task_id="compute_parts", trigger_rule=TriggerRule.NONE_FAILED)
+        def compute_part(params):
+            _magic = 10
+            variant_part = int(params["part"]) // _magic
+            return {
+                "variant_part": variant_part,
+                "part_lower": variant_part * _magic,
+                "part_upper": (variant_part + 1) * _magic,
+            }
+
+        _compute_part = compute_part()
+
+        insert_snv_variants_part = RadiantStarRocksOperator.partial(
+            task_id="insert_snv_variant_part",
+            sql="./sql/radiant/snv_variant_part_insert_part.sql",
+            task_display_name="[StarRocks] Insert SNV Variants Part",
+            map_index_template="{{ task.tenant_code }}",
+            submit_task_options=std_submit_task_opts,
+            parameters=_compute_part,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            max_active_tis_per_dagrun=1,
+        ).expand(tenant_code=tenants)
+
+        (
+            sanity_check_any_snv(tasks=tasks)
+            >> insert_snv_staging_variants
+            >> insert_snv_variants_with_freqs
+            >> insert_snv_variants_part
+        )
+
+    with TaskGroup(group_id="snv_consequence") as tg_consequences:
+        cons_filter_sql = render_pooled_sql.override(
+            task_id="render_snv_consequence_filter_part_sql",
+            task_display_name="[PyOp] Render Pooled SNV Consequence Filter Part SQL",
+        )("radiant/snv_consequence_filter_insert_part.sql", all_tenants)
+
+        import_snv_consequences = RadiantStarRocksOperator(
+            task_id="import_snv_consequence",
+            sql="./sql/radiant/snv_consequence_insert.sql",
+            task_display_name="[StarRocks] Insert SNV Consequences",
+            submit_task_options=std_submit_task_opts,
+            parameters=task_ids,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+        )
+
+        import_snv_consequences_filter = RadiantStarRocksOperator(
+            task_id="import_snv_consequence_filter",
+            sql="./sql/radiant/snv_consequence_filter_insert.sql",
+            task_display_name="[StarRocks] Insert SNV Consequences Filter",
+            submit_task_options=std_submit_task_opts,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+        )
+
+        insert_snv_consequences_filter_part = RadiantStarRocksOperator(
+            task_id="insert_snv_consequence_filter_part",
+            sql=cons_filter_sql,
+            task_display_name="[StarRocks] Insert SNV Consequences Filter Part",
+            submit_task_options=std_submit_task_opts,
+            parameters={"part": "{{ params.part }}"},
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+        )
+
+        (
+            sanity_check_any_snv(tasks=tasks)
+            >> import_snv_consequences
+            >> import_snv_consequences_filter
+            >> insert_snv_consequences_filter_part
+        )
+
+    delete_sequencing_experiments = RadiantStarRocksOperator(
+        task_id="delete_sequencing_experiments",
+        sql="./sql/radiant/sequencing_experiment_delete.sql",
+        task_display_name="[Starrocks] Delete Sequencing Experiments",
+        parameters=task_ids,
+        trigger_rule=TriggerRule.NONE_FAILED,
+    )
+
+    update_sequencing_experiments = RadiantStarRocksOperator(
+        task_id="update_sequencing_experiment",
+        sql="./sql/radiant/sequencing_experiment_update.sql",
+        task_display_name="[Starrocks] Update Sequencing Experiments",
+        parameters=task_ids,
+        trigger_rule=TriggerRule.NONE_FAILED,
+    )
+
+    # Checkpoint objects. Each one closes a phase and names the phase it opens, so the phase numbers in the
+    # DAG-flow block at the bottom of this file can be found in the task list.
+    checkpoint_setup = EmptyOperator(
+        task_id="checkpoint_after_setup",
+        task_display_name="[ --- CHECKPOINT: PHASE 2 --- ] Before VCF Imports",
+        trigger_rule=TriggerRule.NONE_FAILED,
+    )
+    checkpoint_imports = EmptyOperator(
+        task_id="checkpoint_after_vcf_imports",
+        task_display_name="[ --- CHECKPOINT: PHASE 3 --- ] Before Post-VCF Processing",
+        trigger_rule=TriggerRule.NONE_FAILED,
+    )
+    checkpoint_after_exomiser = EmptyOperator(
+        task_id="checkpoint_after_exomiser",
+        task_display_name="[ --- CHECKPOINT: PHASE 4 --- ] Before SNV Occurrence, Variant, Consequence Insertions",
+        trigger_rule=TriggerRule.NONE_FAILED,
+    )
+    checkpoint_variants = EmptyOperator(
+        task_id="checkpoint_after_variants",
+        task_display_name="[ --- CHECKPOINT: PHASE 5 --- ] Before CNV Occurrence Insertions",
+        trigger_rule=TriggerRule.NONE_FAILED,
+    )
+    checkpoint_cnv = EmptyOperator(
+        task_id="checkpoint_after_cnv",
+        task_display_name="[ --- CHECKPOINT: FINAL PHASE --- ] Before Sequencing Experiment Updates",
+        trigger_rule=TriggerRule.NONE_FAILED,
+    )
+
+    # Parallel VCF Imports
+    # Every CNV import must be listed here: `cleanup` below deletes the `stored_tasks` S3 file they
+    # read, and it only waits on the imports this list holds.
+    vcf_imports = [
+        import_snv_vcf,
+        import_cnv_vcf.expand(params=stored_tasks) if IS_AWS else import_cnv_vcf(stored_tasks=stored_tasks),
+        import_somatic_cnv_vcf.expand(params=stored_tasks)
+        if IS_AWS
+        else import_somatic_cnv_vcf(stored_tasks=stored_tasks),
+    ]
+    if IS_AWS:
+        vcf_imports >> cleanup.expand(params=stored_tasks)
+    else:
+        vcf_imports >> cleanup_tasks_files(stored_tasks)
+
+    # --- DAG Flow ---
+
+    # Phase 1: Setup
+    _acquire_import_lock >> start >> namespace_task >> fetch_sequencing_experiment_delta >> checkpoint_setup
+
+    # Phase 2: VCF Imports
+    checkpoint_setup >> vcf_imports >> checkpoint_imports
+
+    # Phase 3: Post-VCF Processing (hashes, exomiser, compound hets)
+    (
+        checkpoint_imports
+        >> load_exomiser
+        >> refresh_iceberg_tables
+        >> insert_hashes
+        >> overwrite_snv_tmp_variants
+        >> insert_exomiser_per_tenant
+        >> insert_germline_snv_comphet_per_tenant
+        >> checkpoint_after_exomiser
+    )
+
+    # Phase 4: SNV Occurrence, Variants, Consequences, and Frequencies Insertions
+    (
+        checkpoint_after_exomiser
+        >> tg_germline_snv_occurrence_per_tenant
+        >> tg_somatic_snv_occurrence_per_tenant
+        >> tg_variants
+        >> tg_consequences
+        >> checkpoint_variants
+    )
+    # The consequence filter is still pooled across every tenant, therefore we need the list of all
+    # tenants in the system to be loaded before importing consequences.
+    checkpoint_after_exomiser >> all_tenants >> tg_consequences
+
+    # Phase 5: CNV Occurrence Insertions
+    # CNVs rely on SNVs, therefore they need to run after
+    (
+        checkpoint_variants
+        >> tg_germline_cnv_occurrence_per_tenant
+        >> tg_somatic_cnv_occurrence_per_tenant
+        >> checkpoint_cnv
+    )
+
+    # Final Phase: Update Sequencing Experiments (deletions and updates)
+    checkpoint_cnv >> [delete_sequencing_experiments, update_sequencing_experiments]
+
+    # The release is a teardown: it runs after a failure too, so a failed partition gives the lock back,
+    # but Airflow leaves teardowns out of the run state, so that failure still fails the run (RAD-133).
+    [delete_sequencing_experiments, update_sequencing_experiments] >> _release_import_lock
+    _release_import_lock.as_teardown(setups=_acquire_import_lock)
+
+
+import_part()

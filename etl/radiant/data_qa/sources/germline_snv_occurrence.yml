@@ -1,0 +1,178 @@
+version: 2
+
+sources:
+  - name: tenant_db
+    schema: "{{ env_var('SR_TENANT_SCHEMA', env_var('SR_SCHEMA', 'radiant')) }}"
+    tables:
+      - name: germline__snv__occurrence
+        tests:
+          # --- Should Not Be Empty -------------------------------------------
+          - should_not_be_empty:
+              name: germline_snv_occurrence__should_not_be_empty
+          # --- Should Not Contain Only Null ----------------------------------
+          - should_not_contain_only_null:
+              name: germline_snv_occurrence__should_not_contain_only_null
+              except:
+                # Already covered by germline_snv_occurrence__should_not_contain_null__*
+                - part
+                - seq_id
+                - task_id
+                - locus_id
+                - phased
+                # RAD-39: a tenant with no family or affected proband has no compound het
+                - has_comphet
+                - comphet_genes
+                # RAD-94: only cases imported after RAD-94, from a family, fill them
+                - other_transmission_modes
+                - transmission_mode_candidate
+                - parental_origin_source
+                - transmission_mode_source
+                # RAD-178: BaseQRankSum, HaplotypeScore, DS and R2_5P_bias are absent from the header of the
+                # pipeline's DRAGEN + GATK VCFs. InbreedingCoeff is declared but GATK computes it from 10 samples,
+                # never on a trio.
+                - info_baseq_rank_sum
+                - info_haplotype_score
+                - info_ds
+                - info_r2_5p_bias
+                - info_inbreed_coeff
+          # --- Should Not Contain Same Value ---------------------------------
+          - should_not_contain_same_value:
+              name: germline_snv_occurrence__should_not_contain_same_value
+              except:
+                # Constant by construction
+                - part
+                # count(distinct) is not supported on STRUCT columns
+                - comphet_genes
+                # RAD-94: one method only until the pipeline revision writes the slivar tags
+                - transmission_mode_candidate
+                - parental_origin_source
+                - transmission_mode_source
+
+          # --- Should Be Within Range ----------------------------------------
+          # allele-depth ratios must be in [0,1] (defaults: like 'ad_ratio', 0..1)
+          - should_be_within_range:
+              name: germline_snv_occurrence__should_be_within_range_ad_ratio
+              like: ad_ratio
+
+          # --- Should Be Unique ----------------------------------------------
+          - dbt_utils.unique_combination_of_columns:
+              name: germline_snv_occurrence__should_be_unique__part_seq_id_task_id_locus_id
+              combination_of_columns:
+                - part
+                - seq_id
+                - task_id
+                - locus_id
+        columns:
+          - name: part
+            tests:
+              # --- Should Not Contain Null -----------------------------------
+              - not_null:
+                  name: germline_snv_occurrence__should_not_contain_null__part
+          - name: seq_id
+            tests:
+              # --- Should Not Contain Null -----------------------------------
+              - not_null:
+                  name: germline_snv_occurrence__should_not_contain_null__seq_id
+          - name: task_id
+            tests:
+              # --- Should Not Contain Null -----------------------------------
+              - not_null:
+                  name: germline_snv_occurrence__should_not_contain_null__task_id
+          - name: locus_id
+            tests:
+              # --- Should Not Contain Null -----------------------------------
+              - not_null:
+                  name: germline_snv_occurrence__should_not_contain_null__locus_id
+              # --- Relationships ---------------------------------------------
+              # RAD-57: every occurrence, whatever its quality, has its variant row.
+              - relationships:
+                  name: germline_snv_occurrence__relationships__locus_id__snv_variant
+                  to: source('tenant_db', 'snv__variant')
+                  field: locus_id
+          - name: phased
+            description: "BOOLEAN."
+            tests:
+              # --- Should Not Contain Null -----------------------------------
+              - not_null:
+                  name: germline_snv_occurrence__should_not_contain_null__phased
+          - name: zygosity
+            description: "CHAR(3)."
+            tests:
+              # --- Accepted Values -------------------------------------------
+              # values: dict_zygosity() — see macros/dictionaries.sql
+              - accepted_values:
+                  name: germline_snv_occurrence__accepted_values_zygosity
+                  values: "{{ dict_zygosity() }}"
+                  config:
+                    where: "zygosity is not null"
+          - name: father_zygosity
+            description: "CHAR(3)."
+            tests:
+              # --- Accepted Values -------------------------------------------
+              # values: dict_zygosity() — see macros/dictionaries.sql
+              - accepted_values:
+                  name: germline_snv_occurrence__accepted_values_father_zygosity
+                  values: "{{ dict_zygosity() }}"
+                  config:
+                    where: "father_zygosity is not null"
+          - name: mother_zygosity
+            description: "CHAR(3)."
+            tests:
+              # --- Accepted Values -------------------------------------------
+              # values: dict_zygosity() — see macros/dictionaries.sql
+              - accepted_values:
+                  name: germline_snv_occurrence__accepted_values_mother_zygosity
+                  values: "{{ dict_zygosity() }}"
+                  config:
+                    where: "mother_zygosity is not null"
+          - name: transmission_mode
+            description: "VARCHAR(50)."
+            tests:
+              # --- Accepted Values -------------------------------------------
+              # values: dict_transmission_mode() — see macros/dictionaries.sql
+              - accepted_values:
+                  name: germline_snv_occurrence__accepted_values_transmission_mode
+                  values: "{{ dict_transmission_mode() }}"
+                  config:
+                    where: "transmission_mode is not null"
+          - name: other_transmission_modes
+            description: "ARRAY<VARCHAR(50)>. Slivar modes not kept in transmission_mode (RAD-94)."
+            tests:
+              # --- Accepted Values (array) -----------------------------------
+              # values: dict_transmission_mode() — see macros/dictionaries.sql
+              - accepted_values_in_array:
+                  name: germline_snv_occurrence__accepted_values_other_transmission_modes
+                  values: "{{ dict_transmission_mode() }}"
+          - name: transmission_mode_candidate
+            description: "BOOLEAN. Set whenever the transmission mode comes from slivar (RAD-94)."
+            tests:
+              - not_null:
+                  name: germline_snv_occurrence__should_not_contain_null__transmission_mode_candidate
+                  config:
+                    where: "transmission_mode_source = 'slivar'"
+          - name: parental_origin_source
+            description: "VARCHAR(10). Method that gave parental_origin (RAD-94)."
+            tests:
+              - accepted_values:
+                  name: germline_snv_occurrence__accepted_values_parental_origin_source
+                  values: ["slivar", "etl"]
+                  config:
+                    where: "parental_origin_source is not null"
+          - name: transmission_mode_source
+            description: "VARCHAR(10). Method that gave transmission_mode (RAD-94)."
+            tests:
+              - accepted_values:
+                  name: germline_snv_occurrence__accepted_values_transmission_mode_source
+                  values: ["slivar", "etl"]
+                  config:
+                    where: "transmission_mode_source is not null"
+          - name: exomiser_acmg_classification
+            description: "VARCHAR(300)."
+            tests:
+              # --- Accepted Values -------------------------------------------
+              # values: dict_exomiser_acmg_classification() — see macros/dictionaries.sql
+              - accepted_values:
+                  name: germline_snv_occurrence__accepted_values_exomiser_acmg_classification
+                  values: "{{ dict_exomiser_acmg_classification() }}"
+                  config:
+                    where: "exomiser_acmg_classification is not null"

@@ -1,0 +1,10 @@
+# Context is the repo root: keep only what the MCP image copies.
+*
+!mcp/pyproject.toml
+!mcp/uv.lock
+!mcp/server.py
+!mcp/radiant_mcp/
+!clients/python/
+**/__pycache__
+**/.venv
+clients/python/.gen

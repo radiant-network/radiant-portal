@@ -1,0 +1,83 @@
+def test_dag_loads_without_errors(dag_bag):
+    dag = dag_bag.get_dag("radiant-import")
+    assert dag is not None
+    assert not dag_bag.import_errors
+
+
+def test_dag_has_expected_tasks(dag_bag):
+    dag = dag_bag.get_dag("radiant-import")
+    expected_tasks = {
+        "start",
+        "partitioner_group.fetch_sequencing_experiment_delta",
+        "partitioner_group.assign_partitions",
+        "partitioner_group.insert_sequencing_experiment",
+        "fetch_sequencing_experiment",
+        "prepare_tenants_tables",
+        "assign_priority",
+        "import_part",
+        "update_sequencing_experiment_deleted",
+        "data_integrity_checks",
+    }
+    assert set(dag.task_ids) == expected_tasks
+
+
+def test_dag_task_dependencies_are_correct(dag_bag):
+    dag = dag_bag.get_dag("radiant-import")
+    start = dag.get_task("start")
+    fetch_delta = dag.get_task("partitioner_group.fetch_sequencing_experiment_delta")
+    assign_partitions = dag.get_task("partitioner_group.assign_partitions")
+    insert_exp = dag.get_task("partitioner_group.insert_sequencing_experiment")
+    update_deleted_exp = dag.get_task("update_sequencing_experiment_deleted")
+    fetch_exp = dag.get_task("fetch_sequencing_experiment")
+    assign_priority = dag.get_task("assign_priority")
+    import_part = dag.get_task("import_part")
+
+    # Check direct downstream dependencies
+    assert fetch_delta in start.get_direct_relatives(upstream=False)
+    assert assign_partitions in fetch_delta.get_direct_relatives(upstream=False)
+    assert insert_exp in assign_partitions.get_direct_relatives(upstream=False)
+    assert update_deleted_exp in insert_exp.get_direct_relatives(
+        upstream=False
+    ) or fetch_exp in start.get_direct_relatives(upstream=False)
+    assert fetch_exp in update_deleted_exp.get_direct_relatives(upstream=False)
+    assert assign_priority in fetch_exp.get_direct_relatives(upstream=False)
+    assert import_part in assign_priority.get_direct_relatives(upstream=False)
+    assert "data_integrity_checks" in import_part.downstream_task_ids
+
+
+def test_data_integrity_checks_scoped_to_this_batch_tenants(dag_bag):
+    """QA only tests the tenants this run touched, not every tenant on the platform.
+
+    prepare_tenants_tables returns sorted(tenants); the DAG renders templates as native
+    objects, so this reaches the QA DAG as a real list rather than a repr.
+    """
+    dag = dag_bag.get_dag("radiant-import")
+    qa = dag.get_task("data_integrity_checks")
+    assert qa.conf == {"tenants": "{{ ti.xcom_pull(task_ids='prepare_tenants_tables') }}"}
+    assert dag.render_template_as_native_obj is True
+
+
+def test_data_integrity_failure_does_not_fail_the_import(dag_bag):
+    """The checks run after the data is loaded: a failed integrity run is accepted, not raised."""
+    dag = dag_bag.get_dag("radiant-import")
+    qa = dag.get_task("data_integrity_checks")
+    assert qa.wait_for_completion is True
+    assert set(qa.allowed_states) == {"success", "failed"}
+    assert qa.failed_states == []
+
+
+def test_partition_triggers_are_serialised_and_bounded(dag_bag):
+    """The partition fan-out waits rather than races, and no wait is unbounded.
+
+    `import_part` is `max_active_runs=1`, so a trigger whose partition is not next in line sits on a
+    QUEUED run. Queued runs are promoted in `execution_date` order -- the instant each trigger ran --
+    so the 1-slot pool is what keeps `assign_priority`'s order; and the wait needs a deadline, or one
+    wedged partition holds every sibling trigger open forever.
+    """
+    from radiant.tasks.locking import STALE_LOCK_MAX_AGE
+
+    trigger = dag_bag.get_dag("radiant-import").get_task("import_part")
+    assert trigger.pool == "import_part"
+    assert trigger.execution_timeout == STALE_LOCK_MAX_AGE
+    # Bounded by the same constant the stale-lock reclaim uses, so the two cannot drift apart.
+    assert dag_bag.get_dag("radiant-import-part").max_active_runs == 1

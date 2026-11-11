@@ -1,0 +1,33 @@
+language: 'python'
+layer: 'library'
+stack: 'backend'
+
+# Generated from the backend OpenAPI spec, consumed by the MCP (and one day the ETL).
+dependsOn: ['backend']
+
+fileGroups:
+  sources: ['radiant_python/**/*', 'setup.py', 'setup.cfg', 'pyproject.toml', 'requirements.txt']
+
+tasks:
+  # Fails when swagger.yaml changed but the client was not regenerated (or holds stale files).
+  check:
+    script: >-
+      rm -rf .gen && mkdir .gen && cp .openapi-generator-ignore .gen/ &&
+      npx -y @openapitools/openapi-generator-cli@2.20.0 version-manager set 7.12.0 >/dev/null &&
+      npx -y @openapitools/openapi-generator-cli@2.20.0 generate -i ../../backend/docs/swagger.yaml
+      -g python -o .gen -c openapi-config.yaml >/dev/null &&
+      rm -f openapitools.json &&
+      diff -r -x lib -x __pycache__ .gen/radiant_python radiant_python &&
+      diff -r .gen/docs docs
+    # test/ holds stubs the generator never overwrites: not compared.
+    inputs: ['/backend/docs/swagger.yaml', 'radiant_python/**/*', 'docs/**/*', 'openapi-config.yaml', '.openapi-generator-ignore']
+  # Regenerates in place (what a dev runs after changing the API).
+  generate:
+    script: >-
+      npx -y @openapitools/openapi-generator-cli@2.20.0 version-manager set 7.12.0 >/dev/null &&
+      npx -y @openapitools/openapi-generator-cli@2.20.0 generate -i ../../backend/docs/swagger.yaml
+      -g python -o . -c openapi-config.yaml >/dev/null && rm -f openapitools.json
+    inputs: ['/backend/docs/swagger.yaml']
+    options:
+      cache: false
+      runInCI: false

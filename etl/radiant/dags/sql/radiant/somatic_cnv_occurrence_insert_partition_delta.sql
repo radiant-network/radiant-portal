@@ -1,0 +1,132 @@
+WITH cytoband AS (SELECT o.name, o.seq_id, array_agg(c.cytoband) AS cytoband
+                  FROM {{ mapping.iceberg_somatic_cnv_occurrence }} o
+                  JOIN {{ mapping.starrocks_cytoband }} c ON c.chromosome = o.chromosome AND c.start <= o.end AND c.end >= o.start
+                  WHERE o.seq_id IN %(seq_ids)s
+                    AND o.tenant_code = %(tenant_code)s
+                  GROUP BY o.name, o.seq_id),
+     genes AS (SELECT o.name, o.seq_id, array_agg(g.name) AS symbol
+               FROM {{ mapping.iceberg_somatic_cnv_occurrence }} o
+               JOIN {{ mapping.starrocks_ensembl_gene }} g ON g.chromosome = o.chromosome AND g.start <= o.end
+                    AND g.end >= o.start
+               WHERE o.seq_id IN %(seq_ids)s
+                 AND o.tenant_code = %(tenant_code)s
+               GROUP BY o.name, o.seq_id),
+     -- Somatic segments are counted against somatic SNVs: germline SNVs inside a tumour segment would be a
+     -- meaningless number. COUNT(DISTINCT locus_id) because a tumour sample analysed both tumour-only and
+     -- tumour-normal holds each locus under two task_ids. See SJRA-1811 Decision 3 for the join.
+     -- Position first, then overlap on (seq_id, chromosome, bin). Occurrence and variant are colocated on locus_id,
+     -- so `snv_pos` is a local join. RAD-61: keyed on (seq_id, chromosome) alone, every CNV still met every SNV of its
+     -- chromosome before the interval filter, and the planner, with no stats on the CNV side, could pick `snv_pos` as
+     -- the hash table: a 166-sample WGS part filled the BE spill disk. Each CNV now has one row per 1 Mb bin it covers,
+     -- so an SNV meets only the CNVs of its own bin, and exactly one row of each CNV covering it (nb_snv unchanged).
+     -- The CNV bins are the small side: broadcast them as the hash table, never `snv_pos`.
+     snv_pos AS (SELECT s.tumor_seq_id AS seq_id, s.locus_id, v.chromosome, v.start, v.start DIV 1000000 AS bin
+                 FROM {{ mapping.starrocks_somatic_snv_occurrence }} s
+                 JOIN {{ mapping.starrocks_snv_variant }} v ON v.locus_id = s.locus_id
+                 WHERE s.part = {{ partition }} AND s.tumor_seq_id IN %(seq_ids)s
+                   -- RAD-57: same quality gate as the frequencies, so nb_snv counts quality-passing SNVs only.
+                   AND s.filter = 'PASS' AND s.tumor_ad_alt >= 2),
+     cnv_bin AS (SELECT o.name, o.seq_id, o.chromosome, o.start, o.end, b.bin
+                 FROM {{ mapping.iceberg_somatic_cnv_occurrence }} o,
+                      unnest(array_generate(o.start DIV 1000000, o.end DIV 1000000)) AS b(bin)
+                 WHERE o.seq_id IN %(seq_ids)s
+                   AND o.tenant_code = %(tenant_code)s),
+     snv AS (SELECT c.name, c.seq_id, COUNT(DISTINCT p.locus_id) AS nb_snv
+             FROM snv_pos p
+             JOIN [BROADCAST] cnv_bin c ON c.seq_id = p.seq_id AND c.chromosome = p.chromosome AND c.bin = p.bin
+                    AND p.start >= c.start AND p.start <= c.end
+             GROUP BY c.name, c.seq_id),
+    gnomad_overlaps AS (
+        SELECT
+            cnv.seq_id,
+            cnv.name,
+            gnomad.af as af,
+            -- Only the `gnomad_sv_v1` contract table has `ac`: on the legacy table, gnomad_ac stays NULL.
+            {% if mapping.iceberg_gnomad_sv_is_contract %}gnomad.ac{% else %}CAST(NULL AS INT){% endif %} as ac,
+            gnomad.n_het + gnomad.n_homalt as sc,
+            gnomad.n_het as sc_het,
+            gnomad.n_homalt as sc_hom,
+            gnomad.n_bi_genos as sn,
+            (gnomad.n_het + gnomad.n_homalt) / gnomad.n_bi_genos as sf
+        FROM {{ mapping.iceberg_somatic_cnv_occurrence }} cnv
+        JOIN {{ mapping.iceberg_gnomad_sv }} gnomad
+        /* Key on `type`, not `alternate`: an LOH event stores `<LOH>`, which matches no gnomAD svtype.
+           The CASE says what the join actually means -- same copy-number direction -- so GAINLOH matches
+           DUP and CNLOH (copy-neutral) matches nothing, keeping its gnomad_* columns NULL. It also yields
+           only 'DUP', 'DEL' or NULL, which is why no separate `svtype IN ('DUP','DEL')` filter is needed. */
+        ON cnv.chromosome = gnomad.chromosome
+        AND gnomad.svtype = CASE WHEN cnv.type IN ('GAIN', 'GAINLOH') THEN 'DUP'
+                                 WHEN cnv.type = 'LOSS'               THEN 'DEL' END
+        WHERE
+            /* Reciprocal overlap of at least 80 percent */
+            GREATEST(0, LEAST(cnv.end, gnomad.end) - GREATEST(cnv.start, gnomad.start)) >= 0.8 * (cnv.end - cnv.start)
+        AND
+            GREATEST(0, LEAST(cnv.end, gnomad.end) - GREATEST(cnv.start, gnomad.start)) >= 0.8 * (gnomad.end - gnomad.start)
+{% if not mapping.iceberg_gnomad_sv_is_contract %}
+		/* `gnomad_sv_v1` Contract table filters the rows, but not the legacy table  */
+        AND gnomad.filters = 'PASS'
+{% endif %}
+        AND cnv.seq_id IN %(seq_ids)s
+        AND cnv.tenant_code = %(tenant_code)s
+    ),
+    gnomad_ranked AS (
+        SELECT
+        o.*,
+        ROW_NUMBER() OVER (
+            PARTITION BY o.seq_id, o.name
+            ORDER BY o.af DESC, o.sf DESC
+        ) AS rn
+        FROM gnomad_overlaps o
+    )
+-- Column order follows somatic_cnv_occurrence_create_table.sql, which differs from germline's: `cn` sits in
+-- the ASCN block after `phased` rather than between `bc` and `pe`. This is a positional insert.
+SELECT o.part,
+       o.seq_id,
+       o.task_id,
+       GET_CNV_ID(o.chromosome, o.start, o.length, o.type) as cnv_id,
+       o.aliquot,
+       o.chromosome,
+       o.alternate,
+       o.start,
+       o.end,
+       o.type,
+       o.length,
+       o.name,
+       o.quality,
+       o.calls,
+       o.filter,
+       o.bc,
+       o.pe,
+       o.sm,
+       o.svtype,
+       o.svlen,
+       o.reflen,
+       o.ciend,
+       o.cipos,
+       o.phased,
+       o.cn,
+       o.cnf,
+       o.cnq,
+       o.mcn,
+       o.mcnf,
+       o.mcnq,
+       o.maf,
+       o.sd,
+       o.ascn_as,
+       cytoband.cytoband, genes.symbol, array_length(genes.symbol) AS nb_genes,
+       snv.nb_snv,
+       gnomad_ranked.af AS gnomad_af,
+       gnomad_ranked.sc AS gnomad_sc,
+       gnomad_ranked.sn AS gnomad_sn,
+       gnomad_ranked.sf AS gnomad_sf,
+       gnomad_ranked.sc_hom AS gnomad_sc_hom,
+       gnomad_ranked.sc_het AS gnomad_sc_het,
+       gnomad_ranked.ac AS gnomad_ac
+FROM {{ mapping.iceberg_somatic_cnv_occurrence }} o
+         LEFT JOIN cytoband ON cytoband.seq_id = o.seq_id AND o.name = cytoband.name
+         LEFT JOIN genes ON genes.seq_id = o.seq_id AND o.name = genes.name
+         LEFT JOIN snv ON snv.seq_id = o.seq_id AND o.name = snv.name
+         LEFT JOIN gnomad_ranked ON gnomad_ranked.seq_id = o.seq_id AND o.name = gnomad_ranked.name AND gnomad_ranked.rn = 1
+WHERE o.seq_id IN %(seq_ids)s
+  AND o.tenant_code = %(tenant_code)s
+;

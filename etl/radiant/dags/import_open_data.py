@@ -1,0 +1,398 @@
+import logging
+
+from airflow import DAG
+from airflow.decorators import task
+from airflow.models import Param
+from airflow.models.baseoperator import chain
+from airflow.operators.empty import EmptyOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from airflow.utils.task_group import TaskGroup
+
+from radiant.dags import NAMESPACE
+from radiant.tasks.starrocks.operator import RadiantStarrocksLoadOperator, RadiantStarRocksOperator, SubmitTaskOptions
+
+LOGGER = logging.getLogger(__name__)
+
+
+default_args = {"owner": "radiant"}
+variant_group_ids = ["1000_genomes", "clinvar", "dbnsfp", "dbsnp", "gnomad", "spliceai", "topmed_bravo"]
+gene_group_ids = [
+    "gnomad_constraint",
+    "omim_gene_panel",
+    "hpo_gene_panel",
+    "ensembl_gene",
+    "ensembl_exon_by_gene",
+    "orphanet_gene_panel",
+    "ddd_gene_panel",
+    "mondo_term",
+    "hpo_term",
+]
+
+# The `mapping.iceberg_*` key each group reads, for the five that are not simply `iceberg_{group}`.
+source_keys = {
+    "gnomad": "iceberg_gnomad_joint",
+    "ddd_gene_panel": "iceberg_ddd_gene_set",
+    "hpo_gene_panel": "iceberg_hpo_gene_set",
+    "omim_gene_panel": "iceberg_omim_gene_set",
+    "orphanet_gene_panel": "iceberg_orphanet_gene_set",
+}
+
+
+IMPORT_GATES_TASK_ID = "compute_import_gates"
+IMPORT_REFS_XCOM_KEY = "refs"
+
+
+def skip_legacy(group: str) -> str:
+    key = source_keys.get(group, f"iceberg_{group}")
+    return f"params.skip_legacy_tables and not mapping.get('{key}_is_contract')"
+
+
+def skip_unchanged(group: str) -> str:
+    key = source_keys.get(group, f"iceberg_{group}")
+    return (
+        f"not not mapping.get('{key}_is_contract') and not params.force_import "
+        f"and not (ti.xcom_pull(task_ids='{IMPORT_GATES_TASK_ID}') or {{}}).get('{key}', True)"
+    )
+
+
+def gated(group: str) -> str:
+    return "{{ (" + skip_legacy(group) + ") or (" + skip_unchanged(group) + ") }}"
+
+
+dag_params = {
+    "skip_legacy_tables": Param(
+        default=False,
+        description=(
+            "Import only the OpenDataLake sources, skipping every table still read from the legacy Radiant "
+            "Iceberg catalog. Those do not move when OpenDataLake publishes, so a refresh-driven run has "
+            "nothing new to read for them. Set by the re-annotation DAG; leave False for a full import."
+        ),
+        type="boolean",
+    ),
+    "force_import": Param(
+        default=False,
+        description=(
+            "Re-import every source whether or not OpenDataLake published since the last recorded "
+            "release. Set it after editing an insert statement, and after truncating or recreating a "
+            "StarRocks open-data table -- the gate compares Iceberg snapshots and cannot see either."
+        ),
+        type="boolean",
+    ),
+    "raw_rcv_filepaths": Param(
+        default=None,
+        description="RCV filepaths to load into the raw ClinVar RCV Summary table.",
+        type=["array", "null"],
+    ),
+    "cytoband_filepath": Param(
+        default=None,
+        description="Cytoband filepath to load into the raw Cytoband table.",
+        type=["array", "null"],
+    ),
+    "cosmic_gene_set_filepath": Param(
+        default=None,
+        description=(
+            "COSMIC Cancer Gene Census filepath(s). When set, triggers radiant-import-cosmic-gene-set, which "
+            "loads cosmic_gene_set and rebuilds cosmic_gene_panel from it."
+        ),
+        type=["array", "null"],
+    ),
+    "cosmic_mutation_set_filepath": Param(
+        default=None,
+        description=(
+            "COSMIC Mutation Census filepath (cmc_export.tsv.gz). When set, triggers "
+            "radiant-import-cosmic-mutation-set, which normalizes the variants against the reference and loads "
+            "cosmic_mutation_set."
+        ),
+        type=["string", "null"],
+    ),
+    "reference_fasta_filepath": Param(
+        default=None,
+        description=(
+            "GRCh38 reference FASTA the COSMIC Mutation Census normalization left-aligns against. Leave empty "
+            "to use the RADIANT_REFERENCE_FASTA_S3_URI default of radiant-import-cosmic-mutation-set."
+        ),
+        type=["string", "null"],
+    ),
+    "import_igv_tracks": Param(
+        default=False,
+        description=(
+            "Rebuild the public IGV tracks (ClinVar, DGV, gnomAD SV/CNV, ClinGen, UCSC repeats, ...) by "
+            "triggering radiant-import-igv-tracks. Off by default: the re-annotation DAG triggers this one and "
+            "must not rebuild the files each time. A failed track fails this run after the tables are loaded: "
+            "retry the track in radiant-import-igv-tracks, not this import."
+        ),
+        type="boolean",
+    ),
+}
+
+with DAG(
+    dag_id=f"{NAMESPACE}-import-open-data",
+    dag_display_name="Radiant - Import Open Data",
+    schedule=None,
+    catchup=False,
+    default_args=default_args,
+    params=dag_params,
+    render_template_as_native_obj=True,
+    tags=["radiant", "starrocks", "open-data", "manual"],
+) as dag:
+    start = EmptyOperator(task_id="start")
+
+    @task(task_id="get_tables_to_refresh", task_display_name="[PyOp] Iceberg Tables to Refresh")
+    def get_tables_to_refresh() -> list[dict[str, str]]:
+        from airflow.sdk import get_current_context
+
+        from radiant.tasks.data.open_data import list_iceberg_source_tables
+
+        conf = get_current_context()["dag_run"].conf or {}
+        return [{"table": table} for table in list_iceberg_source_tables(conf)]
+
+    _tables_to_refresh = get_tables_to_refresh()
+
+    refresh_iceberg_tables = RadiantStarRocksOperator.partial(
+        task_id="refresh_iceberg_tables",
+        task_display_name="[StarRocks] Refresh Iceberg Metadata Cache",
+        sql="REFRESH EXTERNAL TABLE {{ params.table }}",
+        map_index_template="{{ params.table }}",
+    ).expand(params=_tables_to_refresh)
+
+    @task(task_id=IMPORT_GATES_TASK_ID, task_display_name="[PyOp] Which Sources Have New Data?")
+    def compute_import_gates() -> dict[str, bool]:
+        from airflow.sdk import get_current_context
+
+        from radiant.tasks.data.open_data import (
+            IMPORTED_SNAPSHOT,
+            changed_sources,
+            resolve_current_refs,
+            resolve_current_snapshots,
+        )
+
+        context = get_current_context()
+        conf = context["dag_run"].conf or {}
+        refs = resolve_current_refs(conf)
+        snapshots = resolve_current_snapshots(conf, refs=refs)
+        changed = changed_sources(conf, column=IMPORTED_SNAPSHOT, current=snapshots)
+        context["ti"].xcom_push(key=IMPORT_REFS_XCOM_KEY, value=refs)
+        LOGGER.info(f"Sources with something new: {sorted(changed) or 'none'}.")
+        return {key: key in changed for key in snapshots}
+
+    _import_gates = compute_import_gates()
+
+    data_tasks = []
+    for group in variant_group_ids:
+        data_tasks.append(
+            RadiantStarRocksOperator(
+                task_id=f"insert_hashes_{group}",
+                task_display_name=f"{group} Insert Hashes",
+                sql=f"./sql/open_data/{group}_insert_hashes.sql",
+                submit_task_options=SubmitTaskOptions(max_query_timeout=3600, poll_interval=30),
+                trigger_rule="none_failed",
+                skip_if=gated(group),
+            )
+        )
+        data_tasks.append(
+            RadiantStarRocksOperator(
+                task_id=f"insert_{group}",
+                task_display_name=f"{group} Insert Data",
+                sql=f"./sql/open_data/{group}_insert.sql",
+                submit_task_options=SubmitTaskOptions(max_query_timeout=3600, poll_interval=30),
+                trigger_rule="none_failed",
+                skip_if=gated(group),
+            )
+        )
+
+    for group in gene_group_ids:
+        data_tasks.append(
+            RadiantStarRocksOperator(
+                task_id=f"insert_{group}",
+                task_display_name=f"{group} Insert Data",
+                sql=f"./sql/open_data/{group}_insert.sql",
+                submit_task_options=SubmitTaskOptions(max_query_timeout=3600, poll_interval=30),
+                trigger_rule="none_failed",
+                skip_if=gated(group),
+            )
+        )
+
+    @task.short_circuit(
+        task_id="has_cytoband_filepath",
+        task_display_name="[PyOp] Cytoband Filepath Provided?",
+        ignore_downstream_trigger_rules=False,
+    )
+    def has_cytoband_filepath(params: dict | None = None) -> bool:
+        return bool((params or {}).get("cytoband_filepath"))
+
+    with TaskGroup(group_id="clinvar_rcv_summary") as tg_clinvar_rcv_summary:
+
+        @task.short_circuit(
+            task_id="has_raw_filepaths",
+            task_display_name="[PyOp] RCV Summary Filepaths Provided?",
+            ignore_downstream_trigger_rules=False,
+            trigger_rule="none_failed",
+        )
+        def has_raw_filepaths(params: dict | None = None) -> bool:
+            return bool((params or {}).get("raw_rcv_filepaths"))
+
+        insert_raw_from_open_data = RadiantStarRocksOperator(
+            task_id="insert_raw_from_open_data",
+            task_display_name="[StarRocks] Raw ClinVar RCV Summary Insert Data",
+            sql="./sql/open_data/raw_clinvar_rcv_summary_insert.sql",
+            submit_task_options=SubmitTaskOptions(max_query_timeout=3600, poll_interval=30),
+            trigger_rule="none_failed",
+            skip_if=(
+                f"{{{{ (not mapping.get('iceberg_clinvar_rcv_is_contract')) or ({skip_unchanged('clinvar_rcv')}) }}}}"
+            ),
+        )
+
+        load_raw_from_files = RadiantStarrocksLoadOperator(
+            task_id="load_raw_from_files",
+            task_display_name="[StarRocks] Load Raw ClinVar RCV Summary",
+            sql="./sql/open_data/raw_clinvar_rcv_summary_load.sql",
+            table="{{ mapping.starrocks_raw_clinvar_rcv_summary }}",
+            truncate=True,
+            load_label="load_raw_clinvar_rcv_summary_{{ ts_nodash }}_{{ ti.try_number }}",
+            parameters={"rcv_summary_filepaths": "{{ params.raw_rcv_filepaths }}"},
+        )
+
+        insert_summary = RadiantStarRocksOperator(
+            task_id="insert_summary",
+            task_display_name="[StarRocks] ClinVar RCV Summary Insert Data",
+            sql="./sql/open_data/clinvar_rcv_summary_insert.sql",
+            submit_task_options=SubmitTaskOptions(max_query_timeout=3600, poll_interval=30),
+            trigger_rule="none_failed",
+        )
+
+        insert_raw_from_open_data >> has_raw_filepaths() >> load_raw_from_files >> insert_summary
+
+    load_cytoband = RadiantStarrocksLoadOperator(
+        task_id="load_cytoband",
+        task_display_name="[StarRocks] Load Cytoband",
+        sql="./sql/open_data/cytoband_load.sql",
+        table="{{ mapping.starrocks_cytoband }}",
+        truncate=True,
+        load_label="load_cytoband_{{ ts_nodash }}_{{ ti.try_number }}",
+        parameters={"tsv_filepath": "{{ params.cytoband_filepath }}"},
+    )
+
+    # COSMIC has no OpenDataLake contract and is not an Iceberg source any more: it is loaded from the
+    # census TSV by its own DAG, which also rebuilds cosmic_gene_panel.
+    with TaskGroup(group_id="cosmic_gene_set") as tg_cosmic_gene_set:
+
+        @task.short_circuit(
+            task_id="has_cosmic_gene_set_filepath",
+            task_display_name="[PyOp] COSMIC Gene Set Filepath Provided?",
+            ignore_downstream_trigger_rules=False,
+        )
+        def has_cosmic_gene_set_filepath(params: dict | None = None) -> bool:
+            return bool((params or {}).get("cosmic_gene_set_filepath"))
+
+        trigger_import_cosmic_gene_set = TriggerDagRunOperator(
+            task_id="trigger_import_cosmic_gene_set",
+            task_display_name="[DAG] Import COSMIC Gene Set",
+            trigger_dag_id=f"{NAMESPACE}-import-cosmic-gene-set",
+            conf={"cosmic_gene_set_filepath": "{{ params.cosmic_gene_set_filepath }}"},
+            reset_dag_run=True,
+            wait_for_completion=True,
+            poke_interval=30,
+        )
+
+        has_cosmic_gene_set_filepath() >> trigger_import_cosmic_gene_set
+
+    # Same hand-off for the Mutation Census: its own DAG owns the bcftools normalization step.
+    with TaskGroup(group_id="cosmic_mutation_set") as tg_cosmic_mutation_set:
+
+        @task.short_circuit(
+            task_id="has_cosmic_mutation_set_filepath",
+            task_display_name="[PyOp] COSMIC Mutation Set Filepath Provided?",
+            ignore_downstream_trigger_rules=False,
+        )
+        def has_cosmic_mutation_set_filepath(params: dict | None = None) -> bool:
+            return bool((params or {}).get("cosmic_mutation_set_filepath"))
+
+        @task(task_id="cosmic_mutation_set_conf", task_display_name="[PyOp] COSMIC Mutation Set Conf")
+        def cosmic_mutation_set_conf(params: dict | None = None) -> dict:
+            # Only forward the FASTA when given, so the triggered DAG's env-var default still applies.
+            conf = {"cosmic_mutation_set_filepath": (params or {})["cosmic_mutation_set_filepath"]}
+            if (params or {}).get("reference_fasta_filepath"):
+                conf["reference_fasta_filepath"] = params["reference_fasta_filepath"]
+            return conf
+
+        trigger_import_cosmic_mutation_set = TriggerDagRunOperator(
+            task_id="trigger_import_cosmic_mutation_set",
+            task_display_name="[DAG] Import COSMIC Mutation Set",
+            trigger_dag_id=f"{NAMESPACE}-import-cosmic-mutation-set",
+            conf="{{ ti.xcom_pull(task_ids='cosmic_mutation_set.cosmic_mutation_set_conf') }}",
+            reset_dag_run=True,
+            wait_for_completion=True,
+            poke_interval=30,
+        )
+
+        has_cosmic_mutation_set_filepath() >> cosmic_mutation_set_conf() >> trigger_import_cosmic_mutation_set
+
+    # The public IGV tracks are files, not tables: their own DAG downloads, converts and indexes them.
+    with TaskGroup(group_id="igv_tracks") as tg_igv_tracks:
+
+        @task.short_circuit(
+            task_id="should_import_igv_tracks",
+            task_display_name="[PyOp] Import IGV Tracks?",
+            ignore_downstream_trigger_rules=False,
+        )
+        def should_import_igv_tracks(params: dict | None = None) -> bool:
+            return bool((params or {}).get("import_igv_tracks"))
+
+        # No conf: the triggered DAG's igv_tracks_prefix default (RADIANT_IGV_TRACKS_S3_PREFIX) applies.
+        trigger_import_igv_tracks = TriggerDagRunOperator(
+            task_id="trigger_import_igv_tracks",
+            task_display_name="[DAG] Import IGV Tracks",
+            trigger_dag_id=f"{NAMESPACE}-import-igv-tracks",
+            reset_dag_run=True,
+            wait_for_completion=True,
+            poke_interval=30,
+        )
+
+        should_import_igv_tracks() >> trigger_import_igv_tracks
+
+    @task(task_id="build_import_rows", task_display_name="[PyOp] Build Open Data Release Rows")
+    def build_import_rows() -> list[dict[str, str]]:
+        from airflow.sdk import get_current_context
+
+        from radiant.tasks.data.open_data import annotated_snapshots, build_open_data_release_rows
+
+        context = get_current_context()
+        conf = context["dag_run"].conf or {}
+        refs = context["ti"].xcom_pull(task_ids=IMPORT_GATES_TASK_ID, key=IMPORT_REFS_XCOM_KEY)
+        return build_open_data_release_rows(conf, refs=refs, annotated=annotated_snapshots(conf))
+
+    @task(task_id="render_import_sql", task_display_name="[PyOp] Render Open Data Release SQL")
+    def render_import_sql(releases: list[dict[str, str]]) -> str:
+        import jinja2
+        from airflow.sdk import get_current_context
+
+        from radiant.dags import DAGS_DIR
+        from radiant.tasks.data.radiant_tables import get_radiant_mapping
+
+        context = get_current_context()
+        conf = context["dag_run"].conf or {}
+        text = (DAGS_DIR / "sql" / "radiant" / "open_data_release_insert.sql").read_text()
+        return jinja2.Template(text).render(
+            mapping=get_radiant_mapping(conf),
+            releases=releases,
+            dag_run_id=context["run_id"],
+        )
+
+    _import_rows = build_import_rows()
+    record_import = RadiantStarRocksOperator(
+        task_id="record_open_data_import",
+        task_display_name="[StarRocks] Record What Was Imported",
+        sql=render_import_sql(_import_rows),
+        trigger_rule="none_failed",
+    )
+
+    start >> _tables_to_refresh
+    chain(refresh_iceberg_tables, _import_gates, *data_tasks)
+
+    data_tasks[-1] >> tg_clinvar_rcv_summary
+    data_tasks[-1] >> has_cytoband_filepath() >> load_cytoband
+    data_tasks[-1] >> tg_cosmic_gene_set
+    data_tasks[-1] >> tg_cosmic_mutation_set
+    data_tasks[-1] >> tg_igv_tracks
+
+    tg_clinvar_rcv_summary >> _import_rows >> record_import

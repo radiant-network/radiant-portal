@@ -1,0 +1,218 @@
+"""The variant catalog must never expose another tenant's cohort.
+
+`snv_variant_insert.sql` used to pool every tenant's frequency tables, so `germline_pn_*` was the
+sum of all cohorts and a locus carried by one tenant showed up in everyone's catalog. This test
+seeds two real tenant databases with overlapping and disjoint loci, runs the real insert once per
+tenant, and asserts each catalog only ever sees its own numbers.
+"""
+
+import os
+
+import jinja2
+import pytest
+
+from radiant.dags import DAGS_DIR
+from radiant.tasks.data.radiant_tables import RadiantConfigKeys, get_radiant_mapping
+from tests.integration.conftest import TENANT_CODES
+
+_SQL_DIR = os.path.join(DAGS_DIR, "sql", "radiant")
+
+_TENANT_A, _TENANT_B = TENANT_CODES
+
+# Locus 4 is carried by no tenant: it exists in the shared staging catalog (open-data annotations
+# have no tenant), so it proves the insert restricts to the loci the tenant actually carries.
+_STAGING_LOCI = (1, 2, 3, 4)
+
+# Locus 2 is the one both tenants carry, so giving it the odd value proves pick_source travels with
+# its own row rather than being broadcast.
+_STAGING_PICK_SOURCE = {1: "Ensembl", 2: "RefSeq", 3: "Ensembl", 4: "Ensembl"}
+
+# RAD-15. Appended at the very end of the positional projection, so an off-by-one there shows up as a
+# value in the wrong column. Locus 3 has no COSMIC entry.
+_STAGING_CMC_COLUMNS = ("cmc_mutation_url", "cmc_sample_mutated", "cmc_sample_ratio", "cmc_tier")
+_STAGING_CMC = {
+    1: ("https://cosmic/1", 11, 0.125, "1"),
+    2: ("https://cosmic/2", 22, 0.25, "Other"),
+    3: (None, None, None, None),
+    4: ("https://cosmic/4", 44, 0.5, "3"),
+}
+
+# locus_id -> (pc_wgs, pn_wgs, hom_wgs). `pn_*` is the tenant's whole cohort, broadcast onto every row by
+# germline_snv_variant_frequency_insert.sql.
+_GERMLINE_FREQ_COLUMNS = ("pc_wgs", "pn_wgs", "hom_wgs")
+_GERMLINE_FREQ = {
+    _TENANT_A: {1: (3, 10, 1), 2: (5, 10, 2)},
+    _TENANT_B: {2: (1, 4, 0), 3: (2, 4, 2)},
+}
+# locus_id -> (pc_tn_wgs, pn_tn_wgs, pc_to_wgs, pn_to_wgs, hom_tn_wgs, hom_to_wgs). Tenant B has no somatic
+# experiments at all. The pc/pn values are deliberately distinct and the `*_to_wxs` columns are left unseeded, so a
+# wgs/wxs or tn/to mix-up in the positional projections of snv_variant_insert.sql shows up as a
+# wrong number rather than passing silently — every somatic column there is INT(11) or DOUBLE, so
+# the column count alone would still line up.
+_SOMATIC_FREQ_COLUMNS = ("pc_tn_wgs", "pn_tn_wgs", "pc_to_wgs", "pn_to_wgs", "hom_tn_wgs", "hom_to_wgs")
+_SOMATIC_FREQ = {
+    _TENANT_A: {2: (1, 7, 3, 12, 1, 2)},
+    _TENANT_B: {},
+}
+
+# The catalog columns this test reads back, by name. Reading by name rather than by position keeps
+# the test stable as the catalog gains columns (it grew six `*_to_*` ones in SJRA-1751).
+_CATALOG_COLUMNS = (
+    "germline_pc_wgs",
+    "germline_pn_wgs",
+    "somatic_pc_tn_wgs",
+    "somatic_pn_tn_wgs",
+    "somatic_pf_tn_wgs",
+    "somatic_pc_to_wgs",
+    "somatic_pn_to_wgs",
+    "somatic_pf_to_wgs",
+    "somatic_pc_to_wxs",
+    "somatic_pn_to_wxs",
+    "somatic_pf_to_wxs",
+    # SJRA-1833. Not a frequency, but it sits next to `transcript_id` in the middle of the positional
+    # projection, so a wrong ordinal there surfaces here rather than as a silent column swap.
+    "pick_source",
+    *_STAGING_CMC_COLUMNS,
+    # RAD-22. Appended after the CMC columns, at the very end of the positional projection.
+    "germline_hom_wgs",
+    "germline_af_wgs",
+    "germline_af_wxs",
+    "somatic_hom_tn_wgs",
+    "somatic_af_tn_wgs",
+    "somatic_hom_to_wgs",
+    "somatic_af_to_wgs",
+    "somatic_hom_to_wxs",
+    "somatic_af_to_wxs",
+)
+
+
+def _reset_table(cursor, table, mapping):
+    with open(os.path.join(_SQL_DIR, "init", f"{table}_create_table.sql")) as f_in:
+        cursor.execute(jinja2.Template(f_in.read()).render({"mapping": mapping}))
+    cursor.execute(f"TRUNCATE TABLE {mapping[f'starrocks_{table}']};")
+
+
+def _seed(cursor, table, columns, rows):
+    if not rows:
+        return
+    placeholders = ", ".join(["%s"] * len(columns))
+    cursor.executemany(f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({placeholders})", rows)
+
+
+def test_snv_variant_is_isolated_per_tenant(starrocks_session, mapping_conf, starrocks_tenant_database):
+    conf = {**mapping_conf, RadiantConfigKeys.RADIANT_TENANT_DB_TEMPLATE.env_key: starrocks_tenant_database}
+    base_mapping = get_radiant_mapping(conf)
+    mappings = {tenant: get_radiant_mapping(conf, tenant_code=tenant) for tenant in TENANT_CODES}
+
+    with starrocks_session.cursor() as cursor:
+        # The annotation source is shared: both tenants read the same staging catalog.
+        _reset_table(cursor, "snv_staging_variant", base_mapping)
+        _seed(
+            cursor,
+            base_mapping["starrocks_snv_staging_variant"],
+            ("locus_id", "chromosome", "start", "reference", "alternate", "pick_source", *_STAGING_CMC_COLUMNS),
+            [
+                (locus_id, "1", 1000 + locus_id, "A", "T", _STAGING_PICK_SOURCE[locus_id], *_STAGING_CMC[locus_id])
+                for locus_id in _STAGING_LOCI
+            ],
+        )
+
+        for tenant, mapping in mappings.items():
+            for table in ("germline_snv_variant_frequency", "somatic_snv_variant_frequency", "snv_variant"):
+                _reset_table(cursor, table, mapping)
+
+            _seed(
+                cursor,
+                mapping["starrocks_germline_snv_variant_frequency"],
+                ("locus_id", *_GERMLINE_FREQ_COLUMNS),
+                [(locus_id, *values) for locus_id, values in _GERMLINE_FREQ[tenant].items()],
+            )
+            _seed(
+                cursor,
+                mapping["starrocks_somatic_snv_variant_frequency"],
+                ("locus_id", *_SOMATIC_FREQ_COLUMNS),
+                [(locus_id, *values) for locus_id, values in _SOMATIC_FREQ[tenant].items()],
+            )
+
+        with open(os.path.join(_SQL_DIR, "snv_variant_insert.sql")) as f_in:
+            insert_template = f_in.read()
+
+        catalogs = {}
+        for tenant, mapping in mappings.items():
+            cursor.execute(jinja2.Template(insert_template).render({"mapping": mapping}))
+            cursor.execute(
+                f"SELECT locus_id, {', '.join(_CATALOG_COLUMNS)} "
+                f"FROM {mapping['starrocks_snv_variant']} ORDER BY locus_id"
+            )
+            catalogs[tenant] = {row[0]: dict(zip(_CATALOG_COLUMNS, row[1:], strict=True)) for row in cursor.fetchall()}
+
+    # Each catalog holds exactly the loci that tenant carries — never the other tenant's, and never
+    # locus 4, which no tenant carries.
+    assert set(catalogs[_TENANT_A]) == {1, 2}
+    assert set(catalogs[_TENANT_B]) == {2, 3}
+
+    # pn_* is the tenant's own cohort. Pooled, locus 2 would have read 10 + 4 = 14 patients.
+    assert {row["germline_pn_wgs"] for row in catalogs[_TENANT_A].values()} == {10}
+    assert {row["germline_pn_wgs"] for row in catalogs[_TENANT_B].values()} == {4}
+
+    # pc_* on the shared locus counts only the tenant's own carriers (pooled it would have been 6).
+    assert catalogs[_TENANT_A][2]["germline_pc_wgs"] == 5
+    assert catalogs[_TENANT_B][2]["germline_pc_wgs"] == 1
+
+    # Tenant A's somatic cohort stays out of tenant B, which has no somatic experiments.
+    tenant_a_locus_2 = catalogs[_TENANT_A][2]
+    assert (tenant_a_locus_2["somatic_pc_tn_wgs"], tenant_a_locus_2["somatic_pn_tn_wgs"]) == (1, 7)
+    assert {row["somatic_pc_tn_wgs"] for row in catalogs[_TENANT_B].values()} == {0}
+    assert {row["somatic_pn_tn_wgs"] for row in catalogs[_TENANT_B].values()} == {0}
+
+    # The tumor-only columns are carried through with their own cohort, distinct from tumor-normal's
+    # (SJRA-1751). `*_to_wxs` was never seeded, so it must read as an all-zero cohort.
+    assert (
+        tenant_a_locus_2["somatic_pc_to_wgs"],
+        tenant_a_locus_2["somatic_pn_to_wgs"],
+        tenant_a_locus_2["somatic_pf_to_wgs"],
+    ) == (3, 12, 0.25)
+    assert float(tenant_a_locus_2["somatic_pf_tn_wgs"]) == pytest.approx(1 / 7, rel=1e-6)
+    assert (
+        tenant_a_locus_2["somatic_pc_to_wxs"],
+        tenant_a_locus_2["somatic_pn_to_wxs"],
+        tenant_a_locus_2["somatic_pf_to_wxs"],
+    ) == (0, 0, 0)
+    assert {row["somatic_pc_to_wgs"] for row in catalogs[_TENANT_B].values()} == {0}
+    assert {row["somatic_pn_to_wgs"] for row in catalogs[_TENANT_B].values()} == {0}
+
+    # pick_source is copied from the shared staging catalog, per row (SJRA-1833).
+    assert catalogs[_TENANT_A][1]["pick_source"] == "Ensembl"
+    assert catalogs[_TENANT_A][2]["pick_source"] == "RefSeq"
+    assert catalogs[_TENANT_B][2]["pick_source"] == "RefSeq"
+    assert catalogs[_TENANT_B][3]["pick_source"] == "Ensembl"
+
+    # The COSMIC CMC columns are copied from the shared staging catalog, per row (RAD-15).
+    for tenant, catalog in catalogs.items():
+        for locus_id, row in catalog.items():
+            cmc = tuple(row[column] for column in _STAGING_CMC_COLUMNS)
+            assert cmc == _STAGING_CMC[locus_id], (tenant, locus_id)
+
+    # af = (pc + hom) / (2 * pn), with the tenant's own pn (RAD-22). Pooled, locus 2 would have read
+    # (5 + 1 + 2 + 0) / 28 for both tenants.
+    expected_germline = {
+        _TENANT_A: {1: (1, (3 + 1) / 20), 2: (2, (5 + 2) / 20)},
+        _TENANT_B: {2: (0, (1 + 0) / 8), 3: (2, (2 + 2) / 8)},
+    }
+    for tenant, loci in expected_germline.items():
+        for locus_id, (hom, af) in loci.items():
+            row = catalogs[tenant][locus_id]
+            assert row["germline_hom_wgs"] == hom, (tenant, locus_id)
+            assert float(row["germline_af_wgs"]) == pytest.approx(af, rel=1e-6), (tenant, locus_id)
+            # No wxs cohort: pn_wxs = 0, so af is 0 rather than NULL or a division error.
+            assert row["germline_af_wxs"] == 0, (tenant, locus_id)
+
+    # Somatic tumor-normal and tumor-only each use their own pn: (1 + 1) / 14 and (3 + 2) / 24.
+    assert (tenant_a_locus_2["somatic_hom_tn_wgs"], tenant_a_locus_2["somatic_hom_to_wgs"]) == (1, 2)
+    assert float(tenant_a_locus_2["somatic_af_tn_wgs"]) == pytest.approx(2 / 14, rel=1e-6)
+    assert float(tenant_a_locus_2["somatic_af_to_wgs"]) == pytest.approx(5 / 24, rel=1e-6)
+    # The last column of the catalog. `*_to_wxs` was never seeded (pn = 0), so both read 0.
+    assert (tenant_a_locus_2["somatic_hom_to_wxs"], tenant_a_locus_2["somatic_af_to_wxs"]) == (0, 0)
+    # Tenant B has no somatic cohort at all: every somatic af is 0.
+    for row in catalogs[_TENANT_B].values():
+        assert (row["somatic_hom_tn_wgs"], row["somatic_af_tn_wgs"], row["somatic_af_to_wgs"]) == (0, 0, 0)

@@ -1,0 +1,432 @@
+"""SJRA-1811 -- `nb_snv` counts the part's quality-passing SNV occurrences, coordinates joined from `snv__variant`.
+
+A mismatched join key fails silently: no rows, every `nb_snv` NULL, indistinguishable from a part with no
+SNVs. `EXPLAIN` plans that happily, so the values are asserted here, with a row on each side of the
+interval, chromosome, sample and part boundaries.
+"""
+
+import os
+
+import jinja2
+import pyarrow as pa
+import pytest
+from pyiceberg.expressions import EqualTo
+
+from radiant.dags import DAGS_DIR
+
+_SQL_DIR = os.path.join(DAGS_DIR, "sql")
+
+# Own part and task_id so the rows are addressable: the tables are partitioned by `part`, the Iceberg
+# teardown deletes on `task_id`.
+_PART = 1888
+_OTHER_PART = 1889
+_TASK_ID = 18110
+# Same sample and locus under a second task -- what makes COUNT(1) and COUNT(DISTINCT locus_id) differ.
+_SECOND_TASK_ID = 18111
+_TENANT = "test"
+
+_SEQ_ID = 1811001
+_OTHER_SEQ_ID = 1811002
+
+# The CNV segment every assertion is about: chromosome 1, 1000-2000 inclusive.
+_CNV_START = 1000
+_CNV_END = 2000
+
+# One locus per predicate under test.
+_INSIDE = 1811101
+_AT_START = 1811102  # pins `>=` rather than `>`
+_AT_END = 1811103  # pins `<=` rather than `<`
+_TWO_TASKS = 1811104
+_BEFORE = 1811105
+_AFTER = 1811106
+_OTHER_CHROMOSOME = 1811107
+_OTHER_SAMPLE = 1811108
+_WRONG_PART = 1811109
+# An occurrence inside the segment, with its `snv__variant` row, that fails the frequencies' quality gate
+# (gq/filter/ad_alt). Since RAD-57 every occurrence locus has a variant row, so the gate is applied in the
+# `snv` CTE itself: this is what keeps nb_snv a count of quality-passing SNVs.
+_FAILS_QUALITY = 1811110
+
+# RAD-61: the overlap join is keyed on 1 Mb bins (`start DIV 1000000`), so a segment spanning several bins must
+# find the SNVs of each of them, once. Chromosome 4, 999_500-2_000_500: bins 0, 1 and 2.
+_MULTI_BIN_START = 999_500
+_MULTI_BIN_END = 2_000_500
+_MB_AT_START = 1811111  # bin 0, first base of the segment
+_MB_BIN_BOUNDARY = 1811112  # bin 1, first base of the bin
+_MB_MIDDLE = 1811113  # bin 1
+_MB_AT_END = 1811114  # bin 2, last base of the segment
+_MB_BEFORE = 1811115  # bin 0, one base before the segment
+_MB_AFTER = 1811116  # bin 2, one base after the segment
+
+# (locus_id, chromosome, start) -- the only source of coordinates; the occurrence row has none.
+_VARIANTS = [
+    (_INSIDE, "1", 1500),
+    (_AT_START, "1", _CNV_START),
+    (_AT_END, "1", _CNV_END),
+    (_TWO_TASKS, "1", 1600),
+    (_BEFORE, "1", _CNV_START - 1),
+    (_AFTER, "1", _CNV_END + 1),
+    (_OTHER_CHROMOSOME, "2", 1500),
+    (_OTHER_SAMPLE, "1", 1500),
+    (_WRONG_PART, "1", 1500),
+    (_FAILS_QUALITY, "1", 1700),
+    (_MB_AT_START, "4", _MULTI_BIN_START),
+    (_MB_BIN_BOUNDARY, "4", 1_000_000),
+    (_MB_MIDDLE, "4", 1_500_000),
+    (_MB_AT_END, "4", _MULTI_BIN_END),
+    (_MB_BEFORE, "4", _MULTI_BIN_START - 1),
+    (_MB_AFTER, "4", _MULTI_BIN_END + 1),
+]
+
+# (part, seq_id, task_id, locus_id)
+_SNV_OCCURRENCES = [
+    (_PART, _SEQ_ID, _TASK_ID, _INSIDE),
+    (_PART, _SEQ_ID, _TASK_ID, _AT_START),
+    (_PART, _SEQ_ID, _TASK_ID, _AT_END),
+    (_PART, _SEQ_ID, _TASK_ID, _TWO_TASKS),
+    (_PART, _SEQ_ID, _SECOND_TASK_ID, _TWO_TASKS),
+    (_PART, _SEQ_ID, _TASK_ID, _BEFORE),
+    (_PART, _SEQ_ID, _TASK_ID, _AFTER),
+    (_PART, _SEQ_ID, _TASK_ID, _OTHER_CHROMOSOME),
+    (_PART, _SEQ_ID, _TASK_ID, _FAILS_QUALITY),
+    (_PART, _OTHER_SEQ_ID, _TASK_ID, _OTHER_SAMPLE),
+    (_OTHER_PART, _SEQ_ID, _TASK_ID, _WRONG_PART),
+    (_PART, _SEQ_ID, _TASK_ID, _MB_AT_START),
+    (_PART, _SEQ_ID, _TASK_ID, _MB_BIN_BOUNDARY),
+    (_PART, _SEQ_ID, _TASK_ID, _MB_MIDDLE),
+    (_PART, _SEQ_ID, _TASK_ID, _MB_AT_END),
+    (_PART, _SEQ_ID, _TASK_ID, _MB_BEFORE),
+    (_PART, _SEQ_ID, _TASK_ID, _MB_AFTER),
+]
+
+# What survives every predicate, for the chromosome-1 segment of `_SEQ_ID`.
+_EXPECTED_NB_SNV = 4
+# Start, bin boundary, middle and end: one per bin at least, none outside, none twice.
+_EXPECTED_MULTI_BIN_NB_SNV = 4
+
+_SEGMENT = "cnv-chr1"
+_SEGMENT_OTHER_SAMPLE = "cnv-chr1-other-sample"
+_SEGMENT_NO_SNV = "cnv-chr3-no-snv"
+_SEGMENT_MULTI_BIN = "cnv-chr4-multi-bin"
+
+
+def _cnv_row(*, name, seq_id, chromosome, start=_CNV_START, end=_CNV_END):
+    """One Iceberg CNV segment, every required field of the schema filled.
+
+    `type` is GAIN, not UNKNOWN: `GET_CNV_ID` returns NULL for a type it cannot encode, and `cnv_id` is
+    NOT NULL on the target table.
+    """
+    return {
+        "part": _PART,
+        "seq_id": seq_id,
+        "tenant_code": _TENANT,
+        "task_id": _TASK_ID,
+        "aliquot": f"SA{seq_id}",
+        "chromosome": chromosome,
+        "alternate": "<DUP>",
+        "start": start,
+        "end": end,
+        "type": "GAIN",
+        "length": end - start,
+        "name": name,
+    }
+
+
+_CNV_ROWS = [
+    _cnv_row(name=_SEGMENT, seq_id=_SEQ_ID, chromosome="1"),
+    # Same coordinates, different sample: scoping asserted in both directions.
+    _cnv_row(name=_SEGMENT_OTHER_SAMPLE, seq_id=_OTHER_SEQ_ID, chromosome="1"),
+    # Nothing overlaps it. `snv` is LEFT JOINed, so the segment still loads with a NULL count.
+    _cnv_row(name=_SEGMENT_NO_SNV, seq_id=_SEQ_ID, chromosome="3"),
+    _cnv_row(name=_SEGMENT_MULTI_BIN, seq_id=_SEQ_ID, chromosome="4", start=_MULTI_BIN_START, end=_MULTI_BIN_END),
+]
+
+
+def _create_table(starrocks_session, sql_subdir, table_name, mapping, truncate):
+    with open(os.path.join(_SQL_DIR, sql_subdir, "init", f"{table_name}_create_table.sql")) as f_in:
+        create_table_sql = jinja2.Template(f_in.read()).render({"mapping": mapping})
+
+    with starrocks_session.cursor() as cursor:
+        cursor.execute(create_table_sql)
+        if truncate:
+            cursor.execute(f"TRUNCATE TABLE {mapping[f'starrocks_{table_name}']};")
+
+
+def _insert_rows(starrocks_session, table, columns, rows):
+    sql = f"INSERT INTO {table} ({', '.join(columns)}) VALUES ({', '.join(['%s'] * len(columns))})"
+    with starrocks_session.cursor() as cursor:
+        cursor.executemany(sql, rows)
+
+
+def _create_cnv_id_udf(starrocks_session, mapping):
+    with open(os.path.join(_SQL_DIR, "radiant", "init", "cnv_id_udf.sql")) as f_in:
+        udf_sql = jinja2.Template(f_in.read()).render(
+            {"mapping": mapping, "params": {"udf_release_version": "v2.0.0"}}
+        )
+    with starrocks_session.cursor() as cursor:
+        cursor.execute(udf_sql)
+
+
+def _seed(starrocks_session, iceberg_client, namespace, mapping, *, flavour):
+    """Seed one flavour's tables and return its Iceberg table, ready for teardown.
+
+    Germline and somatic differ only in the occurrence table's sample column and in which Iceberg CNV
+    table holds the segments.
+    """
+    occurrence_table = f"{flavour}_snv_occurrence"
+    sample_column = "seq_id" if flavour == "germline" else "tumor_seq_id"
+
+    # Truncated because this test seeds them in full. `cytoband` and `ensembl_gene` are only created --
+    # they feed columns nothing here asserts.
+    for table in (f"{flavour}_cnv_occurrence", occurrence_table, "snv_variant"):
+        _create_table(starrocks_session, "radiant", table, mapping, truncate=True)
+    for table in ("cytoband", "ensembl_gene"):
+        _create_table(starrocks_session, "open_data", table, mapping, truncate=False)
+
+    _create_cnv_id_udf(starrocks_session, mapping)
+
+    _insert_rows(
+        starrocks_session,
+        mapping["starrocks_snv_variant"],
+        ("locus_id", "chromosome", "start"),
+        _VARIANTS,
+    )
+
+    # Quality columns: passing values for every row but `_FAILS_QUALITY`, which misses the alt-depth threshold
+    # by one (germline `ad_alt >= 3`, somatic `tumor_ad_alt >= 2`).
+    if flavour == "germline":
+        # `phased` is NOT NULL on the germline occurrence table only.
+        quality_columns = ["gq", "filter", "ad_alt", "phased"]
+        passing, failing = (50, "PASS", 7, False), (50, "PASS", 2, False)
+    else:
+        quality_columns = ["filter", "tumor_ad_alt"]
+        passing, failing = ("PASS", 7), ("PASS", 1)
+    occurrence_columns = ["part", sample_column, "task_id", "locus_id", *quality_columns]
+    occurrence_rows = [
+        (part, seq_id, task_id, locus_id, *(failing if locus_id == _FAILS_QUALITY else passing))
+        for part, seq_id, task_id, locus_id in _SNV_OCCURRENCES
+    ]
+
+    _insert_rows(
+        starrocks_session,
+        mapping[f"starrocks_{occurrence_table}"],
+        occurrence_columns,
+        occurrence_rows,
+    )
+
+    iceberg_table = iceberg_client.load_table(f"{namespace}.{flavour}_cnv_occurrence")
+    # The table's own schema, not the module's: Iceberg renumbers field ids on create, and the append is
+    # validated by id.
+    iceberg_table.append(pa.Table.from_pylist(_CNV_ROWS, schema=iceberg_table.schema().as_arrow()))
+
+    # StarRocks caches Iceberg metadata, which `test_queries.py` may already have populated by EXPLAINing
+    # this table; without the refresh the insert reads a pre-append snapshot.
+    with starrocks_session.cursor() as cursor:
+        cursor.execute(f"REFRESH EXTERNAL TABLE {mapping[f'iceberg_{flavour}_cnv_occurrence']}")
+
+    return iceberg_table
+
+
+def _run_cnv_insert(starrocks_session, mapping, flavour, task_ids=(_TASK_ID,)):
+    """Run the delta insert the way `RadiantStarRocksPartitionSwapOperator` does: positional INSERT INTO."""
+    sql_file = os.path.join(_SQL_DIR, "radiant", f"{flavour}_cnv_occurrence_insert_partition_delta.sql")
+    with open(sql_file) as f_in:
+        rendered_sql = jinja2.Template(f_in.read()).render({"mapping": mapping, "partition": _PART})
+
+    target = mapping[f"starrocks_{flavour}_cnv_occurrence"]
+    with starrocks_session.cursor() as cursor:
+        cursor.execute(
+            f"INSERT INTO {target} {rendered_sql.rstrip().rstrip(';')}",
+            {"seq_ids": [_SEQ_ID, _OTHER_SEQ_ID], "task_ids": list(task_ids), "tenant_code": _TENANT},
+        )
+
+
+def _nb_snv_by_segment(starrocks_session, mapping, flavour):
+    with starrocks_session.cursor() as cursor:
+        cursor.execute(f"SELECT name, nb_snv FROM {mapping[f'starrocks_{flavour}_cnv_occurrence']}")
+        return dict(cursor.fetchall())
+
+
+@pytest.fixture(params=["germline", "somatic"])
+def seeded_cnv(
+    request,
+    starrocks_session,
+    iceberg_client,
+    setup_iceberg_namespace,
+    # For `gnomad_sv`, which the CNV statement LEFT JOINs and which exists only in Iceberg.
+    open_data_iceberg_tables,
+    radiant_mapping,
+):
+    flavour = request.param
+    iceberg_table = _seed(
+        starrocks_session,
+        iceberg_client,
+        setup_iceberg_namespace,
+        radiant_mapping,
+        flavour=flavour,
+    )
+    yield flavour
+    # The Iceberg CNV tables are shared with the VCF tests, which assert unfiltered row counts on them.
+    iceberg_table.delete(EqualTo("task_id", _TASK_ID))
+
+
+def test_nb_snv_counts_the_overlapping_snvs_of_the_same_sample(seeded_cnv, starrocks_session, radiant_mapping):
+    flavour = seeded_cnv
+    _run_cnv_insert(starrocks_session, radiant_mapping, flavour)
+
+    nb_snv = _nb_snv_by_segment(starrocks_session, radiant_mapping, flavour)
+    assert set(nb_snv) == {_SEGMENT, _SEGMENT_OTHER_SAMPLE, _SEGMENT_NO_SNV, _SEGMENT_MULTI_BIN}
+
+    # The whole point: exact and non-NULL. NULL means the occurrence -> staging-variant join matched
+    # nothing, the silent failure `EXPLAIN` cannot catch.
+    assert nb_snv[_SEGMENT] == _EXPECTED_NB_SNV
+
+    # Scoped per sample in both directions.
+    assert nb_snv[_SEGMENT_OTHER_SAMPLE] == 1
+
+    # LEFT JOINed: the segment loads even with nothing to count.
+    assert nb_snv[_SEGMENT_NO_SNV] is None
+
+
+def test_nb_snv_counts_a_locus_once_across_tasks(seeded_cnv, starrocks_session, radiant_mapping):
+    """`COUNT(DISTINCT locus_id)`, not `COUNT(1)`.
+
+    The occurrence tables are keyed on `task_id`, so a sample analysed twice -- routine on the somatic
+    side -- holds the same locus twice and a row count reports it as two SNVs. `_TWO_TASKS` is that
+    locus, so the two counts differ by exactly one.
+    """
+    flavour = seeded_cnv
+    _run_cnv_insert(starrocks_session, radiant_mapping, flavour)
+
+    nb_snv = _nb_snv_by_segment(starrocks_session, radiant_mapping, flavour)
+    assert nb_snv[_SEGMENT] == _EXPECTED_NB_SNV, (
+        f"expected {_EXPECTED_NB_SNV} distinct loci; {_EXPECTED_NB_SNV + 1} means the duplicate "
+        f"`task_id` row for locus {_TWO_TASKS} was counted twice"
+    )
+
+
+def test_nb_snv_counts_a_segment_spanning_several_bins(seeded_cnv, starrocks_session, radiant_mapping):
+    """RAD-61: the CNV side is expanded to one row per 1 Mb bin it covers and joined on the SNV's bin.
+
+    Fewer means a bin of the segment was dropped (an off-by-one in the bin range); more means an SNV met
+    several rows of the same segment, or one outside it slipped through.
+    """
+    flavour = seeded_cnv
+    _run_cnv_insert(starrocks_session, radiant_mapping, flavour)
+
+    nb_snv = _nb_snv_by_segment(starrocks_session, radiant_mapping, flavour)
+    assert nb_snv[_SEGMENT_MULTI_BIN] == _EXPECTED_MULTI_BIN_NB_SNV
+
+
+# The proband's slivar set, a second germline CNV set of `_SEQ_ID`, under the CNV annotation task. The
+# pipeline keeps DRAGEN's call IDs, so it can name a call as the DRAGEN set does: same sample and name, other bounds.
+_SLIVAR_TASK_ID = 18112
+_SLIVAR_END = 1550  # covers `_AT_START` and `_INSIDE` only
+_EXPECTED_SLIVAR_NB_SNV = 2
+_SLIVAR_COLUMNS = {
+    "parental_origin": "MOTHER",
+    "transmission_mode": "inherited_maternal",
+    "mother_calls": [0, 1],
+    "mother_cn": 1,
+    "mother_bc": 9,
+    "mother_pe": [11, 12],
+    "mother_sm": 0.5,
+    "mother_name": "DRAGEN:LOSS:chr1:1001-1550",
+    "father_calls": [0, 0],
+    "father_cn": 2,
+    "father_bc": 8,
+    "father_pe": [0, 0],
+    "father_sm": 1.0,
+    "father_name": None,
+}
+
+
+@pytest.fixture
+def seeded_two_germline_sets(
+    starrocks_session, iceberg_client, setup_iceberg_namespace, open_data_iceberg_tables, radiant_mapping
+):
+    iceberg_table = _seed(
+        starrocks_session, iceberg_client, setup_iceberg_namespace, radiant_mapping, flavour="germline"
+    )
+    slivar_row = _cnv_row(name=_SEGMENT, seq_id=_SEQ_ID, chromosome="1", end=_SLIVAR_END) | {
+        "task_id": _SLIVAR_TASK_ID,
+        **_SLIVAR_COLUMNS,
+    }
+    iceberg_table.append(pa.Table.from_pylist([slivar_row], schema=iceberg_table.schema().as_arrow()))
+    with starrocks_session.cursor() as cursor:
+        cursor.execute(f"REFRESH EXTERNAL TABLE {radiant_mapping['iceberg_germline_cnv_occurrence']}")
+    yield
+    iceberg_table.delete(EqualTo("task_id", _TASK_ID))
+    iceberg_table.delete(EqualTo("task_id", _SLIVAR_TASK_ID))
+
+
+def test_each_germline_set_of_a_sequencing_gets_its_own_annotations(
+    seeded_two_germline_sets, starrocks_session, radiant_mapping
+):
+    """The DRAGEN and slivar sets of one sequencing share a call name. Keyed on (seq_id, name) only,
+    each set's row would meet both sets' counts and be loaded twice."""
+    _run_cnv_insert(starrocks_session, radiant_mapping, "germline", task_ids=(_TASK_ID, _SLIVAR_TASK_ID))
+
+    with starrocks_session.cursor() as cursor:
+        cursor.execute(
+            f"SELECT task_id, nb_snv FROM {radiant_mapping['starrocks_germline_cnv_occurrence']} WHERE name = %s",
+            (_SEGMENT,),
+        )
+        rows = sorted(cursor.fetchall())
+    assert rows == sorted([(_TASK_ID, _EXPECTED_NB_SNV), (_SLIVAR_TASK_ID, _EXPECTED_SLIVAR_NB_SNV)])
+
+
+def test_slivar_columns_land_in_their_own_columns(seeded_two_germline_sets, starrocks_session, radiant_mapping):
+    """The insert is positional: each new column must reach the StarRocks column of the same name, and the DRAGEN
+    set keeps them NULL."""
+    _run_cnv_insert(starrocks_session, radiant_mapping, "germline", task_ids=(_TASK_ID, _SLIVAR_TASK_ID))
+
+    columns = list(_SLIVAR_COLUMNS)
+    with starrocks_session.cursor() as cursor:
+        cursor.execute(
+            f"SELECT task_id, {', '.join(columns)} FROM {radiant_mapping['starrocks_germline_cnv_occurrence']} "
+            "WHERE name = %s",
+            (_SEGMENT,),
+        )
+        rows = {row[0]: dict(zip(columns, row[1:], strict=True)) for row in cursor.fetchall()}
+
+    slivar = rows[_SLIVAR_TASK_ID]
+    for column, expected in _SLIVAR_COLUMNS.items():
+        value = slivar[column]
+        if isinstance(value, str) and value.startswith("["):
+            value = [int(v) for v in value.strip("[]").split(",")]
+        if isinstance(expected, float):
+            assert value == pytest.approx(expected), column
+        else:
+            assert value == expected, column
+    assert all(v is None for v in rows[_TASK_ID].values())
+
+
+def test_insert_skips_the_iceberg_rows_of_a_task_not_in_the_run(
+    seeded_two_germline_sets, starrocks_session, radiant_mapping
+):
+    _run_cnv_insert(starrocks_session, radiant_mapping, "germline", task_ids=(_SLIVAR_TASK_ID,))
+
+    with starrocks_session.cursor() as cursor:
+        cursor.execute(f"SELECT DISTINCT task_id FROM {radiant_mapping['starrocks_germline_cnv_occurrence']}")
+        assert cursor.fetchall() == ((_SLIVAR_TASK_ID,),)
+
+
+def test_copy_step_keeps_the_other_set_of_a_sequencing(seeded_two_germline_sets, starrocks_session, radiant_mapping):
+    """A run with only the CNV annotation task keeps the sequencing's DRAGEN rows. Keyed on seq_id, the
+    copy step would drop them: the run's seq_ids are those of every member of its tasks."""
+    _run_cnv_insert(starrocks_session, radiant_mapping, "germline", task_ids=(_TASK_ID, _SLIVAR_TASK_ID))
+
+    with open(os.path.join(_SQL_DIR, "radiant", "germline_cnv_occurrence_copy_partition.sql")) as f_in:
+        copy_sql = jinja2.Template(f_in.read()).render(
+            {"table": radiant_mapping["starrocks_germline_cnv_occurrence"], "partition": _PART}
+        )
+    with starrocks_session.cursor() as cursor:
+        cursor.execute(
+            copy_sql.rstrip().rstrip(";"),
+            {"seq_ids": [_SEQ_ID], "deleted_seq_ids": [-1], "task_ids": [_SLIVAR_TASK_ID], "deleted_task_ids": [-1]},
+        )
+        kept = cursor.fetchall()
+    kept_task_ids = {row[2] for row in kept}
+    assert kept_task_ids == {_TASK_ID}
+    assert len(kept) == len([r for r in _CNV_ROWS if r["task_id"] == _TASK_ID])

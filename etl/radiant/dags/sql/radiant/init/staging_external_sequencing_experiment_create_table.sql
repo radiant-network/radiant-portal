@@ -1,0 +1,150 @@
+CREATE VIEW IF NOT EXISTS {{ mapping.starrocks_staging_external_sequencing_experiment }} AS
+with sequencing_context AS (
+	SELECT
+	c.id as case_id,
+    se.id,
+    se.aliquot,
+    se.sample_id,
+    se.experimental_strategy_code,
+	se.tenant_code as tenant_code,
+    se.created_on,
+    se.updated_on AS updated_on,
+    ANY_VALUE(c.case_type_code) as analysis_type,
+    CASE
+        MIN(
+                CASE priority_code
+                    WHEN 'stat' THEN 1
+                    WHEN 'asap' THEN 2
+                    WHEN 'urgent' THEN 3
+                    ELSE 4 -- routine
+                END
+            )
+            WHEN 1 THEN 'stat'
+            WHEN 2 THEN 'asap'
+            WHEN 3 THEN 'urgent'
+	        ELSE 'routine'
+        END AS priority_code
+	FROM  {{ mapping.clinical_sequencing_experiment }} se
+	LEFT JOIN {{ mapping.clinical_case_has_sequencing_experiment }} chse ON chse.sequencing_experiment_id = se.id
+	JOIN {{ mapping.clinical_case }} c ON chse.case_id = c.id
+	WHERE c.status_code NOT IN ({{ mapping.pipeline_ignored_case_statuses }})
+	GROUP BY
+	    c.id,
+		se.id,
+	    se.aliquot,
+	    se.sample_id,
+	    se.experimental_strategy_code,
+	    se.tenant_code,
+	    se.created_on,
+	    se.updated_on
+),
+sequencing_experiments AS (
+	SELECT
+        se.case_id,
+	    t.id AS task_id,
+	    t.task_type_code AS task_type,
+	    se.id AS seq_id,
+	    se.sample_id,
+	    se.aliquot,
+	    se.analysis_type,
+	    se.experimental_strategy_code AS experimental_strategy,
+	    se.tenant_code,
+        COALESCE(se.priority_code, 'routine') AS request_priority,
+	    ANY_VALUE(CASE WHEN d.format_code = 'vcf' AND d.data_type_code IN ('snv', 'ssnv') THEN d.url ELSE NULL END) AS vcf_filepath,
+	    ANY_VALUE(CASE WHEN d.format_code = 'vcf' AND d.data_type_code IN ('gcnv', 'scnv') THEN d.url ELSE NULL END) AS cnv_vcf_filepath,
+	    ANY_VALUE(CASE WHEN d.format_code = 'tsv' AND d.data_type_code = 'exomiser' THEN d.url ELSE NULL END) AS exomiser_filepath,
+        se.created_on AS created_at,
+        IF(tctx.case_id IS NOT NULL, c.updated_on, se.updated_on) AS updated_at
+	FROM
+	    sequencing_context se
+	-- A task naming a case belongs to that case alone, even when its experiment is shared with another
+	-- case. A NULL case_id is a per-experiment task (e.g. alignment_germline_variant_calling), shared
+	-- by every case of the experiment.
+	LEFT JOIN {{ mapping.clinical_task_context }} tctx
+	    ON tctx.sequencing_experiment_id = se.id
+	    AND (tctx.case_id IS NULL OR tctx.case_id = se.case_id)
+	LEFT JOIN {{ mapping.clinical_case }} c ON tctx.case_id = c.id
+	LEFT JOIN {{ mapping.clinical_task }} t ON t.id = tctx.task_id
+	LEFT JOIN {{ mapping.clinical_task_has_document }} thd ON thd.task_id = t.id AND thd.type = 'output'
+	LEFT JOIN {{ mapping.clinical_document }} d ON d.id = thd.document_id
+	-- The data-type gate on the two *calling* steps is what keeps a raw, un-annotated VCF out of
+	-- `vcf_filepath`, which must only ever hold the annotated file from a `radiant_*_annotation` task.
+	-- The Exomiser report is an output of the germline SNV annotation task. The `exomiser` data-type
+	-- gate keeps the CNV report (`exomiser_cnv`) out: `radiant_germline_cnv_annotation` has a `gcnv` VCF branch only.
+	-- That branch admits the family's slivar VCF, in `cnv_vcf_filepath` on every member's row.
+	WHERE (
+		(d.format_code = 'vcf' AND t.task_type_code IN ('radiant_germline_annotation', 'radiant_somatic_annotation'))
+		OR (d.format_code = 'vcf' AND d.data_type_code = 'gcnv' AND t.task_type_code = 'alignment_germline_variant_calling')
+		OR (d.format_code = 'vcf' AND d.data_type_code = 'gcnv' AND t.task_type_code = 'radiant_germline_cnv_annotation')
+		OR (d.format_code = 'vcf' AND d.data_type_code = 'scnv' AND t.task_type_code = 'tumor_only_variant_calling')
+		OR (d.url LIKE '%variants.tsv' AND d.data_type_code = 'exomiser' AND t.task_type_code = 'radiant_germline_annotation')
+	)
+	GROUP BY
+	    se.case_id,
+	    t.id,
+	    t.task_type_code,
+		se.id,
+		se.sample_id,
+		se.aliquot,
+		se.analysis_type,
+		se.experimental_strategy_code,
+		se.tenant_code,
+		se.priority_code,
+		se.created_on,
+		updated_at
+),
+-- Proband source rule: the proband's alignment tasks of each case whose CNV annotation task has a slivar VCF.
+original_alignment AS (
+	SELECT dragen.case_id, dragen.task_id
+	FROM sequencing_experiments dragen
+	JOIN sequencing_experiments slivar ON slivar.case_id = dragen.case_id AND slivar.seq_id = dragen.seq_id
+	JOIN {{ mapping.clinical_sample }} sa ON sa.id = dragen.sample_id
+	LEFT JOIN {{ mapping.clinical_family }} f ON f.family_member_id = sa.patient_id AND f.case_id = dragen.case_id
+	WHERE dragen.task_type = 'alignment_germline_variant_calling'
+	  AND slivar.task_type = 'radiant_germline_cnv_annotation'
+	  AND slivar.cnv_vcf_filepath IS NOT NULL
+	  AND COALESCE(f.relationship_to_proband_code, "proband") = "proband"
+)
+SELECT
+    s.case_id,
+	s.seq_id,
+	s.task_id,
+	s.task_type,
+	s.analysis_type,
+	s.aliquot,
+	p.id as patient_id,
+	s.experimental_strategy,
+	s.tenant_code,
+	s.request_priority,
+	s.vcf_filepath,
+    s.cnv_vcf_filepath,
+	-- The annotation task holds the aliquots of every family member, but Exomiser ranks the proband:
+	-- only the proband's row carries the file, so the load tags the rows with the proband's seq_id.
+	CASE
+	    WHEN s.analysis_type = 'germline' AND COALESCE(f.relationship_to_proband_code, "proband") <> "proband" THEN NULL
+	    ELSE s.exomiser_filepath
+	END AS exomiser_filepath,
+	p.sex_code AS sex,
+    f.id AS family_id,
+    CASE
+        WHEN s.analysis_type = 'germline' THEN COALESCE(f.relationship_to_proband_code, "proband")
+        ELSE "proband"
+    END AS family_role,
+    CASE
+    	WHEN s.analysis_type = 'germline' THEN COALESCE(f.affected_status_code, "affected")
+		ELSE "affected"
+	END AS affected_status,
+	sa.histology_code AS histology_type,
+	s.created_at,
+	s.updated_at
+FROM sequencing_experiments s
+LEFT JOIN {{ mapping.clinical_sample }} sa ON sa.id = s.sample_id
+LEFT JOIN {{ mapping.clinical_patient }} p ON p.id = sa.patient_id
+-- A patient has one family row per case: without the case, a patient in two cases doubles every row.
+LEFT JOIN {{ mapping.clinical_family }} f ON f.family_member_id = p.id AND f.case_id = s.case_id
+-- Proband source rule: in a case with a slivar VCF, the proband's alignment task stays out, so the proband's
+-- CNVs come from the slivar set only. The parents' and the siblings' alignment tasks stay. A row left out never enters
+-- staging, so it is never loaded nor seen as pending; its `deleted` flag comes from the clinical tasks, not from this
+-- view, so nothing is deleted. The task and its files stay in the clinical model: the portal still shows them.
+LEFT JOIN original_alignment x ON x.case_id = s.case_id AND x.task_id = s.task_id
+WHERE x.task_id IS NULL

@@ -1,0 +1,463 @@
+import datetime
+import logging
+from typing import Any
+
+from airflow.decorators import dag, task
+from airflow.models import Param
+from airflow.operators.empty import EmptyOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from airflow.utils.task_group import TaskGroup
+from airflow.utils.trigger_rule import TriggerRule
+
+from radiant.dags import DEFAULT_ARGS, NAMESPACE, RADIANT_LOCK_S3_BUCKET, load_docs_md
+from radiant.tasks.locking import IMPORT_MUTEX_LOCK_NAME, acquire_lock, release_lock
+from radiant.tasks.starrocks.operator import (
+    STARROCKS_INSERT_POOL,
+    RadiantStarRocksOperator,
+    SubmitTaskOptions,
+)
+
+LOGGER = logging.getLogger(__name__)
+
+std_submit_task_opts = SubmitTaskOptions(max_query_timeout=14400, poll_interval=30)
+
+PARTS_PER_VARIANT_PART = 10
+
+GATES_TASK_ID = "compute_reannotation_gates"
+
+RECOMPUTE_FREQUENCIES = "recompute_frequencies"
+
+dag_params = {
+    "force_reannotation": Param(
+        default=False,
+        description=(
+            "Re-annotate every branch whether or not its sources moved. Leave False for a scheduled "
+            "run; set True after changing a statement, since the gates watch the OpenDataLake "
+            "snapshots and cannot see a change to the SQL itself."
+        ),
+        type="boolean",
+    ),
+    RECOMPUTE_FREQUENCIES: Param(
+        default=False,
+        description=(
+            "Recompute the SNV frequencies of every tenant and part, then rebuild snv__variant, its "
+            "partitioned copy and the CNV occurrences. Set True after changing a frequency statement "
+            "(e.g. the RAD-22 backfill): the gates cannot see it, and force_reannotation is not needed."
+        ),
+        type="boolean",
+    ),
+}
+
+
+def gated(branch: str, opened_by: str | None = None) -> str:
+    """`skip_if` for a statement of `branch`. `opened_by` names a boolean param that also opens it."""
+    opener = f"not params.{opened_by} and " if opened_by else ""
+    return (
+        f"{{{{ {opener}not params.force_reannotation and not "
+        f"(ti.xcom_pull(task_ids='{GATES_TASK_ID}') or {{}}).get('{branch}', True) }}}}"
+    )
+
+
+def build_variant_part_params(tenant_parts: list[dict]) -> list[dict[str, Any]]:
+    pairs = sorted({(row["tenant_code"], int(row["part"]) // PARTS_PER_VARIANT_PART) for row in tenant_parts})
+    return [
+        {
+            "tenant_code": tenant_code,
+            "parameters": {
+                "variant_part": variant_part,
+                "part_lower": variant_part * PARTS_PER_VARIANT_PART,
+                "part_upper": (variant_part + 1) * PARTS_PER_VARIANT_PART,
+            },
+        }
+        for tenant_code, variant_part in pairs
+    ]
+
+
+def build_frequency_params(tenant_parts: list[dict]) -> list[dict[str, Any]]:
+    # The frequency statements bind tenant_code as a query parameter as well: the staging frequency
+    # tables are shared, keyed by (tenant_code, part).
+    return [
+        {
+            "tenant_code": row["tenant_code"],
+            "parameters": {"part": int(row["part"]), "tenant_code": row["tenant_code"]},
+        }
+        for row in sorted(tenant_parts, key=lambda r: (r["tenant_code"], int(r["part"])))
+    ]
+
+
+def build_cnv_params(tenant_parts: list[dict]) -> list[dict[str, Any]]:
+    return [
+        {"tenant_code": row["tenant_code"], "parameters": {"part": int(row["part"])}}
+        for row in sorted(tenant_parts, key=lambda r: (r["tenant_code"], int(r["part"])))
+    ]
+
+
+@dag(
+    start_date=datetime.datetime(2021, 1, 1),
+    # Weekly, Saturday 00:00 (§4).
+    schedule="0 0 * * 6",
+    catchup=False,
+    max_active_runs=1,
+    default_args=DEFAULT_ARGS,
+    params=dag_params,
+    tags=["radiant", "starrocks", "open-data"],
+    dag_display_name="Radiant - Re-annotate against OpenDataLake",
+    dag_id=f"{NAMESPACE}-reannotate-open-data",
+    render_template_as_native_obj=True,
+    doc_md=load_docs_md("reannotate_open_data.md"),
+    template_searchpath=["/opt/airflow/dags/radiant/dags/sql"],
+)
+def reannotate_open_data():
+    @task(
+        task_id="acquire_import_lock",
+        task_display_name="[PyOp] Acquire Import Lock",
+    )
+    def acquire_import_lock():
+        from airflow.sdk import get_current_context
+
+        context = get_current_context()
+        holder = f"{context['dag'].dag_id}:{context['run_id']}"
+        acquire_lock(bucket=RADIANT_LOCK_S3_BUCKET, name=IMPORT_MUTEX_LOCK_NAME, holder=holder)
+
+    @task(task_id="release_import_lock", task_display_name="[PyOp] Release Import Lock")
+    def release_import_lock():
+        from airflow.sdk import get_current_context
+
+        context = get_current_context()
+        holder = f"{context['dag'].dag_id}:{context['run_id']}"
+        release_lock(bucket=RADIANT_LOCK_S3_BUCKET, name=IMPORT_MUTEX_LOCK_NAME, holder=holder)
+
+    _acquire_import_lock = acquire_import_lock()
+    _release_import_lock = release_import_lock()
+
+    @task(task_id="preflight_tables_exist", task_display_name="[PyOp] Preflight: Tables Exist?")
+    def preflight_tables_exist():
+        from airflow.exceptions import AirflowFailException
+        from airflow.sdk import get_current_context
+
+        from radiant.tasks.data.open_data import format_missing_tables, list_missing_open_data_tables
+
+        conf = get_current_context()["dag_run"].conf or {}
+        missing = list_missing_open_data_tables(conf)
+        if missing:
+            raise AirflowFailException(format_missing_tables(missing))
+
+    _preflight_tables_exist = preflight_tables_exist()
+
+    reference_load = TriggerDagRunOperator(
+        task_id="reference_load",
+        task_display_name="[DAG] Refresh Open Data from OpenDataLake",
+        trigger_dag_id=f"{NAMESPACE}-import-open-data",
+        conf={"skip_legacy_tables": True},
+        reset_dag_run=True,
+        wait_for_completion=True,
+        poke_interval=30,
+    )
+
+    sources_loaded = EmptyOperator(
+        task_id="sources_loaded",
+        task_display_name="[ --- CHECKPOINT: PHASE 2 --- ] All New Sources Are Loaded",
+    )
+
+    @task.short_circuit(
+        task_id="extract_all_tenants",
+        task_display_name="[PyOp] Extract All Tenants",
+        ignore_downstream_trigger_rules=False,
+    )
+    def extract_all_tenants() -> list[str]:
+        from airflow.sdk import get_current_context
+
+        from radiant.tasks.data.tenants import list_all_tenants
+
+        context = get_current_context()
+        return list_all_tenants(context["dag_run"].conf or {})
+
+    @task.short_circuit(
+        task_id="extract_all_parts",
+        task_display_name="[PyOp] Extract All Parts",
+        ignore_downstream_trigger_rules=False,
+    )
+    def extract_all_parts() -> list[int]:
+        from airflow.sdk import get_current_context
+
+        from radiant.tasks.data.tenants import list_all_parts
+
+        context = get_current_context()
+        return list_all_parts(context["dag_run"].conf or {})
+
+    @task.short_circuit(
+        task_id="extract_tenant_parts",
+        task_display_name="[PyOp] Extract Tenant/Part Pairs",
+        ignore_downstream_trigger_rules=False,
+    )
+    def extract_tenant_parts() -> list[dict]:
+        from airflow.sdk import get_current_context
+
+        from radiant.tasks.data.tenants import list_tenant_parts
+
+        context = get_current_context()
+        return list_tenant_parts(context["dag_run"].conf or {})
+
+    all_tenants = extract_all_tenants()
+    all_parts = extract_all_parts()
+    tenant_parts = extract_tenant_parts()
+
+    @task(task_id="build_variant_part_params", task_display_name="[PyOp] Per-tenant Variant-Part Params")
+    def variant_part_params(tenant_parts: list[dict]) -> list[dict[str, Any]]:
+        return build_variant_part_params(tenant_parts)
+
+    @task(task_id="build_frequency_params", task_display_name="[PyOp] Per-tenant Frequency Part Params")
+    def frequency_params(tenant_parts: list[dict]) -> list[dict[str, Any]]:
+        return build_frequency_params(tenant_parts)
+
+    @task(task_id="build_cnv_params", task_display_name="[PyOp] Per-tenant CNV Part Params")
+    def cnv_params(tenant_parts: list[dict]) -> list[dict[str, Any]]:
+        return build_cnv_params(tenant_parts)
+
+    @task(task_id="build_part_params", task_display_name="[PyOp] Per-part Params")
+    def part_params(parts: list[int]) -> list[dict[str, Any]]:
+        return [{"part": part} for part in parts]
+
+    _variant_part_params = variant_part_params(tenant_parts)
+    _frequency_params = frequency_params(tenant_parts)
+    _cnv_params = cnv_params(tenant_parts)
+    _part_params = part_params(all_parts)
+
+    @task(task_id=GATES_TASK_ID, task_display_name="[PyOp] Collect updated upstream Iceberg branches")
+    def compute_reannotation_gates() -> dict[str, bool]:
+        from airflow.sdk import get_current_context
+
+        from radiant.tasks.data.open_data import branches_to_reannotate, changed_sources
+
+        conf = get_current_context()["dag_run"].conf or {}
+        changed = changed_sources(conf)
+        gates = branches_to_reannotate(conf, changed=changed)
+        LOGGER.info(f"Sources that moved: {sorted(changed) or 'none'}. Branches to re-annotate: {gates}.")
+        return gates
+
+    _gates = compute_reannotation_gates()
+
+    @task(task_id="render_pooled_sql", task_display_name="[PyOp] Render Pooled SQL")
+    def render_pooled_sql(sql_file: str, tenants: list[str]) -> str:
+        import jinja2
+        from airflow.sdk import get_current_context
+
+        from radiant.dags import DAGS_DIR
+        from radiant.tasks.data.radiant_tables import get_radiant_mapping
+
+        conf = get_current_context()["dag_run"].conf or {}
+        text = (DAGS_DIR / "sql" / sql_file).read_text()
+        return jinja2.Template(text).render(
+            mapping=get_radiant_mapping(conf),
+            tenants=tenants,
+            per_tenant_mapping=lambda t: get_radiant_mapping(conf, tenant_code=t),
+        )
+
+    with TaskGroup(group_id="reannotate_accumulators") as tg_accumulators:
+        reannotate_staging_variant = RadiantStarRocksOperator(
+            task_id="reannotate_snv_staging_variant",
+            task_display_name="[StarRocks] Re-annotate Staging SNV Variants",
+            sql="./sql/radiant/snv_staging_variant_reannotate.sql",
+            skip_if=gated("snv_variant"),
+            submit_task_options=std_submit_task_opts,
+            pool=STARROCKS_INSERT_POOL,
+        )
+
+        reannotate_consequence = RadiantStarRocksOperator(
+            task_id="reannotate_snv_consequence",
+            task_display_name="[StarRocks] Re-annotate SNV Consequences",
+            sql="./sql/radiant/snv_consequence_reannotate.sql",
+            skip_if=gated("snv_consequence"),
+            submit_task_options=std_submit_task_opts,
+            pool=STARROCKS_INSERT_POOL,
+            trigger_rule=TriggerRule.NONE_FAILED,
+        )
+        reannotate_staging_variant >> reannotate_consequence
+
+    # Off unless recompute_frequencies is set: the frequencies depend on the occurrences, not on open
+    # data, so no gate can open this group. Same statements as import_part, over every tenant and part.
+    skip_unless_recompute = f"{{{{ not params.{RECOMPUTE_FREQUENCIES} }}}}"
+
+    with TaskGroup(group_id="snv_frequency") as tg_frequencies:
+        insert_stg_germline_freq = RadiantStarRocksOperator.partial(
+            task_id="insert_stg_germline_snv_variant_freq",
+            task_display_name="[StarRocks] Insert Stg Germline SNV Variants Freq Part",
+            sql="./sql/radiant/germline_snv_staging_variant_freq_insert.sql",
+            skip_if=skip_unless_recompute,
+            map_index_template="{{ task.tenant_code }} part={{ task.parameters['part'] }}",
+            submit_task_options=std_submit_task_opts,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            pool=STARROCKS_INSERT_POOL,
+        ).expand_kwargs(_frequency_params)
+
+        aggregate_germline_freq = RadiantStarRocksOperator.partial(
+            task_id="aggregate_germline_snv_variant_freq",
+            task_display_name="[StarRocks] Aggregate all Germline SNV variants frequencies",
+            sql="./sql/radiant/germline_snv_variant_frequency_insert.sql",
+            skip_if=skip_unless_recompute,
+            map_index_template="{{ task.tenant_code }}",
+            parameters={"tenant_code": "{{ tenant_code }}"},
+            submit_task_options=std_submit_task_opts,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            pool=STARROCKS_INSERT_POOL,
+        ).expand(tenant_code=all_tenants)
+
+        insert_stg_somatic_freq = RadiantStarRocksOperator.partial(
+            task_id="insert_stg_somatic_snv_variant_freq",
+            task_display_name="[StarRocks] Insert Stg Somatic SNV Variants Freq Part",
+            sql="./sql/radiant/somatic_snv_staging_variant_freq_insert.sql",
+            skip_if=skip_unless_recompute,
+            map_index_template="{{ task.tenant_code }} part={{ task.parameters['part'] }}",
+            submit_task_options=std_submit_task_opts,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            pool=STARROCKS_INSERT_POOL,
+        ).expand_kwargs(_frequency_params)
+
+        aggregate_somatic_freq = RadiantStarRocksOperator.partial(
+            task_id="aggregate_somatic_snv_variant_freq",
+            task_display_name="[StarRocks] Aggregate all Somatic SNV variants frequencies",
+            sql="./sql/radiant/somatic_snv_variant_frequency_insert.sql",
+            skip_if=skip_unless_recompute,
+            map_index_template="{{ task.tenant_code }}",
+            parameters={"tenant_code": "{{ tenant_code }}"},
+            submit_task_options=std_submit_task_opts,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            pool=STARROCKS_INSERT_POOL,
+        ).expand(tenant_code=all_tenants)
+
+        insert_stg_germline_freq >> aggregate_germline_freq >> insert_stg_somatic_freq >> aggregate_somatic_freq
+
+    with TaskGroup(group_id="snv_variant") as tg_variants:
+        insert_snv_variants = RadiantStarRocksOperator.partial(
+            task_id="insert_snv_variant",
+            task_display_name="[StarRocks] Insert SNV Variants",
+            sql="./sql/radiant/snv_variant_insert.sql",
+            skip_if=gated("snv_variant", opened_by=RECOMPUTE_FREQUENCIES),
+            map_index_template="{{ task.tenant_code }}",
+            submit_task_options=std_submit_task_opts,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            pool=STARROCKS_INSERT_POOL,
+        ).expand(tenant_code=all_tenants)
+
+        insert_snv_variants_part = RadiantStarRocksOperator.partial(
+            task_id="insert_snv_variant_part",
+            task_display_name="[StarRocks] Insert SNV Variants Part",
+            sql="./sql/radiant/snv_variant_part_insert_part.sql",
+            skip_if=gated("snv_variant", opened_by=RECOMPUTE_FREQUENCIES),
+            map_index_template="{{ task.tenant_code }} variant_part={{ task.parameters['variant_part'] }}",
+            submit_task_options=std_submit_task_opts,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            pool=STARROCKS_INSERT_POOL,
+        ).expand_kwargs(_variant_part_params)
+
+        insert_snv_variants >> insert_snv_variants_part
+
+    with TaskGroup(group_id="snv_consequence") as tg_consequences:
+        cons_filter_sql = render_pooled_sql.override(
+            task_id="render_snv_consequence_filter_part_sql",
+            task_display_name="[PyOp] Render Pooled SNV Consequence Filter Part SQL",
+        )("radiant/snv_consequence_filter_insert_part.sql", all_tenants)
+
+        insert_consequence_filter = RadiantStarRocksOperator(
+            task_id="insert_snv_consequence_filter",
+            task_display_name="[StarRocks] Insert SNV Consequences Filter",
+            sql="./sql/radiant/snv_consequence_filter_insert.sql",
+            skip_if=gated("snv_consequence"),
+            submit_task_options=std_submit_task_opts,
+            pool=STARROCKS_INSERT_POOL,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+        )
+
+        insert_consequence_filter_part = RadiantStarRocksOperator.partial(
+            task_id="insert_snv_consequence_filter_part",
+            task_display_name="[StarRocks] Insert SNV Consequences Filter Part",
+            sql=cons_filter_sql,
+            skip_if=gated("snv_consequence"),
+            map_index_template="part={{ task.parameters['part'] }}",
+            submit_task_options=std_submit_task_opts,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            pool=STARROCKS_INSERT_POOL,
+        ).expand(parameters=_part_params)
+
+        insert_consequence_filter >> insert_consequence_filter_part
+
+    with TaskGroup(group_id="cnv_occurrence") as tg_cnv:
+        reannotate_germline_cnv = RadiantStarRocksOperator.partial(
+            task_id="reannotate_germline_cnv_occurrence",
+            task_display_name="[StarRocks] Re-annotate Germline CNV Occurrences",
+            sql="./sql/radiant/germline_cnv_occurrence_reannotate_partition.sql",
+            skip_if=gated("cnv_occurrence", opened_by=RECOMPUTE_FREQUENCIES),
+            map_index_template="{{ task.tenant_code }} part={{ task.parameters['part'] }}",
+            submit_task_options=std_submit_task_opts,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            pool=STARROCKS_INSERT_POOL,
+        ).expand_kwargs(_cnv_params)
+
+        reannotate_somatic_cnv = RadiantStarRocksOperator.partial(
+            task_id="reannotate_somatic_cnv_occurrence",
+            task_display_name="[StarRocks] Re-annotate Somatic CNV Occurrences",
+            sql="./sql/radiant/somatic_cnv_occurrence_reannotate_partition.sql",
+            skip_if=gated("cnv_occurrence", opened_by=RECOMPUTE_FREQUENCIES),
+            map_index_template="{{ task.tenant_code }} part={{ task.parameters['part'] }}",
+            submit_task_options=std_submit_task_opts,
+            trigger_rule=TriggerRule.ALL_SUCCESS,
+            pool=STARROCKS_INSERT_POOL,
+        ).expand_kwargs(_cnv_params)
+
+        reannotate_germline_cnv >> reannotate_somatic_cnv
+
+    # Checkpoints
+
+    accumulators_reannotated = EmptyOperator(
+        task_id="accumulators_reannotated",
+        task_display_name="[ --- CHECKPOINT: PHASE 3A --- ] Accumulators Re-annotated",
+        trigger_rule=TriggerRule.NONE_FAILED,
+    )
+
+    frequencies_recomputed = EmptyOperator(
+        task_id="frequencies_recomputed",
+        task_display_name="[ --- CHECKPOINT: PHASE 3A (freq) --- ] Frequencies Recomputed",
+        trigger_rule=TriggerRule.NONE_FAILED,
+    )
+
+    snv_variants_rebuilt = EmptyOperator(
+        task_id="snv_variants_rebuilt",
+        task_display_name="[ --- CHECKPOINT: PHASE 3A (cont.) --- ] SNV Variants Rebuilt",
+        trigger_rule=TriggerRule.NONE_FAILED,
+    )
+
+    snv_consequences_rebuilt = EmptyOperator(
+        task_id="snv_consequences_rebuilt",
+        task_display_name="[ --- CHECKPOINT: PHASE 3B --- ] SNV Consequences Rebuilt",
+        trigger_rule=TriggerRule.NONE_FAILED,
+    )
+
+    rebuilds_complete = EmptyOperator(
+        task_id="rebuilds_complete",
+        task_display_name="[ --- CHECKPOINT: FINAL PHASE --- ] Before Recording the Release",
+        trigger_rule=TriggerRule.NONE_FAILED,
+    )
+
+    record_release = RadiantStarRocksOperator(
+        task_id="record_open_data_release",
+        task_display_name="[StarRocks] Record the Release",
+        sql="./sql/radiant/open_data_release_annotate.sql",
+        trigger_rule=TriggerRule.NONE_FAILED,
+        pool=STARROCKS_INSERT_POOL,
+    )
+
+    # --- Flow --------------------------------------------------------------------------------------
+    _preflight_tables_exist >> _acquire_import_lock >> reference_load >> sources_loaded
+
+    sources_loaded >> [all_tenants, all_parts, tenant_parts]
+
+    sources_loaded >> _gates >> tg_accumulators >> accumulators_reannotated
+    accumulators_reannotated >> tg_frequencies >> frequencies_recomputed
+    frequencies_recomputed >> tg_variants >> snv_variants_rebuilt
+    snv_variants_rebuilt >> tg_consequences >> snv_consequences_rebuilt
+    snv_consequences_rebuilt >> tg_cnv >> rebuilds_complete
+
+    rebuilds_complete >> record_release >> _release_import_lock
+
+
+reannotate_open_data()

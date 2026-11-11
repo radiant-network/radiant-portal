@@ -1,4 +1,4 @@
-# POC only, never run (local tour: `moon ci` is what this job executes). Replaces the portal's backend.yml.
+# POC only, never run (local tour: `moon ci` is what this job executes). Replaces the portal's backend.yml, the ETL's test.yml and the MCP's test.yml.
 name: CI
 on:
   pull_request:
@@ -19,6 +19,8 @@ jobs:
         with: { go-version: '1.27', cache-dependency-path: backend/go.sum }
       - uses: actions/setup-node@v6
         with: { node-version-file: .nvmrc, cache: npm, cache-dependency-path: frontend/package-lock.json }
+      - uses: astral-sh/setup-uv@v6
+        with: { enable-cache: true }
       - run: npm install -g @moonrepo/cli@2.6.2
       # Only tasks whose inputs changed between the PR base and HEAD,
       # plus the tasks that depend on them (e.g. swagger.yaml -> frontend:api-client-check).

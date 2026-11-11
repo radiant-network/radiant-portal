@@ -1,0 +1,21 @@
+SELECT part,
+       seq_id,
+       id,
+       tenant_code,
+       rank,
+       symbol,
+       entrez_gene_id,
+       moi,
+       variant_score,
+       gene_combined_score,
+       contributing_variant,
+       chromosome,
+       start,
+       end,
+       reference,
+       alternate,
+       acmg_classification,
+       acmg_evidence,
+       task_id
+FROM {{ table }} PARTITION ( p{{ partition }})
+WHERE task_id NOT IN %(task_ids)s AND task_id NOT IN %(deleted_task_ids)s;

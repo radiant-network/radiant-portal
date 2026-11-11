@@ -1,0 +1,346 @@
+import pytest
+from airflow.utils.trigger_rule import TriggerRule
+
+from radiant.dags import NAMESPACE
+from radiant.dags.import_part import (
+    build_tenant_scoped_params,
+    tasks_output_processor,
+)
+
+_MULTI_TENANT_TASKS = [
+    {
+        "task_id": 1,
+        "deleted": False,
+        "experiments": [{"seq_id": 10, "tenant_code": "chop"}, {"seq_id": 11, "tenant_code": "chop"}],
+    },
+    {"task_id": 2, "deleted": False, "experiments": [{"seq_id": 20, "tenant_code": "chusj"}]},
+    {"task_id": 3, "deleted": True, "experiments": [{"seq_id": 30, "tenant_code": "chop"}]},
+]
+
+
+def _by_tenant(rows):
+    return {r["tenant_code"]: r for r in rows}
+
+
+def test_build_tenant_scoped_params_buckets_ids_per_tenant():
+    by_tenant = _by_tenant(build_tenant_scoped_params(_MULTI_TENANT_TASKS))
+
+    # Sorted by tenant_code, one payload each.
+    assert list(by_tenant) == ["chop", "chusj"]
+
+    chop = by_tenant["chop"]["parameters"]
+    assert chop["tenant_code"] == "chop"
+    assert chop["seq_ids"] == [10, 11]  # active seq_ids from task 1
+    assert chop["task_ids"] == [1]
+    assert chop["deleted_seq_ids"] == [30]  # from deleted task 3
+    assert chop["deleted_task_ids"] == [3]
+
+    chusj = by_tenant["chusj"]["parameters"]
+    assert chusj["seq_ids"] == [20]
+    assert chusj["task_ids"] == [2]
+    # No deleted rows for chusj -> [-1] fallback keeps `IN (...)` valid.
+    assert chusj["deleted_seq_ids"] == [-1]
+    assert chusj["deleted_task_ids"] == [-1]
+
+
+def test_build_tenant_scoped_params_exposes_tenant_code_as_kwarg():
+    # Each payload doubles as .expand_kwargs kwargs: top-level tenant_code drives DB routing.
+    for row in build_tenant_scoped_params(_MULTI_TENANT_TASKS):
+        assert row["tenant_code"] == row["parameters"]["tenant_code"]
+
+
+@pytest.mark.parametrize(
+    "tasks",
+    [
+        [],
+        [{"task_id": 1, "deleted": False, "experiments": []}],
+        [{"task_id": 1, "deleted": False, "experiments": None}],
+        [{"task_id": 1, "deleted": False, "experiments": [None]}],
+    ],
+)
+def test_build_tenant_scoped_params_no_experiments(tasks):
+    assert build_tenant_scoped_params(tasks) == []
+
+
+@pytest.fixture
+def mock_results():
+    return [
+        [
+            (
+                1,
+                "radiant_germline_annotation",
+                "file_1.vcf",
+                1,
+                "germline",
+                1,
+                "cnv_1.vcf",
+                "exomiser_1.tsv",
+                1,
+                "wgs",
+                "routine",
+                "sample_1",
+                "tenant1",
+                "proband",
+                "M",
+                "affected",
+                False,
+            ),
+            (
+                1,
+                "radiant_germline_annotation",
+                "file_1.vcf",
+                1,
+                "germline",
+                2,
+                None,
+                None,
+                2,
+                "wgs",
+                "routine",
+                "sample_2",
+                "tenant1",
+                "role_2",
+                "F",
+                "not_affected",
+                False,
+            ),
+            (
+                2,
+                "alignment_germline_variant_calling",
+                "file_2.vcf",
+                2,
+                "germline",
+                3,
+                "cnv_2.vcf",
+                None,
+                3,
+                "wgs",
+                "routine",
+                "sample_3",
+                "tenant1",
+                "role_3",
+                "M",
+                "affected",
+                False,
+            ),
+        ]
+    ]
+
+
+@pytest.fixture
+def mock_descriptions():
+    return [
+        [
+            ("task_id",),
+            ("task_type",),
+            ("vcf_filepath",),
+            ("part",),
+            ("analysis_type",),
+            ("seq_id",),
+            ("cnv_vcf_filepath",),
+            ("exomiser_filepath",),
+            ("patient_id",),
+            ("experimental_strategy",),
+            ("request_priority",),
+            ("aliquot",),
+            ("tenant_code",),
+            ("family_role",),
+            ("sex",),
+            ("affected_status",),
+            ("deleted",),
+        ]
+    ]
+
+
+def test_tasks_output_processor_returns_correct_tasks(mock_results, mock_descriptions):
+    result = tasks_output_processor(mock_results, mock_descriptions)
+    assert len(result[0]) == 2
+    assert result[0][0]["task_id"] == 1
+    assert result[0][1]["task_id"] == 2
+
+
+def test_tasks_output_processor_handles_empty_results():
+    result = tasks_output_processor([[]], [[]])
+    assert result == [[]]
+
+
+def test_dag_is_importable(dag_bag):
+    assert f"{NAMESPACE}-import-part" in dag_bag.dags
+    dag = dag_bag.get_dag(f"{NAMESPACE}-import-part")
+    assert dag is not None
+
+
+def test_dag_has_no_import_errors(dag_bag):
+    assert len(dag_bag.import_errors) == 0
+
+
+def test_dag_contains_all_tasks(dag_bag):
+    dag = dag_bag.get_dag(f"{NAMESPACE}-import-part")
+    task_ids = [task.task_id for task in dag.tasks]
+    expected_tasks = [
+        "start",
+        "acquire_import_lock",
+        "release_import_lock",
+        "get_iceberg_namespace",
+        "get_tables_to_refresh",
+        "fetch_sequencing_experiment_delta",
+        "sanity_check_tasks",
+        "store_tasks",
+        "cleanup_tasks_files",
+        "prepare_config",
+        "build_tenant_params",
+        "extract_tenants",
+        "extract_all_tenants",
+        "extract_task_ids",
+        "checkpoint_after_setup",
+        "import_cnv_vcf_k8s",
+        "import_somatic_cnv_vcf_k8s",
+        "import_snv_vcf",
+        "checkpoint_after_vcf_imports",
+        "load_exomiser_files",
+        "refresh_iceberg_tables",
+        "germline_cnv_occurrence.sanity_check_cnvs",
+        "germline_cnv_occurrence.insert_germline_cnv_occurrences",
+        "germline_cnv_occurrence.aggregate_germline_cnv_variant_freq",
+        "somatic_cnv_occurrence.sanity_check_somatic_cnvs",
+        "somatic_cnv_occurrence.insert_somatic_cnv_occurrences",
+        "somatic_cnv_occurrence.aggregate_somatic_cnv_variant_freq",
+        "insert_variant_hashes",
+        "overwrite_snv_tmp_variant",
+        "insert_exomiser",
+        "insert_germline_snv_comphet",
+        "checkpoint_after_exomiser",
+        "germline_snv_occurrence.insert_germline_snv_occurrence",
+        "germline_snv_occurrence.insert_stg_germline_snv_variant_freq",
+        "germline_snv_occurrence.aggregate_germline_snv_variant_freq",
+        "germline_snv_occurrence.sanity_check_delta_germline_snv",
+        "somatic_snv_occurrence.insert_somatic_snv_occurrences",
+        "somatic_snv_occurrence.insert_stg_somatic_snv_variant_freq",
+        "somatic_snv_occurrence.aggregate_somatic_snv_variant_freq",
+        "somatic_snv_occurrence.sanity_check_delta_somatic_snv",
+        "snv_variant.sanity_check_any_snv",
+        "snv_variant.insert_snv_staging_variant",
+        "snv_variant.insert_snv_variant",
+        "snv_variant.compute_parts",
+        "snv_variant.insert_snv_variant_part",
+        "snv_consequence.sanity_check_any_snv",
+        "snv_consequence.render_snv_consequence_filter_part_sql",
+        "snv_consequence.import_snv_consequence",
+        "snv_consequence.import_snv_consequence_filter",
+        "snv_consequence.insert_snv_consequence_filter_part",
+        "checkpoint_after_variants",
+        "checkpoint_after_cnv",
+        "delete_sequencing_experiments",
+        "update_sequencing_experiment",
+    ]
+    assert set(task_ids) == set(expected_tasks)
+
+
+def test_dag_task_dependencies_are_valid(dag_bag):
+    dag = dag_bag.get_dag(f"{NAMESPACE}-import-part")
+    assert dag.validate() is None
+
+    namespace_task = dag.get_task("get_iceberg_namespace")
+    import_cnv_vcf_k8s_task = dag.get_task("import_cnv_vcf_k8s")
+    assert namespace_task in import_cnv_vcf_k8s_task.get_flat_relatives(upstream=True)
+    import_somatic_cnv_vcf_k8s_task = dag.get_task("import_somatic_cnv_vcf_k8s")
+    assert namespace_task in import_somatic_cnv_vcf_k8s_task.get_flat_relatives(upstream=True)
+
+    # The somatic CNV group is chained after the germline one, so its short-circuit carries
+    # `trigger_rule=NONE_FAILED` to survive a germline-only part skipping the germline insert.
+    assert (
+        "somatic_cnv_occurrence.sanity_check_somatic_cnvs"
+        in dag.get_task("germline_cnv_occurrence.aggregate_germline_cnv_variant_freq").downstream_task_ids
+    )
+
+    # RAD-120: each CNV frequency recompute runs after its occurrence insert, and is skipped with it.
+    for kind in ("germline", "somatic"):
+        aggregate = dag.get_task(f"{kind}_cnv_occurrence.aggregate_{kind}_cnv_variant_freq")
+        assert aggregate.upstream_task_ids == {
+            f"{kind}_cnv_occurrence.insert_{kind}_cnv_occurrences",
+            "extract_tenants",
+        }
+        assert aggregate.trigger_rule == TriggerRule.ALL_SUCCESS
+    assert dag.get_task("somatic_cnv_occurrence.sanity_check_somatic_cnvs").trigger_rule == TriggerRule.NONE_FAILED
+
+    # Phase 5 opens once Phase 4 is fully complete, so both CNV groups sit behind every SNV group --
+    # `nb_snv` needs the occurrences and `snv__staging_variant`, and the rest is for legibility.
+    assert "germline_cnv_occurrence.sanity_check_cnvs" in dag.get_task("checkpoint_after_variants").downstream_task_ids
+    upstream_ids = {
+        t.task_id for t in dag.get_task("germline_cnv_occurrence.sanity_check_cnvs").get_flat_relatives(upstream=True)
+    }
+    assert "germline_snv_occurrence.insert_germline_snv_occurrence" in upstream_ids
+    assert "somatic_snv_occurrence.insert_somatic_snv_occurrences" in upstream_ids
+    assert "snv_variant.insert_snv_staging_variant" in upstream_ids
+    assert "snv_consequence.insert_snv_consequence_filter_part" in upstream_ids
+
+    # Defensive here, load-bearing on the somatic side: `checkpoint_after_variants` already absorbs the
+    # skips of an SNV-less part, so Phase 5's direct upstream succeeds either way.
+    assert dag.get_task("germline_cnv_occurrence.sanity_check_cnvs").trigger_rule == TriggerRule.NONE_FAILED
+
+    # Phase 5 closes the run: its checkpoint gates the sequencing-experiment updates.
+    assert (
+        "checkpoint_after_cnv"
+        in dag.get_task("somatic_cnv_occurrence.aggregate_somatic_cnv_variant_freq").downstream_task_ids
+    )
+    checkpoint_cnv_downstream = dag.get_task("checkpoint_after_cnv").downstream_task_ids
+    assert {"delete_sequencing_experiments", "update_sequencing_experiment"} == checkpoint_cnv_downstream
+
+    # What keeps `insert_variant_hashes` alive is an implicit edge: `parameters` is a template field, so the
+    # `extract_task_ids` XComArg is a real upstream.
+    assert "insert_variant_hashes" in dag.get_task("extract_task_ids").downstream_task_ids
+
+    # `compute_parts` is only referenced through `.partial(parameters=...)`; the edge exists because
+    # `parameters` is a template field, so `MappedOperator` applies the XComArg relationship.
+    assert "snv_variant.insert_snv_variant_part" in dag.get_task("snv_variant.compute_parts").downstream_task_ids
+
+    # Only the consequence filter is still pooled across every tenant.
+    all_tenants_downstream = dag.get_task("extract_all_tenants").downstream_task_ids
+    assert "snv_consequence.render_snv_consequence_filter_part_sql" in all_tenants_downstream
+    assert not any(task_id.startswith("snv_variant.") for task_id in all_tenants_downstream)
+
+    # S3 mutex lock (design/SJRA-1811-opendatalake-integration.md)
+    assert dag.get_task("acquire_import_lock").downstream_task_ids == {"start", "release_import_lock"}
+    release_lock_task = dag.get_task("release_import_lock")
+    assert release_lock_task.upstream_task_ids == {
+        "acquire_import_lock",
+        "delete_sequencing_experiments",
+        "update_sequencing_experiment",
+    }
+    # A teardown of the acquire, not a plain ALL_DONE task: it still releases after a failure (this DAG
+    # runs once per partition and fails routinely, and holding the mutex through a failure took every
+    # partition behind it down too), but Airflow leaves teardowns out of the run state. As a plain
+    # ALL_DONE leaf it succeeded after any failure and the run ended in success (RAD-133). The
+    # re-annotation DAG is the opposite case and still holds on failure.
+    assert release_lock_task.is_teardown
+    assert release_lock_task.trigger_rule == TriggerRule.ALL_DONE_SETUP_SUCCESS
+    assert dag.get_task("acquire_import_lock").is_setup
+    assert "acquire_import_lock" in release_lock_task.upstream_task_ids
+    assert release_lock_task.downstream_task_ids == set()
+
+
+def test_failed_task_fails_the_run(dag_bag):
+    """The run state comes from the leaves. The lock release must not be the one deciding it (RAD-133)."""
+    from collections import namedtuple
+
+    from airflow.models.dagrun import DagRun
+
+    _TI = namedtuple("_TI", ["task_id", "state"])
+
+    dag = dag_bag.get_dag(f"{NAMESPACE}-import-part")
+    tis = [_TI(t.task_id, None) for t in dag.tasks]
+    leaves = {ti.task_id for ti in DagRun._tis_for_dagrun_state(None, dag=dag, tis=tis)}
+    assert "release_import_lock" not in leaves
+    assert {"delete_sequencing_experiments", "update_sequencing_experiment"} <= leaves
+
+
+def test_only_one_partition_imports_at_a_time(dag_bag):
+    """The `import_mutex` lock is the backstop, not the scheduler -- two concurrent runs race it and the
+    loser fails outright.
+
+    Pinned on the DAG rather than left to the caller's `import_part` pool: that pool sits on the mapped
+    trigger in `import_radiant`, so it does nothing for a manual or API-triggered run, and nothing at all
+    while the trigger is deferred (a deferred task holds no pool slot unless the pool has
+    `include_deferred` -- apache/airflow#40528). See `radiant/dags/docs/import_part.md`.
+    """
+    assert dag_bag.get_dag(f"{NAMESPACE}-import-part").max_active_runs == 1

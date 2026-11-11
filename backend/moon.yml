@@ -2,10 +2,20 @@ language: 'go'
 layer: 'application'
 stack: 'backend'
 
+# The backend reads tables the ETL owns (StarRocks schema).
+dependsOn: ['etl']
+
 fileGroups:
   sources: ['**/*.go', 'go.mod', 'go.sum']
-  # Published to the frontend (generated TS client in frontend/api).
+  # Published to the frontend (TS client) and the MCP (radiant_python client).
   openapi: ['docs/swagger.yaml']
+  # What the backend creates in each tenant database (views), read by the MCP schema tests.
+  views:
+    - 'scripts/seed/views/**/*'
+    - 'scripts/pcx_tables/access_controlled_views/**/*'
+    - 'scripts/init-sql/migrations/**/*'
+    - 'internal/types/**/*'
+    - 'internal/repository/starrocks/starrocks_tenant.go'
 
 tasks:
   build:

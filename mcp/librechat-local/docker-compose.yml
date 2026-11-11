@@ -1,0 +1,40 @@
+# Local LibreChat test stack for radiant-mcp.
+#
+# Runs LibreChat + MongoDB locally, pointed at a REMOTE Keycloak (OIDC login)
+# and a REMOTE radiant-mcp server. The LLM is served by Ollama running on the
+# host. LibreChat forwards the logged-in user's Keycloak access token to the
+# MCP server as `Authorization: Bearer ...` (non-discovery, portal-client path).
+#
+# This stack is intentionally separate from the project's ../docker-compose.yml
+# (which spins up its own local keycloak/starrocks). Here those are remote.
+#
+# Usage:
+#   cp .env.example .env   # then fill in the remote Keycloak/MCP values
+#   docker compose up -d
+#   open http://localhost:3080
+
+services:
+  librechat:
+    image: librechat/librechat:latest
+    container_name: librechat
+    ports:
+      - "3080:3080"
+    env_file: .env
+    volumes:
+      - ./librechat.yaml:/app/librechat.yaml:ro
+    depends_on:
+      - mongodb
+    extra_hosts:
+      # Lets the container reach Ollama on the host via host.docker.internal.
+      # Required on Linux; harmless on macOS/Windows where the name resolves natively.
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  mongodb:
+    # Pinned to 4.4: MongoDB 5+ requires AVX and crashes on Apple Silicon.
+    image: mongo:4.4
+    container_name: librechat-mongodb
+    volumes:
+      - ./data-node:/data/db
+    command: mongod --noauth
+    restart: unless-stopped

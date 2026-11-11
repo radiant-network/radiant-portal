@@ -1,0 +1,53 @@
+[project]
+name = "radiant-mcp"
+version = "1.1.1"
+description = "Radiant MCP server — StarRocks SQL and Radiant portal API tools behind Keycloak OAuth"
+requires-python = ">=3.11"
+dependencies = [
+    # 4.x: MCP Python SDK v2, negotiates the protocol version per connection.
+    "fastmcp>=4.1,<5",
+    # >= 9.1: authentication_openid_connect_client plugin (JWT login to StarRocks).
+    "mysql-connector-python>=9.1",
+    # Tool argument models (survival groups); fastmcp builds the tool schemas with it.
+    "pydantic>=2",
+    # Server settings, validated at startup (radiant_mcp/settings.py).
+    "pydantic-settings>=2.7",
+    # Radiant portal API client, generated from backend/docs/swagger.yaml (see [tool.uv.sources]).
+    "radiant-python-cli",
+    "scipy>=1.12",
+    "matplotlib>=3.8",
+]
+
+# Deps-only project: radiant_mcp/ is COPY'd into the image and run from the
+# working directory, not installed as a distribution.
+[dependency-groups]
+# Unit tests only; the image installs with --no-dev.
+dev = [
+    "pytest>=8",
+    "ruff==0.17.4",
+    "sqlglot>=30.30.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit"]
+pythonpath = [".", "tests/unit"]
+addopts = "-ra"
+
+[tool.uv]
+package = false
+
+# Monorepo: the client generated from backend/docs/swagger.yaml, at the same commit.
+[tool.uv.sources]
+radiant-python-cli = { path = "../clients/python", editable = true }
+
+# Pinned in the dev group: the default rules change between ruff versions.
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+# pycodestyle errors, pyflakes, import order, Python 3.11 syntax, bugbear, simplify.
+select = ["E4", "E7", "E9", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["radiant_mcp"]

@@ -1,0 +1,13 @@
+# Commit messages must follow Conventional Commits: release-please derives the
+# version and CHANGELOG.md from them. Install once with:
+#   uvx pre-commit install
+default_install_hook_types:
+  - commit-msg
+
+repos:
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [--verbose]

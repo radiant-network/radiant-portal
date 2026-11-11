@@ -4,3 +4,6 @@ node_modules/
 frontend/.gen/
 frontend/portals/*/build/
 frontend/openapitools.json
+.venv/
+__pycache__/
+clients/python/.gen/

@@ -1,0 +1,231 @@
+import logging
+
+import pytest
+from airflow.exceptions import AirflowSkipException
+
+from radiant.tasks.nextflow import case_status
+from radiant.tasks.nextflow.portal import PortalError
+from tests.unit.nextflow.cnv.conftest import member_row as cnv_member_row
+from tests.unit.nextflow.conftest import member_row as snv_member_row
+from tests.unit.nextflow.qc.conftest import member_row as qc_member_row
+from tests.unit.nextflow.somatic.conftest import calling_task_rows
+
+
+def status_row(case_id, status_code="submitted", has_variants=False, tenant_code="radiant"):
+    return {"case_id": case_id, "tenant_code": tenant_code, "status_code": status_code, "has_variants": has_variants}
+
+
+def test_work_waiting_is_the_union_of_every_pipeline_and_the_import_delta():
+    waiting = case_status.cases_with_work(
+        germline_snv_rows=[snv_member_row(case_id=1)],
+        germline_cnv_rows=[cnv_member_row(case_id=2)],
+        somatic_snv_rows=calling_task_rows(case_id=5),
+        qc_rows=[qc_member_row(case_id=3)],
+        import_rows=[{"case_id": 4}, {"case_id": 4}],
+    )
+    assert waiting == {1, 2, 3, 4, 5}
+
+
+@pytest.mark.parametrize("reason", ["pending_sequencing", "no_gvcf", "tenant_excluded"])
+def test_a_case_the_pipeline_would_exclude_is_not_work_waiting(reason):
+    """Moved to `processing`, it would wait there with nothing running for it."""
+    waiting = case_status.cases_with_work(
+        germline_snv_rows=[snv_member_row(case_id=1, exclusion_reason=reason)],
+        germline_cnv_rows=[cnv_member_row(case_id=2, exclusion_reason=reason)],
+        somatic_snv_rows=calling_task_rows(case_id=5, exclusion_reason=reason),
+        qc_rows=[qc_member_row(case_id=3, exclusion_reason=reason)],
+        import_rows=[],
+    )
+    assert waiting == set()
+
+
+def test_a_qc_case_with_two_metrics_tarballs_is_not_work_waiting():
+    """The QC DAG excludes it at `select_cases`, so it would hold the case in processing for ever."""
+    row = qc_member_row(case_id=3, dragen_metrics_matches=2, exclusion_reason="ambiguous_dragen_metrics")
+    assert case_status.cases_with_work([], [], [], [row], []) == set()
+
+
+def test_a_qc_case_without_a_metrics_tarball_is_work_waiting():
+    """The QC DAG runs it on its CRAM's directory: there is no S3 search to fail."""
+    assert case_status.cases_with_work([], [], [], [qc_member_row(case_id=3, tarball=False)], []) == {3}
+
+
+def test_a_tumor_only_case_waiting_for_qc_is_work_waiting():
+    row = qc_member_row(case_id=23, case_type="somatic", affected_status="unknown")
+    assert case_status.cases_with_work([], [], [], [row], []) == {23}
+
+
+def test_a_tumor_without_a_metrics_tarball_is_not_work_waiting():
+    """The QC DAG excludes it as `no_metrics`: a tumor has no CRAM-directory fallback."""
+    row = qc_member_row(case_id=23, case_type="somatic", tarball=False, exclusion_reason="no_metrics")
+    assert case_status.cases_with_work([], [], [], [row], []) == set()
+
+
+def test_nothing_discovered_is_no_work():
+    assert case_status.cases_with_work([], [], [], [], []) == set()
+
+
+def test_only_submitted_cases_with_work_or_variants_move_to_processing():
+    rows = [
+        status_row(1),  # work waiting
+        status_row(2, has_variants=True),  # work done before the control DAG saw it
+        status_row(3),  # nothing to do yet
+        status_row(4, status_code="processing"),  # already there
+        status_row(5, status_code="processing", has_variants=True),
+    ]
+    assert case_status.plan_processing(rows, waiting={1, 4}, excluded_tenants=[]) == [
+        {"tenant": "radiant", "case_ids": [1, 2]}
+    ]
+
+
+def test_every_done_processing_case_with_variants_moves_to_in_progress_not_only_this_runs():
+    rows = [
+        status_row(1, status_code="processing", has_variants=True),
+        status_row(2, status_code="processing"),  # no variants imported yet: stays
+        status_row(3, status_code="submitted", has_variants=True),  # its tenant refused processing
+    ]
+    assert case_status.plan_in_progress(rows, processed=set(), waiting=set(), excluded_tenants=[]) == [
+        {"tenant": "radiant", "case_ids": [1], "processed_case_ids": []}
+    ]
+
+
+def test_a_case_with_a_pipeline_still_pending_stays_processing_even_with_variants(caplog):
+    """SNV post-processing failed, but the alignment's CNV VCF was imported: the case has
+    variants, and must still not be opened for analysis before its SNVs are in."""
+    rows = [
+        status_row(1, status_code="processing", has_variants=True),
+        status_row(2, status_code="processing", has_variants=True),
+    ]
+    with caplog.at_level(logging.INFO):
+        batches = case_status.plan_in_progress(rows, processed=set(), waiting={2}, excluded_tenants=[])
+    assert batches == [{"tenant": "radiant", "case_ids": [1], "processed_case_ids": []}]
+    assert "kept in processing, a pipeline still has work for them: [2]" in caplog.text
+
+
+def test_a_done_case_with_no_variants_stays_processing_and_is_reported(caplog):
+    rows = [status_row(1, status_code="processing", has_variants=False)]
+    with caplog.at_level(logging.WARNING):
+        assert case_status.plan_in_progress(rows, processed=set(), waiting=set(), excluded_tenants=[]) == []
+    assert "no pipeline left to run but no variant data: [1]" in caplog.text
+
+
+def test_the_cases_past_processing_this_run_finished_are_notified_without_a_status_change():
+    """New results for a case already open for analysis are emailed too, not only the cases moved."""
+    rows = [
+        status_row(1, status_code="processing", has_variants=True),  # moved, and so notified
+        status_row(2, status_code="in_progress", has_variants=True),  # processed this run
+        status_row(3, status_code="in_review"),  # processed this run, QC only
+        status_row(4, status_code="completed", has_variants=True),  # nothing new this run
+        status_row(5, status_code="in_progress", has_variants=True),  # a pipeline failed: not done
+        status_row(6, status_code="submitted", has_variants=True),  # notified once in in_progress
+        status_row(7, status_code="in_progress", tenant_code="qlin"),  # a tenant with nothing to move
+    ]
+    batches = case_status.plan_in_progress(rows, processed={2, 3, 5, 6, 7}, waiting={5}, excluded_tenants=[])
+    assert batches == [
+        {"tenant": "qlin", "case_ids": [], "processed_case_ids": [7]},
+        {"tenant": "radiant", "case_ids": [1], "processed_case_ids": [2, 3]},
+    ]
+
+
+def test_has_variants_is_read_from_the_query_s_integer():
+    """StarRocks returns the boolean expression as 0/1."""
+    rows = [
+        status_row(1, status_code="processing", has_variants=1),
+        status_row(2, status_code="processing", has_variants=0),
+    ]
+    assert case_status.plan_in_progress(rows, processed=set(), waiting=set(), excluded_tenants=[]) == [
+        {"tenant": "radiant", "case_ids": [1], "processed_case_ids": []}
+    ]
+
+
+def test_changes_are_batched_once_per_tenant():
+    rows = [
+        status_row(3, tenant_code="radiant"),
+        status_row(1, tenant_code="qlin"),
+        status_row(2, tenant_code="radiant"),
+    ]
+    assert case_status.plan_processing(rows, waiting={1, 2, 3}, excluded_tenants=[]) == [
+        {"tenant": "qlin", "case_ids": [1]},
+        {"tenant": "radiant", "case_ids": [2, 3]},
+    ]
+
+
+def test_an_excluded_tenant_s_cases_are_never_moved(caplog):
+    """Not even those with variants: the import is not filtered by tenant."""
+    rows = [
+        status_row(1, tenant_code="radiant", has_variants=True),
+        status_row(2, tenant_code="qlin"),
+        status_row(3, status_code="processing", tenant_code="radiant", has_variants=True),
+    ]
+    with caplog.at_level(logging.INFO):
+        assert case_status.plan_processing(rows, waiting={1, 2}, excluded_tenants=["radiant"]) == [
+            {"tenant": "qlin", "case_ids": [2]}
+        ]
+        assert case_status.plan_in_progress(rows, processed=set(), waiting=set(), excluded_tenants=["radiant"]) == []
+        finished = [status_row(4, status_code="in_progress", tenant_code="radiant")]
+        assert case_status.plan_in_progress(finished, processed={4}, waiting=set(), excluded_tenants=["radiant"]) == []
+    assert "tenant 'radiant' is excluded" in caplog.text
+
+
+def test_change_tenant_status_sends_the_batch(monkeypatch):
+    calls = []
+
+    def update(tenant, case_ids, status_code):
+        calls.append((tenant, case_ids, status_code))
+        return [{"case_id": 1, "updated": True, "current_status_code": status_code}]
+
+    monkeypatch.setattr("radiant.tasks.nextflow.register.update_case_system_status", update)
+    result = case_status.change_tenant_status({"tenant": "radiant", "case_ids": [1]}, case_status.PROCESSING)
+    assert calls == [("radiant", [1], "processing")]
+    assert result == [{"case_id": 1, "updated": True, "current_status_code": "processing"}]
+
+
+def test_a_tenant_with_nothing_to_move_sends_no_patch(monkeypatch):
+    def update(*_):
+        raise AssertionError("PATCH sent with no case")
+
+    monkeypatch.setattr("radiant.tasks.nextflow.register.update_case_system_status", update)
+    batch = {"tenant": "radiant", "case_ids": [], "processed_case_ids": [1]}
+    assert case_status.change_tenant_status(batch, case_status.IN_PROGRESS) == []
+
+
+def test_a_tenant_the_service_account_is_not_granted_on_is_skipped(monkeypatch, caplog):
+    def update(*_):
+        raise PortalError("PATCH .../cases/status returned 403", status=403)
+
+    monkeypatch.setattr("radiant.tasks.nextflow.register.update_case_system_status", update)
+    with caplog.at_level(logging.WARNING), pytest.raises(AirflowSkipException, match="qlin"):
+        case_status.change_tenant_status({"tenant": "qlin", "case_ids": [1]}, case_status.IN_PROGRESS)
+    assert "tenant 'qlin' skipped" in caplog.text
+
+
+@pytest.mark.parametrize("status", [400, 500, None])
+def test_any_other_portal_error_fails_the_task(monkeypatch, status):
+    def update(*_):
+        raise PortalError("boom", status=status)
+
+    monkeypatch.setattr("radiant.tasks.nextflow.register.update_case_system_status", update)
+    with pytest.raises(PortalError):
+        case_status.change_tenant_status({"tenant": "radiant", "case_ids": [1]}, case_status.PROCESSING)
+
+
+def test_the_cases_to_notify_include_those_an_earlier_attempt_moved():
+    """A retried `set_in_progress` gets `updated: false` for what its first attempt moved; those
+    cases still reached in_progress in this run and must be in the email."""
+    results = [
+        {"case_id": 2, "updated": True, "current_status_code": "in_progress"},
+        {"case_id": 1, "updated": False, "current_status_code": "in_progress"},
+        {"case_id": 3, "updated": False, "current_status_code": "revoked"},
+    ]
+    assert case_status.cases_now_in(results, case_status.IN_PROGRESS) == [1, 2]
+
+
+def test_a_case_group_refused_for_the_tenant_is_skipped(caplog):
+    """A tenant with only cases to notify sends no PATCH: its 403 comes from the group instead."""
+
+    def post_group(*_):
+        raise PortalError("POST .../case_groups returned 403", status=403)
+
+    with caplog.at_level(logging.WARNING), pytest.raises(AirflowSkipException, match="qlin"):
+        case_status.skip_if_not_granted("qlin", post_group, "results-x", [1])
+    assert "tenant 'qlin' skipped" in caplog.text

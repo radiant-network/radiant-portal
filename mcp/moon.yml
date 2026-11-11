@@ -1,0 +1,29 @@
+language: 'python'
+layer: 'application'
+stack: 'backend'
+
+# Queries the ETL tables through the portal tenant views; calls the portal API.
+dependsOn: ['etl', 'backend', 'python-client']
+
+fileGroups:
+  sources: ['radiant_mcp/**/*', 'server.py', 'tests/**/*', 'pyproject.toml', 'uv.lock', '.ruff.toml']
+
+tasks:
+  lint:
+    command: 'uv run --frozen --only-group dev ruff check .'
+    inputs: ['@group(sources)']
+  test:
+    # In the monorepo the sibling checkouts of the CI become plain paths.
+    command: 'uv run --frozen pytest -q tests/unit'
+    env:
+      RADIANT_ETL_DIR: '$workspaceRoot/etl'
+      RADIANT_REQUIRE_ETL: '1'
+      RADIANT_PORTAL_DIR: '$workspaceRoot'
+      RADIANT_REQUIRE_PORTAL: '1'
+    inputs:
+      - '@group(sources)'
+      # Only the files the schema tests read, not the whole ETL or backend.
+      - 'project://etl?group=schema'
+      - 'project://backend?group=views'
+      # The generated API client: regenerated whenever the backend API changes.
+      - 'project://python-client?group=sources'

@@ -1,0 +1,41 @@
+CREATE TABLE IF NOT EXISTS {{ mapping.starrocks_snv_staging_variant }} (
+    locus_id BIGINT NOT NULL,
+    gnomad_v3_af DOUBLE,
+    topmed_af DOUBLE,
+    tg_af DOUBLE,
+    chromosome CHAR(2),
+    start BIGINT NULL COMMENT '',
+    end BIGINT NULL COMMENT '',
+    clinvar_name VARCHAR(2000) NULL COMMENT '',
+    variant_class VARCHAR(50) NULL COMMENT '',
+    clinvar_interpretation ARRAY<VARCHAR(100)> NULL COMMENT '',
+    symbol VARCHAR(100) NULL COMMENT '',
+    impact_score tinyint NULL COMMENT "",
+    consequences ARRAY<VARCHAR(50)> NULL COMMENT '',
+    vep_impact VARCHAR(20) NULL COMMENT '',
+    is_mane_select BOOLEAN NULL COMMENT '',
+    is_mane_plus BOOLEAN NULL COMMENT '',
+    is_canonical BOOLEAN NULL COMMENT '',
+    rsnumber VARCHAR(20) NULL COMMENT '',
+    reference VARCHAR(2000),
+    alternate VARCHAR(2000),
+    mane_select varchar(200) NULL,
+    hgvsg VARCHAR(2000) NULL,
+    hgvsc varchar(2000) NULL,
+    hgvsp varchar(2000) NULL,
+    locus VARCHAR(2000) NULL,
+    dna_change VARCHAR(2000),
+    aa_change VARCHAR(2000),
+    transcript_id varchar(100) COMMENT "",
+    pick_source varchar(20) NULL COMMENT "",
+    omim_inheritance_code array<varchar(5)> COMMENT "",
+    cmc_mutation_url VARCHAR(255) NULL COMMENT "",
+    cmc_sample_mutated INT NULL COMMENT "",
+    cmc_sample_ratio DOUBLE NULL COMMENT "",
+    cmc_tier VARCHAR(8) NULL COMMENT ""
+)
+PRIMARY KEY(locus_id)
+DISTRIBUTED BY HASH(locus_id) BUCKETS 10
+PROPERTIES (
+    "colocate_with" = "{{ mapping.colocate_query_group }}"
+);

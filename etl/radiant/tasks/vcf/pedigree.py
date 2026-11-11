@@ -1,0 +1,53 @@
+from radiant.tasks.vcf.experiment import BaseTask
+
+# The children of the case's father and mother, the same roles as `CHILD_ROLES` in the PED
+# (`radiant/tasks/nextflow/inputs.py`). A fetus is the proband's child, not a progeny.
+PROGENY_ROLES = ("proband", "brother", "sister", "sibling")
+
+
+class Pedigree:
+    """
+    Represents a pedigree structure for a genetic task, linking family roles
+    (e.g., father, mother, progenies) to their corresponding experiments.
+
+    Attributes:
+       experiments (list[Task.Experiment]): A list of experiments corresponding to the VCF samples,
+           ordered as they appear in the VCF file.
+        father_experiment (Task.Experiment or None): The experiment associated with the father, if available.
+        mother_experiment (Task.Experiment or None): The experiment associated with the mother, if available.
+        is_father_affected (bool): Indicates if the father is affected by the condition.
+        is_mother_affected (bool): Indicates if the mother is affected by the condition.
+        father_seq_id (str or None): The sequence ID of the father, if available.
+        mother_seq_id (str or None): The sequence ID of the mother, if available.
+        progenies (list[Task.Experiment]): A list of experiments for progenies (proband, brother, sister, sibling).
+        is_family (bool): Indicates if the pedigree represents a family (requires at least one parent and one progeny).
+
+    Methods:
+        __init__(task: Task, vcf_samples: list[str]):
+            Initializes the Pedigree instance by mapping VCF samples to experiments
+            and identifying family roles.
+    """
+
+    def __init__(self, task: BaseTask, vcf_samples: list[str]):
+        self.experiments = []
+        # We save the experiments in the order of the samples in the VCF file
+        for vcf_sample in vcf_samples:
+            experiment = next((exp for exp in task.experiments if exp.aliquot == vcf_sample), None)
+            if experiment:
+                self.experiments.append(experiment)
+
+        self.father_experiment = next((exp for exp in self.experiments if exp.family_role == "father"), None)
+        self.mother_experiment = next((exp for exp in self.experiments if exp.family_role == "mother"), None)
+        self.is_father_affected = (
+            self.father_experiment.affected_status == "affected" if self.father_experiment else False
+        )
+        self.is_mother_affected = (
+            self.mother_experiment.affected_status == "affected" if self.mother_experiment else False
+        )
+
+        self.father_seq_id = self.father_experiment.seq_id if self.father_experiment else None
+        self.mother_seq_id = self.mother_experiment.seq_id if self.mother_experiment else None
+
+        self.progenies = [exp for exp in self.experiments if exp.family_role in PROGENY_ROLES]
+
+        self.is_family = (self.mother_seq_id or self.father_seq_id) and len(self.progenies) > 0

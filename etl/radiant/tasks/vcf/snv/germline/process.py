@@ -1,0 +1,191 @@
+import json
+import logging
+import sys
+import tempfile
+from collections import Counter
+
+from cyvcf2 import VCF
+from pyiceberg.catalog import load_catalog
+
+from radiant.tasks.iceberg.partition_commit import PartitionCommit
+from radiant.tasks.iceberg.table_accumulator import TableAccumulator
+from radiant.tasks.tracing.trace import get_tracer
+from radiant.tasks.utils import capture_libc_stderr_and_check_errors, download_s3_file
+from radiant.tasks.vcf.experiment import RadiantGermlineAnnotationTask
+from radiant.tasks.vcf.pedigree import Pedigree
+from radiant.tasks.vcf.snv.common import process_common
+from radiant.tasks.vcf.snv.consequence import log_invalid_cds, log_source_counts, parse_csq_header, process_consequence
+from radiant.tasks.vcf.snv.germline.comphet import process_comphet
+from radiant.tasks.vcf.snv.germline.inheritance import slivar_inheritance_methods
+from radiant.tasks.vcf.snv.germline.occurrence import process_occurrence
+from radiant.tasks.vcf.snv.variant import process_variant
+from radiant.tasks.vcf.vcf_utils import InfoKeys
+
+logger = logging.getLogger("airflow.task")
+tracer = get_tracer(__name__)
+
+SUPPORTED_CHROMOSOMES = tuple(f"chr{i}" for i in range(1, 23)) + ("chrX", "chrY", "chrM")
+
+
+# Required decoration because cyvcf2 doesn't fail when it encounters an error, it just prints to stderr.
+# Airflow will treat the task as successful if the error is not captured properly.
+@capture_libc_stderr_and_check_errors(error_patterns=["[E::"])
+def process_task(
+    task: RadiantGermlineAnnotationTask,
+    catalog_name="default",
+    namespace="radiant",
+    vcf_threads=None,
+    catalog_properties=None,
+):
+    with tracer.start_as_current_span(f"process_task_{str(task.task_id)}"):
+        occurrences_partition_commit = []
+        variants_partition_commit = []
+        consequences_partition_commit = []
+        comphets_partition_commit = []
+        catalog = (
+            load_catalog(catalog_name, **catalog_properties) if catalog_properties else load_catalog(catalog_name)
+        )
+
+        vcf = VCF(
+            task.vcf_filepath,
+            strict_gt=True,
+            threads=vcf_threads,
+            samples=[exp.aliquot for exp in task.experiments],
+        )
+        if task.index_vcf_filepath:
+            vcf.set_index(index_path=task.index_vcf_filepath)
+
+        occurrences_table_name = f"{namespace}.germline_snv_occurrence"
+        variants_table_name = f"{namespace}.snv_variant"
+        consequences_table_name = f"{namespace}.snv_consequence"
+        comphets_table_name = f"{namespace}.germline_snv_comphet"
+        if not vcf.samples:
+            raise ValueError(f"Task {task.task_id} has no matching samples in the VCF file {task.vcf_filepath}")
+
+        csq_header = parse_csq_header(vcf)
+        info_keys = InfoKeys(vcf)
+        pedigree = Pedigree(task, vcf.samples)
+        slivar = slivar_inheritance_methods(vcf)
+        logger.info(
+            f"Task {task.task_id}: parental origin from {'slivar' if slivar.parental_origin else 'etl'}, "
+            f"transmission mode from {'slivar' if slivar.transmission_mode else 'etl'}"
+        )
+        with tracer.start_as_current_span(f"vcf_task_{task.task_id}"):
+            logger.info(f"Starting processing vcf for task {task.task_id} with file {task.vcf_filepath}")
+
+            occurrence_table = catalog.load_table(occurrences_table_name)
+            occurrence_partition_filter = {"part": task.part, "task_id": task.task_id}
+            occurrence_buffer = TableAccumulator(occurrence_table, partition_filter=occurrence_partition_filter)
+
+            variant_csq_partition_filter = {"task_id": task.task_id}
+            variant_table = catalog.load_table(variants_table_name)
+            variant_buffer = TableAccumulator(variant_table, partition_filter=variant_csq_partition_filter)
+
+            consequence_table = catalog.load_table(consequences_table_name)
+            consequence_buffer = TableAccumulator(consequence_table, partition_filter=variant_csq_partition_filter)
+
+            # Same partition filter as the occurrences: a re-imported task replaces its pairs, even with none.
+            comphet_table = catalog.load_table(comphets_table_name)
+            comphet_buffer = TableAccumulator(comphet_table, partition_filter=occurrence_partition_filter)
+            source_counts = Counter()
+            invalid_cds = Counter()
+            skipped_no_alt = 0
+            for record in vcf:
+                if len(record.ALT) <= 1:
+                    if record.CHROM in SUPPORTED_CHROMOSOMES:
+                        common = process_common(record, task_id=task.task_id, part=task.part)
+                        occurrences = process_occurrence(
+                            record, pedigree, common=common, slivar=slivar, info_keys=info_keys
+                        )
+                        # RAD-75: a record no sample carries is dropped from all the tables together. The
+                        # StarRocks load keeps `has_alt` occurrences only and inner-joins them to the variants,
+                        # so the tables must hold the same loci; the consequences of such a locus were loaded
+                        # into `snv__consequence` without any case ever showing them.
+                        if not any(o["has_alt"] for o in occurrences.values()):
+                            skipped_no_alt += 1
+                            continue
+                        picked_consequence, consequences = process_consequence(record, csq_header, common, invalid_cds)
+                        source_counts.update(c["source"] for c in consequences)
+                        consequence_buffer.extend(consequences)
+                        occurrence_buffer.extend(list(occurrences.values()))
+                        variant = process_variant(record, picked_consequence, common)
+                        variant_buffer.append(variant)
+                        comphet_buffer.extend(process_comphet(record, pedigree, common))
+                    else:
+                        logger.debug(
+                            f"Skipped record {record.CHROM} - {record.POS} - {record.ALT} in file {task.vcf_filepath}:"
+                            f" this is non supported chromosome."
+                        )
+
+                else:
+                    logger.debug(
+                        f"Skipped record {record.CHROM} - {record.POS} - {record.ALT} in file {task.vcf_filepath}:"
+                        f" this is a multi allelic variant, mult-allelic are not supported. Please split vcf file."
+                    )
+
+            #### End of VCF file processing, flush buffers ####
+            log_source_counts(source_counts, task.task_id, task.vcf_filepath)
+            log_invalid_cds(invalid_cds, task.task_id, task.vcf_filepath)
+            logger.info(f"Task {task.task_id}: skipped {skipped_no_alt} records with no alt call in any sample")
+
+            occurrence_buffer.write_files()
+            occurrences_partition_commit.append(
+                PartitionCommit(
+                    parquet_files=occurrence_buffer.parquet_paths,
+                    partition_filter=occurrence_buffer.partition_filter,
+                )
+            )
+
+            variant_buffer.write_files()
+            variants_partition_commit.append(
+                PartitionCommit(
+                    parquet_files=variant_buffer.parquet_paths, partition_filter=variant_buffer.partition_filter
+                )
+            )
+
+            consequence_buffer.write_files()
+            consequences_partition_commit.append(
+                PartitionCommit(
+                    parquet_files=consequence_buffer.parquet_paths,
+                    partition_filter=consequence_buffer.partition_filter,
+                )
+            )
+
+            comphet_buffer.write_files()
+            comphets_partition_commit.append(
+                PartitionCommit(
+                    parquet_files=comphet_buffer.parquet_paths,
+                    partition_filter=comphet_buffer.partition_filter,
+                )
+            )
+
+            logger.info(f"✅ Parquet files created: {task.task_id}, file {task.vcf_filepath}")
+
+        vcf.close()
+        return {
+            occurrences_table_name: occurrences_partition_commit,
+            variants_table_name: variants_partition_commit,
+            consequences_table_name: consequences_partition_commit,
+            comphets_table_name: comphets_partition_commit,
+        }
+
+
+def create_parquet_files(task: dict, namespace: str) -> dict[str, list[dict]]:
+    logging.basicConfig(level=logging.INFO, handlers=[logging.StreamHandler(sys.stdout)])
+    logger = logging.getLogger(__name__)
+
+    logger.info("Downloading VCF and index files to a temporary directory")
+    with tempfile.TemporaryDirectory() as tmpdir:
+        vcf_local = download_s3_file(task["vcf_filepath"], tmpdir)
+        index_local = download_s3_file(task["vcf_filepath"] + ".tbi", tmpdir)
+        task["vcf_filepath"] = vcf_local
+        task["index_vcf_filepath"] = index_local
+
+        task = RadiantGermlineAnnotationTask.model_validate(task)
+        logger.info(f"🔁 STARTING IMPORT for Task: {task.task_id}")
+        logger.info("=" * 80)
+
+        res = process_task(task, namespace=namespace, vcf_threads=4)
+        logger.info(f"✅ Parquet files created: {task.task_id}, file {task.vcf_filepath}")
+
+    return {k: [json.loads(pc.model_dump_json()) for pc in v] for k, v in res.items()}

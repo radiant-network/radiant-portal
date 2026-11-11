@@ -1,0 +1,27 @@
+language: 'python'
+layer: 'application'
+stack: 'data'
+
+fileGroups:
+  sources: ['radiant/**/*', 'tests/**/*', 'pyproject.toml', 'pytest.ini', '.ruff.toml', 'requirements*.txt']
+  # StarRocks schema the ETL publishes: read by the backend and the MCP.
+  schema:
+    - 'radiant/dags/sql/**/*'
+    - 'radiant/data_qa/macros/**/*'
+    - 'radiant/tasks/data/radiant_tables.py'
+
+tasks:
+  venv:
+    script: 'uv venv -q --allow-existing -p 3.12 .venv && uv pip install -q -p .venv -r requirements.txt -r requirements-dev.txt'
+    inputs: ['requirements*.txt']
+    outputs: ['.venv']
+    options:
+      cache: false
+  lint:
+    command: '.venv/bin/ruff check radiant/'
+    inputs: ['radiant/**/*.py', '.ruff.toml', 'pyproject.toml']
+    deps: ['venv']
+  test-unit:
+    command: '.venv/bin/pytest -q tests/unit'
+    inputs: ['@group(sources)']
+    deps: ['venv']

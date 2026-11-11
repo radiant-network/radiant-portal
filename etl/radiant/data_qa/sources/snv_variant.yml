@@ -1,0 +1,186 @@
+version: 2
+
+sources:
+  - name: tenant_db
+    schema: "{{ env_var('SR_TENANT_SCHEMA', env_var('SR_SCHEMA', 'radiant')) }}"
+    tables:
+      - name: snv__variant
+        tests:
+          # --- Should Not Be Empty -------------------------------------------
+          - should_not_be_empty:
+              name: snv_variant__should_not_be_empty
+          # --- Should Not Contain Only Null ----------------------------------
+          - should_not_contain_only_null:
+              # RAD-177 (was SJRA-1550) mane_select
+              name: snv_variant__should_not_contain_only_null_RAD-177
+              except:
+                # Already covered by snv_variant__should_not_contain_null__*
+                - locus_id
+                - chromosome
+                - start
+                - reference
+                - alternate
+                - locus
+
+          # --- Should Not Contain Same Value ---------------------------------
+          - should_not_contain_same_value:
+              # RAD-177 (was SJRA-1550) is_mane_select is_mane_plus
+              name: snv_variant__should_not_contain_same_value_RAD-177
+              except:
+                - pick_source
+                # Already covered by snv_variant__should_be_unique__*
+                - locus_id
+                - locus
+                # Constant by construction
+                - germline_pn_wgs
+                - germline_pn_wgs_affected
+                - germline_pn_wgs_not_affected
+                - germline_pn_wxs
+                - germline_pn_wxs_affected
+                - germline_pn_wxs_not_affected
+                - somatic_pn_tn_wgs
+                - somatic_pn_tn_wxs
+                - somatic_pn_to_wgs
+                - somatic_pn_to_wxs
+                # WGS-only QA dataset
+                - germline_pc_wxs
+                - germline_pc_wxs_affected
+                - germline_pf_wxs_affected
+                - germline_pc_wxs_not_affected
+                - germline_pf_wxs_not_affected
+                - germline_pf_wxs
+                - somatic_pc_tn_wxs
+                - somatic_pf_tn_wxs
+                # No tumor-only cohort in the QA dataset (SJRA-1751); all six are constant 0.
+                # They are deliberately NOT excluded from should_not_contain_only_null: the level-3
+                # projections COALESCE them to 0, so an all-NULL column means a missing COALESCE.
+                - somatic_pc_to_wgs
+                - somatic_pf_to_wgs
+                - somatic_pc_to_wxs
+                - somatic_pf_to_wxs
+                # hom / af of the same cohorts as above (WGS-only, no tumor-only cohort), constant 0.
+                - germline_hom_wxs
+                - germline_af_wxs
+                - germline_hom_wxs_affected
+                - germline_af_wxs_affected
+                - germline_hom_wxs_not_affected
+                - germline_af_wxs_not_affected
+                - somatic_hom_tn_wxs
+                - somatic_af_tn_wxs
+                - somatic_hom_to_wgs
+                - somatic_af_to_wgs
+                - somatic_hom_to_wxs
+                - somatic_af_to_wxs
+                # A tumor-normal call is not homozygous in practice (RAD-177): constant 0.
+                - somatic_hom_tn_wgs
+
+          # --- Should Be Within Range ----------------------------------------
+          # pf frequency ratios must be in [0,1] (defaults: like '_pf_', 0..1)
+          - should_be_within_range:
+              name: snv_variant__should_be_within_range_pf
+          # RAD-15: COSMIC sample_mutated / sample_tested
+          - should_be_within_range:
+              name: snv_variant__should_be_within_range_cmc_sample_ratio
+              like: cmc_sample_ratio
+          # Approximate allele frequencies (pc + hom) / (2 * pn). `_af_` matches only the
+          # germline_af_* / somatic_af_* columns, not gnomad_v3_af, topmed_af or tg_af.
+          - should_be_within_range:
+              name: snv_variant__should_be_within_range_af
+              like: _af_
+        columns:
+          - name: locus_id
+            tests:
+              # --- Should Not Contain Null -----------------------------------
+              - not_null:
+                  name: snv_variant__should_not_contain_null__locus_id
+              # --- Should Be Unique ------------------------------------------
+              - unique:
+                  name: snv_variant__should_be_unique__locus_id
+          - name: chromosome
+            description: "CHAR(2)."
+            tests:
+              # --- Should Not Contain Null -----------------------------------
+              - not_null:
+                  name: snv_variant__should_not_contain_null__chromosome
+              # --- Accepted Values -------------------------------------------
+              # values: dict_chromosome() — see macros/dictionaries.sql
+              - accepted_values:
+                  name: snv_variant__accepted_values_chromosome
+                  values: "{{ dict_chromosome() }}"
+          - name: start
+            description: "1-based start position."
+            tests:
+              # --- Should Not Contain Null -----------------------------------
+              - not_null:
+                  name: snv_variant__should_not_contain_null__start
+          - name: reference
+            tests:
+              # --- Should Not Contain Null -----------------------------------
+              - not_null:
+                  name: snv_variant__should_not_contain_null__reference
+          - name: alternate
+            tests:
+              # --- Should Not Contain Null -----------------------------------
+              - not_null:
+                  name: snv_variant__should_not_contain_null__alternate
+          - name: locus
+            tests:
+              # --- Should Not Contain Null -----------------------------------
+              - not_null:
+                  name: snv_variant__should_not_contain_null__locus
+              # --- Should Be Unique ------------------------------------------
+              - unique:
+                  name: snv_variant__should_be_unique__locus
+          - name: symbol
+            tests:
+              # --- Relationships ---------------------------------------------
+              # gene symbol must exist in the ensembl_gene.name. Only for symbols picked from
+              # Ensembl (null pick_source = pre-merged loads, Ensembl-only): a RefSeq pick carries
+              # NCBI names (LOC…, readthroughs) that Ensembl does not have (RAD-176).
+              - relationships:
+                  name: snv_variant__relationships__symbol__ensembl_gene_RAD-176
+                  to: source('radiant', 'ensembl_gene')
+                  field: name
+                  config:
+                    where: "symbol is not null and symbol <> '' and (pick_source is null or pick_source <> 'RefSeq')"
+          - name: vep_impact
+            tests:
+              # --- Accepted Values -------------------------------------------
+              # values: dict_vep_impact() — see macros/dictionaries.sql
+              - accepted_values:
+                  name: snv_variant__accepted_values_vep_impact
+                  values: "{{ dict_vep_impact() }}"
+                  config:
+                    where: "vep_impact is not null"
+          - name: variant_class
+            tests:
+              # --- Accepted Values -------------------------------------------
+              # values: dict_variant_class() — see macros/dictionaries.sql
+              - accepted_values:
+                  name: snv_variant__accepted_values_variant_class
+                  values: "{{ dict_variant_class() }}"
+                  config:
+                    where: "variant_class is not null"
+          - name: clinvar_interpretation
+            tests:
+              # --- Accepted Values (array) -----------------------------------
+              # values: dict_clinvar_interpretation() — see macros/dictionaries.sql
+              - accepted_values_in_array:
+                  name: snv_variant__accepted_values_clinvar_interpretation
+                  values: "{{ dict_clinvar_interpretation() }}"
+          - name: consequences
+            tests:
+              # --- Accepted Values (array) -----------------------------------
+              # values: dict_consequences() — see macros/dictionaries.sql
+              - accepted_values_in_array:
+                  name: snv_variant__accepted_values_consequences
+                  values: "{{ dict_consequences() }}"
+          - name: cmc_tier
+            tests:
+              # --- Accepted Values -------------------------------------------
+              # values: dict_cosmic_tier() — see macros/dictionaries.sql (RAD-15)
+              - accepted_values:
+                  name: snv_variant__accepted_values_cmc_tier
+                  values: "{{ dict_cosmic_tier() }}"
+                  config:
+                    where: "cmc_tier is not null"
