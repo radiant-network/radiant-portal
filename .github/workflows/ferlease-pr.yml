@@ -99,6 +99,21 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # The specs come from the merge with the base branch, the Ferlease image from the branch alone: they only match once rebased.
+      - name: Check the branch is rebased on main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          BEHIND=$(gh api "repos/${{ github.repository }}/compare/${{ github.event.pull_request.base.ref }}...${{ github.event.pull_request.head.sha }}" --jq .behind_by)
+          if [ "$BEHIND" != "0" ]; then
+            curl -sf -X POST "$SLACK_WEBHOOK" \
+              -H 'Content-Type: application/json' \
+              -d "{\"attachments\":[{\"title\":\"Ferlease - Cypress Launch Attempt Failed (Radiant) 🚨\",\"text\":\"Branch ${BRANCH} is behind main: rebase it on main to run the Cypress tests.\",\"color\":\"danger\"}]}"
+            exit 1
+          fi
+
       - name: Notify Slack launch
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
