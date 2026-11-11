@@ -1,0 +1,107 @@
+import { useCallback, useState } from 'react';
+import { MessageSquare } from 'lucide-react';
+import useSWR from 'swr';
+
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/base/shadcn/sheet';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { occurencesNotesApi } from '@/utils/api';
+
+import { Button } from '../shadcn/button';
+import { Spinner } from '../shadcn/spinner';
+
+import NotesContainer, { type NotesContainerProps } from './notes-container';
+
+type NotesSliderProps = NotesContainerProps;
+
+async function fetchNotesCount(input: NotesContainerProps, tenant: string) {
+  const response = await occurencesNotesApi.countOccurrenceNotes(
+    tenant,
+    input.caseId,
+    input.seqId,
+    input.taskId,
+    input.occurrenceId,
+  );
+  return response.data;
+}
+
+function NotesSliderSheet({ ...props }: NotesSliderProps) {
+  const { t } = useI18n();
+  const { tenant } = useTenant();
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const { data, mutate, isLoading } = useSWR(
+    `fetch-note-count-${props.caseId}-${props.seqId}-${props.taskId}-${props.occurrenceId}`,
+    () =>
+      fetchNotesCount(
+        {
+          seqId: props.seqId,
+          caseId: props.caseId,
+          taskId: props.taskId,
+          occurrenceId: props.occurrenceId,
+        },
+        tenant,
+      ),
+    {
+      revalidateOnFocus: true,
+    },
+  );
+
+  const handleOpen = useCallback(() => {
+    setIsOpen(true);
+  }, []);
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false);
+    mutate();
+  }, []);
+
+  const noteCount = data?.count ?? 0;
+  const isIconOnly = !isLoading && noteCount === 0;
+
+  if (!props.canComment && !isLoading && (data?.count ?? 0) === 0) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            iconOnly
+            aria-disabled
+            aria-label={t('notes.variant.tooltip.none')}
+            className="cursor-default hover:bg-background"
+          >
+            <MessageSquare className="h-4 w-4" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>{t('notes.variant.tooltip.none')}</TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return (
+    <div>
+      <Button
+        variant="outline"
+        size="sm"
+        iconOnly={isIconOnly}
+        aria-label={t('a11y.notes.open_count', { count: data?.count ?? 0 })}
+        onClick={handleOpen}
+      >
+        <MessageSquare className="h-4 w-4" />
+        {isLoading ? <Spinner /> : (data?.count ?? 0) > 0 && data?.count}
+      </Button>
+      <Sheet open={isOpen} onOpenChange={handleClose}>
+        <SheetContent side="right" className="flex flex-col w-full sm:max-w-lg p-0 gap-0">
+          <SheetHeader className="px-6 py-4">
+            <SheetTitle>{t('notes.variant.title')}</SheetTitle>
+            <SheetDescription className="sr-only">{t('notes.variant.title')}</SheetDescription>
+          </SheetHeader>
+          <NotesContainer {...props} enableEmptyIcon />
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+}
+export default NotesSliderSheet;

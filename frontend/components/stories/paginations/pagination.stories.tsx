@@ -1,0 +1,369 @@
+import * as React from 'react';
+import { BrowserRouter } from 'react-router';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+
+import { SavedFilterType } from '@/api/api';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationFirst,
+  PaginationItem,
+  PaginationLast,
+  PaginationLink,
+  PaginationNext,
+  PaginationPageSize,
+  PaginationPrevious,
+} from '@/components/base/shadcn/pagination';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
+
+import { StorySection, StoryShowcase } from '../story-section';
+
+const config: PortalConfig = {
+  variant_entity: {
+    app_id: ApplicationId.variant_entity,
+  },
+  germline_snv_occurrence: {
+    app_id: ApplicationId.germline_snv_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
+  },
+  germline_cnv_occurrence: {
+    app_id: ApplicationId.germline_cnv_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.GERMLINE_CNV_OCCURRENCE,
+  },
+  somatic_snv_to_occurrence: {
+    app_id: ApplicationId.somatic_snv_to_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+  },
+  somatic_snv_tn_occurrence: {
+    app_id: ApplicationId.somatic_snv_tn_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+  },
+  somatic_cnv_to_occurrence: {
+    app_id: ApplicationId.somatic_cnv_to_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_CNV_OCCURRENCE,
+  },
+  admin: {
+    admin_code: 'admin',
+    app_id: ApplicationId.admin,
+  },
+  portal: {
+    name: '',
+    navigation: {},
+  },
+};
+
+const meta = {
+  title: 'Components/Paginations/Pagination',
+  component: Pagination,
+  decorators: [
+    Story => (
+      <BrowserRouter>
+        <ConfigProvider config={config}>
+          <Story className="w-full" />
+        </ConfigProvider>
+      </BrowserRouter>
+    ),
+  ],
+} satisfies Meta<typeof Pagination>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+// Individual building blocks
+export const BuildingBlocks: Story = {
+  render: () => (
+    <StoryShowcase>
+      <StorySection title="Container with numbers">
+        <Pagination className="mx-0 w-fit">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationLink>1</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink>2</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink>3</PaginationLink>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </StorySection>
+
+      <StorySection title="First">
+        <PaginationFirst />
+      </StorySection>
+
+      <StorySection title="Last">
+        <PaginationLast />
+      </StorySection>
+
+      <StorySection title="Previous">
+        <PaginationPrevious />
+      </StorySection>
+
+      <StorySection title="Next">
+        <PaginationNext />
+      </StorySection>
+
+      <StorySection title="Ellipsis">
+        <PaginationEllipsis />
+      </StorySection>
+
+      <StorySection title="Page size">
+        <PaginationPageSize pageSize={20} onPageSizeChange={() => {}} className="w-fit" />
+      </StorySection>
+    </StoryShowcase>
+  ),
+};
+
+// Combined story showing all components together
+export const CompletePagination: Story = {
+  render: () => (
+    <StoryShowcase>
+      <StorySection title="Basic pagination">
+        <Pagination className="mx-0 w-fit">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationLink>1</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink isActive>2</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink>3</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink>4</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink>5</PaginationLink>
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </StorySection>
+
+      <StorySection title="With navigation">
+        <Pagination className="mx-0 w-fit">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationFirst />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationPrevious />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink>4</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink isActive>5</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink>6</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLast />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </StorySection>
+
+      <StorySection title="Complete example">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Showing 21-40</span>
+            <span className="text-sm text-muted-foreground">of 1,234 results</span>
+          </div>
+
+          <Pagination className="mx-0 w-fit">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPageSize pageSize={20} onPageSizeChange={() => {}} />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationFirst />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationPrevious />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink>1</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink>4</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink isActive>5</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink>6</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink>62</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLast />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      </StorySection>
+    </StoryShowcase>
+  ),
+};
+
+// Interactive story with state management
+export const InteractivePagination: Story = {
+  render: () => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [currentPage, setCurrentPage] = React.useState(5);
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [pageSize, setPageSize] = React.useState(20);
+    const totalPages = 62;
+    const totalResults = 1234;
+
+    const startItem = (currentPage - 1) * pageSize + 1;
+    const endItem = Math.min(currentPage * pageSize, totalResults);
+
+    const handlePageChange = (page: number) => {
+      setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+    };
+
+    const renderPageNumbers = () => {
+      const pages = [];
+      const maxVisiblePages = 5;
+
+      if (totalPages <= maxVisiblePages) {
+        // Show all pages if total is small
+        for (let i = 1; i <= totalPages; i++) {
+          pages.push(
+            <PaginationItem key={i}>
+              <PaginationLink isActive={i === currentPage} onClick={() => handlePageChange(i)}>
+                {i}
+              </PaginationLink>
+            </PaginationItem>,
+          );
+        }
+      } else {
+        // Show first page
+        pages.push(
+          <PaginationItem key={1}>
+            <PaginationLink isActive={1 === currentPage} onClick={() => handlePageChange(1)}>
+              1
+            </PaginationLink>
+          </PaginationItem>,
+        );
+
+        // Show ellipsis if needed
+        if (currentPage > 3) {
+          pages.push(
+            <PaginationItem key="ellipsis1">
+              <PaginationEllipsis />
+            </PaginationItem>,
+          );
+        }
+
+        // Show current page and neighbors
+        const start = Math.max(2, currentPage - 1);
+        const end = Math.min(totalPages - 1, currentPage + 1);
+
+        for (let i = start; i <= end; i++) {
+          pages.push(
+            <PaginationItem key={i}>
+              <PaginationLink isActive={i === currentPage} onClick={() => handlePageChange(i)}>
+                {i}
+              </PaginationLink>
+            </PaginationItem>,
+          );
+        }
+
+        // Show ellipsis if needed
+        if (currentPage < totalPages - 2) {
+          pages.push(
+            <PaginationItem key="ellipsis2">
+              <PaginationEllipsis />
+            </PaginationItem>,
+          );
+        }
+
+        // Show last page
+        pages.push(
+          <PaginationItem key={totalPages}>
+            <PaginationLink isActive={totalPages === currentPage} onClick={() => handlePageChange(totalPages)}>
+              {totalPages}
+            </PaginationLink>
+          </PaginationItem>,
+        );
+      }
+
+      return pages;
+    };
+
+    return (
+      <StorySection title="Interactive">
+        <div className="space-y-4">
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              Current Page: {currentPage} | Page Size: {pageSize} | Total Pages: {totalPages}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Showing {startItem}-{endItem} of {totalResults} results
+            </p>
+          </div>
+
+          <Pagination className="mx-0 w-fit">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationFirst onClick={() => handlePageChange(1)} />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
+              </PaginationItem>
+
+              {renderPageNumbers()}
+
+              <PaginationItem>
+                <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLast onClick={() => handlePageChange(totalPages)} />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+
+          <div className="flex justify-center">
+            <PaginationPageSize
+              pageSize={pageSize}
+              onPageSizeChange={setPageSize}
+              pageSizeOptions={[10, 20, 50, 100]}
+            />
+          </div>
+        </div>
+      </StorySection>
+    );
+  },
+};

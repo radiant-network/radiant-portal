@@ -1,0 +1,203 @@
+// @ts-nocheck
+import { MemoryRouter, Route, Routes } from 'react-router';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+
+import { SortBodyOrderEnum } from '@/api/api';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
+import DataTable, { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
+
+import { StorySection } from '../story-section';
+
+import {
+  applicationCellData,
+  applicationFirstSetCellColumns,
+  defaultColumnSettings,
+  firstSetCellColumns,
+  firstSetCellData,
+  secondSetCellColumns,
+  secondSetCellData,
+  thirdSetCellColumns,
+  thirdSetCellData,
+} from './cells-mock';
+import { data, type TableMockData } from './table-mock';
+
+const columnHelper = createAppColumnHelper<TableMockData>();
+
+const config: PortalConfig = {
+  variant_entity: {
+    app_id: ApplicationId.variant_entity,
+  },
+  germline_snv_occurrence: {
+    app_id: ApplicationId.germline_snv_occurrence,
+    aggregations: [] as any,
+  },
+  germline_cnv_occurrence: {
+    app_id: ApplicationId.germline_cnv_occurrence,
+    aggregations: [] as any,
+  },
+  admin: {
+    admin_code: 'admin',
+    app_id: ApplicationId.admin,
+  },
+  portal: {
+    name: '',
+    navigation: {},
+  },
+};
+
+const meta = {
+  title: 'Features/Data Table/Cells',
+  component: DataTable,
+  args: {
+    id: 'storybook',
+    columns: [
+      columnHelper.accessor('firstName', {
+        cell: info => info.getValue(),
+        header: () => <span>First Name</span>,
+      }),
+      columnHelper.accessor(row => row.lastName, {
+        id: 'lastName',
+        cell: info => <i>{info.getValue()}</i>,
+        header: () => <span>Last Name</span>,
+      }),
+      columnHelper.accessor('age', {
+        header: () => 'Age',
+        cell: info => info.renderValue(),
+      }),
+      columnHelper.accessor('visits', {
+        header: () => <span>Visits</span>,
+      }),
+      columnHelper.accessor('status', {
+        header: 'Status',
+      }),
+      columnHelper.accessor('progress', {
+        header: 'Profile Progress',
+      }),
+    ] as TableColumnDef<TableMockData, any>[],
+    data,
+    serverOptions: {
+      defaultSorting: [
+        {
+          field: 'germline_pf_wgs',
+          order: SortBodyOrderEnum.Asc,
+        },
+      ],
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      onSortingChange: sorting => {},
+    },
+    defaultColumnSettings: createColumnSettings([
+      {
+        id: 'firstName',
+        visible: true,
+        label: 'First Name',
+      },
+      {
+        id: 'lastName',
+        visible: true,
+        label: 'Last Name',
+      },
+      {
+        id: 'age',
+        visible: true,
+        label: 'Age',
+      },
+      {
+        id: 'visits',
+        visible: true,
+        label: 'Visits',
+      },
+      {
+        id: 'status',
+        visible: true,
+        label: 'Status',
+      },
+      {
+        id: 'progress',
+        visible: true,
+        label: 'Profile Progress',
+      },
+    ]),
+    loadingStates: {
+      total: false,
+      list: false,
+    },
+    pagination: {
+      type: 'server',
+      state: {
+        pageIndex: 0,
+        pageSize: 10,
+      },
+      onPaginationChange: () => {},
+    },
+    total: 10,
+  },
+  decorators: [
+    Story => (
+      <MemoryRouter initialEntries={['/case/entity/1']}>
+        <Routes>
+          <Route
+            path="/case/entity/:caseId"
+            element={
+              <ConfigProvider config={config}>
+                <Story />
+              </ConfigProvider>
+            }
+          />
+        </Routes>
+      </MemoryRouter>
+    ),
+  ],
+} satisfies Meta<typeof DataTable<any>>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const BaseCell: Story = {
+  args: {
+    pagination: { type: 'hidden' },
+  },
+  render: args => (
+    <StorySection title="Base cell">
+      <DataTable
+        {...args}
+        columns={firstSetCellColumns}
+        data={firstSetCellData}
+        defaultColumnSettings={defaultColumnSettings}
+      />
+      <DataTable
+        {...args}
+        columns={secondSetCellColumns}
+        data={secondSetCellData}
+        defaultColumnSettings={defaultColumnSettings}
+      />
+      <DataTable
+        {...args}
+        columns={thirdSetCellColumns}
+        data={thirdSetCellData}
+        defaultColumnSettings={defaultColumnSettings}
+      />
+    </StorySection>
+  ),
+};
+
+export const ApplicationFeatureCell: Story = {
+  args: {
+    pagination: { type: 'hidden' },
+  },
+  render: args => (
+    <StorySection title="Application feature cell">
+      <div style={{ overflowX: 'auto' }}>
+        <div style={{ width: 2000, paddingRight: 16, boxSizing: 'content-box' }}>
+          <DataTable
+            {...args}
+            columns={applicationFirstSetCellColumns}
+            data={applicationCellData}
+            defaultColumnSettings={defaultColumnSettings}
+          />
+        </div>
+      </div>
+    </StorySection>
+  ),
+};

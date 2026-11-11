@@ -1,0 +1,405 @@
+package server
+
+import (
+	"bytes"
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/stretchr/testify/assert"
+)
+
+type MockSomaticSNVOccurrencesRepository struct{}
+
+func (m *MockSomaticSNVOccurrencesRepository) CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (types.OccurrenceCount, error) {
+	return types.OccurrenceCount{Count: 1111, FilteredCount: 11}, nil
+}
+
+func (m *MockSomaticSNVOccurrencesRepository) AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]starrocks.Aggregation, error) {
+	return []types.Aggregation{
+			{Bucket: "insertion", Count: 479564},
+			{Bucket: "deletion", Count: 495942},
+		},
+		nil
+}
+
+func (m *MockSomaticSNVOccurrencesRepository) GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*starrocks.Statistics, error) {
+	return &types.Statistics{
+			Min:  0,
+			Max:  100,
+			Type: types.IntegerType,
+		},
+		nil
+}
+
+func (m *MockSomaticSNVOccurrencesRepository) GetExpandedOccurrence(context.Context, int, int, int, int) (*types.ExpandedSomaticSNVOccurrence, error) {
+	return &types.ExpandedSomaticSNVOccurrence{
+		LocusId:    "1000",
+		Locus:      "locus1",
+		Chromosome: "1",
+		Hgvsg:      "hgvsg1",
+		Symbol:     "BRAF",
+	}, nil
+}
+
+func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(context.Context, int, int, int, types.OccurrenceListQuery) ([]types.SomaticSNVOccurrence, error) {
+	somaticPfTn := 0.55
+	somaticPcTn := 6
+	somaticPfTo := 0.42
+	somaticPcTo := 21
+	germlinePf := 0.99
+	germlinePc := 3
+	adRatio := float32(1.0)
+	sq := float32(31.5)
+	aq := float32(4.2)
+	gnomadV3Af := 0.1
+	isCanonical := true
+	isManeSelect := true
+	hotspot := true
+	cmcSampleMutated := 12
+	cmcSampleRatio := 0.0012
+	cmcTier := "1"
+	cmcMutationUrl := "https://cancer.sanger.ac.uk/cosmic/search?q=COSV1000"
+	return []types.SomaticSNVOccurrence{
+		{
+			LocusId:             "1000",
+			SeqId:               74,
+			TaskId:              74,
+			HasInterpretation:   false,
+			HasNote:             false,
+			FlagType:            "",
+			Hgvsg:               "hgvsg1",
+			Chromosome:          "1",
+			Start:               int64(1000),
+			End:                 int64(1001),
+			Symbol:              "BRAF",
+			AaChange:            "p.Arg19His",
+			VariantClass:        "class1",
+			VepImpact:           types.MODIFIER,
+			PickedConsequences:  types.JsonArray[string]{"Benign", "Pathogenic"},
+			IsCanonical:         &isCanonical,
+			IsManeSelect:        &isManeSelect,
+			Rsnumber:            "rs111111111",
+			OmimInheritanceCode: types.JsonArray[string]{"code1"},
+			Hotspot:             &hotspot,
+			Clinvar:             types.JsonArray[string]{"splice acceptor"},
+			GnomadV3Af:          &gnomadV3Af,
+			GermlinePcWgs:       &germlinePc,
+			GermlinePfWgs:       &germlinePf,
+			SomaticPfTnWgs:      &somaticPfTn,
+			SomaticPcTnWgs:      &somaticPcTn,
+			SomaticPfToWgs:      &somaticPfTo,
+			SomaticPcToWgs:      &somaticPcTo,
+			AdRatio:             &adRatio,
+			Sq:                  &sq,
+			Aq:                  &aq,
+			TranscriptId:        "T001",
+			Reference:           "A",
+			Alternate:           "T",
+			CmcSampleMutated:    &cmcSampleMutated,
+			CmcSampleRatio:      &cmcSampleRatio,
+			CmcTier:             &cmcTier,
+			CmcMutationUrl:      &cmcMutationUrl,
+		},
+	}, nil
+}
+
+func Test_SomaticSNVListHandler(t *testing.T) {
+	repo := &MockSomaticSNVOccurrencesRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(repo))
+	body := `{
+			"additional_fields":[
+				"ad_ratio"
+			]
+	}`
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/list", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `[{
+		"aa_change":"p.Arg19His",
+		"ad_ratio":1,
+		"alternate":"T",
+		"aq":4.2,
+		"chromosome": "1",
+		"clinvar":["splice acceptor"],
+		"cmc_mutation_url":"https://cancer.sanger.ac.uk/cosmic/search?q=COSV1000",
+		"cmc_sample_mutated":12,
+		"cmc_sample_ratio":0.0012,
+		"cmc_tier":"1",
+		"end": 1001,
+		"germline_pc_wgs":3, 
+		"germline_pf_wgs":0.99, 
+		"gnomad_v3_af":0.1, 
+		"has_interpretation":false,
+		"has_note":false,
+		"hgvsg":"hgvsg1",
+		"hotspot": true, 
+		"is_canonical":true, 
+		"is_mane_plus": null, 
+		"is_mane_select":true, 
+		"locus_id":"1000", 
+		"omim_inheritance_code":["code1"], 
+		"picked_consequences":["Benign", "Pathogenic"], 
+		"reference":"A",
+		"rsnumber":"rs111111111", 
+		"seq_id":74, 
+		"somatic_pc_tn_wgs":6,
+		"somatic_pf_tn_wgs":0.55,
+		"somatic_pc_to_wgs":21,
+		"somatic_pf_to_wgs":0.42,
+		"sq":31.5,
+		"start": 1000,
+		"symbol":"BRAF",
+		"task_id":74,
+		"transcript_id":"T001",
+		"variant_class":"class1", 
+		"vep_impact":"MODIFIER"
+	}]`, w.Body.String())
+}
+
+func Test_SomaticSNVCountHandler(t *testing.T) {
+	repo := &MockSomaticSNVOccurrencesRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/count", OccurrencesSomaticSNVCountHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/count", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"count":1111, "filtered_count":11}`, w.Body.String())
+}
+
+func Test_SomaticSNVAggregateHandler(t *testing.T) {
+	repo := &MockSomaticSNVOccurrencesRepository{}
+	facetsRepo := &MockFacetsRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/aggregate", OccurrencesSomaticSNVAggregateHandler(repo, facetsRepo))
+
+	body := `{
+			"field": "variant_class",
+			"sqon":{
+				"op":"and",
+				"content":[]
+		    },
+			"size": 10
+	}`
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/aggregate", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `[{"key": "insertion", "count": 479564}, {"key": "deletion", "count": 495942}]`
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_SomaticSNVAggregateHandler_withDictionary(t *testing.T) {
+	repo := &MockSomaticSNVOccurrencesRepository{}
+	facetsRepo := &MockFacetsRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/aggregate", OccurrencesSomaticSNVAggregateHandler(repo, facetsRepo))
+
+	body := `{
+			"field": "variant_class",
+			"sqon":{
+				"op":"and",
+				"content":[]
+		    },
+			"size": 10
+	}`
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/aggregate?with_dictionary=true", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `[{"key": "insertion", "count": 479564}, {"key": "deletion", "count": 495942}, {"key": "SNV", "count": 0}, {"key": "indel", "count": 0}, {"key": "substitution", "count": 0}, {"key": "sequence_alteration", "count": 0}]`
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+type MockNotFoundSomaticSNVOccurrencesRepository struct {
+	MockSomaticSNVOccurrencesRepository
+}
+
+func (m *MockNotFoundSomaticSNVOccurrencesRepository) GetExpandedOccurrence(context.Context, int, int, int, int) (*types.ExpandedSomaticSNVOccurrence, error) {
+	return nil, nil
+}
+
+type MockEmptyInterpretationsRepository struct {
+	MockRepository
+}
+
+func (m *MockEmptyInterpretationsRepository) RetrieveSomaticInterpretationClassificationCounts(ctx context.Context, locusId int) (types.JsonMap[string, int], error) {
+	return nil, nil
+}
+
+func Test_GetExpandedSomaticSNVOccurrenceHandler_withInterpretationCounts(t *testing.T) {
+	repo := &MockSomaticSNVOccurrencesRepository{}
+	interpretationRepo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
+
+	req, _ := http.NewRequest("GET", "/radiant/occurrences/somatic/snv/1/1/1/1000/expanded", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"chromosome":"1",
+		"end":0,
+		"hgvsg":"hgvsg1",
+		"interpretation_classification_counts":{"Oncogenic":2, "Likely Oncogenic":1},
+		"locus":"locus1",
+		"locus_id":"1000",
+		"start":0,
+		"symbol":"BRAF"
+	}`, w.Body.String())
+}
+
+func Test_GetExpandedSomaticSNVOccurrenceHandler_emptyInterpretationCounts(t *testing.T) {
+	repo := &MockSomaticSNVOccurrencesRepository{}
+	interpretationRepo := &MockEmptyInterpretationsRepository{}
+	router := gin.Default()
+	router.GET("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
+
+	req, _ := http.NewRequest("GET", "/radiant/occurrences/somatic/snv/1/1/1/1000/expanded", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"chromosome":"1",
+		"end":0,
+		"hgvsg":"hgvsg1",
+		"locus":"locus1",
+		"locus_id":"1000",
+		"start":0,
+		"symbol":"BRAF"
+	}`, w.Body.String())
+}
+
+func Test_GetExpandedSomaticSNVOccurrenceHandler_notFound(t *testing.T) {
+	repo := &MockNotFoundSomaticSNVOccurrencesRepository{}
+	interpretationRepo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
+
+	req, _ := http.NewRequest("GET", "/radiant/occurrences/somatic/snv/1/1/1/9999/expanded", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404, "message":"occurrence not found"}`, w.Body.String())
+}
+
+func Test_GetExpandedSomaticSNVOccurrenceHandler_invalidLocusId(t *testing.T) {
+	repo := &MockSomaticSNVOccurrencesRepository{}
+	interpretationRepo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", GetExpandedSomaticSNVOccurrence(repo, interpretationRepo))
+
+	req, _ := http.NewRequest("GET", "/radiant/occurrences/somatic/snv/1/1/1/abc/expanded", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404, "message":"locus_id not found"}`, w.Body.String())
+}
+
+func Test_SomaticSNVStatisticsHandler(t *testing.T) {
+	repo := &MockSomaticSNVOccurrencesRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/statistics", OccurrencesSomaticSNVStatisticsHandler(repo))
+
+	body := `{
+			"field": "somatic_pf_tn_wgs",
+			"sqon":{
+				"op":"in",
+				"content":{
+					"field": "filter",
+					"value": ["PASS"]
+				}
+		    }
+	}`
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/statistics", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `{"min": 0, "max": 100, "type": "integer"}`
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+// somaticSNVFiltersRecorder captures the query the handlers build, so the wiring of the annotation
+// filters can be asserted without a database.
+type somaticSNVFiltersRecorder struct {
+	MockSomaticSNVOccurrencesRepository
+	listQuery  types.OccurrenceListQuery
+	countQuery types.OccurrenceCountQuery
+}
+
+func (m *somaticSNVFiltersRecorder) GetOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceListQuery) ([]types.SomaticSNVOccurrence, error) {
+	m.listQuery = query
+	return nil, nil
+}
+
+func (m *somaticSNVFiltersRecorder) CountOccurrences(_ context.Context, _ int, _ int, _ int, query types.OccurrenceCountQuery) (types.OccurrenceCount, error) {
+	m.countQuery = query
+	return types.OccurrenceCount{}, nil
+}
+
+func Test_SomaticSNVOccurrencesListHandler_Forwards_Annotation_Filters(t *testing.T) {
+	repo := &somaticSNVFiltersRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(repo))
+
+	body := `{"with_note":true,"with_flag":["pin","star"],"with_interpretation":true}`
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/list", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if assert.NotNil(t, repo.listQuery) {
+		assert.True(t, repo.listQuery.WithNote())
+		assert.Equal(t, []types.OccurrenceFlagType{"pin", "star"}, repo.listQuery.WithFlag())
+		assert.True(t, repo.listQuery.WithInterpretation())
+	}
+}
+
+func Test_SomaticSNVOccurrencesCountHandler_Forwards_Annotation_Filters(t *testing.T) {
+	repo := &somaticSNVFiltersRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/count", OccurrencesSomaticSNVCountHandler(repo))
+
+	body := `{"with_note":true,"with_flag":["flag"],"with_interpretation":true}`
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/count", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	if assert.NotNil(t, repo.countQuery) {
+		assert.True(t, repo.countQuery.WithNote())
+		assert.Equal(t, []types.OccurrenceFlagType{"flag"}, repo.countQuery.WithFlag())
+		assert.True(t, repo.countQuery.WithInterpretation())
+	}
+}
+
+func Test_SomaticSNVOccurrencesListHandler_Rejects_Unknown_Flag_Type(t *testing.T) {
+	repo := &somaticSNVFiltersRecorder{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/list", bytes.NewBuffer([]byte(`{"with_flag":["bogus"]}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "invalid flag type")
+	assert.Nil(t, repo.listQuery)
+}

@@ -1,0 +1,434 @@
+import type { TFunction } from 'i18next';
+import { User } from 'lucide-react';
+
+import type { CaseResult } from '@/api/api';
+import AnalysisTypeCodeCell, {
+  AnalysisTypeCodeCellTooltip,
+} from '@/components/base/data-table/cells/analysis-type-code-cell';
+import CaseLinkCell from '@/components/base/data-table/cells/case-link-cell';
+import DateCell from '@/components/base/data-table/cells/date-cell';
+import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
+import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
+import TextListCell from '@/components/base/data-table/cells/text-list-cell';
+import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
+import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
+
+import CaseActionsMenuCell from './cells/case-actions-menu-cell';
+import CaseAssignmentCell from './cells/case-assignment-cell';
+import CaseStatusCell from './cells/case-status-cell';
+
+const columnHelper = createAppColumnHelper<CaseResult>();
+
+function getCaseExplorationColumns(t: TFunction<string, undefined>, onCaseChange?: () => void) {
+  return [
+    // Assignment
+    columnHelper.accessor(row => row.assignees, {
+      id: 'assignees',
+      cell: info => <CaseAssignmentCell {...info} onSaved={onCaseChange} />,
+      header: () => (
+        <TooltipHeader iconOnly tooltip={t('case_exploration.case.headers.assignees_tooltip')}>
+          <User className="size-4 text-foreground" />
+        </TooltipHeader>
+      ),
+      size: 80,
+      minSize: 80,
+      maxSize: 80,
+      enableResizing: false,
+      enableSorting: false,
+    }),
+    // case
+    columnHelper.accessor(row => row.case_id, {
+      id: 'case_id',
+      cell: info => <CaseLinkCell caseId={info.row.original.case_id}>{info.getValue()}</CaseLinkCell>,
+      header: t('case_exploration.case.headers.case_id'),
+      size: 48,
+      minSize: 40,
+    }),
+    // Patient
+    columnHelper.accessor(row => row.proband_id, {
+      id: 'proband_id',
+      cell: info => info.getValue(),
+      header: t('case_exploration.case.headers.patient_id'),
+      size: 48,
+      minSize: 40,
+    }),
+    // MRN
+    columnHelper.accessor(row => row.submitter_proband_id, {
+      id: 'submitter_proband_id',
+      cell: info => info.getValue(),
+      header: () => (
+        <TooltipHeader tooltip={t('case_exploration.case.headers.submitter_patient_id_tooltip')}>
+          {t('case_exploration.case.headers.submitter_patient_id')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // First name
+    columnHelper.accessor(row => row.proband_first_name, {
+      id: 'proband_first_name',
+      cell: info => info.getValue(),
+      header: t('case_exploration.case.headers.first_name'),
+      size: 124,
+      minSize: 40,
+    }),
+    // Last name
+    columnHelper.accessor(row => row.proband_last_name, {
+      id: 'proband_last_name',
+      cell: info => info.getValue(),
+      header: t('case_exploration.case.headers.last_name'),
+      size: 124,
+      minSize: 40,
+    }),
+    // Vital status
+    columnHelper.accessor(row => row.proband_life_status_code, {
+      id: 'proband_life_status_code',
+      cell: info => info.getValue(),
+      header: t('case_exploration.case.headers.life_status'),
+      size: 124,
+      minSize: 40,
+    }),
+    // Pre/Postnatal
+    columnHelper.accessor(row => row.case_category_code, {
+      id: 'case_category_code',
+      cell: info => info.getValue(),
+      header: t('case_exploration.case.headers.category_code'),
+      size: 124,
+      minSize: 40,
+    }),
+    // JHN
+    columnHelper.accessor(row => row.proband_jhn, {
+      id: 'proband_jhn',
+      cell: info => info.getValue(),
+      header: t('case_exploration.case.headers.jhn'),
+      size: 124,
+      minSize: 40,
+    }),
+    // Priority
+    columnHelper.accessor(row => row.priority_code, {
+      id: 'priority_code',
+      cell: info => <PriorityIndicatorCell code={info.getValue()} />,
+      header: t('case_exploration.case.headers.priority_code'),
+      size: 124,
+      minSize: 40,
+    }),
+    // Status
+    columnHelper.accessor(row => row.status_code, {
+      id: 'status_code',
+      cell: CaseStatusCell,
+      header: t('case_exploration.case.headers.status_code'),
+      size: 124,
+      minSize: 40,
+    }),
+    // Type
+    columnHelper.accessor(row => row.case_type, {
+      id: 'case_type',
+      cell: info => <AnalysisTypeCodeCell code={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={<AnalysisTypeCodeCellTooltip />}>
+          {t('case_exploration.case.headers.case_type')}
+        </TooltipHeader>
+      ),
+      size: 48,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // Analysis
+    columnHelper.accessor(row => row.analysis_catalog_code, {
+      id: 'analysis_catalog_code',
+      cell: info => (
+        <TextTooltipCell tooltipText={info.row.original.analysis_catalog_name}>{info.getValue()}</TextTooltipCell>
+      ),
+      header: t('case_exploration.case.headers.analysis_catalog_code'),
+      size: 48,
+      minSize: 40,
+    }),
+    // Primary Condition
+    columnHelper.accessor(row => row.primary_condition_id, {
+      id: 'primary_condition_id',
+      cell: info => (
+        <PhenotypeConditionLinkCell code={info.getValue()} name={info.row.original.primary_condition_name} />
+      ),
+      header: t('case_exploration.case.headers.primary_condition'),
+      size: 208,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // Panel
+    columnHelper.accessor(row => row.panel_code, {
+      id: 'panel_code',
+      cell: info => <TextTooltipCell tooltipText={info.row.original.panel_name}>{info.getValue()}</TextTooltipCell>,
+      header: t('case_exploration.case.headers.panel'),
+      size: 124,
+      minSize: 40,
+    }),
+    // Req. by
+    columnHelper.accessor(row => row.ordering_organization_code, {
+      id: 'ordering_organization_code',
+      cell: info => (
+        <TextTooltipCell tooltipText={info.row.original.ordering_organization_name}>{info.getValue()}</TextTooltipCell>
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('case_exploration.case.headers.ordering_organization_code_tooltip')}>
+          {t('case_exploration.case.headers.ordering_organization_code')}
+        </TooltipHeader>
+      ),
+      size: 48,
+      minSize: 40,
+    }),
+    // Sample
+    columnHelper.accessor(row => row.proband_submitter_sample_ids, {
+      id: 'proband_submitter_sample_ids',
+      cell: info => <TextListCell values={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('case_exploration.case.headers.proband_submitter_sample_ids_tooltip')}>
+          {t('case_exploration.case.headers.proband_submitter_sample_ids')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // Run
+    columnHelper.accessor(row => row.run_names, {
+      id: 'run_names',
+      cell: info => <TextListCell values={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('case_exploration.case.headers.run_names_tooltip')}>
+          {t('case_exploration.case.headers.run_names')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // Project
+    columnHelper.accessor(row => row.project_code, {
+      id: 'project_code',
+      cell: info => <TextTooltipCell tooltipText={info.row.original.project_name}>{info.getValue()}</TextTooltipCell>,
+      header: t('case_exploration.case.headers.project_code'),
+      size: 48,
+      minSize: 40,
+    }),
+    // Created on
+    columnHelper.accessor(row => row.created_on, {
+      id: 'created_on',
+      cell: info => <DateCell date={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('case_exploration.case.headers.created_on_tooltip')}>
+          {t('case_exploration.case.headers.created_on')}
+        </TooltipHeader>
+      ),
+      size: 96,
+      minSize: 40,
+    }),
+    // Updated
+    columnHelper.accessor(row => row.updated_on, {
+      id: 'updated_on',
+      cell: info => <DateCell date={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('case_exploration.case.headers.updated_on_tooltip')}>
+          {t('case_exploration.case.headers.updated_on')}
+        </TooltipHeader>
+      ),
+      size: 96,
+      minSize: 40,
+    }),
+    // Prescriber
+    columnHelper.accessor(row => row.prescriber, {
+      id: 'prescriber',
+      cell: info => info.getValue(),
+      header: () => (
+        <TooltipHeader tooltip={t('case_exploration.case.headers.prescriber_tooltip')}>
+          {t('case_exploration.case.headers.prescriber')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // Diagnostic lab
+    columnHelper.accessor(row => row.diagnosis_lab_code, {
+      id: 'diagnosis_lab_code',
+      cell: info => (
+        <TextTooltipCell tooltipText={info.row.original.diagnosis_lab_name}>{info.getValue()}</TextTooltipCell>
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('case_exploration.case.headers.diagnostic_lab_tooltip')}>
+          {t('case_exploration.case.headers.diagnostic_lab')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // Patient managing organization
+    columnHelper.accessor(row => row.organization_code, {
+      id: 'organization_code',
+      cell: info => (
+        <TextTooltipCell tooltipText={info.row.original.organization_name}>{info.getValue()}</TextTooltipCell>
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('case_exploration.case.headers.managing_organization_tooltip')}>
+          {t('case_exploration.case.headers.managing_organization')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      // Sort disabled: backend fix needed
+      enableSorting: false,
+    }),
+    // Actions Buttons
+    {
+      id: 'actions',
+      cell: CaseActionsMenuCell,
+      size: 44,
+      maxSize: 44,
+      enableResizing: false,
+      enablePinning: true,
+    },
+  ] as TableColumnDef<CaseResult, any>[];
+}
+
+const defaultSettings = createColumnSettings([
+  {
+    id: 'assignees',
+    visible: true,
+    label: 'case_exploration.case.headers.assignees',
+  },
+  {
+    id: 'case_id',
+    visible: true,
+    label: 'case_exploration.case.headers.case_id',
+  },
+  {
+    id: 'proband_id',
+    visible: false,
+    label: 'case_exploration.case.headers.patient_id',
+  },
+  {
+    id: 'submitter_proband_id',
+    visible: true,
+    label: 'case_exploration.case.headers.submitter_patient_id',
+  },
+  {
+    id: 'proband_first_name',
+    visible: false,
+    label: 'case_exploration.case.headers.first_name',
+    additionalFields: ['proband_first_name'],
+  },
+  {
+    id: 'proband_last_name',
+    visible: false,
+    label: 'case_exploration.case.headers.last_name',
+    additionalFields: ['proband_last_name'],
+  },
+  {
+    id: 'proband_life_status_code',
+    visible: false,
+    label: 'case_exploration.case.headers.life_status',
+    additionalFields: ['proband_life_status_code'],
+  },
+  {
+    id: 'case_category_code',
+    visible: false,
+    label: 'case_exploration.case.headers.category_code',
+    additionalFields: ['case_category_code'],
+  },
+  {
+    id: 'proband_jhn',
+    visible: false,
+    label: 'case_exploration.case.headers.jhn',
+    additionalFields: ['proband_jhn'],
+  },
+  {
+    id: 'priority_code',
+    visible: true,
+    label: 'case_exploration.case.headers.priority_code',
+  },
+  {
+    id: 'status_code',
+    visible: true,
+    label: 'case_exploration.case.headers.status_code',
+  },
+  {
+    id: 'case_type',
+    visible: true,
+    label: 'case_exploration.case.headers.case_type',
+    additionalFields: ['case_type'],
+  },
+  {
+    id: 'analysis_catalog_code',
+    visible: true,
+    label: 'case_exploration.case.headers.analysis_catalog_code',
+  },
+  {
+    id: 'primary_condition_id',
+    visible: false,
+    label: 'case_exploration.case.headers.primary_condition',
+    additionalFields: ['primary_condition_id', 'primary_condition_name'],
+  },
+  {
+    id: 'panel_code',
+    visible: false,
+    label: 'case_exploration.case.headers.panel',
+    additionalFields: ['panel_code', 'panel_name'],
+  },
+  {
+    id: 'ordering_organization_code',
+    visible: true,
+    label: 'case_exploration.case.headers.ordering_organization_code',
+  },
+  {
+    id: 'proband_submitter_sample_ids',
+    visible: true,
+    label: 'case_exploration.case.headers.proband_submitter_sample_ids',
+  },
+  {
+    id: 'run_names',
+    visible: false,
+    label: 'case_exploration.case.headers.run_names',
+    additionalFields: ['run_names'],
+  },
+  {
+    id: 'project_code',
+    visible: false,
+    label: 'case_exploration.case.headers.project_code',
+  },
+  {
+    id: 'created_on',
+    visible: false,
+    label: 'case_exploration.case.headers.created_on',
+  },
+  {
+    id: 'updated_on',
+    visible: true,
+    label: 'case_exploration.case.headers.updated_on',
+  },
+  {
+    id: 'prescriber',
+    visible: false,
+    label: 'case_exploration.case.headers.prescriber',
+    additionalFields: ['prescriber'],
+  },
+  {
+    id: 'diagnosis_lab_code',
+    visible: false,
+    label: 'case_exploration.case.headers.diagnostic_lab',
+    additionalFields: ['diagnosis_lab_name'],
+  },
+  {
+    id: 'organization_code',
+    visible: false,
+    label: 'case_exploration.case.headers.managing_organization',
+    additionalFields: ['organization_code', 'organization_name'],
+  },
+  {
+    id: 'actions',
+    visible: true,
+    fixed: true,
+    pinningPosition: 'end',
+  },
+]);
+
+export { getCaseExplorationColumns, defaultSettings };

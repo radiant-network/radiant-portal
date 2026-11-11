@@ -1,0 +1,58 @@
+# YAC agent (HIDIVE udi-yac, https://github.com/hms-dbmi/udi-yac) for the local-dev stack. POC.
+# Gated by the `yac` profile: a plain `docker compose up` never starts it. Use
+# `YAC_ENABLED=true make docker-run` (or `COMPOSE_PROFILES=yac docker compose up`).
+#
+# The chat sends no OpenAI key, so the LLM is the agent's own: by default a local Ollama on the
+# host (Docker on macOS has no GPU access, so a containerised Ollama is CPU-only and too slow).
+# For that: `ollama serve` and `ollama pull qwen3:14b`. For OpenAI instead, set
+# YAC_OPENAI_API_KEY, YAC_LLM_BASE_URL=https://api.openai.com/v1 and YAC_MODEL (see YAC.md).
+#
+# The image is built straight from the public git repo. To iterate on agent code, point
+# YAC_BUILD_CONTEXT at a local clone (path relative to this file), e.g. ../../../udi-yac.
+# Auth: Keycloak JWTs (radiant realm), passed through to StarRocks. See YAC.md for the env
+# overrides and a smoke test.
+services:
+  yac-agent:
+    profiles: [yac]
+    build:
+      context: ${YAC_BUILD_CONTEXT:-https://github.com/hms-dbmi/udi-yac.git#udi-yac-v0.12.3}
+      dockerfile: packages/agent/Dockerfile
+    image: radiant/yac-agent:local
+    ports:
+      - "${YAC_PORT:-8007}:8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      # Lowercase on purpose. The agent's settings read it case-insensitively, but the OpenAI SDK
+      # reads only OPENAI_BASE_URL and applies it to every client it builds, which would send a
+      # user's own key (X-OpenAI-Key) to Ollama. Lowercase keeps it on the agent's default
+      # client only: requests with a user key go to api.openai.com, the others to Ollama.
+      openai_base_url: ${YAC_LLM_BASE_URL:-http://host.docker.internal:11434/v1}
+      # Blank (the default) is unset to the agent, which then needs no key for Ollama.
+      OPENAI_API_KEY: ${YAC_OPENAI_API_KEY:-}
+      GPT_MODEL_NAME: ${YAC_MODEL:-qwen3:14b}
+      UDI_CORS_ORIGINS: ${YAC_CORS_ORIGINS:-http://localhost:3000}
+      # Keycloak auth, same realm/audience as the API and the StarRocks JWT users. The issuer is
+      # the host-facing URL tokens are minted through; locally the keys are fetched in-network
+      # (keycloak:8080), since localhost is the container itself. YAC_KEYCLOAK (e.g. QA) sets both.
+      JWT_JWKS_URL: "${YAC_KEYCLOAK:-http://keycloak:8080/realms/radiant}/protocol/openid-connect/certs"
+      JWT_ALGORITHM: RS256
+      JWT_ISSUER: ${YAC_KEYCLOAK:-http://localhost:8080/realms/radiant}
+      JWT_AUDIENCE: radiant
+      # StarRocks packages with JWT passthrough: queries run as the caller (StarRocks user =
+      # Keycloak sub), so Ranger masks/filters apply per user. See yac/backends.json.
+      UDI_QUERY_BACKENDS: /config/backends.json
+    volumes:
+      - ./yac/backends.json:/config/backends.json:ro
+      - starrocks-certs:/certs:ro
+    depends_on:
+      keycloak:
+        condition: service_started
+      starrocks:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s

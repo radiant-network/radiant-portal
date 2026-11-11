@@ -1,0 +1,164 @@
+package types
+
+import (
+	"fmt"
+	"time"
+)
+
+type Document struct {
+	ID               int `gorm:"unique;primaryKey;autoIncrement"`
+	Name             string
+	DataCategoryCode string
+	DataCategory     DataCategory `gorm:"foreignKey:code;references:DataCategoryCode"`
+	DataTypeCode     string
+	DataType         DataType   `gorm:"foreignKey:code;references:DataTypeCode"`
+	FileFormatCode   string     `gorm:"column:format_code"`
+	FileFormat       FileFormat `gorm:"foreignKey:code;references:FileFormatCode"`
+	Size             int64
+	Url              string
+	Hash             string
+	CreatedOn        time.Time `gorm:"autoCreateTime"`
+	TenantCode       string
+}
+
+type DocumentResult struct {
+	DocumentID                int       `json:"document_id" validate:"required"`
+	Name                      string    `json:"name" validate:"required"`
+	FormatCode                string    `json:"format_code" validate:"required"`
+	DataTypeCode              string    `json:"data_type_code" validate:"required"`
+	Size                      int       `json:"size" validate:"required"`
+	CaseID                    int       `json:"case_id" validate:"required"`
+	DiagnosisLabCode          string    `json:"diagnosis_lab_code,omitempty"`
+	DiagnosisLabName          string    `json:"diagnosis_lab_name,omitempty"`
+	RelationshipToProbandCode string    `json:"relationship_to_proband_code" validate:"required"`
+	PatientID                 int       `json:"patient_id" validate:"required"`
+	SubmitterSampleID         string    `json:"submitter_sample_id,omitempty"`
+	TaskID                    int       `json:"task_id" validate:"required"`
+	SeqID                     int       `json:"seq_id,omitempty"`
+	Hash                      string    `json:"hash,omitempty"`
+	RunAlias                  string    `json:"run_alias,omitempty"`
+	CreatedOn                 time.Time `json:"created_on" validate:"required"`
+}
+
+var DocumentFields = []Field{
+	CaseIdField,
+	CaseDiagnosisLabCodeField,
+	CaseDiagnosisLabNameField,
+	DocumentIdField,
+	DocumentNameField,
+	DocumentDataTypeCodeField,
+	DocumentFormatCodeField,
+	DocumentSizeField,
+	DocumentCreatedOnField,
+	DocumentHashField,
+	FamilyRelationshipToProbandCodeField,
+	ProjectCodeField,
+	SampleSubmitterSampleIdField,
+	SampleIdField,
+	SequencingExperimentIdField,
+	SamplePatientIdField,
+	SequencingExperimentRunAliasField,
+	SequencingExperimentRunNameField,
+	TaskHasDocumentTaskIdField,
+}
+
+var DocumentDefaultFields = []Field{
+	DocumentIdField,
+	DocumentNameField,
+	DocumentDataTypeCodeField,
+	DocumentFormatCodeField,
+	DocumentSizeField,
+	DocumentCreatedOnField,
+	FamilyRelationshipToProbandCodeField,
+	CaseIdField,
+	CaseDiagnosisLabCodeField,
+	CaseDiagnosisLabNameField,
+	SampleSubmitterSampleIdField,
+	SamplePatientIdField,
+	TaskHasDocumentTaskIdField,
+}
+
+var DocumentsDefaultSort = []SortField{{Field: DocumentIdField, Order: "desc"}, {Field: SequencingExperimentIdField, Order: "desc"}}
+
+var DocumentsQueryConfig = QueryConfig{
+	AllFields:     DocumentFields,
+	DefaultFields: DocumentDefaultFields,
+	DefaultSort:   DocumentsDefaultSort,
+	IdField:       DocumentIdField,
+}
+
+var DocumentIdField = Field{
+	Name:          "id",
+	Alias:         "document_id",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         DocumentTable,
+}
+
+var DocumentNameField = Field{
+	Name:          "name",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         DocumentTable,
+}
+
+var DocumentDataTypeCodeField = Field{
+	Name:          "data_type_code",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         DocumentTable,
+}
+
+var DocumentFormatCodeField = Field{
+	Name:          "format_code",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         DocumentTable,
+}
+
+var DocumentSizeField = Field{
+	Name:          "size",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         DocumentTable,
+}
+
+var DocumentHashField = Field{
+	Name:          "hash",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         DocumentTable,
+}
+
+var DocumentCreatedOnField = Field{
+	Name:          "created_on",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         DocumentTable,
+}
+
+var DocumentTable = Table{
+	Name:           "document",
+	FederationName: "radiant_jdbc.public.document",
+	Alias:          "doc",
+}
+
+func (Document) TableName() string {
+	return DocumentTable.Name
+}
+
+// NotQCMetricsJSON leaves out the QC pipeline's per-sample metrics.json, an ETL input that is neither
+// listed to users nor sent to the labs. It needs the document table under its DocumentTable alias.
+var NotQCMetricsJSON = fmt.Sprintf("NOT (%[1]s.data_type_code = 'aggqc' AND %[1]s.format_code = 'json')", DocumentTable.Alias)
+
+type DocumentFilters struct {
+	Project               []FiltersValue `json:"project_code,omitempty"`
+	DiagnosisLab          []FiltersValue `json:"diagnosis_lab_code,omitempty"`
+	RelationshipToProband []FiltersValue `json:"relationship_to_proband_code" validate:"required"`
+	Format                []FiltersValue `json:"format_code" validate:"required"`
+	DataType              []FiltersValue `json:"data_type_code" validate:"required"`
+}

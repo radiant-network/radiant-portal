@@ -1,0 +1,66 @@
+import type { AvatarSize } from '@/components/base/shadcn/avatar';
+import { Button } from '@/components/base/shadcn/button';
+import { HoverCard, HoverCardContent, HoverCardPortal, HoverCardTrigger } from '@/components/base/shadcn/hover-card';
+import { useI18n } from '@/components/hooks/i18n';
+
+import type { AvatarUser } from './avatar.types';
+import { AvatarUserItem } from './avatar-user-item';
+
+interface AvatarPopoverProps {
+  users: AvatarUser | AvatarUser[];
+  size?: AvatarSize;
+  title?: string;
+  onEdit?: () => void;
+  className?: string;
+  children: React.ReactNode;
+}
+
+export function AvatarPopover({ users, title, onEdit, children }: AvatarPopoverProps) {
+  const { t } = useI18n();
+  // Normalize users to always be an array
+  const usersArray = Array.isArray(users) ? users : [users];
+
+  // Sort users alphabetically by last name
+  const sortedUsers = usersArray.sort((a, b) => {
+    const getLastName = (name: string) => {
+      const words = name.trim().split(/\s+/);
+      return words.length > 1 ? words[words.length - 1] : words[0];
+    };
+
+    const lastNameA = getLastName(a.name).toLowerCase();
+    const lastNameB = getLastName(b.name).toLowerCase();
+
+    return lastNameA.localeCompare(lastNameB);
+  });
+
+  const isSingleUser = sortedUsers.length === 1;
+
+  return (
+    <HoverCard>
+      <HoverCardTrigger asChild>{children}</HoverCardTrigger>
+      <HoverCardPortal>
+        <HoverCardContent
+          className="w-80 max-h-96 overflow-y-auto"
+          side="top"
+          onClick={event => event.stopPropagation()}
+        >
+          {(title || onEdit) && (
+            <div className="mb-4 flex items-center gap-2">
+              {title && <h3 className="text-xs font-medium leading-none truncate">{title}</h3>}
+              {onEdit && (
+                <Button variant="link" size="xs" className="h-auto p-0" onClick={onEdit}>
+                  {t('common.edit')}
+                </Button>
+              )}
+            </div>
+          )}
+          <div className={isSingleUser ? '' : 'space-y-3'}>
+            {sortedUsers.map(user => (
+              <AvatarUserItem key={user.id} user={user} size="sm" />
+            ))}
+          </div>
+        </HoverCardContent>
+      </HoverCardPortal>
+    </HoverCard>
+  );
+}

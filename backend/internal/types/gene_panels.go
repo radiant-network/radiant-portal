@@ -1,0 +1,78 @@
+package types
+
+var HpoGenePanelTable = Table{
+	Name:  "hpo_gene_panel",
+	Alias: "hpo",
+}
+var HpoGenePanelField = Field{
+	Name:            "panel",
+	Alias:           "hpo_gene_panel",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           HpoGenePanelTable,
+}
+
+var DddGenePanelTable = Table{
+	Name:  "ddd_gene_panel",
+	Alias: "ddd",
+}
+var DddGenePanelField = Field{
+	Name:            "panel",
+	Alias:           "ddd_gene_panel",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           DddGenePanelTable,
+}
+
+var CosmicGenePanelTable = Table{
+	Name:  "cosmic_gene_panel",
+	Alias: "cosmic",
+}
+var CosmicGenePanelField = Field{
+	Name:            "panel",
+	Alias:           "cosmic_gene_panel",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           CosmicGenePanelTable,
+}
+var OrphanetGenePanelTable = Table{
+	Name:  "orphanet_gene_panel",
+	Alias: "orph",
+}
+var OrphanetGenePanelField = Field{
+	Name:            "panel",
+	Alias:           "orphanet_gene_panel",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           OrphanetGenePanelTable,
+}
+
+// TenantGenePanelTable is the tenant's gene panel MV (panel, symbol), in the tenant database.
+var TenantGenePanelTable = Table{
+	Name:      TenantGenePanelMV,
+	Alias:     "tgp",
+	PerTenant: true,
+}
+var TenantGenePanelField = Field{
+	Name:            "panel",
+	Alias:           "tenant_gene_panel",
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           TenantGenePanelTable,
+}
+
+var GenePanelsTables = []Table{HpoGenePanelTable, OmimGenePanelTable, DddGenePanelTable, CosmicGenePanelTable, OrphanetGenePanelTable, TenantGenePanelTable}
+
+type GenePanelCondition = struct {
+	Symbol          string            `json:"-"`
+	PanelName       string            `json:"panel_name" validate:"required"`
+	InheritanceCode JsonArray[string] `gorm:"type:json" json:"inheritance_code,omitempty"`
+	PanelID         string            `json:"panel_id,omitempty"`
+}
+
+type GenePanelConditions = struct {
+	CountOmim     int64                           `json:"count_omim" validate:"required"`
+	CountOrphanet int64                           `json:"count_orphanet" validate:"required"`
+	CountHpo      int64                           `json:"count_hpo" validate:"required"`
+	Conditions    map[string][]GenePanelCondition `json:"conditions" validate:"required"`
+}

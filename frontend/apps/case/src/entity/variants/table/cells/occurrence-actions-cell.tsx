@@ -1,0 +1,139 @@
+import { useCallback, useState } from 'react';
+import { useSearchParams } from 'react-router';
+import { ArrowUpRight, Download, EyeIcon, FlipHorizontal2Icon } from 'lucide-react';
+
+import type { CaseEntity, GermlineSNVOccurrence } from '@/api/api';
+import { ActionButton } from '@/components/base/buttons';
+import type { AppFeatures, Row } from '@/components/base/data-table/data-table';
+import { useI18n } from '@/components/hooks/i18n';
+import { useLocalPath } from '@/components/hooks/use-local-path';
+import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
+import IGVDialog from 'components/base/igv/igv-dialog';
+
+import { SELECTED_VARIANT_PARAM } from '../../constants';
+import useVariantsReportDownload, { type VariantsReportKind } from '../use-variants-report-download';
+
+type OccurrenceActionsMenuProps = {
+  row: Row<AppFeatures, GermlineSNVOccurrence>;
+  caseEntity?: CaseEntity;
+  reportKind?: VariantsReportKind;
+};
+
+function OccurrenceActionsMenu({ row, caseEntity, reportKind }: OccurrenceActionsMenuProps) {
+  const { t } = useI18n();
+  const [igvOpen, setIgvOpen] = useState<boolean>(false);
+  const caseId = useCaseIdFromParam();
+  const taskId = useTaskIdFromSearchParam();
+  const localPath = useLocalPath();
+  const downloadReport = useVariantsReportDownload(reportKind ?? 'germline');
+  const { locus_id, chromosome, start, end, rsnumber, seq_id, locus } = row.original;
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handlePreview = useCallback(() => {
+    searchParams.set(SELECTED_VARIANT_PARAM, locus_id);
+    setSearchParams(searchParams, { replace: true });
+  }, []);
+
+  const onNavigateToVariantPage = useCallback(() => {
+    window.open(localPath(`/variants/entity/${locus_id}`), '_blank');
+  }, [locus_id, localPath]);
+
+  const handleDownloadReport = useCallback(() => {
+    if (taskId === undefined) return;
+    downloadReport(seq_id, taskId, async () => [locus_id]).catch(() => undefined);
+  }, [downloadReport, seq_id, taskId, locus_id]);
+
+  const handleUcsclick = useCallback(() => {
+    window.open(
+      `https://genome.ucsc.edu/cgi-bin/hgTracks?db=hg38&lastVirtModeType=default&lastVirtModeExtraState=&virtModeType=default&virtMode=0&nonVirtPosition=&position=chr${chromosome}%3A${start}-${end}`,
+      '_blank',
+      'noopener noreferrer',
+    );
+  }, [chromosome, start]);
+
+  const handleLitvarClick = useCallback(() => {
+    window.open(
+      `https://www.ncbi.nlm.nih.gov/research/litvar2/docsum?text=${rsnumber}`,
+      '_blank',
+      'noopener noreferrer',
+    );
+  }, [rsnumber]);
+
+  return (
+    <>
+      {caseEntity?.has_igv_files && (
+        <IGVDialog
+          context="snv"
+          open={igvOpen}
+          setOpen={setIgvOpen}
+          caseId={caseId}
+          seqId={seq_id}
+          locus={locus}
+          start={start}
+          chromosome={chromosome}
+        />
+      )}
+      <ActionButton
+        className="px-0"
+        variant="outline"
+        size="2xs"
+        tooltip={t('variant.actions.view_variant')}
+        tooltipSide="top"
+        actions={[
+          {
+            id: 'preview',
+            icon: <EyeIcon />,
+            label: t('variant.actions.preview'),
+            onClick: handlePreview,
+          },
+          {
+            id: 'view_variant',
+            icon: <ArrowUpRight />,
+            label: t('variant.actions.view_variant'),
+            onClick: onNavigateToVariantPage,
+            hasSeparator: !reportKind,
+          },
+          ...(reportKind
+            ? [
+                {
+                  id: 'download_report',
+                  icon: <Download />,
+                  label: t('variant.report.download'),
+                  disabled: taskId === undefined,
+                  onClick: handleDownloadReport,
+                  hasSeparator: true,
+                },
+              ]
+            : []),
+          {
+            id: 'open_in_igv',
+            icon: <FlipHorizontal2Icon />,
+            label: t('variant.actions.open_in_igv'),
+            tooltip:
+              caseEntity?.has_igv_files === false ? t('variant.actions.open_in_igv_disabled_tooltip') : undefined,
+            disabled: caseEntity?.has_igv_files === false,
+            onClick: () => setIgvOpen(true),
+          },
+          {
+            id: 'ucsc',
+            icon: <ArrowUpRight />,
+            label: t('variant.actions.ucsc'),
+            disabled: chromosome === undefined || start === undefined || end === undefined,
+            onClick: handleUcsclick,
+          },
+          {
+            id: 'litvar',
+            icon: <ArrowUpRight />,
+            label: t('variant.actions.litvar'),
+            disabled: rsnumber === undefined || rsnumber?.length === 0,
+            onClick: handleLitvarClick,
+          },
+        ]}
+        onDefaultAction={onNavigateToVariantPage}
+      >
+        <ArrowUpRight size={16} />
+      </ActionButton>
+    </>
+  );
+}
+export default OccurrenceActionsMenu;

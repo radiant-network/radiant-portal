@@ -1,0 +1,40 @@
+package types
+
+type Family struct {
+	ID                        int `gorm:"unique;primaryKey;autoIncrement"`
+	CaseID                    int
+	Case                      Case `gorm:"foreignKey:ID;references:CaseID"`
+	FamilyMemberID            *int
+	FamilyMember              Patient `gorm:"foreignKey:ID;references:FamilyMemberID"`
+	FetusID                   *int
+	Fetus                     Fetus `gorm:"foreignKey:ID;references:FetusID"`
+	RelationshipToProbandCode string
+	RelationshipToProband     FamilyRelationship `gorm:"foreignKey:code;references:RelationshipToProbandCode"`
+	AffectedStatusCode        string
+	AffectedStatus            AffectedStatus `gorm:"foreignKey:Code;references:AffectedStatusCode"`
+	TenantCode                string
+}
+
+var FamilyTable = Table{
+	Name:           "family",
+	FederationName: "radiant_jdbc.public.family",
+	Alias:          "f",
+}
+
+var FamilyRelationshipToProbandCodeField = Field{
+	Name:          "relationship_to_proband_code",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         FamilyTable,
+}
+
+var FamilyAffectedStatusCodeField = Field{
+	Name:          "affected_status_code",
+	CanBeSelected: true,
+	Table:         FamilyTable,
+}
+
+func (Family) TableName() string {
+	return FamilyTable.Name
+}

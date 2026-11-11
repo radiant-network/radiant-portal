@@ -1,0 +1,111 @@
+import { Fragment, useId } from 'react';
+import { Link } from 'react-router';
+import { ArrowUpRight } from 'lucide-react';
+
+import type { VariantConsequence } from '@/api/api';
+import EmptyField from '@/components/base/information/empty-field';
+import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
+import { Badge } from '@/components/base/shadcn/badge';
+import { Button } from '@/components/base/shadcn/button';
+import { Card, CardContent, CardHeader } from '@/components/base/shadcn/card';
+import { Separator } from '@/components/base/shadcn/separator';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { getOmimOrgUrl } from '@/components/base/variant/utils';
+import { useI18n } from '@/components/hooks/i18n';
+import { replaceUnderscore } from '@/components/lib/string-format';
+
+import TranscriptDetails from './transcript-details';
+
+interface ConsequenceAccordionItemProps {
+  value: string;
+  data: VariantConsequence;
+}
+
+function ConsequenceAccordionItem({ value, data }: ConsequenceAccordionItemProps) {
+  const { t } = useI18n();
+  const symbolId = useId();
+
+  return (
+    <AccordionItem value={value}>
+      <Card className="py-4 gap-0">
+        <CardHeader>
+          {/* The trigger stretches over the whole row; links and tooltips sit above it with z-10 */}
+          <div className="relative flex items-center py-2">
+            <AccordionTrigger className="w-auto py-0 after:absolute after:inset-0" aria-labelledby={symbolId} />
+            <div className="flex flex-1 ml-4 items-center gap-2">
+              <span id={symbolId} className="font-semibold text-base">
+                {data.symbol || t('common.no_gene')}
+              </span>
+              {/* ref: https://d3b.atlassian.net/browse/SJRA-146 */}
+              {/* TODO when vep_impact is added to the api if data.is_picked == true */}
+              {/* <ImpactIndicator value="HIGH" size={16} /> */}
+              {data.symbol && (
+                <Button asChild iconOnly size="xs" variant="ghost" className="relative z-10">
+                  <Link
+                    to={getOmimOrgUrl({ symbol: data.symbol })}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={t('a11y.omim_link.open', { symbol: data.symbol })}
+                  >
+                    <ArrowUpRight className="size-4!" />
+                  </Link>
+                </Button>
+              )}
+            </div>
+            <div className="flex flex-1">
+              <Badge variant="neutral" className="capitalize">
+                {t(`variant.biotype`, {
+                  defaultValue: data.biotype ? replaceUnderscore(data.biotype) : <EmptyField />,
+                })}
+              </Badge>
+            </div>
+            <div className="flex flex-1 justify-end items-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">{t('variant.predictions.pli')}:</span>
+                <span>{data?.gnomad_pli?.toExponential(2) ?? <EmptyField />}</span>
+              </div>
+              <Separator orientation="vertical" className="h-4" />
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">{t('variant.predictions.loeuf')}:</span>
+                <span>{data.gnomad_loeuf || <EmptyField />}</span>
+              </div>
+              <Separator orientation="vertical" className="h-4" />
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">{t('variant.predictions.splice_ai')}:</span>
+                <div className="flex items-center gap-2">
+                  <span>{data?.spliceai_ds ? data.spliceai_ds : <EmptyField />}</span>
+                  {data?.spliceai_type?.length && (
+                    <div className="space-x-1">
+                      {data.spliceai_type.map(type => (
+                        <Tooltip key={type}>
+                          <TooltipTrigger className="relative z-10">
+                            <Badge variant="outline">{type}</Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>{t(`variant.splice_ai.${type}`)}</TooltipContent>
+                        </Tooltip>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="py-0">
+          <AccordionContent className="pt-2 px-5">
+            <div className="border rounded-sm bg-muted/30">
+              {data.transcripts?.map((transcript, index) => (
+                <Fragment key={transcript.transcript_id}>
+                  <TranscriptDetails data={transcript} />
+                  {index !== (data.transcripts?.length || 0) - 1 && <Separator />}
+                </Fragment>
+              ))}
+            </div>
+          </AccordionContent>
+        </CardContent>
+      </Card>
+    </AccordionItem>
+  );
+}
+
+export default ConsequenceAccordionItem;

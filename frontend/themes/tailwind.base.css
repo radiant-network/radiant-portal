@@ -1,0 +1,461 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source "../apps/*/src/**/*.{html,js,jsx,ts,tsx}";
+@source "../components/base/**/*.{html,js,ts,tsx,jsx}";
+@source "../components/base/**/*.{html,js,ts,tsx,jsx}";
+
+:root {
+  /* Define colors/variable that are global for all portals */
+  /* Extracted Tailwind color variables for light mode */
+  --radiant-amber-500: var(--color-amber-500);
+  --radiant-amber-800: var(--color-amber-800);
+  --radiant-amber-600: var(--color-amber-600);
+  --radiant-amber-400: var(--color-amber-400);
+
+  --radiant-red-400: var(--color-red-400);
+  --radiant-red-700: var(--color-red-700);
+  --radiant-red-500: var(--color-red-500);
+
+  --radiant-orange-400: var(--color-orange-400);
+  --radiant-orange-800: var(--color-orange-800);
+
+  --radiant-yellow-400: var(--color-yellow-400);
+  --radiant-yellow-800: var(--color-yellow-800);
+
+  --radiant-lime-400: var(--color-lime-400);
+  --radiant-lime-800: var(--color-lime-800);
+
+  --radiant-green-300: var(--color-green-300);
+  --radiant-green-800: var(--color-green-800);
+  --radiant-green-600: var(--color-green-600);
+  --radiant-green-400: var(--color-green-400);
+
+  --radiant-cyan-400: var(--color-cyan-400);
+  --radiant-cyan-800: var(--color-cyan-800);
+
+  --radiant-blue-400: var(--color-blue-400);
+  --radiant-blue-700: var(--color-blue-700);
+  --radiant-blue-500: var(--color-blue-500);
+  --radiant-blue-800: var(--color-blue-800);
+
+  --radiant-violet-400: var(--color-violet-400);
+  --radiant-violet-700: var(--color-violet-700);
+  --radiant-violet-800: var(--color-violet-800);
+
+  --radiant-fuchsia-400: var(--color-fuchsia-400);
+  --radiant-fuchsia-700: var(--color-fuchsia-700);
+  --radiant-fuchsia-600: var(--color-fuchsia-600);
+
+  --radiant-slate-400: var(--color-slate-400);
+  --radiant-slate-300: var(--color-slate-300);
+  --radiant-slate-500: var(--color-slate-500);
+
+  --radiant-emerald-600: var(--color-emerald-600);
+
+  --color-alert-default: var(--color-slate-50);
+  --color-alert-default-foreground: var(--color-radiant-950);
+  --color-alert-info-foreground: var(--color-blue-700);
+  --color-alert-warning-foreground: var(--color-yellow-800);
+  --color-alert-error-foreground: var(--color-red-700);
+  --color-alert-success-foreground: var(--color-green-800);
+  --color-alert-success: var(--color-green-400);
+  --color-alert-error: var(--color-red-400);
+  --color-alert-warning: var(--color-yellow-400);
+  --color-alert-info: var(--color-blue-400);
+
+  /* Avatar Colors (light) */
+  --color-avatar-red: var(--color-red-200);
+  --color-avatar-red-foreground: var(--color-red-800);
+  --color-avatar-orange: var(--color-orange-200);
+  --color-avatar-orange-foreground: var(--color-orange-800);
+  --color-avatar-amber: var(--color-amber-200);
+  --color-avatar-amber-foreground: var(--color-amber-800);
+  --color-avatar-yellow: var(--color-yellow-200);
+  --color-avatar-yellow-foreground: var(--color-yellow-800);
+  --color-avatar-lime: var(--color-lime-200);
+  --color-avatar-lime-foreground: var(--color-lime-800);
+  --color-avatar-green: var(--color-green-200);
+  --color-avatar-green-foreground: var(--color-green-800);
+  --color-avatar-emerald: var(--color-emerald-200);
+  --color-avatar-emerald-foreground: var(--color-emerald-800);
+  --color-avatar-teal: var(--color-teal-200);
+  --color-avatar-teal-foreground: var(--color-teal-800);
+  --color-avatar-cyan: var(--color-cyan-200);
+  --color-avatar-cyan-foreground: var(--color-cyan-800);
+  --color-avatar-sky: var(--color-sky-200);
+  --color-avatar-sky-foreground: var(--color-sky-800);
+  --color-avatar-blue: var(--color-blue-200);
+  --color-avatar-blue-foreground: var(--color-blue-800);
+  --color-avatar-indigo: var(--color-indigo-200);
+  --color-avatar-indigo-foreground: var(--color-indigo-800);
+  --color-avatar-violet: var(--color-violet-200);
+  --color-avatar-violet-foreground: var(--color-violet-800);
+  --color-avatar-purple: var(--color-purple-200);
+  --color-avatar-purple-foreground: var(--color-purple-800);
+  --color-avatar-fuchsia: var(--color-fuchsia-200);
+  --color-avatar-fuchsia-foreground: var(--color-fuchsia-800);
+  --color-avatar-pink: var(--color-pink-200);
+  --color-avatar-pink-foreground: var(--color-pink-800);
+  --color-avatar-rose: var(--color-rose-200);
+  --color-avatar-rose-foreground: var(--color-rose-800);
+  --color-avatar-neutral: var(--color-slate-200);
+  --color-avatar-neutral-foreground: var(--color-slate-700);
+}
+
+.dark {
+  /* Define colors/variable that are global for all portals in dark mode */
+
+  /* Extracted Tailwind color variables for dark mode */
+  --radiant-amber-500: var(--color-amber-600);
+  --radiant-amber-800: var(--color-amber-400);
+  --radiant-amber-600: var(--color-amber-600);
+  --radiant-amber-400: var(--color-amber-400);
+
+  --radiant-red-400: var(--color-red-700);
+  --radiant-red-700: var(--color-red-400);
+  --radiant-red-500: var(--color-red-500);
+
+  --radiant-orange-400: var(--color-orange-400);
+  --radiant-orange-800: var(--color-orange-400);
+
+  --radiant-yellow-400: var(--color-yellow-400);
+  --radiant-yellow-800: var(--color-yellow-400);
+
+  --radiant-lime-400: var(--color-lime-400);
+  --radiant-lime-800: var(--color-lime-400);
+
+  --radiant-green-300: var(--color-green-400);
+  --radiant-green-800: var(--color-green-300);
+  --radiant-green-600: var(--color-green-600);
+  --radiant-green-400: var(--color-green-400);
+
+  --radiant-cyan-400: var(--color-cyan-400);
+  --radiant-cyan-800: var(--color-cyan-400);
+
+  --radiant-blue-400: var(--color-blue-800);
+  --radiant-blue-700: var(--color-blue-400);
+  --radiant-blue-500: var(--color-blue-500);
+  --radiant-blue-800: var(--color-blue-800);
+
+  --radiant-violet-400: var(--color-violet-800);
+  --radiant-violet-700: var(--color-violet-400);
+  --radiant-violet-800: var(--color-violet-800);
+
+  --radiant-fuchsia-400: var(--color-fuchsia-600);
+  --radiant-fuchsia-700: var(--color-fuchsia-400);
+  --radiant-fuchsia-600: var(--color-fuchsia-600);
+
+  --radiant-slate-400: var(--color-slate-400);
+  --radiant-slate-300: var(--color-slate-500);
+  --radiant-slate-500: var(--color-slate-500);
+
+  --radiant-emerald-600: var(--color-emerald-600);
+
+  --color-alert-default: var(--color-slate-500);
+  --color-alert-default-foreground: var(--color-slate-50);
+  --color-alert-info-foreground: var(--color-blue-400);
+  --color-alert-warning-foreground: var(--color-yellow-400);
+  --color-alert-error-foreground: var(--color-red-400);
+  --color-alert-success-foreground: var(--color-green-300);
+  --color-alert-success: var(--color-green-400);
+  --color-alert-error: var(--color-red-400);
+  --color-alert-warning: var(--color-yellow-400);
+  --color-alert-info: var(--color-blue-400);
+
+  /* Avatar Colors */
+  --color-avatar-red: var(--color-red-900);
+  --color-avatar-red-foreground: var(--color-red-300);
+  --color-avatar-orange: var(--color-orange-800);
+  --color-avatar-orange-foreground: var(--color-orange-200);
+  --color-avatar-amber: var(--color-amber-900);
+  --color-avatar-amber-foreground: var(--color-amber-200);
+  --color-avatar-yellow: var(--color-yellow-800);
+  --color-avatar-yellow-foreground: var(--color-yellow-400);
+  --color-avatar-lime: var(--color-lime-900);
+  --color-avatar-lime-foreground: var(--color-lime-400);
+  --color-avatar-green: var(--color-green-900);
+  --color-avatar-green-foreground: var(--color-green-400);
+  --color-avatar-emerald: var(--color-emerald-900);
+  --color-avatar-emerald-foreground: var(--color-emerald-200);
+  --color-avatar-teal: var(--color-teal-900);
+  --color-avatar-teal-foreground: var(--color-teal-200);
+  --color-avatar-cyan: var(--color-cyan-900);
+  --color-avatar-cyan-foreground: var(--color-cyan-300);
+  --color-avatar-sky: var(--color-sky-900);
+  --color-avatar-sky-foreground: var(--color-sky-200);
+  --color-avatar-blue: var(--color-blue-900);
+  --color-avatar-blue-foreground: var(--color-blue-300);
+  --color-avatar-indigo: var(--color-indigo-900);
+  --color-avatar-indigo-foreground: var(--color-indigo-200);
+  --color-avatar-violet: var(--color-violet-900);
+  --color-avatar-violet-foreground: var(--color-violet-300);
+  --color-avatar-purple: var(--color-purple-900);
+  --color-avatar-purple-foreground: var(--color-purple-200);
+  --color-avatar-fuchsia: var(--color-fuchsia-900);
+  --color-avatar-fuchsia-foreground: var(--color-fuchsia-300);
+  --color-avatar-pink: var(--color-pink-900);
+  --color-avatar-pink-foreground: var(--color-pink-200);
+  --color-avatar-rose: var(--color-rose-900);
+  --color-avatar-rose-foreground: var(--color-rose-200);
+  --color-avatar-neutral: var(--color-slate-700);
+  --color-avatar-neutral-foreground: var(--color-slate-300);
+}
+
+/* Sidebar brand mode: apply the `sidebar-brand` utility on a Sidebar root to
+   remap the semantic sidebar tokens onto their brand counterparts, so the
+   Sidebar component can rely on a single set of `sidebar-*` utilities. */
+@utility sidebar-brand {
+  --sidebar-background: var(--sidebar-brand-background);
+  --sidebar-foreground: var(--sidebar-brand-foreground);
+  --sidebar-primary: var(--sidebar-brand-primary);
+  --sidebar-primary-foreground: var(--sidebar-brand-primary-foreground);
+  --sidebar-accent: var(--sidebar-brand-accent);
+  --sidebar-accent-foreground: var(--sidebar-brand-accent-foreground);
+  --sidebar-border: var(--sidebar-brand-border);
+  --sidebar-ring: var(--sidebar-brand-ring);
+}
+
+@theme inline {
+  /* Radiant Shadcn UI Styles. Check -> themes/[Portal]/main.css */
+  --color-border: var(--border);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted-subdued: var(--muted-subdued);
+
+  --color-neutral: var(--neutral);
+  --color-neutral-foreground: var(--neutral-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar-background: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --color-sidebar-brand-background: var(--sidebar-brand-background);
+  --color-sidebar-brand-foreground: var(--sidebar-brand-foreground);
+  --color-sidebar-brand-primary: var(--sidebar-brand-primary);
+  --color-sidebar-brand-primary-foreground: var(--sidebar-brand-primary-foreground);
+  --color-sidebar-brand-accent: var(--sidebar-brand-accent);
+  --color-sidebar-brand-accent-foreground: var(--sidebar-brand-accent-foreground);
+  --color-sidebar-brand-border: var(--sidebar-brand-border);
+  --color-sidebar-brand-ring: var(--sidebar-brand-ring);
+
+  /* Radiant Custom Colors */
+  --color-amber: var(--radiant-amber-500);
+  --color-amber-foreground: var(--radiant-amber-800);
+
+  --color-red: var(--radiant-red-400);
+  --color-red-foreground: var(--radiant-red-700);
+
+  --color-orange: var(--radiant-orange-400);
+  --color-orange-foreground: var(--radiant-orange-800);
+
+  --color-yellow: var(--radiant-yellow-400);
+  --color-yellow-foreground: var(--radiant-yellow-800);
+
+  --color-lime: var(--radiant-lime-400);
+  --color-lime-foreground: var(--radiant-lime-800);
+
+  --color-green: var(--radiant-green-300);
+  --color-green-foreground: var(--radiant-green-800);
+
+  --color-emerald: var(--radiant-emerald-600);
+
+  --color-cyan: var(--radiant-cyan-400);
+  --color-cyan-foreground: var(--radiant-cyan-800);
+
+  --color-blue: var(--radiant-blue-400);
+  --color-blue-foreground: var(--radiant-blue-700);
+
+  --color-violet: var(--radiant-violet-400);
+  --color-violet-foreground: var(--radiant-violet-700);
+
+  --color-fuchsia: var(--radiant-fuchsia-400);
+  --color-fuchsia-foreground: var(--radiant-fuchsia-700);
+
+  /* Bookmark Colors */
+  --color-bookmark-amber: var(--radiant-amber-500);
+  --color-bookmark-blue: var(--radiant-blue-500);
+  --color-bookmark-green: var(--radiant-green-600);
+  --color-bookmark-red: var(--radiant-red-500);
+  --color-bookmark-off: var(--radiant-slate-400);
+
+  /* Indicator Colors */
+  --color-indicator-red: var(--radiant-red-500);
+  --color-indicator-amber: var(--radiant-amber-500);
+  --color-indicator-emerald: var(--radiant-emerald-600);
+  --color-indicator-blue: var(--radiant-blue-500);
+  --color-indicator-fuchsia: var(--radiant-fuchsia-600);
+  --color-indicator-grey: var(--radiant-slate-300);
+
+  /* Table Colors */
+  --color-table-accent: var(--table-accent);
+  --color-table-active: var(--table-active);
+  --color-table-header: var(--table-header);
+
+  /* Alert Colors */
+  --color-alert-default: var(--color-alert-default);
+  --color-alert-default-foreground: var(--color-alert-default-foreground);
+  --color-alert-info: var(--color-blue-400);
+  --color-alert-info-foreground: var(--color-alert-info-foreground);
+  --color-alert-warning: var(--color-yellow-400);
+  --color-alert-warning-foreground: var(--color-alert-warning-foreground);
+  --color-alert-error: var(--color-red-400);
+  --color-alert-error-foreground: var(--color-alert-error-foreground);
+  --color-alert-success: var(--color-green-400);
+  --color-alert-success-foreground: var(--color-alert-success-foreground);
+
+  /* Avatar Colors */
+  --color-avatar-red: var(--color-avatar-red);
+  --color-avatar-red-foreground: var(--color-avatar-red-foreground);
+  --color-avatar-orange: var(--color-avatar-orange);
+  --color-avatar-orange-foreground: var(--color-avatar-orange-foreground);
+  --color-avatar-amber: var(--color-avatar-amber);
+  --color-avatar-amber-foreground: var(--color-avatar-amber-foreground);
+  --color-avatar-yellow: var(--color-avatar-yellow);
+  --color-avatar-yellow-foreground: var(--color-avatar-yellow-foreground);
+  --color-avatar-lime: var(--color-avatar-lime);
+  --color-avatar-lime-foreground: var(--color-avatar-lime-foreground);
+  --color-avatar-green: var(--color-avatar-green);
+  --color-avatar-green-foreground: var(--color-avatar-green-foreground);
+  --color-avatar-emerald: var(--color-avatar-emerald);
+  --color-avatar-emerald-foreground: var(--color-avatar-emerald-foreground);
+  --color-avatar-teal: var(--color-avatar-teal);
+  --color-avatar-teal-foreground: var(--color-avatar-teal-foreground);
+  --color-avatar-cyan: var(--color-avatar-cyan);
+  --color-avatar-cyan-foreground: var(--color-avatar-cyan-foreground);
+  --color-avatar-sky: var(--color-avatar-sky);
+  --color-avatar-sky-foreground: var(--color-avatar-sky-foreground);
+  --color-avatar-blue: var(--color-avatar-blue);
+  --color-avatar-blue-foreground: var(--color-avatar-blue-foreground);
+  --color-avatar-indigo: var(--color-avatar-indigo);
+  --color-avatar-indigo-foreground: var(--color-avatar-indigo-foreground);
+  --color-avatar-violet: var(--color-avatar-violet);
+  --color-avatar-violet-foreground: var(--color-avatar-violet-foreground);
+  --color-avatar-purple: var(--color-avatar-purple);
+  --color-avatar-purple-foreground: var(--color-avatar-purple-foreground);
+  --color-avatar-fuchsia: var(--color-avatar-fuchsia);
+  --color-avatar-fuchsia-foreground: var(--color-avatar-fuchsia-foreground);
+  --color-avatar-pink: var(--color-avatar-pink);
+  --color-avatar-pink-foreground: var(--color-avatar-pink-foreground);
+  --color-avatar-rose: var(--color-avatar-rose);
+  --color-avatar-rose-foreground: var(--color-avatar-rose-foreground);
+  --color-avatar-neutral: var(--color-avatar-neutral);
+  --color-avatar-neutral-foreground: var(--color-avatar-neutral-foreground);
+}
+
+@layer base {
+  :root {
+    border-radius: var(--radius);
+  }
+
+  html,
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+
+  * {
+    border-color: var(--border);
+  }
+
+  h1 {
+    @apply text-3xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+
+  h3 {
+    @apply text-lg;
+  }
+
+  h4 {
+    @apply text-base;
+  }
+
+  h5 {
+    @apply text-sm;
+  }
+
+  h6 {
+    @apply text-sm;
+  }
+
+  button:not([disabled]),
+  [role='button']:not([disabled]) {
+    cursor: pointer;
+  }
+}
+
+@keyframes accordion-down {
+  from {
+    height: 0;
+  }
+
+  to {
+    height: var(--radix-accordion-content-height);
+  }
+}
+
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+  }
+
+  to {
+    height: 0;
+  }
+}
+
+@layer utilities {
+  .max-w-8xl {
+    max-width: 1440px;
+  }
+
+  .animate-accordion-down {
+    animation: accordion-down 0.2s ease-out;
+  }
+
+  .animate-accordion-up {
+    animation: accordion-up 0.2s ease-out;
+  }
+}

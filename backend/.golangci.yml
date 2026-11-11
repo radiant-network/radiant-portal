@@ -1,0 +1,72 @@
+version: "2"
+
+linters:
+  default: none
+  enable:
+    - bodyclose
+    - errcheck
+    - gosec
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+  exclusions:
+    generated: lax
+    rules:
+      # Test files and shared test infrastructure: tolerate unchecked setup/teardown
+      # errors (os.Setenv, db.Exec cleanups, response Close, json.Unmarshal in asserts).
+      # gosec joins for the same reason — test fixtures legitimately use math/rand
+      # (G404), intentional cleanup db.Exec without error checks (G104), SQL built over
+      # trusted table names (G201/G204), and reading test-data files by path (G304).
+      - path: (_test\.go|test/testutils/)
+        linters:
+          - errcheck
+          - gosec
+      # bodyclose in integration tests: response bodies aren't closed since the test
+      # process tears down right after asserting; no leak that outlives the test.
+      - path: _test\.go
+        linters:
+          - bodyclose
+      # scripts/ is build-time codegen tooling (OpenAPI spec generation), not runtime
+      # server code: reading a spec path (G304) and writing generated output (G306)
+      # operate on trusted, developer-controlled paths, not attacker input.
+      - path: scripts/
+        linters:
+          - gosec
+      # Test files commonly reuse `err` across helper-built fixtures that cannot fail;
+      # the err-overwrite pattern is benign there. It trips both ineffassign and
+      # staticcheck's SA4006 ("value never used"); SA4006 stays strict in non-test code.
+      - path: _test\.go
+        linters:
+          - ineffassign
+      - path: _test\.go
+        linters:
+          - staticcheck
+        text: SA4006
+      # QF1003 ("could use tagged switch") is an opinionated refactor suggestion, not a
+      # correctness or style rule we enforce.
+      - linters:
+          - staticcheck
+        text: QF1003
+      # The MySQL wire protocol packs lengths and capability flags into bytes on purpose:
+      # every byte(x) there is a deliberate truncation of a value the protocol bounds.
+      - path: internal/mysqlproxy/protocol\.go
+        linters:
+          - gosec
+        text: G115
+      # The boolean env parser logs the rejected value so a typo is visible; the value is
+      # operator-set configuration, quoted with %q, not request input.
+      - path: internal/utils/env\.go
+        linters:
+          - gosec
+        text: G706
+
+# Report every finding; do not truncate repeated issues so CI surfaces the full set.
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+# gofmt is checked on `golangci-lint run` and applied by `golangci-lint fmt` / `make fmt`.
+formatters:
+  enable:
+    - gofmt

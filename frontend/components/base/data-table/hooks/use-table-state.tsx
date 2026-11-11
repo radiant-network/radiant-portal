@@ -1,0 +1,259 @@
+import { useEffect, useRef, useState } from 'react';
+import type { ColumnOrderState, ColumnPinningState, PaginationState, TableState } from '@tanstack/react-table';
+import useSWR, { mutate } from 'swr';
+import useSWRMutation from 'swr/mutation';
+
+import type { UserPreference } from '@/api/api';
+import { DEFAULT_PAGE_SIZE } from '@/components/base/shadcn/pagination';
+import { userPreferenceApi } from '@/utils/api';
+
+import type { AppFeatures, ColumnSettings, ColumnVisiblity, LoadingStates } from '../data-table';
+import type { TableObserverColumn, TableObserverProps } from '../type/data-table-type';
+import { addMissingDefaultColumns, getFilteredAdditionalFields } from '../utils';
+
+export enum DataTableState {
+  PENDING,
+  LOADING,
+  ERROR,
+  EMPTY,
+  READY,
+}
+
+type useTableStateObserverProps = {
+  id: string;
+  columns: TableObserverColumn[];
+  columnOrder: ColumnOrderState;
+  columnPinning: ColumnPinningState;
+  columnSizing: Record<string, number>;
+  columnVisibility: ColumnVisiblity;
+  pagination: PaginationState;
+};
+
+type useTableStateFetchProps = {
+  id: string;
+  defaultColumnSettings: ColumnSettings[];
+  setFetched: (value: boolean) => void;
+  setColumnOrder: (value: ColumnOrderState) => void;
+  setColumnPinning: (value: ColumnPinningState) => void;
+  setColumnSizing: (value: Record<string, number>) => void;
+  setColumnVisibility: (value: ColumnVisiblity) => void;
+  setPagination: (value: PaginationState) => void;
+  setAdditionalFields?: (value: string[]) => void;
+};
+
+type useTableStateProps = {
+  loadingStates: LoadingStates;
+  isUserPreferenceFetched: boolean;
+  hasError: boolean;
+  isTableEmpty: boolean;
+};
+
+type useTableColumnSizingProps = {
+  columns: TableObserverColumn[];
+  state: TableState<AppFeatures>;
+  setColumnSizing: (value: Record<string, number>) => void;
+};
+
+type FetchUserPreferenceInput = {
+  key: string;
+};
+
+type PostUserPreferenceInput = FetchUserPreferenceInput & {
+  userPreference: UserPreference;
+};
+
+/**
+ * Get user preference
+ */
+async function fetchUserPreference(input: FetchUserPreferenceInput) {
+  const response = await userPreferenceApi.getUserPreferences(input.key);
+  return response.data;
+}
+
+/**
+ * Post user preference
+ */
+async function postUserPreference(_url: string, { arg }: { arg: PostUserPreferenceInput }) {
+  const response = await userPreferenceApi.postUserPreferences(arg.key, arg.userPreference);
+  return response.data;
+}
+
+function getUserPreferenceKey(id: string) {
+  return `data-table-${id}`;
+}
+
+/**
+ * Load user preference.
+ *
+ * If the api will return a 404 if the config has never been set before.
+ * In that case, the data table falls back to its default configuration.
+ *
+ * The GET cache is revalidated on unmount so the next mount.
+ * Otherwise, navigating away and back would briefly display the stale cached value
+ * (e.g. pageSize=30) before the refetch arrives with the updated one (e.g. pageSize=10),
+ * causing a visible flash.
+ */
+export function useTableGetPreferenceEffect({
+  id,
+  defaultColumnSettings,
+  setFetched,
+  setColumnOrder,
+  setColumnPinning,
+  setColumnSizing,
+  setColumnVisibility,
+  setAdditionalFields,
+  setPagination,
+}: useTableStateFetchProps) {
+  const cacheId = `data-table-get-${id}`;
+  const fetcher = () => fetchUserPreference({ key: getUserPreferenceKey(id) });
+  const tableUserPreference = useSWR(cacheId, fetcher, {
+    revalidateOnMount: true,
+    revalidateIfStale: false,
+    revalidateOnFocus: false,
+  });
+
+  useEffect(
+    () => () => {
+      mutate(cacheId, fetcher, { revalidate: true });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (tableUserPreference.error) {
+      setFetched(true);
+    }
+    if (tableUserPreference.data) {
+      const tablePreference = tableUserPreference.data.content as TableObserverProps;
+      const { columnOrder, columnPinning, columnVisibility } = addMissingDefaultColumns({
+        columnOrder: tablePreference.columnOrder,
+        columnPinning: normalizeColumnPinning(tablePreference.columnPinning),
+        columnVisibility: tablePreference.columnVisibility,
+        defaultColumnSettings,
+      });
+      setColumnOrder(columnOrder);
+      setColumnPinning(columnPinning);
+      setColumnSizing(tablePreference.columnSizing);
+      setColumnVisibility(columnVisibility);
+      setPagination({
+        pageSize: Math.max(tablePreference.pagination?.pageSize ?? DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE),
+        pageIndex: 0,
+      });
+      setAdditionalFields?.(getFilteredAdditionalFields({ columnVisibility, defaultColumnSettings }));
+      setFetched(true);
+    }
+  }, [tableUserPreference.isLoading, tableUserPreference.isValidating, tableUserPreference.data]);
+}
+
+/**
+ * Migrate persisted column pinning from the tanstack v8 shape (`left` / `right`)
+ * to the v9 shape (`start` / `end`), and guarantee both arrays exist so that
+ * `table.getFooterGroups()` / `getHeaderGroups()` never see `undefined`.
+ */
+function normalizeColumnPinning(pinning: unknown): ColumnPinningState {
+  const p = (pinning ?? {}) as {
+    start?: string[];
+    end?: string[];
+    left?: string[];
+    right?: string[];
+  };
+  return {
+    start: p.start ?? p.left ?? [],
+    end: p.end ?? p.right ?? [],
+  };
+}
+
+/**
+ * Update user-preference of the table with a POST request
+ * A debounce of 350 is used to prevent multiple post when use onChange event of data-table
+ */
+export function useTableUpdatePreferenceEffect({
+  id,
+  columnOrder,
+  columnPinning,
+  columnSizing,
+  columnVisibility,
+  pagination,
+}: useTableStateObserverProps) {
+  const { trigger } = useSWRMutation(`data-table-post-${id}`, postUserPreference);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      trigger({
+        key: getUserPreferenceKey(id),
+        userPreference: {
+          key: getUserPreferenceKey(id),
+          content: {
+            columnOrder,
+            columnPinning,
+            columnSizing,
+            columnVisibility,
+            pagination: { pageSize: pagination.pageSize, pageIndex: 0 },
+          },
+        },
+      });
+    }, 350);
+
+    return () => {
+      if (handler) clearTimeout(handler);
+    };
+  }, [columnPinning, columnOrder, columnSizing, columnVisibility, pagination.pageSize]);
+}
+
+/**
+ * Effect to serialize column size into a savable object
+ * @example
+ *  useTableSizingEffect({
+ *    state: table.state,
+ *    columns,
+ *    setColumnSizing,
+ *  });
+ */
+export function useTableSizingEffect({ state: tableState, columns, setColumnSizing }: useTableColumnSizingProps) {
+  const columnResizeRef = useRef<string | false>(false);
+
+  useEffect(() => {
+    if (tableState.columnResizing && !tableState.columnResizing?.isResizingColumn && columnResizeRef.current) {
+      const column = columns.find(column => column.id === columnResizeRef.current);
+      let size = tableState.columnSizing[columnResizeRef.current];
+
+      /**
+       * Resize handle is linked to mouse input, it can
+       * be released and return an invalid size of 0. This
+       * prevent invalid value
+       */
+      if (column?.minSize && size < column.minSize) {
+        size = column?.minSize;
+      } else if (column?.maxSize && size > column.maxSize) {
+        size = column.maxSize;
+      }
+
+      setColumnSizing({
+        ...tableState.columnSizing,
+        [columnResizeRef.current]: size,
+      });
+    }
+    columnResizeRef.current = tableState.columnResizing?.isResizingColumn;
+  }, [tableState.columnResizing, tableState.columnSizing]);
+}
+
+/**
+ * Hook to manage global data-table state
+ */
+export function useTableState({ loadingStates, isUserPreferenceFetched, hasError, isTableEmpty }: useTableStateProps) {
+  const [tableState, setTableState] = useState<DataTableState>(DataTableState.PENDING);
+
+  useEffect(() => {
+    if (loadingStates?.list || !isUserPreferenceFetched) {
+      setTableState(DataTableState.LOADING);
+    } else if (hasError) {
+      setTableState(DataTableState.ERROR);
+    } else if (isTableEmpty) {
+      setTableState(DataTableState.EMPTY);
+    } else {
+      setTableState(DataTableState.READY);
+    }
+  }, [loadingStates, isUserPreferenceFetched, hasError, isTableEmpty]);
+
+  return tableState;
+}

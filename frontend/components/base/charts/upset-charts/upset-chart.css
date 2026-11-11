@@ -1,0 +1,36 @@
+[class^='root-upset-'] text[class^='hoverBarTextStyle-upset'] {
+  opacity: 0;
+  fill: var(--muted-foreground);
+}
+
+[class^='root-upset-'] text[class^='setTextStyle-upset'] {
+  font-size: 10px;
+}
+
+[class^='root-upset-'] text[class^='cChartTextStyle-upset'],
+[class^='root-upset-'] text[class^='sChartTextStyle-upset'] {
+  font-size: 14px;
+}
+
+[class^='root-upset-'] [class^='interactive-upset']:hover > [class^='hoverBar-upset'] {
+  stroke: var(--muted-foreground);
+}
+
+[class^='root-upset-'] [class^='upsetLine-upset'],
+[class^='root-upset-'] [class^='upsetSelectionLine-upset'],
+[class^='root-upset-'] [class^='fillPrimary-upset'] {
+  fill: var(--primary);
+  stroke: var(--primary);
+}
+
+[class^='root-upset-'] [class^='fillSelection-upset'] {
+  fill: var(--color-amber-500);
+}
+
+[class^='root-upset-'] [class^='fillAlternating-upset'] {
+  fill: var(--color-slate-300);
+}
+
+[class^='root-upset-'] [class^='fillNotMember-upset'] {
+  fill: var(--color-slate-400);
+}

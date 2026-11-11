@@ -1,0 +1,116 @@
+import { useMemo, useState } from 'react';
+import useSWR from 'swr';
+
+import type { DocumentFilters, SearchCriterion } from '@/api/api';
+import type { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
+import DataTableFilters, { sortOptions } from '@/components/base/data-table/filters/data-table-filters';
+import getDataTypeOptions from '@/components/base/data-table/filters/options/option-data-type';
+import getFileFormatOptions from '@/components/base/data-table/filters/options/option-file-format';
+import getRelationshipOptions from '@/components/base/data-table/filters/options/option-relationship';
+import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
+import usePersistedFilters, { type StringArrayRecord } from '@/components/hooks/usePersistedFilters';
+import { caseApi } from '@/utils/api';
+
+const DEFAULT_VISIBLE_FILTERS = ['format_code', 'data_type_code', 'relationship_to_proband_code'];
+
+type FilesTableFilters = {
+  caseId: number;
+  setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
+};
+
+export const FILTER_DEFAULTS = {
+  format_code: [],
+  data_type_code: [],
+  relationship_to_proband_code: [],
+};
+
+const CRITERIAS = {
+  format_code: { key: 'format_code', weight: 1, visible: true },
+  data_type_code: { key: 'data_type_code', weight: 2, visible: true },
+  relationship_to_proband_code: { key: 'relationship_to_proband_code', weight: 3, visible: true },
+};
+
+async function fetchFilters(caseId: number, tenant: string) {
+  const response = await caseApi.caseEntityDocumentsFilters(tenant, caseId);
+  return response.data;
+}
+
+function FilesTableFilters({ caseId, setSearchCriteria }: FilesTableFilters) {
+  const { t } = useI18n();
+  const { tenant } = useTenant();
+  const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
+  const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
+  const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-files-filters', {
+    ...FILTER_DEFAULTS,
+  });
+  const { data: apiFilters, isLoading } = useSWR<DocumentFilters>(
+    'document-filters',
+    () => fetchFilters(caseId, tenant),
+    {
+      revalidateOnFocus: false,
+      revalidateOnMount: true,
+      revalidateIfStale: false,
+      revalidateOnReconnect: false,
+    },
+  );
+
+  // Mesmoize filter buttons to prevent unnecessary re-renders
+  const filterButtons = useMemo(() => {
+    if (!apiFilters) return [];
+    return Object.keys(apiFilters).map(key => {
+      const baseOption: IFilterButton = {
+        key,
+        label: t(`files.filters.${key}`),
+        isVisible: DEFAULT_VISIBLE_FILTERS.includes(key), // Show first three by default
+        isOpen: openFilters[key] || false,
+        selectedItems: filters[key] || [],
+        options: [],
+      };
+
+      switch (key) {
+        case 'data_type_code':
+          return {
+            ...baseOption,
+            popoverSize: 'md' as PopoverSize,
+            options: sortOptions(getDataTypeOptions(apiFilters[key], t) || []),
+          };
+        case 'relationship_to_proband_code':
+          return {
+            ...baseOption,
+            popoverSize: 'xs' as PopoverSize,
+            options: sortOptions(getRelationshipOptions(apiFilters[key]) || []),
+          };
+        case 'format_code':
+          return {
+            ...baseOption,
+            options: sortOptions(getFileFormatOptions(apiFilters[key], t) || []),
+          };
+        default:
+          return {
+            ...baseOption,
+            showKey: true,
+            withTooltip: true,
+            options: sortOptions(apiFilters[key as keyof DocumentFilters] || []),
+          };
+      }
+    });
+  }, [apiFilters, filters, openFilters, t]);
+
+  return (
+    <DataTableFilters
+      filterButtons={filterButtons}
+      changedFilterButtons={changedFilterButtons}
+      setChangedFilterButtons={setChangedFilterButtons}
+      filters={filters}
+      setFilters={setFilters}
+      openFilters={openFilters}
+      setOpenFilters={setOpenFilters}
+      loading={isLoading}
+      setSearchCriteria={setSearchCriteria}
+      criterias={CRITERIAS}
+      defaultFilters={FILTER_DEFAULTS}
+    />
+  );
+}
+export default FilesTableFilters;

@@ -1,0 +1,13 @@
+# Radiant monorepo: one moon project per module. Chapter 1: the portal (backend + frontend).
+projects:
+  backend: 'backend'
+  frontend: 'frontend'
+
+vcs:
+  defaultBranch: 'main'
+  provider: 'github'
+
+# Our modules are all applications that publish interfaces to each other
+# (OpenAPI, later the StarRocks schema), so the default "app cannot depend on app" rule is off.
+constraints:
+  enforceLayerRelationships: false

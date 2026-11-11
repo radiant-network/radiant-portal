@@ -1,0 +1,119 @@
+import { useState } from 'react';
+import { Unplug } from 'lucide-react';
+
+import { Button } from '@/components/base/shadcn/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
+import { Separator } from '@/components/base/shadcn/separator';
+import { Skeleton } from '@/components/base/shadcn/skeleton';
+import { useI18n } from '@/components/hooks/i18n';
+
+import carequalityLogo from '../../assets/carequality.png';
+import tefcaLogo from '../../assets/tefca.png';
+import { usePatientExternalRecords } from '../hooks/use-patient-entity';
+
+import ExternalRecordsModal from './external-records-modal';
+
+function ExternalRecordsCard() {
+  const { t } = useI18n();
+  const { data, isLoading } = usePatientExternalRecords();
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const hasOrganizations = (data?.organizations.length ?? 0) > 0;
+
+  return (
+    <Card>
+      <CardHeader bordered>
+        <CardTitle className="flex items-center gap-3">
+          <img
+            src={tefcaLogo}
+            alt={t('patient_entity.sidebar.external_records.network.tefca')}
+            className="h-5 w-auto"
+          />
+          <Separator orientation="vertical" className="h-5" />
+          <img
+            src={carequalityLogo}
+            alt={t('patient_entity.sidebar.external_records.network.carequality')}
+            className="h-5 w-auto"
+          />
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col">
+        <CardBody isLoading={isLoading} data={data} onViewDetails={() => setModalOpen(true)} />
+      </CardContent>
+      {data && hasOrganizations && (
+        <ExternalRecordsModal
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+          organizations={data.organizations}
+          organizationCount={data.organization_count}
+          documentCount={data.document_count}
+        />
+      )}
+    </Card>
+  );
+}
+
+type CardBodyProps = {
+  isLoading: boolean;
+  data: ReturnType<typeof usePatientExternalRecords>['data'];
+  onViewDetails: () => void;
+};
+
+function CardBody({ isLoading, data, onViewDetails }: CardBodyProps) {
+  const { t } = useI18n();
+
+  if (isLoading) {
+    return (
+      <>
+        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-9 w-full mt-2" />
+        <Skeleton className="h-9 w-full mt-2" />
+      </>
+    );
+  }
+
+  if (!data || data.organizations.length === 0) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-6">
+        <div className="flex items-center justify-center rounded-md border p-2">
+          <Unplug className="size-6" />
+        </div>
+        <p className="text-center text-xs text-muted-foreground">
+          {t('patient_entity.sidebar.external_records.not_connected.description')}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <CountRow
+        label={t('patient_entity.sidebar.external_records.organizations')}
+        value={data.organization_count}
+        first
+      />
+      <CountRow label={t('patient_entity.sidebar.external_records.documents')} value={data.document_count} />
+      <CountRow label={t('patient_entity.sidebar.external_records.document_types')} value={data.document_class_count} />
+      <Button variant="outline" size="sm" className="mt-3 w-full" onClick={onViewDetails}>
+        {t('patient_entity.sidebar.external_records.view_external_records')}
+      </Button>
+    </>
+  );
+}
+
+type CountRowProps = {
+  label: string;
+  value?: number;
+  first?: boolean;
+};
+
+function CountRow({ label, value, first }: CountRowProps) {
+  return (
+    <div className={`flex items-center justify-between gap-3 border-b py-2 ${first ? 'pt-0' : ''}`}>
+      <span className="text-sm font-medium">{label}</span>
+      <span className="text-base font-bold tabular-nums">{(value ?? 0).toLocaleString()}</span>
+    </div>
+  );
+}
+
+export default ExternalRecordsCard;

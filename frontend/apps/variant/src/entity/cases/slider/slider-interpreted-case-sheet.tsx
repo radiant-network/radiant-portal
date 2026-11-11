@@ -1,0 +1,155 @@
+import { useParams } from 'react-router';
+import { ArrowUpRight } from 'lucide-react';
+
+import { CaseTasksWithOccurrencesDataTypeEnum, type VariantInterpretedCase } from '@/api/api';
+import Empty from '@/components/base/empties/empty';
+import { Button } from '@/components/base/shadcn/button';
+import { Separator } from '@/components/base/shadcn/separator';
+import GermlineSliderInterpretationDetailsCard from '@/components/base/slider/germline-slider-interpretation-details-card';
+import { useCase } from '@/components/base/slider/hooks/use-slider-occurrence-and-case';
+import SliderCaseDetailsCard from '@/components/base/slider/slider-case-details-card';
+import SliderHeader from '@/components/base/slider/slider-header';
+import OccurrenceSheetDetailsCard from '@/components/base/slider/slider-occurrence-details-card';
+import SliderOccurrenceSubHeader from '@/components/base/slider/slider-occurrence-sub-header';
+import SliderPatientRow from '@/components/base/slider/slider-patient-row';
+import SliderSheet from '@/components/base/slider/slider-sheet';
+import SliderSheetSkeleton from '@/components/base/slider/slider-sheet-skeleton';
+import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
+import { useI18n } from '@/components/hooks/i18n';
+import { useFirstOccurrenceTaskId } from '@/components/hooks/use-first-occurrence-task-id';
+import { useLocalPath } from '@/components/hooks/use-local-path';
+
+type CaseSliderSheetProps = {
+  case?: VariantInterpretedCase;
+  children?: React.ReactElement;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  hasPrevious?: boolean;
+  hasNext?: boolean;
+};
+
+function SliderInterpretedCaseSheet({
+  case: caseData,
+  children,
+  open,
+  setOpen,
+  onPrevious,
+  onNext,
+  hasPrevious,
+  hasNext,
+}: CaseSliderSheetProps) {
+  const { t } = useI18n();
+
+  return (
+    <SliderSheet trigger={children} open={open} setOpen={setOpen}>
+      {caseData ? (
+        <CaseSheetContent
+          caseData={caseData}
+          onPrevious={onPrevious}
+          onNext={onNext}
+          hasPrevious={hasPrevious}
+          hasNext={hasNext}
+        />
+      ) : (
+        <Empty title={t('case.empty.title')} description={t('case.empty.description')} showIcon={false} />
+      )}
+    </SliderSheet>
+  );
+}
+
+type CaseSheetContentProps = {
+  caseData: VariantInterpretedCase;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  hasPrevious?: boolean;
+  hasNext?: boolean;
+};
+
+function CaseSheetContent({ caseData, onPrevious, onNext, hasPrevious, hasNext }: CaseSheetContentProps) {
+  const { t } = useI18n();
+  const localPath = useLocalPath();
+
+  const params = useParams<{ locusId: string }>();
+  const locusId = params.locusId!;
+
+  const { taskId } = useFirstOccurrenceTaskId(
+    caseData.case_id,
+    caseData.seq_id,
+    CaseTasksWithOccurrencesDataTypeEnum.GermlineSnv,
+  );
+  const { expandResult, caseResult, isLoading } = useCase(caseData.case_id, caseData.seq_id, taskId ?? 0, locusId);
+
+  if (taskId === undefined || isLoading || !expandResult.data || !caseResult.data) {
+    return <SliderSheetSkeleton />;
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <SliderHeader onPrevious={onPrevious} onNext={onNext} hasPrevious={hasPrevious} hasNext={hasNext}>
+        <SliderPatientRow
+          patientId={caseData.patient_id}
+          relationshipToProband={caseData?.relationship_to_proband}
+          seqId={caseData?.seq_id}
+        />
+      </SliderHeader>
+      <Separator />
+      <SliderOccurrenceSubHeader
+        type="germline"
+        hgvsg={expandResult.data.hgvsg}
+        locusId={expandResult.data.locus_id}
+        actions={
+          <Button
+            variant="outline"
+            onClick={() => {
+              window.open(
+                localPath(
+                  `/case/entity/${caseResult.data?.case_id}?tab=${CaseEntityTabs.Variants}&seq_id=${caseData.seq_id}`,
+                ),
+                '_blank',
+              );
+            }}
+            size="sm"
+          >
+            {t('preview_sheet.actions.view_all_variants')}
+            <ArrowUpRight />
+          </Button>
+        }
+      />
+      <GermlineSliderInterpretationDetailsCard
+        seqId={caseData.seq_id}
+        caseId={caseData.case_id}
+        symbol={expandResult.data.symbol}
+        locusId={expandResult.data.locus_id}
+        isManeSelect={expandResult.data.is_mane_select}
+        isManePlus={expandResult.data.is_mane_plus}
+        isCanonical={expandResult.data.is_canonical}
+        transcriptId={expandResult.data.transcript_id}
+        actions={undefined}
+      />
+
+      <OccurrenceSheetDetailsCard
+        caseId={caseData.case_id}
+        seqId={caseData.seq_id}
+        relationshipToProband={caseData.relationship_to_proband}
+        locus={expandResult.data.locus || locusId}
+        start={expandResult.data.start || 0}
+        chromosome={expandResult.data.chromosome || ''}
+        zygosity={expandResult.data.zygosity}
+        transmission={expandResult.data.transmission}
+        parental_origin={expandResult.data.parental_origin}
+        genotype_quality={expandResult.data.genotype_quality}
+        filter={expandResult.data.filter}
+        father_calls={expandResult.data.father_calls}
+        mother_calls={expandResult.data.mother_calls}
+        ad_alt={expandResult.data.ad_alt}
+        ad_total={expandResult.data.ad_total}
+      />
+
+      <SliderCaseDetailsCard caseEntity={caseResult.data} />
+    </div>
+  );
+}
+
+export default SliderInterpretedCaseSheet;

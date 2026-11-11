@@ -1,0 +1,408 @@
+package client
+
+import (
+	"bytes"
+	"context"
+	"crypto/rand"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"time"
+)
+
+// RangerConfig points the admin client at Ranger. Mirrors 03_ranger_policies.py.
+type RangerConfig struct {
+	BaseURL   string // e.g. http://localhost:6080
+	AdminUser string
+	AdminPass string
+}
+
+// RangerConfigFromEnv builds a RangerConfig from the environment, defaulting to
+// the local compose stack.
+func RangerConfigFromEnv() RangerConfig {
+	return RangerConfig{
+		BaseURL:   os.Getenv("RANGER_URL"),
+		AdminUser: os.Getenv("RANGER_ADMIN_USER"),
+		AdminPass: os.Getenv("RANGER_ADMIN_PASSWORD"),
+	}
+}
+
+// RangerAdminClient talks to the Ranger REST API with stdlib net/http and basic auth.
+type RangerAdminClient struct {
+	cfg        RangerConfig
+	authHeader string
+	httpClient *http.Client
+}
+
+func NewRangerAdminClient(cfg RangerConfig) *RangerAdminClient {
+	creds := base64.StdEncoding.EncodeToString([]byte(cfg.AdminUser + ":" + cfg.AdminPass))
+	return &RangerAdminClient{
+		cfg:        cfg,
+		authHeader: "Basic " + creds,
+		httpClient: &http.Client{Timeout: 30 * time.Second},
+	}
+}
+
+// EnsureUser creates the Ranger user if it does not already exist. An existing user (HTTP 400) is treated as success.
+func (c *RangerAdminClient) EnsureUser(ctx context.Context, name string) error {
+	// The password is never used by StarRocks but is required by Ranger's
+	// user-creation API, so generate a throwaway random one per call.
+	pw, err := randomPassword()
+	if err != nil {
+		return err
+	}
+	body := map[string]any{
+		"name":         name,
+		"firstName":    name,
+		"emailAddress": "",
+		"password":     pw,
+		"userRoleList": []string{"ROLE_USER"},
+	}
+	status, payload, err := c.request(ctx, http.MethodPost, "/service/xusers/secure/users", body)
+	if err != nil {
+		return err
+	}
+	// 200/201 = created; 400 = already exists -> both fine.
+	if status != http.StatusOK && status != http.StatusCreated && status != http.StatusBadRequest {
+		return fmt.Errorf("ensure user %q: HTTP %d: %s", name, status, string(payload))
+	}
+	return nil
+}
+
+// randomPassword returns a throwaway, policy-compliant password backed by
+// crypto/rand. The base64 body covers upper/lower/digits and the fixed suffix
+// guarantees Ranger's complexity requirement (upper, lower, digit, special).
+func randomPassword() (string, error) {
+	b := make([]byte, 24)
+	if _, err := rand.Read(b); err != nil {
+		return "", fmt.Errorf("generate ranger password: %w", err)
+	}
+	return base64.RawURLEncoding.EncodeToString(b) + "Aa1!", nil
+}
+
+const rangerStarrocksService = "starrocks"
+
+type rangerRoleMember struct {
+	Name    string `json:"name"`
+	IsAdmin bool   `json:"isAdmin"`
+}
+
+type rangerRole struct {
+	ID            int64              `json:"id,omitempty"`
+	Name          string             `json:"name"`
+	CreatedByUser string             `json:"createdByUser,omitempty"`
+	Users         []rangerRoleMember `json:"users"`
+	Roles         []rangerRoleMember `json:"roles"`
+}
+
+// EnsureRole creates an empty Ranger role if absent. An existing role is left
+// untouched — its membership is owned by the user-provisioning flow, so a re-run must
+// never clobber it.
+func (c *RangerAdminClient) EnsureRole(ctx context.Context, name string) error {
+	status, payload, err := c.request(ctx, http.MethodGet, "/service/roles/roles/name/"+name, nil)
+	if err != nil {
+		return err
+	}
+	if status == http.StatusOK {
+		return nil
+	}
+	// Ranger returns 404 OR 400 ("...doesn't have permissions to get details...") for a
+	// role that does not exist; both mean "absent → create". Other statuses (401/5xx)
+	// are real failures and must NOT be read as absent (which would spuriously create).
+	if status != http.StatusNotFound && status != http.StatusBadRequest {
+		return fmt.Errorf("get role %q: HTTP %d: %s", name, status, string(payload))
+	}
+	role := rangerRole{Name: name, CreatedByUser: c.cfg.AdminUser, Users: []rangerRoleMember{}, Roles: []rangerRoleMember{}}
+	status, payload, err = c.request(ctx, http.MethodPost, "/service/roles/roles", role)
+	if err != nil {
+		return err
+	}
+	if status != http.StatusOK && status != http.StatusCreated {
+		return fmt.Errorf("create role %q: HTTP %d: %s", name, status, string(payload))
+	}
+	return nil
+}
+
+// EnsureAccessPolicy upserts a StarRocks access policy (policyType 0) granting roles
+// SELECT on the databases/tables.
+func (c *RangerAdminClient) EnsureAccessPolicy(ctx context.Context, name string, databases, tables, roles []string) error {
+	return c.upsertPolicy(ctx, name, selectPolicy(name, map[string]any{
+		"catalog":  map[string]any{"values": []string{"default_catalog"}},
+		"database": map[string]any{"values": databases},
+		"table":    map[string]any{"values": tables},
+		"column":   map[string]any{"values": []string{"*"}},
+	}, roles))
+}
+
+// EnsureViewAccessPolicy grants the same SELECT against the `view` resource, which a
+// table policy does NOT cover: `view` is a sibling of `table` under `database`, and one
+// Ranger policy cannot span two resource hierarchies. Required since StarRocks fixed
+// #72910 — until then Ranger was inert on views and a table policy was the whole story.
+func (c *RangerAdminClient) EnsureViewAccessPolicy(ctx context.Context, name string, databases, views, roles []string) error {
+	return c.upsertPolicy(ctx, name, selectPolicy(name, map[string]any{
+		"catalog":  map[string]any{"values": []string{"default_catalog"}},
+		"database": map[string]any{"values": databases},
+		"view":     map[string]any{"values": views},
+	}, roles))
+}
+
+// EnsureMaterializedViewAccessPolicy grants SELECT against the `materialized_view` resource,
+// a third sibling of `table` and `view` under `database`: neither of their policies reaches it.
+func (c *RangerAdminClient) EnsureMaterializedViewAccessPolicy(ctx context.Context, name string, databases, mvs, roles []string) error {
+	return c.upsertPolicy(ctx, name, selectPolicy(name, map[string]any{
+		"catalog":           map[string]any{"values": []string{"default_catalog"}},
+		"database":          map[string]any{"values": databases},
+		"materialized_view": map[string]any{"values": mvs},
+	}, roles))
+}
+
+// EnsureWarehouseAccessPolicy upserts a StarRocks access policy granting USAGE + ALTER on
+// the `warehouse` resource to the given users. ALTER is what authorizes SUSPEND/RESUME — so
+// under access_control=ranger the control plane (which resumes a suspended warehouse as root)
+// needs this or the warehouse cannot be resumed.
+func (c *RangerAdminClient) EnsureWarehouseAccessPolicy(ctx context.Context, name string, warehouses, users []string) error {
+	policy := map[string]any{
+		"policyType":     0,
+		"name":           name,
+		"isEnabled":      true,
+		"isAuditEnabled": false,
+		"service":        rangerStarrocksService,
+		"resources": map[string]any{
+			"warehouse": map[string]any{"values": warehouses},
+		},
+		"policyItems": []map[string]any{{
+			"users": users,
+			"accesses": []map[string]any{
+				{"type": "usage", "isAllowed": true},
+				{"type": "alter", "isAllowed": true},
+			},
+		}},
+	}
+	return c.upsertPolicy(ctx, name, policy)
+}
+
+func selectPolicy(name string, resources map[string]any, roles []string) map[string]any {
+	return map[string]any{
+		"policyType":     0,
+		"name":           name,
+		"isEnabled":      true,
+		"isAuditEnabled": false,
+		"service":        rangerStarrocksService,
+		"resources":      resources,
+		"policyItems": []map[string]any{{
+			"roles":    roles,
+			"accesses": []map[string]any{{"type": "select", "isAllowed": true}},
+		}},
+	}
+}
+
+// EnsureRowFilterPolicy upserts a StarRocks row-filter policy (policyType 2) restricting
+// SELECT on database.table to rows matching filterExpr, for the given roles. A caller
+// matched by no item is unfiltered (Ranger applies no filter), so root/admins need no item.
+func (c *RangerAdminClient) EnsureRowFilterPolicy(ctx context.Context, name, database, table, filterExpr string, roles []string) error {
+	policy := map[string]any{
+		"policyType":     2,
+		"name":           name,
+		"isEnabled":      true,
+		"isAuditEnabled": false,
+		"service":        rangerStarrocksService,
+		"resources": map[string]any{
+			"catalog":  map[string]any{"values": []string{"default_catalog"}},
+			"database": map[string]any{"values": []string{database}},
+			"table":    map[string]any{"values": []string{table}},
+		},
+		"rowFilterPolicyItems": []map[string]any{{
+			"roles":         roles,
+			"accesses":      []map[string]any{{"type": "select", "isAllowed": true}},
+			"rowFilterInfo": map[string]any{"filterExpr": filterExpr},
+		}},
+	}
+	return c.upsertPolicy(ctx, name, policy)
+}
+
+// EnsureMaskPolicy upserts a StarRocks column-mask policy (policyType 1) applying a CUSTOM
+// mask expression to the given columns of databases.table, for the given roles. Ranger
+// substitutes {col} per column, so one policy covers columns that share a mask. A caller
+// matched by no item sees the column unmasked, so root/admins need no item.
+func (c *RangerAdminClient) EnsureMaskPolicy(ctx context.Context, name string, databases []string, table string, columns []string, maskExpr string, roles []string) error {
+	policy := map[string]any{
+		"policyType":     1,
+		"name":           name,
+		"isEnabled":      true,
+		"isAuditEnabled": false,
+		"service":        rangerStarrocksService,
+		"resources": map[string]any{
+			"catalog":  map[string]any{"values": []string{"default_catalog"}},
+			"database": map[string]any{"values": databases},
+			"table":    map[string]any{"values": []string{table}},
+			"column":   map[string]any{"values": columns},
+		},
+		"dataMaskPolicyItems": []map[string]any{{
+			"roles":        roles,
+			"accesses":     []map[string]any{{"type": "select", "isAllowed": true}},
+			"dataMaskInfo": map[string]any{"dataMaskType": "CUSTOM", "valueExpr": maskExpr},
+		}},
+	}
+	return c.upsertPolicy(ctx, name, policy)
+}
+
+// upsertPolicy creates the policy (POST) or updates it in place by id (PUT) so an existing
+// policy is never deleted-then-recreated (no access-revoke window). The GET-by-name probe
+// distinguishes the two.
+func (c *RangerAdminClient) upsertPolicy(ctx context.Context, name string, policy map[string]any) error {
+	status, payload, err := c.request(ctx, http.MethodGet,
+		fmt.Sprintf("/service/public/v2/api/service/%s/policy/%s", rangerStarrocksService, name), nil)
+	if err != nil {
+		return err
+	}
+	switch status {
+	case http.StatusOK:
+		var existing struct {
+			ID int64 `json:"id"`
+		}
+		if err := json.Unmarshal(payload, &existing); err != nil {
+			return fmt.Errorf("parse policy %q: %w", name, err)
+		}
+		policy["id"] = existing.ID
+		status, payload, err = c.request(ctx, http.MethodPut, fmt.Sprintf("/service/public/v2/api/policy/%d", existing.ID), policy)
+	case http.StatusNotFound:
+		status, payload, err = c.request(ctx, http.MethodPost, "/service/plugins/policies", policy)
+	default:
+		return fmt.Errorf("get policy %q: HTTP %d: %s", name, status, string(payload))
+	}
+	if err != nil {
+		return err
+	}
+	if status != http.StatusOK && status != http.StatusCreated {
+		return fmt.Errorf("ensure policy %q: HTTP %d: %s", name, status, string(payload))
+	}
+	return nil
+}
+
+// AddUserToRole adds user to roleName via read-modify-write so it never clobbers
+// existing members. The role must already exist, a missing role is an error.
+// Idempotent: a user already in the role is a no-op.
+func (c *RangerAdminClient) AddUserToRole(ctx context.Context, roleName, user string) error {
+	role, err := c.fetchRole(ctx, roleName)
+	if err != nil {
+		return err
+	}
+
+	for _, m := range role.Users {
+		if m.Name == user {
+			return nil // already a member
+		}
+	}
+	role.Users = append(role.Users, rangerRoleMember{Name: user, IsAdmin: false})
+
+	return c.saveRole(ctx, role)
+}
+
+// RemoveUserFromRole drops user from roleName via read-modify-write so it never clobbers the
+// other members. Idempotent: a user who is not a member is a no-op, which is what lets the
+// revoke path be retried. The role must already exist — it is created with the tenant, so its
+// absence is a provisioning fault rather than an already-satisfied removal.
+func (c *RangerAdminClient) RemoveUserFromRole(ctx context.Context, roleName, user string) error {
+	role, err := c.fetchRole(ctx, roleName)
+	if err != nil {
+		return err
+	}
+
+	kept := make([]rangerRoleMember, 0, len(role.Users))
+	for _, m := range role.Users {
+		if m.Name != user {
+			kept = append(kept, m)
+		}
+	}
+	if len(kept) == len(role.Users) {
+		return nil // not a member
+	}
+	role.Users = kept
+
+	return c.saveRole(ctx, role)
+}
+
+// AddRoleToRole adds child as a sub-role of parent via read-modify-write so it never
+// clobbers existing members. parent must already exist. Idempotent: a child already
+// nested is a no-op. Used to nest each tenant role under the masking-subject marker role.
+func (c *RangerAdminClient) AddRoleToRole(ctx context.Context, parent, child string) error {
+	role, err := c.fetchRole(ctx, parent)
+	if err != nil {
+		return err
+	}
+
+	for _, m := range role.Roles {
+		if m.Name == child {
+			return nil // already nested
+		}
+	}
+	role.Roles = append(role.Roles, rangerRoleMember{Name: child, IsAdmin: false})
+
+	return c.saveRole(ctx, role)
+}
+
+// fetchRole reads a role by name, for the membership edits that must not clobber what they did
+// not touch. A role that does not exist is an error: every caller edits the membership of a role
+// the provisioning flow was supposed to have created.
+func (c *RangerAdminClient) fetchRole(ctx context.Context, roleName string) (*rangerRole, error) {
+	status, payload, err := c.request(ctx, http.MethodGet, "/service/roles/roles/name/"+roleName, nil)
+	if err != nil {
+		return nil, err
+	}
+	if status != http.StatusOK {
+		return nil, fmt.Errorf("get role %q: HTTP %d: %s", roleName, status, string(payload))
+	}
+	var role rangerRole
+	if err := json.Unmarshal(payload, &role); err != nil {
+		return nil, fmt.Errorf("parse role %q: %w", roleName, err)
+	}
+	return &role, nil
+}
+
+// saveRole writes an edited role back in place, by the id fetchRole read.
+func (c *RangerAdminClient) saveRole(ctx context.Context, role *rangerRole) error {
+	status, payload, err := c.request(ctx, http.MethodPut, fmt.Sprintf("/service/roles/roles/%d", role.ID), role)
+	if err != nil {
+		return err
+	}
+	if status != http.StatusOK && status != http.StatusCreated {
+		return fmt.Errorf("update role %q: HTTP %d: %s", role.Name, status, string(payload))
+	}
+	return nil
+}
+
+// request issues a basic-auth request to Ranger, JSON-encoding body when non-nil,
+// and returns the HTTP status code plus the raw payload bytes. The response body is
+// fully read and closed before returning, so callers never hold an open body.
+func (c *RangerAdminClient) request(ctx context.Context, method, path string, body any) (int, []byte, error) {
+	var reader io.Reader
+	if body != nil {
+		data, err := json.Marshal(body)
+		if err != nil {
+			return 0, nil, err
+		}
+		reader = bytes.NewReader(data)
+	}
+	req, err := http.NewRequestWithContext(ctx, method, c.cfg.BaseURL+path, reader)
+	if err != nil {
+		return 0, nil, err
+	}
+	req.Header.Set("Authorization", c.authHeader)
+	req.Header.Set("Accept", "application/json")
+	if body != nil {
+		req.Header.Set("Content-Type", "application/json")
+	}
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return 0, nil, err
+	}
+	defer func() { _ = resp.Body.Close() }()
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return 0, nil, err
+	}
+	return resp.StatusCode, data, nil
+}

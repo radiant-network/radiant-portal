@@ -1,0 +1,94 @@
+package server
+
+import (
+	"context"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
+)
+
+type userPreferencesStore interface {
+	GetUserPreferences(ctx context.Context, userId string, key string) (*types.JsonMap[string, interface{}], error)
+	UpdateUserPreferences(ctx context.Context, userId string, key string, content types.JsonMap[string, interface{}]) (*types.JsonMap[string, interface{}], error)
+}
+
+// GetUserPreferencesHandler
+// @Summary Get user preferences
+// @Id getUserPreferences
+// @Description Get user preferences
+// @Tags user_preferences
+// @Security bearerauth
+// @Param key path string true "Preference key"
+// @Produce json
+// @Success 200 {object} types.UserPreference
+// @Failure 401 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /users/preferences/{key} [get]
+func GetUserPreferencesHandler(repo userPreferencesStore, auth utils.Auth) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userId, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleUnauthorizedError(c)
+			return
+		}
+		key := c.Param("key")
+		userPreference, err := repo.GetUserPreferences(c.Request.Context(), *userId, key)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if userPreference == nil {
+			HandleNotFoundError(c, "user preferences")
+			return
+		}
+		c.JSON(http.StatusOK, userPreference)
+	}
+}
+
+// UpdateUserPreferencesHandler
+// @Summary Create or update user preference
+// @Id postUserPreferences
+// @Description Create or update user preference
+// @Tags user_preferences
+// @Security bearerauth
+// @Param key path string true "Preference key"
+// @Param			message	body		types.UserPreference	true	"User Preference to create or update"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.UserPreference
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /users/preferences/{key} [post]
+func UpdateUserPreferencesHandler(repo userPreferencesStore, auth utils.Auth) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body types.JsonMap[string, interface{}]
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		userId, err := auth.RetrieveUserIdFromToken(c)
+		if err != nil {
+			HandleUnauthorizedError(c)
+			return
+		}
+		key := c.Param("key")
+		userPreference, err := repo.UpdateUserPreferences(c.Request.Context(), *userId, key, body)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, userPreference)
+	}
+}

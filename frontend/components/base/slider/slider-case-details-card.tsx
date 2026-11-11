@@ -1,0 +1,164 @@
+import { ArrowUpRight, FolderOpen } from 'lucide-react';
+
+import type { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
+import AffectedStatusBadge, { type AffectedStatusProps } from '@/components/base/badges/affected-status-badge';
+import { PROBAND } from '@/components/base/constants';
+import ExpandableList from '@/components/base/list/expandable-list';
+import PhenotypeConditionLink from '@/components/base/navigation/phenotypes/phenotype-condition-link';
+import { Badge } from '@/components/base/shadcn/badge';
+import { Button } from '@/components/base/shadcn/button';
+import { useI18n } from '@/components/hooks/i18n';
+import { useLocalPath } from '@/components/hooks/use-local-path';
+import { getMemberKey, isPrenatalMother } from '@/components/lib/case-entity';
+import { formatDate } from '@/components/lib/date';
+
+import EmptyField from '../information/empty-field';
+
+import SliderCard from './slider-card';
+
+const PHENOTYPES_VISIBLE_COUNT = 6;
+
+const SliderCaseDetailsCard = ({ caseEntity }: { caseEntity: CaseEntity }) => {
+  const { t } = useI18n();
+  const localPath = useLocalPath();
+
+  return (
+    <SliderCard
+      icon={FolderOpen}
+      title={t('preview_sheet.case.title', { id: caseEntity.case_id })}
+      actions={
+        <Button variant="outline" size="sm" asChild>
+          <a href={localPath(`/case/entity/${caseEntity.case_id}`)} target="_blank" rel="noreferrer">
+            {t('preview_sheet.case.actions.open_case')}
+            <ArrowUpRight />
+          </a>
+        </Button>
+      }
+    >
+      <div className="flex flex-col gap-3 text-sm [&_h4]:text-sm">
+        {caseEntity.members.map(member => (
+          <FamilyMemberCard key={getMemberKey(member)} member={member} caseEntity={caseEntity} />
+        ))}
+      </div>
+    </SliderCard>
+  );
+};
+
+type FamilyMemberCardProps = {
+  member: CasePatientClinicalInformation;
+  caseEntity: CaseEntity;
+};
+
+function FamilyMemberCard({ member, caseEntity }: FamilyMemberCardProps) {
+  const { t } = useI18n();
+  const isProband = member.relationship_to_proband === PROBAND;
+  const hasNonObservedPhenotypes = (member.non_observed_phenotypes?.length ?? 0) > 0;
+  const hasPhenotypes = (member.observed_phenotypes?.length ?? 0) > 0 || hasNonObservedPhenotypes;
+
+  return (
+    <div className="rounded-md border border-border">
+      <div className="flex flex-col gap-4 p-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold">
+            {t(`common.relationships.${member.relationship_to_proband}`)}
+            {isPrenatalMother(member, caseEntity.members) && ` (${t('common.relationships.mother')})`}
+          </h3>
+          {member.affected_status_code && (
+            <AffectedStatusBadge status={member.affected_status_code as AffectedStatusProps} />
+          )}
+        </div>
+
+        <div className="flex gap-3">
+          <div className="flex flex-col gap-2">
+            <span className="text-muted-foreground">{t('preview_sheet.case.details.sex')}</span>
+            <span className="text-muted-foreground">{t('preview_sheet.case.details.dob')}</span>
+            <span className="text-muted-foreground">{t('preview_sheet.case.details.ethnicity')}</span>
+          </div>
+          <div className="flex flex-col gap-2 grow">
+            <Badge variant="secondary" className="self-start">
+              {t(`common.sex.${member.sex_code}`)}
+            </Badge>
+            <span className="font-mono">
+              {member.date_of_birth ? (
+                formatDate(member.date_of_birth, t('common.date.year_month_day'), true)
+              ) : (
+                <EmptyField />
+              )}
+            </span>
+            <span>
+              {member.ethnicities?.length ? (
+                member.ethnicities.map(ethnicity => ethnicity.name || ethnicity.code).join('/')
+              ) : (
+                <EmptyField />
+              )}
+            </span>
+          </div>
+        </div>
+        {isProband && (
+          <div className="space-y-1">
+            <h4 className="font-semibold">{t('preview_sheet.case.details.primary_condition')}</h4>
+            {caseEntity.primary_condition_id ? (
+              <PhenotypeConditionLink
+                code={caseEntity.primary_condition_id}
+                name={caseEntity.primary_condition_name}
+                showCode={false}
+              />
+            ) : (
+              <p className="text-muted-foreground text-xs">{t('preview_sheet.case.details.no_primary_condition')}</p>
+            )}
+          </div>
+        )}
+        {hasPhenotypes ? (
+          <>
+            <div className="space-y-1">
+              <h4 className="font-semibold">{t('preview_sheet.case.details.phenotypes')}</h4>
+              <ExpandableList
+                items={(member.observed_phenotypes ?? []).map(item => (
+                  <PhenotypeConditionLink
+                    key={item.id}
+                    code={item.id}
+                    name={item.name}
+                    onsetCode={item.onset_code}
+                    showCode={false}
+                  />
+                ))}
+                visibleCount={PHENOTYPES_VISIBLE_COUNT}
+                size="md"
+                emptyMessage={
+                  <p className="text-muted-foreground text-xs">{t('preview_sheet.case.details.no_phenotype')}</p>
+                }
+              />
+            </div>
+            {hasNonObservedPhenotypes && (
+              <div className="space-y-1">
+                <h4 className="font-semibold">{t('preview_sheet.case.details.non_observed_phenotypes')}</h4>
+                <ExpandableList
+                  items={(member.non_observed_phenotypes ?? []).map(item => (
+                    <PhenotypeConditionLink
+                      key={item.id}
+                      code={item.id}
+                      name={item.name}
+                      onsetCode={item.onset_code}
+                      showCode={false}
+                    />
+                  ))}
+                  size="md"
+                  visibleCount={PHENOTYPES_VISIBLE_COUNT}
+                  emptyMessage={
+                    <p className="text-muted-foreground text-xs">
+                      {t('preview_sheet.case.details.no_non_observed_phenotype')}
+                    </p>
+                  }
+                />
+              </div>
+            )}
+          </>
+        ) : (
+          <p className="text-muted-foreground text-xs">{t('preview_sheet.case.details.no_phenotype')}</p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default SliderCaseDetailsCard;

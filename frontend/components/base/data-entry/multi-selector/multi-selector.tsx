@@ -1,0 +1,563 @@
+/* eslint-disable no-nested-ternary */
+import { type KeyboardEvent, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { Command as CommandPrimitive } from 'cmdk';
+import { Check, XIcon } from 'lucide-react';
+
+import { Badge } from '@/components/base/shadcn/badge';
+import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/base/shadcn/command';
+import { Skeleton } from '@/components/base/shadcn/skeleton';
+import { useI18n } from '@/components/hooks/i18n';
+import { useDebounce } from '@/hooks/useDebounce';
+import { cn } from '@/lib/utils';
+
+import type { MultipleSelectorProps, MultiSelectorGroupOption, MultiSelectorOption } from './multi-selector.types';
+import {
+  getGroupOptionSignature,
+  getSelectedOptionByValue,
+  isOptionsExist,
+  transToGroupOption,
+} from './multi-selector.utils';
+
+function MultiSelector({
+  value,
+  onChange,
+  placeholder,
+  defaultOptions: arrayDefaultOptions = [],
+  options: arrayOptions,
+  debounceDelay = 500,
+  onSearch,
+  onSearchSync,
+  emptyIndicator,
+  maxSelected = Number.MAX_SAFE_INTEGER,
+  onMaxSelected,
+  disabled,
+  groupBy,
+  className,
+  selectFirstItem = true,
+  creatable = false,
+  triggerSearchOnFocus = false,
+  commandProps,
+  inputProps,
+  hideClearAllButton = false,
+  openOnFocus = false,
+  multiline = false,
+  renderBadge,
+  ref,
+  'aria-invalid': ariaInvalid,
+}: MultipleSelectorProps) {
+  const { t } = useI18n();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const badgesContainerRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [onScrollbar, setOnScrollbar] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const [selected, setSelected] = useState<MultiSelectorOption[]>(
+    getSelectedOptionByValue(value || [], arrayDefaultOptions),
+  );
+  const [visibleBadgesCount, setVisibleBadgesCount] = useState<number>(0);
+  const [showHiddenBadgesDropdown, setShowHiddenBadgesDropdown] = useState(false);
+  const [options, setOptions] = useState<MultiSelectorGroupOption>(transToGroupOption(arrayDefaultOptions, groupBy));
+  const [inputValue, setInputValue] = useState('');
+  const debouncedSearchTerm = useDebounce(inputValue, debounceDelay);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      selectedValue: [...selected],
+      input: inputRef.current as HTMLInputElement,
+      focus: () => inputRef?.current?.focus(),
+      reset: () => setSelected([]),
+    }),
+    [selected],
+  );
+
+  const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+    if (
+      dropdownRef.current &&
+      !dropdownRef.current.contains(event.target as Node) &&
+      inputRef.current &&
+      !inputRef.current.contains(event.target as Node)
+    ) {
+      setOpen(false);
+      inputRef.current.blur();
+    }
+  };
+
+  const handleUnselect = useCallback(
+    (option: MultiSelectorOption) => {
+      const newOptions = selected.filter(s => s.value !== option.value);
+      setSelected(newOptions);
+      onChange?.(newOptions.map(o => o.value));
+    },
+    [onChange, selected],
+  );
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLDivElement>) => {
+      const input = inputRef.current;
+      if (input) {
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+          if (input.value === '' && selected.length > 0) {
+            const lastSelectOption = selected[selected.length - 1];
+            // If last item is fixed, we should not remove it.
+            if (!lastSelectOption.fixed) {
+              handleUnselect(selected[selected.length - 1]);
+            }
+          }
+        }
+        // This is not a default behavior of the <input /> field
+        if (e.key === 'Escape') {
+          input.blur();
+        }
+      }
+    },
+    [handleUnselect, selected],
+  );
+
+  useEffect(() => {
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchend', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchend', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchend', handleClickOutside);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (value && arrayDefaultOptions.length > 0) {
+      setSelected(getSelectedOptionByValue(value, arrayDefaultOptions));
+    }
+  }, [value, arrayDefaultOptions]);
+
+  // Calculate how many badges can fit on one line
+  useEffect(() => {
+    // In multiline mode every badge is rendered and the container wraps freely.
+    if (multiline) {
+      setVisibleBadgesCount(selected.length);
+      return;
+    }
+
+    if (!badgesContainerRef.current || selected.length === 0) {
+      setVisibleBadgesCount(selected.length);
+      return;
+    }
+
+    // When user is typing, show only 1 badge + "+X" to make room for input
+    if (inputValue.length > 0) {
+      setVisibleBadgesCount(1);
+      return;
+    }
+
+    // ellipsis with +n when badge are overflowing
+    const calculateVisibleBadges = () => {
+      const container = badgesContainerRef.current;
+      if (!container) return;
+
+      const children = Array.from(container.children) as HTMLElement[];
+      if (children.length === 0) return;
+
+      const hasOverflowBadge = selected.length > visibleBadgesCount;
+      const renderedBadgeCount = hasOverflowBadge ? Math.max(0, children.length - 2) : Math.max(0, children.length - 1);
+      const renderedBadges = children.slice(0, renderedBadgeCount);
+
+      if (renderedBadges.length === 0) {
+        setVisibleBadgesCount(1);
+        return;
+      }
+
+      const containerWidth = container.offsetWidth;
+      const gap = 4; // gap-1 = 4px
+      const overflowBadgeWidth = 40; // approx width of the "+N" badge
+      const inputWidth = 20; // reserved width for the input cursor
+
+      // Estimate width for unrendered badges via the average of the rendered ones.
+      const avgWidth = renderedBadges.reduce((sum, b) => sum + b.offsetWidth, 0) / renderedBadges.length;
+
+      let totalWidth = 0;
+      let count = 0;
+      for (let i = 0; i < selected.length; i++) {
+        const badgeWidth = i < renderedBadges.length ? renderedBadges[i].offsetWidth : avgWidth;
+        totalWidth += badgeWidth + (i > 0 ? gap : 0);
+
+        const isLast = i === selected.length - 1;
+        const reserved = isLast ? inputWidth : overflowBadgeWidth + gap + inputWidth;
+
+        if (totalWidth + reserved > containerWidth) break;
+        count++;
+      }
+
+      // Ensure at least one badge is visible
+      setVisibleBadgesCount(Math.max(1, count));
+    };
+
+    // Initial calculation
+    calculateVisibleBadges();
+
+    // Recalculate on window resize
+    const resizeObserver = new ResizeObserver(calculateVisibleBadges);
+    if (badgesContainerRef.current) {
+      resizeObserver.observe(badgesContainerRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [selected, inputValue, multiline]);
+
+  useEffect(() => {
+    /** If `onSearch` is provided, do not trigger options updated. */
+    if (!arrayOptions || onSearch) {
+      return;
+    }
+    const newOption = transToGroupOption(arrayOptions || [], groupBy);
+    if (getGroupOptionSignature(newOption) !== getGroupOptionSignature(options)) {
+      setOptions(newOption);
+    }
+  }, [arrayDefaultOptions, arrayOptions, groupBy, onSearch, options]);
+
+  useEffect(() => {
+    const doSearchSync = () => {
+      const res = onSearchSync?.(debouncedSearchTerm);
+      setOptions(transToGroupOption(res || [], groupBy));
+    };
+
+    const exec = async () => {
+      if (!onSearchSync || !open) return;
+
+      if (triggerSearchOnFocus) {
+        doSearchSync();
+      }
+
+      if (debouncedSearchTerm) {
+        doSearchSync();
+      }
+    };
+
+    void exec();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchTerm, groupBy, open, triggerSearchOnFocus]);
+
+  useEffect(() => {
+    /** async search */
+
+    const doSearch = async () => {
+      setIsLoading(true);
+      const res = await onSearch?.(debouncedSearchTerm);
+      const groupedOptions = transToGroupOption(res || [], groupBy);
+      setOptions(groupedOptions);
+      setIsLoading(false);
+    };
+
+    const exec = async () => {
+      if (!onSearch || !open) return;
+
+      if (triggerSearchOnFocus) {
+        await doSearch();
+      }
+
+      if (debouncedSearchTerm) {
+        await doSearch();
+      }
+    };
+
+    void exec();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchTerm, groupBy, open, triggerSearchOnFocus]);
+
+  const CreatableItem = () => {
+    if (!creatable) return undefined;
+    if (
+      isOptionsExist(options, [{ value: inputValue, label: inputValue }]) ||
+      selected.find(s => s.value === inputValue)
+    ) {
+      return undefined;
+    }
+
+    const Item = (
+      <CommandItem
+        value={inputValue}
+        className="cursor-pointer"
+        onMouseDown={e => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onSelect={(value: string) => {
+          if (selected.length >= maxSelected) {
+            onMaxSelected?.(selected.length);
+            return;
+          }
+          setInputValue('');
+          // Clear search results by reverting to default options
+          setOptions(transToGroupOption(arrayDefaultOptions, groupBy));
+          // Close the dropdown
+          setOpen(false);
+          const newOptions = [...selected, { value, label: value }];
+          setSelected(newOptions);
+          onChange?.(newOptions.map(o => o.value));
+        }}
+      >
+        {`Create "${inputValue}"`}
+      </CommandItem>
+    );
+
+    // For normal creatable
+    if (!onSearch && inputValue.length > 0) {
+      return Item;
+    }
+
+    // For async search creatable. avoid showing creatable item before loading at first.
+    if (onSearch && debouncedSearchTerm.length > 0 && !isLoading) {
+      return Item;
+    }
+
+    return undefined;
+  };
+
+  const EmptyItem = useCallback(() => {
+    // For async search that showing emptyIndicator
+    if (onSearch && !creatable && Object.keys(options).length === 0) {
+      return <div className="p-2 py-4 text-center text-sm">{t('common.facets.no_values_found')}</div>;
+    }
+
+    return (
+      <CommandEmpty>
+        {emptyIndicator || <div className="text-center text-sm">{t('common.facets.no_values_found')}</div>}
+      </CommandEmpty>
+    );
+  }, [creatable, emptyIndicator, onSearch, options]);
+
+  /** Avoid Creatable Selector freezing or lagging when paste a long string. */
+  const commandFilter = useCallback(() => {
+    if (commandProps?.filter) {
+      return commandProps.filter;
+    }
+
+    if (creatable) {
+      return (value: string, search: string) => (value.toLowerCase().includes(search.toLowerCase()) ? 1 : -1);
+    }
+    // Using default filter in `cmdk`. We don't have to provide it.
+    return undefined;
+  }, [creatable, commandProps?.filter]);
+
+  return (
+    <Command
+      {...commandProps}
+      onKeyDown={e => {
+        handleKeyDown(e);
+        commandProps?.onKeyDown?.(e);
+      }}
+      className={cn('h-auto overflow-visible bg-background', commandProps?.className)}
+      shouldFilter={commandProps?.shouldFilter !== undefined ? commandProps.shouldFilter : !onSearch} // When onSearch is provided, we don't want to filter the options. You can still override it.
+      filter={commandFilter()}
+    >
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- mouse shortcut, the inner input is focusable */}
+      <div
+        ref={dropdownRef}
+        className={cn(
+          'flex min-h-9 shadow-xs rounded-md border border-input text-sm ring-offset-background focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
+          'has-[[aria-invalid=true]]:border-destructive has-[[aria-invalid=true]]:focus-within:border-destructive has-[[aria-invalid=true]]:focus-within:ring-destructive/50',
+          {
+            'px-3 py-2': selected.length !== 0,
+            'cursor-text': !disabled && selected.length !== 0,
+          },
+          className,
+        )}
+        onClick={() => {
+          if (disabled) return;
+          inputRef?.current?.focus();
+        }}
+      >
+        <div ref={badgesContainerRef} className="relative flex flex-1 flex-wrap gap-1">
+          {selected.slice(0, visibleBadgesCount).map(option => {
+            if (renderBadge) {
+              return renderBadge({
+                option,
+                onRemove: () => handleUnselect(option),
+              });
+            }
+
+            return (
+              <Badge key={option.value} data-disabled={disabled || undefined} onClose={() => handleUnselect(option)}>
+                {option.badgeLabel || (typeof option.label === 'string' ? option.label : option.value)}
+              </Badge>
+            );
+          })}
+          {selected.length > visibleBadgesCount && (
+            <Badge
+              className="cursor-pointer"
+              onClick={e => {
+                e.stopPropagation();
+                setShowHiddenBadgesDropdown(true);
+                setOpen(true);
+              }}
+            >
+              +{selected.length - visibleBadgesCount}
+            </Badge>
+          )}
+          <CommandPrimitive.Input
+            {...inputProps}
+            ref={inputRef}
+            value={inputValue}
+            disabled={disabled}
+            aria-invalid={ariaInvalid ?? inputProps?.['aria-invalid']}
+            onValueChange={value => {
+              setInputValue(value);
+              setShowHiddenBadgesDropdown(false);
+              // Open dropdown based on openOnFocus prop and input value
+              if (openOnFocus) {
+                // Keep dropdown open when typing or clearing input
+                if (!open && value.length > 0) {
+                  setOpen(true);
+                }
+              } else {
+                // Only open when there's text in the input
+                setOpen(value.length > 0);
+              }
+              inputProps?.onValueChange?.(value);
+            }}
+            onBlur={event => {
+              if (!onScrollbar) {
+                setOpen(false);
+                setShowHiddenBadgesDropdown(false);
+              }
+              inputProps?.onBlur?.(event);
+            }}
+            onFocus={event => {
+              // Open dropdown based on openOnFocus prop
+              if (openOnFocus) {
+                setOpen(true);
+              } else if (inputValue.length > 0) {
+                setOpen(true);
+              }
+              inputProps?.onFocus?.(event);
+            }}
+            placeholder={selected.length !== 0 ? '' : placeholder}
+            className={cn(
+              'flex-1 bg-transparent w-full outline-none placeholder:text-muted-foreground',
+              {
+                'px-3 py-2': selected.length === 0,
+                'ml-1 w-full': selected.length !== 0,
+              },
+              inputProps?.className,
+            )}
+          />
+        </div>
+        <button
+          type="button"
+          aria-label={t('a11y.multi_selector.clear_all')}
+          onClick={() => {
+            setSelected(selected.filter(s => s.fixed));
+            onChange?.(selected.filter(s => s.fixed).map(o => o.value));
+          }}
+          className={cn(
+            multiline && 'self-start',
+            (hideClearAllButton ||
+              disabled ||
+              selected.length < 1 ||
+              selected.filter(s => s.fixed).length === selected.length) &&
+              'hidden',
+          )}
+        >
+          <XIcon size={18} />
+        </button>
+      </div>
+      <div className={cn('relative', open ? 'block' : 'hidden')} ref={dropdownRef}>
+        <CommandList
+          className="absolute top-1 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in fade-in-0 zoom-in-95"
+          onMouseLeave={() => {
+            setOnScrollbar(false);
+          }}
+          onMouseEnter={() => {
+            setOnScrollbar(true);
+          }}
+        >
+          {isLoading ? (
+            <div className="p-1">
+              <Skeleton className="h-8 w-full" />
+            </div>
+          ) : showHiddenBadgesDropdown ? (
+            <CommandGroup className="h-full overflow-auto">
+              {selected.slice(visibleBadgesCount).map(option => (
+                <CommandItem
+                  key={option.value}
+                  value={option.value}
+                  onSelect={() => {
+                    handleUnselect(option);
+                    if (selected.length - 1 <= visibleBadgesCount) {
+                      setShowHiddenBadgesDropdown(false);
+                      setOpen(false);
+                    }
+                  }}
+                  className="cursor-pointer"
+                >
+                  <span className="flex-1">{option.label}</span>
+                  <Check className="w-4" />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          ) : (
+            <>
+              {EmptyItem()}
+              {CreatableItem()}
+              {!selectFirstItem && <CommandItem value="-" className="hidden" />}
+              {Object.entries(options).map(([key, dropdowns]) => {
+                const isMaxReached = selected.length >= maxSelected;
+
+                return (
+                  <CommandGroup key={key} heading={key} className="h-full overflow-auto">
+                    <>
+                      {dropdowns.map(option => {
+                        const isSelected = selected.some(s => s.value === option.value);
+                        const isDisabled = option.disable || (isMaxReached && !isSelected);
+
+                        return (
+                          <CommandItem
+                            key={option.value}
+                            value={option.value}
+                            disabled={isDisabled}
+                            onSelect={() => {
+                              if (!isSelected && selected.length >= maxSelected) {
+                                onMaxSelected?.(selected.length);
+                                return;
+                              }
+
+                              setInputValue('');
+                              setOptions(transToGroupOption(arrayDefaultOptions, groupBy));
+
+                              const newOptions = isSelected
+                                ? selected.filter(s => s.value !== option.value)
+                                : [...selected, option];
+
+                              setSelected(newOptions);
+                              onChange?.(newOptions.map(o => o.value));
+                            }}
+                            className={cn('cursor-pointer', isDisabled && 'cursor-default text-muted-foreground')}
+                          >
+                            <span className="flex-1">{option.label}</span>
+                            {isSelected ? <Check className="w-4" /> : null}
+                          </CommandItem>
+                        );
+                      })}
+                    </>
+                  </CommandGroup>
+                );
+              })}
+            </>
+          )}
+        </CommandList>
+      </div>
+    </Command>
+  );
+}
+
+MultiSelector.displayName = 'MultipleSelector';
+
+export default MultiSelector;

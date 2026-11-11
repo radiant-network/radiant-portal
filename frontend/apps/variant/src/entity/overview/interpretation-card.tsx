@@ -1,0 +1,50 @@
+import { useParams } from 'react-router';
+import { HospitalIcon } from 'lucide-react';
+
+import type { VariantOverview } from '@/api/api';
+import { Card, CardContent, CardHeader, type CardProps } from '@/components/base/shadcn/card';
+import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
+import { useI18n } from '@/components/hooks/i18n';
+import { useLocalPath } from '@/components/hooks/use-local-path';
+
+import ClassificationSection from './classification-section';
+
+type InterpretationCardProps = CardProps & {
+  data: VariantOverview;
+};
+
+function InterpretationCard({ data, ...props }: InterpretationCardProps) {
+  const { t } = useI18n();
+  const localPath = useLocalPath();
+  const params = useParams<{ locusId: string }>();
+
+  return (
+    <Card data-cy="interpretation-card" {...props}>
+      <CardHeader>
+        <div className="flex items-center gap-6">
+          <HospitalIcon />
+          <span className="font-semibold">{t('variant_entity.overview.interpretation')}</span>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <ClassificationSection
+          dataCy="my-network"
+          href={localPath(`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.Cases}`)}
+          title={t('variant_entity.overview.my_network')}
+          counts={data.interpretation_classification_counts ?? {}}
+          emptyText={t('variant_entity.overview.no_interpretation_network')}
+        />
+        {/*
+        <ClassificationSection
+          href={localPath(`/variants/entity/${params.locusId}?tab=${VariantEntityTabs.EvidenceAndConditions}`)}
+          title={t('variant_entity.overview.clin_var')}
+          counts={data.interpretation_classification_counts ?? {}}
+          emptyText={t('variant_entity.overview.no_clin_var_interpretation')}
+        />
+        */}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default InterpretationCard;

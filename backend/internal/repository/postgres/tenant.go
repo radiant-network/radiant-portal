@@ -1,0 +1,150 @@
+package postgres
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"gorm.io/gorm"
+)
+
+type roleSeed struct {
+	Code          string
+	NameEn        string
+	DescriptionEn string
+	NameFr        string
+	DescriptionFr string
+	Actions       []string
+}
+
+var DefaultRoles = []roleSeed{
+	{
+		Code:          "tenant_admin",
+		NameEn:        "Administrator",
+		DescriptionEn: "Full administrative access to this network: manage members, organizations, and roles.",
+		NameFr:        "Administrateur",
+		DescriptionFr: "Accès administratif complet à ce réseau : gérer les membres, les organisations et les rôles.",
+		Actions:       []string{"can_manage_user", "can_manage_org", "can_manage_role", "can_manage_analysis_catalog"},
+	},
+	{
+		Code:          "member",
+		NameEn:        "Member",
+		DescriptionEn: "Baseline access for everyone: search cases and browse the knowledge base (genes, variants, phenotypes, population frequencies).",
+		NameFr:        "Membre",
+		DescriptionFr: "Accès de base pour tous : rechercher des cas et consulter la base de connaissances (gènes, variants, phénotypes, fréquences populationnelles).",
+		Actions:       []string{"can_search_case", "can_view_kb"},
+	},
+	{
+		Code:          "geneticist",
+		NameEn:        "Geneticist",
+		DescriptionEn: "Interpret, comment on, and flag variants, read PHI, and download case files at the selected organization(s).",
+		NameFr:        "Généticien",
+		DescriptionFr: "Interpréter, commenter et marquer les variants, consulter les RPS et télécharger les fichiers de cas dans les organisations sélectionnées.",
+		Actions:       []string{"can_read_pii", "can_interpret_variant", "can_comment_variant", "can_flag_variant", "can_download_file", "can_edit_case"},
+	},
+	{
+		Code:          "data_manager",
+		NameEn:        "Data Manager",
+		DescriptionEn: "Submit and manage data batches (cases, patients, samples, sequencing) at the selected organization(s), and manage the network's gene panels.",
+		NameFr:        "Gestionnaire de données",
+		DescriptionFr: "Soumettre et gérer des lots de données (cas, patients, échantillons, séquençage) dans les organisations sélectionnées, et gérer les panels de gènes du réseau.",
+		Actions:       []string{"can_ingest_data", "can_manage_analysis_catalog"},
+	},
+}
+
+type TenantRepository struct {
+	db *gorm.DB
+}
+
+func NewTenantRepository(db database.PostgresDB) *TenantRepository {
+	if db.DB == nil {
+		log.Print("TenantRepository: db is nil")
+		return nil
+	}
+	return &TenantRepository{db: db.DB}
+}
+
+func (r *TenantRepository) ListTenants(ctx context.Context) ([]string, error) {
+	var codes []string
+	if err := r.db.WithContext(ctx).Raw(`SELECT code FROM public.tenant ORDER BY code`).Scan(&codes).Error; err != nil {
+		return nil, fmt.Errorf("list tenants: %w", err)
+	}
+	return codes, nil
+}
+
+// unsupportedFederationTypes are Postgres column types the StarRocks JDBC catalog
+// cannot map, so they are excluded.
+var unsupportedFederationTypes = []string{"json", "jsonb", "uuid"}
+
+// FederatableColumns returns, per table, the columns whose types the radiant_jdbc
+// catalog can read (ordinal order).
+func (r *TenantRepository) FederatableColumnsForViews(ctx context.Context) (map[string][]string, error) {
+	return r.FederatableColumns(ctx, types.ViewTables)
+}
+
+func (r *TenantRepository) FederatableColumns(ctx context.Context, tables []string) (map[string][]string, error) {
+	var rows []struct {
+		TableName  string
+		ColumnName string
+	}
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT table_name, column_name
+		FROM information_schema.columns
+		WHERE table_schema = 'public' AND table_name IN ? AND data_type NOT IN ?
+		ORDER BY table_name, ordinal_position`,
+		tables, unsupportedFederationTypes).Scan(&rows).Error
+	if err != nil {
+		return nil, fmt.Errorf("fetch federatable columns: %w", err)
+	}
+	cols := make(map[string][]string, len(tables))
+	for _, row := range rows {
+		cols[row.TableName] = append(cols[row.TableName], row.ColumnName)
+	}
+	return cols, nil
+}
+
+func (r *TenantRepository) EnsureTenant(ctx context.Context, code, name string) error {
+	if err := types.ValidateTenantCode(code); err != nil {
+		return err
+	}
+	err := r.db.WithContext(ctx).Exec(`
+		INSERT INTO public.tenant (code, name)
+		VALUES (?, ?)
+		ON CONFLICT (code) DO NOTHING`,
+		code, name).Error
+	if err != nil {
+		return fmt.Errorf("ensure tenant %q: %w", code, err)
+	}
+	return nil
+}
+
+func (r *TenantRepository) SeedDefaultRoles(ctx context.Context, tenantCode string) error {
+	if err := types.ValidateTenantCode(tenantCode); err != nil {
+		return err
+	}
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		for _, role := range DefaultRoles {
+			// is_default marks these as the locked catalog: a tenant's own custom roles are the
+			// only ones its administrators may edit or delete.
+			if err := tx.Exec(`
+				INSERT INTO public.role (tenant_code, code, name_en, description_en, name_fr, description_fr, is_default)
+				VALUES (?, ?, ?, ?, ?, ?, true)
+				ON CONFLICT (tenant_code, code) DO NOTHING`,
+				tenantCode, role.Code, role.NameEn, role.DescriptionEn, role.NameFr, role.DescriptionFr).Error; err != nil {
+				return fmt.Errorf("seed role %s/%s: %w", tenantCode, role.Code, err)
+			}
+			for _, action := range role.Actions {
+				if err := tx.Exec(`
+					INSERT INTO public.role_action (tenant_code, role_code, action_code)
+					VALUES (?, ?, ?)
+					ON CONFLICT (tenant_code, role_code, action_code) DO NOTHING`,
+					tenantCode, role.Code, action).Error; err != nil {
+					return fmt.Errorf("seed role_action %s/%s/%s: %w", tenantCode, role.Code, action, err)
+				}
+			}
+		}
+		return nil
+	})
+}

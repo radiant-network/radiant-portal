@@ -1,0 +1,124 @@
+import type { ComponentType, ReactNode } from 'react';
+import { ClipboardList } from 'lucide-react';
+
+import { useDataTable } from '@/components/base/data-table/hooks/use-data-table';
+import { Button } from '@/components/base/shadcn/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
+
+import { useCaseVariantPermissions } from '../use-case-variant-permissions';
+
+import type { InterpretationDialogMode } from './types';
+
+type InterpretationDialogProps = {
+  locusId: string;
+  taskId: number;
+  transcriptId?: string;
+  patientId?: number;
+  handleSaveCallback?: () => void;
+  renderTrigger: (handleOpen: () => void) => ReactNode;
+  mode?: InterpretationDialogMode;
+};
+
+type InterpretationCellProps = {
+  locusId: string;
+  taskId: number;
+  transcriptId?: string;
+  hasInterpretation: boolean;
+  patientId?: number;
+  InterpretationDialog: ComponentType<InterpretationDialogProps>;
+};
+
+function InterpretationCell({
+  locusId,
+  taskId,
+  transcriptId,
+  hasInterpretation,
+  patientId,
+  InterpretationDialog,
+}: InterpretationCellProps) {
+  const { t } = useI18n();
+  const { list, count } = useDataTable();
+  const { canInterpret } = useCaseVariantPermissions();
+
+  if (!hasInterpretation) {
+    if (!canInterpret) {
+      return (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className="size-6 cursor-default hover:bg-transparent"
+              iconOnly
+              variant="ghost"
+              aria-disabled
+              aria-label={t('variant.interpretation.tooltip.none')}
+            >
+              <ClipboardList className="text-muted-foreground/40" size={16} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('variant.interpretation.tooltip.none')}</TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return (
+      <InterpretationDialog
+        mode="create"
+        locusId={locusId}
+        taskId={taskId}
+        transcriptId={transcriptId}
+        patientId={patientId}
+        handleSaveCallback={() => {
+          list?.mutate();
+          count?.mutate();
+        }}
+        renderTrigger={handleOpen => (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                loading={list?.isLoading ?? false}
+                className="size-6"
+                iconOnly
+                variant="ghost"
+                aria-label={t('variant.interpretation.tooltip.add')}
+                onClick={handleOpen}
+              >
+                <ClipboardList className="text-muted-foreground/40" size={16} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t('variant.interpretation.tooltip.add')}</TooltipContent>
+          </Tooltip>
+        )}
+      />
+    );
+  }
+
+  return (
+    <InterpretationDialog
+      mode="view"
+      locusId={locusId}
+      taskId={taskId}
+      transcriptId={transcriptId}
+      patientId={patientId}
+      handleSaveCallback={() => list?.mutate()}
+      renderTrigger={handleOpen => (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              className="size-6"
+              iconOnly
+              variant="ghost"
+              aria-label={t('variant.interpretation.tooltip.view')}
+              onClick={handleOpen}
+            >
+              <ClipboardList className="text-primary fill-primary/20" size={16} />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('variant.interpretation.tooltip.view')}</TooltipContent>
+        </Tooltip>
+      )}
+    />
+  );
+}
+
+export default InterpretationCell;

@@ -1,0 +1,46 @@
+import { Biohazard, User, Users } from 'lucide-react';
+
+import { Badge } from '@/components/base/shadcn/badge';
+import { useI18n } from '@/components/hooks/i18n';
+
+import AnalysisTypeCodeBadge, { type AnalysisTypeCode } from '../../badges/analysis-type-code-badge';
+
+import EmptyCell from './empty-cell';
+
+type AnalysisTypeCodeCellProps = {
+  code: AnalysisTypeCode | undefined;
+};
+
+function AnalysisTypeCodeCell({ code }: AnalysisTypeCodeCellProps) {
+  if (!code) return <EmptyCell />;
+
+  return <AnalysisTypeCodeBadge code={code} />;
+}
+
+export function AnalysisTypeCodeCellTooltip() {
+  const { t } = useI18n();
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
+        <Badge variant="secondary" iconOnly>
+          <Biohazard />
+        </Badge>
+        <span>{t(`case_exploration.analysis_type_code.somatic`)}</span>
+      </div>
+      <div className="flex gap-2">
+        <Badge variant="secondary" iconOnly>
+          <User />
+        </Badge>
+        <span>{t(`case_exploration.analysis_type_code.germline`)}</span>
+      </div>
+      <div className="flex gap-2">
+        <Badge variant="secondary" iconOnly>
+          <Users />
+        </Badge>
+        <span>{t(`case_exploration.analysis_type_code.germline_family`)}</span>
+      </div>
+    </div>
+  );
+}
+
+export default AnalysisTypeCodeCell;

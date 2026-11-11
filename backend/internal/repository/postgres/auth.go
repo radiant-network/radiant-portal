@@ -1,0 +1,379 @@
+package postgres
+
+import (
+	"context"
+	"fmt"
+	"log/slog"
+	"slices"
+	"strings"
+
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"gorm.io/gorm"
+)
+
+type AuthRepository struct {
+	db *gorm.DB
+}
+
+func NewAuthRepository(db database.PostgresDB) *AuthRepository {
+	return &AuthRepository{db: db.DB}
+}
+
+// ListActions returns the global action catalog. It serves the English labels for now
+// (name_en / description_en); resolving by the caller's locale is a separate task.
+func (r *AuthRepository) ListActions(ctx context.Context) ([]types.ActionResponse, error) {
+	actions := []types.ActionResponse{}
+	err := r.db.WithContext(ctx).
+		Table("action").
+		Select("code, scope, COALESCE(name_en, '') AS name, description_en AS description, grantable").
+		Order("scope, lower(code)").
+		Scan(&actions).Error
+	if err != nil {
+		return nil, fmt.Errorf("error listing actions: %w", err)
+	}
+	return actions, nil
+}
+
+// HasAction reports whether the user holds an action in the given tenant. Routing is
+// by the action's scope, not the grant's org_code (a role may map both scopes): a
+// tenant-scoped action matches any grant in the tenant regardless of orgCode; an
+// org-scoped action requires a grant at orgCode or the '*' wildcard.
+func (r *AuthRepository) HasAction(ctx context.Context, userID, tenantCode, orgCode, actionCode string) (bool, error) {
+	var allowed bool
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT EXISTS (
+			SELECT 1
+			FROM user_role ur
+			JOIN role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
+			JOIN action a       ON a.code = ra.action_code
+			WHERE ur.user_id = ? AND ur.tenant_code = ? AND ra.action_code = ?
+			  AND (a.scope = ? OR (a.scope = ? AND (ur.org_code = ? OR ur.org_code = '*')))
+		)`, userID, tenantCode, actionCode, types.ActionScopeTenant, types.ActionScopeOrg, orgCode).Scan(&allowed).Error
+	if err != nil {
+		return false, fmt.Errorf("error checking action %q for %q: %w", actionCode, userID, err)
+	}
+	return allowed, nil
+}
+
+// The org a request is authorized against is the diagnosis lab of the case the target
+// resource hangs off (cases.diagnosis_lab_code, NOT NULL). Each lookup below answers
+// "which labs does this resource belong to?" for one route family; the middleware then
+// checks the action at those orgs. They return an empty slice — never an error — when
+// the resource does not exist or belongs to another tenant, so an unattributable
+// resource is denied rather than implicitly allowed.
+
+// OrgsForCase returns the diagnosis lab of a case in the tenant.
+func (r *AuthRepository) OrgsForCase(ctx context.Context, tenantCode string, caseID int) ([]string, error) {
+	orgs := []string{}
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT diagnosis_lab_code
+		FROM cases
+		WHERE id = ? AND tenant_code = ?`, caseID, tenantCode).Scan(&orgs).Error
+	if err != nil {
+		return nil, fmt.Errorf("error resolving org for case %d: %w", caseID, err)
+	}
+	return orgs, nil
+}
+
+// DiagnosisLabForCases returns the diagnosis lab of each case given, keyed by case id. A case absent
+// from the result does not exist in the tenant, which the caller must treat as unauthorized
+// rather than skip.
+func (r *AuthRepository) DiagnosisLabForCases(ctx context.Context, tenantCode string, caseIDs []int) (map[int]string, error) {
+	if len(caseIDs) == 0 {
+		return map[int]string{}, nil
+	}
+	var rows []struct {
+		ID               int
+		DiagnosisLabCode string
+	}
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT id, diagnosis_lab_code
+		FROM cases
+		WHERE tenant_code = ? AND id IN ?`, tenantCode, caseIDs).Scan(&rows).Error
+	if err != nil {
+		return nil, fmt.Errorf("error resolving diagnosis labs for %d cases: %w", len(caseIDs), err)
+	}
+
+	labs := make(map[int]string, len(rows))
+	for _, row := range rows {
+		labs[row.ID] = row.DiagnosisLabCode
+	}
+	return labs, nil
+}
+
+// OrgsForNote returns the diagnosis lab of the case an occurrence note was written on.
+func (r *AuthRepository) OrgsForNote(ctx context.Context, tenantCode, noteID string) ([]string, error) {
+	orgs := []string{}
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT c.diagnosis_lab_code
+		FROM occurrence_note n
+		JOIN cases c ON c.id = n.case_id AND c.tenant_code = n.tenant_code
+		WHERE n.id = ? AND n.tenant_code = ?`, noteID, tenantCode).Scan(&orgs).Error
+	if err != nil {
+		return nil, fmt.Errorf("error resolving org for note %q: %w", noteID, err)
+	}
+	return orgs, nil
+}
+
+// OrgsForSubmitterCases returns the diagnosis lab of each (project code, submitter case id)
+// pair given, keyed by that pair. It serves the case-batch gate, whose records name their case
+// by submitter key rather than by id. A pair absent from the result does not exist in the
+// tenant, which the caller must treat as unauthorized rather than skip.
+func (r *AuthRepository) OrgsForSubmitterCases(ctx context.Context, tenantCode string, pairs [][2]string) (map[[2]string]string, error) {
+	if len(pairs) == 0 {
+		return map[[2]string]string{}, nil
+	}
+	tuples := make([]string, 0, len(pairs))
+	args := []any{tenantCode}
+	for _, pair := range pairs {
+		tuples = append(tuples, "(?, ?)")
+		args = append(args, pair[0], pair[1])
+	}
+
+	var rows []struct {
+		ProjectCode      string
+		SubmitterCaseID  string
+		DiagnosisLabCode string
+	}
+	query := fmt.Sprintf(`
+		SELECT p.code AS project_code, c.submitter_case_id, c.diagnosis_lab_code
+		FROM cases c
+		JOIN project p ON p.id = c.project_id AND p.tenant_code = c.tenant_code
+		WHERE c.tenant_code = ? AND (p.code, c.submitter_case_id) IN (%s)`, strings.Join(tuples, ", "))
+	if err := r.db.WithContext(ctx).Raw(query, args...).Scan(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error resolving orgs for %d submitter cases: %w", len(pairs), err)
+	}
+
+	orgs := make(map[[2]string]string, len(rows))
+	for _, row := range rows {
+		orgs[[2]string{row.ProjectCode, row.SubmitterCaseID}] = row.DiagnosisLabCode
+	}
+	return orgs, nil
+}
+
+// OrgsForDocument returns the diagnosis labs of the cases a document is attached to. A
+// document reaches its case through the task that produced it, and nothing in the schema
+// forbids two tasks from two cases sharing one document, so this can legitimately return
+// more than one lab — the caller needs the action at any one of them.
+//
+// The case join mirrors joins.TaskContextWithCaseHasSeqExp, the read path documents/search
+// uses, so a document is authorized against exactly the cases it is listed under:
+// task_context.case_id when the task names one, otherwise every case carrying the task's
+// sequencing experiment (task_context.case_id is nullable and often NULL).
+func (r *AuthRepository) OrgsForDocument(ctx context.Context, tenantCode string, documentID int) ([]string, error) {
+	orgs := []string{}
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT DISTINCT c.diagnosis_lab_code
+		FROM document d
+		JOIN task_has_document thd ON thd.document_id = d.id
+		JOIN task_context tc       ON tc.task_id = thd.task_id
+		JOIN case_has_sequencing_experiment chse
+		     ON chse.sequencing_experiment_id = tc.sequencing_experiment_id
+		    AND (tc.case_id IS NULL OR chse.case_id = tc.case_id)
+		JOIN cases c               ON c.id = chse.case_id AND c.tenant_code = d.tenant_code
+		WHERE d.id = ? AND d.tenant_code = ?`, documentID, tenantCode).Scan(&orgs).Error
+	if err != nil {
+		return nil, fmt.Errorf("error resolving org for document %d: %w", documentID, err)
+	}
+	return orgs, nil
+}
+
+// HasActionInTenant reports whether the user holds an action anywhere in the tenant, ignoring
+// the org an org-scoped grant is scoped to. It serves the requests that name no organization to
+// check against — the patient, sample and sequencing batches, whose records are not attached to
+// a case yet, and a batch read.
+//
+// This is NOT what HasAction with an empty orgCode does: that matches only '*' grants, since
+// GrantRole stores a tenant-wide grant's org as NULL. Passing an empty org for an org-scoped
+// action therefore refuses every specific-org grantee.
+func (r *AuthRepository) HasActionInTenant(ctx context.Context, userID, tenantCode, actionCode string) (bool, error) {
+	var allowed bool
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT EXISTS (
+			SELECT 1
+			FROM user_role ur
+			JOIN role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
+			WHERE ur.user_id = ? AND ur.tenant_code = ? AND ra.action_code = ?
+		)`, userID, tenantCode, actionCode).Scan(&allowed).Error
+	if err != nil {
+		return false, fmt.Errorf("error checking action %q in tenant for %q: %w", actionCode, userID, err)
+	}
+	return allowed, nil
+}
+
+// TenantExists reports whether a tenant with the given code exists. It backs the
+// tenant-routing middleware: an unknown tenant in the URL path becomes a 404 instead of
+// reaching a write and surfacing as a foreign-key violation (a 500) downstream.
+func (r *AuthRepository) TenantExists(ctx context.Context, tenantCode string) (bool, error) {
+	var exists bool
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT EXISTS (
+			SELECT 1 FROM tenant WHERE code = ?
+		)`, tenantCode).Scan(&exists).Error
+	if err != nil {
+		return false, fmt.Errorf("error checking tenant existence for %q: %w", tenantCode, err)
+	}
+	return exists, nil
+}
+
+// HasTenantAccess reports whether the user holds at least one role in the given tenant.
+// It backs the tenant-routing middleware: any grant (org-scoped or tenant-wide) makes the
+// caller a member of the tenant.
+func (r *AuthRepository) HasTenantAccess(ctx context.Context, userID, tenantCode string) (bool, error) {
+	var allowed bool
+	err := r.db.WithContext(ctx).Raw(`
+		SELECT EXISTS (
+			SELECT 1 FROM user_role ur
+			WHERE ur.user_id = ? AND ur.tenant_code = ?
+		)`, userID, tenantCode).Scan(&allowed).Error
+	if err != nil {
+		return false, fmt.Errorf("error checking tenant access for %q in %q: %w", userID, tenantCode, err)
+	}
+	return allowed, nil
+}
+
+type membershipGrant struct {
+	TenantCode     string
+	TenantName     string
+	OrgCode        *string
+	ActionCode     string
+	RoleCode       string
+	Scope          string
+	TenantOrgCodes string
+}
+
+// GetMemberships returns the user's effective authorization grouped by tenant.
+//
+// Each action routes by its own scope (a role may map both): tenant-scoped → tenant_actions;
+// org-scoped → orgs_by_action, where a specific org_code maps to that org and '*' expands to
+// every org in the tenant (ADR §5.4).
+func (r *AuthRepository) GetMemberships(ctx context.Context, userID string) ([]types.TenantMembership, error) {
+	var grants []membershipGrant
+	if err := r.db.WithContext(ctx).Raw(`
+		SELECT ur.tenant_code, t.name AS tenant_name, ur.org_code, ra.action_code, a.scope, ra.role_code,
+		       o.org_codes AS tenant_org_codes
+		FROM user_role ur
+		JOIN tenant t       ON t.code = ur.tenant_code
+		JOIN role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
+		JOIN action a       ON a.code = ra.action_code
+		LEFT JOIN (
+			SELECT tenant_code, string_agg(code, ',' ORDER BY code) AS org_codes
+			FROM organization
+			GROUP BY tenant_code
+		) o ON o.tenant_code = ur.tenant_code
+		WHERE ur.user_id = ?
+		ORDER BY ur.tenant_code, ra.action_code, ur.org_code`, userID).Scan(&grants).Error; err != nil {
+		return nil, fmt.Errorf("error loading grants for %q: %w", userID, err)
+	}
+
+	// The ORDER BY is load-bearing twice over:
+	//   - each tenant's grants arrive contiguously, so tenantOrgs (read once when the
+	//     tenant is first seen) stays correct for the rest of that tenant's block;
+	//   - actions and orgs accumulate in sorted order, so no separate sort pass is needed.
+	memberships := []types.TenantMembership{}
+	indexByTenant := map[string]int{}
+	tenantOrgs := []string{}
+	for _, grant := range grants {
+		index, exists := indexByTenant[grant.TenantCode]
+		if !exists {
+			index = len(memberships)
+			indexByTenant[grant.TenantCode] = index
+			tenantOrgs = splitOrgCodes(grant.TenantOrgCodes)
+			memberships = append(memberships, types.TenantMembership{
+				Code:          grant.TenantCode,
+				Name:          grant.TenantName,
+				TenantActions: []string{},
+				OrgsByAction:  map[string][]string{},
+			})
+		}
+		applyGrant(&memberships[index], grant, tenantOrgs)
+	}
+	return memberships, nil
+}
+
+// applyGrant records one grant's action on the tenant's membership, routed by the
+// action's scope (a role may map both scopes).
+func applyGrant(membership *types.TenantMembership, grant membershipGrant, tenantOrgs []string) {
+	switch grant.Scope {
+	case types.ActionScopeTenant:
+		// Tenant-scoped action applies tenant-wide, whatever the grant's org_code is.
+		membership.TenantActions = appendUnique(membership.TenantActions, grant.ActionCode)
+	case types.ActionScopeOrg:
+		if grant.OrgCode == nil {
+			// Org-scoped action on a tenant-wide grant (org_code NULL) so this action applies to no specific org and is intentionally dropped.
+			slog.Warn("org-scoped action should not be applied tenant wide (org_code = NULL)",
+				slog.String("action", grant.ActionCode),
+				slog.String("role", grant.RoleCode),
+				slog.String("tenant", grant.TenantCode),
+			)
+			return
+		} else if *grant.OrgCode == types.WildcardOrg {
+			// Wildcard: the action applies at every org in the tenant.
+			membership.OrgsByAction[grant.ActionCode] = tenantOrgs
+		} else {
+			// Specific org.
+			membership.OrgsByAction[grant.ActionCode] = appendUnique(membership.OrgsByAction[grant.ActionCode], *grant.OrgCode)
+		}
+	}
+}
+
+// splitOrgCodes turns the query's string_agg'd "a,b,c" into a slice. An empty string
+// (a tenant with no orgs, where string_agg yields NULL) becomes an empty slice, not [""].
+func splitOrgCodes(aggregated string) []string {
+	if aggregated == "" {
+		return []string{}
+	}
+	return strings.Split(aggregated, ",")
+}
+
+func appendUnique(values []string, value string) []string {
+	if slices.Contains(values, value) {
+		return values
+	}
+	return append(values, value)
+}
+
+// UpsertUser inserts the user or, on user_id conflict, converges its email and
+// name. user_id (the Keycloak sub) is the identity key; email is an optional
+// attribute. This is the write side used at provisioning time, paired with the
+// read side above. Idempotent.
+//
+// An empty attribute preserves the stored value instead of blanking it, so
+// provisioning an existing user by sub alone (no email/names to hand) doesn't
+// erase attributes an earlier run or a login recorded.
+func (r *AuthRepository) UpsertUser(ctx context.Context, userID, email, firstName, lastName string) error {
+	err := r.db.WithContext(ctx).Exec(`
+		INSERT INTO public.users (user_id, email, first_name, last_name)
+		VALUES (?, ?, ?, ?)
+		ON CONFLICT (user_id) DO UPDATE
+		SET email = COALESCE(NULLIF(EXCLUDED.email, ''), users.email),
+		    first_name = COALESCE(NULLIF(EXCLUDED.first_name, ''), users.first_name),
+		    last_name = COALESCE(NULLIF(EXCLUDED.last_name, ''), users.last_name)`,
+		userID, email, firstName, lastName).Error
+	if err != nil {
+		return fmt.Errorf("upsert user %q: %w", userID, err)
+	}
+	return nil
+}
+
+// GrantRole grants a role to the user within a tenant. An empty orgCode is stored
+// as NULL (a tenant-wide grant); "*" and specific codes are stored verbatim. The
+// role must already exist (FK to public.role). grantedBy records audit attribution
+// for the grant (who performed it). Idempotent via ON CONFLICT DO NOTHING, which
+// catches either partial-unique index (NULL vs non-NULL org_code).
+func (r *AuthRepository) GrantRole(ctx context.Context, userID, tenantCode, orgCode, roleCode, grantedBy string) error {
+	var org any
+	if orgCode != "" {
+		org = orgCode
+	}
+	err := r.db.WithContext(ctx).Exec(`
+		INSERT INTO public.user_role (user_id, tenant_code, org_code, role_code, granted_by)
+		VALUES (?, ?, ?, ?, ?)
+		ON CONFLICT DO NOTHING`,
+		userID, tenantCode, org, roleCode, grantedBy).Error
+	if err != nil {
+		return fmt.Errorf("grant %s/%s/%s to %q: %w", tenantCode, orgCode, roleCode, userID, err)
+	}
+	return nil
+}

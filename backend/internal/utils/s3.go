@@ -1,0 +1,188 @@
+package utils
+
+import (
+	"fmt"
+	"log"
+	"net/url"
+	"path"
+	"strings"
+	"time"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+)
+
+const DefaultAwsRegion = "us-east-1"
+const DefaultS3PresignedUrlExpire = "60m"
+
+type PreSignedURL struct {
+	URL         string `json:"url"`
+	URLExpireAt int64  `json:"expires_at"`
+}
+
+type PreSigner interface {
+	GeneratePreSignedURL(url string) (*PreSignedURL, error)
+}
+
+type S3PreSigner struct {
+	Config *aws.Config
+	Expire time.Duration
+	// One client per presigner: a new session per URL would also resolve the credentials again,
+	// a remote call with a web identity or instance role provider.
+	svc *s3.S3
+}
+
+type S3Location struct {
+	Bucket string
+	Key    string
+}
+
+func NewS3PreSigner() *S3PreSigner {
+	endpoint := GetEnvOrDefault("AWS_ENDPOINT_URL", "")
+	region := GetEnvOrDefault("AWS_REGION", DefaultAwsRegion)
+	useSSL := GetBoolEnvOrDefault("AWS_USE_SSL", true)
+
+	expireStr := GetEnvOrDefault("S3_PRESIGNED_URL_EXPIRE", DefaultS3PresignedUrlExpire)
+	expire, err := time.ParseDuration(expireStr)
+	if err != nil {
+		log.Fatalf("Invalid duration for S3_PRESIGNED_URL_EXPIRE: %v", err)
+	}
+
+	forcePathStyle := endpoint != "" // if endpoint is set, force path style
+	awsConfig := &aws.Config{
+		Region:           aws.String(region),
+		Endpoint:         aws.String(endpoint),
+		S3ForcePathStyle: aws.Bool(forcePathStyle),
+		DisableSSL:       aws.Bool(!useSSL),
+	}
+
+	ps, err := newS3PreSigner(awsConfig, expire)
+	if err != nil {
+		log.Fatalf("Failed to create S3 presigner session: %v", err)
+	}
+	return ps
+}
+
+func newS3PreSigner(awsConfig *aws.Config, expire time.Duration) (*S3PreSigner, error) {
+	sess, err := session.NewSession(awsConfig)
+	if err != nil {
+		return nil, err
+	}
+	return &S3PreSigner{
+		Config: awsConfig,
+		Expire: expire,
+		svc:    s3.New(sess),
+	}, nil
+}
+
+func ExtractS3BucketAndKey(s3URL string) (*S3Location, error) {
+	parsed, err := url.Parse(s3URL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid URL: %w", err)
+	}
+
+	if parsed.Scheme != "s3" {
+		return nil, fmt.Errorf("URL is not an S3 URL")
+	}
+
+	bucket := parsed.Host
+	key := strings.TrimPrefix(parsed.Path, "/")
+
+	return &S3Location{bucket, key}, nil
+}
+
+func ExtractFileName(s3URL string) (*string, error) {
+	parsed, err := url.Parse(s3URL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid URL: %w", err)
+	}
+
+	if parsed.Scheme != "s3" {
+		return nil, fmt.Errorf("URL is not an S3 URL")
+	}
+
+	name := path.Base(parsed.Path)
+
+	return &name, nil
+}
+
+func (ps *S3PreSigner) GeneratePreSignedURL(url string) (*PreSignedURL, error) {
+	s3location, err := ExtractS3BucketAndKey(url)
+	if err != nil {
+		return nil, err
+	}
+
+	req, _ := ps.svc.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(s3location.Bucket),
+		Key:    aws.String(s3location.Key),
+	})
+
+	urlExpiresAt := time.Now().Add(ps.Expire).Unix()
+	urlStr, err := req.Presign(ps.Expire)
+	if err != nil {
+		return nil, err
+	}
+
+	return &PreSignedURL{
+		URL:         urlStr,
+		URLExpireAt: urlExpiresAt,
+	}, nil
+}
+
+type FileMetadata struct {
+	Size int64
+	Hash string
+}
+
+type FileMetadataGetter interface {
+	GetMetadata(url string) (*FileMetadata, error)
+}
+
+type S3Store struct {
+	svc *s3.S3
+}
+
+func NewS3Store() (FileMetadataGetter, error) {
+	endpoint := GetEnvOrDefault("AWS_ENDPOINT_URL", "")
+	region := GetEnvOrDefault("AWS_REGION", DefaultAwsRegion)
+	useSSL := GetBoolEnvOrDefault("AWS_USE_SSL", true)
+
+	forcePathStyle := endpoint != ""
+	awsConfig := &aws.Config{
+		Region:           aws.String(region),
+		Endpoint:         aws.String(endpoint),
+		S3ForcePathStyle: aws.Bool(forcePathStyle),
+		DisableSSL:       aws.Bool(!useSSL),
+	}
+
+	sess, err := session.NewSession(awsConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create s3 store: %w", err)
+	}
+
+	s3svc := s3.New(sess)
+	return &S3Store{svc: s3svc}, nil
+}
+
+func (s *S3Store) GetMetadata(rawUrl string) (*FileMetadata, error) {
+	s3location, err := ExtractS3BucketAndKey(rawUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	out, err := s.svc.HeadObject(&s3.HeadObjectInput{
+		Bucket: aws.String(s3location.Bucket),
+		Key:    aws.String(s3location.Key),
+	})
+	if err != nil {
+		if strings.Contains(err.Error(), "status code: 404") {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &FileMetadata{
+		Size: *out.ContentLength,
+		Hash: strings.Trim(*out.ETag, `"`),
+	}, nil
+}

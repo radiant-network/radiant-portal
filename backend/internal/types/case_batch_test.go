@@ -1,0 +1,170 @@
+package types
+
+import (
+	"bytes"
+	"encoding/json"
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func Test_CaseBatch_ToJSON(t *testing.T) {
+	size := int64(1024)
+	var caseBatch = CaseBatch{
+		SubmitterCaseId:            "CASE-001",
+		Type:                       "germline",
+		StatusCode:                 "active",
+		ProjectCode:                "PROJ-001",
+		DiagnosticLabCode:          "LAB-001",
+		PrimaryConditionCodeSystem: "ICD-10",
+		PrimaryConditionValue:      "E11.9",
+		PriorityCode:               "high",
+		CategoryCode:               "prenatal",
+		AnalysisCode:               "WGS",
+		Note:                       "Test note",
+		OrderingPhysician:          "Johnny Bravo",
+		OrderingOrganizationCode:   "ORG-001",
+		Patients: []*CasePatientBatch{
+			{
+				AffectedStatusCode:      "affected",
+				SubmitterPatientId:      "PAT-001",
+				PatientOrganizationCode: "ORG-001",
+				RelationToProbandCode:   "self",
+			},
+		},
+		SequencingExperiments: []*CaseSequencingExperimentBatch{
+			{
+				Aliquot:                "ALQ-001",
+				SampleOrganizationCode: "ORG-001",
+				SubmitterSampleId:      "SAMPLE-001",
+			},
+		},
+		Tasks: []*CaseTaskBatch{
+			{
+				Aliquots:        []string{"ALQ-001"},
+				TypeCode:        "analysis",
+				PipelineVersion: "v1.0.0",
+				OutputDocuments: []*OutputDocumentBatch{
+					{
+						DataCategoryCode: "variant",
+						DataTypeCode:     "vcf",
+						FormatCode:       "vcf",
+						Name:             "output.vcf",
+						Size:             &size,
+						Url:              "https://example.com/output.vcf",
+					},
+				},
+			},
+		},
+	}
+
+	var expected = []byte(`{"submitter_case_id":"CASE-001","type":"germline","status_code":"active","project_code":"PROJ-001","diagnostic_lab_code":"LAB-001","primary_condition_code_system":"ICD-10","primary_condition_value":"E11.9","priority_code":"high","category_code":"prenatal","analysis_code":"WGS","note":"Test note","ordering_physician":"Johnny Bravo","ordering_organization_code":"ORG-001","patients":[{"affected_status_code":"affected","submitter_patient_id":"PAT-001","patient_organization_code":"ORG-001","relation_to_proband_code":"self"}],"sequencing_experiments":[{"aliquot":"ALQ-001","sample_organization_code":"ORG-001","submitter_sample_id":"SAMPLE-001"}],"tasks":[{"type_code":"analysis","aliquots":["ALQ-001"],"output_documents":[{"data_category_code":"variant","data_type_code":"vcf","format_code":"vcf","name":"output.vcf","size":1024,"url":"https://example.com/output.vcf"}],"pipeline_version":"v1.0.0"}]}`)
+	jsonData, err := json.Marshal(caseBatch)
+	assert.Nil(t, err, "Failed to marshal Case Batch to JSON")
+
+	var isEqual = bytes.Equal(expected, jsonData)
+	assert.True(t, isEqual, "Objects should be equal after marshalling to JSON")
+}
+
+func Test_CaseBatch_FromJSON(t *testing.T) {
+	var jsonData = []byte(`{"submitter_case_id":"CASE-001","type":"germline","status_code":"active","project_code":"PROJ-001","diagnostic_lab_code":"LAB-001","primary_condition_code_system":"ICD-10","primary_condition_value":"E11.9","priority_code":"high","category_code":"prenatal","analysis_code":"WGS","note":"Test note","ordering_physician":"Dr. Smith","ordering_organization_code":"ORG-001","patients":[{"affected_status_code":"affected","submitter_patient_id":"PAT-001","patient_organization_code":"ORG-001","relation_to_proband_code":"self"}],"sequencing_experiments":[{"aliquot":"ALQ-001","sample_organization_code":"ORG-001","submitter_sample_id":"SAMPLE-001"}],"tasks":[{"aliquots":["ALQ-001"],"type_code":"analysis","pipeline_version":"v1.0.0","output_documents":[{"data_category_code":"variant","data_type_code":"vcf","format_code":"vcf","name":"output.vcf","size":1024,"url":"https://example.com/output.vcf"}]}]}`)
+	size := int64(1024)
+	expected := CaseBatch{
+		SubmitterCaseId:            "CASE-001",
+		Type:                       "germline",
+		StatusCode:                 "active",
+		ProjectCode:                "PROJ-001",
+		DiagnosticLabCode:          "LAB-001",
+		PrimaryConditionCodeSystem: "ICD-10",
+		PrimaryConditionValue:      "E11.9",
+		PriorityCode:               "high",
+		CategoryCode:               "prenatal",
+		AnalysisCode:               "WGS",
+		Note:                       "Test note",
+		OrderingPhysician:          "Dr. Smith",
+		OrderingOrganizationCode:   "ORG-001",
+		Patients: []*CasePatientBatch{
+			{
+				AffectedStatusCode:      "affected",
+				SubmitterPatientId:      "PAT-001",
+				PatientOrganizationCode: "ORG-001",
+				RelationToProbandCode:   "self",
+			},
+		},
+		SequencingExperiments: []*CaseSequencingExperimentBatch{
+			{
+				Aliquot:                "ALQ-001",
+				SampleOrganizationCode: "ORG-001",
+				SubmitterSampleId:      "SAMPLE-001",
+			},
+		},
+		Tasks: []*CaseTaskBatch{
+			{
+				Aliquots:        []string{"ALQ-001"},
+				TypeCode:        "analysis",
+				PipelineVersion: "v1.0.0",
+				OutputDocuments: []*OutputDocumentBatch{
+					{
+						DataCategoryCode: "variant",
+						DataTypeCode:     "vcf",
+						FormatCode:       "vcf",
+						Name:             "output.vcf",
+						Size:             &size,
+						Url:              "https://example.com/output.vcf",
+					},
+				},
+			},
+		},
+	}
+
+	var caseBatch CaseBatch
+	err := json.Unmarshal(jsonData, &caseBatch)
+	assert.Nil(t, err, "Failed to unmarshal JSON to Case Batch")
+	assert.Equal(t, expected, caseBatch, "Objects should be equal after unmarshalling from JSON")
+}
+
+func Test_ObservationRequiresOnsetAndInterpretation_ExemptCodes(t *testing.T) {
+	assert.False(t, ObservationRequiresOnsetAndInterpretation(ObsCodeAncestry))
+	assert.False(t, ObservationRequiresOnsetAndInterpretation(ObsCodeConsanguinity))
+}
+
+func Test_ObservationRequiresOnsetAndInterpretation_RequiredCodes(t *testing.T) {
+	assert.True(t, ObservationRequiresOnsetAndInterpretation("phenotype"))
+	assert.True(t, ObservationRequiresOnsetAndInterpretation("condition"))
+	assert.True(t, ObservationRequiresOnsetAndInterpretation("note"))
+	// Empty code defaults to required (safe default).
+	assert.True(t, ObservationRequiresOnsetAndInterpretation(""))
+}
+
+func Test_ObservationRequiresOnsetAndInterpretation_Exam(t *testing.T) {
+	// exam is not exempt: it still requires an interpretation_code. Onset is exempted
+	// separately at the call site whenever the row carries an exam_code
+	assert.True(t, ObservationRequiresOnsetAndInterpretation(ObsCodeExam))
+}
+
+// swag's IsRequired() scans the binding tag token by token and treats a bare `required` as "this
+// field is required" — even when it is meant for the elements after a `dive`. These three arrays
+// are optional, so a bare `required` would make the generated OpenAPI spec (and the TS/Python
+// clients derived from it) mark them required. They use the custom `notnull` validation instead —
+// see notnull in internal/server/validators.go.
+func Test_OptionalBatchArrays_UseNotnullRatherThanRequired(t *testing.T) {
+	for _, tc := range []struct {
+		typ   reflect.Type
+		field string
+	}{
+		{reflect.TypeOf(CaseBatch{}), "Fetuses"},
+		{reflect.TypeOf(CaseFetusBatch{}), "ObservationsCategorical"},
+		{reflect.TypeOf(CaseFetusBatch{}), "ObservationsText"},
+	} {
+		name := tc.typ.Name() + "." + tc.field
+		f, ok := tc.typ.FieldByName(tc.field)
+		require.True(t, ok, "%s does not exist", name)
+
+		tokens := strings.Split(f.Tag.Get("binding"), ",")
+		assert.Contains(t, tokens, "notnull", "%s must carry notnull", name)
+		assert.NotContains(t, tokens, "required", "%s must not carry a bare required token", name)
+	}
+}

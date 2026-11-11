@@ -1,0 +1,6 @@
+.moon/cache
+.tools/node_modules
+node_modules/
+frontend/.gen/
+frontend/portals/*/build/
+frontend/openapitools.json

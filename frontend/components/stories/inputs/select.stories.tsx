@@ -1,0 +1,136 @@
+import { useState } from 'react';
+import { BrowserRouter } from 'react-router';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+
+import { SavedFilterType } from '@/api/api';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/base/shadcn/select';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
+
+import { StoryLabel, StorySection } from '../story-section';
+
+import { StoryErrorField } from './story-error-field';
+import { selectSizes } from './utils';
+
+const config: PortalConfig = {
+  variant_entity: {
+    app_id: ApplicationId.variant_entity,
+  },
+  germline_snv_occurrence: {
+    app_id: ApplicationId.germline_snv_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
+  },
+  germline_cnv_occurrence: {
+    app_id: ApplicationId.germline_cnv_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.GERMLINE_CNV_OCCURRENCE,
+  },
+  admin: {
+    admin_code: 'admin',
+    app_id: ApplicationId.admin,
+  },
+  portal: {
+    name: '',
+    navigation: {},
+  },
+  somatic_snv_to_occurrence: {
+    app_id: ApplicationId.somatic_snv_to_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+  },
+  somatic_snv_tn_occurrence: {
+    app_id: ApplicationId.somatic_snv_tn_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+  },
+  somatic_cnv_to_occurrence: {
+    app_id: ApplicationId.somatic_cnv_to_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_CNV_OCCURRENCE,
+  },
+};
+
+const meta = {
+  title: 'Components/Inputs/Select',
+  component: Select,
+  args: {},
+  decorators: [
+    Story => (
+      <BrowserRouter>
+        <ConfigProvider config={config}>
+          <Story />
+        </ConfigProvider>
+      </BrowserRouter>
+    ),
+  ],
+} satisfies Meta<typeof Select>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Sizes: Story = {
+  args: {},
+  render: () => (
+    <StorySection title="Sizes">
+      {selectSizes.map(size => (
+        <div key={size} className="flex w-[180px] flex-col gap-2">
+          <StoryLabel>{size}</StoryLabel>
+          <Select>
+            <SelectTrigger size={size}>
+              <SelectValue placeholder="Select a fruit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Fruits</SelectLabel>
+                <SelectItem value="apple">Apple</SelectItem>
+                <SelectItem value="banana">Banana</SelectItem>
+                <SelectItem value="blueberry">Blueberry</SelectItem>
+                <SelectItem value="grapes">Grapes</SelectItem>
+                <SelectItem value="pineapple">Pineapple</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+      ))}
+    </StorySection>
+  ),
+};
+
+function SelectErrorDemo() {
+  const [fruit, setFruit] = useState<string>();
+  const invalid = !fruit;
+
+  return (
+    <StoryErrorField label="Fruit" invalid={invalid}>
+      <Select value={fruit} onValueChange={setFruit}>
+        <SelectTrigger size="sm" aria-invalid={invalid}>
+          <SelectValue placeholder="Select a fruit" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            <SelectItem value="apple">Apple</SelectItem>
+            <SelectItem value="banana">Banana</SelectItem>
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+    </StoryErrorField>
+  );
+}
+
+export const ErrorState: Story = {
+  args: {},
+  render: () => (
+    <StorySection title="Error">
+      <SelectErrorDemo />
+    </StorySection>
+  ),
+};

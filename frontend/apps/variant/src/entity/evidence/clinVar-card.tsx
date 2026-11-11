@@ -1,0 +1,102 @@
+import { useMemo, useState } from 'react';
+import { useParams } from 'react-router';
+import { ExternalLink, Search } from 'lucide-react';
+import useSWR from 'swr';
+
+import type { ApiError, ClinvarVariantConditions } from '@/api/api';
+import DataTable from '@/components/base/data-table/data-table';
+import { Button } from '@/components/base/shadcn/button';
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/base/shadcn/card';
+import { Input } from '@/components/base/shadcn/input';
+import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { variantsApi } from '@/utils/api';
+
+import { getPathogenicEvidenceColumns, pathogenicEvidenceDefaultSettings } from './table-settings';
+
+type ClinVarConditionsSearchInput = {
+  key: string;
+  locusId: string;
+};
+
+async function fetchClinVarConditions(input: ClinVarConditionsSearchInput, tenant: string) {
+  const response = await variantsApi.getGermlineVariantConditionsClinvar(tenant, input.locusId);
+  return response.data;
+}
+
+function ClinVarCard() {
+  const { t } = useI18n();
+  const { tenant } = useTenant();
+  const params = useParams<{ locusId: string }>();
+  const [search, setSearch] = useState('');
+  const columns = useMemo(() => getPathogenicEvidenceColumns(t), [t]);
+
+  const { data, isLoading } = useSWR<ClinvarVariantConditions, ApiError, ClinVarConditionsSearchInput>(
+    {
+      key: 'interpreted-cases',
+      locusId: params.locusId!,
+    },
+    input => fetchClinVarConditions(input, tenant),
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    },
+  );
+
+  const filteredData =
+    data?.conditions?.filter(item => {
+      if (!search.trim()) return true;
+
+      const traits = item.traits || [];
+      return traits.some(trait => trait?.toLowerCase().includes(search.toLowerCase()));
+    }) || [];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-xl font-semibold">{t('variant_entity.evidence.clin_var.title')}</CardTitle>
+        <CardDescription>{t('variant_entity.evidence.clin_var.description')}</CardDescription>
+        <CardAction>
+          {data?.clinvar_id && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                window.open(
+                  `https://www.ncbi.nlm.nih.gov/clinvar/variation/${data?.clinvar_id}`,
+                  '_blank',
+                  'noopener,noreferrer',
+                );
+              }}
+            >
+              {t('variant_entity.overview.clin_var')} <ExternalLink />
+            </Button>
+          )}
+        </CardAction>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Input
+          startIcon={Search}
+          placeholder={t('variant_entity.evidence.clin_var.filters.search_placeholder')}
+          wrapperClassName="max-w-[320px]"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+        <DataTable
+          id="pathogenic-evidence"
+          columns={columns}
+          data={filteredData}
+          defaultColumnSettings={pathogenicEvidenceDefaultSettings}
+          loadingStates={{
+            total: isLoading,
+            list: isLoading,
+          }}
+          pagination={{ type: 'hidden' }}
+          total={filteredData.length}
+          tableIndexResultPosition="bottom"
+        />
+      </CardContent>
+    </Card>
+  );
+}
+
+export default ClinVarCard;

@@ -1,0 +1,383 @@
+package types
+
+import (
+	"fmt"
+	"slices"
+
+	"github.com/Goldziher/go-utils/sliceutils"
+)
+
+type Query interface {
+	Filters() FilterNode
+	HasFieldFromTables(tables ...Table) bool
+	GetFieldsFromTables(tables ...Table) []Field
+}
+
+type OccurrenceFilterOption func(*occurrenceFilters)
+
+// occurrenceFilters carries the annotation filters shared by occurrence list and count queries.
+type occurrenceFilters struct {
+	withNote           bool
+	withFlag           []OccurrenceFlagType
+	withInterpretation bool
+}
+
+func (f occurrenceFilters) WithNote() bool                 { return f.withNote }
+func (f occurrenceFilters) WithFlag() []OccurrenceFlagType { return f.withFlag }
+func (f occurrenceFilters) WithInterpretation() bool       { return f.withInterpretation }
+
+// WithNoteFilter restricts a list or count query to the occurrences having at least one note.
+func WithNoteFilter(withNote bool) OccurrenceFilterOption {
+	return func(o *occurrenceFilters) { o.withNote = withNote }
+}
+
+// WithFlagFilter restricts a list or count query to the occurrences flagged with one of flagTypes.
+// An empty slice means no filtering.
+func WithFlagFilter(flagTypes []OccurrenceFlagType) OccurrenceFilterOption {
+	return func(o *occurrenceFilters) { o.withFlag = flagTypes }
+}
+
+// WithInterpretationFilter restricts a list or count query to the occurrences having an interpretation.
+func WithInterpretationFilter(withInterpretation bool) OccurrenceFilterOption {
+	return func(o *occurrenceFilters) { o.withInterpretation = withInterpretation }
+}
+
+func resolveOccurrenceFilters(opts []OccurrenceFilterOption) occurrenceFilters {
+	var resolved occurrenceFilters
+	for _, opt := range opts {
+		opt(&resolved)
+	}
+	return resolved
+}
+
+type QueryConfig struct {
+	AllFields     []Field
+	DefaultFields []Field
+	DefaultSort   []SortField
+	IdField       Field
+}
+
+type ListQuery interface {
+	SelectedFields() []Field
+	Filters() FilterNode
+	Pagination() *Pagination
+	SortedFields() []SortField
+	HasFieldFromTables(tables ...Table) bool
+	GetFieldsFromTables(tables ...Table) []Field
+}
+
+// OccurrenceListQuery is a ListQuery over occurrences, which alone can be restricted to the
+// occurrences having at least one note.
+type OccurrenceListQuery interface {
+	ListQuery
+	WithNote() bool
+	WithFlag() []OccurrenceFlagType
+	WithInterpretation() bool
+}
+
+type listQuery struct {
+	filters        FilterNode //Root node of the filter tree
+	filteredFields []Field    //Fields used in the filters
+	selectedFields []Field    //Fields used for selection
+	pagination     *Pagination
+	sortedFields   []SortField
+}
+
+// occurrenceListQuery adds the occurrence-only note filter on top of a plain list query.
+type occurrenceListQuery struct {
+	listQuery
+	occurrenceFilters
+}
+
+func (l *listQuery) HasFieldFromTables(tables ...Table) bool {
+	return len(l.GetFieldsFromTables(tables...)) > 0
+}
+
+// GetFieldsFromTables includes the sorted fields: a table joined only when the query uses it must also be
+// joined for a sort on one of its fields that is neither selected nor filtered.
+func (l *listQuery) GetFieldsFromTables(tables ...Table) []Field {
+	inTables := func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
+	}
+	sorted := sliceutils.Map(l.sortedFields, func(sort SortField, index int, slice []SortField) Field {
+		return sort.Field
+	})
+	return sliceutils.Unique(sliceutils.Filter(sliceutils.Merge(l.filteredFields, l.selectedFields, sorted), inTables))
+}
+
+func (l *listQuery) Filters() FilterNode {
+	return l.filters
+}
+
+func (l *listQuery) SelectedFields() []Field {
+	return l.selectedFields
+}
+
+func (l *listQuery) Pagination() *Pagination {
+	return l.pagination
+}
+
+func (l *listQuery) SortedFields() []SortField {
+	return l.sortedFields
+}
+
+type SortField struct {
+	Field Field
+	Order string
+}
+
+type Pagination struct {
+	Limit     int //Limit the number of results
+	Offset    int //Offset the results in case it's an infinite scroll
+	PageIndex int //PageIndex the page index in case there is pagination
+}
+
+func ResolvePagination(limit int, offset int, pageIndex int) *Pagination {
+	var p Pagination
+	if limit != 0 && pageIndex != 0 {
+		p = Pagination{Limit: limit, PageIndex: pageIndex}
+	} else if limit != 0 && offset != 0 {
+		p = Pagination{Limit: limit, Offset: offset}
+	} else if limit != 0 {
+		p = Pagination{Limit: limit, Offset: 0}
+	} else {
+		p = Pagination{Limit: 25, Offset: 0}
+	}
+	return &p
+}
+
+func NewOccurrenceListQueryFromSqon(config QueryConfig, additional []string, sqon *Sqon, pagination *Pagination, sorted []SortBody, opts ...OccurrenceFilterOption) (OccurrenceListQuery, error) {
+	annotationFilters := resolveOccurrenceFilters(opts)
+
+	// Define allowed selectedCols
+	selectedFields := findSelectedFields(config.AllFields, additional, config.DefaultFields)
+
+	// Define allowed sortedCols
+	sortedField := findSortedFields(config.AllFields, sorted, config.DefaultSort, config.IdField)
+
+	if sqon != nil {
+		root, visitedFilteredFields, err := sqonToFilter(sqon, config.AllFields, nil)
+		if err != nil {
+			return nil, fmt.Errorf("error during build list query from sqon %w", err)
+		}
+		return &occurrenceListQuery{listQuery: listQuery{selectedFields: selectedFields, filteredFields: visitedFilteredFields, filters: root, pagination: pagination, sortedFields: sortedField}, occurrenceFilters: annotationFilters}, nil
+
+	} else {
+		return &occurrenceListQuery{listQuery: listQuery{selectedFields: selectedFields, pagination: pagination, sortedFields: sortedField}, occurrenceFilters: annotationFilters}, nil
+	}
+}
+
+func NewListQueryFromCriteria(config QueryConfig, additional []string, searchCriteria []SearchCriterion, pagination *Pagination, sorted []SortBody) (ListQuery, error) {
+
+	// Define allowed selectedCols
+	selectedFields := findSelectedFields(config.AllFields, additional, config.DefaultFields)
+
+	// Define allowed sortedCols
+	sortedField := findSortedFields(config.AllFields, sorted, config.DefaultSort, config.IdField)
+
+	if len(searchCriteria) != 0 {
+		root, visitedFilteredFields, err := criteriaToFilter(searchCriteria, config.AllFields)
+		if err != nil {
+			return nil, fmt.Errorf("error during build list query from search criteria %w", err)
+		}
+		return &listQuery{selectedFields: selectedFields, filteredFields: visitedFilteredFields, filters: root, pagination: pagination, sortedFields: sortedField}, nil
+
+	} else {
+		return &listQuery{selectedFields: selectedFields, pagination: pagination, sortedFields: sortedField}, nil
+	}
+}
+
+type AggQuery interface {
+	Filters() FilterNode
+	GetAggregateField() Field
+	HasFieldFromTables(tables ...Table) bool
+	GetFieldsFromTables(tables ...Table) []Field
+}
+
+type aggQuery struct {
+	filters        FilterNode //Root node of the filter tree
+	filteredFields []Field    //Fields used in the filters
+	aggregateField Field      //Fields used for selection
+}
+
+func (l *aggQuery) HasFieldFromTables(tables ...Table) bool {
+	return slices.Contains(tables, l.aggregateField.Table) || (l.filteredFields != nil && sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
+	}))
+}
+
+func (l *aggQuery) GetFieldsFromTables(tables ...Table) []Field {
+	filtered := sliceutils.Filter(l.filteredFields, func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
+	})
+
+	if slices.Contains(tables, l.aggregateField.Table) {
+		return sliceutils.Unique(append(filtered, l.aggregateField))
+	}
+	return sliceutils.Unique(filtered)
+}
+
+func (l *aggQuery) Filters() FilterNode {
+	return l.filters
+}
+
+func (l *aggQuery) GetAggregateField() Field {
+	return l.aggregateField
+}
+
+func NewAggregationQueryFromSqon(aggregation string, sqon *Sqon, fields []Field) (AggQuery, error) {
+	// Define allowed aggregated cols
+	aggregate, err := findAggregatedField(fields, aggregation)
+	if err != nil {
+		return nil, fmt.Errorf("error during build aggregation %w", err)
+	}
+	selectedFields := []Field{aggregate}
+
+	if sqon != nil {
+		root, visitedFilteredFields, err2 := sqonToFilter(sqon, fields, selectedFields)
+		return &aggQuery{filters: root, filteredFields: visitedFilteredFields, aggregateField: aggregate}, err2
+	} else {
+		return &aggQuery{aggregateField: aggregate}, nil
+	}
+}
+
+func NewAggregationQueryFromCriteria(searchCriteria []SearchCriterion, fields []Field) (AggQuery, error) {
+	if len(searchCriteria) != 0 {
+		root, visitedFilteredFields, err := criteriaToFilter(searchCriteria, fields)
+		if err != nil {
+			return nil, fmt.Errorf("error during build agg query from search criteria %w", err)
+		}
+		return &aggQuery{filters: root, filteredFields: visitedFilteredFields}, err
+	} else {
+		return &aggQuery{}, nil
+	}
+}
+
+type CountQuery interface {
+	Filters() FilterNode
+	HasFieldFromTables(tables ...Table) bool
+	GetFieldsFromTables(tables ...Table) []Field
+}
+
+// OccurrenceCountQuery is a CountQuery over occurrences, which alone can be restricted to the
+// occurrences having at least one note.
+type OccurrenceCountQuery interface {
+	CountQuery
+	WithNote() bool
+	WithFlag() []OccurrenceFlagType
+	WithInterpretation() bool
+}
+
+type countQuery struct {
+	filters        FilterNode //Root node of the filter tree
+	filteredFields []Field    //Fields used in the filters
+}
+
+// occurrenceCountQuery adds the occurrence-only note filter on top of a plain count query.
+type occurrenceCountQuery struct {
+	countQuery
+	occurrenceFilters
+}
+
+func (l *countQuery) Filters() FilterNode {
+	return l.filters
+}
+
+func (l *countQuery) HasFieldFromTables(tables ...Table) bool {
+	return sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
+	})
+}
+func (l *countQuery) GetFieldsFromTables(tables ...Table) []Field {
+	filtered := sliceutils.Filter(l.filteredFields, func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
+	})
+
+	return sliceutils.Unique(filtered)
+}
+
+func NewOccurrenceCountQueryFromSqon(sqon *Sqon, fields []Field, opts ...OccurrenceFilterOption) (OccurrenceCountQuery, error) {
+	annotationFilters := resolveOccurrenceFilters(opts)
+
+	if sqon != nil {
+		root, visitedFilteredFields, err := sqonToFilter(sqon, fields, nil)
+		if err != nil {
+			return nil, fmt.Errorf("error during build list query %w", err)
+		}
+		return &occurrenceCountQuery{countQuery: countQuery{filteredFields: visitedFilteredFields, filters: root}, occurrenceFilters: annotationFilters}, nil
+
+	} else {
+		return &occurrenceCountQuery{occurrenceFilters: annotationFilters}, nil
+	}
+}
+
+func NewCountQueryFromCriteria(searchCriteria []SearchCriterion, fields []Field) (CountQuery, error) {
+
+	if len(searchCriteria) != 0 {
+		root, visitedFilteredFields, err := criteriaToFilter(searchCriteria, fields)
+		if err != nil {
+			return nil, fmt.Errorf("error during build count query from search criteria %w", err)
+		}
+		return &countQuery{filteredFields: visitedFilteredFields, filters: root}, nil
+
+	} else {
+		return &countQuery{}, nil
+	}
+}
+
+type StatisticsQuery interface {
+	Filters() FilterNode
+	GetTargetedField() *Field
+	HasFieldFromTables(tables ...Table) bool
+	GetFieldsFromTables(tables ...Table) []Field
+}
+
+type statisticsQuery struct {
+	filters        FilterNode //Root node of the filter tree
+	filteredFields []Field    //Fields used in the filters
+	targetedField  *Field     //Field targeted for statistics
+}
+
+func (l *statisticsQuery) Filters() FilterNode {
+	return l.filters
+}
+
+func (l *statisticsQuery) GetTargetedField() *Field {
+	return l.targetedField
+}
+
+func (l *statisticsQuery) HasFieldFromTables(tables ...Table) bool {
+	return slices.Contains(tables, l.targetedField.Table) || (l.filteredFields != nil && sliceutils.Some(l.filteredFields, func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
+	}))
+}
+
+func (l *statisticsQuery) GetFieldsFromTables(tables ...Table) []Field {
+	filtered := sliceutils.Filter(l.filteredFields, func(field Field, index int, slice []Field) bool {
+		return slices.Contains(tables, field.Table)
+	})
+
+	if slices.Contains(tables, l.targetedField.Table) {
+		return sliceutils.Unique(append(filtered, *l.targetedField))
+	}
+	return sliceutils.Unique(filtered)
+}
+
+func NewStatisticsQueryFromSqon(field string, sqon *Sqon, fields []Field) (StatisticsQuery, error) {
+	// Define allowed target col
+	target := findNumericByAlias(fields, field)
+	if target != nil {
+		if sqon != nil {
+			root, visitedFilteredFields, err := sqonToFilter(sqon, fields, nil)
+			if err != nil {
+				return nil, fmt.Errorf("error during build statistics query %w", err)
+			}
+			return &statisticsQuery{filteredFields: visitedFilteredFields, filters: root, targetedField: target}, nil
+
+		} else {
+			return &statisticsQuery{targetedField: target}, nil
+		}
+	} else {
+		return nil, fmt.Errorf("%s is not a numeric field", field)
+	}
+}

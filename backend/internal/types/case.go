@@ -1,0 +1,588 @@
+package types
+
+import (
+	"fmt"
+	"slices"
+	"strings"
+	"time"
+)
+
+type Case struct {
+	ID                       int `gorm:"unique;primaryKey;autoIncrement"`
+	ProbandID                int
+	Proband                  Patient `gorm:"foreignKey:ID;references:ProbandID"`
+	ProjectID                int
+	Project                  Project `gorm:"foreignKey:ID;references:ProjectID"`
+	AnalysisCatalogID        int
+	AnalysisCatalog          AnalysisCatalog `gorm:"foreignKey:ID;references:AnalysisCatalogID"`
+	CaseTypeCode             string
+	CaseType                 CaseType `gorm:"foreignKey:Code;references:CaseTypeCode"`
+	CaseCategoryCode         string
+	CaseCategory             CaseCategory `gorm:"foreignKey:Code;references:CaseCategoryCode"`
+	PriorityCode             string       `gorm:"default:routine"`
+	Priority                 Priority     `gorm:"foreignKey:PriorityCode;references:Code"`
+	StatusCode               string
+	Status                   Status `gorm:"foreignKey:Code;references:StatusCode"`
+	PrimaryCondition         string
+	ConditionCodeSystem      string
+	DiagnosisHypothesis      string
+	OrderingPhysician        string
+	TenantCode               string
+	OrderingOrganizationCode *string
+	OrderingOrganization     Organization `gorm:"foreignKey:OrderingOrganizationCode,TenantCode;references:Code,TenantCode"`
+	DiagnosisLabCode         *string
+	DiagnosisLab             Organization `gorm:"foreignKey:DiagnosisLabCode,TenantCode;references:Code,TenantCode"`
+	SubmitterCaseID          string
+	Note                     string
+	CreatedOn                time.Time `gorm:"autoCreateTime"`
+	UpdatedOn                time.Time `gorm:"autoUpdateTime:milli"`
+}
+
+// PatchCase is the body of PATCH /{tenant}/cases/{case_id}.
+// @Description Case fields to change. Omitted fields are left untouched.
+type PatchCase struct {
+	StatusCode string `json:"status_code,omitempty" example:"in_review" enums:"in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
+} // @name PatchCase
+
+type CaseStatus = string
+
+const (
+	CaseStatusDraft        CaseStatus = "draft"
+	CaseStatusSubmitted    CaseStatus = "submitted"
+	CaseStatusProcessing   CaseStatus = "processing"
+	CaseStatusInProgress   CaseStatus = "in_progress"
+	CaseStatusInReview     CaseStatus = "in_review"
+	CaseStatusCompleted    CaseStatus = "completed"
+	CaseStatusResolved     CaseStatus = "resolved"
+	CaseStatusUnresolved   CaseStatus = "unresolved"
+	CaseStatusInconclusive CaseStatus = "inconclusive"
+	CaseStatusReopened     CaseStatus = "reopened"
+	CaseStatusRevoked      CaseStatus = "revoked"
+)
+
+var SystemAppliedCaseStatuses = []string{
+	CaseStatusDraft,
+	CaseStatusSubmitted,
+	CaseStatusProcessing,
+}
+
+var UserAppliedCaseStatuses = []string{
+	CaseStatusInProgress,
+	CaseStatusInReview,
+	CaseStatusCompleted,
+	CaseStatusResolved,
+	CaseStatusUnresolved,
+	CaseStatusInconclusive,
+	CaseStatusReopened,
+	CaseStatusRevoked,
+}
+
+func ValidateUserAppliedCaseStatus(code string) error {
+	switch {
+	case code == "":
+		return fmt.Errorf("status_code is required, expected one of: %s", strings.Join(UserAppliedCaseStatuses, ", "))
+	case slices.Contains(SystemAppliedCaseStatuses, code):
+		return fmt.Errorf("status_code %q is system-applied and cannot be set by a user", code)
+	case !slices.Contains(UserAppliedCaseStatuses, code):
+		return fmt.Errorf("unknown status_code %q, expected one of: %s", code, strings.Join(UserAppliedCaseStatuses, ", "))
+	}
+	return nil
+}
+
+// pipelineCaseStatusTransitions maps each status the pipeline may set to the only status it may
+// set it from. They are the only allowed changes that involve a system status.
+var pipelineCaseStatusTransitions = map[CaseStatus]CaseStatus{
+	CaseStatusProcessing: CaseStatusSubmitted,
+	CaseStatusInProgress: CaseStatusProcessing,
+}
+
+// IsSystemCaseStatusChange reports whether a change sets a case to, or expects it in, a
+// system-applied status. Such a change belongs to the pipeline, whatever its other side.
+func IsSystemCaseStatusChange(change CaseStatusChange) bool {
+	if slices.Contains(SystemAppliedCaseStatuses, change.StatusCode) {
+		return true
+	}
+	for _, expected := range change.ExpectedStatusCodes {
+		if slices.Contains(SystemAppliedCaseStatuses, expected) {
+			return true
+		}
+	}
+	return false
+}
+
+func ValidateCaseStatusChange(change CaseStatusChange) error {
+	if change.CaseID <= 0 {
+		return fmt.Errorf("case_id must be a positive integer, got %d", change.CaseID)
+	}
+	if change.StatusCode == "" {
+		return fmt.Errorf("case %d: status_code is required", change.CaseID)
+	}
+	if len(change.ExpectedStatusCodes) == 0 {
+		return fmt.Errorf("case %d: expected_status_codes is required", change.CaseID)
+	}
+
+	if IsSystemCaseStatusChange(change) {
+		from, ok := pipelineCaseStatusTransitions[change.StatusCode]
+		for _, expected := range change.ExpectedStatusCodes {
+			if !ok || expected != from {
+				return fmt.Errorf("case %d: %s -> %s is not an allowed change, the only changes involving a system status are %s -> %s and %s -> %s",
+					change.CaseID, expected, change.StatusCode, CaseStatusSubmitted, CaseStatusProcessing, CaseStatusProcessing, CaseStatusInProgress)
+			}
+		}
+		return nil
+	}
+
+	if !slices.Contains(UserAppliedCaseStatuses, change.StatusCode) {
+		return fmt.Errorf("case %d: unknown status_code %q", change.CaseID, change.StatusCode)
+	}
+	for _, expected := range change.ExpectedStatusCodes {
+		if !slices.Contains(UserAppliedCaseStatuses, expected) {
+			return fmt.Errorf("case %d: unknown expected status code %q", change.CaseID, expected)
+		}
+	}
+	return nil
+}
+
+// CasesStatusRequest is the body of PATCH /{tenant}/cases/status.
+// @Description Status changes to apply to cases. A change between two user statuses needs can_edit_case at the case's lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and is limited to submitted -> processing and processing -> in_progress.
+type CasesStatusRequest struct {
+	Cases []CaseStatusChange `json:"cases" validate:"required"`
+} // @name CasesStatusRequest
+
+// CaseStatusChange
+// @Description One case status change, applied only if the case is still in one of expected_status_codes.
+type CaseStatusChange struct {
+	CaseID              int      `json:"case_id" validate:"required" example:"123"`
+	StatusCode          string   `json:"status_code" validate:"required" example:"in_progress"`
+	ExpectedStatusCodes []string `json:"expected_status_codes" validate:"required" example:"processing"`
+} // @name CaseStatusChange
+
+// CasesStatusResponse
+// @Description Outcome of each requested status change, in request order.
+type CasesStatusResponse struct {
+	Cases []CaseStatusChangeResult `json:"cases" validate:"required"`
+} // @name CasesStatusResponse
+
+// CaseStatusChangeResult
+// @Description updated is false when the case was no longer in an expected status; it is then left unchanged and current_status_code tells what it is. current_status_code may be any case status, including a tenant's own.
+type CaseStatusChangeResult struct {
+	CaseID            int    `json:"case_id" validate:"required" example:"123"`
+	Updated           bool   `json:"updated" validate:"required"`
+	CurrentStatusCode string `json:"current_status_code" validate:"required" example:"in_progress"`
+} // @name CaseStatusChangeResult
+
+// CaseResult - Search cases result
+// @Description Line represented a case in case list
+// @Name CaseResult
+type CaseResult struct {
+	CaseID                    int                     `json:"case_id" validate:"required"`
+	ProbandID                 int                     `json:"proband_id,omitempty"`
+	SubmitterProbandId        string                  `json:"submitter_proband_id,omitempty"`
+	ProbandSubmitterSampleIds JsonArray[string]       `json:"proband_submitter_sample_ids" validate:"required"`
+	RunNames                  JsonArray[string]       `json:"run_names,omitempty"`
+	PriorityCode              string                  `json:"priority_code,omitempty"`
+	StatusCode                CaseStatus              `json:"status_code" validate:"required" enums:"draft,submitted,processing,in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
+	CaseTypeCode              string                  `json:"-"`
+	AnalysisCatalogCode       string                  `json:"analysis_catalog_code,omitempty"`
+	AnalysisCatalogName       string                  `json:"analysis_catalog_name,omitempty"`
+	CaseType                  string                  `json:"case_type,omitempty"`
+	PrimaryConditionID        string                  `json:"primary_condition_id,omitempty"`
+	PrimaryConditionName      string                  `json:"primary_condition_name,omitempty"`
+	OrderingOrganizationCode  string                  `json:"ordering_organization_code,omitempty"`
+	OrderingOrganizationName  string                  `json:"ordering_organization_name,omitempty"`
+	ProjectCode               string                  `json:"project_code,omitempty"`
+	ProjectName               string                  `json:"project_name,omitempty"`
+	CreatedOn                 time.Time               `json:"created_on" validate:"required"`
+	UpdatedOn                 time.Time               `json:"updated_on" validate:"required"`
+	Prescriber                string                  `json:"prescriber,omitempty"`
+	DiagnosisLabCode          string                  `json:"diagnosis_lab_code" validate:"required"`
+	DiagnosisLabName          string                  `json:"diagnosis_lab_name,omitempty"`
+	OrganizationCode          string                  `json:"organization_code,omitempty"`
+	OrganizationName          string                  `json:"organization_name,omitempty"`
+	HasVariants               bool                    `json:"has_variants" validate:"required"`
+	PanelCode                 string                  `json:"panel_code,omitempty"`
+	PanelName                 string                  `json:"panel_name,omitempty"`
+	CaseCategoryCode          string                  `json:"case_category_code,omitempty"`
+	ProbandJhn                string                  `json:"proband_jhn,omitempty"`
+	ProbandLifeStatusCode     string                  `json:"proband_life_status_code,omitempty"`
+	ProbandFirstName          string                  `json:"proband_first_name,omitempty"`
+	ProbandLastName           string                  `json:"proband_last_name,omitempty"`
+	Assignees                 JsonArray[CaseAssignee] `json:"assignees" validate:"required"`
+}
+
+// CaseEntity - Case Entity data
+// @Description Data for Case Entity Page
+// @Name CaseEntity
+type CaseEntity struct {
+	CaseID                   int                                       `json:"case_id" validate:"required"`
+	ProbandID                int                                       `json:"-"`
+	CaseType                 string                                    `json:"case_type,omitempty"`
+	AnalysisCatalogCode      string                                    `json:"analysis_catalog_code,omitempty"`
+	AnalysisCatalogName      string                                    `json:"analysis_catalog_name,omitempty"`
+	CaseTypeCode             string                                    `json:"-"`
+	CaseCategoryCode         string                                    `json:"case_category_code" validate:"required"`
+	CaseCategoryName         string                                    `json:"case_category_name" validate:"required"`
+	CreatedOn                time.Time                                 `json:"created_on" validate:"required"`
+	UpdatedOn                time.Time                                 `json:"updated_on" validate:"required"`
+	Prescriber               string                                    `json:"prescriber,omitempty"`
+	OrderingOrganizationCode string                                    `json:"ordering_organization_code,omitempty"`
+	OrderingOrganizationName string                                    `json:"ordering_organization_name,omitempty"`
+	DiagnosisLabCode         string                                    `json:"diagnosis_lab_code" validate:"required"`
+	DiagnosisLabName         string                                    `json:"diagnosis_lab_name,omitempty"`
+	PriorityCode             string                                    `json:"priority_code,omitempty"`
+	StatusCode               CaseStatus                                `json:"status_code" validate:"required" enums:"draft,submitted,processing,in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
+	PrimaryConditionID       string                                    `json:"primary_condition_id,omitempty"`
+	PrimaryConditionName     string                                    `json:"primary_condition_name,omitempty"`
+	Note                     string                                    `json:"note,omitempty"`
+	DiagnosisHypothesis      string                                    `json:"diagnosis_hypothesis,omitempty"`
+	ProjectCode              string                                    `json:"project_code,omitempty"`
+	ProjectName              string                                    `json:"project_name,omitempty"`
+	PanelCode                string                                    `json:"panel_code,omitempty"`
+	PanelName                string                                    `json:"panel_name,omitempty"`
+	SequencingExperiments    JsonArray[CaseSequencingExperiment]       `json:"sequencing_experiments" validate:"required"`
+	Members                  JsonArray[CasePatientClinicalInformation] `json:"members" validate:"required"`
+	Tasks                    JsonArray[CaseTask]                       `json:"tasks" validate:"required"`
+	HasIGVFiles              bool                                      `json:"has_igv_files" validate:"required"`
+	Assignees                JsonArray[CaseAssignee]                   `json:"assignees" validate:"required"`
+}
+
+// CaseSequencingExperiment - Sequencing experiment to display in a Case
+// @Description Sequencing experiment to display in a Case
+// @Name CaseSequencingExperiment
+type CaseSequencingExperiment struct {
+	SeqID                    int       `json:"seq_id" validate:"required"`
+	PatientID                int       `json:"patient_id" validate:"required"`
+	FetusID                  *int      `json:"fetus_id,omitempty"`
+	RelationshipToProband    string    `json:"relationship_to_proband" validate:"required"`
+	SampleID                 int       `json:"sample_id" validate:"required"`
+	SampleSubmitterID        string    `json:"sample_submitter_id,omitempty"`
+	SampleTypeCode           string    `json:"sample_type_code,omitempty"`
+	AffectedStatusCode       string    `json:"affected_status_code" validate:"required"`
+	HistologyCode            string    `json:"histology_code,omitempty"`
+	ExperimentalStrategyCode string    `json:"experimental_strategy_code" validate:"required"`
+	StatusCode               string    `json:"status_code" validate:"required"`
+	UpdatedOn                time.Time `json:"updated_on" validate:"required"`
+	HasVariants              bool      `json:"has_variants" validate:"required"`
+}
+
+// CasePatientClinicalInformation - Patient clinical information
+// @Description Patient clinical information to display in Case Entity
+// @Name CasePatientClinicalInformation
+type CasePatientClinicalInformation struct {
+	RelationshipToProband string                       `json:"relationship_to_proband" validate:"required"`
+	AffectedStatusCode    string                       `json:"affected_status_code" validate:"required"`
+	PatientID             *int                         `json:"patient_id,omitempty"`
+	FetusID               *int                         `json:"fetus_id,omitempty"`
+	PatientKey            *string                      `json:"patient_key,omitempty" gorm:"-" format:"uuid"` // Key of the PCX patient page, absent when the patient view is off or the caller cannot see the patient there
+	FirstName             string                       `json:"first_name,omitempty"`
+	LastName              string                       `json:"last_name,omitempty"`
+	DateOfBirth           *time.Time                   `json:"date_of_birth,omitempty"`
+	LastMenstrualPeriod   *time.Time                   `json:"last_menstrual_period,omitempty"`
+	EstimatedDueDate      *time.Time                   `json:"estimated_due_date,omitempty"`
+	LifeStatusCode        string                       `json:"life_status_code" validate:"required"`
+	SexCode               string                       `json:"sex_code" validate:"required"`
+	SubmitterPatientId    string                       `json:"submitter_patient_id,omitempty"`
+	Jhn                   string                       `json:"jhn,omitempty"`
+	OrganizationCode      string                       `json:"organization_code,omitempty"`
+	OrganizationName      string                       `json:"organization_name,omitempty"`
+	Ethnicities           JsonArray[ValueSetItem]      `json:"ethnicities,omitempty"`
+	Consanguinity         *ValueSetItem                `json:"consanguinity,omitempty" gorm:"-"`
+	ObservedPhenotypes    JsonArray[Term]              `json:"observed_phenotypes,omitempty"`
+	NonObservedPhenotypes JsonArray[Term]              `json:"non_observed_phenotypes,omitempty"`
+	Exams                 JsonArray[CaseExam]          `json:"exams,omitempty"`
+	Notes                 JsonArray[string]            `json:"notes,omitempty"`
+	FamilyHistory         JsonArray[CaseFamilyHistory] `json:"family_history,omitempty"`
+}
+
+// CaseFamilyHistory - Family history reported for a case member
+// @Description A condition reported in a member's family, and who it was reported for
+// @Name CaseFamilyHistory
+type CaseFamilyHistory struct {
+	FamilyMemberCode string `json:"family_member_code" validate:"required"`
+	Condition        string `json:"condition" validate:"required"`
+}
+
+type CaseTask struct {
+	ID               int               `json:"id" validate:"required"`
+	TypeCode         string            `json:"type_code" validate:"required"`
+	TypeName         string            `json:"type_name" validate:"required"`
+	CreatedOn        time.Time         `json:"created_on" validate:"required"`
+	PatientsUnparsed string            `json:"-"`
+	Patients         JsonArray[string] `json:"patients" validate:"required"`
+	PatientCount     int64             `json:"-"`
+}
+
+type CaseHasSequencingExperiment struct {
+	CaseID                 int
+	SequencingExperimentID int
+}
+
+var CaseTable = Table{
+	Name:           "cases",
+	FederationName: "radiant_jdbc.public.cases",
+	Alias:          "c",
+}
+
+var CaseHasSequencingExperimentTable = Table{
+	Name:           "case_has_sequencing_experiment",
+	FederationName: "radiant_jdbc.public.case_has_sequencing_experiment",
+	Alias:          "chseq",
+}
+
+var CaseProbandSampleTable = Table{
+	Name:  "proband_sample",
+	Alias: "proband_sample",
+}
+
+var CaseRunTable = Table{
+	Name:  "case_run",
+	Alias: "case_run",
+}
+
+func (Case) TableName() string {
+	return CaseTable.Name
+}
+
+func (CaseHasSequencingExperiment) TableName() string {
+	return CaseHasSequencingExperimentTable.Name
+}
+
+var CasesFields = []Field{
+	CaseIdField,
+	CaseProbandIdField,
+	CaseSubmitterCaseIdField,
+	PatientIdField,
+	SubmitterPatientIdField,
+	SubmitterProbandIdField,
+	PatientMrnField,
+	CasePriorityCodeField,
+	CaseStatusCodeField,
+	CaseTypeCodeField,
+	AnalysisCatalogCodeField,
+	AnalysisCatalogNameField,
+	CasePrimaryConditionIdField,
+	CasePrimaryConditionNameField,
+	ProjectCodeField,
+	ProjectNameField,
+	CaseCreatedOnField,
+	CaseUpdatedOnField,
+	CaseOrderingPhysicianField,
+	CaseOrderingOrganizationNameField,
+	CaseOrderingOrganizationCodeField,
+	CaseProbandSubmitterSampleIdsField,
+	CaseRunNamesField,
+	CaseDiagnosisLabCodeField,
+	CaseDiagnosisLabNameField,
+	PatientOrganizationCodeField,
+	PatientOrganizationNameField,
+	CaseSequencingExperimentIdField,
+	PanelCodeField,
+	PanelNameField,
+	CaseCategoryCodeField,
+	ProbandJhnField,
+	ProbandLifeStatusCodeField,
+	ProbandFirstNameField,
+	ProbandLastNameField,
+	CaseGroupField,
+}
+
+var CasesDefaultFields = []Field{
+	CaseIdField,
+	CaseProbandIdField,
+	SubmitterProbandIdField,
+	CasePriorityCodeField,
+	CaseStatusCodeField,
+	CaseTypeCodeField,
+	AnalysisCatalogCodeField,
+	AnalysisCatalogNameField,
+	CaseOrderingOrganizationCodeField,
+	CaseOrderingOrganizationNameField,
+	CaseProbandSubmitterSampleIdsField,
+	CaseDiagnosisLabCodeField,
+	ProjectCodeField,
+	ProjectNameField,
+	CaseCreatedOnField,
+	CaseUpdatedOnField,
+}
+
+var CasesDefaultSort = []SortField{{Field: CaseUpdatedOnField, Order: "desc"}}
+
+var CasePriorityCodeField = Field{
+	Name:            "priority_code",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           CaseTable,
+}
+
+var CasesQueryConfig = QueryConfig{
+	AllFields:     CasesFields,
+	DefaultFields: CasesDefaultFields,
+	DefaultSort:   CasesDefaultSort,
+	IdField:       CaseIdField,
+}
+
+var CaseIdField = Field{
+	Name:          "id",
+	Alias:         "case_id",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         CaseTable,
+}
+
+var CaseProbandIdField = Field{
+	Name:          "proband_id",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	Table:         CaseTable,
+}
+
+var CaseSubmitterCaseIdField = Field{
+	Name:          "submitter_case_id",
+	Alias:         "submitter_case_id",
+	CanBeFiltered: true,
+	Table:         CaseTable,
+}
+
+var CaseStatusCodeField = Field{
+	Name:            "status_code",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           CaseTable,
+}
+
+var CaseCreatedOnField = Field{
+	Name:          "created_on",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         CaseTable,
+}
+
+var CaseUpdatedOnField = Field{
+	Name:          "updated_on",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         CaseTable,
+}
+
+var CaseDiagnosisLabCodeField = Field{
+	Name:            "code",
+	Alias:           "diagnosis_lab_code",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           SequencingLabTable,
+}
+
+var CaseDiagnosisLabNameField = Field{
+	Name:          "name",
+	Alias:         "diagnosis_lab_name",
+	CanBeSelected: true,
+	Table:         SequencingLabTable,
+}
+
+var CasePrimaryConditionIdField = Field{
+	Name:          "id",
+	Alias:         "primary_condition_id",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         MondoTable,
+}
+
+var CasePrimaryConditionNameField = Field{
+	Name:          "name",
+	Alias:         "primary_condition_name",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         MondoTable,
+}
+
+var CaseTypeCodeField = Field{
+	Name:          "case_type_code",
+	Alias:         "case_type_code",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         CaseTable,
+}
+
+var CaseOrderingPhysicianField = Field{
+	Name:          "ordering_physician",
+	Alias:         "prescriber",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Table:         CaseTable,
+}
+
+var CaseOrderingOrganizationCodeField = Field{
+	Name:            "code",
+	Alias:           "ordering_organization_code",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeSorted:     true,
+	CanBeAggregated: true,
+	Table:           OrderingOrganizationTable,
+}
+
+var CaseOrderingOrganizationNameField = Field{
+	Name:          "name",
+	Alias:         "ordering_organization_name",
+	CanBeSelected: true,
+	Table:         OrderingOrganizationTable,
+}
+
+var CaseProbandSubmitterSampleIdsField = Field{
+	Name:          "submitter_sample_ids",
+	Alias:         "proband_submitter_sample_ids",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	IsArray:       true,
+	Table:         CaseProbandSampleTable,
+}
+
+var CaseRunNamesField = Field{
+	Name:          "run_names",
+	Alias:         "run_names",
+	CanBeSelected: true,
+	IsArray:       true,
+	Table:         CaseRunTable,
+}
+
+var CaseSequencingExperimentIdField = Field{
+	Name:          "sequencing_experiment_id",
+	Alias:         "sequencing_experiment_id",
+	CanBeFiltered: true,
+	Table:         CaseHasSequencingExperimentTable,
+}
+
+var CaseCategoryCodeField = Field{
+	Name:          "case_category_code",
+	Alias:         "case_category_code",
+	CanBeSelected: true,
+	CanBeSorted:   true,
+	CanBeFiltered: true,
+	Table:         CaseTable,
+}
+
+type CaseFilters struct {
+	Status               []FiltersValue `json:"status_code" validate:"required"`
+	Priority             []FiltersValue `json:"priority_code" validate:"required"`
+	AnalysisCatalog      []FiltersValue `json:"analysis_catalog_code" validate:"required"`
+	Project              []FiltersValue `json:"project_code" validate:"required"`
+	DiagnosisLab         []FiltersValue `json:"diagnosis_lab_code" validate:"required"`
+	OrderingOrganization []FiltersValue `json:"ordering_organization_code" validate:"required"`
+	Panel                []FiltersValue `json:"panel_code" validate:"required"`
+	LifeStatus           []FiltersValue `json:"life_status_code" validate:"required"`
+	CaseCategory         []FiltersValue `json:"case_category_code" validate:"required"`
+	CaseType             []FiltersValue `json:"case_type_code" validate:"required"`
+}

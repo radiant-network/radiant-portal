@@ -1,0 +1,656 @@
+package main
+
+import (
+	"fmt"
+	"math/rand"
+	"testing"
+	"time"
+
+	"github.com/radiant-network/radiant-api/internal/batchval"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+func randomString(n int, alphabet string) string {
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = alphabet[r.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+func Test_SubmitterPatientId_Too_Long(t *testing.T) {
+	orgPatientId := randomString(120, letters)
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: types.TrimmedString(orgPatientId)}
+	patientValidationRecord := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	patientValidationRecord.validateSubmitterPatientId()
+	assert.Len(t, patientValidationRecord.Errors, 1)
+	assert.Equal(t, fmt.Sprintf("Invalid field submitter_patient_id for patient (CHUSJ / %s). Reason: field is too long, maximum length allowed is 100.", orgPatientId), patientValidationRecord.Errors[0].Message)
+	assert.Equal(t, "patient[0].submitter_patient_id", patientValidationRecord.Errors[0].Path)
+}
+
+func Test_SubmitterPatientId_Special_Characters(t *testing.T) {
+	orgPatientId := "id_with_invalid_char_🧪"
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: types.TrimmedString(orgPatientId)}
+	patientValidationRecord := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	patientValidationRecord.validateSubmitterPatientId()
+	assert.Len(t, patientValidationRecord.Errors, 1)
+	assert.Equal(t, fmt.Sprintf("Invalid field submitter_patient_id for patient (CHUSJ / %s). Reason: does not match the regular expression `^[a-zA-Z0-9\\- ._'À-ÿ]*$`.", orgPatientId), patientValidationRecord.Errors[0].Message)
+	assert.Equal(t, "patient[0].submitter_patient_id", patientValidationRecord.Errors[0].Path)
+}
+
+func Test_SubmitterPatientId_Multiple_Errors(t *testing.T) {
+	orgPatientId := fmt.Sprintf("%s_🧪", randomString(120, letters))
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: types.TrimmedString(orgPatientId)}
+	patientValidationRecord := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	patientValidationRecord.validateSubmitterPatientId()
+	assert.Len(t, patientValidationRecord.Errors, 2)
+}
+
+func Test_SubmitterPatientId_Valid(t *testing.T) {
+	orgPatientId := "valid_patient_id_1"
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: types.TrimmedString(orgPatientId)}
+	patientValidationRecord := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	patientValidationRecord.validateSubmitterPatientId()
+	assert.Nil(t, patientValidationRecord.Errors)
+}
+
+func Test_ValidateLastName(t *testing.T) {
+	// Empty last name: no errors
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LastName: ""}
+	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.Index = 0
+	rec.validateLastName()
+	assert.Nil(t, rec.Errors)
+
+	// Empty last name with spaces: no errors
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LastName: "   "}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateLastName()
+	assert.Nil(t, rec.Errors)
+
+	// Too long last name
+	longName := randomString(120, letters)
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id2", LastName: types.TrimmedString(longName)}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateLastName()
+	assert.Len(t, rec.Errors, 1)
+	assert.Contains(t, rec.Errors[0].Message, "is too long")
+	assert.Equal(t, "patient[0].last_name", rec.Errors[0].Path)
+
+	// Invalid characters
+	invalidName := types.TrimmedString("Smith🧪")
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id3", LastName: invalidName}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateLastName()
+	assert.Len(t, rec.Errors, 1)
+	assert.Contains(t, rec.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "patient[0].last_name", rec.Errors[0].Path)
+
+	// Both errors
+	both := types.TrimmedString(longName + "🧪")
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id4", LastName: both}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateLastName()
+	assert.Len(t, rec.Errors, 2)
+
+	// Valid last name
+	validName := types.TrimmedString("Smith-Jones")
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id5", LastName: validName}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateLastName()
+	assert.Nil(t, rec.Errors)
+
+	// Valid last name with parenthesis
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id5", LastName: "Smith (Jones)"}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateLastName()
+	assert.Nil(t, rec.Errors)
+
+	// Invalid last name with parenthesis
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id5", LastName: "<(-_-)>"}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateLastName()
+	assert.Len(t, rec.Errors, 1)
+	assert.Contains(t, rec.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "patient[0].last_name", rec.Errors[0].Path)
+}
+
+func Test_ValidateFirstName(t *testing.T) {
+	// Empty first name: no errors
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", FirstName: ""}
+	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateFirstName()
+	assert.Nil(t, rec.Errors)
+
+	// Empty first name with spaces: no errors
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", FirstName: "   "}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateFirstName()
+	assert.Nil(t, rec.Errors)
+
+	// Too long first name
+	longName := types.TrimmedString(randomString(120, letters))
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id2", FirstName: longName}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateFirstName()
+	assert.Len(t, rec.Errors, 1)
+	assert.Contains(t, rec.Errors[0].Message, "is too long")
+	assert.Equal(t, "patient[0].first_name", rec.Errors[0].Path)
+
+	// Invalid characters
+	invalidName := types.TrimmedString("John🧪")
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id3", FirstName: invalidName}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateFirstName()
+	assert.Len(t, rec.Errors, 1)
+	assert.Contains(t, rec.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "patient[0].first_name", rec.Errors[0].Path)
+
+	// Both errors
+	both := longName + "🧪"
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id4", FirstName: both}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateFirstName()
+	assert.Len(t, rec.Errors, 2)
+
+	// Valid first name
+	validName := types.TrimmedString("John-Paul")
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id5", FirstName: validName}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateFirstName()
+	assert.Nil(t, rec.Errors)
+
+	// Valid first name with parenthesis
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id5", FirstName: "John (Paul)"}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateFirstName()
+	assert.Nil(t, rec.Errors)
+
+	// Invalid first name with parenthesis
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id5", FirstName: "<(-_-)>"}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateFirstName()
+	assert.Len(t, rec.Errors, 1)
+	assert.Contains(t, rec.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "patient[0].first_name", rec.Errors[0].Path)
+}
+
+func Test_ValidateJhn(t *testing.T) {
+	// Empty JHN: no errors
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", Jhn: ""}
+	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateJhn()
+	assert.Nil(t, rec.Errors)
+
+	// JHN with only spaces: no errors
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", Jhn: "   "}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateJhn()
+	assert.Nil(t, rec.Errors)
+
+	// Too long JHN
+	longJhn := types.TrimmedString(randomString(120, letters))
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id2", Jhn: longJhn}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateJhn()
+	assert.Len(t, rec.Errors, 1)
+	assert.Contains(t, rec.Errors[0].Message, "is too long")
+	assert.Equal(t, "patient[0].jhn", rec.Errors[0].Path)
+
+	// Invalid characters
+	invalidJhn := types.TrimmedString("JHN🧪")
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id3", Jhn: invalidJhn}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateJhn()
+	assert.Len(t, rec.Errors, 1)
+	assert.Contains(t, rec.Errors[0].Message, "does not match the regular expression")
+	assert.Equal(t, "patient[0].jhn", rec.Errors[0].Path)
+
+	// Both errors
+	both := types.TrimmedString(longJhn + "🧪")
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id4", Jhn: both}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateJhn()
+	assert.Len(t, rec.Errors, 2)
+
+	// Valid JHN
+	validJhn := types.TrimmedString("JHN-1234")
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id5", Jhn: validJhn}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateJhn()
+	assert.Nil(t, rec.Errors)
+}
+
+func Test_ValidateOrganization(t *testing.T) {
+	// Nil organization: should have error
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1"}
+	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateOrganization(nil)
+	assert.Len(t, rec.Errors, 1)
+	assert.Contains(t, rec.Errors[0].Message, "does not exist")
+	assert.Equal(t, rec.Errors[0].Code, PatientOrganizationNotExistCode)
+
+	// Invalid organization category: should have error
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id2"}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	invalidOrg := &types.Organization{CategoryCode: "invalid_category"}
+	rec.validateOrganization(invalidOrg)
+	assert.Len(t, rec.Errors, 1)
+	assert.Contains(t, rec.Errors[0].Message, "is not in this list")
+	assert.Equal(t, rec.Errors[0].Code, PatientOrganizationTypeCode)
+
+	// Valid organization with healthcare_provider category: no errors
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id3"}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	validOrg := &types.Organization{CategoryCode: "healthcare_provider"}
+	rec.validateOrganization(validOrg)
+	assert.Nil(t, rec.Errors)
+
+	// Valid organization with research_institute category: no errors
+	patient = types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id4"}
+	rec = PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	validOrg2 := &types.Organization{CategoryCode: "research_institute"}
+	rec.validateOrganization(validOrg2)
+	assert.Nil(t, rec.Errors)
+}
+
+func Test_ValidateDateOfBirth(t *testing.T) {
+	// Nil date of birth: no errors
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", DateOfBirth: nil}
+	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateDateOfBirth()
+
+	expected := types.BatchMessage{
+		Code:    "PATIENT-004",
+		Message: "Invalid field date_of_birth for patient (CHUSJ / id1). Reason: missing value, date of birth is required.",
+		Path:    "patient[0].date_of_birth",
+	}
+	assert.Equal(t, expected, rec.Errors[0])
+}
+
+func Test_ValidateExistingPatient_Nil(t *testing.T) {
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1"}
+	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateExistingPatient(nil)
+	assert.False(t, rec.Skipped)
+	assert.Nil(t, rec.Infos)
+	assert.Nil(t, rec.Warnings)
+}
+
+func Test_ValidateExistingPatient_SameValues(t *testing.T) {
+	dob := types.DateISO8601(time.Date(2000, 1, 2, 0, 0, 0, 0, time.UTC))
+	patient := types.PatientBatch{
+		PatientOrganizationCode: "CHUSJ",
+		SubmitterPatientId:      "id2",
+		SexCode:                 "M",
+		LifeStatusCode:          "alive",
+		DateOfBirth:             &dob,
+		LastName:                "Doe",
+		FirstName:               "John",
+		Jhn:                     "JHN-123",
+	}
+	existing := &types.Patient{
+		SubmitterPatientId: "id2",
+		SexCode:            "M",
+		LifeStatusCode:     "alive",
+		DateOfBirth:        time.Time(dob),
+		LastName:           "Doe",
+		FirstName:          "John",
+		Jhn:                "JHN-123",
+	}
+	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateExistingPatient(existing)
+	assert.True(t, rec.Skipped)
+	assert.Len(t, rec.Infos, 1)
+	assert.Equal(t, PatientAlreadyExistCode, rec.Infos[0].Code)
+	assert.Nil(t, rec.Warnings)
+}
+
+func Test_ValidateExistingPatient_DifferentValues(t *testing.T) {
+	dobExisting := time.Date(1990, 5, 6, 0, 0, 0, 0, time.UTC)
+	dobRecord := time.Date(1991, 7, 8, 0, 0, 0, 0, time.UTC)
+	dobRecordType := types.DateISO8601(dobRecord)
+	patient := types.PatientBatch{
+		PatientOrganizationCode: "CHUSJ",
+		SubmitterPatientId:      "id3",
+		SexCode:                 "F",
+		LifeStatusCode:          "deceased",
+		DateOfBirth:             &dobRecordType,
+		LastName:                "Smith",
+		FirstName:               "Alice",
+		Jhn:                     "JHN-999",
+	}
+	existing := &types.Patient{
+		SubmitterPatientId: "id3",
+		SexCode:            "M",
+		LifeStatusCode:     "alive",
+		DateOfBirth:        dobExisting,
+		LastName:           "Jones",
+		FirstName:          "Bob",
+		Jhn:                "JHN-123",
+	}
+	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateExistingPatient(existing)
+	assert.True(t, rec.Skipped)
+	assert.Len(t, rec.Infos, 0)
+	// All 6 differing fields should produce 6 warnings
+	assert.Len(t, rec.Warnings, 6)
+	for _, w := range rec.Warnings {
+		assert.Equal(t, PatientExistingPatientDifferentFieldCode, w.Code)
+	}
+}
+
+func Test_Persist_Batch_And_Patient_Records_Rollback_On_Error(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		/* This test verifies that rollback occurs when there is an error inserting patient records. */
+		var id string
+		initErr := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'RUNNING', ?, false, 'user999', '2025-10-09', 'radiant')
+    		RETURNING id;
+		`, "{}", types.CreatePatientBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		//Batch has been considered as SUCCESS before inserting patient records
+		batch := types.Batch{
+			ID:        id,
+			BatchType: types.CreatePatientBatchType,
+			Payload:   "[]",
+			Status:    types.BatchStatusSuccess,
+			DryRun:    false,
+		}
+		//Patient records with one having a non-existent organization to trigger foreign key violation
+		// Should never happen in real life as we validate organization existence before this step
+		// but this is to test rollback functionality
+		patientRecords := []*PatientValidationRecord{
+			{
+				Patient: types.PatientBatch{
+					SubmitterPatientId:     "id1",
+					SubmitterPatientIdType: "mrn",
+					SexCode:                "male",
+					LifeStatusCode:         "alive",
+				},
+				OrganizationCode: "CHOP",
+			},
+			{
+				Patient: types.PatientBatch{
+					SubmitterPatientId:     "id2",
+					SubmitterPatientIdType: "mrn",
+					SexCode:                "male",
+					LifeStatusCode:         "alive",
+				},
+				OrganizationCode: "UNKNOWN-ORG", // Non-existent organization to trigger foreign key violation
+			},
+		}
+
+		err := persistBatchAndPatientRecords(t.Context(), env.Postgres, &batch, patientRecords)
+		if assert.NotNil(t, err) {
+			assert.Contains(t, err.Error(), "violates foreign key constraint")
+		}
+
+		// Verify that no patient records were inserted due to rollback
+		var countPatient int64
+		countPatientErr := env.Postgres.Table("patient").Where("submitter_patient_id = ? AND organization_code = ?", "id2", "CHOP").Count(&countPatient).Error
+		if countPatientErr != nil {
+			t.Fatal("failed to count patient :", countPatientErr)
+		}
+		assert.Equal(t, int64(0), countPatient) // No patient should have been inserted due to rollback
+
+		// Verify that batch status has been rolled back to RUNNING
+		resultBatch := types.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusRunning, resultBatch.Status) // Batch status should have been rollback
+
+	})
+
+}
+
+func patientValueSetRepo() *MockValueSetRepository {
+	return &MockValueSetRepository{
+		GetCodesFunc: func(vsType postgres.ValueSetType) ([]string, error) {
+			switch vsType {
+			case postgres.ValueSetLifeStatus:
+				return []string{"alive", "deceased", "unknown"}, nil
+			case postgres.ValueSetSex:
+				return []string{"male", "female", "unknown"}, nil
+			default:
+				return []string{}, nil
+			}
+		},
+	}
+}
+
+func Test_ValidateExistingPatientForUpdate_Nil(t *testing.T) {
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1"}
+	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateExistingPatientForUpdate(nil)
+	assert.True(t, rec.Skipped)
+	assert.Len(t, rec.Errors, 1)
+	assert.Equal(t, PatientNotExistForUpdateCode, rec.Errors[0].Code)
+	assert.Contains(t, rec.Errors[0].Message, "does not exist, cannot update")
+}
+
+func Test_ValidateExistingPatientForUpdate_Found(t *testing.T) {
+	patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1"}
+	rec := PatientValidationRecord{BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel}, Patient: patient}
+	rec.validateExistingPatientForUpdate(&types.Patient{ID: 1, SubmitterPatientId: "id1"})
+	assert.False(t, rec.Skipped)
+	assert.Empty(t, rec.Errors)
+}
+
+func Test_ValidateUpdatePatientsBatch_MissingPatientReportsError(t *testing.T) {
+	org := &types.Organization{Code: "CHUSJ", CategoryCode: "healthcare_provider"}
+	mockOrgRepo := &MockOrganizationRepository{
+		GetOrganizationByCodeFunc: func(code string, tenantCode string) (*types.Organization, error) {
+			return org, nil
+		},
+	}
+	mockPatientRepo := &MockPatientsRepository{
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string, tenantCode string) (*types.Patient, error) {
+			return nil, nil
+		},
+	}
+	mockContext := &batchval.BatchValidationContext{
+		OrgRepo:       mockOrgRepo,
+		PatientRepo:   mockPatientRepo,
+		ValueSetsRepo: patientValueSetRepo(),
+	}
+
+	dob := types.DateISO8601(time.Now().AddDate(-1, 0, 0))
+	patients := []types.PatientBatch{{
+		PatientOrganizationCode: "CHUSJ",
+		SubmitterPatientId:      "id-missing",
+		SubmitterPatientIdType:  "mrn",
+		SexCode:                 "male",
+		LifeStatusCode:          "alive",
+		DateOfBirth:             &dob,
+	}}
+
+	records, err := validateUpdatePatientsBatch(t.Context(), mockContext, patients, types.DefaultTenantCode)
+	assert.NoError(t, err)
+	assert.Len(t, records, 1)
+	assert.True(t, records[0].Skipped)
+	assert.Len(t, records[0].Errors, 1)
+	assert.Equal(t, PatientNotExistForUpdateCode, records[0].Errors[0].Code)
+}
+
+func Test_ValidateUpdatePatientsBatch_ExistingPatientNotSkipped(t *testing.T) {
+	org := &types.Organization{Code: "CHUSJ", CategoryCode: "healthcare_provider"}
+	existing := &types.Patient{ID: 1, SubmitterPatientId: "id-existing"}
+	mockOrgRepo := &MockOrganizationRepository{
+		GetOrganizationByCodeFunc: func(code string, tenantCode string) (*types.Organization, error) {
+			return org, nil
+		},
+	}
+	mockPatientRepo := &MockPatientsRepository{
+		GetPatientByOrgCodeAndSubmitterPatientIdFunc: func(orgCode, submitterPatientId string, tenantCode string) (*types.Patient, error) {
+			return existing, nil
+		},
+	}
+	mockContext := &batchval.BatchValidationContext{
+		OrgRepo:       mockOrgRepo,
+		PatientRepo:   mockPatientRepo,
+		ValueSetsRepo: patientValueSetRepo(),
+	}
+
+	dob := types.DateISO8601(time.Now().AddDate(-1, 0, 0))
+	patients := []types.PatientBatch{{
+		PatientOrganizationCode: "CHUSJ",
+		SubmitterPatientId:      "id-existing",
+		SubmitterPatientIdType:  "mrn",
+		SexCode:                 "male",
+		LifeStatusCode:          "alive",
+		DateOfBirth:             &dob,
+	}}
+
+	records, err := validateUpdatePatientsBatch(t.Context(), mockContext, patients, types.DefaultTenantCode)
+	assert.NoError(t, err)
+	assert.Len(t, records, 1)
+	assert.False(t, records[0].Skipped)
+	assert.Empty(t, records[0].Errors)
+}
+
+func Test_UpdatePatientRecords_SkipsMissingRecords(t *testing.T) {
+	mockRepo := &MockPatientsRepository{}
+	records := []*PatientValidationRecord{
+		{Patient: types.PatientBatch{SubmitterPatientId: "id1"}, OrganizationCode: "CHUSJ", BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel, Skipped: false}},
+		{Patient: types.PatientBatch{SubmitterPatientId: "id2"}, OrganizationCode: "CHUSJ", BaseValidationRecord: batchval.BaseValidationRecord{ResourceType: patientResourceLabel, Skipped: true}},
+	}
+
+	err := updatePatientRecords(t.Context(), records, mockRepo, types.DefaultTenantCode)
+	assert.NoError(t, err)
+	require.Len(t, mockRepo.UpdatedPatients, 1)
+	assert.Equal(t, "id1", mockRepo.UpdatedPatients[0].SubmitterPatientId)
+}
+
+func Test_Persist_Batch_And_Update_Patient_Records(t *testing.T) {
+	// ExclusivePostgres: writes directly into "patient" (id >= 1000), a table other parallel
+	// WritePostgres tests may bulk-clean concurrently — see setup_postgres.go cleanUp.
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		require.NoError(t, db.Exec(`
+			INSERT INTO patient (id, submitter_patient_id, submitter_patient_id_type, organization_code, tenant_code, sex_code, date_of_birth, life_status_code, first_name, last_name, jhn)
+			VALUES (1001, 'MRN-WORKER-UPDATE-1', 'mrn', 'CHUSJ', 'radiant', 'male', '2000-01-01', 'alive', 'Original', 'Name', 'JHN-ORIGINAL')
+		`).Error)
+
+		var id string
+		require.NoError(t, db.Raw(`
+			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+			VALUES (?, 'RUNNING', ?, false, 'user999', '2025-10-09', 'radiant')
+			RETURNING id;
+		`, "{}", types.UpdatePatientBatchType).Scan(&id).Error)
+
+		batch := types.Batch{
+			ID:         id,
+			BatchType:  types.UpdatePatientBatchType,
+			Payload:    "[]",
+			Status:     types.BatchStatusSuccess,
+			DryRun:     false,
+			TenantCode: types.DefaultTenantCode,
+		}
+		records := []*PatientValidationRecord{{
+			Patient: types.PatientBatch{
+				SubmitterPatientId:     "MRN-WORKER-UPDATE-1",
+				SubmitterPatientIdType: "ramq",
+				SexCode:                "female",
+				LifeStatusCode:         "deceased",
+				FirstName:              "Updated",
+				LastName:               "Person",
+			},
+			OrganizationCode: "CHUSJ",
+		}}
+
+		err := persistBatchAndUpdatePatientRecords(t.Context(), db, &batch, records)
+		require.NoError(t, err)
+
+		repo := postgres.NewPatientsRepository(database.PostgresDB{DB: db})
+		patient, err := repo.GetPatientByOrgCodeAndSubmitterPatientId(t.Context(), "CHUSJ", "MRN-WORKER-UPDATE-1", types.DefaultTenantCode)
+		require.NoError(t, err)
+		require.NotNil(t, patient)
+		assert.Equal(t, "female", patient.SexCode)
+		assert.Equal(t, "deceased", patient.LifeStatusCode)
+		assert.Equal(t, "Updated", patient.FirstName)
+	})
+}
+
+func Test_ValidateLifeStatusCode_Valid(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: "alive"}
+		rec := PatientValidationRecord{
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &batchval.BatchValidationContext{
+					ValueSetsRepo: postgres.NewValueSetsRepository(database.PostgresDB{DB: env.Postgres}),
+				},
+				ResourceType: patientResourceLabel,
+			},
+			Patient: patient,
+		}
+		rec.Cache = batchval.NewBatchValidationCache(rec.Context)
+		err := rec.validateLifeStatusCode(t.Context())
+		assert.NoError(t, err)
+		assert.Nil(t, rec.Errors)
+	})
+}
+
+func Test_ValidateLifeStatusCode_Invalid(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: "unalive"}
+		rec := PatientValidationRecord{
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &batchval.BatchValidationContext{
+					ValueSetsRepo: postgres.NewValueSetsRepository(database.PostgresDB{DB: env.Postgres}),
+				},
+				ResourceType: patientResourceLabel,
+			},
+			Patient: patient,
+		}
+		rec.Cache = batchval.NewBatchValidationCache(rec.Context)
+		err := rec.validateLifeStatusCode(t.Context())
+
+		expected := types.BatchMessage{
+			Code:    "PATIENT-004",
+			Message: "Invalid field life_status_code for patient (CHUSJ / id1). Reason: \"unalive\" is not a valid life status code. Valid values [alive, deceased, unknown].",
+			Path:    "patient[0].life_status_code",
+		}
+
+		assert.NoError(t, err)
+		assert.Len(t, rec.Errors, 1)
+		assert.Equal(t, expected, rec.Errors[0])
+	})
+}
+
+func Test_ValidateLifeStatusCode_Missing(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		patient := types.PatientBatch{PatientOrganizationCode: "CHUSJ", SubmitterPatientId: "id1", LifeStatusCode: ""}
+		rec := PatientValidationRecord{
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context: &batchval.BatchValidationContext{
+					ValueSetsRepo: postgres.NewValueSetsRepository(database.PostgresDB{DB: env.Postgres}),
+				},
+				ResourceType: patientResourceLabel,
+			},
+			Patient: patient,
+		}
+		rec.Cache = batchval.NewBatchValidationCache(rec.Context)
+		err := rec.validateLifeStatusCode(t.Context())
+		expected := types.BatchMessage{
+			Code:    "PATIENT-004",
+			Message: "Invalid field life_status_code for patient (CHUSJ / id1). Reason: \"\" is not a valid life status code. Valid values [alive, deceased, unknown].",
+			Path:    "patient[0].life_status_code",
+		}
+
+		assert.NoError(t, err)
+		assert.Len(t, rec.Errors, 1)
+		assert.Equal(t, expected, rec.Errors[0])
+	})
+}

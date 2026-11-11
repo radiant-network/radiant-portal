@@ -1,0 +1,4 @@
+organization_code	patient_id_type	patient_id	session_id	tumor_board_date	age_at_tumor_board_days	reason	diagnosis	consensus	recommendations	status	report_url	can_read_phi
+CHOP	mrn	MRN-0002	1	2024-03-12	3200	Initial Review	AT/RT, SHH subtype	Localized ATRT	ACNS0333	Signed	s3://bucket/tumor_board/report_1.pdf	true
+CHOP	mrn	MRN-0002	2	2025-11-04	3800	Progression Review	AT/RT, SHH subtype	Disseminated ATRT; on tazemetostat	PNOC 028; LP184 ;Temozolomide, Irinotecan and Avastin	Signed	NULL	true
+BCH	research_id	C100004	3	NULL	1500	Progression Review	Medulloblastoma	NULL	NULL	Draft	NULL	false

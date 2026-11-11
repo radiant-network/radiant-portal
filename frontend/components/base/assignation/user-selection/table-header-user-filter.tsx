@@ -1,0 +1,162 @@
+import { useEffect, useState } from 'react';
+import { User } from 'lucide-react';
+
+import { avatarStyles, getIconSize } from '@/components/base/avatar/avatar.styles';
+import type { AvatarUser } from '@/components/base/avatar/avatar.types';
+import { getInitials, getUserColor } from '@/components/base/avatar/avatar.utils';
+import { Avatar, AvatarFallback } from '@/components/base/shadcn/avatar';
+import { Button } from '@/components/base/shadcn/button';
+import { Checkbox } from '@/components/base/shadcn/checkbox';
+import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/components/lib/utils';
+
+import { isNotAssignedUser } from '../constants';
+import { createFilteredUserList, handleUserToggle } from '../user-filtering';
+
+// Table Header User Filter component for filtering users with checkboxes
+interface TableHeaderUserFilterProps {
+  availableUsers: AvatarUser[];
+  selectedUsers: AvatarUser[];
+  onUsersChange: (users: AvatarUser[]) => void;
+  defaultUser?: AvatarUser;
+  placeholder?: string;
+  className?: string;
+  isOpen?: boolean;
+}
+
+export function TableHeaderUserFilter({
+  availableUsers,
+  selectedUsers,
+  onUsersChange,
+  defaultUser,
+  placeholder,
+  className,
+  isOpen = true,
+}: TableHeaderUserFilterProps) {
+  const { t } = useI18n();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [stagedUsers, setStagedUsers] = useState<AvatarUser[]>(selectedUsers);
+
+  const defaultPlaceholder = placeholder || t('common.user_selection.search_placeholder');
+
+  // Update staged users when selectedUsers prop changes
+  useEffect(() => {
+    setStagedUsers(selectedUsers);
+  }, [selectedUsers]);
+
+  // Create filtered user list using shared utility
+  const allFilteredUsers = createFilteredUserList({
+    availableUsers,
+    searchTerm,
+    selectedUsers: stagedUsers,
+    defaultUser,
+    includeNotAssigned: true,
+    notAssignedName: t('common.user_selection.not_assigned'),
+  });
+
+  const handleUserToggleClick = (user: AvatarUser, checked: boolean) => {
+    const newStagedUsers = handleUserToggle({
+      user,
+      isChecked: checked,
+      currentSelectedUsers: stagedUsers,
+    });
+    setStagedUsers(newStagedUsers);
+  };
+
+  const handleApplyFilter = () => {
+    onUsersChange(stagedUsers);
+  };
+
+  const handleReset = () => {
+    setStagedUsers([]);
+    setSearchTerm('');
+  };
+
+  const unassignedStyles = avatarStyles({ variant: 'assignment' });
+  const iconSize = getIconSize('xs');
+
+  if (!isOpen) {
+    return null;
+  }
+
+  return (
+    <div className={cn('bg-background border border-border rounded-md shadow-sm', className)}>
+      {/* Search Input */}
+      <div className="px-3 pt-3 pb-1.5">
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          placeholder={defaultPlaceholder}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        />
+      </div>
+
+      {/* Users List with Checkboxes */}
+      <div className="max-h-60 overflow-y-auto px-3">
+        {allFilteredUsers.length === 0 ? (
+          <div className="py-1.5 text-sm text-muted-foreground text-center">
+            {searchTerm ? t('common.user_selection.no_users_found') : t('common.user_selection.start_typing_to_search')}
+          </div>
+        ) : (
+          allFilteredUsers.map(user => {
+            const isNotAssign = isNotAssignedUser(user);
+            const initials = isNotAssign ? '' : getInitials(user);
+            const color = isNotAssign ? undefined : getUserColor(user.id);
+            const isChecked = stagedUsers.some(stagedUser => stagedUser.id === user.id);
+
+            return (
+              // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- mouse shortcut, the checkbox is keyboard accessible
+              <div
+                key={user.id}
+                className="w-full flex items-center gap-1.5 py-1.5 hover:bg-accent transition-colors cursor-pointer"
+                onClick={() => handleUserToggleClick(user, !isChecked)}
+              >
+                <Checkbox
+                  checked={isChecked}
+                  onCheckedChange={checked => handleUserToggleClick(user, checked as boolean)}
+                  className="flex-shrink-0"
+                  onClick={e => e.stopPropagation()}
+                />
+
+                <div className="flex items-center justify-center w-7 h-7">
+                  <Avatar
+                    size={isNotAssign ? 'xs' : 'sm'}
+                    className={isNotAssign ? unassignedStyles.container() : 'border-2 border-transparent'}
+                  >
+                    {isNotAssign ? (
+                      <AvatarFallback className={cn(unassignedStyles.fallback(), unassignedStyles.text())}>
+                        <User className={iconSize} />
+                      </AvatarFallback>
+                    ) : (
+                      <AvatarFallback color={color}>{initials}</AvatarFallback>
+                    )}
+                  </Avatar>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm truncate">{user.name}</span>
+                    {user.organization && (
+                      <span className="text-sm text-muted-foreground truncate">{user.organization}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex items-center gap-2 px-3 py-3 border-t border-border justify-between">
+        <Button variant="ghost" size="sm" onClick={handleReset}>
+          {t('common.user_selection.reset')}
+        </Button>
+        <Button size="sm" onClick={handleApplyFilter}>
+          {t('common.user_selection.filter')}
+        </Button>
+      </div>
+    </div>
+  );
+}

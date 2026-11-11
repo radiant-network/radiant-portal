@@ -1,0 +1,150 @@
+// Command create-user provisions a regular (non-admin) user end-to-end across
+// Keycloak, Postgres, Ranger, and StarRocks, keyed on the Keycloak `sub`.
+//
+//	go run ./cmd/create-user -email carol@demo.org -first Carol -last Demo \
+//	    -grant tenant_a:ORG_A1:geneticist -grant tenant_b:*:geneticist
+//
+// On create, the email is sent as the Keycloak username verbatim — the CLI never
+// derives a separate username. Identity is keyed on email, not username, so this
+// works whether or not the realm enforces email-as-username: an existing user is
+// matched by email even if its stored username differs.
+//
+// For a user that already exists in Keycloak (a real user who has logged in),
+// pass its `sub` instead of an email to provision Postgres, Ranger and StarRocks
+// only — Keycloak is left untouched and no password is needed:
+//
+//	go run ./cmd/create-user -sub 6f9619ff-8b86-d011-b42d-00c04fc964ff \
+//	    -grant radiant:*:geneticist
+//
+// -email / -first / -last remain accepted alongside -sub as Postgres attributes;
+// omitting them keeps whatever is already stored.
+package main
+
+import (
+	"context"
+	"flag"
+	"fmt"
+	"log"
+	"os"
+	"strings"
+
+	_ "github.com/joho/godotenv/autoload"
+	"golang.org/x/term"
+
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/provisioning"
+	"github.com/radiant-network/radiant-api/internal/service"
+	"github.com/radiant-network/radiant-api/internal/types"
+)
+
+// grantedBy is the audit attribution recorded on role grants made by this CLI.
+const grantedBy = "create-user"
+
+// grantList collects repeated -grant tenant:org:role flags.
+type grantList []types.Grant
+
+func (g *grantList) String() string { return fmt.Sprintf("%v", *g) }
+
+func (g *grantList) Set(value string) error {
+	parts := strings.Split(value, ":")
+	if len(parts) != 3 {
+		return fmt.Errorf("grant %q must be tenant:org:role (org may be empty or '*')", value)
+	}
+	*g = append(*g, types.Grant{TenantCode: parts[0], OrgCode: parts[1], RoleCode: parts[2]})
+	return nil
+}
+
+func main() {
+	var (
+		sub    = flag.String("sub", "", "existing Keycloak sub (user_id); skips Keycloak and provisions Postgres/Ranger/StarRocks only")
+		email  = flag.String("email", "", "user email (PK and Keycloak username); required unless -sub is given")
+		first  = flag.String("first", "", "first name")
+		last   = flag.String("last", "", "last name")
+		prompt = flag.Bool("p", false, "prompt for the user password (masked); ignored if USER_PASSWORD is set or -sub is given")
+		grants grantList
+	)
+	flag.Var(&grants, "grant", "tenant:org:role grant; repeatable")
+	flag.Parse()
+
+	if *email == "" && *sub == "" {
+		log.Fatal("create-user: one of -email (create in Keycloak) or -sub (already in Keycloak) is required")
+	}
+
+	// No Keycloak account is created in -sub mode, so there is no password to set —
+	// don't prompt for one.
+	var password string
+	if *sub == "" {
+		var err error
+		if password, err = resolvePassword(*prompt); err != nil {
+			log.Fatalf("create-user: %v", err)
+		}
+	}
+
+	deps, err := buildDeps()
+	if err != nil {
+		log.Fatalf("create-user: %v", err)
+	}
+
+	// New users are created with the email as their Keycloak username; existing
+	// users are matched by email regardless of their stored username.
+	in := types.UserInput{
+		Sub: *sub, Username: *email, Email: *email, FirstName: *first, LastName: *last,
+		Password: password, Grants: grants,
+	}
+
+	target := *email
+	if target == "" {
+		target = *sub
+	}
+
+	ctx := context.Background()
+	provisioned, err := service.ProvisionUser(ctx, deps, in, grantedBy)
+	if err != nil {
+		log.Fatalf("create-user: provision %q: %v", target, err)
+	}
+	log.Printf("provisioned %s (sub=%s) with %d grant(s)", target, provisioned, len(in.Grants))
+}
+
+// resolvePassword determines the password applied to every provisioned user.
+// USER_PASSWORD wins if set (an explicitly empty value is honored); otherwise, if
+// -p was given, it prompts for a masked password (which may be empty); otherwise
+// the password is empty.
+func resolvePassword(prompt bool) (string, error) {
+	if pw, ok := os.LookupEnv("USER_PASSWORD"); ok {
+		return pw, nil
+	}
+	if prompt {
+		return promptPassword()
+	}
+	return "", nil
+}
+
+// promptPassword reads a password from the terminal without echoing it.
+func promptPassword() (string, error) {
+	fmt.Fprint(os.Stderr, "Password: ")
+	b, err := term.ReadPassword(int(os.Stdin.Fd()))
+	fmt.Fprintln(os.Stderr)
+	if err != nil {
+		return "", fmt.Errorf("read password: %w", err)
+	}
+	return string(b), nil
+}
+
+// buildDeps opens the database handles this command needs and hands them to the shared provisioning
+// wiring, so the CLI and the API provision users identically.
+//
+// The Postgres and StarRocks handles come from database.NewPostgresDB/NewStarrocksDB,
+// which read their connection settings from the environment (loaded from `.env` via
+// godotenv/autoload). Against the compose stack, set DB_SSL_MODE=skip-verify so the
+// StarRocks connection uses TLS without cert validation (the stack enables SSL).
+func buildDeps() (service.AdminDeps, error) {
+	pg, err := database.NewPostgresDB()
+	if err != nil {
+		return service.AdminDeps{}, fmt.Errorf("connect postgres: %w", err)
+	}
+	sr, err := database.NewStarrocksDB()
+	if err != nil {
+		return service.AdminDeps{}, fmt.Errorf("connect starrocks: %w", err)
+	}
+	return provisioning.NewAdminDeps(database.PostgresDB{DB: pg}, database.StarrocksDB{DB: sr}), nil
+}

@@ -1,0 +1,7 @@
+research_id,organization_name,age_at_initial_dx_days,age_at_first_event_days,age_at_first_radiation_ever_days,age_at_initial_radiation_days,age_at_first_chemo_ever_days,age_at_initial_chemo_days,age_at_first_methotrexate_ever_days,had_initial_radiation,had_initial_chemo,had_initial_methotrexate,initial_treatment_order
+C1037013,The Children's Hospital of Philadelphia,4300,5200,4335,4335,4420,4420,,yes,yes,no,radiation_before_chemotherapy
+C313158,The Children's Hospital of Philadelphia,540,900,,,560,560,560,no,yes,yes,chemo_only_no_initial_radiation
+C3556914,The Children's Hospital of Philadelphia,410,,700,,430,430,430,no,yes,yes,chemo_only_no_initial_radiation
+C6389358,The Children's Hospital of Philadelphia,3100,,3134,3134,3215,3215,,yes,yes,no,radiation_before_chemotherapy
+C6859095,The Children's Hospital of Philadelphia,2200,,2233,2233,2320,2320,,yes,yes,no,radiation_before_chemotherapy
+C8832261,Children's Hospital Los Angeles,1100,2000,3340,,1130,1130,1130,no,yes,yes,chemo_only_no_initial_radiation

@@ -1,0 +1,193 @@
+import { tv } from 'tailwind-variants';
+
+export const baseButtonVariants = tv({
+  slots: {
+    base: 'inline-flex items-center justify-center hover:cursor-pointer whitespace-nowrap rounded-md gap-2 font-medium text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg]:size-4',
+  },
+  variants: {
+    variant: {
+      default: {
+        base: 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90',
+      },
+      destructive: {
+        base: 'bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90',
+      },
+      outline: {
+        base: 'border border-input bg-background text-foreground shadow-xs hover:bg-accent hover:text-accent-foreground',
+      },
+      secondary: {
+        base: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80',
+      },
+      ghost: {
+        base: 'hover:bg-accent hover:text-accent-foreground',
+      },
+      link: {
+        base: 'text-primary underline-offset-4 hover:underline',
+      },
+      red: {
+        base: 'bg-red/20 border-1 text-red-foreground border-red-foreground/30 shadow-xs hover:bg-red/15',
+      },
+      orange: {
+        base: 'bg-orange/20 border-1 text-orange-foreground border-orange-foreground/30 shadow-xs hover:bg-orange/15',
+      },
+      yellow: {
+        base: 'bg-yellow/20 border-1 text-yellow-foreground border-yellow-foreground/30 shadow-xs hover:bg-yellow/15',
+      },
+      lime: {
+        base: 'bg-lime/20 border-1 text-lime-foreground border-lime-foreground/30 shadow-xs hover:bg-lime/15',
+      },
+      green: {
+        base: 'bg-green/20 border-1 text-green-foreground border-green-foreground/30 shadow-xs hover:bg-green/15',
+      },
+      cyan: {
+        base: 'bg-cyan/20 border-1 text-cyan-foreground border-cyan-foreground/30 shadow-xs hover:bg-cyan/15',
+      },
+      blue: {
+        base: 'bg-blue/20 border-1 text-blue-foreground border-blue-foreground/30 shadow-xs hover:bg-blue/15',
+      },
+      violet: {
+        base: 'bg-violet/20 border-1 text-violet-foreground border-violet-foreground/30 shadow-xs hover:bg-violet/15',
+      },
+      fuchsia: {
+        base: 'bg-fuchsia/20 border-1 text-fuchsia-foreground border-fuchsia-foreground/30 shadow-xs hover:bg-fuchsia/15',
+      },
+      neutral: {
+        base: 'bg-neutral/20 border-1 text-neutral-foreground border-neutral-foreground/30 shadow-xs hover:bg-neutral/15',
+      },
+    },
+    disabled: {
+      true: {
+        base: 'disabled:pointer-events-none',
+      },
+    },
+    size: {
+      '3xs': {
+        base: 'h-5 pt-0.5 pb-0.5 pr-1.5 pl-1.5 gap-[4px] text-xs [&_svg]:size-3',
+      },
+      '2xs': {
+        base: 'h-6 p-2 gap-[4px] text-xs [&_svg]:size-4',
+      },
+      xs: {
+        base: 'h-7 px-2.5 py-2 gap-[6px] text-xs [&_svg]:size-4',
+      },
+      sm: {
+        base: 'h-8 px-3 py-2',
+      },
+      default: {
+        base: 'h-9 px-4 py-2',
+      },
+      lg: {
+        base: 'h-10 px-8 py-2',
+      },
+    },
+  },
+});
+
+export const buttonVariants = tv({
+  extend: baseButtonVariants,
+  slots: {
+    base: '',
+  },
+  variants: {
+    iconOnly: {
+      true: {
+        base: '',
+      },
+    },
+  },
+  compoundVariants: [
+    {
+      iconOnly: true,
+      size: '3xs',
+      className: {
+        base: 'w-5 h-5 px-0',
+      },
+    },
+    {
+      iconOnly: true,
+      size: '2xs',
+      className: {
+        base: 'w-6 h-6 px-0',
+      },
+    },
+    {
+      iconOnly: true,
+      size: 'xs',
+      className: {
+        base: 'w-7 px-0',
+      },
+    },
+    {
+      iconOnly: true,
+      size: 'sm',
+      className: {
+        base: 'w-8 px-0',
+      },
+    },
+    {
+      iconOnly: true,
+      size: 'default',
+      className: {
+        base: 'w-9 px-0',
+      },
+    },
+    {
+      iconOnly: true,
+      size: 'lg',
+      className: {
+        base: 'w-10 px-0',
+      },
+    },
+  ],
+  defaultVariants: {
+    iconOnly: false,
+    size: 'default',
+    variant: 'default',
+  },
+});
+
+export const actionButtonVariants = tv({
+  extend: baseButtonVariants,
+  slots: {
+    container: 'flex items-center',
+    actionsButton: 'rounded-l-none',
+  },
+  variants: {
+    size: {
+      xxs: {
+        actionsButton: 'h-6 px-1.5 [&_svg]:size-3',
+      },
+      xs: {
+        actionsButton: 'h-7 px-1.5 [&_svg]:size-3',
+      },
+      sm: {
+        actionsButton: 'h-8 px-2 [&_svg]:size-4',
+      },
+      default: {
+        actionsButton: 'h-9 px-2 [&_svg]:size-5',
+      },
+      lg: {
+        actionsButton: 'h-10 px-2 [&_svg]:size-6',
+      },
+    },
+    variant: {
+      outline: {
+        base: 'hover:z-2',
+        actionsButton: '-ml-px hover:z-2',
+      },
+      default: {
+        container: 'divide-x divide-primary-foreground/20',
+      },
+      destructive: {
+        container: 'divide-x divide-destructive-foreground/30',
+      },
+      secondary: {
+        container: 'divide-x divide-secondary-foreground/20',
+      },
+    },
+  },
+  defaultVariants: {
+    size: 'default',
+    variant: 'default',
+  },
+});

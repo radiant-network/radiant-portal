@@ -1,0 +1,112 @@
+import { useMemo } from 'react';
+
+import type { CaseEntity, CaseSequencingExperiment, SortBody } from '@/api/api';
+import { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
+import type { ICountInput, IListInput } from '@/components/base/query-builder/hooks/use-query-builder';
+import QueryBuilder from '@/components/base/query-builder/query-builder';
+import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
+import { useConfig } from '@/components/cores/applications-config';
+import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { getPatientClinicalInformation } from '@/components/lib/case-entity';
+import { occurrencesApi } from '@/utils/api';
+import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
+
+import { useCanDownloadVariantsReport } from '../../../permissions/use-case-permissions';
+import AnnotationsTableQuickfilters from '../filters/annotations-table-quickfilters';
+import VariantsOnboardingWizard from '../onboardings/variants-onboarding-wizard';
+import VariantsReportButton from '../table/variants-report-button';
+
+import { isValidSeqId } from './libs/seq-id';
+import SliderGermlineOccurrenceSheet from './sliders/slider-germline-occurrence-sheet';
+import {
+  defaultGermlineSNVSettings,
+  getGermlineSNVOccurrenceColumns,
+} from './table/germline-snv-occurrence-table-settings';
+
+const GERMLINE_SNV_DEFAULT_SORTING: SortBody[] = [
+  { field: 'exomiser_gene_combined_score', order: 'desc' },
+  { field: 'max_impact_score', order: 'desc' },
+];
+
+type SNVTabProps = {
+  seqId: number;
+  patientSelected?: CaseSequencingExperiment;
+  caseEntity?: CaseEntity;
+};
+
+function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
+  const { t } = useI18n();
+  const { tenant } = useTenant();
+  const config = useConfig();
+  const caseId = useCaseIdFromParam();
+  const appId = config.germline_snv_occurrence.app_id;
+  const patient = getPatientClinicalInformation(caseEntity, patientSelected);
+  const taskId = useTaskIdFromSearchParam();
+  const canDownloadVariantsReport = useCanDownloadVariantsReport();
+
+  const columns = useMemo(
+    () =>
+      getGermlineSNVOccurrenceColumns({
+        t,
+        caseEntity,
+        patientId: patient?.patient_id,
+        canDownloadReport: canDownloadVariantsReport,
+      }),
+    [t, caseEntity, patient?.patient_id, canDownloadVariantsReport],
+  );
+
+  if (!isValidSeqId(seqId)) {
+    return null;
+  }
+
+  return (
+    <>
+      <QueryBuilder
+        appId={appId}
+        swrId={`${seqId}-${taskId}`}
+        fetcher={{
+          list: async (params: IListInput) => {
+            if (taskId === undefined) return [];
+            return occurrencesApi
+              .listGermlineSNVOccurrences(tenant, caseId, seqId, taskId, params.listBody)
+              .then(response => response.data);
+          },
+          count: async (params: ICountInput) => {
+            if (taskId === undefined) return { count: 0 };
+            return occurrencesApi
+              .countGermlineSNVOccurrences(tenant, caseId, seqId, taskId, params.countBody)
+              .then(response => response.data);
+          },
+        }}
+      >
+        <QueryBuilderDataTable
+          id={appId}
+          swrId={`${seqId}-${taskId}`}
+          columns={columns}
+          defaultColumnSettings={defaultGermlineSNVSettings}
+          defaultPageSize={DEFAULT_PAGE_SIZE}
+          defaultSorting={GERMLINE_SNV_DEFAULT_SORTING}
+          enableColumnOrdering
+          enableFullscreen
+          TableFilters={<AnnotationsTableQuickfilters />}
+          selection={
+            canDownloadVariantsReport
+              ? {
+                  idField: 'locus_id',
+                  renderActions: selection => (
+                    <VariantsReportButton kind="germline" seqId={seqId} taskId={taskId} selection={selection} />
+                  ),
+                }
+              : undefined
+          }
+          extras={[
+            <SliderGermlineOccurrenceSheet key="germline-snv-occurrence-sheet" patientSelected={patientSelected} />,
+          ]}
+        />
+      </QueryBuilder>
+      <VariantsOnboardingWizard />
+    </>
+  );
+}
+export default SNVTab;

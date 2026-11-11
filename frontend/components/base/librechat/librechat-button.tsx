@@ -1,0 +1,137 @@
+import { useState } from 'react';
+import { ArrowUpRight, SparklesIcon } from 'lucide-react';
+
+import { Badge } from '@/components/base/shadcn/badge';
+import { Button, type ButtonProps } from '@/components/base/shadcn/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/base/shadcn/dialog';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
+import { useRuntimeConfig } from '@/components/hooks/use-runtime-config';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { cn } from '@/components/lib/utils';
+
+// What the button is opened from; each context has its own D.A.V.I.D agent. None: history only.
+import davidLogo from './david.svg';
+import davidLogoDark from './david-dark.svg';
+import { buildNewChatUrl, type LibrechatContext } from './librechat-url';
+
+type EntityContext =
+  | { caseId: string | number; patientKey?: never; cohort?: never }
+  | { patientKey: string; caseId?: never; cohort?: never }
+  | { cohort: true; caseId?: never; patientKey?: never }
+  | { caseId?: never; patientKey?: never; cohort?: never };
+
+type LibrechatButtonProps = Omit<ButtonProps, 'onClick' | 'children' | 'asChild'> & {
+  demoMode?: boolean;
+} & EntityContext;
+
+type LibrechatMode = 'new' | 'resume';
+
+function toContext(caseId?: string | number, patientKey?: string, cohort?: boolean): LibrechatContext | null {
+  if (caseId != null) return { kind: 'case', caseId };
+  if (patientKey) return { kind: 'patient', patientKey };
+  if (cohort) return { kind: 'cohort' };
+  return null;
+}
+
+function LibrechatButton({
+  className,
+  demoMode = false,
+  caseId,
+  patientKey,
+  cohort,
+  ...buttonProps
+}: LibrechatButtonProps) {
+  const { t } = useI18n();
+  const { librechatDavidUrl } = useRuntimeConfig();
+  const { tenant } = useTenant();
+  const context = toContext(caseId, patientKey, cohort);
+  const hasEntityContext = context != null;
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<LibrechatMode | null>(hasEntityContext ? null : 'resume');
+
+  if (!librechatDavidUrl && !demoMode) return null;
+
+  let newChatUrl = '';
+  if (librechatDavidUrl && context) {
+    let prompt: string;
+    if (context.kind === 'case') prompt = t('librechat.david.prompt_case', { caseId: context.caseId, tenant });
+    else if (context.kind === 'patient')
+      prompt = t('librechat.david.prompt_patient', { patientKey: context.patientKey, tenant });
+    else prompt = t('librechat.david.prompt_cohort', { tenant });
+    newChatUrl = buildNewChatUrl(librechatDavidUrl, context, prompt);
+  }
+
+  let activeUrl = librechatDavidUrl;
+  if (mode === 'new') activeUrl = newChatUrl;
+
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+    if (!next) setMode(hasEntityContext ? null : 'resume');
+  };
+
+  return (
+    <>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            onClick={() => setOpen(true)}
+            className={cn(
+              'relative isolate bg-[linear-gradient(48deg,#1C75BC_-12.64%,#00B6BE_102.78%)] text-white',
+              'before:absolute before:inset-0 before:-z-10 before:rounded-[inherit] before:bg-[linear-gradient(48deg,#00B6BE_-12.64%,#1C75BC_102.78%)]',
+              'before:opacity-0 before:transition-opacity before:duration-400 before:ease-in-out hover:before:opacity-100 motion-reduce:before:transition-none',
+              className,
+            )}
+            {...buttonProps}
+          >
+            <SparklesIcon />
+            {t('librechat.david.title')}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="left">{t('librechat.david.tooltip')}</TooltipContent>
+      </Tooltip>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent size="xl" className="h-[85vh] grid-rows-[auto_1fr]">
+          <DialogHeader className="flex-row items-center gap-2 space-y-0 px-4 py-3 pr-10 w-full">
+            <DialogTitle className="leading-none">
+              <img src={davidLogo} alt={t('librechat.david.title')} className="h-5 dark:hidden" />
+              <img src={davidLogoDark} alt={t('librechat.david.title')} className="hidden h-5 dark:block" />
+            </DialogTitle>
+            <Badge variant="secondary">{t('librechat.david.badge')}</Badge>
+            <Button
+              type="button"
+              variant="ghost"
+              size="3xs"
+              onClick={() => window.open(activeUrl, '_blank', 'noopener,noreferrer')}
+            >
+              {t('librechat.david.open_in_new_tab')}
+              <ArrowUpRight />
+            </Button>
+          </DialogHeader>
+          <div className="w-full h-full border-t">
+            {mode ? (
+              <iframe
+                src={activeUrl}
+                title={t('librechat.david.frame_title')}
+                className="w-full h-full border-0"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+              />
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center gap-3 p-8">
+                <Button type="button" size="lg" className="w-64" onClick={() => setMode('new')}>
+                  <SparklesIcon />
+                  {t('librechat.david.new_analysis')}
+                </Button>
+                <Button type="button" size="lg" variant="outline" className="w-64" onClick={() => setMode('resume')}>
+                  {t('librechat.david.resume_history')}
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
+
+export default LibrechatButton;

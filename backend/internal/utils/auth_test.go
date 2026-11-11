@@ -1,0 +1,282 @@
+package utils
+
+import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/test/testutils/jwt"
+	"github.com/stretchr/testify/assert"
+	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
+)
+
+func requestWithAuthHeader(value string) *gin.Context {
+	c := &gin.Context{}
+	c.Request = httptest.NewRequest(http.MethodGet, "/", nil)
+	if value != "" {
+		c.Request.Header.Set("Authorization", value)
+	}
+	return c
+}
+
+func Test_RetrieveRawToken_ReturnsBearerValue(t *testing.T) {
+	tok, err := RetrieveRawToken(requestWithAuthHeader("Bearer ey.header.sig"))
+	assert.NoError(t, err)
+	assert.Equal(t, "ey.header.sig", tok)
+}
+
+func Test_RetrieveRawToken_MissingHeaderIsError(t *testing.T) {
+	_, err := RetrieveRawToken(requestWithAuthHeader(""))
+	assert.Error(t, err)
+}
+
+func Test_RetrieveRawToken_NonBearerSchemeIsError(t *testing.T) {
+	_, err := RetrieveRawToken(requestWithAuthHeader("Basic abc123"))
+	assert.Error(t, err)
+}
+
+func Test_RetrieveUserIdFromToken_ValidKeycloakToken(t *testing.T) {
+	c := gin.Context{}
+	c.Set("token", ginkeycloak.KeyCloakToken{Sub: "user123"})
+
+	auth := KeycloakAuth{}
+	userId, err := auth.RetrieveUserIdFromToken(&c)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, userId)
+	assert.Equal(t, "user123", *userId)
+}
+
+func Test_RetrieveUserIdFromToken_ValidJWT(t *testing.T) {
+	c := gin.Context{}
+
+	token, err := jwt.GenerateMockJWT("radiant")
+	assert.NoError(t, err)
+
+	c.Request = &http.Request{
+		Header: http.Header{
+			"Authorization": []string{fmt.Sprintf("Bearer %s", token)},
+		},
+	}
+
+	auth := KeycloakAuth{}
+	userId, err := auth.RetrieveUserIdFromToken(&c)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, userId)
+	assert.Equal(t, "test-subject", *userId)
+}
+
+func Test_RetrieveUserIdFromToken_InvalidKeycloakTokenType(t *testing.T) {
+	c := gin.Context{}
+	c.Set("token", "invalidTokenType")
+
+	auth := KeycloakAuth{}
+	userId, err := auth.RetrieveUserIdFromToken(&c)
+
+	assert.Error(t, err)
+	assert.Nil(t, userId)
+}
+
+func Test_RetrieveUserIdFromToken_NoTokenInContext(t *testing.T) {
+	c := gin.Context{
+		Request: &http.Request{},
+	}
+
+	auth := KeycloakAuth{}
+	azp, err := auth.RetrieveUserIdFromToken(&c)
+
+	assert.Error(t, err)
+	assert.Nil(t, azp)
+}
+
+func Test_RetrieveAzpFromToken_ValidKeycloakToken(t *testing.T) {
+	c := gin.Context{}
+	c.Set("token", ginkeycloak.KeyCloakToken{Azp: "client123"})
+
+	auth := KeycloakAuth{}
+	azp, err := auth.RetrieveAzpFromToken(&c)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, azp)
+	assert.Equal(t, "client123", *azp)
+}
+
+func Test_RetrieveAzpFromToken_ValidJWT(t *testing.T) {
+	c := gin.Context{}
+
+	token, err := jwt.GenerateMockJWT("radiant")
+	assert.NoError(t, err)
+
+	c.Request = &http.Request{
+		Header: http.Header{
+			"Authorization": []string{fmt.Sprintf("Bearer %s", token)},
+		},
+	}
+
+	auth := KeycloakAuth{}
+	azp, err := auth.RetrieveAzpFromToken(&c)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, azp)
+	assert.Equal(t, "radiant", *azp)
+}
+
+func Test_RetrieveAzpFromToken_NoTokenInContext(t *testing.T) {
+	c := gin.Context{
+		Request: &http.Request{},
+	}
+
+	auth := KeycloakAuth{}
+	azp, err := auth.RetrieveAzpFromToken(&c)
+
+	assert.Error(t, err)
+	assert.Nil(t, azp)
+}
+
+func Test_RetrieveUsernameFromToken_ValidKeycloakToken(t *testing.T) {
+	c := gin.Context{}
+	c.Set("token", ginkeycloak.KeyCloakToken{PreferredUsername: "testuser"})
+
+	auth := KeycloakAuth{}
+	username, err := auth.RetrieveUsernameFromToken(&c)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, username)
+	assert.Equal(t, "testuser", *username)
+}
+
+func Test_RetrieveUsernameFromToken_ValidJWT(t *testing.T) {
+	c := gin.Context{}
+
+	token, err := jwt.GenerateMockJWT("radiant")
+	assert.NoError(t, err)
+
+	c.Request = &http.Request{
+		Header: http.Header{
+			"Authorization": []string{fmt.Sprintf("Bearer %s", token)},
+		},
+	}
+
+	auth := KeycloakAuth{}
+	username, err := auth.RetrieveUsernameFromToken(&c)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, username)
+	assert.Equal(t, "superbob", *username)
+}
+
+func Test_RetrieveUsernameFromToken_InvalidKeycloakTokenType(t *testing.T) {
+	c := gin.Context{}
+	c.Set("token", 12345)
+
+	auth := KeycloakAuth{}
+	username, err := auth.RetrieveUsernameFromToken(&c)
+
+	assert.Error(t, err)
+	assert.Nil(t, username)
+}
+
+func Test_RetrieveUsernameFromToken_NoTokenInContext(t *testing.T) {
+	c := gin.Context{
+		Request: &http.Request{},
+	}
+
+	auth := KeycloakAuth{}
+	username, err := auth.RetrieveUsernameFromToken(&c)
+
+	assert.Error(t, err)
+	assert.Nil(t, username)
+}
+
+func Test_ParseJWTFromHeader_ValidJWT(t *testing.T) {
+	c := gin.Context{}
+
+	token, err := jwt.GenerateMockJWT("radiant")
+	assert.NoError(t, err)
+
+	c.Request = &http.Request{
+		Header: http.Header{
+			"Authorization": []string{fmt.Sprintf("Bearer %s", token)},
+		},
+	}
+
+	_, err = parseJWTFromHeader(&c)
+
+	assert.NoError(t, err)
+
+	kc, ok := c.Get("token")
+	assert.True(t, ok)
+	assert.NotNil(t, kc)
+}
+
+func Test_ParseJWTFromHeader_InvalidFormat(t *testing.T) {
+	c := gin.Context{}
+	c.Request = &http.Request{
+		Header: http.Header{
+			"Authorization": []string{"InvalidHeader"},
+		},
+	}
+
+	token, err := parseJWTFromHeader(&c)
+
+	assert.Error(t, err)
+	assert.Nil(t, token)
+}
+
+func Test_RetrieveFullNameFromToken_ValidKeycloakToken(t *testing.T) {
+	c := gin.Context{}
+	c.Set("token", ginkeycloak.KeyCloakToken{Name: "John Doe"})
+
+	auth := KeycloakAuth{}
+	fullName, err := auth.RetrieveFullNameFromToken(&c)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, fullName)
+	assert.Equal(t, "John Doe", *fullName)
+}
+
+func Test_RetrieveFullNameFromToken_ValidJWT(t *testing.T) {
+	c := gin.Context{}
+
+	token, err := jwt.GenerateMockJWT("radiant")
+	assert.NoError(t, err)
+
+	c.Request = &http.Request{
+		Header: http.Header{
+			"Authorization": []string{fmt.Sprintf("Bearer %s", token)},
+		},
+	}
+
+	auth := KeycloakAuth{}
+	fullName, err := auth.RetrieveFullNameFromToken(&c)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, fullName)
+	assert.Equal(t, "Bob", *fullName)
+}
+
+func Test_RetrieveFullNameFromToken_InvalidKeycloakTokenType(t *testing.T) {
+	c := gin.Context{}
+	c.Set("token", 12345)
+
+	auth := KeycloakAuth{}
+	fullName, err := auth.RetrieveFullNameFromToken(&c)
+
+	assert.Error(t, err)
+	assert.Nil(t, fullName)
+}
+
+func Test_RetrieveFullNameFromToken_NoTokenInContext(t *testing.T) {
+	c := gin.Context{
+		Request: &http.Request{},
+	}
+
+	auth := KeycloakAuth{}
+	fullName, err := auth.RetrieveFullNameFromToken(&c)
+
+	assert.Error(t, err)
+	assert.Nil(t, fullName)
+}

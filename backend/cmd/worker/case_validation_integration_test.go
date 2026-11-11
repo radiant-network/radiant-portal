@@ -1,0 +1,1695 @@
+package main
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"slices"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/minio/minio-go/v7"
+	"github.com/radiant-network/radiant-api/internal/batchval"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
+	"github.com/radiant-network/radiant-api/test/testutils"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
+)
+
+var emptyMsgs []types.BatchMessage
+
+func dateISO8601Ptr(year int, month time.Month, day int) *types.DateISO8601 {
+	d := types.DateISO8601(time.Date(year, month, day, 0, 0, 0, 0, time.UTC))
+	return &d
+}
+
+func createBaseCasePayload(submitterCaseId string) []*types.CaseBatch {
+	scenario, err := testutils.LoadScenario("base")
+	if err != nil {
+		panic(fmt.Sprintf("failed to load test scenario %q: %v", "base", err))
+	}
+	cases := scenario.Cases
+	cases[0].SubmitterCaseId = submitterCaseId
+	cases[0].Tasks[0].OutputDocuments[0].Url = fmt.Sprintf("s3://test-bucket/%s.recal.crai", submitterCaseId)
+	cases[0].Tasks[0].OutputDocuments[0].Name = fmt.Sprintf("%s.recal.crai", submitterCaseId)
+	return cases
+}
+
+func createDocument(ctx context.Context, client *minio.Client, bucket string, key string, content []byte) error {
+	_ = client.MakeBucket(ctx, bucket, minio.MakeBucketOptions{})
+	_, err := client.PutObject(ctx, bucket, key, bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+	return err
+}
+
+func createDocumentsForBatch(ctx context.Context, client *minio.Client, cases []*types.CaseBatch) {
+	store, _ := utils.NewS3Store()
+	for _, c := range cases {
+		for _, task := range c.Tasks {
+			for _, out := range task.OutputDocuments {
+				content := bytes.Repeat([]byte("a"), int(*out.Size))
+				location, _ := utils.ExtractS3BucketAndKey(out.Url)
+				_ = createDocument(ctx, client, location.Bucket, location.Key, content)
+				metadata, _ := store.GetMetadata(out.Url)
+				out.Hash = metadata.Hash
+			}
+		}
+	}
+}
+
+func getTableCounts(db *gorm.DB, tableNames []string) map[string]int64 {
+	counts := make(map[string]int64)
+	for _, tableName := range tableNames {
+		var count int64
+		db.Table(tableName).Count(&count)
+		counts[tableName] = count
+	}
+	return counts
+}
+
+func Test_ProcessBatch_Case_Dry_Run(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("Dry_Run")
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, true, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, true, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var count int64
+		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Dry_Run").Count(&count)
+		assert.Equal(t, int64(0), count)
+	})
+}
+
+func Test_ProcessBatch_Case_Not_Dry_Run(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("Not_Dry_Run")
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Not_Dry_Run").First(&ca)
+
+		assert.NotNil(t, ca)
+		assert.Equal(t, 1000, ca.ID)
+		assert.Equal(t, 1, ca.ProbandID)
+		assert.Equal(t, 1, ca.ProjectID)
+		assert.Equal(t, "Dr. Test", ca.OrderingPhysician)
+
+		var chse []*types.CaseHasSequencingExperiment
+		env.Postgres.Table("case_has_sequencing_experiment").Where("case_id = ?", ca.ID).Find(&chse)
+		assert.Len(t, chse, 2)
+
+		// Sort to have a predictable order for assertions
+		slices.SortFunc(chse, func(a, b *types.CaseHasSequencingExperiment) int {
+			return a.SequencingExperimentID - b.SequencingExperimentID
+		})
+
+		assert.Equal(t, 1000, chse[0].CaseID)
+		assert.Equal(t, 2, chse[0].SequencingExperimentID)
+		assert.Equal(t, 71, chse[1].SequencingExperimentID)
+
+		var fa []*types.Family
+		env.Postgres.Table("family").Where("case_id = ?", ca.ID).Find(&fa)
+		assert.Len(t, fa, 1)
+		assert.Equal(t, 1000, fa[0].ID)
+		assert.Equal(t, utils.IntPtr(1), fa[0].FamilyMemberID)
+		assert.Equal(t, "proband", fa[0].RelationshipToProbandCode)
+
+		var obscat []*types.ObsCategorical
+		env.Postgres.Table("obs_categorical").Where("case_id = ?", ca.ID).Find(&obscat)
+		assert.Len(t, obscat, 1)
+		assert.Equal(t, 1000, obscat[0].ID)
+		assert.Equal(t, utils.IntPtr(1), obscat[0].PatientID)
+		assert.Equal(t, "TEST:12345", obscat[0].CodeValue)
+
+		var obsstr []*types.ObsString
+		env.Postgres.Table("obs_string").Where("case_id = ?", ca.ID).Order("id").Find(&obsstr)
+		assert.Len(t, obsstr, 2)
+		assert.Equal(t, 1000, obsstr[0].ID)
+		assert.Equal(t, utils.IntPtr(1), obsstr[0].PatientID)
+		assert.Equal(t, "TEST:678901", obsstr[0].Value)
+		assert.Nil(t, obsstr[0].ExamCode)
+
+		assert.Equal(t, utils.IntPtr(1), obsstr[1].PatientID)
+		assert.Equal(t, "Additional exam note", obsstr[1].Value)
+		assert.Equal(t, utils.NilIfEmpty("other"), obsstr[1].ExamCode)
+		assert.Nil(t, obsstr[1].InterpretationCode)
+
+		var famhist []*types.FamilyHistory
+		env.Postgres.Table("family_history").Where("case_id = ?", ca.ID).Find(&famhist)
+		assert.Len(t, famhist, 1)
+		assert.Equal(t, 1000, famhist[0].ID)
+		assert.Equal(t, 1, famhist[0].PatientID)
+		assert.Equal(t, "Seizure", famhist[0].Condition)
+
+		var tc []*types.TaskContext
+		env.Postgres.Table("task_context").Where("task_id = 1000").Find(&tc)
+		assert.Len(t, tc, 2)
+
+		slices.SortFunc(tc, func(a, b *types.TaskContext) int {
+			return a.SequencingExperimentID - b.SequencingExperimentID
+		})
+
+		assert.Equal(t, 2, tc[0].SequencingExperimentID)
+		assert.Equal(t, 71, tc[1].SequencingExperimentID)
+
+		var ta *types.Task
+		env.Postgres.Table("task").Where("id = 1000").First(&ta)
+		assert.Equal(t, "alignment_germline_variant_calling", ta.TaskTypeCode)
+		assert.Equal(t, "Dragen", ta.PipelineName)
+		assert.Equal(t, "4.4.4", ta.PipelineVersion)
+		assert.Equal(t, "GRch38", ta.GenomeBuild)
+
+		var thd []*types.TaskHasDocument
+		env.Postgres.Table("task_has_document").Where("task_id = 1000").Find(&thd)
+		assert.Len(t, thd, 1)
+		assert.Equal(t, 1000, thd[0].DocumentID)
+
+		var doc *types.Document
+		env.Postgres.Table("document").Where("id = ?", thd[0].DocumentID).First(&doc)
+		assert.NotNil(t, doc)
+
+		assert.Equal(t, "Not_Dry_Run.recal.crai", doc.Name)
+		assert.Equal(t, int64(11), doc.Size)
+		assert.Equal(t, "d57f21e6a273781dbf8b7657940f3b03", doc.Hash)
+		assert.Equal(t, "s3://test-bucket/Not_Dry_Run.recal.crai", doc.Url)
+		assert.Equal(t, "genomic", doc.DataCategoryCode)
+		assert.Equal(t, "alignment", doc.DataTypeCode)
+		assert.Equal(t, "cram", doc.FileFormatCode)
+	})
+}
+
+func Test_ProcessBatch_Case_AncestryObservation_PersistsWithNullOnsetAndInterpretation(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		payload := createBaseCasePayload("Ancestry_Obs")
+		// CLIN-6022: an ancestry observation has no onset_code / interpretation_code.
+		payload[0].Patients[0].ObservationsCategorical = append(
+			payload[0].Patients[0].ObservationsCategorical,
+			&types.ObservationCategoricalBatch{
+				Code:   types.ObsCodeAncestry,
+				System: "radiant",
+				Value:  "BLK",
+			},
+		)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Ancestry_Obs").First(&ca)
+		assert.NotNil(t, ca)
+
+		var ancestry *types.ObsCategorical
+		db.Table("obs_categorical").Where("case_id = ? AND observation_code = ?", ca.ID, types.ObsCodeAncestry).First(&ancestry)
+		assert.NotNil(t, ancestry)
+		assert.Equal(t, "radiant", ancestry.CodingSystem)
+		assert.Equal(t, "BLK", ancestry.CodeValue)
+		// Persisted as NULL, not "" — the FK to onset(code) / obs_interpretation(code)
+		// would reject an empty string.
+		assert.Nil(t, ancestry.OnsetCode)
+		assert.Nil(t, ancestry.InterpretationCode)
+	})
+}
+
+// Test_ProcessBatch_Case_TenantIsolation_DoesNotResolveAnotherTenantsPatient reproduces
+// CLIN-6157: a proband resolved by (organization_code, submitter_patient_id) alone would silently
+// match a patient belonging to a different tenant sharing the same natural key. Patient MRN-283773
+// / CHUSJ only exists under "radiant" (test/data/clinical/02_patient.sql); a create_case batch for
+// tenant_b referencing the same key as its proband must report the patient as not found, not
+// resolve it across tenants.
+func Test_ProcessBatch_Case_TenantIsolation_DoesNotResolveAnotherTenantsPatient(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		// project.id is a plain IDENTITY column and fixtures insert explicit low ids (1, 2)
+		// without advancing the sequence, so an unqualified INSERT can collide with them —
+		// use an explicit high id, matching the id >= 1000 convention used elsewhere.
+		const projectID = 9000
+		if err := env.Postgres.Exec(`
+			INSERT INTO project (id, code, name, description, tenant_code)
+			VALUES (?, 'TENANT-ISO-PROJ', 'Tenant Isolation Test Project', '', 'tenant_b')
+			ON CONFLICT (id) DO NOTHING;
+		`, projectID).Error; err != nil {
+			t.Fatal("failed to insert tenant_b project:", err)
+		}
+		defer env.Postgres.Exec(`DELETE FROM project WHERE id = ?`, projectID)
+
+		// The analysis catalog is tenant-scoped too, so tenant_b needs its own 'WGA' row —
+		// otherwise the batch also fails on CASE-005 and the patient check never runs.
+		const analysisCatalogID = 9000
+		if err := env.Postgres.Exec(`
+			INSERT INTO analysis_catalog (id, code, name, tenant_code)
+			VALUES (?, 'WGA', 'Whole Genome Analysis', 'tenant_b')
+			ON CONFLICT (id) DO NOTHING;
+		`, analysisCatalogID).Error; err != nil {
+			t.Fatal("failed to insert tenant_b analysis catalog:", err)
+		}
+		defer env.Postgres.Exec(`DELETE FROM analysis_catalog WHERE id = ?`, analysisCatalogID)
+
+		payload := []types.CaseBatch{{
+			Type:                     "germline",
+			StatusCode:               "in_progress",
+			ProjectCode:              "TENANT-ISO-PROJ",
+			CategoryCode:             "postnatal",
+			AnalysisCode:             "WGA",
+			SubmitterCaseId:          "TENANT-ISO-CASE",
+			DiagnosticLabCode:        "TENANT_B_ORG",
+			OrderingOrganizationCode: "TENANT_B_ORG",
+			Patients: []*types.CasePatientBatch{
+				{
+					SubmitterPatientId:      "MRN-283773",
+					PatientOrganizationCode: "CHUSJ",
+					AffectedStatusCode:      "affected",
+					RelationToProbandCode:   "proband",
+				},
+			},
+		}}
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatchForTenant(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04", "tenant_b")
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		if assert.Len(t, resultBatch.Report.Errors, 1) {
+			assert.Equal(t, PatientNotFound, resultBatch.Report.Errors[0].Code)
+		}
+
+		var count int64
+		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", projectID, "TENANT-ISO-CASE").Count(&count)
+		assert.Equal(t, int64(0), count, "the case must not be created when its proband cannot be resolved for this tenant")
+	})
+}
+
+func Test_ProcessBatch_Case_Fetuses_Twins_CreatesTwoFetusAndFamilyRows(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		payload := createBaseCasePayload("Fetus_Twins")
+		payload[0].Fetuses = []*types.CaseFetusBatch{
+			{
+				SubmitterFetusId:    "TWIN-1",
+				SexCode:             "male",
+				LifeStatusCode:      "alive",
+				AffectedStatusCode:  "unknown",
+				LastMenstrualPeriod: dateISO8601Ptr(2026, time.February, 1),
+				ObservationsCategorical: []*types.ObservationCategoricalBatch{
+					{Code: "phenotype", System: "HPO", Value: "HP:0001631", OnsetCode: "antenatal", InterpretationCode: "positive"},
+				},
+			},
+			{
+				SubmitterFetusId:   "TWIN-2",
+				SexCode:            "female",
+				LifeStatusCode:     "deceased",
+				AffectedStatusCode: "affected",
+				ObservationsText: []*types.ObservationTextBatch{
+					{Code: "note", Value: "Stillborn at 32 weeks"},
+				},
+			},
+		}
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Fetus_Twins").First(&ca)
+		assert.NotNil(t, ca)
+
+		var fetuses []*types.Fetus
+		db.Table("fetus").Where("mother_id = ?", ca.ProbandID).Order("sex_code").Find(&fetuses)
+		assert.Len(t, fetuses, 2)
+		assert.Equal(t, "female", fetuses[0].SexCode)
+		assert.Equal(t, "deceased", fetuses[0].LifeStatusCode)
+		assert.Equal(t, "male", fetuses[1].SexCode)
+		assert.Equal(t, "alive", fetuses[1].LifeStatusCode)
+
+		var fa []*types.Family
+		db.Table("family").Where("case_id = ? AND relationship_to_proband_code = ?", ca.ID, RelationshipFetusCode).Order("affected_status_code").Find(&fa)
+		assert.Len(t, fa, 2)
+		for _, f := range fa {
+			assert.Nil(t, f.FamilyMemberID)
+			assert.NotNil(t, f.FetusID)
+		}
+		assert.Equal(t, "affected", fa[0].AffectedStatusCode)
+		assert.Equal(t, "unknown", fa[1].AffectedStatusCode)
+
+		var obscat *types.ObsCategorical
+		db.Table("obs_categorical").Where("case_id = ? AND fetus_id = ?", ca.ID, fetuses[1].ID).First(&obscat)
+		assert.NotNil(t, obscat)
+		assert.Nil(t, obscat.PatientID)
+		assert.Equal(t, "HP:0001631", obscat.CodeValue)
+
+		var obsstr *types.ObsString
+		db.Table("obs_string").Where("case_id = ? AND fetus_id = ?", ca.ID, fetuses[0].ID).First(&obsstr)
+		assert.NotNil(t, obsstr)
+		assert.Nil(t, obsstr.PatientID)
+		assert.Equal(t, "Stillborn at 32 weeks", obsstr.Value)
+	})
+}
+
+func Test_ProcessBatch_Case_Fetus_InvalidSexCode_Error(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		payload := createBaseCasePayload("Fetus_Invalid_Sex")
+		payload[0].Fetuses = []*types.CaseFetusBatch{
+			{SubmitterFetusId: "F-BAD-SEX", SexCode: "not-a-sex", LifeStatusCode: "alive", AffectedStatusCode: "unknown", LastMenstrualPeriod: dateISO8601Ptr(2026, time.February, 1)},
+		}
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		errors := []types.BatchMessage{
+			{
+				Code:    "FETUS-001",
+				Message: "Invalid field sex_code for case 0 - fetus 0. Reason: \"not-a-sex\" is not a valid sex code. Valid values [female, male, unknown].",
+				Path:    "case[0].fetuses[0].sex_code",
+			},
+		}
+		assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+
+		var count int64
+		db.Table("fetus").Where("mother_id = ?", 1).Count(&count)
+		assert.Equal(t, int64(0), count)
+	})
+}
+
+func Test_ProcessBatch_Case_ExamObservationCategorical_PersistsWithExamCodeAndInterpretation(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		payload := createBaseCasePayload("Exam_Obs_Cat")
+		payload[0].Patients[0].ObservationsCategorical = append(
+			payload[0].Patients[0].ObservationsCategorical,
+			&types.ObservationCategoricalBatch{
+				Code:               types.ObsCodeExam,
+				System:             "radiant",
+				Value:              "abnormal",
+				ExamCode:           "other",
+				InterpretationCode: "abnormal",
+			},
+		)
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(db, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, db, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		db.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Exam_Obs_Cat").First(&ca)
+		assert.NotNil(t, ca)
+
+		var exam *types.ObsCategorical
+		db.Table("obs_categorical").Where("case_id = ? AND observation_code = ?", ca.ID, types.ObsCodeExam).First(&exam)
+		assert.NotNil(t, exam)
+		assert.Equal(t, "radiant", exam.CodingSystem)
+		assert.Equal(t, "abnormal", exam.CodeValue)
+		assert.Nil(t, exam.OnsetCode)
+		assert.Equal(t, utils.NilIfEmpty("abnormal"), exam.InterpretationCode)
+		assert.Equal(t, utils.NilIfEmpty("other"), exam.ExamCode)
+	})
+}
+
+func Test_ProcessBatch_Case_Not_Dry_Run_No_SubmitterCaseId(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("")
+		payload[0].SubmitterCaseId = ""
+		payload[0].OrderingPhysician = "Not_Dry_Run_No_SubmitterCaseId"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_No_SubmitterCaseId_1.recal.crai"
+		payload[0].Tasks[0].OutputDocuments[0].Name = "Not_Dry_Run_No_SubmitterCaseId_1.recal.crai"
+
+		payload = append(payload, payload[0])
+
+		payload[1].SubmitterCaseId = ""
+		payload[1].OrderingPhysician = "Not Dry Run No SubmitterCaseId"
+		payload[1].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_No_SubmitterCaseId_2.recal.crai"
+		payload[1].Tasks[0].OutputDocuments[0].Name = "Not_Dry_Run_No_SubmitterCaseId_2.recal.crai"
+
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca []*types.Case
+		env.Postgres.Table("cases").Where("project_id = ? AND ordering_physician = ?", 1, "Not Dry Run No SubmitterCaseId").Find(&ca)
+
+		assert.NotNil(t, ca)
+		assert.Len(t, ca, 2)
+		assert.GreaterOrEqual(t, ca[0].ID, 1000)
+		assert.Equal(t, "Not Dry Run No SubmitterCaseId", ca[0].OrderingPhysician)
+		assert.Equal(t, "", ca[0].SubmitterCaseID)
+	})
+}
+
+func Test_ProcessBatch_Case_Not_Dry_Run_SubmitterCaseId_Collision(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("")
+		payload[0].SubmitterCaseId = "SUBMITTER_CASE_ID_COLLISION"
+		payload[0].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
+		payload[0].Tasks[0].OutputDocuments[0].Name = "Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
+
+		payload = append(payload, payload[0])
+
+		payload[1].SubmitterCaseId = "SUBMITTER_CASE_ID_COLLISION"
+		payload[1].Tasks[0].OutputDocuments[0].Url = "s3://test-bucket/Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
+		payload[1].Tasks[0].OutputDocuments[0].Name = "Not_Dry_Run_SubmitterCaseId_Collision_1.recal.crai"
+
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		errors := []types.BatchMessage{
+			{
+				Code:    "CASE-011",
+				Message: "Case (N1 / SUBMITTER_CASE_ID_COLLISION) appears multiple times in the batch.",
+				Path:    "case[1]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_Persist_Failure_ID_Collision(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		for _, tableName := range []string{"cases", "family", "obs_categorical", "obs_string", "family_history", "task", "document"} {
+			var maxID int
+			if err := env.Postgres.Raw(fmt.Sprintf("SELECT COALESCE(MAX(id), 0) FROM %s;", tableName)).Scan(&maxID).Error; err != nil || maxID == 0 {
+				t.Fatalf("failed to get max ID from table %s: %v", tableName, err)
+			}
+
+			env.Postgres.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN id RESTART WITH 1;", tableName)) // Force ID collision
+
+			before := getTableCounts(env.Postgres, []string{"cases", "family", "obs_categorical", "obs_string", "family_history", "task", "document"})
+
+			payload := createBaseCasePayload("Persist_Failure_ID_Collision_" + tableName)
+			createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+			payloadBytes, _ := json.Marshal(payload)
+			id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+
+			var msg string
+			switch tableName {
+			case "cases":
+				msg = "error processing case batch records: error during case insertion failed to persist case for case 0: failed to persist case ERROR: duplicate key value violates unique constraint \"case_pkey\" (SQLSTATE 23505)"
+			case "family":
+				msg = "error processing case batch records: error during case insertion failed to persist family for case 0: failed to persist family member \"MRN-283773\" for case 0: ERROR: duplicate key value violates unique constraint \"family_pkey\" (SQLSTATE 23505)"
+			case "obs_categorical":
+				msg = "error processing case batch records: error during case insertion failed to persist observations categorical for case 0: failed to persist observation categorical for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"observation_coding_pkey\" (SQLSTATE 23505)"
+			case "obs_string":
+				msg = "error processing case batch records: error during case insertion failed to persist observations text for case 0: failed to persist observation text for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"obs_string_pkey\" (SQLSTATE 23505)"
+			case "family_history":
+				msg = "error processing case batch records: error during case insertion failed to persist family history for case 0: failed to persist family history for patient \"MRN-283773\" in case 0: ERROR: duplicate key value violates unique constraint \"family_history_pkey\" (SQLSTATE 23505)"
+			case "task":
+				msg = "error processing case batch records: error during case insertion failed to persist tasks for case 0: failed to persist task for case 0: ERROR: duplicate key value violates unique constraint \"task_pkey\" (SQLSTATE 23505)"
+			case "document":
+				msg = "error processing case batch records: error during case insertion failed to persist tasks for case 0: failed to persist document \"Persist_Failure_ID_Collision_document.recal.crai\" for case 0: ERROR: duplicate key value violates unique constraint \"document_pkey\" (SQLSTATE 23505)"
+			default:
+				t.Fatalf("unexpected table name: %s", tableName)
+			}
+
+			expectedErrors := []types.BatchMessage{
+				{
+					Code:    "GLOBAL-000",
+					Message: msg,
+					Path:    "",
+				},
+			}
+			assertBatchProcessing(t, env.Postgres, id, types.BatchStatusError, false, "user123", emptyMsgs, emptyMsgs, expectedErrors)
+
+			after := getTableCounts(env.Postgres, []string{"cases", "family", "obs_categorical", "obs_string", "family_history", "task", "document"})
+			assert.Equal(t, before, after)
+
+			if err := env.Postgres.Exec(fmt.Sprintf("ALTER TABLE %s ALTER COLUMN id RESTART WITH %d;", tableName, maxID+1)).Error; err != nil {
+				t.Fatalf("failed to reset ID sequence on table %s: %v", tableName, err)
+			}
+		}
+	})
+}
+
+func Test_ProcessBatch_Case_validateTask_Error_TaskField(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("validateTask_Error_TaskField")
+		payload[0].Tasks[0].PipelineVersion = "!@#$%^&*()_+"
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field pipeline_version for case 0 - task 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[0].tasks[0].pipeline_version",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskTypeCode(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("validateTask_Error_InvalidTaskTypeCode")
+		payload[0].Tasks[0].TypeCode = "invalid_task_type"
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `invalid_task_type`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, family_variant_calling, quality_control_metrics, radiant_germline_annotation, radiant_germline_cnv_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
+				Path:    "case[0].tasks[0].type_code",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateTask_Error_InvalidTaskAliquot(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("validateTask_Error_InvalidTaskAliquot")
+		payload[0].Tasks[0].Aliquots = []string{"UNKNOWN_ALIQUOT"}
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-002",
+				Message: "Sequencing \"UNKNOWN_ALIQUOT\" is not defined for case 0 - task 0.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateTask_Error_MissingInputDocuments(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("validateTask_Error_MissingInputDocuments")
+		payload[0].Tasks[0].TypeCode = "family_variant_calling"
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-003",
+				Message: "Missing input documents for case 0 - task 0 of type family_variant_calling.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateTask_Error_MissingOutputDocuments(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("validateTask_Error_MissingOutputDocuments")
+		payload[0].Tasks[0].OutputDocuments = []*types.OutputDocumentBatch{}
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 0 of type alignment_germline_variant_calling.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateTask_Error_ExternalSequencingExperiment(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("validateTask_Error_ExternalSequencingExperiment")
+		payload[0].Tasks[0].TypeCode = "family_variant_calling"
+		payload[0].Tasks[0].Aliquots = []string{"NA12891", "ABC123"} // One Aliquot not-matching
+		payload[0].Tasks[0].InputDocuments = []*types.InputDocumentBatch{
+			{
+				Url: "s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram",
+			},
+		}
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-002",
+				Message: "Sequencing \"ABC123\" is not defined for case 0 - task 0.",
+				Path:    "case[0].tasks[0]",
+			},
+			{
+				Code:    "TASK-006",
+				Message: "Input document with URL s3://cqdg-prod-file-workspace/sarek/preprocessing/recalibrated/NA12892/NA12892.recal.cram for case 0 - task 0 was produced by a sequencing experiment not defined in this case.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateDocument_IdenticalTaskAlreadyAttached_Skipped(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		const url = "s3://test-bucket/validateDocument_IdenticalTaskAlreadyAttached.recal.crai"
+		payload := createBaseCasePayload("validateDocument_IdenticalTaskAlreadyAttached_1")
+		payload[0].Tasks[0].OutputDocuments[0].Url = url
+		payload[0].Tasks[0].OutputDocuments[0].Name = "validateDocument_IdenticalTaskAlreadyAttached.recal.crai"
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		payload[0].SubmitterCaseId = "validateDocument_IdenticalTaskAlreadyAttached_2"
+		payloadBytes, _ = json.Marshal(payload)
+		id = insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		infos := []types.BatchMessage{
+			{
+				Code:    "TASK-008",
+				Message: "Task alignment_germline_variant_calling on aliquots [NA12891] is already attached, skipped.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", infos, emptyMsgs, emptyMsgs)
+
+		var docs, owners int64
+		env.Postgres.Table("document").Where("url = ?", url).Count(&docs)
+		env.Postgres.Table("task_has_document thd").Joins("JOIN document d ON d.id = thd.document_id").Where("d.url = ? AND thd.type = ?", url, "output").Count(&owners)
+		assert.Equal(t, int64(1), docs)
+		assert.Equal(t, int64(1), owners)
+	})
+}
+
+// A document row left without an output owner (its task was deleted) must be adopted by the
+// re-sent task, not duplicated: the second row would be the one GetDocumentByUrl misses and
+// TASK-008 would never hold again.
+func Test_ProcessBatch_Case_validateDocument_OrphanDocumentAdopted_ThenSkipped(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		const url = "s3://test-bucket/validateDocument_OrphanDocumentAdopted.recal.crai"
+		payload := createBaseCasePayload("validateDocument_OrphanDocumentAdopted_1")
+		payload[0].Tasks[0].OutputDocuments[0].Url = url
+		payload[0].Tasks[0].OutputDocuments[0].Name = "validateDocument_OrphanDocumentAdopted.recal.crai"
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var taskID int
+		env.Postgres.Raw("SELECT thd.task_id FROM task_has_document thd JOIN document d ON d.id = thd.document_id WHERE d.url = ? AND thd.type = 'output'", url).Scan(&taskID)
+		require.NotZero(t, taskID)
+		require.NoError(t, env.Postgres.Exec("DELETE FROM task_has_document WHERE task_id = ?", taskID).Error)
+		require.NoError(t, env.Postgres.Exec("DELETE FROM task_context WHERE task_id = ?", taskID).Error)
+		require.NoError(t, env.Postgres.Exec("DELETE FROM task WHERE id = ?", taskID).Error)
+
+		payload[0].SubmitterCaseId = "validateDocument_OrphanDocumentAdopted_2"
+		payloadBytes, _ = json.Marshal(payload)
+		id = insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		infos := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-003",
+				Message: "Document " + url + " already exists, skipped.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", infos, emptyMsgs, emptyMsgs)
+
+		payload[0].SubmitterCaseId = "validateDocument_OrphanDocumentAdopted_3"
+		payloadBytes, _ = json.Marshal(payload)
+		id = insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		infos = []types.BatchMessage{
+			{
+				Code:    "TASK-008",
+				Message: "Task alignment_germline_variant_calling on aliquots [NA12891] is already attached, skipped.",
+				Path:    "case[0].tasks[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", infos, emptyMsgs, emptyMsgs)
+
+		var docs, owners int64
+		env.Postgres.Table("document").Where("url = ?", url).Count(&docs)
+		env.Postgres.Table("task_has_document thd").Joins("JOIN document d ON d.id = thd.document_id").Where("d.url = ? AND thd.type = ?", url, "output").Count(&owners)
+		assert.Equal(t, int64(1), docs)
+		assert.Equal(t, int64(1), owners)
+	})
+}
+
+// Same outputs, other pipeline version: not the same task, so the former DOCUMENT-005 stands.
+func Test_ProcessBatch_Case_validateDocument_SameOutputsOtherPipelineVersion_Document005(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		const url = "s3://test-bucket/validateDocument_SameOutputsOtherPipelineVersion.recal.crai"
+		payload := createBaseCasePayload("validateDocument_SameOutputsOtherPipelineVersion_1")
+		payload[0].Tasks[0].OutputDocuments[0].Url = url
+		payload[0].Tasks[0].OutputDocuments[0].Name = "validateDocument_SameOutputsOtherPipelineVersion.recal.crai"
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		payload[0].SubmitterCaseId = "validateDocument_SameOutputsOtherPipelineVersion_2"
+		payload[0].Tasks[0].PipelineVersion = payload[0].Tasks[0].PipelineVersion + "-other"
+		payloadBytes, _ = json.Marshal(payload)
+		id = insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		infos := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-003",
+				Message: "Document " + url + " already exists, skipped.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		errors := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-005",
+				Message: "A document with same url " + url + " has been found in the output of a different task.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", infos, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateDocument_Error_DocumentField(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("validateDocument_Error_DocumentField")
+		payload[0].Tasks[0].OutputDocuments[0].Name = "!@#$%^&*()_+"
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		errors := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-001",
+				Message: "Invalid field name for case 0 - task 0 - output document 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-009",
+				Message: "Document name !@#$%^&*()_+ is not consistent with URL s3://test-bucket/validateDocument_Error_DocumentField.recal.crai for case 0 - task 0 - output document 0.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateDocument_Error_DocumentNotFoundAtUrl(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("validateDocument_Error_DocumentNotFoundAtUrl")
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		errors := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-002",
+				Message: "No document can be found on the URL s3://test-bucket/validateDocument_Error_DocumentNotFoundAtUrl.recal.crai for case 0 - task 0 - output document 0.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateDocument_Warning_PartiallyDifferentDocumentExists(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("validateDocument_Warning_PartiallyDifferentDocumentExists")
+		url := "s3://test-bucket/validateDocument_Warning_PartiallyDifferentDocumentExists.recal.crai"
+		doc := payload[0].Tasks[0].OutputDocuments[0]
+
+		env.Postgres.Exec(`
+            INSERT INTO document (name, data_category_code, data_type_code, format_code, size, url, hash, tenant_code)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'radiant');
+        `,
+			doc.Name,
+			doc.DataCategoryCode,
+			doc.DataTypeCode,
+			doc.FormatCode,
+			doc.Size,
+			url,
+			doc.Hash,
+		)
+
+		payload[0].SubmitterCaseId = "WARNING_CASE_123"
+		payload[0].Tasks[0].OutputDocuments[0].Url = url
+		payload[0].Tasks[0].OutputDocuments[0].Name = "Something Else"
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		warnings := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-004",
+				Message: "A document with same url s3://test-bucket/validateDocument_Warning_PartiallyDifferentDocumentExists.recal.crai has been found but with a different name (validateDocument_Warning_PartiallyDifferentDocumentExists.recal.crai <> Something Else).",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", emptyMsgs, warnings, emptyMsgs)
+	})
+}
+
+func Test_ProcessBatch_Case_validateDocument_Error_DuplicateDocumentInBatch(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("validateDocument_Error_DuplicateDocumentInBatch")
+		payload[0].Tasks[0].OutputDocuments = append(payload[0].Tasks[0].OutputDocuments, payload[0].Tasks[0].OutputDocuments[0])
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		errors := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-008",
+				Message: "Duplicate output document with URL s3://test-bucket/validateDocument_Error_DuplicateDocumentInBatch.recal.crai found.",
+				Path:    "case[0].tasks[0].output_documents[1]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateDocument_Error_SizeNotMatch(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("validateDocument_Error_SizeNotMatch")
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		size := int64(42)
+		payload[0].Tasks[0].OutputDocuments[0].Size = &size
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		errors := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-006",
+				Message: "Document size does not match the actual size of the document s3://test-bucket/validateDocument_Error_SizeNotMatch.recal.crai for case 0 - task 0 - output document 0.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_validateDocument_Error_HashNotMatch(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("validateDocument_Error_HashNotMatch")
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+
+		payload[0].Tasks[0].OutputDocuments[0].Hash = "not-the-right-hash"
+
+		payloadBytes, _ := json.Marshal(payload)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		errors := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-007",
+				Message: "Document hash does not match the actual hash of the document s3://test-bucket/validateDocument_Error_HashNotMatch.recal.crai for case 0 - task 0 - output document 0.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_TopLevelCase_Codes(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, _ := testutils.LoadScenario("cases_case_codes")
+		payload, _ := json.Marshal(scenario.Cases)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
+
+		infos := []types.BatchMessage{
+			{
+				Code:    "CASE-001",
+				Message: "Case (1 / 1:1) already exists, skipped.",
+				Path:    "case[0]",
+			},
+		}
+		errors := []types.BatchMessage{
+			{
+				Code:    "CASE-003",
+				Message: "Project non_existing_project for case 1 does not exist.",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-004",
+				Message: "Diagnostic lab \"LDM-CHUSJJ\" for case 1 does not exist.",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-005",
+				Message: "Analysis \"WGAA\" for case 1 does not exist.",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-006",
+				Message: "Ordering organization \"CHUSJJ\" for case 1 does not exist.",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-002",
+				Message: "Invalid field status_code for case 1. Reason: \"not_in_progress\" is not a valid status code. Valid values [completed, draft, inconclusive, in_progress, in_review, processing, reopened, resolved, revoked, submitted, unresolved].",
+				Path:    "case[1].status_code",
+			},
+			{
+				Code:    "CASE-002",
+				Message: "Invalid field priority_code for case 1. Reason: \"not-routine\" is not a valid priority code. Valid values [asap, routine, stat, urgent].",
+				Path:    "case[1].priority_code",
+			},
+			{
+				Code:    "CASE-002",
+				Message: "Invalid field category_code for case 1. Reason: \"not-postnatal\" is not a valid category code. Valid values [postnatal, prenatal].",
+				Path:    "case[1].category_code",
+			},
+			{
+				Code:    "CASE-002",
+				Message: "Invalid field primary_condition_value for case 1. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-002",
+				Message: "Invalid field ordering_physician for case 1. Reason: field is too long, maximum length allowed is 100.",
+				Path:    "case[1]",
+			},
+			{
+				Code:    "CASE-007",
+				Message: "Case 1 must have exactly 1 proband.",
+				Path:    "case[1].patients",
+			},
+			{
+				Code:    "CASE-008",
+				Message: "Duplicate patient (CHUSJ / MRN-283773) for case 2.",
+				Path:    "case[2].patients",
+			},
+			{
+				Code:    "CASE-007",
+				Message: "Case 2 must have exactly 1 proband.",
+				Path:    "case[2].patients",
+			},
+			{
+				Code:    "CASE-005",
+				Message: "Analysis \"\" for case 3 does not exist.",
+				Path:    "case[3]",
+			},
+			{
+				Code:    "CASE-007",
+				Message: "Case 3 must have exactly 1 proband.",
+				Path:    "case[3].patients",
+			},
+			{
+				Code:    "CASE-011",
+				Message: "Case (N1 / CASE-12345) appears multiple times in the batch.",
+				Path:    "case[3]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", infos, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_Inner_Codes_PatientsAndObservations(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, _ := testutils.LoadScenario("cases_inner_codes_patients_and_observations")
+		payload, _ := json.Marshal(scenario.Cases)
+
+		// Create document to validate size and hash checks
+		_ = createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "PATIENT-004",
+				Message: "Invalid field submitter_patient_id for case 0 - patient 1. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[0].patients[1].submitter_patient_id",
+			},
+			{
+				Code:    "PATIENT-006",
+				Message: "Patient (CHUSJ / MRN-283773!@#$%^) for case 0 - patient 1 does not exist.",
+				Path:    "case[0].patients[1]",
+			},
+			{
+				Code:    "PATIENT-004",
+				Message: "Invalid field affected_status_code for case 0 - patient 1. Reason: \"super-affected\" is not a valid affected status code. Valid values [affected, non_affected, unknown].",
+				Path:    "case[0].patients[1].affected_status_code",
+			},
+			{
+				Code:    "PATIENT-004",
+				Message: "Invalid field relation_to_proband_code for case 0 - patient 1. Reason: \"not-proband\" is not a valid relation to proband code. Valid values [brother, father, mother, proband, sibling, sister].",
+				Path:    "case[0].patients[1].relation_to_proband_code",
+			},
+			{
+				Code:    "OBS-001",
+				Message: "Invalid field onset_code for case 0 - patient 1 - observations_categorical 0. Reason: \"infantilee\" is not a valid onset code. Valid values [antenatal, childhood, congenital, infantile, juvenile, middle_age, neonatal, senior, unknown, young_adult].",
+				Path:    "case[0].patients[1].observations_categorical[0].onset_code",
+			},
+			{
+				Code:    "OBS-001",
+				Message: "Invalid field system for case 0 - patient 1 - observations_categorical 0. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[0].patients[1].observations_categorical[0].system",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_Inner_Codes_SequencingExperiments(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, _ := testutils.LoadScenario("cases_inner_codes_sequencing_experiments")
+		payload, _ := json.Marshal(scenario.Cases)
+
+		// Create document to validate size and hash checks
+		_ = createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "SEQ-007",
+				Message: "Sequencing experiment (CQGC / S13225 / NA128911) does not exist.",
+				Path:    "case[0].sequencing_experiments[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_Inner_Codes_Tasks(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, _ := testutils.LoadScenario("cases_inner_codes_tasks")
+		payload, _ := json.Marshal(scenario.Cases)
+
+		// Create document to validate size and hash checks
+		_ = createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field aliquots for case 0 - task 0. Reason: field is empty.",
+				Path:    "case[0].tasks[0].aliquots",
+			},
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field type_code for case 0 - task 0. Reason: invalid task type code `desalignment`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, family_variant_calling, quality_control_metrics, radiant_germline_annotation, radiant_germline_cnv_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
+				Path:    "case[0].tasks[0].type_code",
+			},
+			{
+				Code:    "TASK-002",
+				Message: "Sequencing \"\" is not defined for case 0 - task 0.",
+				Path:    "case[0].tasks[0]",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 0 of type desalignment.",
+				Path:    "case[0].tasks[0]",
+			},
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field pipeline_name for case 0 - task 0. Reason: field is too long, maximum length allowed is 100.",
+				Path:    "case[0].tasks[0].pipeline_name",
+			},
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field aliquots for case 0 - task 1. Reason: aliquots must contain at least one value.",
+				Path:    "case[0].tasks[1].aliquots",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 1 of type alignment.",
+				Path:    "case[0].tasks[1]",
+			},
+			{
+				Code:    "TASK-002",
+				Message: "Sequencing \"NA12891111\" is not defined for case 0 - task 2.",
+				Path:    "case[0].tasks[2]",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 2 of type radiant_germline_annotation.",
+				Path:    "case[0].tasks[2]",
+			},
+			{
+				Code:    "TASK-006",
+				Message: "Input document with URL s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz for case 0 - task 2 was produced by a sequencing experiment not defined in this case.",
+				Path:    "case[0].tasks[2]",
+			},
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field pipeline_name for case 0 - task 2. Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "case[0].tasks[2].pipeline_name",
+			},
+			{
+				Code:    "TASK-003",
+				Message: "Missing input documents for case 0 - task 3 of type family_variant_calling.",
+				Path:    "case[0].tasks[3]",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 3 of type family_variant_calling.",
+				Path:    "case[0].tasks[3]",
+			},
+			{
+				Code:    "TASK-001",
+				Message: "Invalid field type_code for case 0 - task 4. Reason: invalid task type code `exomiser`. Valid codes are: [alignment, alignment_germline_variant_calling, alignment_somatic_variant_calling, clinical_report, family_variant_calling, quality_control_metrics, radiant_germline_annotation, radiant_germline_cnv_annotation, radiant_somatic_annotation, rnaseq_analysis, somatic_variant_calling, tumor_only_variant_calling].",
+				Path:    "case[0].tasks[4].type_code",
+			},
+			{
+				Code:    "TASK-002",
+				Message: "Sequencing \"NA12892\" is not defined for case 0 - task 4.",
+				Path:    "case[0].tasks[4]",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 4 of type exomiser.",
+				Path:    "case[0].tasks[4]",
+			},
+			{
+				Code:    "TASK-007",
+				Message: "Task type alignment_germline_variant_calling doesn't support being associated with more than 1 aliquot value.",
+				Path:    "case[0].tasks[5]",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 5 of type alignment_germline_variant_calling.",
+				Path:    "case[0].tasks[5]",
+			},
+			{
+				Code:    "TASK-007",
+				Message: "Task type alignment_somatic_variant_calling doesn't support being associated with more than 1 aliquot value.",
+				Path:    "case[0].tasks[6]",
+			},
+			{
+				Code:    "TASK-004",
+				Message: "Missing output documents for case 0 - task 6 of type alignment_somatic_variant_calling.",
+				Path:    "case[0].tasks[6]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_Inner_Codes_Documents(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, _ := testutils.LoadScenario("cases_inner_codes_documents")
+		payload, _ := json.Marshal(scenario.Cases)
+
+		// Create document to validate size and hash checks
+		_ = createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
+
+		infos := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-003",
+				Message: "Document s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz already exists, skipped.",
+				Path:    "case[0].tasks[0].output_documents[2]",
+			},
+		}
+		warnings := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-004",
+				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found but with a different data_category_code (genomic <> genomicc).",
+				Path:    "case[0].tasks[0].output_documents[3]",
+			},
+		}
+		errors := []types.BatchMessage{
+			{
+				Code:    "DOCUMENT-001",
+				Message: "Invalid field data_type_code for case 0. Reason: data type code \"not-alignment\" is not a valid data type code. Valid values [aggqc, alignment, alirpg, chrmr, clinical_report, cnvvis, covgene, exomiser, exomiser_cnv, exp, gcnv, gsv, igv, nrrv, qcrun, scnv, snv, snvpg, somfu, ssnv, ssup, ssv].",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-001",
+				Message: "Invalid field data_category_code for case 0. Reason: data category code \"not-genomic\" is not a valid data category code. Valid values [clinical, genomic].",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-001",
+				Message: "Invalid field format_code for case 0. Reason: format code \"not-cram\" is not a valid format code. Valid values [bed, bw, crai, cram, csv, gvcf, html, json, maf, pdf, png, tbi, tgz, tsv, txt, vcf, xlsx, zip].",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-002",
+				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.recal.crai for case 0 - task 0 - output document 0.",
+				Path:    "case[0].tasks[0].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-001",
+				Message: "Invalid field data_category_code for case 0. Reason: data category code \"genomic!@#$%\" is not a valid data category code. Valid values [clinical, genomic].",
+				Path:    "case[0].tasks[0].output_documents[1]",
+			},
+			{
+				Code:    "DOCUMENT-009",
+				Message: "Document name wrong_name.recal.crai is not consistent with URL s3://test-bucket/existing_document.recal.crai for case 0 - task 0 - output document 1.",
+				Path:    "case[0].tasks[0].output_documents[1]",
+			},
+			{
+				Code:    "DOCUMENT-006",
+				Message: "Document size does not match the actual size of the document s3://test-bucket/existing_document.recal.crai for case 0 - task 0 - output document 1.",
+				Path:    "case[0].tasks[0].output_documents[1]",
+			},
+			{
+				Code:    "DOCUMENT-007",
+				Message: "Document hash does not match the actual hash of the document s3://test-bucket/existing_document.recal.crai for case 0 - task 0 - output document 1.",
+				Path:    "case[0].tasks[0].output_documents[1]",
+			},
+			{
+				Code:    "DOCUMENT-005",
+				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found in the output of a different task.",
+				Path:    "case[0].tasks[0].output_documents[2]",
+			},
+			{
+				Code:    "DOCUMENT-005",
+				Message: "A document with same url s3://cqdg-prod-file-workspace/Postprocessing/exomiser/SH032.exomiser.vcf.gz has been found in the output of a different task.",
+				Path:    "case[0].tasks[0].output_documents[3]",
+			},
+			{
+				Code:    "DOCUMENT-002",
+				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.recal.crai for case 0 - task 0 - output document 4.",
+				Path:    "case[0].tasks[0].output_documents[4]",
+			},
+			{
+				Code:    "DOCUMENT-008",
+				Message: "Duplicate output document with URL s3://test-bucket/CASE-12345.recal.crai found.",
+				Path:    "case[0].tasks[0].output_documents[4]",
+			},
+			{
+				Code:    "DOCUMENT-010",
+				Message: "A document with a data type ssnv and format type vcf cannot be linked to a task of type clinical_report.",
+				Path:    "case[0].tasks[1].output_documents[0]",
+			},
+			{
+				Code:    "DOCUMENT-002",
+				Message: "No document can be found on the URL s3://test-bucket/CASE-12345.report.vcf for case 0 - task 1 - output document 0.",
+				Path:    "case[0].tasks[1].output_documents[0]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", infos, warnings, errors)
+	})
+}
+
+func Test_ProcessBatch_Case_MafDocument_Persisted(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, err := testutils.LoadScenario("cases_maf_document")
+		require.NoError(t, err)
+		maf, err := os.ReadFile(filepath.Join(testutils.TestResources, "worker", "documents", "TSRX1091647.somatic.maf"))
+		require.NoError(t, err)
+		document := scenario.Cases[0].Tasks[0].OutputDocuments[0]
+		require.NoError(t, createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", document.Name, maf))
+
+		payload, err := json.Marshal(scenario.Cases)
+		require.NoError(t, err)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var persisted struct {
+			FormatCode   string
+			DataTypeCode string
+			Size         int64
+			Hash         string
+		}
+		require.NoError(t, env.Postgres.Table("document").Select("format_code, data_type_code, size, hash").Where("url = ?", document.Url).Take(&persisted).Error)
+		assert.Equal(t, "maf", persisted.FormatCode)
+		assert.Equal(t, "ssnv", persisted.DataTypeCode)
+		assert.Equal(t, int64(len(maf)), persisted.Size)
+		assert.Equal(t, document.Hash, persisted.Hash)
+	})
+}
+
+func Test_ProcessBatch_Case_Optional_Values_NoError(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, _ := testutils.LoadScenario("cases_optional_values")
+		payload, _ := json.Marshal(scenario.Cases)
+
+		// Create document to validate size and hash checks
+		_ = createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+
+		// Get count of cases existing in DB
+		var before int64
+		env.Postgres.Table("cases").Count(&before)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var after int64
+		env.Postgres.Table("cases").Count(&after)
+		assert.Equal(t, before+2, after)
+	})
+}
+
+func Test_ProcessBatch_Case_Aliquots_Permutations(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, _ := testutils.LoadScenario("cases_aliquots_permutations")
+		payload, _ := json.Marshal(scenario.Cases)
+
+		// Create document to validate size and hash checks
+		_ = createDocument(env.Ctx, env.ObjectStore.Client, "test-bucket", "existing_document.recal.crai", []byte("test content"))
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-10-10")
+		assertBatchProcessing(t, env.Postgres, id, "SUCCESS", false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+	})
+}
+
+func Test_ProcessBatch_Case_Not_Dry_Run_Empty_Tasks(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("Not_Dry_Run_No_Tasks")
+		payload[0].Tasks = []*types.CaseTaskBatch{}
+
+		case0 := *payload[0]
+
+		payload = append(payload, &case0)
+
+		payload[1].SubmitterCaseId = "Not_Dry_Run_No_Task_ReUse_SequencingExperiments_From_Existing_Case"
+		payload[1].Tasks = []*types.CaseTaskBatch{}
+		payload[1].SequencingExperiments = []*types.CaseSequencingExperimentBatch{
+			{
+				Aliquot:                "NA12892",
+				SampleOrganizationCode: "CQGC",
+				SubmitterSampleId:      "S13224",
+			},
+			{
+				Aliquot:                "NA12891",
+				SampleOrganizationCode: "CQGC",
+				SubmitterSampleId:      "S13225",
+			},
+			{
+				Aliquot:                "NA12878",
+				SampleOrganizationCode: "CQGC",
+				SubmitterSampleId:      "S13226",
+			},
+		}
+		payload[1].Patients = []*types.CasePatientBatch{
+			{
+				AffectedStatusCode:      "affected",
+				SubmitterPatientId:      "MRN-283775",
+				PatientOrganizationCode: "CHUSJ",
+				RelationToProbandCode:   "proband",
+			},
+			{
+				AffectedStatusCode:      "affected",
+				SubmitterPatientId:      "MRN-283774",
+				PatientOrganizationCode: "CHUSJ",
+				RelationToProbandCode:   "father",
+			},
+			{
+				AffectedStatusCode:      "affected",
+				SubmitterPatientId:      "MRN-283773",
+				PatientOrganizationCode: "CHUSJ",
+				RelationToProbandCode:   "mother",
+			},
+		}
+
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca0 []*types.Case
+		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Not_Dry_Run_No_Tasks").Find(&ca0)
+
+		assert.NotNil(t, ca0)
+		assert.Len(t, ca0, 1)
+		assert.GreaterOrEqual(t, ca0[0].ID, 1000)
+
+		var ca1 []*types.Case
+		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Not_Dry_Run_No_Task_ReUse_SequencingExperiments_From_Existing_Case").Find(&ca1)
+
+		assert.NotNil(t, ca1)
+		assert.Len(t, ca1, 1)
+		assert.GreaterOrEqual(t, ca1[0].ID, 1000)
+
+		var chse []*types.CaseHasSequencingExperiment
+		env.Postgres.Table("case_has_sequencing_experiment").Where("case_id = ?", ca1[0].ID).Find(&chse)
+		assert.Len(t, chse, 3)
+
+		var tc []*types.TaskContext
+		env.Postgres.Table("task_context").Where("case_id = ?", ca0[0].ID).Find(&tc)
+		assert.Len(t, tc, 0)
+
+		env.Postgres.Table("task_context").Where("case_id = ?", ca1[0].ID).Find(&tc)
+		assert.Len(t, tc, 0)
+	})
+}
+
+func Test_ProcessBatch_Case_AnnotationTasks_WithExomiserOutputs(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, _ := testutils.LoadScenario("annotation_with_exomiser_outputs")
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, scenario.Cases)
+		payloadBytes, _ := json.Marshal(scenario.Cases)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "RAD-116-EXOMISER").First(&ca)
+
+		type exomiserOutput struct {
+			URL          string
+			DataTypeCode string
+			TaskTypeCode string
+			CaseID       *int
+		}
+		var outputs []exomiserOutput
+		env.Postgres.Raw(`
+			SELECT DISTINCT d.url, d.data_type_code, t.task_type_code, tc.case_id
+			FROM document d
+			JOIN task_has_document thd ON thd.document_id = d.id AND thd.type = 'output'
+			JOIN task t ON t.id = thd.task_id
+			JOIN task_context tc ON tc.task_id = t.id
+			WHERE d.data_type_code IN ('exomiser', 'exomiser_cnv') AND tc.case_id = ?
+			ORDER BY d.url`, ca.ID).Scan(&outputs)
+
+		assert.Equal(t, []exomiserOutput{
+			{URL: "s3://test-bucket/cnv/NA12878.json", DataTypeCode: "exomiser_cnv", TaskTypeCode: types.RadiantGermlineCNVAnnotationTask, CaseID: &ca.ID},
+			{URL: "s3://test-bucket/cnv/NA12878.variants.tsv", DataTypeCode: "exomiser_cnv", TaskTypeCode: types.RadiantGermlineCNVAnnotationTask, CaseID: &ca.ID},
+			{URL: "s3://test-bucket/snv/NA12878.html", DataTypeCode: "exomiser", TaskTypeCode: types.RadiantGermlineAnnotationTask, CaseID: &ca.ID},
+			{URL: "s3://test-bucket/snv/NA12878.variants.tsv", DataTypeCode: "exomiser", TaskTypeCode: types.RadiantGermlineAnnotationTask, CaseID: &ca.ID},
+		}, outputs)
+	})
+}
+
+func Test_ProcessBatch_Case_ClinicalReportTask_IsLinkedToCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("Clinical_Report")
+		size := int64(13)
+		reportUrl := "s3://test-bucket/Clinical_Report.nexus.vcf"
+		payload[0].Tasks = append(payload[0].Tasks, &types.CaseTaskBatch{
+			TypeCode:        types.ClinicalReportTaskTypeCode,
+			Aliquots:        []string{"NA12891"},
+			PipelineName:    "DGD Nexus",
+			PipelineVersion: "1.0.0",
+			GenomeBuild:     "GRch38",
+			OutputDocuments: []*types.OutputDocumentBatch{
+				{
+					DataCategoryCode: "clinical",
+					DataTypeCode:     "clinical_report",
+					FormatCode:       "vcf",
+					Name:             "Clinical_Report.nexus.vcf",
+					Size:             &size,
+					Url:              reportUrl,
+				},
+			},
+		})
+
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Clinical_Report").First(&ca)
+
+		var task *types.Task
+		env.Postgres.Table("task").Where("task_type_code = ?", types.ClinicalReportTaskTypeCode).First(&task)
+		assert.Equal(t, "DGD Nexus", task.PipelineName)
+
+		var tc []*types.TaskContext
+		env.Postgres.Table("task_context").Where("task_id = ?", task.ID).Find(&tc)
+		assert.NotEmpty(t, tc)
+		for _, ctx := range tc {
+			if assert.NotNil(t, ctx.CaseID) {
+				assert.Equal(t, ca.ID, *ctx.CaseID)
+			}
+		}
+
+		var doc *types.Document
+		env.Postgres.Table("document").Where("url = ?", reportUrl).First(&doc)
+		assert.Equal(t, "clinical_report", doc.DataTypeCode)
+		assert.Equal(t, "vcf", doc.FileFormatCode)
+	})
+}
+
+func Test_ProcessBatch_Case_QualityControlMetricsTask_IsLinkedToCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		payload := createBaseCasePayload("Quality_Control")
+		size := int64(13)
+		reportUrl := "s3://test-bucket/CA1/CA1_multiqc_report.html"
+		payload[0].Tasks = append(payload[0].Tasks, &types.CaseTaskBatch{
+			TypeCode:        types.QualityControlMetricsTaskTypeCode,
+			Aliquots:        []string{"NA12891"},
+			PipelineName:    "quality-control-pipeline",
+			PipelineVersion: "2.1.0-beta.1",
+			GenomeBuild:     "GRch38",
+			OutputDocuments: []*types.OutputDocumentBatch{
+				{
+					DataCategoryCode: "genomic",
+					DataTypeCode:     "aggqc",
+					FormatCode:       "html",
+					Name:             "CA1_multiqc_report.html",
+					Size:             &size,
+					Url:              reportUrl,
+				},
+			},
+		})
+
+		createDocumentsForBatch(env.Ctx, env.ObjectStore.Client, payload)
+		payloadBytes, _ := json.Marshal(payload)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payloadBytes), types.BatchStatusPending, types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusSuccess, false, "user123", emptyMsgs, emptyMsgs, emptyMsgs)
+
+		var ca *types.Case
+		env.Postgres.Table("cases").Where("project_id = ? AND submitter_case_id = ?", 1, "Quality_Control").First(&ca)
+
+		var task *types.Task
+		env.Postgres.Table("task").Where("task_type_code = ?", types.QualityControlMetricsTaskTypeCode).First(&task)
+
+		var tc []*types.TaskContext
+		env.Postgres.Table("task_context").Where("task_id = ?", task.ID).Find(&tc)
+		assert.NotEmpty(t, tc)
+		for _, ctx := range tc {
+			if assert.NotNil(t, ctx.CaseID) {
+				assert.Equal(t, ca.ID, *ctx.CaseID)
+			}
+		}
+	})
+}
+
+func Test_ProcessBatch_Case_Template(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		t.Skip("Template test - implement specific error case tests as needed")
+
+		//// FIXME: The following test is for example purposes only.
+		////        Use this template to create your own test cases for different error scenarios.
+		////        Make sure to adjust the payload and expected error messages accordingly.
+		//
+		//payload := createBaseCasePayload()
+		//
+		//// TODO: Change values for your test case
+		//payload[0]["project_code"] = "TEMPLATE_ERROR_PROJECT_123" // example of an error case
+		//
+		//// TODO: Load the payload into the batch and into the database
+		//payloadBytes, _ := json.Marshal(payload)
+		//id := insertPayloadAndProcessBatch(db, string(payloadBytes), "PENDING", types.CreateCaseBatchType, false, "user123", "2025-12-04")
+		//
+		//// TODO: Implement the specific message assertions for your test case
+		//errors := []types.BatchMessage{
+		//	{
+		//		Code:    "CASE-001",
+		//		Message: "project with code \"TEMPLATE_ERROR_PROJECT_123\" not found",
+		//		Path:    "/0/project_code",
+		//	},
+		//}
+		//
+		//// TODO: Call the assertion function with expected messages
+		//assertBatchProcessing(t, db, id, "ERROR", false, "user123", emptyMsgs, emptyMsgs, errors)
+	})
+}
+
+func Test_persistTask_SkippedTaskNotPersisted(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const skippedURL = "s3://test-bucket/persistTask_SkippedTaskNotPersisted.skipped.cram"
+		const newURL = "s3://test-bucket/persistTask_SkippedTaskNotPersisted.new.cram"
+		size := int64(11)
+		task := func(url string) *types.CaseTaskBatch {
+			return &types.CaseTaskBatch{
+				TypeCode:        types.AlignmentGermlineVariantCallingTaskTypeCode,
+				PipelineVersion: "1.0.0",
+				OutputDocuments: []*types.OutputDocumentBatch{
+					{DataCategoryCode: "genomic", DataTypeCode: "alignment", FormatCode: "cram", Name: url[strings.LastIndex(url, "/")+1:], Size: &size, Url: url},
+				},
+			}
+		}
+		bctx := &batchval.BatchValidationContext{}
+		cr := NewCaseValidationRecord(bctx, batchval.NewBatchValidationCache(bctx), types.CaseBatch{Tasks: []*types.CaseTaskBatch{task(skippedURL), task(newURL)}}, 0, types.DefaultTenantCode)
+		cr.SkippedTasks[0] = struct{}{}
+		sc := NewStorageContext(env.Postgres)
+		sc.TenantCode = types.DefaultTenantCode
+
+		assert.NoError(t, persistTask(env.Ctx, sc, cr))
+
+		var skipped, created int64
+		env.Postgres.Table("document").Where("url = ?", skippedURL).Count(&skipped)
+		env.Postgres.Table("document").Where("url = ?", newURL).Count(&created)
+		assert.Equal(t, int64(0), skipped)
+		assert.Equal(t, int64(1), created)
+	})
+}
+
+func persistTaskRecord(env *testutils.Env, url string, hash string) (*StorageContext, *CaseValidationRecord) {
+	size := int64(11)
+	task := &types.CaseTaskBatch{
+		TypeCode:        types.AlignmentGermlineVariantCallingTaskTypeCode,
+		PipelineVersion: "1.0.0",
+		OutputDocuments: []*types.OutputDocumentBatch{
+			{DataCategoryCode: "genomic", DataTypeCode: "alignment", FormatCode: "cram", Name: url[strings.LastIndex(url, "/")+1:], Size: &size, Url: url, Hash: hash},
+		},
+	}
+	bctx := &batchval.BatchValidationContext{}
+	cr := NewCaseValidationRecord(bctx, batchval.NewBatchValidationCache(bctx), types.CaseBatch{Tasks: []*types.CaseTaskBatch{task}}, 0, types.DefaultTenantCode)
+	sc := NewStorageContext(env.Postgres)
+	sc.TenantCode = types.DefaultTenantCode
+	return sc, cr
+}
+
+func Test_persistTask_IdenticalExistingDocumentReused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const url = "s3://test-bucket/persistTask_IdenticalExistingDocumentReused.cram"
+		sc, cr := persistTaskRecord(env, url, "h1")
+		existing := &types.Document{Name: "persistTask_IdenticalExistingDocumentReused.cram", DataCategoryCode: "genomic", DataTypeCode: "alignment", FileFormatCode: "cram", Size: 11, Url: url, Hash: "h1", TenantCode: types.DefaultTenantCode}
+		require.NoError(t, sc.DocRepo.CreateDocument(env.Ctx, existing))
+		cr.Documents[url] = existing
+
+		assert.NoError(t, persistTask(env.Ctx, sc, cr))
+
+		var docs int64
+		var ownedIDs []int
+		env.Postgres.Table("document").Where("url = ?", url).Count(&docs)
+		env.Postgres.Table("task_has_document").Where("document_id = ? AND type = ?", existing.ID, "output").Pluck("task_id", &ownedIDs)
+		assert.Equal(t, int64(1), docs)
+		assert.Len(t, ownedIDs, 1)
+	})
+}
+
+// Same url, other content: the DOCUMENT-004 path keeps creating its own row, as before.
+func Test_persistTask_DifferentExistingDocumentNotReused(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		const url = "s3://test-bucket/persistTask_DifferentExistingDocumentNotReused.cram"
+		sc, cr := persistTaskRecord(env, url, "h2")
+		existing := &types.Document{Name: "persistTask_DifferentExistingDocumentNotReused.cram", DataCategoryCode: "genomic", DataTypeCode: "alignment", FileFormatCode: "cram", Size: 11, Url: url, Hash: "h1", TenantCode: types.DefaultTenantCode}
+		require.NoError(t, sc.DocRepo.CreateDocument(env.Ctx, existing))
+		cr.Documents[url] = existing
+
+		assert.NoError(t, persistTask(env.Ctx, sc, cr))
+
+		var docs, ownedExisting int64
+		env.Postgres.Table("document").Where("url = ?", url).Count(&docs)
+		env.Postgres.Table("task_has_document").Where("document_id = ?", existing.ID).Count(&ownedExisting)
+		assert.Equal(t, int64(2), docs)
+		assert.Equal(t, int64(0), ownedExisting)
+		assert.NotEqual(t, existing.ID, cr.Documents[url].ID)
+	})
+}

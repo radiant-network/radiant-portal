@@ -1,0 +1,136 @@
+package postgres
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"gorm.io/gorm"
+)
+
+type ValueSetType string
+
+const (
+	ValueSetAffectedStatus            ValueSetType = "affected_status"
+	ValueSetAnalysisCatalog           ValueSetType = "analysis_catalog"
+	ValueSetAncestry                  ValueSetType = "ancestry"
+	ValueSetCaseCategory              ValueSetType = "case_category"
+	ValueSetCaseType                  ValueSetType = "case_type"
+	ValueSetConsanguinity             ValueSetType = "consanguinity"
+	ValueSetDataCategory              ValueSetType = "data_category"
+	ValueSetDataType                  ValueSetType = "data_type"
+	ValueSetExperimentalStrategy      ValueSetType = "experimental_strategy"
+	ValueSetFamilyRelationship        ValueSetType = "family_relationship"
+	ValueSetFileFormat                ValueSetType = "file_format"
+	ValueSetHistologyType             ValueSetType = "histology_type"
+	ValueSetLifeStatus                ValueSetType = "life_status"
+	ValueSetObservation               ValueSetType = "observation"
+	ValueSetObservationInterpretation ValueSetType = "observation_interpretation"
+	ValueSetOnset                     ValueSetType = "onset"
+	ValueSetOrganizationCategory      ValueSetType = "organization_category"
+	ValueSetPanelType                 ValueSetType = "panel_type"
+	ValueSetPlatform                  ValueSetType = "platform"
+	ValueSetPriority                  ValueSetType = "priority"
+	ValueSetSampleType                ValueSetType = "sample_type"
+	ValueSetSequencingReadTechnology  ValueSetType = "sequencing_read_technology"
+	ValueSetSex                       ValueSetType = "sex"
+	ValueSetStatus                    ValueSetType = "status"
+	ValueSetTaskType                  ValueSetType = "task_type"
+)
+
+type ValueSetsRepository struct {
+	db       *gorm.DB
+	tableMap map[ValueSetType]string
+}
+
+func NewValueSetsRepository(db database.PostgresDB) *ValueSetsRepository {
+	tableNameMap := map[ValueSetType]string{
+		ValueSetAffectedStatus:            types.AffectedStatusTable.Name,
+		ValueSetAnalysisCatalog:           types.AnalysisCatalogTable.Name,
+		ValueSetAncestry:                  types.AncestryTable.Name,
+		ValueSetCaseCategory:              types.CaseCategoryTable.Name,
+		ValueSetCaseType:                  types.CaseTypeTable.Name,
+		ValueSetConsanguinity:             types.ConsanguinityTable.Name,
+		ValueSetDataCategory:              types.DataCategoryTable.Name,
+		ValueSetDataType:                  types.DataTypeTable.Name,
+		ValueSetExperimentalStrategy:      types.ExperimentalStrategyTable.Name,
+		ValueSetFamilyRelationship:        types.FamilyRelationshipTable.Name,
+		ValueSetFileFormat:                types.FileFormatTable.Name,
+		ValueSetHistologyType:             types.HistologyTypeTable.Name,
+		ValueSetLifeStatus:                types.LifeStatusTable.Name,
+		ValueSetObservation:               types.ObservationTable.Name,
+		ValueSetObservationInterpretation: types.ObservationInterpretationTable.Name,
+		ValueSetOnset:                     types.OnsetTable.Name,
+		ValueSetOrganizationCategory:      types.OrganizationCategoryTable.Name,
+		ValueSetPanelType:                 types.PanelTypeTable.Name,
+		ValueSetPlatform:                  types.PlatformTable.Name,
+		ValueSetPriority:                  types.PriorityTable.Name,
+		ValueSetSampleType:                types.SampleTypeTable.Name,
+		ValueSetSequencingReadTechnology:  types.SequencingReadTechnologyTable.Name,
+		ValueSetSex:                       types.SexTable.Name,
+		ValueSetStatus:                    types.StatusTable.Name,
+		ValueSetTaskType:                  types.TaskTypeTable.Name,
+	}
+
+	return &ValueSetsRepository{
+		db:       db.DB,
+		tableMap: tableNameMap,
+	}
+}
+
+// ListValueSet returns the (code, label) options of a value set by its type string. An unknown
+// type maps to types.ErrUnknownValueSet so the handler can answer 404 without importing this
+// package's ValueSetType. Every mapped table has the code/name_en columns.
+func (r *ValueSetsRepository) ListValueSet(ctx context.Context, valueSetType string) ([]types.ValueSetItem, error) {
+	tableName, ok := r.tableMap[ValueSetType(valueSetType)]
+	if !ok {
+		return nil, types.ErrUnknownValueSet
+	}
+	items := []types.ValueSetItem{}
+	err := r.db.WithContext(ctx).
+		Table(tableName).
+		Select("code, name_en AS name").
+		Order("name_en asc").
+		Scan(&items).Error
+	if err != nil {
+		return nil, fmt.Errorf("error listing value set %q: %w", valueSetType, err)
+	}
+	return items, nil
+}
+
+func (r *ValueSetsRepository) GetCodes(ctx context.Context, vsType ValueSetType) ([]string, error) {
+	tableName, ok := r.tableMap[vsType]
+	if !ok {
+		return nil, fmt.Errorf("unknown value set type: %s", vsType)
+	}
+
+	var codes []string
+	err := r.db.WithContext(ctx).
+		Table(tableName).
+		Select("code").
+		Order("lower(code) asc").
+		Find(&codes).Error
+
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving codes for %s: %w", vsType, err)
+	}
+
+	return codes, nil
+}
+
+// exam is the only value set keyed by (code, tenant_code): the generic GetCodes would return other
+// tenants' codes, which pass validation and then violate the composite FK.
+func (r *ValueSetsRepository) GetExamCodes(ctx context.Context, tenantCode string) ([]string, error) {
+	var codes []string
+	err := r.db.WithContext(ctx).
+		Table(types.ExamTable.Name).
+		Select("code").
+		Where("tenant_code = ?", tenantCode).
+		Order("lower(code) asc").
+		Find(&codes).Error
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving exam codes for tenant %q: %w", tenantCode, err)
+	}
+	return codes, nil
+}

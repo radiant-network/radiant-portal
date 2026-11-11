@@ -1,0 +1,26 @@
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { useI18n } from '@/components/hooks/i18n';
+
+import PriorityIndicator, { type PriorityIndicatorCode } from '../../indicators/priority-indicator';
+
+type PriorityIndicatorCellProps = {
+  code: PriorityIndicatorCode | undefined;
+};
+
+function PriorityIndicatorCell({ code }: PriorityIndicatorCellProps) {
+  const { t } = useI18n();
+
+  if (!code) return <EmptyCell />;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger>
+        <PriorityIndicator size="sm" code={code} />
+      </TooltipTrigger>
+      <TooltipContent>{t(`case_exploration.priority.${code}_tooltip`)}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+export default PriorityIndicatorCell;

@@ -1,0 +1,236 @@
+package starrocks
+
+import (
+	"slices"
+	"strings"
+	"testing"
+
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func testColumns() map[string][]string {
+	cols := map[string][]string{}
+	for _, t := range types.ViewTables {
+		cols[t] = []string{"id", "tenant_code"}
+	}
+	cols["patient"] = []string{"id", "organization_code"} // can_read_pii references organization_code
+	return cols
+}
+
+// --- ViewTables --------------------------------------------------------------
+
+func Test_ViewTables_IncludesPatientAndExcludesNonFederatedTables(t *testing.T) {
+	assert.True(t, slices.Contains(types.ViewTables, "patient"), "patient must get a view")
+	assert.False(t, slices.Contains(types.ViewTables, "batch"), "batch is tenant-scoped but not federated")
+	assert.False(t, slices.Contains(types.ViewTables, "user_set"), "user_set is tenant-scoped but not federated")
+}
+
+// --- template registry (loadViewTemplates) -----------------------------------
+
+func Test_ViewTemplates_RegistersOnlyTmplFilesKeyedByTable(t *testing.T) {
+	_, ok := viewTemplates["patient"]
+	assert.True(t, ok, "patient.sql.tmpl should be registered under its table name")
+
+	_, ok = viewTemplates["auth_pii_grant"]
+	assert.False(t, ok, "auth_pii_grant.sql is not a .sql.tmpl and must not be a view template")
+
+	_, ok = viewTemplates["cases"]
+	assert.False(t, ok, "a table with no .sql.tmpl has no template (uses the generated SELECT)")
+}
+
+// --- BuildAuthStatements -----------------------------------------------------
+
+func Test_BuildAuthStatements_CreatesAuthDbThenReplacesBothGrantViews(t *testing.T) {
+	stmts := BuildAuthStatements()
+	require.Len(t, stmts, 3)
+	assert.Contains(t, stmts[0], "CREATE DATABASE IF NOT EXISTS auth")
+	assert.Contains(t, stmts[1], "CREATE OR REPLACE VIEW auth.pii_grant")
+	assert.Contains(t, stmts[2], "CREATE OR REPLACE VIEW auth.pii_lab_patient",
+		"pii_lab_patient reads pii_grant, so it must be created after it")
+}
+
+func Test_BuildAuthStatements_LabPatientViewReachesProbandAndFamilyMember(t *testing.T) {
+	labPatient := BuildAuthStatements()[2]
+
+	assert.Contains(t, labPatient, "c.diagnosis_lab_code = g.org_code", "the reveal follows the case's lab")
+	assert.Contains(t, labPatient, "c.proband_id AS patient_id")
+	assert.Contains(t, labPatient, "f.family_member_id AS patient_id",
+		"a lab grantee must see the family members of its case, not just the proband")
+	assert.Contains(t, labPatient, "FROM auth.pii_grant g",
+		"deriving from pii_grant is what expands '*' grants to every org of the tenant")
+}
+
+// --- BuildViewStatements: database -------------------------------------------
+
+func Test_BuildViewStatements_FirstStatementCreatesTenantDatabaseWithSuffix(t *testing.T) {
+	stmts, err := BuildViewStatements("demo", testColumns())
+	require.NoError(t, err)
+	require.NotEmpty(t, stmts)
+	assert.Equal(t, "CREATE DATABASE IF NOT EXISTS `demo_tenant`", stmts[0])
+}
+
+func Test_BuildViewStatements_EmptyColumns_OnlyCreatesDatabase(t *testing.T) {
+	stmts, err := BuildViewStatements("demo", map[string][]string{})
+	require.NoError(t, err)
+	assert.Equal(t, []string{"CREATE DATABASE IF NOT EXISTS `demo_tenant`"}, stmts,
+		"no columns for any table → just the database, no views")
+}
+
+// --- BuildViewStatements: templated path (patient) ---------------------------
+
+func Test_BuildViewStatements_PatientUsesTemplateWithMaskingAndTenantFilter(t *testing.T) {
+	stmts, err := BuildViewStatements("demo", map[string][]string{"patient": {"id", "organization_code"}})
+	require.NoError(t, err)
+	joined := strings.Join(stmts, "\n")
+
+	assert.Contains(t, joined, "CREATE OR REPLACE VIEW `demo_tenant`.`patient` AS")
+	assert.Contains(t, joined, "SELECT `id`, `organization_code`,")
+	assert.Contains(t, joined, "AS can_read_pii", "patient view exposes the masking flag")
+	assert.Contains(t, joined, "g.tenant_code = 'demo'", "mask subquery scoped to the tenant")
+	// Both correlated references are qualified: unqualified, they would silently rebind to the
+	// subquery's own table if an auth view ever grew a column of the same name.
+	assert.Contains(t, joined, "g.org_code = patient.organization_code", "first path: a grant at the patient's own org")
+	assert.Contains(t, joined, "FROM auth.pii_lab_patient l", "second path: a grant at the case's diagnosis lab")
+	assert.Contains(t, joined, "l.patient_id = patient.id")
+	assert.Contains(t, joined, "l.tenant_code = 'demo'", "the lab path is scoped to the tenant too")
+	assert.Contains(t, joined, "FROM radiant_jdbc.public.patient")
+	assert.Contains(t, joined, "WHERE tenant_code = 'demo'")
+}
+
+// --- BuildViewStatements: generic path ---------------------------------------
+
+func Test_BuildViewStatements_TenantScopedTableIsFilteredByTenantCode(t *testing.T) {
+	stmts, err := BuildViewStatements("demo", map[string][]string{"cases": {"id", "submitter_case_id", "tenant_code"}})
+	require.NoError(t, err)
+	joined := strings.Join(stmts, "\n")
+
+	assert.NotContains(t, joined, "SELECT *", "must not SELECT * (unfederatable columns break it)")
+	assert.Contains(t, joined,
+		"CREATE OR REPLACE VIEW `demo_tenant`.`cases` AS SELECT `id`, `submitter_case_id`, `tenant_code` FROM radiant_jdbc.public.`cases` WHERE tenant_code = 'demo'")
+	assert.NotContains(t, joined, "can_read_pii", "only the patient template carries the mask flag")
+}
+
+func Test_BuildViewStatements_NonTenantScopedTableIsUnfiltered(t *testing.T) {
+	// sex is a value-set table with no tenant_code column → exposed unfiltered.
+	stmts, err := BuildViewStatements("demo", map[string][]string{"sex": {"code", "name"}})
+	require.NoError(t, err)
+	joined := strings.Join(stmts, "\n")
+
+	assert.Contains(t, joined, "CREATE OR REPLACE VIEW `demo_tenant`.`sex` AS SELECT `code`, `name` FROM radiant_jdbc.public.`sex`")
+	assert.NotContains(t, joined, "WHERE tenant_code", "a table without tenant_code must not be filtered")
+}
+
+func Test_BuildViewStatements_BacktickQuotesEveryColumn(t *testing.T) {
+	stmts, err := BuildViewStatements("demo", map[string][]string{"cases": {"id", "status_code"}})
+	require.NoError(t, err)
+	assert.Contains(t, strings.Join(stmts, "\n"), "SELECT `id`, `status_code`")
+}
+
+func Test_BuildViewStatements_FiltersByBareTenantCodeNotDatabaseName(t *testing.T) {
+	stmts, err := BuildViewStatements("demo", map[string][]string{"cases": {"id", "tenant_code"}})
+	require.NoError(t, err)
+	joined := strings.Join(stmts, "\n")
+	assert.Contains(t, joined, "WHERE tenant_code = 'demo'")
+	assert.NotContains(t, joined, "tenant_code = 'demo_tenant'", "filter uses the tenant code, not the db name")
+}
+
+// --- BuildViewStatements: table selection ------------------------------------
+
+func Test_BuildViewStatements_SkipsTablesWithNoColumns(t *testing.T) {
+	stmts, err := BuildViewStatements("demo", map[string][]string{"cases": {"id"}})
+	require.NoError(t, err)
+	assert.NotContains(t, strings.Join(stmts, "\n"), "`demo_tenant`.`occurrence_note`",
+		"a table absent from the columns map gets no view")
+}
+
+func Test_BuildViewStatements_IgnoresColumnsForTablesNotInViewTables(t *testing.T) {
+	stmts, err := BuildViewStatements("demo", map[string][]string{"batch": {"id", "status"}})
+	require.NoError(t, err)
+	assert.NotContains(t, strings.Join(stmts, "\n"), "`batch`",
+		"batch is not in types.ViewTables; no view even if columns are provided")
+}
+
+func Test_BuildViewStatements_CoversEveryViewTable(t *testing.T) {
+	stmts, err := BuildViewStatements("demo", testColumns())
+	require.NoError(t, err)
+	joined := strings.Join(stmts, "\n")
+	for _, table := range types.ViewTables {
+		assert.Contains(t, joined, "CREATE OR REPLACE VIEW `demo_tenant`.`"+table+"`", "missing view for %q", table)
+	}
+}
+
+// --- BuildViewStatements: idempotency & validation ---------------------------
+
+func Test_BuildViewStatements_ViewsAreCreateOrReplaceWithNoDrop(t *testing.T) {
+	stmts, err := BuildViewStatements("demo", testColumns())
+	require.NoError(t, err)
+	for _, s := range stmts {
+		assert.NotContains(t, s, "DROP VIEW", "views are CREATE OR REPLACE; no DROP step")
+		if strings.Contains(s, " VIEW ") {
+			assert.Contains(t, s, "CREATE OR REPLACE VIEW", "every view is idempotent via CREATE OR REPLACE: %q", s)
+		}
+	}
+}
+
+func Test_BuildViewStatements_AcceptsValidCodeWithUnderscoreAndDigits(t *testing.T) {
+	stmts, err := BuildViewStatements("tenant_a1", map[string][]string{"cases": {"id"}})
+	require.NoError(t, err)
+	assert.Equal(t, "CREATE DATABASE IF NOT EXISTS `tenant_a1_tenant`", stmts[0])
+}
+
+func Test_BuildViewStatements_RejectsInvalidTenantCode(t *testing.T) {
+	for _, code := range []string{"", "Demo", "a.b", "te nant", "x'; DROP DATABASE y; --"} {
+		_, err := BuildViewStatements(code, testColumns())
+		assert.Error(t, err, "expected error for invalid tenant code %q", code)
+	}
+}
+
+// --- BuildGenePanelMVStatement -----------------------------------------------
+
+func Test_BuildGenePanelMVStatement_CreatesDeferredManualMVInTenantDatabaseIfNotExists(t *testing.T) {
+	stmt, err := BuildGenePanelMVStatement("demo")
+	require.NoError(t, err)
+	assert.True(t, strings.HasPrefix(stmt, "CREATE MATERIALIZED VIEW IF NOT EXISTS `demo_tenant`.`gene_panel_mv` "), stmt)
+	assert.Contains(t, stmt, "REFRESH DEFERRED MANUAL",
+		"no async refresh at creation: EnsureGenePanelMV refreshes synchronously, and the API after each write")
+}
+
+func Test_BuildGenePanelMVStatement_JoinsPanelAndGenesOverFederationFilteredToTenant(t *testing.T) {
+	stmt, err := BuildGenePanelMVStatement("demo")
+	require.NoError(t, err)
+	assert.Contains(t, stmt, "SELECT DISTINCT p.name AS panel, g.symbol AS symbol")
+	assert.Contains(t, stmt, "FROM radiant_jdbc.public.panel p")
+	assert.Contains(t, stmt, "JOIN radiant_jdbc.public.panel_has_genes g ON g.panel_id = p.id")
+	assert.Contains(t, stmt, "WHERE p.tenant_code = 'demo'")
+}
+
+func Test_BuildGenePanelMVStatement_KeepsPanelsOfEveryType(t *testing.T) {
+	stmt, err := BuildGenePanelMVStatement("demo")
+	require.NoError(t, err)
+	assert.NotContains(t, stmt, "type_code")
+}
+
+func Test_BuildGenePanelMVStatement_RejectsInvalidTenantCode(t *testing.T) {
+	_, err := BuildGenePanelMVStatement("x'; DROP DATABASE y; --")
+	assert.Error(t, err)
+}
+
+func Test_BuildGenePanelMVStatement_RejectsEmptyTenantCode(t *testing.T) {
+	_, err := BuildGenePanelMVStatement("")
+	assert.Error(t, err)
+}
+
+// --- BuildGenePanelMVRefreshStatement ----------------------------------------
+
+func Test_BuildGenePanelMVRefreshStatement_ForcesSyncRefreshOfTenantMV(t *testing.T) {
+	stmt, err := BuildGenePanelMVRefreshStatement("demo")
+	require.NoError(t, err)
+	assert.Equal(t, "REFRESH MATERIALIZED VIEW `demo_tenant`.`gene_panel_mv` FORCE WITH SYNC MODE", stmt)
+}
+
+func Test_BuildGenePanelMVRefreshStatement_RejectsInvalidTenantCode(t *testing.T) {
+	_, err := BuildGenePanelMVRefreshStatement("Demo")
+	assert.Error(t, err)
+}

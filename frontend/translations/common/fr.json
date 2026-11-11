@@ -1,0 +1,3120 @@
+{
+  "a11y": {
+    "action_button": {
+      "more": "Plus d'actions"
+    },
+    "assignment_picker": {
+      "open": "Modifier l'assignation du cas",
+      "open_assigned": "Modifier l'assignation du cas, assigné à {{names}}",
+      "remove_user": "Retirer {{name}}"
+    },
+    "auto_complete": {
+      "clear": "Effacer"
+    },
+    "back_link": {
+      "back_to": "Retour à {{page}}"
+    },
+    "badge": {
+      "remove": "Retirer"
+    },
+    "breadcrumb": {
+      "more": "Plus"
+    },
+    "carousel": {
+      "next_slide": "Diapositive suivante",
+      "previous_slide": "Diapositive précédente"
+    },
+    "case_actions_menu": {
+      "open": "Actions du cas"
+    },
+    "case_group_tag": {
+      "copy_name": "Copier le nom du groupe",
+      "remove": "Retirer le filtre Nouvelles données"
+    },
+    "classification_section": {
+      "open": "Aller à {{title}}"
+    },
+    "clingen_cell": {
+      "open": "Ouvrir dans ClinGen (nouvel onglet)"
+    },
+    "cmc": {
+      "open_cosmic_one": "{{count}} échantillon COSMIC, ouvrir dans COSMIC (nouvel onglet)",
+      "open_cosmic_other": "{{count}} échantillons COSMIC, ouvrir dans COSMIC (nouvel onglet)"
+    },
+    "cmc_tier_badge": {
+      "no_data": "Aucune donnée",
+      "open_franklin": "{{tier}}, ouvrir dans Franklin (nouvel onglet)"
+    },
+    "comphet_genes_cell": {
+      "filter_variants": "Afficher les {{count}} variants hét. composés dans {{gene}} dans une nouvelle requête"
+    },
+    "data_table": {
+      "collapse_row": "Replier la ligne",
+      "column_settings": "Paramètres des colonnes",
+      "expand_row": "Déplier la ligne",
+      "group_by": "Regrouper par",
+      "grouped_by": "Regroupé par {{value}}",
+      "pin_column": "Épingler la colonne",
+      "pin_row": "Épingler la ligne",
+      "select_page_rows": "Sélectionner toutes les lignes de la page",
+      "select_row": "Sélectionner la ligne",
+      "sort": "Trier",
+      "sorted_asc": "Trié par ordre croissant",
+      "sorted_desc": "Trié par ordre décroissant",
+      "unpin_row": "Désépingler la ligne"
+    },
+    "date_picker": {
+      "open_calendar": "Ouvrir le calendrier"
+    },
+    "editable_text": {
+      "edit": "Modifier"
+    },
+    "facets_sidebar": {
+      "collapse": "Réduire les filtres",
+      "expand": "Développer les filtres"
+    },
+    "gene_cell": {
+      "add_to_query": "Ajouter {{symbol}} à la requête"
+    },
+    "lang_switcher": {
+      "switch_to_en": "Passer en anglais (EN)",
+      "switch_to_fr": "Passer en français (FR)"
+    },
+    "list_item": {
+      "delete": "Supprimer",
+      "edit": "Modifier",
+      "share": "Partager"
+    },
+    "main_navbar": {
+      "close_menu": "Fermer le menu",
+      "open_menu": "Ouvrir le menu"
+    },
+    "main_sidebar": {
+      "collapse": "Réduire le menu",
+      "expand": "Développer le menu"
+    },
+    "message_scroller": {
+      "scroll_to_end": "Défiler vers la fin",
+      "scroll_to_start": "Défiler vers le début"
+    },
+    "multi_selector": {
+      "clear_all": "Tout effacer"
+    },
+    "note": {
+      "actions": "Actions du commentaire"
+    },
+    "notes": {
+      "open_count_one": "{{count}} commentaire",
+      "open_count_other": "{{count}} commentaires"
+    },
+    "occurrence_flag": {
+      "edit": "Modifier le drapeau"
+    },
+    "omim_link": {
+      "open": "Ouvrir {{symbol}} dans OMIM (nouvel onglet)"
+    },
+    "pubmed_form_field": {
+      "remove_citation": "Retirer la citation"
+    },
+    "query_bar": {
+      "delete": "Supprimer la requête",
+      "duplicate": "Dupliquer la requête",
+      "select": "Sélectionner la requête {{index}}"
+    },
+    "query_builder": {
+      "close_facets": "Fermer le panneau des filtres"
+    },
+    "query_pill": {
+      "remove": "Retirer le filtre"
+    },
+    "saved_filter": {
+      "delete": "Supprimer le filtre",
+      "discard": "Annuler les modifications non enregistrées",
+      "duplicate": "Dupliquer le filtre",
+      "edit": "Modifier le filtre",
+      "new": "Nouveau filtre",
+      "save": "Enregistrer le filtre"
+    },
+    "slider": {
+      "next": "Résultat suivant",
+      "previous": "Résultat précédent"
+    },
+    "slider_patient_row": {
+      "sequencing_details": "Détails du séquençage"
+    },
+    "theme_toggle": {
+      "to_dark": "Passer au thème sombre",
+      "to_light": "Passer au thème clair"
+    },
+    "sidebar": {
+      "description": "Affiche la barre latérale mobile.",
+      "title": "Barre latérale",
+      "toggle": "Basculer la barre latérale"
+    },
+    "tabs": {
+      "next": "Onglets suivants",
+      "previous": "Onglets précédents"
+    },
+    "spinner": {
+      "loading": "Chargement en cours"
+    },
+    "timeline": {
+      "filters_group": "Filtrer la chronologie par type",
+      "results_count_one": "{{count}} résultat affiché",
+      "results_count_other": "{{count}} résultats affichés"
+    }
+  },
+  "admin": {
+    "title": "{{tenant}} - Administration",
+    "organizations": {
+      "add": "Ajouter une organisation",
+      "count_one": "{{count}} organisation",
+      "count_other": "{{count}} organisations",
+      "create": {
+        "description": "Les membres peuvent se voir attribuer des rôles limités à certaines organisations.",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de créer l'organisation."
+          },
+          "success": "Organisation créée."
+        },
+        "submit": "Créer l'organisation",
+        "title": "Ajouter une organisation"
+      },
+      "edit": {
+        "description": "Les membres peuvent se voir attribuer des rôles limités à certaines organisations.",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de mettre à jour l'organisation."
+          },
+          "success": "Organisation mise à jour."
+        },
+        "submit": "Enregistrer",
+        "title": "Modifier l'organisation"
+      },
+      "fields": {
+        "category": "Catégorie",
+        "category_hint": "Ne peut pas être modifiée après la création.",
+        "category_placeholder": "Sélectionnez une catégorie",
+        "code": "Code",
+        "code_hint": "Ne peut pas être modifié après la création. Lettres, chiffres, traits de soulignement et tirets.",
+        "name": "Nom",
+        "notification_emails": "Courriels de notification",
+        "notification_emails_hint": "Séparez les adresses par des virgules.",
+        "notification_placeholder": "diagnosticlab@exemple.org, geneticien@exemple.org",
+        "notification_section": "Notifications",
+        "notification_section_description": "Un courriel avec le manifeste des fichiers est envoyé aux adresses ci-dessous lorsque de nouvelles données génomiques sont disponibles."
+      },
+      "filters": {
+        "category": "Catégorie",
+        "search_placeholder": "Rechercher par nom ou code"
+      },
+      "subtitle": "Créez et modifiez les organisations.",
+      "table": {
+        "category": "Catégorie",
+        "edit": "Modifier l'organisation",
+        "name": "Nom"
+      }
+    },
+    "roles": {
+      "add": "Ajouter un rôle",
+      "count_one": "{{count}} rôle",
+      "count_other": "{{count}} rôles",
+      "create": {
+        "description": "Un rôle est un ensemble nommé de permissions. Attribuez-le à des membres pour accorder ces actions — les rôles ajoutent des accès, ils n'en retirent jamais.",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de créer le rôle."
+          },
+          "success": "Rôle créé."
+        },
+        "submit": "Créer le rôle",
+        "title": "Ajouter un rôle"
+      },
+      "default_note": "Les rôles par défaut ne peuvent être modifiés ni supprimés.",
+      "delete": {
+        "action": "Supprimer le rôle",
+        "body": "<name>{{name}}</name> Ce rôle est attribué à <b>{{members}}</b> dans <b>{{orgs}}</b>. Sa suppression révoquera immédiatement les permissions qu'il accorde à l'ensemble de ces membres. Cette action est irréversible.",
+        "body_empty": "<name>{{name}}</name> n'est attribué à aucun membre. Il sera définitivement supprimé.",
+        "body_no_orgs": "<name>{{name}}</name> Ce rôle est attribué à <b>{{members}}</b>. Sa suppression révoquera immédiatement les permissions qu'il accorde à l'ensemble de ces membres. Cette action est irréversible.",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de supprimer le rôle."
+          },
+          "success": "Rôle supprimé."
+        },
+        "submit": "Supprimer le rôle",
+        "title": "Supprimer ce rôle ?"
+      },
+      "duplicate": {
+        "notifications": {
+          "errors": {
+            "default": "Impossible de dupliquer le rôle."
+          },
+          "success": "Rôle dupliqué."
+        }
+      },
+      "duplicate_suffix": "(copie)",
+      "edit": {
+        "notifications": {
+          "errors": {
+            "default": "Impossible de mettre à jour le rôle."
+          },
+          "success": "Rôle mis à jour."
+        },
+        "submit": "Enregistrer",
+        "title": "Modifier le rôle"
+      },
+      "edit_impact": {
+        "body": "Les modifications apportées à <b>{{name}}</b> affecteront les permissions accordées à <b>{{members}}</b> dans <b>{{orgs}}</b>.",
+        "body_first_org_scope_one": "Vous ajoutez la première permission à portée organisationnelle au rôle <b>{{name}}</b>. Pour l'accorder, vous devrez <b>attribuer une ou plusieurs organisations au {{count}} membre de ce rôle</b>. Son accès actuel reste inchangé.",
+        "body_first_org_scope_other": "Vous ajoutez la première permission à portée organisationnelle au rôle <b>{{name}}</b>. Pour l'accorder, vous devrez <b>attribuer une ou plusieurs organisations à chacun des {{count}} membres de ce rôle</b>. Leur accès actuel reste inchangé.",
+        "body_no_orgs": "Les modifications apportées à <b>{{name}}</b> affecteront les permissions accordées à <b>{{members}}</b>.",
+        "submit": "Enregistrer",
+        "title": "Modifier ce rôle ?",
+        "title_first_org_scope": "Étape supplémentaire requise"
+      },
+      "fields": {
+        "code": "Code",
+        "code_hint": "Ne peut pas être modifié après la création. Lettres minuscules, chiffres et traits de soulignement.",
+        "description": "Description",
+        "description_placeholder": "À quoi sert ce rôle ? (facultatif)",
+        "name": "Nom",
+        "name_placeholder": "Nom du rôle",
+        "permissions": "Permissions",
+        "permissions_hint": "Sélectionnez-en au moins une. Les permissions Réseau et Organisation peuvent être combinées."
+      },
+      "filters": {
+        "custom_only": "Rôles personnalisés seulement",
+        "search_placeholder": "Rechercher par nom ou description"
+      },
+      "permissions": {
+        "description": "Descriptions des permissions et portée de ce rôle",
+        "empty": "Ce rôle n'accorde aucune permission.",
+        "locked": "Non modifiable ni supprimable"
+      },
+      "scope": {
+        "network": "Réseau",
+        "organization": "Organisation"
+      },
+      "subtitle": "Définissez ce que les membres peuvent faire à l’échelle du réseau ou au sein des organisations. Tous les membres peuvent rechercher des cas et parcourir la base de connaissances (<permissions>voir ce qui est inclus</permissions>).",
+      "table": {
+        "actions": "Actions du rôle",
+        "assigned_to": "Attribué à",
+        "delete": "Supprimer",
+        "duplicate": "Dupliquer",
+        "edit": "Modifier",
+        "members_count_one": "{{count}} membre",
+        "members_count_other": "{{count}} membres",
+        "orgs_count_one": "{{count}} organisation",
+        "orgs_count_other": "{{count}} organisations",
+        "permissions": "Permissions",
+        "permissions_count_one": "{{count}} permission",
+        "permissions_count_other": "{{count}} permissions",
+        "role": "Rôle",
+        "scope": "Portée",
+        "view": "Voir",
+        "view_role": "Voir le rôle"
+      },
+      "view_permissions": "Voir les permissions"
+    },
+    "sections": {
+      "group_label": "Paramètres du réseau",
+      "organizations": "Organisations",
+      "roles": "Rôles et permissions",
+      "users": "Membres"
+    },
+    "users": {
+      "add": "Ajouter un membre",
+      "count_one": "{{count}} membre",
+      "count_other": "{{count}} membres",
+      "create": {
+        "details_title": "Détails du membre",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de créer le membre."
+          },
+          "success": "Membre créé."
+        },
+        "submit": "Créer le membre",
+        "title": "Ajouter un membre"
+      },
+      "delete": {
+        "action": "Supprimer le membre",
+        "body": "Le compte de <b>{{name}}</b> sera retiré du <b>réseau {{tenant}}</b> et de toutes ses organisations.",
+        "notifications": {
+          "errors": {
+            "default": "Impossible de supprimer le membre."
+          },
+          "success": "Membre retiré de ce réseau."
+        },
+        "title": "Supprimer ce membre ?"
+      },
+      "edit": {
+        "notifications": {
+          "errors": {
+            "default": "Impossible de mettre à jour le membre."
+          },
+          "success": "Membre mis à jour."
+        },
+        "submit": "Enregistrer",
+        "title": "Modifier le membre"
+      },
+      "errors": {
+        "last_admin_update": "{{name}} est la seule personne possédant le rôle Administrateur dans {{tenant}}. Attribuez ce rôle à un autre membre avant de le retirer ici.",
+        "last_admin_update_title": "Ce réseau doit conserver un administrateur",
+        "self_delete": "Vous ne pouvez pas supprimer votre propre compte."
+      },
+      "fields": {
+        "email": "Courriel",
+        "first_name": "Prénom",
+        "last_name": "Nom"
+      },
+      "filters": {
+        "role": "Rôle",
+        "search_placeholder": "Rechercher par nom ou courriel"
+      },
+      "roles": {
+        "admin_access": "Administrateur",
+        "admin_hint": "Accès administratif complet à ce réseau (<permissions>voir les permissions</permissions>)",
+        "all_organizations": "Toutes les organisations actuelles et futures",
+        "baseline": "Chaque membre peut rechercher des cas et consulter la base de connaissances (<permissions>voir le détail</permissions>).",
+        "errors": {
+          "organizations_required": "Sélectionnez au moins une organisation.",
+          "self_admin": "Vous ne pouvez pas vous attribuer le rôle Administrateur."
+        },
+        "organizations": "Dans ces organisations",
+        "organizations_placeholder": "Organisations",
+        "subtitle": "Attribuez des rôles pour permettre des actions supplémentaires — les rôles ajoutent des permissions, sans jamais en retirer.",
+        "title": "Rôles du membre"
+      },
+      "subtitle": "Gérez les membres et les attributions de rôles.",
+      "table": {
+        "all_organizations": "Toutes les orgs",
+        "baseline_role": "Membre",
+        "edit": "Modifier le membre",
+        "name": "Nom",
+        "roles": "Rôles et accès",
+        "you": "(Vous)"
+      }
+    }
+  },
+  "analysis": {
+    "title": "Analyses",
+    "subtitle": "Visualisez et interprétez rapidement les données grâce à nos outils conviviaux.",
+    "newsletter": {
+      "title": "Nouveaux outils d'analyse à venir bientôt !",
+      "description": "Inscrivez-vous à notre liste de diffusion pour recevoir les mises à jour et être parmi les premiers à essayer nos prochains outils.",
+      "form": {
+        "placeholder": "courriel@exemple.com",
+        "button_label": "Recevoir les mises à jour"
+      }
+    },
+    "set_operations": {
+      "get_started": "Sélectionnez deux ou trois ensembles pour commencer",
+      "get_started_visualize": "Visualisez les intersections entre les ensembles sauvegardés à l'aide d'un diagramme de Venn interactif.",
+      "get_started_dashboard": "Consultez vos ensembles sauvegardés dans le <dashboard>Tableau de bord</dashboard>.",
+      "title": "Opérations sur les ensembles",
+      "description": "Visualisez les intersections entre les cohortes virtuelles sauvegardées comme ensembles à l'aide d'un diagramme de Venn interactif.",
+      "tags": {
+        "clinical": "Clinique",
+        "genomics": "Génomique"
+      },
+      "empty": {
+        "title": "Aucun ensemble à comparer",
+        "description": "Vous devez avoir au moins deux ensembles sauvegardés d'identifiants d'entités (p. ex. deux ensembles de participants) pour utiliser cet outil. Vous pouvez créer des ensembles sauvegardés en haut du tableau des résultats dans les <variant>pages d'exploration des variants</variant>."
+      },
+      "launch": "Lancer",
+      "download": "Télécharger PNG",
+      "selected_sets": "Ensembles sélectionnés",
+      "set_definitions": "Définitions des ensembles",
+      "set_definition": "Définitions d'ensemble",
+      "union_of_selected_set": "Union des ensembles sélectionnés :",
+      "entity_type": {
+        "participants": "Participants",
+        "biospecimens": "Biospécimens",
+        "files": "Fichiers",
+        "variants_germline": "Variants germinaux",
+        "variants_somatic": "Variants somatiques"
+      },
+      "filters": {
+        "select_entity": "Type d'entité",
+        "select_entity_placeholder": "Sélectionner un type d'entité",
+        "select_set": "Ensembles",
+        "select_set_placeholder": "Sélectionner deux ou trois ensembles",
+        "reset": "Réinitialiser",
+        "reset_tooltip": "Revenir à la dernière sélection comparée",
+        "compare": "Comparer",
+        "compare_disabled_tooltip": "Sélectionner au moins deux ensembles pour comparer"
+      }
+    }
+  },
+  "community": {
+    "title": "Communauté",
+    "search": {
+      "label": "Rechercher par nom de membre ou affiliation",
+      "placeholder": "ex. Watson, Linda Crnic Institute"
+    },
+    "filters": {
+      "toggle": "Filtres",
+      "role": "Rôle",
+      "area_of_interest": "Domaine d'intérêt"
+    },
+    "sort": {
+      "newest": "Plus récents d'abord",
+      "oldest": "Plus anciens d'abord",
+      "name": "Nom (A–Z)"
+    }
+  },
+  "common": {
+    "date": {
+      "hour": "HH'h'mm",
+      "month_day_hour": "d MMMM, HH'h'mm",
+      "year_month_day": "yyyy-MM-dd",
+      "year_month_day_hour": "d MMMM yyyy, HH'h'mm'",
+      "year_month_day_at_hour": "{{date}} à {{time}}",
+      "month_day_year": "dd MMM yyyy"
+    },
+    "date_picker": {
+      "placeholder": "Choisir une date"
+    },
+    "empty_section": "Aucune donnée {{title}} signalée",
+    "unspecified": "Indéterminée",
+    "no_data_available": "Aucune donnée disponible",
+    "not_available_yet": "Pas encore disponible",
+    "no_gene": "Aucun gène",
+    "save": "Sauvegarder",
+    "edit": "Éditer",
+    "delete": "Supprimer",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "view_all": "Voir tout",
+    "form": {
+      "errors": {
+        "required": "Ce champ est requis",
+        "min_2": "2 caractères minimum",
+        "max_50": "50 caractères maximum",
+        "invalid_code": "Lettres, chiffres, traits de soulignement et tirets; commencez par une lettre.",
+        "at_least_one_permission": "Sélectionnez au moins une permission.",
+        "invalid_email": "Saisissez une adresse courriel valide.",
+        "invalid_notification_emails": "Entrez des adresses courriel valides, séparées par des virgules.",
+        "invalid_role_code": "Doit commencer par une lettre minuscule et ne contenir que des lettres minuscules, des chiffres et des traits de soulignement.",
+        "organization_code_exists": "Une organisation avec ce code existe déjà.",
+        "role_code_exists": "Un rôle avec ce code existe déjà.",
+        "role_name_exists": "Un rôle avec ce nom existe déjà.",
+        "user_email_exists": "Un membre avec ce courriel existe déjà."
+      }
+    },
+    "editor": {
+      "headings": {
+        "normal": "Normal",
+        "h1": "Titre 1",
+        "h2": "Titre 2",
+        "h3": "Titre 3",
+        "h4": "Titre 4",
+        "h5": "Titre 5",
+        "h6": "Titre 6"
+      },
+      "toolbar": {
+        "link": {
+          "label": "Lien"
+        }
+      },
+      "link": {
+        "popover": {
+          "title": "Lien",
+          "subtitle": "Attacher un lien au texte sélectionné",
+          "url": {
+            "placeholder": "https://example.com"
+          },
+          "confirm": "Confirmer",
+          "update": "Mettre à jour",
+          "remove": "Supprimer",
+          "close": {
+            "ariaLabel": "Fermer"
+          }
+        }
+      }
+    },
+    "auto_complete": {
+      "type_to_search": "Tapez pour rechercher",
+      "no_data": "Aucune donnée"
+    },
+    "grid": {
+      "charts": "Graphiques",
+      "remove_chart": "Retirer le graphique",
+      "reset": "Réinitialiser"
+    },
+    "sex": {
+      "male": "Masculin",
+      "female": "Féminin",
+      "other": "Autre"
+    },
+    "classification": {
+      "other": "Autre",
+      "other.abbrev": "O",
+      "other.tooltip": "Autre",
+      "affects": "Affecte",
+      "affects.abbrev": "AF",
+      "affects.tooltip": "Affecte",
+      "association": "Association",
+      "association.abbrev": "AS",
+      "association.tooltip": "Association",
+      "association_not_found": "Association non trouvée",
+      "association_not_found.abbrev": "ANF",
+      "association_not_found.tooltip": "Association non trouvée",
+      "uncertain_significance": "VUS",
+      "uncertain_significance.abbrev": "VUS",
+      "uncertain_significance.tooltip": "De signification incertaine",
+      "likely_benign": "Probablement bénigne",
+      "likely_benign.abbrev": "LB",
+      "likely_benign.tooltip": "Probablement bénigne",
+      "likely_oncogenic": "Prob. oncogénique",
+      "likely_oncogenic.abbrev": "LO",
+      "likely_oncogenic.tooltip": "Probablement oncogénique",
+      "likely_pathogenic": "Probablement pathogénique",
+      "likely_pathogenic.abbrev": "LP",
+      "likely_pathogenic.tooltip": "Probablement pathogénique",
+      "likely_pathogenic_low_penetrance": "Probablement pathogénique, faible pénétrance",
+      "likely_pathogenic_low_penetrance.abbrev": "LPLP",
+      "likely_pathogenic_low_penetrance.tooltip": "Probablement pathogénique, faible pénétrance",
+      "likely_risk_allele": "Allèle de risque probable",
+      "likely_risk_allele.abbrev": "LRA",
+      "likely_risk_allele.tooltip": "Allèle de risque probable",
+      "low_penetrance": "Faible pénétrance",
+      "low_penetrance.abbrev": "LPN",
+      "low_penetrance.tooltip": "Faible pénétrance",
+      "risk_factor": "Facteur de risque",
+      "risk_factor.abbrev": "RF",
+      "risk_factor.tooltip": "Facteur de risque",
+      "uncertain_risk_allele": "Allèle à risque incertain",
+      "uncertain_risk_allele.abbrev": "URA",
+      "uncertain_risk_allele.tooltip": "Allèle à risque incertain",
+      "no_classification_for_the_single_variant": "Pas de classification pour le variant unique",
+      "no_classification_for_the_single_variant.abbrev": "NC",
+      "no_classification_for_the_single_variant.tooltip": "Pas de classification",
+      "no_classifications_from_unflagged_records": "Aucune classification issue des soumissions non signalées",
+      "no_classifications_from_unflagged_records.abbrev": "NCU",
+      "no_classifications_from_unflagged_records.tooltip": "Aucune classification issue des soumissions non signalées",
+      "no_data": "Aucune donnée",
+      "no_data.abbrev": "ND",
+      "no_data.tooltip": "Aucune donnée",
+      "oncogenic": "Oncogénique",
+      "oncogenic.abbrev": "O",
+      "oncogenic.tooltip": "Oncogénique",
+      "pathogenic": "Pathogénique",
+      "pathogenic.abbrev": "P",
+      "pathogenic.tooltip": "Pathogénique",
+      "pathogenic_low_penetrance": "Pathogénique, faible pénétrance",
+      "pathogenic_low_penetrance.abbrev": "PLP",
+      "pathogenic_low_penetrance.tooltip": "Pathogénique, faible pénétrance",
+      "protective": "Protecteur",
+      "protective.abbrev": "PV",
+      "protective.tooltip": "Protecteur",
+      "conflicting_classifications_of_pathogenicity": "Classifications conflictuelles",
+      "conflicting_classifications_of_pathogenicity.abbrev": "CC",
+      "conflicting_classifications_of_pathogenicity.tooltip": "Classifications conflictuelles",
+      "conflicting_data_from_submitters": "Données contradictoires des soumissionnaires",
+      "conflicting_data_from_submitters.abbrev": "CDS",
+      "conflicting_data_from_submitters.tooltip": "Données contradictoires des soumissionnaires",
+      "conflicting_interpretations_of_pathogenicity": "Interprétations conflictuelles",
+      "conflicting_interpretations_of_pathogenicity.abbrev": "CI",
+      "conflicting_interpretations_of_pathogenicity.tooltip": "Interprétations conflictuelles",
+      "not_provided": "Non fourni",
+      "not_provided.abbrev": "NP",
+      "not_provided.tooltip": "Non fourni",
+      "established_risk_allele": "Allèle de risque établi",
+      "established_risk_allele.abbrev": "ERA",
+      "established_risk_allele.tooltip": "Allèle de risque établi",
+      "drug_response": "Réponse au médicament",
+      "drug_response.abbrev": "DR",
+      "drug_response.tooltip": "Réponse au médicament",
+      "benign": "Bénigne",
+      "benign.abbrev": "B",
+      "benign.tooltip": "Bénigne",
+      "confers_sensitivity": "Confère une sensibilité",
+      "confers_sensitivity.abbrev": "CS",
+      "confers_sensitivity.tooltip": "Confère une sensibilité"
+    },
+    "file_format": {
+      "cram": "Fichier CRAM",
+      "crai": "Fichier d’index CRAI",
+      "vcf": "Fichier VCF",
+      "tbi": "Fichier d’index TBI",
+      "tgz": "Fichier archive TGZ",
+      "json": "Fichier JSON",
+      "html": "Fichier HTML",
+      "tsv": "Fichier TSV",
+      "bw": "Fichier BW",
+      "bed": "Fichier BED",
+      "png": "Fichier PNG",
+      "csv": "Fichier CSV",
+      "pdf": "Fichier PDF",
+      "txt": "Fichier texte",
+      "gvcf": "Fichier GVCF",
+      "zip": "Fichier archive ZIP",
+      "xlsx": "Fichier XLSX",
+      "maf": "Fichier MAF"
+    },
+    "data_type_code": {
+      "alignment": "Lectures alignées",
+      "snv": "SNV constitutionnel",
+      "ssnv": "SNV somatique",
+      "gcnv": "CNV constitutionnel",
+      "scnv": "CNV somatique",
+      "gsv": "SV constitutionnel",
+      "ssv": "SV somatique",
+      "somfu": "VCF Dragen de fusions somatiques",
+      "ssup": "Supplément de données de séquençage",
+      "igv": "Piste IGV",
+      "cnvvis": "Visualisation CNV",
+      "exp": "PNG d’expression",
+      "covgene": "Rapport de couverture par gène",
+      "qcrun": "Rapport de QC de séquençage",
+      "exomiser": "Rapport Exomiser",
+      "exomiser_cnv": "Rapport Exomiser CNV",
+      "clinical_report": "Rapport clinique",
+      "aggqc": "Rapport de contrôle qualité agrégé",
+      "chrmr": "Rapport mitochondrial",
+      "nrrv": "Rapport de variants annotés",
+      "snvpg": "SNV constitutionnel (masqué/filtré)",
+      "alirpg": "Lectures alignées (masquées)"
+    },
+    "query_bar": {
+      "selector": "Q{{index}}",
+      "empty": "Utilisez les outils de recherche et les facettes à gauche pour construire une requête",
+      "delete_popover": {
+        "title": "Supprimer cette requête ?",
+        "cancel": "Annuler",
+        "ok": "Supprimer"
+      }
+    },
+    "query_pill": {
+      "operator": {
+        "change_operator_to": "Changer l'opérateur pour {{operator}}",
+        "and": "et",
+        "or": "ou"
+      }
+    },
+    "relationships": {
+      "proband": "Proband",
+      "mother": "Mère",
+      "father": "Père",
+      "sister": "Sœur",
+      "brother": "Frère",
+      "sibling": "Fratrie",
+      "fetus": "Fœtus",
+      "child": "Enfant",
+      "daugther": "Fille",
+      "ftwinbro": "Frère jumeau fraternel",
+      "ftwinsis": "Sœur jumelle fraternelle",
+      "granddaughter": "Petite-fille",
+      "grandson": "Petit-fils",
+      "hbro": "Demi-frère",
+      "hsis": "Demi-sœur",
+      "itwinbro": "Frère jumeau identique",
+      "itwinsis": "Sœur jumelle identique",
+      "matmem": "Membre de la branche maternelle",
+      "maunt": "Tante maternelle",
+      "mcousn": "Cousin maternel",
+      "mgrfth": "Grand-père maternel",
+      "mgrmth": "Grand-mère maternelle",
+      "muncle": "Oncle maternel",
+      "nephew": "Neveu",
+      "niece": "Nièce",
+      "patmem": "Membre de la branche paternelle",
+      "paunt": "Tante paternelle",
+      "pcousn": "Cousin paternel",
+      "pgrfth": "Grand-père paternel",
+      "pgrmth": "Grand-mère paternelle",
+      "puncle": "Oncle paternel",
+      "sonc": "Fils"
+    },
+    "toolbar": {
+      "combine": "Combiner",
+      "new_query": "Nouvelle requête",
+      "clear_all": "Tout effacer",
+      "clear_all_dialog": {
+        "title": "Supprimer toutes les requêtes ?",
+        "description": "Vous êtes sur le point de supprimer toutes vos requêtes. Elles seront perdues définitivement.",
+        "cancel": "Annuler",
+        "ok": "Supprimer"
+      },
+      "labels": "Étiquettes"
+    },
+    "saved_filter": {
+      "delete_tooltip": "Supprimer le filtre",
+      "no_filter_selected": "Aucun filtre sélectionné",
+      "delete_dialog": {
+        "title": "Supprimer définitivement ce filtre ?",
+        "description": "Vous êtes sur le point de supprimer définitivement ce filtre et toutes ses requêtes.",
+        "ok": "Supprimer le filtre"
+      },
+      "duplicate_tooltip": "Dupliquer le filtre",
+      "overwrite_dialog": {
+        "title": "Modifications non enregistrées",
+        "description": "Vous êtes sur le point de créer un nouveau filtre ; toutes les modifications seront perdues.",
+        "cancel": "Annuler",
+        "ok": "Créer"
+      },
+      "edit_dialog": {
+        "edit_title": "Modifier le filtre",
+        "save_title": "Enregistrer le filtre",
+        "fields": {
+          "title": {
+            "label": "Nom",
+            "placeholder": "Requête sans titre"
+          }
+        }
+      },
+      "my_filters": "Mes filtres",
+      "manage_filters": "Gérer les filtres",
+      "manage_dialog": {
+        "title": "Gérer les filtres",
+        "last_save_at": "Dernière sauvegarde il y a : {{lastSaveAt}}"
+      },
+      "new_filter": "Nouveau filtre",
+      "save_tooltip": {
+        "when_empty": "Ajoutez une requête pour enregistrer",
+        "default": "Enregistrer le filtre"
+      },
+      "discard_tooltip": "Annuler les modifications non enregistrées",
+      "no_saved_filters": "Vous n'avez aucun filtre enregistré",
+      "untitled_filter": "Filtre sans titre",
+      "notifications": {
+        "created": "Filtre enregistré",
+        "deleted": "Filtre supprimé",
+        "updated": "Filtre mis à jour",
+        "errors": {
+          "duplicated": "Un filtre avec ce nom existe déjà",
+          "created": "Impossible de créer le filtre",
+          "updated": "Impossible de mettre à jour le filtre",
+          "deleted": "Impossible de supprimer le filtre"
+        }
+      }
+    },
+    "components": {
+      "empty_cell": "-"
+    },
+    "table": {
+      "group_by": "Regrouper par",
+      "columns": "Colonnes",
+      "fullscreen": {
+        "maximize": "Plein écran",
+        "minimize": "Quitter plein écran"
+      },
+      "headers": {
+        "created_on": "Créé le",
+        "created_on_tooltip": "Date de création du cas (aaaa-mm-jj)"
+      },
+      "pin": {
+        "left": "Épingler à gauche",
+        "right": "Épingler à droite",
+        "unpin": "Désépingler"
+      },
+      "sort": {
+        "descending": "Décroissant",
+        "ascending": "Croissant",
+        "clear": "Trier"
+      },
+      "filters": {
+        "more": "Plus",
+        "more_placeholder": "Filtres",
+        "min_search_length": "{{count}} caractères minimum",
+        "no_values_found": "Aucune valeur trouvée",
+        "search": {
+          "case_id": "Cas",
+          "patient_id": "Patient",
+          "patient_name": "Patient",
+          "submitter_patient_id": "MRN",
+          "run_name": "Nom du lot",
+          "sample_id": "ID Échantillon",
+          "task_id": "Tâche",
+          "sequencing_experiment_id": "Séquençage",
+          "proband_submitter_sample_ids": "Échantillon",
+          "placeholder": "Rechercher..."
+        },
+        "buttons": {
+          "clear": "Effacer",
+          "apply": "Appliquer",
+          "show_more": "{{count}} de plus",
+          "show_less": "Moins",
+          "some_not_in": "Certains exclus",
+          "all": "Tous",
+          "not_in": "Aucun",
+          "select_all": "Tout sélectionner",
+          "clear_selection": "Désélectionner tout"
+        }
+      },
+      "reset": "Réinitialiser",
+      "results": "Résultats {{from}} - {{to}} de {{total}}",
+      "results_filtered": "{{shown}} affichés sur {{total}}",
+      "no_result": "Aucun résultat",
+      "items_selected_one": "{{value}} élément sélectionné",
+      "items_selected_other": "{{value}} éléments sélectionnés",
+      "select_all": "Tout sélectionner",
+      "clear_selection": "Effacer la sélection",
+      "no_result_description": "Ajuster vos filtres et essayer à nouveau.",
+      "has_error": "Erreur lors du chargement du contenu",
+      "has_error_description": "Essayer de rafraichir la page ou essayer à nouveau dans quelques minutes."
+    },
+    "pagination": {
+      "aria": {
+        "first": "Aller à la première page",
+        "previous": "Aller à la page précédente",
+        "next": "Aller à la page suivante",
+        "last": "Aller à la dernière page",
+        "more": "Plus de pages"
+      },
+      "first": "Première",
+      "size": "{{size}} / page",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "last": "Dernière"
+    },
+    "navigation": {
+      "dashboard": "Tableau de bord",
+      "variant": "Variant",
+      "profile": "Profil",
+      "settings": "Paramètres",
+      "logout": "Déconnexion"
+    },
+    "actions": {
+      "select_language": "Choisir une langue",
+      "collapse_all": "Tout fermer",
+      "expand_all": "Tout ouvrir",
+      "see_less": "Moins",
+      "see_more": "Plus",
+      "clear": "Effacer",
+      "copy": "Copier dans le presse-papiers",
+      "copied": "Copié!",
+      "cancel": "Annuler",
+      "upload": "Téléverser"
+    },
+    "download": {
+      "tooltip": "Télécharger le fichier",
+      "error_title": "Erreur de téléchargement",
+      "error_description": "Un problème est survenu lors du téléchargement du fichier. Veuillez réessayer ou vérifier votre connexion.",
+      "error_close": "Fermer"
+    },
+    "languages": {
+      "en": "Anglais",
+      "fr": "Français",
+      "de": "Allemand",
+      "es": "Espagnol"
+    },
+    "facets": {
+      "labels": {
+        "program": "Programme",
+        "domain": "Domaine",
+        "data_category": "Catégorie de données",
+        "experimental_strategy": "Stratégie expérimentale",
+        "family_data": "Données familiales",
+        "[fieldKey]": "Champ : {{fieldKey}}",
+        "actual_interval": "Intervalle actuel {{min}}-{{max}}",
+        "ad_alt": "Profondeur allélique ALT",
+        "ad_ratio": "Ratio allélique ALT",
+        "ad_total": "Profondeur totale ALT + REF",
+        "aq": "Bruit systématique (AQ)",
+        "biotype": "Type de gène",
+        "cadd_phred": "CADD (phred)",
+        "cadd_phred_tooltip": "Combined Annotation Dependent Depletion PHRED",
+        "cadd_score": "CADD (raw)",
+        "cadd_score_tooltip": "Combined Annotation Dependent Depletion",
+        "chromosome": "Chromosome",
+        "clinvar": "ClinVar",
+        "clinvar_interpretation": "ClinVar",
+        "cmc_sample_mutated": "COSMIC CMC",
+        "cmc_sample_mutated_tooltip": "Nombre d’échantillons dans COSMIC avec cette mutation",
+        "cmc_sample_ratio": "COSMIC CMC (ratio)",
+        "cmc_sample_ratio_tooltip": "Ratio des échantillons dans COSMIC avec cette mutation par rapport au variant par rapport à l’ensemble des échantillons",
+        "cmc_tier": "COSMIC CMC tier",
+        "cmc_tier_tooltip": "Signification de la mutation. 1 - haute signification, 2 - signification moyenne, 3 - faible signification, Other - Pas de signification prédite (autres mutations)",
+        "cn": "Nombre de copies",
+        "cnv_end": "Fin du CNV",
+        "cnv_exomiser_gene_combined_score": "Score Exomiser",
+        "cnv_exomiser_gene_combined_score_tooltip": "La fonctionnalité CNV d’Exomiser est uniquement destinée à la priorisation des variants germinaux et n’est pas conçue pour l’analyse des variants somatique",
+        "cnv_exomiser_acmg_classification": "ACMG de Exomiser",
+        "cnv_exomiser_acmg_classification_tooltip": "La fonctionnalité CNV d’Exomiser est uniquement destinée à la priorisation des variants germinaux et n’est pas conçue pour l’analyse des variants somatique",
+        "cnv_length": "Longueur du CNV",
+        "cnv_quality": "Qualité du CNV",
+        "cnv_start": "Début du CNV",
+        "cnv_transmission_mode": "Transmission",
+        "cnv_transmission_mode_tooltip": "Interprétation potentielle de la dominance génique d’un variant en fonction de son origine parentale et du statut pathologique du patient",
+        "consequence": "Conséquence",
+        "cosmic_gene_panel": "COSMIC",
+        "cosmic_gene_panel_tooltip": "Catalogue Of Somatic Mutations In Cancer",
+        "cytoband": "Cytobande",
+        "dann_score": "DANN",
+        "dann_score_tooltip": "Deleterious Annotation of genetic variants using Neural Networks",
+        "ddd_gene_panel": "DDD",
+        "ddd_gene_panel_tooltip": "Deciphering Developmental Disorders",
+        "exomiser_acmg_classification": "ACMG de Exomiser",
+        "exomiser_acmg_evidence": "Critères ACMG de Exomiser",
+        "exomiser_gene_combined_score": "Score Exomiser",
+        "exomiser_gene_combined_score_tooltip": "Score calculé par Exomiser en fonction des caractéristiques du variant et des phénotypes du patient",
+        "fathmm_pred": "FATHMM",
+        "fathmm_pred_tooltip": "Functional Analysis Through Hidden Markov Models",
+        "father_zygosity": "Zygosité paternelle",
+        "filter": "Filtre",
+        "genotype_quality": "Qualité du génotype",
+        "gnomad_loeuf": "gnomAD LOEUF",
+        "gnomad_pli": "gnomAD pLI",
+        "gnomad_sf": "gnomAD 4.1.0",
+        "gnomad_sc": "gnomAD 4.1.0 ALT",
+        "gnomad_v3_af": "gnomAD 4.1.0",
+        "comphet_of": "Hét. composé de",
+        "has_comphet": "Hét. composé",
+        "has_comphet_tooltip": "Hétérozygotie composite (slivar) : seuls les variants PASS à impact (LoF, Missense, Inframe, Splice Region) hétérozygotes chez le Proband, avec GQ ≥ 20, profondeur ≥ 6 et équilibre allélique entre 0,2 et 0,8, sont pris en compte. Dans les trios, exactement un parent doit porter le variant et aucun ne doit être homozygote.",
+        "hotspot": "Hotspot",
+        "hpo_gene_panel": "HPO",
+        "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
+        "impact_score": "Score d'Impact",
+        "info_qd": "Qualité de profondeur",
+        "lrt_pred": "LRT",
+        "lrt_pred_tooltip": "Likelihood Ratio Test",
+        "mother_zygosity": "Zygosité maternelle",
+        "nb_snv": "Nombre de SNVs",
+        "nb_snv_tooltip": "Nombre de SNVs inclus par le CNV",
+        "no_data": "Pas de données",
+        "omim_gene_panel": "OMIM",
+        "omim_gene_panel_tooltip": "Online Mendelian Inheritance in Man",
+        "omim_inheritance": "OMIM hérédité",
+        "ordering_organization": "Établissement prescripteur",
+        "orphanet_gene_panel": "Orphanet",
+        "parental_origin": "Origine parentale",
+        "pathogenicity_exomiser_divider": "Exomiser",
+        "pe": "PE",
+        "pe_tooltip": "Nombre de fragments incorrectement appariés au début et à la fin des points de cassure",
+        "diagnosis_lab": "Laboratoire de diagnostic",
+        "germline_pf_wgs": "Fréq. tous les patients",
+        "germline_pf_wgs_affected": "Fréq. patients atteints",
+        "germline_pf_wgs_affected_tooltip": "Fréquence parmi les patients atteints du réseau (WGS)",
+        "germline_pf_wgs_not_affected": "Fréq. patients non atteints",
+        "germline_pf_wgs_not_affected_tooltip": "Fréquence parmi les patients non atteints du réseau (WGS)",
+        "germline_pf_wgs_tooltip": "Fréquence sur l’ensemble des patients du réseau (WGS)",
+        "polyphen2_hvar_pred": "PolyPhen-2 HVAR",
+        "polyphen2_hvar_pred_tooltip": "Polymorphism Phenotyping v2 HumVar",
+        "project_code": "Projet",
+        "revel_score": "REVEL",
+        "revel_score_tooltip": "Rare Exome Variant Ensemble Learner",
+        "search_by_symbol": "Recherche par gène",
+        "search_by_symbol_placeholder": "ex. BRAF, ENSG00000157764",
+        "search_by_symbol_tooltip": "Recherche par symbole et Ensembl ID",
+        "select_unit": "Sélectionner une unité",
+        "sift_pred": "SIFT",
+        "sift_pred_tooltip": "Sorting Intolerant From Tolerant",
+        "spliceai_ds": "SpliceAI",
+        "sm": "SM",
+        "sm_tooltip": "Taux de copie linéaire de la moyenne du segment",
+        "somatic_pf_tn_wgs": "Fréq. TN tous les patients",
+        "somatic_pf_tn_wgs_tooltip": "Fréquence sur l’ensemble des patients du réseau ayant eu une analyse tumeur-normal (WGS)",
+        "somatic_pf_to_wgs": "Fréq. TO tous les patients",
+        "somatic_pf_to_wgs_tooltip": "Fréquence sur l’ensemble des patients du réseau ayant eu une analyse tumeur seule (WGS)",
+        "sq": "Qualité somatique",
+        "start": "Position",
+        "study_code": "Code d'étude",
+        "study_id": "ID de l'étude",
+        "symbol": "Symbole",
+        "tenant_gene_panel": "Mon réseau",
+        "thousand_genome_af": "1000 Genomes",
+        "topmed_af": "TopMed",
+        "transmission": "Transmission",
+        "transmission_mode": "Transmission",
+        "transmission_mode_tooltip": "Interprétation potentielle de la dominance génique d’un variant en fonction de son origine parentale et du statut pathologique du patient.",
+        "type": "Type de variant",
+        "unit": "Unité",
+        "variant_class": "Type de variant",
+        "variant_type": "Type de variant",
+        "variantexternal_reference": "Référence externe du variant",
+        "vep_impact": "VEP",
+        "vep_impact_tooltip": "Ensembl Variant Effect Predictor",
+        "zygosity": "Zygosité"
+      },
+      "values": {
+        "biotype": {
+          "ig_c_gene": "Gène IG C",
+          "ig_c_pseudogene": "Pseudogène IG C",
+          "ig_v_gene": "Gène IG V",
+          "ig_v_pseudogene": "Pseudogène IG V",
+          "lncrna": "lncRNA",
+          "ncrna": "ncRNA",
+          "ncrna_pseudogene": "Pseudogène ncRNA",
+          "non_stop_decay": "Dégradation sans arrêt",
+          "nonsense_mediated_decay": "Dégradation médiée par non-sens",
+          "processed_pseudogene": "Pseudogène traité",
+          "processed_transcript": "Transcrit traité",
+          "protein_coding": "Codant pour une protéine",
+          "protein_coding_cds_not_defined": "Codant pour une protéine (CDS non défini)",
+          "protein_coding_lof": "Codant pour une protéine (perte de fonction)",
+          "retained_intron": "Intron retenu",
+          "rnase_mrp_rna": "ARN de la RNase MRP",
+          "rnase_p_rna": "ARN de la RNase P",
+          "tec": "TEC",
+          "telomerase_rna": "ARN de la télomérase",
+          "transcribed_processed_pseudogene": "Pseudogène traité transcrit",
+          "transcribed_pseudogene": "Pseudogène transcrit",
+          "transcribed_unitary_pseudogene": "Pseudogène unitaire transcrit",
+          "transcribed_unprocessed_pseudogene": "Pseudogène non traité transcrit",
+          "tr_c_gene": "Gène TR C",
+          "tr_v_gene": "Gène TR V",
+          "tr_v_pseudogene": "Pseudogène TR V",
+          "trna": "ARNt",
+          "unitary_pseudogene": "Pseudogène unitaire",
+          "unprocessed_pseudogene": "Pseudogène non traité",
+          "y_rna": "ARN Y",
+          "": "Aucune donnée"
+        },
+        "cmc_tier": {
+          "1": "Tier 1",
+          "2": "Tier 2",
+          "3": "Tier 3",
+          "other": "Other",
+          "": "Aucune donnée"
+        },
+        "consequence": {
+          "3_prime_utr_variant": "3' UTR",
+          "5_prime_utr_variant": "5' UTR",
+          "coding_sequence_variant": "Coding Sequence",
+          "downstream_gene_variant": "Downstream Gene",
+          "feature_elongation": "Feature Elongation",
+          "feature_truncation": "Feature Truncation",
+          "frameshift_variant": "Frameshift",
+          "incomplete_terminal_codon_variant": "Incomplete Terminal Codon",
+          "inframe_deletion": "Inframe Deletion",
+          "inframe_insertion": "Inframe Insertion",
+          "intergenic_variant": "Intergenic",
+          "intron_variant": "Intron",
+          "mature_mirna_variant": "Mature miRNA",
+          "missense_variant": "Missense",
+          "nmd_transcript_variant": "NMD Transcript",
+          "non_coding_transcript_variant": "Non Coding Transcript",
+          "non_coding_transcript_exon_variant": "Non Coding Transcript Exon",
+          "protein_altering_variant": "Protein Altering",
+          "regulatory_region_variant": "Regulatory Region",
+          "regulatory_region_ablation": "Regulatory Region Ablation",
+          "regulatory_region_amplification": "Regulatory Region Amplification",
+          "splice_acceptor_variant": "Splice Acceptor",
+          "splice_donor_variant": "Splice Donor",
+          "splice_donor_5th_base_variant": "Splice Donor 5th Base",
+          "splice_donor_region_variant": "Splice Donor Region",
+          "splice_polypyrimidine_tract_variant": "Splice Polypyrimidine Tract",
+          "splice_region_variant": "Splice Region",
+          "start_lost": "Start Lost",
+          "start_retained_variant": "Start Retained",
+          "stop_gained": "Stop Gained",
+          "stop_lost": "Stop Lost",
+          "stop_retained_variant": "Stop Retained",
+          "synonymous_variant": "Synonymous",
+          "tf_binding_site_variant": "TF Binding Site",
+          "tfbs_ablation": "TFBS Ablation",
+          "tfbs_amplification": "TFBS Amplification",
+          "transcript_ablation": "Transcript Ablation",
+          "transcript_amplification": "Transcript Amplification",
+          "upstream_gene_variant": "Upstream Gene"
+        },
+        "exomiser_acmg_classification": {
+          "likely_benign": "Probablement bénin",
+          "pathogenic": "Pathogène",
+          "uncertain_significance": "Signification incertaine"
+        },
+        "fathmm_pred": {
+          "t": "Toléré",
+          "d": "Délétère"
+        },
+        "has_comphet": {
+          "0": "Faux",
+          "1": "Vrai"
+        },
+        "lrt_pred": {
+          "n": "Neutre",
+          "d": "Délétère",
+          "u": "Inconnu"
+        },
+        "polyphen2_hvar_pred": {
+          "b": "Bénin",
+          "d": "Délétère",
+          "p": "Potentiellement délétère"
+        },
+        "sift_pred": {
+          "t": "Toléré",
+          "d": "Délétère"
+        },
+        "transmission_mode": {
+          "autosomal_dominant": "Dominant autosomique",
+          "autosomal_dominant_abbrev": "AD",
+          "autosomal_dominant_de_novo": "Dominant autosomique de novo",
+          "autosomal_dominant_de_novo_abbrev": "AD DNV",
+          "autosomal_recessive": "Récessif autosomique",
+          "autosomal_recessive_abbrev": "AR",
+          "non_carrier_proband": "Sujet index non porteur",
+          "non_carrier_proband_abbrev": "NCP",
+          "uniparental_disomy": "Disomie uniparentale",
+          "uniparental_disomy_abbrev": "UPD",
+          "unknown_father_genotype": "Génotype du père inconnu",
+          "unknown_father_genotype_abbrev": "UFG",
+          "unknown_mother_genotype": "Génotype de la mère inconnu",
+          "unknown_mother_genotype_abbrev": "UMG",
+          "unknown_parents_genotype": "Génotype des parents inconnu",
+          "unknown_parents_genotype_abbrev": "UPG",
+          "unknown_proband_genotype": "Génotype du sujet index inconnu",
+          "unknown_proband_genotype_abbrev": "UPBG",
+          "x_linked_dominant": "Dominant lié à l’X",
+          "x_linked_dominant_abbrev": "XLD",
+          "x_linked_dominant_de_novo": "Dominant lié à l’X de novo",
+          "x_linked_dominant_de_novo_abbrev": "XLD DNV",
+          "x_linked_recessive": "Récessif lié à l’X",
+          "x_linked_recessive_abbrev": "XLR",
+          "x_linked_recessive_de_novo": "Récessif lié à l’X de novo",
+          "x_linked_recessive_de_novo_abbrev": "XLR DNV"
+        },
+        "father_zygosity": {
+          "het": "Hétérozygote",
+          "wt": "Type sauvage",
+          "hom": "Homozygote",
+          "hem": "Hémizygote",
+          "unk": "Inconnu"
+        },
+        "mother_zygosity": {
+          "het": "Hétérozygote",
+          "wt": "Type sauvage",
+          "hom": "Homozygote",
+          "hem": "Hémizygote",
+          "unk": "Inconnu"
+        },
+        "zygosity": {
+          "het": "Hétérozygote",
+          "wt": "Type sauvage",
+          "hom": "Homozygote",
+          "hem": "Hémizygote",
+          "unk": "Inconnu"
+        }
+      },
+      "operators": {
+        "greater_than": "Plus grand que",
+        "less_than": "Plus petit que",
+        "between": "Entre",
+        "greater_than_or_equal": "Plus grand ou égal à",
+        "less_than_or_equal": "Plus petit ou égal à",
+        "in": "Dans",
+        "select_operator": "Sélectionner un opérateur",
+        "unknown": "Opérateur inconnu"
+      },
+      "buttons": {
+        "clear": "Effacer",
+        "apply": "Appliquer",
+        "all": "Tous",
+        "none": "Aucun",
+        "show_more": "{{value}} de plus",
+        "show_less": "Moins",
+        "some_not_in": "Certains des",
+        "not_in": "Aucun des"
+      },
+      "search": {
+        "placeholder": "Rechercher..."
+      },
+      "no_results_found": "Aucun résultat trouvé",
+      "no_values_found": "Aucune valeur trouvée",
+      "unsupported_type": "Type non pris en charge",
+      "gene_divider": "Panels de gènes",
+      "pathogenicity_exomiser_divider": "Exomiser",
+      "pathogenicity_predictions_divider": "Prédictions",
+      "pathogenicity_oncology_divider": "Oncologie",
+      "occurrence_metrics_divider": "Métriques",
+      "occurrence_parental_divider": "Analyse parentale",
+      "frequency_divider_my_organization": "Mon organisation",
+      "frequency_divider_pulic_cohorts": "Cohortes publiques",
+      "zygosity_divider_parental_analysis": "Analyse parentale",
+      "with_dictionary": "Dictionnaire",
+      "more": "Plus"
+    },
+    "upload_id": {
+      "clear": "Supprimer",
+      "upload_a_file": "Téléverser un fichier",
+      "summary_table": "Résumé ({{matched}} reconnus, {{unmatched}} inconnus)",
+      "resume": "{{total}} identifiants soumis correspondant à {{unique}} identifiants uniques au système",
+      "matched": "Correspondants ({{total}})",
+      "unmatched": "Non correspondants ({{total}})",
+      "symbol": {
+        "button": "Téléverser une liste de gènes",
+        "dialog_title": "Téléverser une liste de gènes",
+        "input_placeholder": "ex. ENSG00000157764, TP53",
+        "popover_identifiers_values": "Symbole du gène, Ensembl ID",
+        "submitted_identifier": "Identifiant soumis",
+        "symbol": "Symbole",
+        "omim_gene_id": "ID Ensembl"
+      },
+      "input_label": "Copier-coller une liste d'identifiants ou téléverser un fichier",
+      "mapped_to": "Correspondant à",
+      "popover_file_formats": "Formats de fichiers :",
+      "popover_file_formats_values": ".txt, .csv, .tsv",
+      "popover_identifiers": "Identifiants :",
+      "popover_separators": "Séparateurs :",
+      "popover_separators_values": "virgule, espace, retour de ligne",
+      "popover_title": "Identifiants et formats de fichier"
+    },
+    "assignment_picker": {
+      "search_placeholder": "Rechercher par nom ou courriel",
+      "remove_all": "Tout supprimer",
+      "apply": "Appliquer",
+      "no_members_found": "Aucun membre trouvé",
+      "you": "(vous)"
+    },
+    "user_selection": {
+      "search_placeholder": "Rechercher",
+      "no_users_found": "Aucun utilisateur trouvé",
+      "start_typing_to_search": "Commencez à taper pour rechercher",
+      "not_assigned": "Non assigné",
+      "filter": "Filtrer",
+      "reset": "Réinitialiser",
+      "case_assignment": "Assignation du cas"
+    },
+    "unassigned_avatar": {
+      "can_assign": "Assigner ce cas",
+      "cannot_assign": "Aucune assignation"
+    }
+  },
+  "onboarding": {
+    "actions": {
+      "back": "Précédent",
+      "last": "Terminer",
+      "next": "Suivant",
+      "next_with_progress": "Suivant ({current} sur {total})",
+      "skip": "Passer"
+    },
+    "sequencing_experiment": {
+      "seq_id": "Choisissez le membre de la famille dont vous voulez interroger les données de séquençage — proband, parents ou fratrie. Le statut atteint et le lien de parenté sont indiqués à côté de chaque échantillon.",
+      "variant_type": "Basculez entre les différents types de variant. Vos filtres sont conservés séparément pour chaque type.",
+      "tasks": "Basculez entre les runs d'analyse — par exemple, différentes versions de variant callers — sans perdre vos filtres en cours."
+    },
+    "query_builder": {
+      "facets": "Parcourez les filtres par catégorie. Cliquez sur une catégorie pour ouvrir ses facettes.",
+      "query_card": "Chaque requête (Q1, Q2, …) est un ensemble de filtres indépendant. Vous pouvez les combiner avec ET / OU, les dupliquer, ou activer les libellés pour lire le SQON en langage clair.",
+      "saved_filters": "Enregistrez un jeu de filtres récurrent (par exemple « LoF rares dans gènes OMIM »)."
+    },
+    "data_table": {
+      "column_settings": "Cliquez pour ouvrir les réglages des colonnes.",
+      "column_settings_dropdown": "Réordonnez, masquez ou épinglez les colonnes. La disposition est sauvegardée par utilisateur, l'espace de travail reste identique à la prochaine ouverture d'un cas.",
+      "fullscreen": "Agrandissez le tableau en plein écran pour les sessions de revue intensives. Appuyez sur Échap pour sortir.",
+      "interpretation_note_flag": "Chaque ligne offre trois actions rapides : ouvrir ou créer une interprétation, joindre une note, et marquer le variant (épinglé, retenu, exclu).",
+      "hgvsg": "Ouvrez le variant dans un panneau latéral."
+    },
+    "occurrence_slider": {
+      "header": "Chaque panneau est rattaché au patient/échantillon affiché en haut.",
+      "navigation": "Utilisez les flèches à droite pour parcourir les variants de votre tableau de résultats sans refermer le panneau.",
+      "note_flag": "Marquez le variant (épinglé, retenu, exclu), ajoutez une note ou démarrez une interprétation depuis ici — vos choix sont enregistrés sur le cas et reflétés dans le tableau."
+    }
+  },
+  "patient_entity": {
+    "header": {
+      "title": "Patient {{id}}",
+      "research_id": "ID : {{id}}",
+      "born_date": "Né le {{date}}",
+      "born_year": "Né en {{year}}",
+      "phi_restricted": "Restreint",
+      "phi_restricted_tooltip": "Identité restreinte hors de votre organisation",
+      "vital_status": {
+        "alive": "Vivant",
+        "deceased": "Décédé"
+      }
+    },
+    "tabs": {
+      "overview": "Aperçu",
+      "timeline": "Chronologie",
+      "treatments": "Traitements",
+      "genomics": "Génomique",
+      "tumor_board": "Tumor Board",
+      "laboratory": "Laboratoire",
+      "imaging": "Imagerie",
+      "clinical_trials": "Essais cliniques"
+    },
+    "overview": {
+      "initial_diagnosis": {
+        "title": "Diagnostic initial",
+        "cns_diagnosis_category": "Catégorie de diagnostic SNC",
+        "cns_integrated_diagnosis": "Diagnostic intégré SNC",
+        "event_date": "Date du diagnostic",
+        "day": "Jour {{day}}",
+        "tumor_locations": "Localisations tumorales",
+        "tumor_location_other": "Autre localisation",
+        "metastasis": "Métastase",
+        "initial_tumor_resections": "Résections tumorales initiales"
+      },
+      "tumor_and_metastasis": {
+        "title": "Tumeur et métastases",
+        "tumor_locations": "Localisations tumorales",
+        "tumor_location_other": "Autre localisation",
+        "metastasis": "Métastase",
+        "metastasis_locations": "Sites de métastase",
+        "metastasis_location_other": "Site extraneural"
+      },
+      "demographics": {
+        "title": "Données démographiques",
+        "mrn": "MRN",
+        "birth_year": "Année de naissance",
+        "gender": "Sexe",
+        "race": "Race",
+        "ethnicity": "Ethnicité",
+        "postal_code": "Code postal",
+        "organization_name": "Site"
+      },
+      "cancer_predispositions": {
+        "title": "Prédispositions au cancer",
+        "cancer_predisposition": "Liste des prédispositions"
+      }
+    },
+    "genomics": {
+      "day": "Jour {{day}}",
+      "origin": {
+        "germline": "Germinal",
+        "somatic": "Somatique"
+      },
+      "interpretations": {
+        "title": "Interprétations de variants",
+        "empty": "Aucune interprétation de variant pour ce patient.",
+        "aa_tooltip": "Changement d'acide aminé",
+        "date_tooltip": "Dernière date d'interprétation",
+        "headers": {
+          "variant": "Variant",
+          "gene": "Gène",
+          "aa": "AA",
+          "classification": "Classification",
+          "origin": "Origine",
+          "case": "Cas",
+          "analysis": "Analyse",
+          "date": "Date"
+        }
+      },
+      "cases": {
+        "title": "Cas génomiques",
+        "empty": "Aucun cas génomique pour ce patient.",
+        "type": {
+          "somatic": "Somatique",
+          "germline": "Germinal solo",
+          "germline_family": "Germinal familial"
+        },
+        "headers": {
+          "case": "Cas",
+          "type": "Type",
+          "analysis": "Analyse",
+          "primary_condition": "Condition primaire",
+          "status": "Statut",
+          "priority": "Priorité",
+          "requested_by": "Demandé par",
+          "updated": "Mis à jour"
+        }
+      }
+    },
+    "sidebar": {
+      "key_dates": {
+        "title": "Dates clés",
+        "initial_diagnosis": "Diagnostic initial",
+        "latest_encounter": "Dernière rencontre",
+        "day_age": "{{age}} a · Jour {{day}}",
+        "sources": {
+          "clinical": "Clinique",
+          "registry": "Registre"
+        }
+      },
+      "external_records": {
+        "title": "Dossiers externes",
+        "organizations": "Organisations",
+        "documents": "Documents",
+        "document_types": "Types de document",
+        "view_external_records": "Voir les dossiers externes",
+        "networks": "TEFCA / Carequality",
+        "header_summary": "{{orgs}} organisations · {{docs}} documents",
+        "network": {
+          "tefca": "TEFCA",
+          "carequality": "Carequality"
+        },
+        "not_connected": {
+          "description": "Les dossiers externes ne sont pas encore liés pour ce patient."
+        }
+      },
+      "clinical_note_extraction": {
+        "title": "Extraction de notes cliniques",
+        "description": "Traite les notes cliniques de ce patient et extrait les observations sous forme de données FHIR structurées.",
+        "run": "Lancer l'extraction",
+        "iframe_title": "Résultat de l'extraction des notes cliniques",
+        "open_in_new_tab": "Ouvrir dans un nouvel onglet"
+      }
+    },
+    "timeline": {
+      "title": "Chronologie clinique",
+      "description": "Événements de maladie, chirurgies, radiothérapie et traitement médical selon l'âge en jours depuis la naissance.",
+      "empty": "Aucune chronologie clinique pour ce patient.",
+      "event_type": {
+        "initial_cns_tumor": "Tumeur SNC initiale",
+        "progressive": "Progression",
+        "recurrence": "Récurrence",
+        "second_malignancy": "Deuxième cancer",
+        "deceased": "Décès",
+        "unavailable": "Non disponible",
+        "not_reported": "Non rapporté"
+      },
+      "event_fields": {
+        "tumor_locations": "Localisations tumorales",
+        "metastasis": "Métastase",
+        "metastasis_locations": "Localisations des métastases"
+      },
+      "radiation_doses": {
+        "craniospinal": "Craniospinale",
+        "focal_boost": "Surimpression focale",
+        "total_primary": "Total sur la tumeur primitive"
+      }
+    },
+    "treatments": {
+      "title_count_one": "{{count}} traitement",
+      "title_count_other": "{{count}} traitements",
+      "day_value": "Jour {{day}}",
+      "columns": {
+        "day": "Jour",
+        "type": "Type",
+        "description": "Description",
+        "dose": "Dose"
+      },
+      "types": {
+        "surgery": "Chirurgie",
+        "radiation": "Radiothérapie",
+        "medical_therapy": "Traitement médical"
+      },
+      "doses": {
+        "craniospinal": "Craniospinale",
+        "focal_boost": "Surimpression focale",
+        "total_primary": "Total sur la tumeur primitive"
+      }
+    },
+    "imaging": {
+      "title_count_one": "{{count}} examen d'imagerie",
+      "title_count_other": "{{count}} examens d'imagerie",
+      "day_age": "Jour {{day}} · âge {{age}} ans",
+      "columns": {
+        "date": "Date",
+        "modality": "Modalité",
+        "body_part": "Partie du corps",
+        "body_part_tooltip": "Partie du corps examinée",
+        "viewer": "Visionneuse"
+      },
+      "livai_report": "Rapport LivAI"
+    },
+    "clinical_trials": {
+      "title": "Inscriptions antérieures",
+      "empty": "Aucune inscription antérieure pour ce patient.",
+      "day_value": "Jour {{day}}",
+      "initial_badge": "Traitement initial",
+      "columns": {
+        "protocol": "Protocole",
+        "start": "Début",
+        "stop": "Fin",
+        "agents": "Agents"
+      },
+      "trial_eligibilities": {
+        "title": "Admissibilité aux essais",
+        "subtitle": "Verdicts extraits par BRIM des notes cliniques du patient.",
+        "empty": "Ce patient n'a pas encore été évalué dans BRIM afin de déterminer son admissibilité aux essais cliniques.",
+        "confidence": "Confiance",
+        "not_reviewed": "Non révisé",
+        "date_tooltip": "Dernière évaluation",
+        "reasoning_label": "Raisonnement :",
+        "view_in_brim": "Ouvrir dans BRIM",
+        "phi_restricted": "Raisonnement restreint hors de votre organisation",
+        "verdict": {
+          "eligible": "Admissible",
+          "ineligible_modifiable": "Non admissible modifiable",
+          "ineligible_permanent": "Non admissible permanent"
+        }
+      }
+    },
+    "tumor_board": {
+      "title": "Séances de tumor board",
+      "create_presentation": "Créer la présentation",
+      "consensus": "Consensus",
+      "recommendations": "Recommandations",
+      "empty": "Aucune séance de tumor board pour ce patient."
+    },
+    "laboratory": {
+      "date": {
+        "no_date_on_file": "Aucune date au dossier",
+        "age_day": "{{age}} a · Jour {{day}}",
+        "age_day_capped": "90+ a · Jour {{day}}"
+      },
+      "lab_tile": {
+        "reported": "rapporté {{reported}}",
+        "aria_empty": "{{label}} : aucun résultat au dossier",
+        "aria_value": "{{label}} : {{value}} {{unit}}"
+      },
+      "cbc": {
+        "title": "Dernière formule sanguine",
+        "empty": "Aucune formule sanguine au dossier.",
+        "analytes": {
+          "wbc": "GB",
+          "hemoglobin": "Hémoglobine",
+          "platelets": "Plaquettes",
+          "anc": "PNN"
+        }
+      },
+      "performance_status": {
+        "title": "Statut de performance",
+        "empty": "Aucun score de performance au dossier.",
+        "released": "Publié",
+        "score_suffix": "/ 100",
+        "aria_box": "{{scale}} : {{score}} sur 100",
+        "scales": {
+          "lansky": "Lansky",
+          "karnofsky": "Karnofsky"
+        },
+        "mismatch": {
+          "lansky-adult": "Lansky enregistré à 16 ans ou plus",
+          "karnofsky-paediatric": "Karnofsky enregistré avant 16 ans"
+        }
+      },
+      "csf": {
+        "title": "Analyse du LCR",
+        "empty": "Aucune analyse du LCR au dossier.",
+        "analytes": {
+          "protein": "Protéines",
+          "glucose": "Glucose",
+          "nucleated_cells": "Cellules nucléées",
+          "rbc": "GR"
+        },
+        "cytology": {
+          "title": "Cytologie",
+          "multi_specimen_warning": "Le rapport couvre plus d'un spécimen — le résultat pourrait ne pas provenir du LCR.",
+          "multi_specimen": {
+            "yes": "Oui",
+            "no": "Non"
+          },
+          "fields": {
+            "test_name": "Nom du test",
+            "multi_specimen": "Couvre plusieurs spécimens",
+            "result_date": "Date du résultat"
+          },
+          "badge": {
+            "positive": "Cellules malignes présentes",
+            "suspicious": "Suspect de malignité",
+            "negative": "Aucune cellule maligne rapportée",
+            "non_diagnostic": "Spécimen non diagnostique",
+            "no_malignancy_statement": "Le rapport ne se prononce pas sur la malignité",
+            "unknown": "Résultat de cytologie non reconnu",
+            "empty": "Aucune cytologie au dossier"
+          },
+          "tier_note": {
+            "text_confirmed": "Attribué au LCR à partir du texte du rapport.",
+            "same_day_only": "Attribué au LCR uniquement parce que prélevé le même jour — ce résultat pourrait ne pas provenir du LCR."
+          }
+        },
+        "chemistry": {
+          "title": "Biochimie et numération cellulaire"
+        },
+        "specimen": {
+          "title": "Spécimen prélevé — résultat non affiché dans RADIANT",
+          "cell_free_dna": "ADN libre circulant",
+          "collected": "Prélevé"
+        }
+      }
+    }
+  },
+  "timeline": {
+    "collapse_all": "Tout replier",
+    "evidence": "Preuve",
+    "expand_all": "Tout déplier",
+    "initial_treatment": "Traitement initial",
+    "marker": {
+      "day": "Jour {{day}}",
+      "day_range": "Jour {{start}} — {{end}}",
+      "day_unknown": "Jour n/a",
+      "years": "{{value}} a"
+    },
+    "filters": {
+      "all": "Tous",
+      "events": "Évolution",
+      "surgery": "Chirurgie",
+      "chemotherapy": "Chimiothérapie",
+      "radiation": "Radiothérapie"
+    },
+    "empty": {
+      "title": "Aucun résultat",
+      "description": "Ajuster vos filtres et essayer à nouveau."
+    }
+  },
+  "patient_exploration": {
+    "title": "{{total}} Patients",
+    "description": "",
+    "search_placeholder": "Rechercher par nom, ID de recherche ou dossier",
+    "tabs": {
+      "cohort_analytics": "Analyse de cohorte",
+      "patient_list": "Liste des patients"
+    },
+    "chat": {
+      "title": "Analyse de cohorte",
+      "explore": "Explorer les graphiques",
+      "explore_tooltip": "Posez des questions sur ces graphiques et générez de nouvelles vues avec l'IA"
+    },
+    "cells": {
+      "patient": {
+        "research_id": "ID : {{id}}",
+        "masked_aria": "PHI masqué"
+      }
+    },
+    "columns": {
+      "patient": "Patient",
+      "mrn": "Dossier",
+      "birth_year": "Année de naissance",
+      "sex": "Sexe",
+      "site": "Site",
+      "cns_integrated_diagnosis": "Diagnostic SNC intégré",
+      "vital_status": "Statut vital",
+      "survival": "Survie"
+    },
+    "filters": {
+      "vital_status": "Statut vital",
+      "organization_code": "Site",
+      "cns_integrated_diagnosis": "Diagnostic",
+      "age_at_initial_dx_group": "Âge au diagnostic",
+      "age_at_initial_dx_group_values": {
+        "congenital": "Congénital (à la naissance)",
+        "neonatal": "Néonatal (moins de 28 jours)",
+        "infantile": "Nourrisson (≥ 28 jours et < 1 an)",
+        "childhood": "Enfance (≥ 1 an et < 5 ans)",
+        "juvenile": "Juvénile (≥ 5 ans et < 16 ans)",
+        "young_adult": "Jeune adulte (≥ 16 ans et < 40 ans)",
+        "middle_age": "Âge moyen (≥ 40 ans et < 60 ans)",
+        "senior": "Aîné (≥ 60 ans)",
+        "unknown": "Inconnu (âge non disponible)"
+      },
+      "chemotherapy_agents": "Agents de chimiothérapie",
+      "got_radiation_ever": "Radiothérapie",
+      "diagnosis_type_cohort": "Cohorte"
+    },
+    "pagination": {
+      "previous": "Précédent",
+      "next": "Suivant"
+    },
+    "footer": {
+      "awaiting_data": "En attente du backend — lignes fictives",
+      "total": "{{count}} patients"
+    }
+  },
+  "case_exploration": {
+    "filters_group": {
+      "analysis_catalog_code": "Analyse",
+      "diagnosis_lab": "Laboratoire de diagnostic",
+      "ordering_organization": "Établissement prescripteur",
+      "priority_code": "Priorité",
+      "project_code": "Projet",
+      "search_by_id": "Recherche par ID",
+      "search_placeholder": "Cas, séquençage, patient ou MRN",
+      "status_code": "Statut"
+    },
+    "priority": {
+      "asap": "ASAP",
+      "asap_tooltip": "Dès que possible",
+      "routine": "Routine",
+      "routine_tooltip": "Service de routine",
+      "stat": "STAT",
+      "stat_tooltip": "La demande doit être traitée immédiatement, en priorité la plus élevée possible",
+      "urgent": "Urgent",
+      "urgent_tooltip": "La demande doit être traitée rapidement"
+    },
+    "analysis_type_code": {
+      "somatic": "Somatique",
+      "germline": "Germinal seul",
+      "germline_family": "Lignée Germinale Familiale"
+    },
+    "status": {
+      "completed": "Complété",
+      "draft": "En brouillon",
+      "in_progress": "En cours",
+      "in_review": "En révision",
+      "inconclusive": "Non concluant",
+      "processing": "En traitement",
+      "reopened": "Rouvert",
+      "resolved": "Résolu",
+      "revoked": "Annulé",
+      "submitted": "En attente",
+      "unresolved": "Non résolu"
+    },
+    "case_group": {
+      "label": "Nouvelles données • {{date}}",
+      "count_one": "{{count}} cas",
+      "count_other": "{{count}} cas",
+      "stat_count": "{{count}} STAT",
+      "empty": {
+        "title": "Aucun cas trouvé pour cette notification",
+        "description": "Le lien est peut-être périmé, ou vous n’avez pas accès à ces cas.",
+        "show_all": "Afficher tous les cas"
+      }
+    },
+    "case": {
+      "title": "{{total}} Cas",
+      "actions": {
+        "view_case": "Voir cas",
+        "view_variant": "Voir variants"
+      },
+      "filters": {
+        "analysis_catalog_code": "Analyse",
+        "case_category_code": "Pré/Postnatal",
+        "case_type_code": "Type",
+        "diagnosis_lab_code": "Laboratoire de diagnostic",
+        "life_status_code": "Statut vital",
+        "ordering_organization_code": "Établissement prescripteur",
+        "panel_code": "Panel",
+        "priority_code": "Priorité",
+        "project_code": "Projet",
+        "status_code": "Statut"
+      },
+      "headers": {
+        "assignees": "Assignation",
+        "assignees_tooltip": "Assignation du cas",
+        "case_id": "Cas",
+        "patient_id": "Patient",
+        "submitter_patient_id": "Dossier",
+        "submitter_patient_id_tooltip": "Numéro de dossier médicale du patient",
+        "priority_code": "Priorité",
+        "status_code": "Statut",
+        "case_type": "Type de cas",
+        "primary_condition": "Condition principale",
+        "analysis_catalog_code": "Analyse",
+        "ordering_organization_code": "Req. par",
+        "ordering_organization_code_tooltip": "Requête faite par",
+        "proband_submitter_sample_ids": "Échantillon",
+        "proband_submitter_sample_ids_tooltip": "Identifiant d'échantillon du proband (échantillon tumoral pour les cas somatiques)",
+        "run_names": "Lot",
+        "run_names_tooltip": "Numéro de lot pour l'échantillon du proband",
+        "project_code": "Projet",
+        "updated_on": "Dernière modification",
+        "updated_on_tooltip": "Date de la dernière modification du cas (aaaa-mm-jj)",
+        "prescriber": "Prescripteur",
+        "prescriber_tooltip": "Médecin prescripteur",
+        "diagnostic_lab": "Laboratoire de diagnostic",
+        "diagnostic_lab_tooltip": "Laboratoire de diagnostic moléculaire",
+        "managing_organization": "Organisation resp.",
+        "managing_organization_tooltip": "Organisation responsable du dossier du patient",
+        "created_on": "Créé le",
+        "created_on_tooltip": "Date de création du cas (aaaa-mm-jj)",
+        "first_name": "Prénom",
+        "last_name": "Nom de famille",
+        "life_status": "Statut vital",
+        "category_code": "Pré/Postnatal",
+        "panel": "Panel",
+        "jhn": "RAMQ"
+      }
+    },
+    "sequencing": {
+      "title": "Séquençage"
+    }
+  },
+  "case_status": {
+    "error": "Échec de la mise à jour du statut. Veuillez réessayer."
+  },
+  "case_assignment": {
+    "error": "Échec de la mise à jour de l'assignation. Veuillez réessayer."
+  },
+  "files": {
+    "filters": {
+      "data_type_code": "Type",
+      "format_code": "Format",
+      "project_code": "Projet",
+      "diagnosis_lab_code": "Laboratoire de diagnostic",
+      "relationship_to_proband_code": "Parenté"
+    }
+  },
+  "study": {
+    "title": "Études",
+    "search": {
+      "label": "Rechercher par code d'étude, nom d'étude, dbGaP",
+      "placeholder": "KF-AIS, Kids First: Genomics of Orthopaedic Disease Program, phs001410"
+    },
+    "facets": {
+      "collapse": "Replier les facettes",
+      "expand": "Déplier les facettes"
+    },
+    "table": {
+      "headers": {
+        "study_code": "Code",
+        "study_name": "Nom",
+        "program": "Programme",
+        "domain": "Domaine",
+        "dbgap": "dbGaP",
+        "participant_count": "Participants",
+        "biospecimen_count": "Biospécimens",
+        "family_count": "Familles",
+        "file_count": "Fichiers",
+        "genomics": "Génomique",
+        "transcriptomics": "Transcriptomique",
+        "imaging": "Imagerie",
+        "proteomics": "Protéomique"
+      }
+    }
+  },
+  "landing": {
+    "include": {
+      "hero": {
+        "wordmark": "INCLUDE Data Hub",
+        "title": "Découvrez de <accent>nouvelles perspectives</accent> sur la biologie de la trisomie 21 et des affections concomitantes.",
+        "description": "Accédez à des ressources de données intégrées à grande échelle et analysez des ensembles de données de cohortes personnalisés à partir des participants, des biospécimens et des données cliniques et génomiques.",
+        "login": "Connexion",
+        "signup": "Inscription",
+        "mondo_chart": {
+          "title": "Affections concomitantes les plus fréquentes (MONDO)",
+          "axis": {
+            "x_label": "Nombre de participants",
+            "y_label": "Diagnostic (MONDO)"
+          }
+        }
+      },
+      "tiles": {
+        "germline_variants": {
+          "title": "Variants germinaux",
+          "description": "Notre explorateur de variants offre des capacités de recherche avancées. En quelques clics, vous pouvez explorer des millions de variants germinaux annotés provenant des génomes des participants de l'INCLUDE Data Hub.",
+          "buttons": {
+            "explore": "Explorer les données de variants"
+          }
+        },
+        "cavatica": {
+          "title": "CAVATICA",
+          "description": "Le portail s'intègre à CAVATICA, une plateforme infonuagique conçue pour l'analyse de données et la collaboration à l'échelle mondiale. Les chercheurs peuvent analyser les jeux de données INCLUDE à l'aide de flux de travail personnalisés ou préexistants.",
+          "buttons": {
+            "learn_more": "En savoir plus",
+            "login": "Connexion"
+          }
+        },
+        "experimental_models": {
+          "title": "Modèles expérimentaux",
+          "description": "Le portail Modèles expérimentaux fournit aux chercheurs des publications, des phénotypes, des jeux de données et des biospécimens issus de modèles expérimentaux du syndrome de Down, permettant de mieux comprendre les mécanismes des effets tissu-spécifiques de la trisomie 21.",
+          "buttons": {
+            "explore": "Explorer les modèles expérimentaux"
+          }
+        }
+      },
+      "data_release": {
+        "title": "Publication de données",
+        "stats": {
+          "studies": "Études",
+          "participants": "Participants",
+          "biospecimens": "Biospécimens",
+          "files": "Fichiers",
+          "genomes": "Génomes",
+          "transcriptomes": "Transcriptomes"
+        }
+      },
+      "demographics": {
+        "title": "Démographie",
+        "t21_status": "Statut T21",
+        "sex": "Sexe",
+        "race": "Race"
+      },
+      "studies": {
+        "title": "Études",
+        "description": "Explorez une collection sélectionnée d'études harmonisées, allant des programmes déclarés par les participants aux cohortes financées par INCLUDE, aux initiatives institutionnelles et aux consortiums dédiés à la recherche sur la trisomie 21.",
+        "view_all": "Voir toutes les études"
+      },
+      "documentation": {
+        "center": {
+          "title": "Centre de documentation INCLUDE",
+          "description": "Pour en savoir plus sur l'accès, la soumission et le téléversement de données, consultez notre Centre de documentation.",
+          "cta": "Documentation",
+          "citation": "Règles de citation"
+        },
+        "participate": {
+          "title": "Participer au projet INCLUDE",
+          "description": "Visitez la page du projet NIH INCLUDE pour en savoir plus sur l'initiative, les possibilités de financement et d'autres ressources.",
+          "cta": "En savoir plus"
+        }
+      },
+      "footer": {
+        "legal": "Le Data Coordinating Center (DCC) d'INCLUDE est soutenu par le projet INCLUDE des National Institutes of Health, sous le numéro de projet U2CHL156291 administré par le National Heart, Lung and Blood Institute. L'ensemble du contenu, des conditions générales et des politiques associés au contenu et au site Web du DCC d'INCLUDE (les « Services ») est produit par le DCC d'INCLUDE. Les points de vue et opinions des auteurs exprimés sur les Services ne reflètent pas nécessairement ceux des National Institutes of Health (« NIH ») ni du gouvernement des États-Unis. De plus, les NIH n'endossent ni ne promeuvent aucune entité du DCC d'INCLUDE ni aucun de ses produits ou services, et ne garantissent pas les produits, services ou informations fournis par le DCC d'INCLUDE."
+      }
+    },
+    "kidsfirst": {
+      "hero": {
+        "logo_alt": "Kids First Data Resource Portal",
+        "title": "Kids First Data Resource Portal",
+        "description": "Boostez vos recherches grâce à notre vaste collection de données sur les cancers pédiatriques, les troubles congénitaux et les conditions croisées.",
+        "getting_started": "Commencer est aussi simple que 1-2-3",
+        "free": "Inscrivez-vous en quelques minutes… gratuitement !",
+        "login": "Connexion",
+        "signup": "S'inscrire"
+      },
+      "studies": {
+        "section_title": "Ouvrir la voie grâce au partage des données",
+        "title": "Études",
+        "description": "Explorez une vaste collection d'études harmonisées axées sur le cancer pédiatrique et les malformations congénitales structurelles pour la recherche transversale.",
+        "view_all": "Voir toutes les études",
+        "participants": "Participants",
+        "domains": {
+          "cancer": "Cancer",
+          "cross_condition": "Condition croisée",
+          "congenital_disorder": "Trouble congénital",
+          "unknown": "Inconnu"
+        }
+      },
+      "accelerating_research": {
+        "title": "Accélérer la recherche",
+        "description": "Constituez des cohortes virtuelles à partir de données de plus de 99 000 échantillons, incluant le séquençage du génome entier (WGS) et le séquençage de l'ARN, disponibles pour stimuler vos recherches dès aujourd'hui.",
+        "get_started": "Commencer",
+        "stats": {
+          "studies": "Études",
+          "participants": "Participants",
+          "variants": "Variants",
+          "biospecimens": "Biospécimens",
+          "files": "Fichiers",
+          "genomes": "Génomes"
+        },
+        "mondo_chart": {
+          "title": "Diagnostics les plus fréquents (MONDO)",
+          "axis": {
+            "x_label": "# de participants",
+            "y_label": "Diagnostics (MONDO)"
+          }
+        },
+        "demographics": {
+          "title": "Démographie",
+          "family_composition": "Composition familiale",
+          "race": "Origine",
+          "ethnicity": "Ethnicité"
+        }
+      },
+      "collaboration": {
+        "section_title": "Faire progresser la science par la collaboration",
+        "subtitle": "Accédez facilement à une gamme de ressources robustes basées sur le cloud pour faire avancer des recherches significatives.",
+        "germline_variants": {
+          "title": "Variants germinaux",
+          "description": "Notre explorateur de variants offre des capacités de recherche avancées. En quelques clics, vous pouvez explorer des millions de variants germinaux annotés issus des génomes des participants de Kids First.",
+          "button": "Explorer les données de variants"
+        },
+        "cavatica": {
+          "description": "Le portail s'intègre à CAVATICA, une plateforme cloud conçue pour l'analyse et la collaboration de données à l'échelle mondiale. Les chercheurs peuvent analyser les jeux de données Kids First à l'aide de flux de travail personnalisés ou préexistants.",
+          "button": "Commencer"
+        },
+        "pedcbioportal": {
+          "description": "Outil de navigation regroupant des données cliniques issues des visites médicales des patients, PedcBioPortal guide les chercheurs et les cliniciens vers des pistes de traitement optimales pour favoriser l'exploration de thérapies innovantes.",
+          "button": "Commencer"
+        }
+      },
+      "documentation": {
+        "find_inspiration": {
+          "title": "Trouver l'inspiration",
+          "description": "Consultez les travaux publiés qui citent Kids First, puis publiez les découvertes que vous avez faites grâce à cette puissante ressource.",
+          "button": "Voir les publications"
+        },
+        "get_answers": {
+          "title": "Obtenir des réponses",
+          "description": "Naviguez dans l'univers Kids First comme un pro grâce aux conseils et informations du Centre d'aide du portail de données.",
+          "button": "Centre d'aide"
+        }
+      },
+      "footer": {
+        "columns": {
+          "about": {
+            "title": "À propos",
+            "links": {
+              "about_kids_first": "À propos de Kids First",
+              "community": "Communauté",
+              "faqs": "FAQ"
+            }
+          },
+          "resources": {
+            "title": "Ressources",
+            "links": {
+              "data": "Données",
+              "tools": "Outils",
+              "help_center": "Centre d'aide"
+            }
+          },
+          "news": {
+            "title": "Actualités",
+            "links": {
+              "articles": "Articles",
+              "events": "Événements",
+              "press": "Presse"
+            }
+          }
+        },
+        "partners_title": "Institutions partenaires de Kids First",
+        "follow": "Suivez @kidsfirstdrc",
+        "email": "Écrire à Kids First",
+        "privacy": "Politique de confidentialité",
+        "cookies": "Témoins",
+        "disclaimer": "Le Kids First Data Resource Center (« DRC ») regroupe des institutions partenaires soutenues par le NIH Common Fund sous le numéro de subvention U2CHL138346, dans le cadre du programme Gabriella Miller Kids First Pediatric Research du Common Fund (« Kids First »). L'ensemble du contenu, des conditions générales et des politiques associés au portail et au site Web du DRC (les « Services ») est produit par le DRC. Les points de vue et opinions des auteurs exprimés sur les Services ne reflètent pas nécessairement ceux des National Institutes of Health (« NIH ») ni du gouvernement des États-Unis. De plus, les NIH n'endossent ni ne promeuvent aucune entité du DRC ni aucun de ses produits ou services, et ne garantissent pas les produits, services ou informations fournis par le DRC.",
+        "copyright": "© 2024 Gabriella Miller Kids First Data Resource Center. Tous droits réservés."
+      }
+    }
+  },
+  "interpretation": {
+    "title": "Interprétation clinique"
+  },
+  "query_filters": {
+    "sidebar_panel": {
+      "collapse": "Réduire",
+      "expand": "Développer",
+      "organization": "RQDM Panel",
+      "filters": {
+        "panel": "Panel",
+        "variant": "Variant",
+        "gene": "Gène",
+        "frequency": "Fréquence",
+        "pathogenicity": "Pathogénicité",
+        "occurrence": "Occurrence",
+        "organization": "Mon Organisation",
+        "metric_qc": "Metric QC"
+      }
+    }
+  },
+  "variant": {
+    "no_data_for_variant": "Aucune donnée pour ce variant.",
+    "report": {
+      "download": "Télécharger rapport",
+      "select_at_least_one": "Sélectionner au moins un élément",
+      "max_exceeded": {
+        "title": "Nombre maximum dépassé",
+        "description": "Un maximum de 100 éléments peut être exporté à la fois. Veuillez réduire votre sélection et réessayer."
+      },
+      "toast": {
+        "loading": "Génération du rapport…",
+        "success": "Rapport téléchargé",
+        "error": "Impossible de télécharger le rapport. Veuillez réessayer."
+      }
+    },
+    "headers": {
+      "aa_change": "AA",
+      "aa_change_tooltip": "Substitution acide aminé",
+      "ad_ratio": "Ratio PA",
+      "ad_ratio_tooltip": "Ratio profondeur allélique ALT/(ALT+REF)",
+      "aq": "AQ",
+      "aq_tooltip": "Score de bruit systématique (AQ)",
+      "bc": "BC",
+      "bc_tooltip": "Nombre de bins dans la région",
+      "calls": "GT",
+      "calls_tooltip": "Génotype",
+      "chromosome": "Chr",
+      "chromosome_tooltip": "Chromosome",
+      "clinical_interpretation": "Interprétation clinique",
+      "clingen": "ClinGen",
+      "clinvar": "ClinVar",
+      "cmc_sample_mutated": "CMC",
+      "cmc_sample_mutated_tooltip": "Nombre d’échantillons dans COSMIC avec cette mutation suivi de son ratio",
+      "cmc_tier": "Tier",
+      "cmc_tier_tooltip": "CMC tier. Signification de la mutation. 1 - haute signification, 2 - signification moyenne, 3 - faible signification, Other - Pas de signification prédite (autres mutations)",
+      "comphet_genes": "HC",
+      "comphet_genes_tooltip": "Hétérozygotie composite (slivar) : seuls les variants PASS à impact (LoF, Missense, Inframe, Splice Region) hétérozygotes chez le Proband, avec GQ ≥ 20, profondeur ≥ 6 et équilibre allélique entre 0,2 et 0,8, sont pris en compte. Dans les trios, exactement un parent doit porter le variant et aucun ne doit être homozygote.",
+      "cn": "CN",
+      "cn_tooltip": "Nombre de copies estimé",
+      "cytoband": "Cytobande",
+      "dbSNP": "dbSNP",
+      "end": "Fin",
+      "exomiser_acmg_classification": "ACMG Exo.",
+      "exomiser_acmg_classification_tooltip": "ACMG de Exomiser",
+      "exomiser_gene_combined_score": "Exo.",
+      "exomiser_gene_combined_score_tooltip": "Score Exomiser calculé en fonction des caractéristiques du variant et des phénotypes du patient",
+      "freq_tn": "Fréq. TN",
+      "freq_tn_tooltip": "Nombre de génomes tumeur-normal comportant ce variant et la fréquence sur l'ensemble du réseau. Seules les occurrences rencontrant le critère ALT > 2 sont considérées pour le calcul des fréquences.",
+      "freq_to": "Fréq. TO",
+      "freq_to_tooltip": "Nombre de génomes tumeur seule comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant le critère ALT > 2 sont considérées pour le calcul des fréquences.",
+      "freq_g": "Fréq. G",
+      "freq_g_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
+      "filter": "Filtre",
+      "gene_length": "Longueur du gène",
+      "gene_length_tooltip": "Longueur du gène en bases",
+      "genotype_quality": "QG",
+      "genotype_quality_tooltip": "Qualité du génotypage : seules les occurrences rencontrant le critère QG ≥ 20 sont considérées pour le calcul des fréquences.",
+      "gnomad_sf": "gnomAD SF",
+      "gnomad_sf_tooltip": "gnomAD 4.1.0 (fréquence de site)",
+      "gnomad_sv_ac": "gnomAD AC",
+      "gnomad_sv_ac_tooltip": "gnomAD 4.1.0 (nombre d'allèles)",
+      "gnomad_sv_af": "gnomAD AF",
+      "gnomad_sv_af_tooltip": "gnomAD 4.1.0 (fréquence allélique)",
+      "gnomad_sv_sc": "gnomAD SC",
+      "gnomad_sv_sc_tooltip": "gnomAD 4.1.0 (nombre de sites)",
+      "gnomad_v3_af": "gnomAD",
+      "gnomad_v3_af_tooltip": "gnomAD 4.1.0 Joint (fréquence)",
+      "hgvsg": "Variant",
+      "hotspot": "Hotspot",
+      "hotspot_tooltip": "Hotspot Cancer",
+      "is_mane_select": "MANE",
+      "length": "Longueur",
+      "length_tooltip": "Longueur du CNV en bases",
+      "name": "Variant",
+      "nb_exons": "# Exons",
+      "nb_exons_tooltip": "Nombre d’exons chevauchés",
+      "nb_genes": "# Gènes",
+      "nb_genes_tooltip": "Nombre de gènes chevauchant le CNV",
+      "nb_overlap_bases": "# Bases",
+      "nb_overlap_bases_tooltip": "Chevauchement en bases",
+      "nb_snv": "# SNVs",
+      "nb_snv_tooltip": "Nombre de SNVs inclus par le CNV",
+      "omim_inheritance_code": "OMIM",
+      "omim_inheritance_code_tooltip": "Modes d'hérédité MIM pour le gène de la conséquence la plus délétère",
+      "overlapping_gene_percent": "% Gène",
+      "overlapping_gene_percent_tooltip": "% de la longueur du gène chevauché",
+      "overlapping_cnv_percent": "% CNV",
+      "overlapping_cnv_percent_tooltip": "% de la longueur du CNV chevauché",
+      "overlap_type": "Type",
+      "overlap_type_tooltip": "Type de chevauchement entre le gène et le CNV",
+      "panels": "Chevauchement avec le CNV",
+      "pe": "PE",
+      "pe_tooltip": "Nombre de fragments incorrectement appariés au début et à la fin des points de cassure",
+      "germline_pf_wgs": "Fréq.",
+      "germline_pf_wgs_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
+      "picked_consequences": "Conséquence",
+      "picked_consequences_tooltip": "Conséquence la plus délétère annotée avec VEP",
+      "quality": "Qual.",
+      "quality_tooltip": "Qualité du CNV",
+      "sq": "QS",
+      "sq_tooltip": "Qualité somatique",
+      "start": "Début",
+      "symbol": "Gène",
+      "symbols": "Gènes",
+      "symbol_overlapping": "Gène",
+      "symbol_tooltip": "Liste des gènes chevauchant le CNV",
+      "type": "Type",
+      "variant_class": "Type",
+      "zygosity": "Zyg.",
+      "zygosity_tooltip": "Zygosité"
+    },
+    "actions": {
+      "preview": "Aperçu",
+      "open_in_igv": "Ouvrir dans IGV ",
+      "open_in_igv_disabled_tooltip": "Aucun fichier d'alignement disponible pour ce cas",
+      "ucsc": "UCSC",
+      "litvar": "LitVar",
+      "view_variant": "Voir variant"
+    },
+    "splice_ai": {
+      "AG": "Gain du site accepteur",
+      "AL": "Perte du site accepteur",
+      "DG": "Gain du site donneur",
+      "DL": "Perte du site donneur"
+    },
+    "interpretation": {
+      "tooltip": {
+        "add": "Ajouter une interprétation",
+        "view": "Voir l’interprétation",
+        "none": "Aucune interprétation pour ce variant"
+      },
+      "classifications": {
+        "all_classifications": "Toutes les classifications",
+        "pathogenic": "Pathogénique",
+        "likelyPathogenic": "Prob. pathogénique",
+        "likelyPathogenic_tooltip": "Probablement pathogénique",
+        "vus": "VSI",
+        "vus_tooltip": "Variant de signification incertaine",
+        "likelyBenign": "Prob. bénigne",
+        "likelyBenign_tooltip": "Probablement bénigne",
+        "benign": "Bénigne"
+      }
+    },
+    "omim": {
+      "AD": "Dominant Autosomique",
+      "AR": "Récessif Autosomique",
+      "DD": "Dominant Dygénique",
+      "DR": "Récessif Dygénique",
+      "IC": "Cas Isolés",
+      "Mi": "Mitochondrial",
+      "Mu": "Multifactoriel",
+      "NA": "Non Applicable",
+      "NRT": "Aucune Transmission Signalée",
+      "null": "-",
+      "SMo": "Mosaïcisme Somatique",
+      "Smu": "Mutation Somatique",
+      "XL": "Lié à l'X",
+      "XLD": "Dominant Lié à l'X",
+      "XLR": "Récessif Lié à l'X",
+      "YL": "Lié à l'Y"
+    },
+    "predictions": {
+      "sift": "SIFT",
+      "revel": "REVEL",
+      "loeuf": "LOEUF",
+      "splice_ai": "SpliceAI",
+      "fathmm": "FATHMM",
+      "cadd_raw": "CADD (Raw)",
+      "cadd_phred": "CADD (Phred)",
+      "dann": "DANN",
+      "lrt": "LRT",
+      "polyphen2hvar": "PolyPhen-2 HVAR",
+      "phylop17way": "PhyloP17Way",
+      "pli": "pLI",
+      "no_prediction": "Aucune prédiction"
+    },
+    "cmc_tiers": {
+      "1": "Tier 1",
+      "2": "Tier 2",
+      "3": "Tier 3",
+      "other": "Other",
+      "no_data": "ND"
+    },
+    "classes": {
+      "indel": "Indel",
+      "insertion": "Insertion",
+      "snv": "SNV",
+      "deletion": "Deletion",
+      "sequence_alteration": "Sequence Alteration",
+      "substitution": "Substitution"
+    },
+    "canonical_transcript": "Canonical transcript",
+    "igv": {
+      "title": "Alignement et variant",
+      "dense_reads_hidden": {
+        "title": "Lectures masquées dans une région dense",
+        "description": "Certaines pistes sont très profondes ici. Pour qu'IGV reste réactif, leurs lectures s'affichent seulement dans les vues de {{window}} pb ou moins. Zoomez pour les voir."
+      },
+      "failed_tracks": {
+        "title_one": "Une piste n'a pas pu être chargée",
+        "title_other": "{{count}} pistes n'ont pas pu être chargées"
+      },
+      "public_tracks": {
+        "menu": "Pistes",
+        "clinvar": "ClinVar",
+        "dgv": "DGV",
+        "clinvar_sv": "SV ClinVar",
+        "clingen_region_haploinsufficiency": "Haploinsuffisance des régions ClinGen",
+        "clingen_region_triplosensitivity": "Triplosensibilité des régions ClinGen",
+        "gnomad_sv": "SV gnomAD v4.1",
+        "gnomad_cnv": "CNV gnomAD v4.1",
+        "clingen_gene_haploinsufficiency": "Haploinsuffisance des gènes ClinGen",
+        "clingen_gene_triplosensitivity": "Triplosensibilité des gènes ClinGen",
+        "segmental_duplications": "Duplications segmentaires",
+        "repeat_masker": "RepeatMasker",
+        "simple_repeats": "Répétitions simples",
+        "self_chain": "Self chain"
+      }
+    },
+    "interpretation_form": {
+      "alert": {
+        "cancel": "Retourner",
+        "description": "La soumission de ces modifications remplacera l’interprétation du variant existante au sein de votre organisation. Cette action est irréversible.",
+        "save": "Soumettre les modifications ",
+        "title": "Écraser l’interprétation ?"
+      },
+      "title": "Interprétation clinique",
+      "cancel_text": "Annuler",
+      "ok_text": "Sauvegarder l'interprétation",
+      "last_update": "<strong>Dernière mise à jour :</strong> {{name}} le <date/>",
+      "header": {
+        "germline": "Germinal",
+        "germline_family": "Germinal",
+        "patient": "Patient",
+        "sequencing": "Séquençage",
+        "somatic": "Somatique"
+      },
+      "transcript": {
+        "exon": "Exon"
+      },
+      "notification": {
+        "success": {
+          "title": "Interprétation enregistrée",
+          "button": "Voir l'interprétation"
+        },
+        "error": {
+          "title": "La sauvegarde d'interprétation a échouée",
+          "text": "L’enregistrement de l’interprétation a échoué. Veuillez réessayer."
+        }
+      },
+      "generic": {
+        "interpretation": "Interprétation",
+        "pub_med_publication": "Publication PubMed",
+        "pub_med_publication_popover": {
+          "enter": "Entrer un",
+          "pmid": "PMID"
+        },
+        "pub_med_id_not_found": "PMID invalide ou inconnu",
+        "citation_placeholder": "Ex : 25741868",
+        "add_citation": "Ajouter une publication",
+        "ensembl_gene_id": "Ensembl",
+        "transcript_id": "ID Transcrit"
+      },
+      "germline": {
+        "condition": "Condition MONDO",
+        "condition_placeholder": "Ex : muscular dystrophy",
+        "condition_popover": "Rechercher une condition médicale dans",
+        "condition_popover_link": "l'ontologie MONDO",
+        "condition_empty_indicator": "Aucun résultat trouvé",
+        "condition_no_search_indicator": "3 caractères minimum",
+        "classification": "Classification ACMG/AMP",
+        "classification_popover": {
+          "consult": "Consulter les ",
+          "standards_and_guidelines": "normes et les lignes directrices",
+          "variant_interpretation": "pour l'interprétation des variants",
+          "full_text": "Consulter les <guides>normes et les lignes directrices</guides> pour l'interprétation des variants"
+        },
+        "classification_criteria": "Critères de classification",
+        "classification_criteria_placeholder": "Ex : PM1, PS2",
+        "mode_of_transmission": "Mode de transmission",
+        "mode_of_transmission_placeholder": "Ex : Autosomal dominant de novo",
+        "no_results": "Aucun résultat trouvé"
+      },
+      "somatic": {
+        "tumoral_type": "Type tumoral",
+        "tumoral_type_placeholder": "Ex : colon sarcoma",
+        "oncogenicity": "Oncogénicité ClinGen/CGC/VICC",
+        "oncogenicity_options": {
+          "oncogenic": "Oncogénique",
+          "likely_oncogenic": "Prob. oncogénique",
+          "likely_oncogenic_tooltip": "Probablement oncogénique",
+          "vus": "VSI",
+          "vus_tooltip": "Variant de signification incertaine",
+          "likely_benign": "Prob. bénigne",
+          "likely_benign_tooltip": "Probablement bénigne",
+          "benign": "Bénigne"
+        },
+        "oncogenicity_popover": {
+          "full_text": "Consulter les <guides>normes et lignes directrices</guides> pour l'interprétation des variants"
+        },
+        "classification_criteria": "Critères de classification",
+        "classification_criteria_placeholder": "Ex : OS1, OM2",
+        "clinical_utility": "Utilité clinique",
+        "clinical_utility_placeholder": "Selectionner",
+        "clinical_utility_options": {
+          "category_ia": "Tier IA",
+          "category_ib": "Tier IB",
+          "category_iic": "Tier IIC",
+          "category_iid": "Tier IID",
+          "category_iii": "Tier III"
+        },
+        "sections": {
+          "cancer": {
+            "title": "Cancer Hotspot",
+            "hotspot": "Hotspot"
+          },
+          "annotations_variant": {
+            "title": "Annotations variant"
+          },
+          "annotations_gene": {
+            "title": "Annotations gène"
+          }
+        }
+      },
+      "no_results": "Aucun résultat trouvé"
+    }
+  },
+  "preview_sheet": {
+    "header": {
+      "germline": "Germinal",
+      "germline_family": "Germline",
+      "somatic": "Somatique"
+    },
+    "actions": {
+      "download_report": "Télécharger le rapport",
+      "open_igv": "Ouvrir IGV",
+      "interpret": "Interpréter",
+      "interpretation": "Interpréter variant",
+      "view_all_variants": "Voir les variants",
+      "view_in_case": "Voir dans le cas"
+    },
+    "interpretation_details": {
+      "title": "Interprétation de variant",
+      "fields": {
+        "gene": "Gène",
+        "transcript": "Transcrit",
+        "classification": "Classification",
+        "primary_condition": "Condition principale",
+        "classification_criteria": "Critères de classification",
+        "clinical_utility": "Utilité clinique",
+        "interpretation": "Interprétation",
+        "references": "{{count}} références",
+        "tumoral_type": "Type tumoral",
+        "updated_at_tooltip": "Dernière date d'interprétation",
+        "updated_by_name_tooltip": "Rédigé par"
+      }
+    },
+    "variant_details": {
+      "title": "Détails du Variant",
+      "actions": {
+        "ucsc": "UCSC",
+        "litvar": "LitVar",
+        "ensembl": "Ensembl"
+      },
+      "sections": {
+        "gene": {
+          "title": "Gène",
+          "pli": "pLI",
+          "loeuf": "LOEUF",
+          "splice_ai": "SpliceAI",
+          "no_data": "Aucune donnée sur le gène rapportée"
+        },
+        "interpretations": {
+          "title": "Interprétations",
+          "my_network": "Mon Réseau",
+          "no_data": "Aucune donnée d'interprétation rapportée"
+        },
+        "classification": {
+          "title": "Classification",
+          "exomiser": "Exomiser",
+          "clinvar": "ClinVar",
+          "cosmic": "COSMIC",
+          "hotspot": "Hotspot",
+          "no_data": "Aucune donnée de classification rapportée"
+        },
+        "frequencies": {
+          "title": "Fréquences",
+          "affected": "Affectés",
+          "to": "Tumeur seule",
+          "tn": "Tumeur-normal",
+          "cosmic": "COSMIC",
+          "cosmic_tooltip": "Nombre d’échantillons dans COSMIC avec cette mutation suivi de son ratio",
+          "gnomad": "gnomAD"
+        },
+        "functional_scores": {
+          "title": "Scores Fonctionnels",
+          "no_data": "Aucune donnée de scores fonctionnels rapportée"
+        },
+        "clinical_associations": {
+          "title": "Associations Cliniques (OMIM)",
+          "no_data": "Aucune donnée d'associations cliniques rapportée"
+        },
+        "gene_card": {
+          "consequence": "Conséquence",
+          "cdna_change": "Changement cDNA",
+          "transcript_id": "ID du transcrit",
+          "exon": "Exon",
+          "dbsnp_id": "ID dbSNP"
+        }
+      }
+    },
+    "occurrence_details": {
+      "title": "Détails de l'occurrence",
+      "patient": "Patient",
+      "sequencing": "Séquençage",
+      "actions": {
+        "view_in_igv": "Ouvrir dans IGV"
+      },
+      "sections": {
+        "inheritance": {
+          "title": "Héritabilité",
+          "zygosity": "Zygosité",
+          "compound_het": "Hétérozygote Composite",
+          "potential_compound_het": "Hétérozygote Composite Potentiel",
+          "inheritance": "Héritabilité",
+          "parental_origin": "Origine parentale"
+        },
+        "family": {
+          "title": "Famille",
+          "mother_genotype": "Génotype de la mère",
+          "father_genotype": "Génotype du père",
+          "affected_tooltip": "Affecté",
+          "not_affected_tooltip": "Non affecté"
+        },
+        "metrics": {
+          "title": "Métriques",
+          "quality_depth": "Profondeur qualité",
+          "allele_depth_alt": "Profondeur allélique ALT",
+          "total_depth_alt_ref": "Profondeur totale ALT + REF",
+          "sq": "Qualité somatique",
+          "aq": "Bruit systématique (AQ)",
+          "genotype_quality": "Qualité de génotype",
+          "filter": "Filtre",
+          "pass": "Pass",
+          "fail": "Fail"
+        }
+      }
+    },
+    "case": {
+      "title": "Cas {{id}}",
+      "actions": {
+        "open_case": "Ouvrir le cas"
+      },
+      "details": {
+        "sex": "Sexe",
+        "dob": "Date de naissance",
+        "ethnicity": "Ethnicité",
+        "primary_condition": "Condition principale",
+        "no_primary_condition": "Aucune condition principale rapportée",
+        "phenotypes": "Phénotypes (HPO)",
+        "no_phenotype": "Aucun phénotype rapporté",
+        "non_observed_phenotypes": "Phénotypes non observés (HPO)",
+        "no_non_observed_phenotype": "Aucun phénotype non observé rapporté"
+      },
+      "empty": {
+        "title": "Aucun cas trouvé",
+        "description": "Aucun cas trouvé"
+      }
+    }
+  },
+  "occurrence_expand": {
+    "classifications": {
+      "title": "Classifications",
+      "clinvar": "ClinVar"
+    },
+    "predictions": {
+      "title": "Prédictions",
+      "franklin": "Franklin",
+      "exomiser": "Exomiser"
+    },
+    "gene": {
+      "title": "Gène",
+      "pli": "pLI",
+      "loeuf": "LOEUF",
+      "revel": "REVEL",
+      "splice_ai": "SpliceAI"
+    },
+    "frequencies": {
+      "title": "Fréquences",
+      "affected": "Affectés",
+      "non_affected": "Non affectés",
+      "affected_tooltip": "Patients affectés",
+      "non_affected_tooltip": "Patients non affectés",
+      "gnomad": "gnomAD"
+    },
+    "functional_scores": {
+      "cadd_phred": "CADD (Phred)",
+      "cadd_raw": "CADD (Brut)",
+      "dann": "DANN",
+      "fathmm": "FATHMM",
+      "lrt": "LRT",
+      "polyphen2_hvar": "PolyPhen-2 HVAR",
+      "revel": "REVEL",
+      "sift": "SIFT",
+      "title": "Scores Fonctionnels"
+    },
+    "zygosity": {
+      "title": "Zygosité",
+      "zygosity": "Zygosité",
+      "compound_het": "Hétérozygote Composite",
+      "potential_compound_het": "Hétérozygote Composite Potentiel",
+      "inheritance": "Héritabilité",
+      "parental_origin": "Origine parentale"
+    },
+    "inheritance": {
+      "title": "Héritabilité",
+      "zygosity": "Zygosité",
+      "compound_het": "Hétérozygote Composite",
+      "potential_compound_het": "Hétérozygote Composite Potentiel",
+      "inheritance": "Héritabilité",
+      "parental_origin": "Origine parentale"
+    },
+    "clinical_association": {
+      "title": "Associations Cliniques (OMIM)"
+    },
+    "family": {
+      "title": "Famille",
+      "mother_genotype": "Génotype de la mère",
+      "father_genotype": "Génotype du père",
+      "affected_tooltip": "Affecté",
+      "not_affected_tooltip": "Non affecté"
+    },
+    "metrics": {
+      "title": "Métriques",
+      "filter": "Filtre"
+    }
+  },
+  "case_entity": {
+    "not_found": "Cas introuvable",
+    "not_found.button": "Retour à la liste de cas",
+    "header": {
+      "case": "Cas",
+      "cases": "Cas",
+      "germline": "Germinal",
+      "germline_family": "Germinal familial",
+      "somatic": "Somatique",
+      "priority_tooltip": "Priorité",
+      "status_tooltip": "Statut",
+      "unknown": "Inconnu"
+    },
+    "patient_information": {
+      "dob": "Date de naissance",
+      "estimated_due_date": "Date prévue d'accouchement",
+      "father": "Père",
+      "id": "ID",
+      "jhn": "RAMQ",
+      "last_menstrual_period": "Dernières menstruations",
+      "life_status": "Statut vital",
+      "managing_org": "Organisation Resp.",
+      "managing_org_tooltip": "Organisation responsable du dossier du patient",
+      "mother": "Mère",
+      "name": "Nom (Prénom / Nom de famille)",
+      "no_patient": "Aucune information du patient disponible",
+      "proband": "Proband",
+      "sex": "Sexe",
+      "submitter_patient_id": "ID patient org.",
+      "submitter_patient_id_tooltip": "ID patient de l’organisation",
+      "title": "Information du patient",
+      "view_patient": "Voir patient"
+    },
+    "details": {
+      "aliquot": "Aliquot",
+      "assigned_to": "Assigné à",
+      "bioinformatics": "Bio-informatique",
+      "capture_kit": "Kit de capture",
+      "case_id": "ID du cas",
+      "case_note": "Note",
+      "case_overview": "Sommaire du cas",
+      "case_type": "Type",
+      "clinical_note": "Note Clinique",
+      "clinical_overview": "Clinique",
+      "consanguinity": "Consanguinité",
+      "created_on_female": "Créée le",
+      "created_on_male": "Créé le",
+      "date_format_tooltip": "aaaa-mm-jj",
+      "description": "Description",
+      "diag_lab": "Lab de diagnostic",
+      "diag_lab_tooltip": "Laboratoire de diagnostic moléculaire",
+      "diagnosis_hypothesis": "Hypothèse diagnostique",
+      "ethnicity": "Ethnicité",
+      "exam_interpretation": {
+        "abnormal": "Anormal",
+        "normal": "Normal"
+      },
+      "experiment": "Détails de l'expérience",
+      "experimental_strategy_code": "Strat. exp.",
+      "experimental_strategy_code_tooltip": "Stratégie Expérimentale",
+      "family_history": "Histoire familiale",
+      "fetus_numbered": "Fœtus {{index}}",
+      "histology_code": "Histologie",
+      "last_update": "Dernière modification",
+      "no_phenotype": "Aucun phénotype rapporté",
+      "no_task_found": "Aucune tâche trouvée",
+      "no_variants": "Aucun variant pour ce cas",
+      "observations": "Observations",
+      "panel": "Panel",
+      "patient": "Patient",
+      "patient_id": "ID patient",
+      "phenotypes": "Phénotypes",
+      "phenotypes_non_observed": "Non-observé",
+      "phenotypes_observed": "Observé",
+      "platform": "Plateforme",
+      "pre_postnatal": "Pre/Postnatal",
+      "prescriber": "Prescripteur",
+      "prescriber_tooltip": "Médecin prescripteur",
+      "prescribing_inst": "Établissement presc.",
+      "prescribing_inst_tooltip": "Établissement prescripteur",
+      "primary_condition": "Condition principale",
+      "priority": "Priorité",
+      "project_code": "Projet",
+      "read_technology": "Technologie de lecture",
+      "requested_analysis": "Analyse demandée",
+      "run_alias": "Alias du lot",
+      "run_date": "Date du lot",
+      "run_name": "Nom du lot",
+      "sample_id": "ID Échantillon",
+      "sample_submitter_id": "ID échantillon {{sampleId}}",
+      "sample_type_code": "Type d’échantillon",
+      "sequencing": "ID séquençage {{seqId}}",
+      "sequencing_details": "Détails",
+      "sequencing_details_dialog": "Détails du séquençage",
+      "sequencing_id": "ID Séq.",
+      "sequencing_id_tooltip": "ID du séquençage",
+      "sequencing_overview": "Séquençage",
+      "status": "Statut",
+      "status_code": "Statut séq.",
+      "status_code_tooltip": "Statut séquençage",
+      "status_options": {
+        "completed": "Completé",
+        "draft": "Brouillon",
+        "in_progress": "En cours",
+        "incomplete": "Incomplet",
+        "revoke": "Refusé",
+        "submitted": "Soumis",
+        "unknown": "Inconnu"
+      },
+      "task_id": "Analyse",
+      "tissue_site": "Site tissulaire",
+      "title": "Détails de Cas",
+      "type": "Type",
+      "updated_on": "Dernière modification",
+      "view_variants": "Voir variants"
+    },
+    "variants": {
+      "title": "Variants",
+      "filters": {
+        "proband": "Proband",
+        "affected_status_code": {
+          "affected": "Affecté",
+          "non_affected": "Non-affecté",
+          "unknown": "Inconnu"
+        },
+        "cnv_type": {
+          "full_gene": "Gène entièrement contenu dans CNV",
+          "partial": "Gène recoupe le CNV à une de ses extrémités",
+          "full_cnv": "Gène contient entièrement le CNV"
+        },
+        "cnv": "CNV",
+        "cnv_to": "CNV (TO)",
+        "latest": "Récente",
+        "sample_submitter_id": "ID soumissionnaire :",
+        "sample_id": "ID échantillon",
+        "select_task_label": "Pipeline produisant des lectures alignées et des variants identifiés.",
+        "sequencing_id": "ID Séq.",
+        "snv": "SNV",
+        "snv_tn": "SNV (TN)",
+        "snv_tn_tooltip": "SNV (tumeur-normal)",
+        "snv_to": "SNV (TO)",
+        "snv_to_tooltip": "SNV (tumeur seule)",
+        "show_only_interpreted": "Afficher les variants interprétés",
+        "show_only_commented": "Afficher les variants commentés",
+        "filter_by_flag": "Filtrer par drapeau"
+      },
+      "dialog": {
+        "overlapping_gene": "Liste des gènes chevauchants le CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
+      }
+    },
+    "files": {
+      "title": "Fichiers"
+    }
+  },
+  "file_entity": {
+    "count_one": "{{total}} Fichier",
+    "count_other": "{{total}} Fichiers",
+    "search_by_id_placeholder": "Fichier, échantillon, patient, cas, lot ou séquençage",
+    "name": "Nom du fichier",
+    "format_code": "Format",
+    "data_type_code": "Type",
+    "size": "Taille",
+    "case_id": "Cas",
+    "diagnosis_lab": "Lab. de diagnostic",
+    "patient_id": "Patient",
+    "relationship_to_proband_code": "Parenté",
+    "submitter_sample_id": "Échantillon",
+    "task_id": "Tâche",
+    "seq_id": "Séquençage",
+    "hash": "Hash",
+    "run_alias": "Lot"
+  },
+  "variant_entity": {
+    "not_found": "Variante introuvable",
+    "not_found.button": "Retour à la liste de variants",
+    "header": {
+      "variants": "Variants",
+      "germline": "Germinal"
+    },
+    "overview": {
+      "title": "Résumé",
+      "interpretation": "Interprétation",
+      "my_network": "Mon Réseau",
+      "classification": "Classifications",
+      "exomiser": "Exomiser",
+      "details": "Détails",
+      "radiant": "Radiant",
+      "consequence": "Conséquence",
+      "clin_var": "ClinVar",
+      "patients": "Patients",
+      "patients_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
+      "gnom_ad": "gnomAD",
+      "gnom_ad_info_tooltip": "gnomAD 4.1.0 Joint (fréquence)",
+      "exon": "Exon",
+      "most_deleterious_consequence_notice": "Ce transcrit a été sélectionné car il représente la conséquence la plus délétère.",
+      "view_all_transcripts": "Voir tous les transcrits",
+      "prediction_scores": "Scores de prédiction",
+      "sift": "SIFT",
+      "revel": "REVEL",
+      "loeuf": "LOEUF",
+      "splice_ai": "SpliceAI",
+      "fathmm": "FATHMM",
+      "cadd_raw": "CADD (raw)",
+      "cadd_phred": "CADD (phred)",
+      "dann": "DANN",
+      "lrt": "LRT",
+      "polyphen2hvar": "PolyPhen-2 HVAR",
+      "phylop17way": "PhyloP17Way",
+      "pli": "pLI",
+      "associated_conditions_omim": "Conditions associées (OMIM)",
+      "external_references": "Références externes",
+      "dbSNP": "dbSNP",
+      "no_exomiser_score": "Ce variant n'a pas de score Exomiser.",
+      "no_interpretation_network": "Ce variant n'a pas été interprété dans votre réseau.",
+      "no_clin_var_interpretation": "Ce variant n'a pas été soumis à ClinVar."
+    },
+    "evidence": {
+      "title": "Preuves et conditions",
+      "clin_var": {
+        "title": "ClinVar",
+        "description": "Preuves pathogènes fournies par ClinVar",
+        "filters": {
+          "search_placeholder": "Filtrer par condition"
+        },
+        "table": {
+          "headers": {
+            "evaluated": "Évalué",
+            "evaluated.tooltip": "Soumission la plus récente pour cette combinaison de variant/condition",
+            "condition": "Condition",
+            "classification": "Classification",
+            "submission_count": "Soumissions",
+            "submission_count.tooltip": "Nombre d’interprétations soumises pour cette combinaison de variant/condition (RCV)",
+            "status": "Statut",
+            "origin": "Origine"
+          }
+        },
+        "origin": {
+          "germline": "Germline",
+          "inherited": "Héréditaire",
+          "paternal": "Paternel",
+          "biparental": "Biparental",
+          "not_applicable": "Non Applicable",
+          "maternal": "Maternel",
+          "uniparental": "Uniparental",
+          "tested_inconclusive": "Tests non concluants",
+          "de_novo": "DeNovo",
+          "not_reported": "Non Reporté",
+          "not_provided": "Non Fournie",
+          "unknown": "Inconnue",
+          "somatic": "Somatique"
+        }
+      },
+      "gene": {
+        "title": "Conditions et phénotypes associés par gène",
+        "filters": {
+          "search_placeholder": "Filtrer par condition ou phénotype",
+          "omim": "OMIM ({{value}})",
+          "orphanet": "Orphanet ({{value}})",
+          "hpo": "HPO ({{value}})"
+        },
+        "table": {
+          "headers": {
+            "condition": "Condition",
+            "inheritance": "Hérédité",
+            "classification": "Classification",
+            "status": "Statut",
+            "status.tooltip": "TODO",
+            "origin": "Origin"
+          },
+          "empty": {
+            "description": "Aucune condition pour ce gène. Essayez de réinitialiser vos onglets et filtres ci-dessus."
+          }
+        }
+      }
+    },
+    "frequency": {
+      "title": "Fréquence",
+      "my_network": {
+        "title": "Mon réseau",
+        "description": "Fréquences du réseau indiquant le nombre de patients porteurs du variant dans chaque catégorie, ainsi que le nombre d’individus homozygotes pour l’allèle alternatif.",
+        "primary_condition": "Condition principale",
+        "project": "Projet",
+        "analysis": "Analyse",
+        "global_frequencies": {
+          "all_patients": "Globale",
+          "all_patients_tooltip": "Nombre et proportion de patients porteurs du variant sur l’ensemble du réseau. La fraction représente le nombre de tous les patients porteurs du variant / le nombre total de patients dans le réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
+          "affected": "Atteint",
+          "affected_tooltip": "Nombre et proportion de patients atteints par la condition principale et porteurs du variant dans le réseau. La fraction représente le nombre de patients atteints qui sont porteurs du variant / le nombre total de patients atteints. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
+          "non_affected": "Non atteint",
+          "non_affected_tooltip": "Nombre et proportion de patients non atteints par la condition principale et porteurs du variant dans le réseau. La fraction représente le nombre de patients non atteints qui sont porteurs du variant / le nombre total de patients non atteints. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences."
+        },
+        "all_patients": "Tous les patients",
+        "affected_patients": "Patients atteints",
+        "non_affected_patients": "Patients non atteints",
+        "frequency": "Fréquence",
+        "homozygotes": "Homozygotes"
+      },
+      "public_cohorts": {
+        "title": "Cohortes publiques",
+        "cohort": "Cohorte",
+        "ac": "# Allèles alternatives",
+        "ac_tooltip": "Nombre d'allèles alternatives",
+        "an": "# Allèles (ALT + REF)",
+        "an_tooltip": "Nombre d’allèles alternatives + allèles références",
+        "hom": "# Homo",
+        "hom_tooltip": "Nombre de variants homozygotes",
+        "af": "Fréquence",
+        "af_tooltip": "Fréquence allélique",
+        "topmed_bravo": "TopMed",
+        "gnomad_genomes_v3": "gnomAD 4.1.0 Joint",
+        "1000_genomes": "1000 Génomes"
+      }
+    },
+    "transcripts": {
+      "title": "Transcrits",
+      "amino_acid_substitution": "Substitution acide aminé"
+    },
+    "cases": {
+      "title": "{{count}} Cas",
+      "tab": "Cas",
+      "description": "Cas du réseau porteurs de ce variant, répartis par statut d'interprétation.",
+      "affected_status": {
+        "affected": "Affecté",
+        "non_affected": "Non affecté",
+        "unknown": "Inconnu"
+      },
+      "common_headers": {
+        "patient_id": "Patient",
+        "relationship_to_proband": "Parenté"
+      },
+      "common_filters": {
+        "institutions": {
+          "all_institutions": "Tous les lab. de diagnostic"
+        },
+        "tests": {
+          "all_tests": "Toutes les analyses"
+        },
+        "created_on": {
+          "most_recent": "Plus récent",
+          "least_recent": "Plus ancien"
+        }
+      },
+      "status": {
+        "active": "Actif",
+        "completed": "Complété"
+      },
+      "interpreted_table": {
+        "title": "Interprété ({{count}})",
+        "headers": {
+          "case": "Cas",
+          "date": "Date",
+          "date_tooltip": "Date de dernière interprétation",
+          "mondo": "Condition (Mondo)",
+          "classification": "Classification",
+          "zygosity": "Zygosité",
+          "inheritance": "Hérédité",
+          "institution": "Lab de diagnostic",
+          "institution_tooltip": "Laboratoire de diagnostic moléculaire",
+          "test": "Analyse",
+          "status": "Statut"
+        },
+        "filters": {
+          "classification": "Classification",
+          "institution": "Lab de diagnostic",
+          "search_condition": "Condition",
+          "search_condition_placeholder": "Filtrer les conditions MONDO",
+          "test": "Analyse"
+        },
+        "expand": {
+          "patient_id": "ID du proband du cas",
+          "copy": "Copier",
+          "copy_success": "Copié dans le presse-papiers"
+        }
+      },
+      "other_table": {
+        "title": "Non-interprété ({{count}})",
+        "headers": {
+          "ad_alt": "ALT",
+          "ad_alt_tooltip": "Profondeur allélique ALT",
+          "ad_ratio": "ALT / (ALT + REF)",
+          "ad_ratio_tooltip": "Ratio allélique ALT/(ALT+REF)",
+          "ad_total": "ALT + REF",
+          "ad_total_tooltip": "Profondeur totale ALT + REF",
+          "affected_status": "Statut aff.",
+          "affected_status_tooltip": "Statut affecté",
+          "case": "Cas",
+          "case_tooltip": "ID du cas et du séquençage",
+          "date": "Date",
+          "date_tooltip": "Date de la dernière modification du cas (aaaa-mm-jj)",
+          "filter_fail": "Fail",
+          "filter_is_pass": "Filtre",
+          "filter_pass": "Pass",
+          "gq": "QG",
+          "gq_tooltip": "Qualité du génotypage",
+          "inheritance": "Hérédité",
+          "institution": "Lab. de diag.",
+          "institution_tooltip": "Laboratoire de diagnostic moléculaire",
+          "mondo": "Condition (Mondo)",
+          "patient_id": "Patient",
+          "phenotypes_hpo": "Phénotype (HPO)",
+          "primary_condition": "Condition principale",
+          "qd": "QP",
+          "qd_tooltip": "Qualité de profondeur",
+          "relationship_to_proband": "Relation",
+          "sample": "Échantillon",
+          "sex": "Sexe",
+          "status": "Statut",
+          "test": "Analyse",
+          "transmission_mode": "Transmission",
+          "zygosity": "Zygosité",
+          "zygosity_tooltip": "Zygosité"
+        },
+        "filters": {
+          "analysis_catalog_code": "Analyse",
+          "diagnosis_lab_code": "Lab. de diagnostic",
+          "filter_fail": "Fail",
+          "filter_is_pass": "Filtre",
+          "filter_pass": "Pass",
+          "search_hpo": "Recherche par phénotype",
+          "search_hpo_placeholder": "Filtrer par phénotype HPO",
+          "sex_code": "Sexe",
+          "transmission_mode": "Transmission",
+          "zygosity": "Zygosité"
+        },
+        "seq_id_abrv": "Séq.",
+        "view_case": "Voir cas",
+        "view_variants": "Voir variants"
+      }
+    }
+  },
+  "occurrence_flag": {
+    "flag": "Drapeau",
+    "pin": "Épingle",
+    "star": "Étoile",
+    "error": "Échec de la mise à jour. Veuillez réessayer.",
+    "tooltip": {
+      "flagged": "Variant avec drapeau",
+      "unflagged": "Aucun drapeau pour ce variant"
+    }
+  },
+  "notes": {
+    "variant": {
+      "title": "Commentaires sur le variant",
+      "button": "Commentaires",
+      "empty_title": "Aucun commentaire",
+      "empty_description": "Ajoutez des commentaires afin de documenter votre analyse et vos décisions (visibles par tous les utilisateurs ayant accès à ce cas).",
+      "editor_placeholder": "Ajoutez votre commentaire",
+      "edited": "(modifié)",
+      "char_limit": "{{count}}/{{max}}",
+      "delete_dialog": {
+        "title": "Supprimer le commentaire ?",
+        "description": "Êtes-vous sûr de vouloir supprimer ce commentaire ? Cette action est irréversible."
+      },
+      "tooltip": {
+        "add": "Ajouter un commentaire",
+        "view": "Voir les commentaires",
+        "none": "Aucun commentaire pour ce variant"
+      }
+    }
+  },
+  "main_navbar": {
+    "user_details": {
+      "profile": "Profil",
+      "sign_out": "Se déconnecter"
+    },
+    "links": {
+      "admin": "Admin",
+      "analysis": "Analyse",
+      "cases": "Cas",
+      "files": "Archive de fichiers",
+      "patients": "Patients",
+      "dashboard": "Tableau de bord",
+      "data_exploration": "Exploration des données",
+      "studies": "Études",
+      "variants": "Variants"
+    },
+    "actions": {
+      "community": "Communauté",
+      "resources": "Ressources",
+      "website": "Site web",
+      "documentation": "Documentation",
+      "contact": "Contact"
+    },
+    "tenant_switcher": {
+      "title": "Changer de tenant"
+    }
+  },
+  "occurrence": {
+    "canonical": "Transcrit canonique",
+    "mane_select": "Mane Select",
+    "mane_plus": "Mane Plus"
+  },
+  "pubmed_list_dialog": {
+    "title": "Publications PubMed"
+  },
+  "errors": {
+    "forbidden": {
+      "title": "Vous n'avez pas accès à RADIANT",
+      "body": "Pour obtenir l'accès, communiquez avec l'administrateur RADIANT de votre organisation.",
+      "cta": "Retour à la connexion"
+    }
+  },
+  "librechat": {
+    "david": {
+      "title": "D.A.V.I.D",
+      "badge": "Assistant IA",
+      "description": "Analytique prédictive par IA pour des soins oncologiques personnalisés",
+      "frame_title": "Assistant D.A.V.I.D",
+      "new_analysis": "Nouvelle analyse",
+      "not_configured": "D.A.V.I.D n'est pas configuré pour cet environnement.",
+      "open_in_new_tab": "Ouvrir dans un onglet",
+      "resume_history": "Reprendre l'historique",
+      "tooltip": "Posez à D.A.V.I.D n'importe quelle question sur vos patients, cas et fichiers, à partir de ce qui est à l'écran",
+      "prompt_case": "Contexte : cas {{caseId}} (tenant {{tenant}}). Charge le contexte de ce cas et présente un bref résumé clinique (structure familiale, phénotypes HPO). Ensuite, attends les questions de l'utilisateur.",
+      "prompt_patient": "Contexte : clé patient {{patientKey}} (tenant {{tenant}}). Charge le contexte clinique de ce patient et présente un bref résumé clinique. Ensuite, attends les questions de l'utilisateur.",
+      "prompt_cohort": "Contexte : la cohorte de patients du tenant {{tenant}}. En deux phrases, dis ce que tu peux répondre sur cette cohorte. Ensuite, attends les questions de l'utilisateur."
+    }
+  }
+}

@@ -1,0 +1,268 @@
+import { useState } from 'react';
+import { BrowserRouter } from 'react-router';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { CellContext, HeaderContext, RowSelectionState } from '@tanstack/react-table';
+
+import { SavedFilterType } from '@/api/api';
+import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
+import { type AppFeatures, createAppColumnHelper, type TableColumnDef } from '@/components/base/data-table/data-table';
+import DisplayTable from '@/components/base/data-table/display-table';
+import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
+
+import { StorySection } from '../story-section';
+
+import { data, type TableMockData } from './table-mock';
+
+const columnHelper = createAppColumnHelper<TableMockData>();
+
+const config: PortalConfig = {
+  variant_entity: {
+    app_id: ApplicationId.variant_entity,
+  },
+  germline_snv_occurrence: {
+    app_id: ApplicationId.germline_snv_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
+  },
+  germline_cnv_occurrence: {
+    app_id: ApplicationId.germline_cnv_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.GERMLINE_CNV_OCCURRENCE,
+  },
+  somatic_snv_to_occurrence: {
+    app_id: ApplicationId.somatic_snv_to_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+  },
+  somatic_snv_tn_occurrence: {
+    app_id: ApplicationId.somatic_snv_tn_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+  },
+  somatic_cnv_to_occurrence: {
+    app_id: ApplicationId.somatic_cnv_to_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_CNV_OCCURRENCE,
+  },
+  admin: {
+    admin_code: 'admin',
+    app_id: ApplicationId.admin,
+  },
+  portal: {
+    name: '',
+    navigation: {},
+  },
+};
+
+const meta = {
+  title: 'Components/Display Table',
+  component: DisplayTable,
+  args: {
+    data,
+    columns: [
+      columnHelper.accessor('firstName', {
+        cell: info => info.getValue(),
+        header: () => <span>First Name</span>,
+      }),
+      columnHelper.accessor(row => row.lastName, {
+        id: 'lastName',
+        cell: info => <i>{info.getValue()}</i>,
+        header: () => <span>Last Name</span>,
+      }),
+      columnHelper.accessor('age', {
+        header: () => 'Age',
+        cell: info => info.renderValue(),
+      }),
+      columnHelper.accessor('visits', {
+        header: () => <span>Visits</span>,
+      }),
+      columnHelper.accessor('status', {
+        header: 'Status',
+      }),
+      columnHelper.accessor('progress', {
+        header: 'Profile Progress',
+      }),
+    ] as TableColumnDef<TableMockData, any>[],
+  },
+  decorators: [
+    Story => (
+      <BrowserRouter>
+        <ConfigProvider config={config}>
+          <Story />
+        </ConfigProvider>
+      </BrowserRouter>
+    ),
+  ],
+} satisfies Meta<typeof DisplayTable>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: {},
+  render: args => (
+    <StorySection title="Default">
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
+};
+
+export const Borderless: Story = {
+  args: {
+    variant: 'borderless',
+  },
+  render: args => (
+    <StorySection title="Borderless">
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
+};
+
+export const Border: Story = {
+  args: {
+    variant: 'border',
+  },
+  render: args => (
+    <StorySection title="Border">
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
+};
+
+export const FullHeight: Story = {
+  args: {
+    fullHeight: true,
+  },
+  render: args => (
+    <StorySection
+      title="Full height"
+      description="Renders every row without the default 10-row max height, so the table never scrolls vertically."
+    >
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
+};
+
+export const WithHeaderGroups: Story = {
+  args: {
+    variant: 'border',
+    columns: [
+      columnHelper.group({
+        id: 'group_1',
+        header: () => <span>Group 1</span>,
+        columns: columnHelper.columns([
+          columnHelper.accessor('firstName', {
+            cell: info => info.getValue(),
+            footer: props => props.column.id,
+          }),
+          columnHelper.accessor(row => row.lastName, {
+            id: 'lastName',
+            cell: info => info.getValue(),
+            header: () => <span>Last Name</span>,
+            footer: props => props.column.id,
+          }),
+        ]),
+      }),
+      columnHelper.group({
+        header: 'group_2',
+        columns: columnHelper.columns([
+          columnHelper.accessor('age', {
+            header: () => 'Age',
+            footer: props => props.column.id,
+          }),
+          columnHelper.group({
+            header: 'More Info',
+            columns: columnHelper.columns([
+              columnHelper.accessor('visits', {
+                header: () => <span>Visits</span>,
+              }),
+              columnHelper.accessor('status', {
+                header: 'Status',
+              }),
+              columnHelper.accessor('progress', {
+                header: 'Profile Progress',
+              }),
+            ]),
+          }),
+        ]),
+      }),
+    ] as TableColumnDef<TableMockData, any>[],
+  },
+  render: args => (
+    <StorySection title="With header groups">
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
+};
+
+export const Loading: Story = {
+  args: {
+    loading: true,
+  },
+  render: args => (
+    <StorySection title="Loading" description="Renders skeleton rows in place of the data while it is loading.">
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
+};
+
+export const Empty: Story = {
+  args: {
+    data: [],
+  },
+  render: args => (
+    <StorySection title="Empty">
+      <DisplayTable {...args} />
+    </StorySection>
+  ),
+};
+
+export const WithRowSelection: Story = {
+  args: {
+    columns: [
+      {
+        id: 'rowSelection',
+        size: 48,
+        maxSize: 48,
+        header: (header: HeaderContext<AppFeatures, any, unknown>) => <RowSelectionHeader table={header.table} />,
+        cell: (info: CellContext<AppFeatures, any, unknown>) => <RowSelectionCell row={info.row} />,
+      },
+      columnHelper.accessor('firstName', {
+        cell: info => info.getValue(),
+        header: () => <span>First Name</span>,
+      }),
+      columnHelper.accessor(row => row.lastName, {
+        id: 'lastName',
+        cell: info => <i>{info.getValue()}</i>,
+        header: () => <span>Last Name</span>,
+      }),
+      columnHelper.accessor('age', {
+        header: () => 'Age',
+        cell: info => info.renderValue(),
+      }),
+      columnHelper.accessor('visits', {
+        header: () => <span>Visits</span>,
+      }),
+      columnHelper.accessor('status', {
+        header: 'Status',
+      }),
+      columnHelper.accessor('progress', {
+        header: 'Profile Progress',
+      }),
+    ] as TableColumnDef<TableMockData, any>[],
+  },
+  render: args => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+    return (
+      <StorySection
+        title="With row selection"
+        description="Click a row's checkbox to select it, or use the header checkbox to toggle all rows on the page."
+      >
+        <DisplayTable {...args} rowSelection={rowSelection} onRowSelectionChange={setRowSelection} />
+      </StorySection>
+    );
+  },
+};

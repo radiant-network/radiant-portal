@@ -1,0 +1,293 @@
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/server"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
+	"github.com/stretchr/testify/assert"
+)
+
+const mockUserUUID = "11111111-1111-1111-1111-111111111111"
+
+func assertPostOccurrenceNote(t *testing.T, repo *postgres.OccurrenceNotesRepository, auth *testutils.MockAuth, body string, expectedStatus int) *types.OccurrenceNote {
+	t.Helper()
+	router := tenantRouter()
+	router.POST("/:tenant/notes", server.PostOccurrenceNoteHandler(repo, auth))
+
+	req, _ := http.NewRequest("POST", "/radiant/notes", bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, expectedStatus, w.Code)
+	if expectedStatus == http.StatusCreated {
+		var note types.OccurrenceNote
+		err := json.Unmarshal(w.Body.Bytes(), &note)
+		assert.NoError(t, err)
+		return &note
+	}
+	return nil
+}
+
+func assertPutOccurrenceNote(t *testing.T, repo *postgres.OccurrenceNotesRepository, auth *testutils.MockAuth, id string, body string, expectedStatus int) *types.OccurrenceNote {
+	t.Helper()
+	router := tenantRouter()
+	router.PUT("/:tenant/notes/:id", server.PutOccurrenceNoteHandler(repo, auth))
+
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/radiant/notes/%s", id), bytes.NewBuffer([]byte(body)))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, expectedStatus, w.Code)
+	if expectedStatus == http.StatusOK {
+		var note types.OccurrenceNote
+		err := json.Unmarshal(w.Body.Bytes(), &note)
+		assert.NoError(t, err)
+		return &note
+	}
+	return nil
+}
+
+func assertGetOccurrenceNotes(t *testing.T, repo *postgres.OccurrenceNotesRepository, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) []types.OccurrenceNote {
+	t.Helper()
+	router := tenantRouter()
+	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id", server.GetOccurrenceNotesHandler(repo))
+
+	url := fmt.Sprintf("/radiant/notes/%d/%d/%d/%s", caseID, seqID, taskID, occurrenceID)
+	req, _ := http.NewRequest("GET", url, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, expectedStatus, w.Code)
+	var notes []types.OccurrenceNote
+	err := json.Unmarshal(w.Body.Bytes(), &notes)
+	assert.NoError(t, err)
+	return notes
+}
+
+func assertGetOccurrenceNoteCount(t *testing.T, repo *postgres.OccurrenceNotesRepository, caseID int, seqID int, taskID int, occurrenceID string, expectedStatus int) int64 {
+	t.Helper()
+	router := tenantRouter()
+	router.GET("/:tenant/notes/:case_id/:seq_id/:task_id/:occurrence_id/count", server.GetOccurrenceNoteCountHandler(repo))
+
+	url := fmt.Sprintf("/radiant/notes/%d/%d/%d/%s/count", caseID, seqID, taskID, occurrenceID)
+	req, _ := http.NewRequest("GET", url, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, expectedStatus, w.Code)
+	var count types.Count
+	err := json.Unmarshal(w.Body.Bytes(), &count)
+	assert.NoError(t, err)
+	return count.Count
+}
+
+func assertDeleteOccurrenceNote(t *testing.T, repo *postgres.OccurrenceNotesRepository, auth *testutils.MockAuth, id string, expectedStatus int) {
+	t.Helper()
+	router := tenantRouter()
+	router.DELETE("/:tenant/notes/:id", server.DeleteOccurrenceNoteHandler(repo, auth))
+
+	req, _ := http.NewRequest("DELETE", fmt.Sprintf("/radiant/notes/%s", id), nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, expectedStatus, w.Code)
+}
+
+// All tests below use case_id=1 (preserved by cleanUp) and a unique
+// occurrence_id per test so they can run in parallel without interfering.
+
+func Test_GetOccurrenceNoteCount(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90001", "content": "First note"}`, http.StatusCreated)
+		assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90001", "content": "Second note"}`, http.StatusCreated)
+
+		count := assertGetOccurrenceNoteCount(t, repo, 1, 1, 1, "90001", http.StatusOK)
+		assert.Equal(t, int64(2), count)
+	})
+}
+
+func Test_GetOccurrenceNoteCount_EmptyResult(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+
+		count := assertGetOccurrenceNoteCount(t, repo, 1, 1, 1, "99999", http.StatusOK)
+		assert.Equal(t, int64(0), count)
+	})
+}
+
+func Test_GetOccurrenceNoteCount_ExcludesDeletedNotes(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		created := assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90002", "content": "Note to delete"}`, http.StatusCreated)
+		if !assert.NotNil(t, created) {
+			return
+		}
+		assertDeleteOccurrenceNote(t, repo, auth, created.ID, http.StatusNoContent)
+
+		count := assertGetOccurrenceNoteCount(t, repo, 1, 1, 1, "90002", http.StatusOK)
+		assert.Equal(t, int64(0), count)
+	})
+}
+
+func Test_PostOccurrenceNote(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		created := assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90003", "content": "Integration test note"}`, http.StatusCreated)
+
+		if assert.NotNil(t, created) {
+			assert.NotEmpty(t, created.ID)
+			assert.Equal(t, 1, created.CaseID)
+			assert.Equal(t, 1, created.SeqID)
+			assert.Equal(t, 1, created.TaskID)
+			assert.Equal(t, "90003", created.OccurrenceID)
+			assert.Equal(t, mockUserUUID, created.UserID)
+			assert.Equal(t, testutils.DefaultMockFullName, created.UserName)
+			assert.Equal(t, "Integration test note", created.Content)
+			assert.NotZero(t, created.CreatedAt)
+			assert.NotZero(t, created.UpdatedAt)
+		}
+	})
+}
+
+func Test_PostOccurrenceNote_MissingContent(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90004"}`, http.StatusBadRequest)
+	})
+}
+
+func Test_GetOccurrenceNotes_EmptyResult(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+
+		notes := assertGetOccurrenceNotes(t, repo, 1, 1, 1, "99998", http.StatusOK)
+		assert.Empty(t, notes)
+	})
+}
+
+func Test_GetOccurrenceNotes(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90005", "content": "First note"}`, http.StatusCreated)
+		assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90005", "content": "Second note"}`, http.StatusCreated)
+
+		notes := assertGetOccurrenceNotes(t, repo, 1, 1, 1, "90005", http.StatusOK)
+
+		if assert.Len(t, notes, 2) {
+			// Most recently created note should be first (ORDER BY created_at DESC)
+			assert.Equal(t, "Second note", notes[0].Content)
+			assert.Equal(t, "First note", notes[1].Content)
+		}
+	})
+}
+
+func Test_PutOccurrenceNote(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		created := assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90006", "content": "Original content"}`, http.StatusCreated)
+		if !assert.NotNil(t, created) {
+			return
+		}
+
+		updated := assertPutOccurrenceNote(t, repo, auth, created.ID, `{"content": "Updated content"}`, http.StatusOK)
+
+		if assert.NotNil(t, updated) {
+			assert.Equal(t, created.ID, updated.ID)
+			assert.Equal(t, "Updated content", updated.Content)
+			assert.Equal(t, mockUserUUID, updated.UserID)
+		}
+	})
+}
+
+func Test_PutOccurrenceNote_NoteNotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		assertPutOccurrenceNote(t, repo, auth, "00000000-0000-0000-0000-000000000000", `{"content": "Updated content"}`, http.StatusNotFound)
+	})
+}
+
+func Test_PutOccurrenceNote_Forbidden(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		ownerAuth := &testutils.MockAuth{Id: mockUserUUID}
+		otherAuth := &testutils.MockAuth{Id: "22222222-2222-2222-2222-222222222222"}
+
+		created := assertPostOccurrenceNote(t, repo, ownerAuth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90007", "content": "Original content"}`, http.StatusCreated)
+		if !assert.NotNil(t, created) {
+			return
+		}
+
+		assertPutOccurrenceNote(t, repo, otherAuth, created.ID, `{"content": "Hijacked content"}`, http.StatusForbidden)
+	})
+}
+
+func Test_DeleteOccurrenceNote(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		created := assertPostOccurrenceNote(t, repo, auth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90008", "content": "Note to delete"}`, http.StatusCreated)
+		if !assert.NotNil(t, created) {
+			return
+		}
+
+		assertDeleteOccurrenceNote(t, repo, auth, created.ID, http.StatusNoContent)
+
+		notes := assertGetOccurrenceNotes(t, repo, 1, 1, 1, "90008", http.StatusOK)
+		assert.Empty(t, notes)
+	})
+}
+
+func Test_DeleteOccurrenceNote_NoteNotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		auth := &testutils.MockAuth{Id: mockUserUUID}
+
+		assertDeleteOccurrenceNote(t, repo, auth, "00000000-0000-0000-0000-000000000000", http.StatusNotFound)
+	})
+}
+
+func Test_DeleteOccurrenceNote_Forbidden(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+		ownerAuth := &testutils.MockAuth{Id: mockUserUUID}
+		otherAuth := &testutils.MockAuth{Id: "22222222-2222-2222-2222-222222222222"}
+
+		created := assertPostOccurrenceNote(t, repo, ownerAuth, `{"case_id": 1, "seq_id": 1, "task_id": 1, "occurrence_id": "90009", "content": "Note to delete"}`, http.StatusCreated)
+		if !assert.NotNil(t, created) {
+			return
+		}
+
+		assertDeleteOccurrenceNote(t, repo, otherAuth, created.ID, http.StatusForbidden)
+
+		// Note should still be visible after failed delete attempt
+		notes := assertGetOccurrenceNotes(t, repo, 1, 1, 1, "90009", http.StatusOK)
+		assert.Len(t, notes, 1)
+	})
+}

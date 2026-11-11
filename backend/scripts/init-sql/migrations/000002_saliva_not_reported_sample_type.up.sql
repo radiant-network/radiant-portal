@@ -1,0 +1,2 @@
+INSERT INTO public.sample_type (code, name_en) VALUES ('saliva', 'Saliva') ON CONFLICT (code) DO NOTHING;
+INSERT INTO public.sample_type (code, name_en) VALUES ('not_reported', 'Not Reported') ON CONFLICT (code) DO NOTHING;

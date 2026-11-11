@@ -1,0 +1,3 @@
+locus_id	symbol	transcript_id	is_picked	aa_change	dna_change
+1000	BRAF	T001	true	p.Val600Glu	c.1799T>A
+1000	BRAF	T002	false	p.Val640Glu	c.1919T>A

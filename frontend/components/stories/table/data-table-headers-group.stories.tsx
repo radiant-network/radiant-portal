@@ -1,0 +1,784 @@
+// @ts-nocheck
+import { BrowserRouter } from 'react-router';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+
+import { SortBodyOrderEnum } from '@/api/api';
+import PinRowCell from '@/components/base/data-table/cells/pin-row-cell';
+import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
+import DataTable, {
+  type AppFeatures,
+  createAppColumnHelper,
+  createColumnSettings,
+  type HeaderContext,
+  type TableColumnDef,
+} from '@/components/base/data-table/data-table';
+import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
+import { Card, CardContent } from '@/components/base/shadcn/card';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
+
+import { StorySection } from '../story-section';
+
+import {
+  advancedData,
+  type AdvancedTableMockData,
+  data,
+  mockColumns,
+  mockDefaultColumnSettings,
+  type TableMockData,
+} from './table-mock';
+
+const columnHelper = createAppColumnHelper<TableMockData>();
+
+const defaultMockColumnSettings = createColumnSettings([
+  {
+    id: 'pinRow',
+    visible: true,
+    label: 'Pin Row',
+    pinningPosition: 'start',
+    fixed: true,
+    variant: 'ghost',
+  },
+  {
+    id: 'rowSelection',
+    visible: true,
+    label: 'Row Selection',
+    pinningPosition: 'start',
+    fixed: true,
+  },
+  {
+    id: 'firstName',
+    visible: true,
+    label: 'First Name',
+  },
+  {
+    id: 'lastName',
+    visible: true,
+    label: 'Last Name',
+  },
+  {
+    id: 'age',
+    visible: true,
+    label: 'Age',
+  },
+  {
+    id: 'visits',
+    visible: true,
+    label: 'firstName',
+  },
+  {
+    id: 'status',
+    visible: true,
+    label: 'Status',
+  },
+  {
+    id: 'progress',
+    visible: true,
+    label: 'Profile Progress',
+  },
+]);
+
+const defaultAdvancedColumnSettings = createColumnSettings([
+  {
+    id: 'pinRow',
+    visible: true,
+    label: 'Pin Row',
+    fixed: true,
+    pinningPosition: 'start',
+    variant: 'ghost',
+  },
+  {
+    id: 'rowSelection',
+    visible: true,
+    label: 'Row Selection',
+    fixed: true,
+    pinningPosition: 'start',
+  },
+  {
+    id: 'firstName',
+    visible: true,
+    label: 'First Name',
+  },
+  {
+    id: 'lastName',
+    visible: true,
+    label: 'Last Name',
+  },
+  {
+    id: 'email',
+    visible: true,
+    label: 'Email',
+  },
+  {
+    id: 'phoneNumber',
+    visible: true,
+    label: 'Phone Number',
+  },
+  {
+    id: 'age',
+    visible: true,
+    label: 'Age',
+  },
+  {
+    id: 'visits',
+    visible: true,
+    label: 'firstName',
+  },
+  {
+    id: 'status',
+    visible: true,
+    label: 'Status',
+  },
+  {
+    id: 'progress',
+    visible: true,
+    label: 'Profile Progress',
+  },
+  {
+    id: 'hobbies',
+    visible: false,
+    label: 'Hobbies',
+  },
+  {
+    id: 'country',
+    visible: true,
+    label: 'Country',
+  },
+  {
+    id: 'city',
+    visible: true,
+    label: 'City',
+  },
+  {
+    id: 'accountCreatedAt',
+    visible: true,
+    label: 'Account Created At',
+  },
+  {
+    id: 'lastLoginAt',
+    visible: true,
+    label: 'Last Login At',
+  },
+  {
+    id: 'isActive',
+    visible: true,
+    label: 'Is Active',
+  },
+  {
+    id: 'role',
+    visible: true,
+    label: 'Role',
+  },
+  {
+    id: 'lastVisitAt',
+    visible: true,
+    label: 'Last Visit At',
+  },
+  {
+    id: 'preferredLanguage',
+    visible: true,
+    label: 'Preferred Language',
+  },
+  {
+    id: 'newsletterSubscribed',
+    visible: true,
+    label: 'Newsletter Subscribed',
+  },
+  {
+    id: 'themePreference',
+    visible: true,
+    label: 'Theme Preference',
+  },
+  {
+    id: 'tags',
+    visible: false,
+    label: 'Tags',
+  },
+  {
+    id: 'notes',
+    visible: false,
+    label: 'Notes',
+  },
+]);
+
+const config: PortalConfig = {
+  variant_entity: {
+    app_id: ApplicationId.variant_entity,
+  },
+  germline_snv_occurrence: {
+    app_id: ApplicationId.germline_snv_occurrence,
+    aggregations: [] as any,
+  },
+  germline_cnv_occurrence: {
+    app_id: ApplicationId.germline_cnv_occurrence,
+    aggregations: [] as any,
+  },
+  admin: {
+    admin_code: 'admin',
+    app_id: ApplicationId.admin,
+  },
+  portal: {
+    name: '',
+    navigation: {},
+  },
+};
+
+const meta = {
+  title: 'Features/Data Table/Headers Group',
+  component: DataTable,
+  args: {
+    id: 'storybook',
+    columns: mockColumns,
+    data,
+    serverOptions: {
+      defaultSorting: [
+        {
+          field: 'germline_pf_wgs',
+          order: SortBodyOrderEnum.Asc,
+        },
+      ],
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      onSortingChange: sorting => {},
+    },
+    defaultColumnSettings: mockDefaultColumnSettings,
+    loadingStates: {
+      total: false,
+      list: false,
+    },
+    pagination: {
+      type: 'server',
+      state: {
+        pageIndex: 0,
+        pageSize: 10,
+      },
+      onPaginationChange: () => {},
+    },
+    total: 10,
+  },
+  decorators: [
+    Story => (
+      <BrowserRouter>
+        <ConfigProvider config={config}>
+          <Story />
+        </ConfigProvider>
+      </BrowserRouter>
+    ),
+  ],
+} satisfies Meta<typeof DataTable<any>>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+// Shared full-page wrapper: every story renders the same DataTable scaffold,
+// differing only by its column config.
+function HeadersGroupStory({ args, title }: { args: any; title: string }) {
+  return (
+    <StorySection title={title}>
+      <div className="bg-muted w-full size-auto h-screen overflow-auto p-3">
+        <Card className="h-auto size-max w-full">
+          <CardContent>
+            <DataTable {...args} />
+          </CardContent>
+        </Card>
+      </div>
+    </StorySection>
+  );
+}
+
+export const Default: Story = {
+  args: {
+    enableFullscreen: true,
+    enableColumnOrdering: true,
+    columns: [
+      {
+        id: 'actions',
+        columns: [
+          {
+            id: 'pinRow',
+            cell: PinRowCell,
+            size: 10,
+            maxSize: 10,
+            enableResizing: false,
+            enablePinning: false,
+          },
+          {
+            id: 'rowSelection',
+            size: 48,
+            maxSize: 48,
+            header: (header: HeaderContext<AppFeatures, TableMockData, unknown>) => (
+              <RowSelectionHeader table={header.table} />
+            ),
+            cell: info => <RowSelectionCell row={info.row} />,
+            enableResizing: false,
+            enablePinning: false,
+          },
+        ],
+      },
+      {
+        header: 'Group Left',
+        size: 400,
+        minSize: 200,
+        columns: [
+          columnHelper.accessor('firstName', {
+            cell: info => info.getValue(),
+          }),
+          columnHelper.accessor('lastName', {
+            id: 'lastName',
+            cell: info => info.getValue(),
+            header: 'Last Name',
+          }),
+        ],
+      },
+      {
+        header: 'Group Right',
+        size: 400,
+        minSize: 200,
+        columns: [
+          columnHelper.accessor('age', {
+            header: () => 'Age',
+          }),
+          columnHelper.accessor('visits', {
+            header: 'Visits',
+          }),
+          columnHelper.accessor('status', {
+            header: 'Status',
+          }),
+          columnHelper.accessor('progress', {
+            header: 'Profile Progress',
+          }),
+        ],
+      },
+    ] as TableColumnDef<TableMockData, any>[],
+    defaultColumnSettings: defaultMockColumnSettings,
+  },
+  render: args => <HeadersGroupStory args={args} title="Default" />,
+};
+
+export const WithSubgroups: Story = {
+  args: {
+    data: data.slice(0, 10),
+    enableFullscreen: true,
+    enableColumnOrdering: true,
+    columns: [
+      {
+        id: 'actions',
+        columns: [
+          columnHelper.group({
+            id: 'sub-group-actions',
+            columns: [
+              {
+                id: 'pinRow',
+                cell: PinRowCell,
+                size: 48,
+                maxSize: 48,
+                enableResizing: false,
+                enablePinning: false,
+              },
+              {
+                id: 'rowSelection',
+                header: (header: HeaderContext<AppFeatures, TableMockData, unknown>) => (
+                  <RowSelectionHeader table={header.table} />
+                ),
+                cell: info => <RowSelectionCell row={info.row} />,
+                size: 48,
+                maxSize: 48,
+                enableResizing: false,
+                enablePinning: false,
+              },
+            ],
+          }),
+        ],
+      },
+      {
+        header: 'Group Left',
+        columns: [
+          columnHelper.group({
+            id: 'sub-group-left',
+            columns: [
+              columnHelper.accessor('firstName', {
+                cell: info => info.getValue(),
+              }),
+              columnHelper.accessor('lastName', {
+                id: 'lastName',
+                cell: info => info.getValue(),
+                header: 'Last Name',
+              }),
+            ],
+          }),
+        ],
+      },
+      {
+        header: 'Group Right',
+        columns: [
+          columnHelper.group({
+            header: 'Sub Group',
+            columns: [
+              columnHelper.accessor('age', {
+                header: () => 'Age',
+              }),
+              columnHelper.accessor('visits', {
+                header: 'Visits',
+              }),
+              columnHelper.accessor('status', {
+                header: 'Status',
+              }),
+              columnHelper.accessor('progress', {
+                header: 'Profile Progress',
+              }),
+            ],
+          }),
+        ],
+      },
+    ] as TableColumnDef<TableMockData, any>[],
+    defaultColumnSettings: defaultMockColumnSettings,
+  },
+  render: args => <HeadersGroupStory args={args} title="With subgroups" />,
+};
+
+export const Advanced: Story = {
+  args: {
+    data: advancedData.slice(0, 10),
+    enableFullscreen: true,
+    enableColumnOrdering: true,
+    columns: [
+      // group actions
+      {
+        id: 'actions',
+        size: 96,
+        columns: [
+          columnHelper.group({
+            id: 'sub-group-user',
+            columns: [
+              {
+                id: 'pinRow',
+                cell: PinRowCell,
+                size: 48,
+                maxSize: 48,
+                enableResizing: false,
+                enablePinning: false,
+              },
+              {
+                id: 'rowSelection',
+                header: (header: HeaderContext<AppFeatures, AdvancedTableMockData, unknown>) => (
+                  <RowSelectionHeader table={header.table} />
+                ),
+                cell: info => <RowSelectionCell row={info.row} />,
+                size: 48,
+                maxSize: 48,
+                enableResizing: false,
+                enablePinning: false,
+              },
+            ],
+          }),
+        ],
+      },
+      // group user
+      {
+        header: 'User',
+        columns: [
+          columnHelper.group({
+            header: 'Name',
+            columns: [
+              columnHelper.accessor('firstName', {
+                cell: info => info.getValue(),
+              }),
+              columnHelper.accessor('lastName', {
+                id: 'lastName',
+                cell: info => info.getValue(),
+                header: 'Last Name',
+              }),
+            ],
+          }),
+          columnHelper.accessor('email', {
+            header: 'Email',
+          }),
+          columnHelper.accessor('phoneNumber', {
+            header: 'Phone Number',
+          }),
+        ],
+      },
+      // group statistics
+      {
+        header: 'Statistics',
+        columns: [
+          columnHelper.group({
+            id: 'subgroup-statistics',
+            columns: [
+              columnHelper.accessor('age', {
+                header: 'Age',
+              }),
+              columnHelper.accessor('visits', {
+                header: 'Visits',
+              }),
+              columnHelper.accessor('status', {
+                header: 'Status',
+              }),
+              columnHelper.accessor('progress', {
+                header: 'Profile Progress',
+              }),
+              columnHelper.accessor('hobbies', {
+                header: 'Hobbies',
+              }),
+            ],
+          }),
+        ],
+      },
+      // group location
+      {
+        header: 'Location',
+        columns: [
+          columnHelper.group({
+            id: 'subgroup-location',
+            columns: [
+              columnHelper.accessor('country', {
+                header: 'Country',
+              }),
+              columnHelper.accessor('city', {
+                header: 'City',
+              }),
+            ],
+          }),
+        ],
+      },
+      // group account
+      {
+        header: 'Account',
+        columns: [
+          columnHelper.group({
+            id: 'sub-group-account',
+            columns: [
+              columnHelper.accessor('isActive', {
+                header: 'Is Active',
+              }),
+              columnHelper.accessor('role', {
+                header: 'Role',
+              }),
+              columnHelper.accessor('preferredLanguage', {
+                header: 'Preferred Language',
+              }),
+              columnHelper.accessor('newsletterSubscribed', {
+                header: 'Newsletter Subscribed',
+              }),
+              columnHelper.accessor('themePreference', {
+                header: 'Theme Preference',
+              }),
+              columnHelper.accessor('accountCreatedAt', {
+                header: 'Account Created At',
+              }),
+              columnHelper.accessor('lastLoginAt', {
+                header: 'Last Login At',
+              }),
+              columnHelper.accessor('lastVisitAt', {
+                header: 'Last Visited At',
+              }),
+            ],
+          }),
+        ],
+      },
+      // group additionals
+      {
+        header: 'Additionals',
+        columns: [
+          columnHelper.group({
+            id: 'sub-group-additionals',
+            columns: [
+              columnHelper.accessor('tags', {
+                header: 'Tags',
+              }),
+              columnHelper.accessor('notes', {
+                header: 'Notes',
+              }),
+            ],
+          }),
+        ],
+      },
+    ] as TableColumnDef<AdvancedTableMockData, any>[],
+    defaultColumnSettings: defaultAdvancedColumnSettings,
+    loadingStates: {
+      total: false,
+      list: false,
+    },
+    pagination: {
+      type: 'server',
+      state: {
+        pageIndex: 0,
+        pageSize: 10,
+      },
+    },
+  },
+  render: args => <HeadersGroupStory args={args} title="Advanced" />,
+};
+
+export const AdvancedWith50users: Story = {
+  args: {
+    data: advancedData,
+    enableFullscreen: true,
+    enableColumnOrdering: true,
+    columns: [
+      // group actions
+      {
+        id: 'actions',
+        size: 96,
+        columns: [
+          columnHelper.group({
+            id: 'sub-group-user',
+            columns: [
+              {
+                id: 'pinRow',
+                cell: PinRowCell,
+                size: 48,
+                maxSize: 48,
+                enableResizing: false,
+                enablePinning: false,
+              },
+              {
+                id: 'rowSelection',
+                header: (header: HeaderContext<AppFeatures, AdvancedTableMockData, unknown>) => (
+                  <RowSelectionHeader table={header.table} />
+                ),
+                cell: info => <RowSelectionCell row={info.row} />,
+                size: 48,
+                maxSize: 48,
+                enableResizing: false,
+                enablePinning: false,
+              },
+            ],
+          }),
+        ],
+      },
+      // group user
+      {
+        header: 'User',
+        columns: [
+          columnHelper.group({
+            header: 'Name',
+            columns: [
+              columnHelper.accessor('firstName', {
+                cell: info => info.getValue(),
+              }),
+              columnHelper.accessor('lastName', {
+                id: 'lastName',
+                cell: info => info.getValue(),
+                header: 'Last Name',
+              }),
+            ],
+          }),
+          columnHelper.accessor('email', {
+            header: 'Email',
+          }),
+          columnHelper.accessor('phoneNumber', {
+            header: 'Phone Number',
+          }),
+        ],
+      },
+      // group statistics
+      {
+        header: 'Statistics',
+        columns: [
+          columnHelper.group({
+            id: 'subgroup-statistics',
+            columns: [
+              columnHelper.accessor('age', {
+                header: 'Age',
+              }),
+              columnHelper.accessor('visits', {
+                header: 'Visits',
+              }),
+              columnHelper.accessor('status', {
+                header: 'Status',
+              }),
+              columnHelper.accessor('progress', {
+                header: 'Profile Progress',
+              }),
+              columnHelper.accessor('hobbies', {
+                header: 'Hobbies',
+              }),
+            ],
+          }),
+        ],
+      },
+      // group location
+      {
+        header: 'Location',
+        columns: [
+          columnHelper.group({
+            id: 'subgroup-location',
+            columns: [
+              columnHelper.accessor('country', {
+                header: 'Country',
+              }),
+              columnHelper.accessor('city', {
+                header: 'City',
+              }),
+            ],
+          }),
+        ],
+      },
+      // group account
+      {
+        header: 'Account',
+        columns: [
+          columnHelper.group({
+            id: 'sub-group-account',
+            columns: [
+              columnHelper.accessor('isActive', {
+                header: 'Is Active',
+              }),
+              columnHelper.accessor('role', {
+                header: 'Role',
+              }),
+              columnHelper.accessor('preferredLanguage', {
+                header: 'Preferred Language',
+              }),
+              columnHelper.accessor('newsletterSubscribed', {
+                header: 'Newsletter Subscribed',
+              }),
+              columnHelper.accessor('themePreference', {
+                header: 'Theme Preference',
+              }),
+              columnHelper.accessor('accountCreatedAt', {
+                header: 'Account Created At',
+              }),
+              columnHelper.accessor('lastLoginAt', {
+                header: 'Last Login At',
+              }),
+              columnHelper.accessor('lastVisitAt', {
+                header: 'Last Visited At',
+              }),
+            ],
+          }),
+        ],
+      },
+      // group additionals
+      {
+        header: 'Additionals',
+        columns: [
+          columnHelper.group({
+            id: 'sub-group-additionals',
+            columns: [
+              columnHelper.accessor('tags', {
+                header: 'Tags',
+              }),
+              columnHelper.accessor('notes', {
+                header: 'Notes',
+              }),
+            ],
+          }),
+        ],
+      },
+    ] as TableColumnDef<AdvancedTableMockData, any>[],
+    defaultColumnSettings: defaultAdvancedColumnSettings,
+    loadingStates: {
+      total: false,
+      list: false,
+    },
+    pagination: {
+      type: 'server',
+      state: {
+        pageIndex: 0,
+        pageSize: 50,
+      },
+    },
+  },
+  render: args => <HeadersGroupStory args={args} title="Advanced with 50 users" />,
+};

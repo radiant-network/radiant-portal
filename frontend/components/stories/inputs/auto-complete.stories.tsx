@@ -1,0 +1,141 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+import { useState } from 'react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { action } from 'storybook/actions';
+
+import { AutoComplete, type Option } from '@/components/base/data-entry/auto-complete';
+
+import { StorySection } from '../story-section';
+
+import { StoryErrorField } from './story-error-field';
+
+const FRAMEWORKS: Option[] = [
+  {
+    value: 'next.js',
+    label: 'Next.js',
+  },
+  {
+    value: 'sveltekit',
+    label: 'SvelteKit',
+  },
+  {
+    value: 'nuxt.js',
+    label: 'Nuxt.js',
+  },
+  {
+    value: 'remix',
+    label: 'Remix',
+  },
+  {
+    value: 'astro',
+    label: 'Astro',
+  },
+  {
+    value: 'wordpress',
+    label: 'WordPress',
+  },
+  {
+    value: 'express.js',
+    label: 'Express.js',
+  },
+  {
+    value: 'nest.js',
+    label: 'Nest.js',
+  },
+];
+
+const meta = {
+  title: 'Components/Inputs/Auto Complete',
+  component: AutoComplete,
+  args: {
+    value: '',
+    options: FRAMEWORKS,
+    onChange: () => {},
+    placeholder: 'Placeholder',
+  },
+} satisfies Meta<typeof AutoComplete>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  render: () => {
+    const [value, setValue] = useState<string | undefined>('nest.js');
+
+    return (
+      <StorySection title="Default">
+        <AutoComplete
+          value={value}
+          onChange={value => {
+            setValue(value);
+            action('onChange')(value);
+          }}
+          className="max-w-[300px]"
+          placeholder="Placeholder"
+          options={FRAMEWORKS}
+        />
+      </StorySection>
+    );
+  },
+};
+
+export const Async: Story = {
+  render: () => {
+    const [value, setValue] = useState<string | undefined>('');
+    const [loading, setLoading] = useState(false);
+    const [options, setOptions] = useState<Option[]>([]);
+
+    const handleSearch = async (searchValue: string) => {
+      setLoading(true);
+      action('onSearch')(searchValue);
+
+      return new Promise<Option[]>(resolve => {
+        setTimeout(() => resolve(FRAMEWORKS), 1000);
+      })
+        .then(results => setOptions(results))
+        .finally(() => setLoading(false));
+    };
+
+    return (
+      <StorySection title="Async">
+        <AutoComplete
+          value={value}
+          onChange={value => {
+            setValue(value);
+            action('onChange')(value);
+          }}
+          options={options}
+          loading={loading}
+          onSearch={handleSearch}
+          debounceDelay={300}
+          className="max-w-[300px]"
+          placeholder="Placeholder"
+        />
+      </StorySection>
+    );
+  },
+};
+
+export const ErrorState: Story = {
+  render: () => {
+    const [value, setValue] = useState<string | undefined>('');
+
+    return (
+      <StorySection title="Error">
+        <StoryErrorField label="Framework" invalid={!value}>
+          <AutoComplete
+            aria-invalid={!value}
+            value={value}
+            onChange={value => {
+              setValue(value);
+              action('onChange')(value);
+            }}
+            placeholder="Placeholder"
+            options={FRAMEWORKS}
+          />
+        </StoryErrorField>
+      </StorySection>
+    );
+  },
+};

@@ -1,0 +1,157 @@
+import { useMemo, useState } from 'react';
+import { useParams, useSearchParams } from 'react-router';
+import useSWR from 'swr';
+
+import type {
+  ApiError,
+  ListBodyWithCriteria,
+  SearchCriterion,
+  SortBody,
+  VariantInterpretedCasesSearchResponse,
+} from '@/api/api';
+import type { PaginationState } from '@/components/base/data-table/data-table';
+import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
+import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { variantsApi } from '@/utils/api';
+
+import SliderInterpretedCaseSheet from './slider/slider-interpreted-case-sheet';
+import { useSliderCasePatientIdNavigation } from './slider/use-slider-case-navigation';
+import InterpretedCasesFilters, { type InterpretedCasesFiltersState } from './table/interpreted-cases-filters';
+import { getInterpretedCasesColumns, interpretedCasesDefaultSettings } from './table/interpreted-cases-table-settings';
+import { INTERPRETED_CASE_ID_PARAM, INTERPRETED_PATIENT_ID_PARAM } from './constants';
+
+const INTERPRETED_CASES_DEFAULT_SORTING: SortBody[] = [{ field: 'interpretation_updated_on', order: 'desc' }];
+
+type InterpretedCasesSearchInput = {
+  key: string;
+  locusId: string;
+  criteria: ListBodyWithCriteria;
+};
+
+async function fetchInterpretedCases(input: InterpretedCasesSearchInput, tenant: string) {
+  const response = await variantsApi.getGermlineVariantInterpretedCases(tenant, input.locusId, input.criteria);
+  return response.data;
+}
+
+function InterpretedCasesTable() {
+  const { t } = useI18n();
+  const { tenant } = useTenant();
+  const params = useParams<{ locusId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [rowSelection, setRowSelection] = useState({});
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: DEFAULT_PAGE_SIZE,
+  });
+  const [sorting, setSorting] = useState<SortBody[]>(INTERPRETED_CASES_DEFAULT_SORTING);
+
+  const [initialFilters, setInitialFilters] = useState<InterpretedCasesFiltersState>({
+    mondo: '',
+    institution: [],
+    test: [],
+    classification: [],
+  });
+
+  const searchCriteria: SearchCriterion[] = useMemo(() => {
+    const criteria: SearchCriterion[] = [];
+
+    if (initialFilters.mondo) {
+      criteria.push({
+        field: 'condition_term',
+        value: [initialFilters.mondo],
+        operator: 'contains',
+      });
+    }
+
+    if (initialFilters.institution && initialFilters.institution.length > 0) {
+      criteria.push({
+        field: 'diagnosis_lab_code',
+        value: [...initialFilters.institution],
+      });
+    }
+
+    if (initialFilters.test && initialFilters.test.length > 0) {
+      criteria.push({
+        field: 'analysis_catalog_code',
+        value: [...initialFilters.test],
+      });
+    }
+
+    if (initialFilters.classification && initialFilters.classification.length > 0) {
+      criteria.push({
+        field: 'classification',
+        value: [...initialFilters.classification],
+      });
+    }
+
+    return criteria;
+  }, [initialFilters.mondo, initialFilters.institution, initialFilters.test, initialFilters.classification]);
+
+  const { data, isLoading } = useSWR<VariantInterpretedCasesSearchResponse, ApiError, InterpretedCasesSearchInput>(
+    {
+      key: 'interpreted-cases',
+      locusId: params.locusId!,
+      criteria: {
+        search_criteria: searchCriteria,
+        sort: sorting,
+        limit: pagination.pageSize,
+        offset: pagination.pageIndex * pagination.pageSize,
+        page_index: pagination.pageIndex,
+      },
+    },
+    input => fetchInterpretedCases(input, tenant),
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    },
+  );
+
+  const casesData = useMemo(() => data?.list || [], [data?.list]);
+  const columns = useMemo(() => getInterpretedCasesColumns(t), [t]);
+
+  const { selectedCase, hasPrevious, hasNext, handleClosePreview, handlePreviousCase, handleNextCase } =
+    useSliderCasePatientIdNavigation({
+      casesData,
+      searchParams,
+      setSearchParams,
+      searchParamsKey: { patientId: INTERPRETED_PATIENT_ID_PARAM, caseId: INTERPRETED_CASE_ID_PARAM },
+      setRowSelection,
+    });
+
+  return (
+    <div className="space-y-6 mt-2">
+      <DataTable
+        id="interpreted-cases"
+        columns={columns}
+        TableFilters={<InterpretedCasesFilters filters={initialFilters} onFiltersChange={setInitialFilters} />}
+        data={casesData}
+        defaultColumnSettings={interpretedCasesDefaultSettings}
+        loadingStates={{
+          total: isLoading,
+          list: isLoading,
+        }}
+        total={data?.count || 0}
+        pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
+        tableIndexResultPosition="bottom"
+        rowSelection={rowSelection}
+        onRowSelectionChange={setRowSelection}
+        serverOptions={{
+          onSortingChange: setSorting,
+          defaultSorting: INTERPRETED_CASES_DEFAULT_SORTING,
+        }}
+      />
+      <SliderInterpretedCaseSheet
+        open={!!selectedCase}
+        setOpen={() => handleClosePreview()}
+        case={selectedCase!}
+        onPrevious={handlePreviousCase}
+        onNext={handleNextCase}
+        hasPrevious={hasPrevious}
+        hasNext={hasNext}
+      />
+    </div>
+  );
+}
+
+export default InterpretedCasesTable;

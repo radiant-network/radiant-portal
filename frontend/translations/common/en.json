@@ -1,0 +1,3119 @@
+{
+  "a11y": {
+    "action_button": {
+      "more": "More actions"
+    },
+    "assignment_picker": {
+      "open": "Edit case assignment",
+      "open_assigned": "Edit case assignment, assigned to {{names}}",
+      "remove_user": "Remove {{name}}"
+    },
+    "auto_complete": {
+      "clear": "Clear"
+    },
+    "back_link": {
+      "back_to": "Back to {{page}}"
+    },
+    "badge": {
+      "remove": "Remove"
+    },
+    "breadcrumb": {
+      "more": "More"
+    },
+    "carousel": {
+      "next_slide": "Next slide",
+      "previous_slide": "Previous slide"
+    },
+    "case_actions_menu": {
+      "open": "Case actions"
+    },
+    "case_group_tag": {
+      "copy_name": "Copy group name",
+      "remove": "Remove the New data filter"
+    },
+    "classification_section": {
+      "open": "Go to {{title}}"
+    },
+    "clingen_cell": {
+      "open": "Open in ClinGen (new tab)"
+    },
+    "cmc": {
+      "open_cosmic_one": "{{count}} COSMIC sample, open in COSMIC (new tab)",
+      "open_cosmic_other": "{{count}} COSMIC samples, open in COSMIC (new tab)"
+    },
+    "cmc_tier_badge": {
+      "no_data": "No data",
+      "open_franklin": "{{tier}}, open in Franklin (new tab)"
+    },
+    "comphet_genes_cell": {
+      "filter_variants": "Show the {{count}} compound het variants in {{gene}} in a new query"
+    },
+    "data_table": {
+      "collapse_row": "Collapse row",
+      "column_settings": "Column settings",
+      "expand_row": "Expand row",
+      "group_by": "Group by",
+      "grouped_by": "Grouped by {{value}}",
+      "pin_column": "Pin column",
+      "pin_row": "Pin row",
+      "select_page_rows": "Select all rows on this page",
+      "select_row": "Select row",
+      "sort": "Sort",
+      "sorted_asc": "Sorted ascending",
+      "sorted_desc": "Sorted descending",
+      "unpin_row": "Unpin row"
+    },
+    "date_picker": {
+      "open_calendar": "Open calendar"
+    },
+    "editable_text": {
+      "edit": "Edit"
+    },
+    "facets_sidebar": {
+      "collapse": "Collapse filters",
+      "expand": "Expand filters"
+    },
+    "gene_cell": {
+      "add_to_query": "Add {{symbol}} to the query"
+    },
+    "lang_switcher": {
+      "switch_to_en": "Switch to English (EN)",
+      "switch_to_fr": "Switch to French (FR)"
+    },
+    "list_item": {
+      "delete": "Delete",
+      "edit": "Edit",
+      "share": "Share"
+    },
+    "main_navbar": {
+      "close_menu": "Close menu",
+      "open_menu": "Open menu"
+    },
+    "main_sidebar": {
+      "collapse": "Collapse menu",
+      "expand": "Expand menu"
+    },
+    "message_scroller": {
+      "scroll_to_end": "Scroll to end",
+      "scroll_to_start": "Scroll to start"
+    },
+    "multi_selector": {
+      "clear_all": "Clear all"
+    },
+    "note": {
+      "actions": "Comment actions"
+    },
+    "notes": {
+      "open_count_one": "{{count}} comment",
+      "open_count_other": "{{count}} comments"
+    },
+    "occurrence_flag": {
+      "edit": "Edit flag"
+    },
+    "omim_link": {
+      "open": "Open {{symbol}} in OMIM (new tab)"
+    },
+    "pubmed_form_field": {
+      "remove_citation": "Remove citation"
+    },
+    "query_bar": {
+      "delete": "Delete query",
+      "duplicate": "Duplicate query",
+      "select": "Select query {{index}}"
+    },
+    "query_builder": {
+      "close_facets": "Close filters panel"
+    },
+    "query_pill": {
+      "remove": "Remove filter"
+    },
+    "saved_filter": {
+      "delete": "Delete filter",
+      "discard": "Discard unsaved changes",
+      "duplicate": "Duplicate filter",
+      "edit": "Edit filter",
+      "new": "New filter",
+      "save": "Save filter"
+    },
+    "slider": {
+      "next": "Next result",
+      "previous": "Previous result"
+    },
+    "slider_patient_row": {
+      "sequencing_details": "Sequencing details"
+    },
+    "theme_toggle": {
+      "to_dark": "Switch to dark theme",
+      "to_light": "Switch to light theme"
+    },
+    "sidebar": {
+      "description": "Displays the mobile sidebar.",
+      "title": "Sidebar",
+      "toggle": "Toggle Sidebar"
+    },
+    "tabs": {
+      "next": "Next tabs",
+      "previous": "Previous tabs"
+    },
+    "spinner": {
+      "loading": "Loading"
+    },
+    "timeline": {
+      "filters_group": "Filter timeline by type",
+      "results_count_one": "Showing {{count}} result",
+      "results_count_other": "Showing {{count}} results"
+    }
+  },
+  "admin": {
+    "title": "{{tenant}} - Administration",
+    "organizations": {
+      "add": "Add organization",
+      "count_one": "{{count}} Organization",
+      "count_other": "{{count}} Organizations",
+      "create": {
+        "description": "Members can be granted roles scoped to specific organizations.",
+        "notifications": {
+          "errors": {
+            "default": "Unable to create organization."
+          },
+          "success": "Organization created."
+        },
+        "submit": "Create organization",
+        "title": "Add organization"
+      },
+      "edit": {
+        "description": "Members can be granted roles scoped to specific organizations.",
+        "notifications": {
+          "errors": {
+            "default": "Unable to update organization."
+          },
+          "success": "Organization updated."
+        },
+        "submit": "Save",
+        "title": "Edit organization"
+      },
+      "fields": {
+        "category": "Category",
+        "category_hint": "Can't be changed after creation.",
+        "category_placeholder": "Select a category",
+        "code": "Code",
+        "code_hint": "Can't be changed after creation. Letters, numbers, underscores, and dashes.",
+        "name": "Name",
+        "notification_emails": "Notification emails",
+        "notification_emails_hint": "Separate addresses with commas.",
+        "notification_placeholder": "diagnosticlab@example.org, geneticist@example.org",
+        "notification_section": "Notifications",
+        "notification_section_description": "An email with the file manifest is sent to the addresses below when new genomic data is available."
+      },
+      "filters": {
+        "category": "Category",
+        "search_placeholder": "Search by name or code"
+      },
+      "subtitle": "Create and edit organizations.",
+      "table": {
+        "category": "Category",
+        "edit": "Edit organization",
+        "name": "Name"
+      }
+    },
+    "roles": {
+      "add": "Add role",
+      "count_one": "{{count}} Role",
+      "count_other": "{{count}} Roles",
+      "create": {
+        "description": "A role is a named bundle of permissions. Assign it to members to grant those actions—roles only add access, never remove it.",
+        "notifications": {
+          "errors": {
+            "default": "Unable to create role."
+          },
+          "success": "Role created."
+        },
+        "submit": "Create role",
+        "title": "Add role"
+      },
+      "default_note": "Default roles can't be edited or deleted.",
+      "delete": {
+        "action": "Delete role",
+        "body": "<name>{{name}}</name> This role is assigned to <b>{{members}}</b> across <b>{{orgs}}</b>. Deleting it will immediately revoke the permissions it grants for all of them. This cannot be undone.",
+        "body_empty": "<name>{{name}}</name> is unassigned. It will be permanently deleted.",
+        "body_no_orgs": "<name>{{name}}</name> This role is assigned to <b>{{members}}</b>. Deleting it will immediately revoke the permissions it grants for all of them. This cannot be undone.",
+        "notifications": {
+          "errors": {
+            "default": "Unable to delete role."
+          },
+          "success": "Role deleted."
+        },
+        "submit": "Delete role",
+        "title": "Delete this role?"
+      },
+      "duplicate": {
+        "notifications": {
+          "errors": {
+            "default": "Unable to duplicate role."
+          },
+          "success": "Role duplicated."
+        }
+      },
+      "duplicate_suffix": "(copy)",
+      "edit": {
+        "notifications": {
+          "errors": {
+            "default": "Unable to update role."
+          },
+          "success": "Role updated."
+        },
+        "submit": "Save",
+        "title": "Edit role"
+      },
+      "edit_impact": {
+        "body": "The changes to <b>{{name}}</b> will affect the permissions granted to <b>{{members}}</b> across <b>{{orgs}}</b>.",
+        "body_first_org_scope_one": "You're adding the first organization-scoped permission to the <b>{{name}}</b> role. To grant it, you'll need to <b>assign one or more organizations to the {{count}} member who holds this role</b>. Their current access remains unchanged.",
+        "body_first_org_scope_other": "You're adding the first organization-scoped permission to the <b>{{name}}</b> role. To grant it, you'll need to <b>assign one or more organizations to each of the {{count}} members who hold this role</b>. Their current access remains unchanged.",
+        "body_no_orgs": "The changes to <b>{{name}}</b> will affect the permissions granted to <b>{{members}}</b>.",
+        "submit": "Save",
+        "title": "Edit this role?",
+        "title_first_org_scope": "Additional step required"
+      },
+      "fields": {
+        "code": "Code",
+        "code_hint": "Can't be changed after creation. Lowercase letters, numbers, and underscores.",
+        "description": "Description",
+        "description_placeholder": "What is this role for? (optional)",
+        "name": "Name",
+        "name_placeholder": "Role name",
+        "permissions": "Permissions",
+        "permissions_hint": "Select at least one. Network and Organization permissions can be mixed."
+      },
+      "filters": {
+        "custom_only": "Custom roles only",
+        "search_placeholder": "Search by name or description"
+      },
+      "permissions": {
+        "description": "Permission descriptions and scope for this role",
+        "empty": "This role grants no permission.",
+        "locked": "Can't be edited or deleted"
+      },
+      "scope": {
+        "network": "Network",
+        "organization": "Organization"
+      },
+      "subtitle": "Define what members can do across the network or within organizations. All members can search cases and browse the knowledge base (<permissions>see what's included</permissions>).",
+      "table": {
+        "actions": "Role actions",
+        "assigned_to": "Assigned to",
+        "delete": "Delete",
+        "duplicate": "Duplicate",
+        "edit": "Edit",
+        "members_count_one": "{{count}} member",
+        "members_count_other": "{{count}} members",
+        "orgs_count_one": "{{count}} organization",
+        "orgs_count_other": "{{count}} organizations",
+        "permissions": "Permissions",
+        "permissions_count_one": "{{count}} permission",
+        "permissions_count_other": "{{count}} permissions",
+        "role": "Role",
+        "scope": "Scope",
+        "view": "View",
+        "view_role": "View role"
+      },
+      "view_permissions": "View permissions"
+    },
+    "sections": {
+      "group_label": "Network settings",
+      "organizations": "Organizations",
+      "roles": "Roles & Permissions",
+      "users": "Members"
+    },
+    "users": {
+      "add": "Add member",
+      "count_one": "{{count}} Member",
+      "count_other": "{{count}} Members",
+      "create": {
+        "details_title": "Member details",
+        "notifications": {
+          "errors": {
+            "default": "Unable to create member."
+          },
+          "success": "Member created."
+        },
+        "submit": "Create member",
+        "title": "Add member"
+      },
+      "delete": {
+        "action": "Delete member",
+        "body": "<b>{{name}}</b> will be removed from the <b>{{tenant}} network</b> and all of its organizations.",
+        "notifications": {
+          "errors": {
+            "default": "Unable to delete member."
+          },
+          "success": "Member removed from this network."
+        },
+        "title": "Delete this member?"
+      },
+      "edit": {
+        "notifications": {
+          "errors": {
+            "default": "Unable to update member."
+          },
+          "success": "Member updated."
+        },
+        "submit": "Save",
+        "title": "Edit member"
+      },
+      "errors": {
+        "last_admin_update": "{{name}} is the only Administrator in {{tenant}}. Assign the Administrator role to someone else before removing it here.",
+        "last_admin_update_title": "This network needs an Administrator",
+        "self_delete": "You can't delete your own account."
+      },
+      "fields": {
+        "email": "Email",
+        "first_name": "First name",
+        "last_name": "Last name"
+      },
+      "filters": {
+        "role": "Role",
+        "search_placeholder": "Search by name or email"
+      },
+      "roles": {
+        "admin_access": "Administrator",
+        "admin_hint": "Full administrative access to this network (<permissions>view permissions</permissions>)",
+        "all_organizations": "All current and future organizations",
+        "baseline": "Every member can search cases and browse the knowledge base (<permissions>see what's included</permissions>).",
+        "errors": {
+          "organizations_required": "Select at least one organization.",
+          "self_admin": "You can't grant yourself the Administrator role."
+        },
+        "organizations": "At these organizations",
+        "organizations_placeholder": "Organizations",
+        "subtitle": "Assign roles to enable additional actions—roles only add permissions, never remove them.",
+        "title": "Member roles"
+      },
+      "subtitle": "Manage members and role assignments.",
+      "table": {
+        "all_organizations": "All orgs",
+        "baseline_role": "Member",
+        "edit": "Edit member",
+        "name": "Name",
+        "roles": "Roles & Access",
+        "you": "(You)"
+      }
+    }
+  },
+  "analysis": {
+    "title": "Analysis",
+    "subtitle": "Quickly visualize and interpret data with our user-friendly tools.",
+    "newsletter": {
+      "title": "New Analysis Tools Coming Soon!",
+      "description": "Join our mailing list to receive updates and be among the first to try our upcoming tools.",
+      "form": {
+        "placeholder": "email@example.com",
+        "button_label": "Get updates"
+      }
+    },
+    "set_operations": {
+      "get_started": "Select two or three sets to get started",
+      "get_started_visualize": "Visualize intersections between saved sets using an interactive Venn diagram.",
+      "get_started_dashboard": "View your saved sets in the <dashboard>Dashboard</dashboard>.",
+      "title": "Set Operations",
+      "description": "Visualize intersections between virtual cohorts saved as sets using an interactive Venn diagram.",
+      "tags": {
+        "clinical": "Clinical",
+        "genomics": "Genomics"
+      },
+      "empty": {
+        "title": "No sets to compare",
+        "description": "You need at least two saved sets of entity IDs (e.g. two sets of participants) in order to use this tool. You can create saved sets at the top of the table of results in the <variant>Variants Exploration pages</variant>."
+      },
+      "launch": "Launch",
+      "download": "Download PNG",
+      "selected_sets": "Selected Sets",
+      "set_definitions": "Set Definitions",
+      "set_definition": "Set Definition",
+      "union_of_selected_set": "Union of selected sets:",
+      "entity_type": {
+        "participants": "Participants",
+        "biospecimens": "Biospecimens",
+        "files": "Files",
+        "variants_germline": "Variants Germline",
+        "variants_somatic": "Variants Somatic"
+      },
+      "filters": {
+        "select_entity": "Entity type",
+        "select_entity_placeholder": "Select an entity type",
+        "select_set": "Sets",
+        "select_set_placeholder": "Select two or three sets",
+        "reset": "Reset",
+        "reset_tooltip": "Reset to the last compared selection",
+        "compare": "Compare",
+        "compare_disabled_tooltip": "Select at least two sets to compare"
+      }
+    }
+  },
+  "community": {
+    "title": "Community",
+    "search": {
+      "label": "Search by member name or affiliation",
+      "placeholder": "e.g. Watson, Linda Crnic Institute"
+    },
+    "filters": {
+      "toggle": "Filters",
+      "role": "Role",
+      "area_of_interest": "Area of Interest"
+    },
+    "sort": {
+      "newest": "Newest first",
+      "oldest": "Oldest first",
+      "name": "Name (A–Z)"
+    }
+  },
+  "common": {
+    "date": {
+      "hour": "h:mm a",
+      "month_day_hour": "MMMM d, h:mm a",
+      "year_month_day": "yyyy-MM-dd",
+      "year_month_day_hour": "MMMM d yyyy, h:mm a",
+      "year_month_day_at_hour": "{{date}} at {{time}}",
+      "month_day_year": "MMM dd, yyyy"
+    },
+    "date_picker": {
+      "placeholder": "Pick a date"
+    },
+    "empty_section": "No {{title}} data reported",
+    "unspecified": "Unspecified",
+    "no_data_available": "No data available",
+    "not_available_yet": "Not available yet",
+    "no_gene": "No gene",
+    "save": "Save",
+    "close": "Close",
+    "view_all": "View all",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "form": {
+      "errors": {
+        "required": "This field is required",
+        "min_2": "Min 2 characters",
+        "max_50": "Max 50 characters",
+        "invalid_code": "Letters, numbers, underscores and dashes; start with a letter.",
+        "at_least_one_permission": "Select at least one permission.",
+        "invalid_email": "Enter a valid email.",
+        "invalid_notification_emails": "Enter valid email addresses, separated by commas.",
+        "invalid_role_code": "Must start with a lowercase letter and contain only lowercase letters, numbers and underscores",
+        "organization_code_exists": "An organization with this code already exists.",
+        "role_code_exists": "A role with this code already exists.",
+        "role_name_exists": "A role with this name already exists.",
+        "user_email_exists": "A member with this email already exists."
+      }
+    },
+    "editor": {
+      "headings": {
+        "normal": "Normal",
+        "h1": "Heading 1",
+        "h2": "Heading 2",
+        "h3": "Heading 3",
+        "h4": "Heading 4",
+        "h5": "Heading 5",
+        "h6": "Heading 6"
+      },
+      "toolbar": {
+        "link": {
+          "label": "Link"
+        }
+      },
+      "link": {
+        "popover": {
+          "title": "Link",
+          "subtitle": "Attach a link to the selected text",
+          "url": {
+            "placeholder": "https://example.com"
+          },
+          "confirm": "Confirm",
+          "update": "Update",
+          "remove": "Remove",
+          "close": {
+            "ariaLabel": "Close"
+          }
+        }
+      }
+    },
+    "auto_complete": {
+      "type_to_search": "Type to search",
+      "no_data": "No data"
+    },
+    "grid": {
+      "charts": "Charts",
+      "remove_chart": "Remove chart",
+      "reset": "Reset"
+    },
+    "sex": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "classification": {
+      "other": "Other",
+      "other.abbrev": "O",
+      "other.tooltip": "Other",
+      "affects": "Affects",
+      "affects.abbrev": "AF",
+      "affects.tooltip": "Affects",
+      "association": "Association",
+      "association.abbrev": "AS",
+      "association.tooltip": "Association",
+      "association_not_found": "Association Not Found",
+      "association_not_found.abbrev": "ANF",
+      "association_not_found.tooltip": "Association Not Found",
+      "uncertain_significance": "VUS",
+      "uncertain_significance.abbrev": "VUS",
+      "uncertain_significance.tooltip": "Uncertain Significance",
+      "likely_benign": "Likely Benign",
+      "likely_benign.abbrev": "LB",
+      "likely_benign.tooltip": "Likely Benign",
+      "likely_oncogenic": "Likely Oncogenic",
+      "likely_oncogenic.abbrev": "LO",
+      "likely_oncogenic.tooltip": "Likely Oncogenic",
+      "likely_pathogenic": "Likely Patho.",
+      "likely_pathogenic.abbrev": "LP",
+      "likely_pathogenic.tooltip": "Likely Pathogenic",
+      "likely_pathogenic_low_penetrance": "Likely Pathogenic, Low Penetrance",
+      "likely_pathogenic_low_penetrance.abbrev": "LPLP",
+      "likely_pathogenic_low_penetrance.tooltip": "Likely Pathogenic, Low Penetrance",
+      "likely_risk_allele": "Likely Risk Allele",
+      "likely_risk_allele.abbrev": "LRA",
+      "likely_risk_allele.tooltip": "Likely Risk Allele",
+      "low_penetrance": "Low Penetrance",
+      "low_penetrance.abbrev": "LPN",
+      "low_penetrance.tooltip": "Low Penetrance",
+      "risk_factor": "Risk Factor",
+      "risk_factor.abbrev": "RF",
+      "risk_factor.tooltip": "Risk Factor",
+      "uncertain_risk_allele": "Uncertain Risk Allele",
+      "uncertain_risk_allele.abbrev": "URA",
+      "uncertain_risk_allele.tooltip": "Uncertain Risk Allele",
+      "no_classification_for_the_single_variant": "No Classification for the Single Variant",
+      "no_classification_for_the_single_variant.abbrev": "NC",
+      "no_classification_for_the_single_variant.tooltip": "No Classification",
+      "no_classifications_from_unflagged_records": "No Classifications from Unflagged Records",
+      "no_classifications_from_unflagged_records.abbrev": "NCU",
+      "no_classifications_from_unflagged_records.tooltip": "No Classifications from Unflagged Records",
+      "no_data": "No Data",
+      "no_data.abbrev": "ND",
+      "no_data.tooltip": "No Data",
+      "oncogenic": "Oncogenic",
+      "oncogenic.abbrev": "O",
+      "oncogenic.tooltip": "Oncogenic",
+      "pathogenic": "Pathogenic",
+      "pathogenic.abbrev": "P",
+      "pathogenic.tooltip": "Pathogenic",
+      "pathogenic_low_penetrance": "Pathogenic, Low Penetrance",
+      "pathogenic_low_penetrance.abbrev": "PLP",
+      "pathogenic_low_penetrance.tooltip": "Pathogenic, Low Penetrance",
+      "protective": "Protective",
+      "protective.abbrev": "PV",
+      "protective.tooltip": "Protective",
+      "conflicting_classifications_of_pathogenicity": "Conflict. Class. of Patho.",
+      "conflicting_classifications_of_pathogenicity.abbrev": "CC",
+      "conflicting_classifications_of_pathogenicity.tooltip": "Conflicting Classifications of Pathogenicity",
+      "conflicting_data_from_submitters": "Conflicting Data from Submitters",
+      "conflicting_data_from_submitters.abbrev": "CDS",
+      "conflicting_data_from_submitters.tooltip": "Conflicting Data from Submitters",
+      "conflicting_interpretations_of_pathogenicity": "Conflict. Interpretat. of Patho.",
+      "conflicting_interpretations_of_pathogenicity.abbrev": "CI",
+      "conflicting_interpretations_of_pathogenicity.tooltip": "Conflicting Interpretations of Pathogenicity",
+      "not_provided": "Not Provided",
+      "not_provided.abbrev": "NP",
+      "not_provided.tooltip": "Not Provided",
+      "established_risk_allele": "Established Risk Allele",
+      "established_risk_allele.abbrev": "ERA",
+      "established_risk_allele.tooltip": "Established Risk Allele",
+      "drug_response": "Drug Response",
+      "drug_response.abbrev": "DR",
+      "drug_response.tooltip": "Drug Response",
+      "benign": "Benign",
+      "benign.abbrev": "B",
+      "benign.tooltip": "Benign",
+      "confers_sensitivity": "Confers Sensitivity",
+      "confers_sensitivity.abbrev": "CS",
+      "confers_sensitivity.tooltip": "Confers Sensitivity"
+    },
+    "file_format": {
+      "cram": "CRAM File",
+      "crai": "CRAI Index File",
+      "vcf": "VCF File",
+      "tbi": "TBI Index File",
+      "tgz": "TGZ Archive File",
+      "json": "JSON File",
+      "html": "HTML File",
+      "tsv": "TSV File",
+      "bw": "BW File",
+      "bed": "BED File",
+      "png": "PNG File",
+      "csv": "CSV File",
+      "pdf": "PDF File",
+      "txt": "Text File",
+      "gvcf": "GVCF File",
+      "zip": "ZIP Archive File",
+      "xlsx": "XLSX File",
+      "maf": "MAF File"
+    },
+    "data_type_code": {
+      "alignment": "Aligned Reads",
+      "snv": "Germline SNV",
+      "ssnv": "Somatic SNV",
+      "gcnv": "Germline CNV",
+      "scnv": "Somatic CNV",
+      "gsv": "Germline SV",
+      "ssv": "Somatic SV",
+      "somfu": "Somatic Fusion Dragen VCF",
+      "ssup": "Sequencing Data Supplement",
+      "igv": "IGV Track",
+      "cnvvis": "CNV Visualization",
+      "exp": "Expression PNG",
+      "covgene": "Coverage by Gene Report",
+      "qcrun": "Sequencing Run QC Report",
+      "exomiser": "Exomiser Report",
+      "exomiser_cnv": "Exomiser CNV Report",
+      "clinical_report": "Clinical Report",
+      "aggqc": "Aggregate Quality Control Report",
+      "chrmr": "Mitochondrial Report",
+      "nrrv": "Annotated Variant Report",
+      "snvpg": "Germline SNV (masked/filtered)",
+      "alirpg": "Aligned Reads (masked)"
+    },
+    "query_bar": {
+      "selector": "Q{{index}}",
+      "empty": "Use the search tools & facets on the left to build a query",
+      "delete_popover": {
+        "title": "Delete this query?",
+        "cancel": "Cancel",
+        "ok": "Delete"
+      }
+    },
+    "query_pill": {
+      "operator": {
+        "change_operator_to": "Change operator to {{operator}}",
+        "and": "and",
+        "or": "or"
+      }
+    },
+    "relationships": {
+      "proband": "Proband",
+      "mother": "Mother",
+      "father": "Father",
+      "sister": "Sister",
+      "brother": "Brother",
+      "sibling": "Sibling",
+      "fetus": "Fetus",
+      "child": "Child",
+      "daugther": "Daughter",
+      "ftwinbro": "Fraternal Twin Brother",
+      "ftwinsis": "Fraternal Twin Sister",
+      "granddaughter": "Granddaughter",
+      "grandson": "Grandson",
+      "hbro": "Half-Brother",
+      "hsis": "Half-Sister",
+      "itwinbro": "Identical Twin Brother",
+      "itwinsis": "Identical Twin Sister",
+      "matmem": "Maternal Family Member",
+      "maunt": "Maternal Aunt",
+      "mcousn": "Maternal Cousin",
+      "mgrfth": "Maternal Grandfather",
+      "mgrmth": "Maternal Grandmother",
+      "muncle": "Maternal Uncle",
+      "nephew": "Nephew",
+      "niece": "Niece",
+      "patmem": "Paternal Family Member",
+      "paunt": "Paternal Aunt",
+      "pcousn": "Paternal Cousin",
+      "pgrfth": "Paternal Grandfather",
+      "pgrmth": "Paternal Grandmother",
+      "puncle": "Paternal Uncle",
+      "sonc": "Son"
+    },
+    "toolbar": {
+      "combine": "Combine",
+      "new_query": "New query",
+      "clear_all": "Clear all",
+      "clear_all_dialog": {
+        "title": "Delete all queries?",
+        "description": "You are about to delete all your queries. They will be lost forever.",
+        "cancel": "Cancel",
+        "ok": "Delete"
+      },
+      "labels": "Labels"
+    },
+    "saved_filter": {
+      "delete_tooltip": "Delete filter",
+      "no_filter_selected": "No filter selected",
+      "delete_dialog": {
+        "title": "Permanently delete this filter?",
+        "description": "You are about to permanently delete this filter and all of its queries.",
+        "ok": "Delete filter"
+      },
+      "duplicate_tooltip": "Duplicate filter",
+      "overwrite_dialog": {
+        "title": "Unsaved changes",
+        "description": "You are about to create a new filter; all modifications will be lost.",
+        "cancel": "Cancel",
+        "ok": "Create"
+      },
+      "edit_dialog": {
+        "edit_title": "Edit filter",
+        "save_title": "Save filter",
+        "fields": {
+          "title": {
+            "label": "Name",
+            "placeholder": "Untitled query"
+          }
+        }
+      },
+      "my_filters": "My Filters",
+      "manage_filters": "Manage filters",
+      "manage_dialog": {
+        "title": "Manage filters",
+        "last_save_at": "Last saved at: {{lastSaveAt}} ago"
+      },
+      "new_filter": "New filter",
+      "save_tooltip": {
+        "when_empty": "Add a query to save",
+        "default": "Save filter"
+      },
+      "discard_tooltip": "Discard unsaved changes",
+      "no_saved_filters": "You have no saved filters",
+      "untitled_filter": "Untitled filter",
+      "notifications": {
+        "created": "Filter saved",
+        "deleted": "Filter deleted",
+        "updated": "Filter updated",
+        "errors": {
+          "duplicated": "A filter with this name already exists",
+          "created": "Unable to create filter",
+          "updated": "Unable to update filter",
+          "deleted": "Unable to delete filter"
+        }
+      }
+    },
+    "components": {
+      "empty_cell": "-"
+    },
+    "table": {
+      "group_by": "Group By",
+      "columns": "Columns",
+      "fullscreen": {
+        "maximize": "Fullscreen",
+        "minimize": "Exit fullscreen"
+      },
+      "headers": {
+        "created_on": "Created On",
+        "created_on_tooltip": "Date of case creation (yyyy-mm-dd)"
+      },
+      "pin": {
+        "left": "Pin Left",
+        "right": "Pin Right",
+        "unpin": "Unpin"
+      },
+      "sort": {
+        "descending": "Descending",
+        "ascending": "Ascending",
+        "clear": "Sort"
+      },
+      "filters": {
+        "more": "More",
+        "more_placeholder": "Filters",
+        "min_search_length": "Minimum {{count}} characters",
+        "no_values_found": "No values found",
+        "search": {
+          "case_id": "Case",
+          "patient_id": "Patient",
+          "patient_name": "Patient",
+          "submitter_patient_id": "MRN",
+          "run_name": "Run Name",
+          "sample_id": "Sample ID",
+          "task_id": "Task",
+          "sequencing_experiment_id": "Sequencing",
+          "proband_submitter_sample_ids": "Sample",
+          "placeholder": "Search..."
+        },
+        "buttons": {
+          "clear": "Clear",
+          "apply": "Apply",
+          "show_more": "{{count}} more",
+          "show_less": "Less",
+          "some_not_in": "Some excluded",
+          "all": "All",
+          "not_in": "None",
+          "select_all": "Select all",
+          "clear_selection": "Clear selection"
+        }
+      },
+      "reset": "Reset",
+      "results": "Results {{from}} - {{to}} of {{total}}",
+      "results_filtered": "{{shown}} shown of {{total}}",
+      "no_result": "No results",
+      "items_selected_one": "{{value}} item selected",
+      "items_selected_other": "{{value}} items selected",
+      "select_all": "Select all",
+      "clear_selection": "Clear selection",
+      "no_result_description": "Adjust your filters and try again.",
+      "has_error": "Error loading this content",
+      "has_error_description": "Try refreshing the page or try again in a few minutes."
+    },
+    "pagination": {
+      "aria": {
+        "first": "Go to first page",
+        "previous": "Go to previous page",
+        "next": "Go to next page",
+        "last": "Go to last page",
+        "more": "More pages"
+      },
+      "first": "First",
+      "size": "{{size}} / page",
+      "previous": "Previous",
+      "next": "Next",
+      "last": "Last"
+    },
+    "navigation": {
+      "dashboard": "Dashboard",
+      "variant": "Variant",
+      "profile": "Profile",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
+    "actions": {
+      "select_language": "Select language",
+      "collapse_all": "Collapse all",
+      "expand_all": "Expand all",
+      "see_more": "See more",
+      "clear": "Clear",
+      "copy": "Copy to clipboard",
+      "copied": "Copied!",
+      "cancel": "Cancel",
+      "upload": "Upload"
+    },
+    "download": {
+      "tooltip": "Download File",
+      "error_title": "Download Error",
+      "error_description": "Something went wrong while downloading the file. Please try again or check your connection.",
+      "error_close": "Close"
+    },
+    "languages": {
+      "en": "English",
+      "fr": "French",
+      "de": "German",
+      "es": "Spanish"
+    },
+    "facets": {
+      "labels": {
+        "program": "Program",
+        "domain": "Domain",
+        "data_category": "Data Category",
+        "experimental_strategy": "Experimental Strategy",
+        "family_data": "Family Data",
+        "[fieldKey]": "Field: {{fieldKey}}",
+        "actual_interval": "Actual interval {{min}}-{{max}}",
+        "ad_alt": "ALT Allele Depth",
+        "ad_ratio": "Allelic Ratio ALT",
+        "ad_total": "Total Depth ALT + REF",
+        "aq": "Systematic Noise (AQ)",
+        "biotype": "Gene Type",
+        "cadd_phred": "CADD (Phred)",
+        "cadd_phred_tooltip": "Combined Annotation Dependent Depletion PHRED",
+        "cadd_score": "CADD (Raw)",
+        "cadd_score_tooltip": "Combined Annotation Dependent Depletion",
+        "chromosome": "Chromosome",
+        "clinvar": "ClinVar",
+        "clinvar_interpretation": "ClinVar",
+        "cmc_sample_mutated": "COSMIC CMC",
+        "cmc_sample_mutated_tooltip": "Number of samples in COSMIC with this mutation",
+        "cmc_sample_ratio": "COSMIC CMC (Ratio)",
+        "cmc_sample_ratio_tooltip": "Ratio of samples in COSMIC with this mutation compared to the variant compared to all the samples",
+        "cmc_tier": "COSMIC CMC Tier",
+        "cmc_tier_tooltip": "Mutation significance. 1 - high significance, 2 - medium significance, 3 - low significance, Other - No predicted significance (other mutations)",
+        "cn": "Copy Number",
+        "cnv_end": "CNV End",
+        "cnv_exomiser_gene_combined_score": "Exomiser Score",
+        "cnv_exomiser_gene_combined_score_tooltip": "Exomiser’s CNV functionality is intended solely for germline variant prioritization and is not designed for somatic variant analysis",
+        "cnv_exomiser_acmg_classification": "Exomiser ACMG",
+        "cnv_exomiser_acmg_classification_tooltip": "Exomiser’s CNV functionality is intended solely for germline variant prioritization and is not designed for somatic variant analysis",
+        "cnv_length": "CNV Size",
+        "cnv_quality": "CNV Quality",
+        "cnv_start": "CNV Start",
+        "cnv_transmission_mode": "Transmission",
+        "cnv_transmission_mode_tooltip": "Indicator of the possible relationship between the genetics dominance of the variant and its parental origin",
+        "consequence": "Consequence",
+        "cosmic_gene_panel": "COSMIC",
+        "cosmic_gene_panel_tooltip": "Catalogue Of Somatic Mutations In Cancer",
+        "cytoband": "Cytoband",
+        "dann_score": "DANN",
+        "dann_score_tooltip": "Deleterious Annotation of genetic variants using Neural Networks",
+        "ddd_gene_panel": "DDD",
+        "ddd_gene_panel_tooltip": "Deciphering Developmental Disorders",
+        "exomiser_acmg_classification": "Exomiser ACMG",
+        "exomiser_acmg_evidence": "Exomiser ACMG Evidences",
+        "exomiser_gene_combined_score": "Exomiser Score",
+        "exomiser_gene_combined_score_tooltip": "Exomiser score based on variant properties and patient phenotypes",
+        "fathmm_pred": "FATHMM",
+        "fathmm_pred_tooltip": "Functional Analysis Through Hidden Markov Models",
+        "father_zygosity": "Father’s Zygosity",
+        "filter": "Filter",
+        "genotype_quality": "Genotype Quality",
+        "gnomad_loeuf": "gnomAD LOEUF",
+        "gnomad_pli": "gnomAD pLI",
+        "gnomad_sf": "gnomAD 4.1.0",
+        "gnomad_sc": "gnomAD 4.1.0 ALT",
+        "gnomad_v3_af": "gnomAD 4.1.0",
+        "comphet_of": "Compound Het of",
+        "has_comphet": "Compound Het",
+        "has_comphet_tooltip": "Compound heterozygous (slivar): only PASS, impactful variants (LoF, Missense, Inframe, Splice Region) heterozygous in the proband with GQ ≥ 20, depth ≥ 6 and allele balance between 0.2 and 0.8 are considered. In trios, exactly one parent must carry the variant and neither may be homozygous.",
+        "hotspot": "Hotspot",
+        "hpo_gene_panel": "HPO",
+        "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
+        "impact_score": "Impact Score",
+        "info_qd": "Quality Depth",
+        "lrt_pred": "LRT",
+        "lrt_pred_tooltip": "Likelihood Ratio Test",
+        "mother_zygosity": "Mother’s Zygosity",
+        "nb_snv": "SNVs Count",
+        "nb_snv_tooltip": "Number of SNVs included in the CNV",
+        "no_data": "No data",
+        "omim_gene_panel": "OMIM",
+        "omim_gene_panel_tooltip": "Online Mendelian Inheritance in Man",
+        "omim_inheritance": "OMIM Inheritance",
+        "ordering_organization": "Prescribing Institution",
+        "orphanet_gene_panel": "Orphanet",
+        "parental_origin": "Parental Origin",
+        "pathogenicity_exomiser_divider": "Exomiser",
+        "pe": "PE",
+        "pe_tooltip": "Number of improperly paired end reads at start and stop breakpoints",
+        "diagnosis_lab": "Diagnostic Lab",
+        "germline_pf_wgs": "All Patient Freq.",
+        "germline_pf_wgs_affected": "Affected Patient Freq.",
+        "germline_pf_wgs_affected_tooltip": "Frequency across affected patients of the network (WGS)",
+        "germline_pf_wgs_not_affected": "Non-Affected Patient Freq.",
+        "germline_pf_wgs_not_affected_tooltip": "Frequency across non-affected patients of the network (WGS)",
+        "germline_pf_wgs_tooltip": "Frequency across all patients of the network (WGS)",
+        "polyphen2_hvar_pred": "PolyPhen-2 HVAR",
+        "polyphen2_hvar_pred_tooltip": "Polymorphism Phenotyping v2 HumVar",
+        "project_code": "Project",
+        "revel_score": "REVEL",
+        "revel_score_tooltip": "Rare Exome Variant Ensemble Learner",
+        "search_by_symbol": "Search by gene",
+        "search_by_symbol_placeholder": "e.g. BRAF, ENSG00000157764",
+        "search_by_symbol_tooltip": "Enter a Gene Symbol or Ensembl ID",
+        "select_unit": "Select unit",
+        "sift_pred": "SIFT",
+        "sift_pred_tooltip": "Sorting Intolerant From Tolerant",
+        "spliceai_ds": "SpliceAI",
+        "sm": "SM",
+        "sm_tooltip": "Linear copy ratio of the segment mean",
+        "somatic_pf_tn_wgs": "Freq. TN All Patients",
+        "somatic_pf_tn_wgs_tooltip": "Frequency across all patients of the network who had a tumor-normal analysis (WGS)",
+        "somatic_pf_to_wgs": "Freq. TO All Patients",
+        "somatic_pf_to_wgs_tooltip": "Frequency across all patients of the network who had a tumor-only analysis (WGS)",
+        "sq": "Somatic Quality",
+        "start": "Position",
+        "study_code": "Study Code",
+        "study_id": "Study ID",
+        "symbol": "Gene Symbol",
+        "tenant_gene_panel": "My Network",
+        "thousand_genome_af": "1000 Genomes",
+        "topmed_af": "TopMed",
+        "transmission": "Transmission",
+        "transmission_mode": "Transmission",
+        "transmission_mode_tooltip": "Indicator of the possible relationship between the genetics dominance of the variant and its parental origin.",
+        "type": "Variant Type",
+        "unit": "Unit",
+        "variant_class": "Variant Type",
+        "variant_type": "Variant Type",
+        "variantexternal_reference": "Variant External Reference",
+        "vep_impact": "VEP",
+        "vep_impact_tooltip": "Ensembl Variant Effect Predictor",
+        "zygosity": "Zygosity"
+      },
+      "values": {
+        "biotype": {
+          "ig_c_gene": "IG C Gene",
+          "ig_c_pseudogene": "IG C Pseudogene",
+          "ig_v_gene": "IG V Gene",
+          "ig_v_pseudogene": "IG V Pseudogene",
+          "lncrna": "lncRNA",
+          "ncrna": "ncRNA",
+          "ncrna_pseudogene": "ncRNA Pseudogene",
+          "non_stop_decay": "Non Stop Decay",
+          "nonsense_mediated_decay": "Nonsense Mediated Decay",
+          "processed_pseudogene": "Processed Pseudogene",
+          "processed_transcript": "Processed Transcript",
+          "protein_coding": "Protein Coding",
+          "protein_coding_cds_not_defined": "Protein Coding CDS Not Defined",
+          "protein_coding_lof": "Protein Coding LOF",
+          "retained_intron": "Retained Intron",
+          "rnase_mrp_rna": "RNase MRP RNA",
+          "rnase_p_rna": "RNase P RNA",
+          "tec": "TEC",
+          "telomerase_rna": "Telomerase RNA",
+          "transcribed_processed_pseudogene": "Transcribed Processed Pseudogene",
+          "transcribed_pseudogene": "Transcribed Pseudogene",
+          "transcribed_unitary_pseudogene": "Transcribed Unitary Pseudogene",
+          "transcribed_unprocessed_pseudogene": "Transcribed Unprocessed Pseudogene",
+          "tr_c_gene": "TR C Gene",
+          "tr_v_gene": "TR V Gene",
+          "tr_v_pseudogene": "TR V Pseudogene",
+          "trna": "tRNA",
+          "unitary_pseudogene": "Unitary Pseudogene",
+          "unprocessed_pseudogene": "Unprocessed Pseudogene",
+          "y_rna": "Y RNA",
+          "": "No Data"
+        },
+        "cmc_tier": {
+          "1": "Tier 1",
+          "2": "Tier 2",
+          "3": "Tier 3",
+          "other": "Other",
+          "": "No Data"
+        },
+        "consequence": {
+          "3_prime_utr_variant": "3' UTR",
+          "5_prime_utr_variant": "5' UTR",
+          "coding_sequence_variant": "Coding Sequence",
+          "downstream_gene_variant": "Downstream Gene",
+          "feature_elongation": "Feature Elongation",
+          "feature_truncation": "Feature Truncation",
+          "frameshift_variant": "Frameshift",
+          "incomplete_terminal_codon_variant": "Incomplete Terminal Codon",
+          "inframe_deletion": "Inframe Deletion",
+          "inframe_insertion": "Inframe Insertion",
+          "intergenic_variant": "Intergenic",
+          "intron_variant": "Intron",
+          "mature_mirna_variant": "Mature miRNA",
+          "missense_variant": "Missense",
+          "nmd_transcript_variant": "NMD Transcript",
+          "non_coding_transcript_variant": "Non Coding Transcript",
+          "non_coding_transcript_exon_variant": "Non Coding Transcript Exon",
+          "protein_altering_variant": "Protein Altering",
+          "regulatory_region_variant": "Regulatory Region",
+          "regulatory_region_ablation": "Regulatory Region Ablation",
+          "regulatory_region_amplification": "Regulatory Region Amplification",
+          "splice_acceptor_variant": "Splice Acceptor",
+          "splice_donor_variant": "Splice Donor",
+          "splice_donor_5th_base_variant": "Splice Donor 5th Base",
+          "splice_donor_region_variant": "Splice Donor Region",
+          "splice_polypyrimidine_tract_variant": "Splice Polypyrimidine Tract",
+          "splice_region_variant": "Splice Region",
+          "start_lost": "Start Lost",
+          "start_retained_variant": "Start Retained",
+          "stop_gained": "Stop Gained",
+          "stop_lost": "Stop Lost",
+          "stop_retained_variant": "Stop Retained",
+          "synonymous_variant": "Synonymous",
+          "tf_binding_site_variant": "TF Binding Site",
+          "tfbs_ablation": "TFBS Ablation",
+          "tfbs_amplification": "TFBS Amplification",
+          "transcript_ablation": "Transcript Ablation",
+          "transcript_amplification": "Transcript Amplification",
+          "upstream_gene_variant": "Upstream Gene"
+        },
+        "exomiser_acmg_classification": {
+          "likely_benign": "Likely Benign",
+          "pathogenic": "Pathogenic",
+          "uncertain_significance": "Uncertain Significance"
+        },
+        "fathmm_pred": {
+          "t": "Tolerated",
+          "d": "Damaging"
+        },
+        "has_comphet": {
+          "0": "False",
+          "1": "True"
+        },
+        "lrt_pred": {
+          "n": "Neutral",
+          "d": "Deleterious",
+          "u": "Unknown"
+        },
+        "polyphen2_hvar_pred": {
+          "b": "Benign",
+          "d": "Damaging",
+          "p": "Possibly Damaging"
+        },
+        "sift_pred": {
+          "t": "Tolerated",
+          "d": "Damaging"
+        },
+        "transmission_mode": {
+          "autosomal_dominant": "Autosomal Dominant",
+          "autosomal_dominant_abbrev": "AD",
+          "autosomal_dominant_de_novo": "Autosomal Dominant De Novo",
+          "autosomal_dominant_de_novo_abbrev": "AD DNV",
+          "autosomal_recessive": "Autosomal Recessive",
+          "autosomal_recessive_abbrev": "AR",
+          "non_carrier_proband": "Non Carrier Proband",
+          "non_carrier_proband_abbrev": "NCP",
+          "uniparental_disomy": "Uniparental Disomy",
+          "uniparental_disomy_abbrev": "UPD",
+          "unknown_father_genotype": "Unknown Father Genotype",
+          "unknown_father_genotype_abbrev": "UFG",
+          "unknown_mother_genotype": "Unknown Mother Genotype",
+          "unknown_mother_genotype_abbrev": "UMG",
+          "unknown_parents_genotype": "Unknown Parents Genotype",
+          "unknown_parents_genotype_abbrev": "UPG",
+          "unknown_proband_genotype": "Unknown Proband Genotype",
+          "unknown_proband_genotype_abbrev": "UPBG",
+          "x_linked_dominant": "X Linked Dominant",
+          "x_linked_dominant_abbrev": "XLD",
+          "x_linked_dominant_de_novo": "X Linked Dominant De Novo",
+          "x_linked_dominant_de_novo_abbrev": "XLD DNV",
+          "x_linked_recessive": "X Linked Recessive",
+          "x_linked_recessive_abbrev": "XLR",
+          "x_linked_recessive_de_novo": "X Linked Recessive De Novo",
+          "x_linked_recessive_de_novo_abbrev": "XLR DNV"
+        },
+        "father_zygosity": {
+          "het": "Heterozygote",
+          "wt": "Wild Type",
+          "hom": "Homozygote",
+          "hem": "Hemizygous",
+          "unk": "Unknown"
+        },
+        "mother_zygosity": {
+          "het": "Heterozygote",
+          "wt": "Wild Type",
+          "hom": "Homozygote",
+          "hem": "Hemizygous",
+          "unk": "Unknown"
+        },
+        "zygosity": {
+          "het": "Heterozygote",
+          "wt": "Wild Type",
+          "hom": "Homozygote",
+          "hem": "Hemizygous",
+          "unk": "Unknown"
+        }
+      },
+      "operators": {
+        "greater_than": "Greater than",
+        "less_than": "Less than",
+        "between": "Between",
+        "greater_than_or_equal": "Greater than or equal to",
+        "less_than_or_equal": "Less than or equal to",
+        "in": "In",
+        "select_operator": "Select operator",
+        "unknown": "Unknown operator"
+      },
+      "buttons": {
+        "clear": "Clear",
+        "apply": "Apply",
+        "all": "All",
+        "none": "None",
+        "show_more": "{{value}} More",
+        "show_less": "Less",
+        "some_not_in": "Any of",
+        "not_in": "None of"
+      },
+      "search": {
+        "placeholder": "Search..."
+      },
+      "no_results_found": "No results found",
+      "no_values_found": "No values found",
+      "unsupported_type": "Unsupported type",
+      "gene_divider": "Gene Panels",
+      "pathogenicity_exomiser_divider": "Exomiser",
+      "pathogenicity_predictions_divider": "Predictions",
+      "pathogenicity_oncology_divider": "Oncology",
+      "occurrence_metrics_divider": "Metrics",
+      "occurrence_parental_divider": "Parental Analysis",
+      "frequency_divider_my_organization": "My Organization",
+      "frequency_divider_pulic_cohorts": "Public Cohorts",
+      "zygosity_divider_parental_analysis": "Parental Analysis",
+      "with_dictionary": "Dictionary",
+      "more": "More"
+    },
+    "upload_id": {
+      "clear": "Clear",
+      "upload_a_file": "Upload a file",
+      "summary_table": "Summary table ({{matched}} mapped, {{unmatched}} unmapped)",
+      "resume": "{{total}} submitted identifiers mapped to {{unique}} unique system identifier",
+      "matched": "Matched ({{total}})",
+      "unmatched": "Unmatched ({{total}})",
+      "symbol": {
+        "button": "Upload a gene list",
+        "dialog_title": "Upload a gene list",
+        "input_placeholder": "e.g. ENSG00000157764, TP53",
+        "popover_identifiers_values": "Gene Symbol, Ensembl ID",
+        "submitted_identifier": "Submitted Gene Identifier",
+        "symbol": "Symbol",
+        "omim_gene_id": "Ensembl ID"
+      },
+      "input_label": "Copy-paste a list of identifiers or upload a file",
+      "mapped_to": "Mapped to",
+      "popover_file_formats": "Upload file formats:",
+      "popover_file_formats_values": ".txt, .csv, .tsv",
+      "popover_identifiers": "Identifiers:",
+      "popover_separators": "Separated by:",
+      "popover_separators_values": "comma, space, new line",
+      "popover_title": "Identifiers and File Formats"
+    },
+    "assignment_picker": {
+      "search_placeholder": "Search by name or email",
+      "remove_all": "Remove all",
+      "apply": "Apply",
+      "no_members_found": "No members found",
+      "you": "(you)"
+    },
+    "user_selection": {
+      "search_placeholder": "Search",
+      "no_users_found": "No users found",
+      "start_typing_to_search": "Start typing to search",
+      "not_assigned": "Not assigned",
+      "filter": "Filter",
+      "reset": "Reset",
+      "case_assignment": "Case assignment"
+    },
+    "unassigned_avatar": {
+      "can_assign": "Assign case",
+      "cannot_assign": "No assignment"
+    }
+  },
+  "onboarding": {
+    "actions": {
+      "back": "Back",
+      "last": "Finish",
+      "next": "Next",
+      "next_with_progress": "Next ({current} of {total})",
+      "skip": "Skip"
+    },
+    "sequencing_experiment": {
+      "seq_id": "Pick which family member's sequencing data you want to query — proband, parents, or siblings. Affected status and relationship are shown next to each sample.",
+      "variant_type": "Toggle between variant types. Your filters are kept separately per variant type.",
+      "tasks": "Switch between analysis runs — for example, different caller versions — without losing your current filters."
+    },
+    "query_builder": {
+      "facets": "Browse filters by category. Click a category to open its facets.",
+      "query_card": "Each query (Q1, Q2, …) is an independent filter set. You can combine queries with AND / OR, duplicate them, or toggle labels to read the SQON in plain language.",
+      "saved_filters": "Save a filter set you reuse often (e.g. \"Rare LoF in OMIM genes\")."
+    },
+    "data_table": {
+      "column_settings": "Click to open the column settings.",
+      "column_settings_dropdown": "Reorder, hide or pin columns. Your layout is saved per user, so the workspace looks the same the next time you open a case.",
+      "fullscreen": "Expand the table to fill the screen for dense review sessions. Press Esc to exit.",
+      "interpretation_note_flag": "Each row shows three quick actions: open or create an interpretation, attach a note, and flag the variant (pinned, kept, excluded).",
+      "hgvsg": "Open the variant in a side panel."
+    },
+    "occurrence_slider": {
+      "header": "Each panel is tied to a specific patient/sample shown at the top.",
+      "navigation": "Use the arrows on the right to step through the variants of your current result table without closing the panel.",
+      "note_flag": "Flag the variant (pinned, kept, excluded), attach a note, or start an interpretation directly from here — your choices are saved on the case and reflected in the table"
+    }
+  },
+  "patient_entity": {
+    "header": {
+      "title": "Patient {{id}}",
+      "research_id": "ID: {{id}}",
+      "born_date": "Born {{date}}",
+      "born_year": "Born {{year}}",
+      "phi_restricted": "Restricted",
+      "phi_restricted_tooltip": "Identity restricted outside your organisation",
+      "vital_status": {
+        "alive": "Alive",
+        "deceased": "Deceased"
+      }
+    },
+    "tabs": {
+      "overview": "Overview",
+      "timeline": "Timeline",
+      "treatments": "Treatments",
+      "genomics": "Genomics",
+      "tumor_board": "Tumor Board",
+      "laboratory": "Laboratory",
+      "imaging": "Imaging",
+      "clinical_trials": "Clinical Trials"
+    },
+    "overview": {
+      "initial_diagnosis": {
+        "title": "Initial diagnosis",
+        "cns_diagnosis_category": "CNS diagnosis category",
+        "cns_integrated_diagnosis": "CNS integrated diagnosis",
+        "event_date": "Date of diagnosis",
+        "day": "Day {{day}}",
+        "tumor_locations": "Tumor locations",
+        "tumor_location_other": "Other location",
+        "metastasis": "Metastasis",
+        "initial_tumor_resections": "Initial tumor resections"
+      },
+      "tumor_and_metastasis": {
+        "title": "Tumor and metastasis",
+        "tumor_locations": "Tumor locations",
+        "tumor_location_other": "Other location",
+        "metastasis": "Metastasis",
+        "metastasis_locations": "Metastasis sites",
+        "metastasis_location_other": "Extraneural site"
+      },
+      "demographics": {
+        "title": "Demographics",
+        "mrn": "MRN",
+        "birth_year": "Birth year",
+        "gender": "Sex",
+        "race": "Race",
+        "ethnicity": "Ethnicity",
+        "postal_code": "Postal code",
+        "organization_name": "Site"
+      },
+      "cancer_predispositions": {
+        "title": "Cancer predispositions",
+        "cancer_predisposition": "Predisposition list"
+      }
+    },
+    "genomics": {
+      "day": "Day {{day}}",
+      "origin": {
+        "germline": "Germline",
+        "somatic": "Somatic"
+      },
+      "interpretations": {
+        "title": "Variant interpretations",
+        "empty": "No variant interpretation for this patient.",
+        "aa_tooltip": "Amino acid change",
+        "date_tooltip": "Last interpretation date",
+        "headers": {
+          "variant": "Variant",
+          "gene": "Gene",
+          "aa": "AA",
+          "classification": "Classification",
+          "origin": "Origin",
+          "case": "Case",
+          "analysis": "Analysis",
+          "date": "Date"
+        }
+      },
+      "cases": {
+        "title": "Genomic cases",
+        "empty": "No genomic case for this patient.",
+        "type": {
+          "somatic": "Somatic",
+          "germline": "Solo germline",
+          "germline_family": "Family germline"
+        },
+        "headers": {
+          "case": "Case",
+          "type": "Type",
+          "analysis": "Analysis",
+          "primary_condition": "Primary Condition",
+          "status": "Status",
+          "priority": "Priority",
+          "requested_by": "Req. By",
+          "updated": "Updated"
+        }
+      }
+    },
+    "sidebar": {
+      "key_dates": {
+        "title": "Key Dates",
+        "initial_diagnosis": "Initial diagnosis",
+        "latest_encounter": "Latest encounter",
+        "day_age": "{{age}}y · Day {{day}}",
+        "sources": {
+          "clinical": "Clinical",
+          "registry": "Registry"
+        }
+      },
+      "external_records": {
+        "title": "External Records",
+        "organizations": "Organizations",
+        "documents": "Documents",
+        "document_types": "Document types",
+        "view_external_records": "View external records",
+        "networks": "TEFCA / Carequality",
+        "header_summary": "{{orgs}} organizations · {{docs}} documents",
+        "network": {
+          "tefca": "TEFCA",
+          "carequality": "Carequality"
+        },
+        "not_connected": {
+          "description": "External records have not yet been linked for this patient."
+        }
+      },
+      "clinical_note_extraction": {
+        "title": "Clinical note extraction",
+        "description": "Process this patient's clinical notes and extract the findings into structured FHIR data.",
+        "run": "Run extraction",
+        "iframe_title": "Clinical note extraction output",
+        "open_in_new_tab": "Open in new tab"
+      }
+    },
+    "timeline": {
+      "title": "Clinical Timeline",
+      "description": "Disease events, surgeries, radiation and medical therapy by age in days since birth.",
+      "empty": "No clinical timeline for this patient.",
+      "event_type": {
+        "initial_cns_tumor": "Initial CNS Tumor",
+        "progressive": "Progressive",
+        "recurrence": "Recurrence",
+        "second_malignancy": "Second Malignancy",
+        "deceased": "Deceased",
+        "unavailable": "Unavailable",
+        "not_reported": "Not Reported"
+      },
+      "event_fields": {
+        "tumor_locations": "Tumor locations",
+        "metastasis": "Metastasis",
+        "metastasis_locations": "Metastasis locations"
+      },
+      "radiation_doses": {
+        "craniospinal": "Craniospinal",
+        "focal_boost": "Focal boost",
+        "total_primary": "Total to primary"
+      }
+    },
+    "treatments": {
+      "title_count_one": "{{count}} treatment",
+      "title_count_other": "{{count}} treatments",
+      "day_value": "Day {{day}}",
+      "columns": {
+        "day": "Day",
+        "type": "Type",
+        "description": "Description",
+        "dose": "Dose"
+      },
+      "types": {
+        "surgery": "Surgery",
+        "radiation": "Radiation",
+        "medical_therapy": "Medical therapy"
+      },
+      "doses": {
+        "craniospinal": "Craniospinal",
+        "focal_boost": "Focal boost",
+        "total_primary": "Total to primary"
+      }
+    },
+    "imaging": {
+      "title_count_one": "{{count}} imaging session",
+      "title_count_other": "{{count}} imaging sessions",
+      "day_age": "Day {{day}} · age {{age}}y",
+      "columns": {
+        "date": "Date",
+        "modality": "Modality",
+        "body_part": "Body Part",
+        "body_part_tooltip": "Body Part Examined",
+        "viewer": "Viewer"
+      },
+      "livai_report": "LivAI Report"
+    },
+    "clinical_trials": {
+      "title": "Previous enrollment",
+      "empty": "No previous enrollment for this patient.",
+      "day_value": "Day {{day}}",
+      "initial_badge": "Initial treatment",
+      "columns": {
+        "protocol": "Protocol",
+        "start": "Start",
+        "stop": "Stop",
+        "agents": "Agents"
+      },
+      "trial_eligibilities": {
+        "title": "Trial Eligibility",
+        "subtitle": "Verdicts extracted by BRIM from patient clinical notes.",
+        "empty": "This patient has not yet been screened in BRIM for clinical trial eligibility.",
+        "confidence": "Confidence",
+        "not_reviewed": "Not reviewed",
+        "date_tooltip": "Latest assessment",
+        "reasoning_label": "Reasoning:",
+        "view_in_brim": "Open in BRIM",
+        "phi_restricted": "Reasoning restricted outside your organization",
+        "verdict": {
+          "eligible": "Eligible",
+          "ineligible_modifiable": "Ineligible modifiable",
+          "ineligible_permanent": "Ineligible permanent"
+        }
+      }
+    },
+    "tumor_board": {
+      "title": "Tumor board sessions",
+      "create_presentation": "Create Presentation",
+      "consensus": "Consensus",
+      "recommendations": "Recommendations",
+      "empty": "No tumor board session for this patient."
+    },
+    "laboratory": {
+      "date": {
+        "no_date_on_file": "No date on file",
+        "age_day": "{{age}}y · Day {{day}}",
+        "age_day_capped": "90+y · Day {{day}}"
+      },
+      "lab_tile": {
+        "reported": "reported {{reported}}",
+        "aria_empty": "{{label}}: no result on file",
+        "aria_value": "{{label}}: {{value}} {{unit}}"
+      },
+      "cbc": {
+        "title": "Latest blood counts",
+        "empty": "No complete blood count on file.",
+        "analytes": {
+          "wbc": "WBC",
+          "hemoglobin": "Hemoglobin",
+          "platelets": "Platelets",
+          "anc": "ANC"
+        }
+      },
+      "performance_status": {
+        "title": "Performance status",
+        "empty": "No performance status score on file.",
+        "released": "Released",
+        "score_suffix": "/ 100",
+        "aria_box": "{{scale}}: {{score}} out of 100",
+        "scales": {
+          "lansky": "Lansky",
+          "karnofsky": "Karnofsky"
+        },
+        "mismatch": {
+          "lansky-adult": "Lansky recorded at age 16+",
+          "karnofsky-paediatric": "Karnofsky recorded under age 16"
+        }
+      },
+      "csf": {
+        "title": "CSF analysis",
+        "empty": "No CSF analysis on file.",
+        "analytes": {
+          "protein": "Protein",
+          "glucose": "Glucose",
+          "nucleated_cells": "Nucleated cells",
+          "rbc": "RBC"
+        },
+        "cytology": {
+          "title": "Cytology",
+          "multi_specimen_warning": "The report covers more than one specimen — the finding may pertain to a non-CSF sample.",
+          "multi_specimen": {
+            "yes": "Yes",
+            "no": "No"
+          },
+          "fields": {
+            "test_name": "Test name",
+            "multi_specimen": "Covers multiple specimens",
+            "result_date": "Result date"
+          },
+          "badge": {
+            "positive": "Malignant cells present",
+            "suspicious": "Suspicious for malignancy",
+            "negative": "No malignant cells reported",
+            "non_diagnostic": "Non-diagnostic specimen",
+            "no_malignancy_statement": "Report makes no malignancy statement",
+            "unknown": "Unrecognised cytology result",
+            "empty": "No cytology on file"
+          },
+          "tier_note": {
+            "text_confirmed": "Attributed to CSF from the report text.",
+            "same_day_only": "Attributed to CSF only because it was collected the same day — this result may not be from CSF."
+          }
+        },
+        "chemistry": {
+          "title": "Chemistry and cell count"
+        },
+        "specimen": {
+          "title": "Specimen collected — result not shown in RADIANT",
+          "cell_free_dna": "Cell-free DNA",
+          "collected": "Collected"
+        }
+      }
+    }
+  },
+  "timeline": {
+    "collapse_all": "Collapse all",
+    "evidence": "Evidence",
+    "expand_all": "Expand all",
+    "initial_treatment": "Initial treatment",
+    "marker": {
+      "day": "Day {{day}}",
+      "day_range": "Day {{start}} — {{end}}",
+      "day_unknown": "Day n/a",
+      "years": "{{value}}y"
+    },
+    "filters": {
+      "all": "All",
+      "events": "Disease events",
+      "surgery": "Surgery",
+      "chemotherapy": "Chemotherapy",
+      "radiation": "Radiation"
+    },
+    "empty": {
+      "title": "No results",
+      "description": "Adjust your filters and try again."
+    }
+  },
+  "patient_exploration": {
+    "title": "{{total}} Patients",
+    "description": "",
+    "search_placeholder": "Search by name, research ID or MRN",
+    "tabs": {
+      "cohort_analytics": "Cohort analytics",
+      "patient_list": "Patient list"
+    },
+    "chat": {
+      "title": "Cohort analytics",
+      "explore": "Explore charts",
+      "explore_tooltip": "Ask questions about these charts and generate new views with AI"
+    },
+    "cells": {
+      "patient": {
+        "research_id": "ID: {{id}}",
+        "masked_aria": "PHI masked"
+      }
+    },
+    "columns": {
+      "patient": "Patient",
+      "mrn": "MRN",
+      "birth_year": "Birth year",
+      "sex": "Sex",
+      "site": "Site",
+      "cns_integrated_diagnosis": "CNS integrated diagnosis",
+      "vital_status": "Vital status",
+      "survival": "Survival"
+    },
+    "filters": {
+      "vital_status": "Vital status",
+      "organization_code": "Site",
+      "cns_integrated_diagnosis": "Diagnosis",
+      "age_at_initial_dx_group": "Age at diagnosis",
+      "age_at_initial_dx_group_values": {
+        "congenital": "Congenital (at birth)",
+        "neonatal": "Neonatal (under 28 days)",
+        "infantile": "Infantile (≥ 28 days and < 1 year)",
+        "childhood": "Childhood (≥ 1 year and < 5 years)",
+        "juvenile": "Juvenile (≥ 5 years and < 16 years)",
+        "young_adult": "Young Adult (≥ 16 years and < 40 years)",
+        "middle_age": "Middle Age (≥ 40 years and < 60 years)",
+        "senior": "Senior (≥ 60 years)",
+        "unknown": "Unknown (age not available)"
+      },
+      "chemotherapy_agents": "Chemotherapy agents",
+      "got_radiation_ever": "Radiation",
+      "diagnosis_type_cohort": "Cohort"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "footer": {
+      "awaiting_data": "Awaiting backend — placeholder rows",
+      "total": "{{count}} patients"
+    }
+  },
+  "case_exploration": {
+    "filters_group": {
+      "analysis_catalog_code": "Analysis",
+      "diagnosis_lab": "Diagnostic Lab",
+      "ordering_organization": "Prescribing Institution",
+      "priority_code": "Priority",
+      "project_code": "Project",
+      "search_by_id": "Search by ID",
+      "search_placeholder": "Case, sequencing, patient, or MRN",
+      "status_code": "Status"
+    },
+    "priority": {
+      "asap": "ASAP",
+      "asap_tooltip": "As Soon As Possible",
+      "routine": "Routine",
+      "routine_tooltip": "Routine Service",
+      "stat": "STAT",
+      "stat_tooltip": "The request should be actioned immediately - highest possible priority",
+      "urgent": "Urgent",
+      "urgent_tooltip": "The request should be actioned promptly"
+    },
+    "analysis_type_code": {
+      "somatic": "Somatic",
+      "germline": "Solo germline",
+      "germline_family": "Family germline"
+    },
+    "status": {
+      "completed": "Closed",
+      "draft": "Draft",
+      "in_progress": "In Progress",
+      "in_review": "In Review",
+      "inconclusive": "Inconclusive",
+      "processing": "Processing",
+      "reopened": "Reopened",
+      "resolved": "Resolved",
+      "revoked": "Cancelled",
+      "submitted": "Pending",
+      "unresolved": "Unresolved"
+    },
+    "case_group": {
+      "label": "New data • {{date}}",
+      "count_one": "{{count}} case",
+      "count_other": "{{count}} cases",
+      "stat_count": "{{count}} STAT",
+      "empty": {
+        "title": "No cases found for this notification",
+        "description": "The link may be outdated, or you may not have access to these cases.",
+        "show_all": "Show all cases"
+      }
+    },
+    "case": {
+      "title": "{{total}} Cases",
+      "actions": {
+        "view_case": "View Case",
+        "view_variant": "View Variants"
+      },
+      "filters": {
+        "analysis_catalog_code": "Analysis",
+        "case_category_code": "Pre/Postnatal",
+        "case_type_code": "Type",
+        "diagnosis_lab_code": "Diagnostic lab",
+        "life_status_code": "Vital Status",
+        "ordering_organization_code": "Prescribing Institution",
+        "panel_code": "Panel",
+        "priority_code": "Priority",
+        "project_code": "Project",
+        "status_code": "Status"
+      },
+      "headers": {
+        "assignees": "Assignment",
+        "assignees_tooltip": "Case assignment",
+        "case_id": "Case",
+        "patient_id": "Patient",
+        "submitter_patient_id": "MRN",
+        "submitter_patient_id_tooltip": "Patient's medical record number",
+        "priority_code": "Priority",
+        "status_code": "Status",
+        "case_type": "Type",
+        "analysis_catalog_code": "Analysis",
+        "primary_condition": "Primary Condition",
+        "ordering_organization_code": "Req. By",
+        "ordering_organization_code_tooltip": "Requested by",
+        "proband_submitter_sample_ids": "Sample",
+        "proband_submitter_sample_ids_tooltip": "Proband's sample ID (tumor sample for somatic cases)",
+        "run_names": "Run",
+        "run_names_tooltip": "Run ID for the proband's sample",
+        "project_code": "Project",
+        "updated_on": "Updated",
+        "updated_on_tooltip": "Date of last case modification (yyyy-mm-dd)",
+        "prescriber": "Prescriber",
+        "prescriber_tooltip": "Prescribing doctor",
+        "diagnostic_lab": "Diagnostic Lab",
+        "diagnostic_lab_tooltip": "Molecular diagnostic laboratory",
+        "managing_organization": "Managing Org.",
+        "managing_organization_tooltip": "Organization managing the patient’s file",
+        "created_on": "Created On",
+        "created_on_tooltip": "Date of case creation (yyyy-mm-dd)",
+        "first_name": "First Name",
+        "last_name": "Last Name",
+        "life_status": "Vital Status",
+        "category_code": "Pre/Postnatal",
+        "panel": "Panel",
+        "jhn": "JHN"
+      }
+    },
+    "sequencing": {
+      "title": "Sequencing"
+    }
+  },
+  "case_status": {
+    "error": "Status update failed. Please try again."
+  },
+  "case_assignment": {
+    "error": "Assignment update failed. Please try again."
+  },
+  "files": {
+    "filters": {
+      "data_type_code": "Type",
+      "format_code": "Format",
+      "project_code": "Project",
+      "diagnosis_lab_code": "Diagnostic Lab",
+      "relationship_to_proband_code": "Relationship"
+    }
+  },
+  "study": {
+    "title": "Studies",
+    "search": {
+      "label": "Search by study code, study name, dbGaP",
+      "placeholder": "KF-AIS, Kids First: Genomics of Orthopaedic Disease Program, phs001410"
+    },
+    "facets": {
+      "collapse": "Collapse facets",
+      "expand": "Expand facets"
+    },
+    "table": {
+      "headers": {
+        "study_code": "Code",
+        "study_name": "Name",
+        "program": "Program",
+        "domain": "Domain",
+        "dbgap": "dbGaP",
+        "participant_count": "Participants",
+        "biospecimen_count": "Biospecimens",
+        "family_count": "Families",
+        "file_count": "Files",
+        "genomics": "Genomics",
+        "transcriptomics": "Transcriptomics",
+        "imaging": "Imaging",
+        "proteomics": "Proteomics"
+      }
+    }
+  },
+  "landing": {
+    "include": {
+      "hero": {
+        "wordmark": "INCLUDE Data Hub",
+        "title": "Uncover <accent>new insights</accent> into the biology of Down Syndrome and co-occurring conditions.",
+        "description": "Access large-scale integrated data resources and analyze custom built cohort datasets based on participants, biospecimens, clinical, and genomic data.",
+        "login": "Login",
+        "signup": "Sign up",
+        "mondo_chart": {
+          "title": "Most Frequent Co-occurring Conditions (MONDO)",
+          "axis": {
+            "x_label": "# of participants",
+            "y_label": "Diagnoses (MONDO)"
+          }
+        }
+      },
+      "tiles": {
+        "germline_variants": {
+          "title": "Germline Variants",
+          "description": "Our variant explorer offers advanced searching capabilities. With just a few clicks, you can explore millions of annotated germline variants from genomes of INCLUDE Data Hub participants.",
+          "buttons": {
+            "explore": "Explore variant data"
+          }
+        },
+        "cavatica": {
+          "title": "CAVATICA",
+          "description": "The portal integrates with CAVATICA, a cloud-based platform designed for worldwide data analysis and collaboration. Researchers can analyze INCLUDE datasets using custom or pre-existing workflows.",
+          "buttons": {
+            "learn_more": "Learn more",
+            "login": "Login"
+          }
+        },
+        "experimental_models": {
+          "title": "Experimental Models",
+          "description": "The Experimental Models portal provides researchers with publications, phenotypes, datasets, and biospecimens derived from experimental models of Down syndrome, enabling mechanistic insights into the tissue-specific effects of trisomy 21.",
+          "buttons": {
+            "explore": "Explore Experimental Models"
+          }
+        }
+      },
+      "data_release": {
+        "title": "Data Release",
+        "stats": {
+          "studies": "Studies",
+          "participants": "Participants",
+          "biospecimens": "Biospecimens",
+          "files": "Files",
+          "genomes": "Genomes",
+          "transcriptomes": "Transcriptomes"
+        }
+      },
+      "demographics": {
+        "title": "Demographics",
+        "t21_status": "T21 Status",
+        "sex": "Sex",
+        "race": "Race"
+      },
+      "studies": {
+        "title": "Studies",
+        "description": "Explore a curated collection of harmonized studies, ranging from participant-reported programs, INCLUDE-funded cohorts, institutional initiatives, and dedicated consortia focused on Down Syndrome research.",
+        "view_all": "View all studies"
+      },
+      "documentation": {
+        "center": {
+          "title": "INCLUDE Documentation Center",
+          "description": "For information on accessing, submitting and uploading data, visit our Documentation Center.",
+          "cta": "Documentation",
+          "citation": "Citation guidelines"
+        },
+        "participate": {
+          "title": "Participate in the INCLUDE Project",
+          "description": "Visit the NIH INCLUDE project page to learn more about the initiative, funding opportunities, or other resources.",
+          "cta": "Learn more"
+        }
+      },
+      "footer": {
+        "legal": "The INCLUDE Data Coordinating Center (DCC) is supported by the National Institutes of Health INCLUDE Project under Project Number U2CHL156291 administered by the National Heart, Lung and Blood Institute. All content, terms and conditions and policies associated with the INCLUDE DCC content and website (the \"Services\") are produced by the INCLUDE DCC. The views and opinions of authors expressed on the Services do not necessarily state or reflect those of the National Institutes of Health (\"NIH\") or the U.S. government. Furthermore, the NIH does not endorse or promote any INCLUDE DCC entity or any of its products or services nor guarantees the products, services, or information provided by the INCLUDE DCC."
+      }
+    },
+    "kidsfirst": {
+      "hero": {
+        "logo_alt": "Kids First Data Resource Portal",
+        "title": "Kids First Data Resource Portal",
+        "description": "Empower your research with our robust collection of childhood cancer, congenital disorder, and cross-condition data.",
+        "getting_started": "Getting started is as easy as 1-2-3",
+        "free": "Sign up within minutes… free of charge!",
+        "login": "Login",
+        "signup": "Sign up"
+      },
+      "studies": {
+        "section_title": "Leading the way through data-sharing",
+        "title": "Studies",
+        "description": "Explore a broad collection of harmonized studies focused pediatric cancer and structural birth defects for cross condition research.",
+        "view_all": "View all studies",
+        "participants": "Participants",
+        "domains": {
+          "cancer": "Cancer",
+          "cross_condition": "Cross condition",
+          "congenital_disorder": "Congenital disorder",
+          "unknown": "Unknown"
+        }
+      },
+      "accelerating_research": {
+        "title": "Accelerating research",
+        "description": "Build virtual cohorts using data from over 99K samples, including whole genome sequencing (WGS) and RNA-Sequencing, is available to empower your research today.",
+        "get_started": "Get started",
+        "stats": {
+          "studies": "Studies",
+          "participants": "Participants",
+          "variants": "Variants",
+          "biospecimens": "Biospecimens",
+          "files": "Files",
+          "genomes": "Genomes"
+        },
+        "mondo_chart": {
+          "title": "Most Frequent Diagnoses (MONDO)",
+          "axis": {
+            "x_label": "# of participants",
+            "y_label": "Diagnoses (MONDO)"
+          }
+        },
+        "demographics": {
+          "title": "Demographics",
+          "family_composition": "Family Composition",
+          "race": "Race",
+          "ethnicity": "Ethnicity"
+        }
+      },
+      "collaboration": {
+        "section_title": "Advancing science through collaboration",
+        "subtitle": "Easily gain access to a range of robust cloud-based resources to drive meaningful research progress.",
+        "germline_variants": {
+          "title": "Germline Variants",
+          "description": "Our variant explorer offers advanced searching capabilities. With just a few clicks, you can explore millions of annotated germline variants from the genomes of Kids First participants.",
+          "button": "Explore variant data"
+        },
+        "cavatica": {
+          "description": "The portal integrates with CAVATICA, a cloud-based platform designed for worldwide data analysis and collaboration. Researchers can analyze Kids First datasets using custom or pre-existing workflows.",
+          "button": "Get started"
+        },
+        "pedcbioportal": {
+          "description": "A navigational tool housing clinical data sourced from patient medical visits, PedcBioPortal guides researchers and clinicians toward optimal treatment avenues to enhance the exploration of innovative therapies.",
+          "button": "Get started"
+        }
+      },
+      "documentation": {
+        "find_inspiration": {
+          "title": "Find inspiration",
+          "description": "Review published work that cites Kids First, then publish findings you've uncovered using this powerful resource.",
+          "button": "View publications"
+        },
+        "get_answers": {
+          "title": "Get answers",
+          "description": "Navigate the Kids First landscape like a pro with tips and information found at the Data Portal Help Center.",
+          "button": "Help center"
+        }
+      },
+      "footer": {
+        "columns": {
+          "about": {
+            "title": "About",
+            "links": {
+              "about_kids_first": "About Kids First",
+              "community": "Community",
+              "faqs": "FAQs"
+            }
+          },
+          "resources": {
+            "title": "Resources",
+            "links": {
+              "data": "Data",
+              "tools": "Tools",
+              "help_center": "Help Center"
+            }
+          },
+          "news": {
+            "title": "News",
+            "links": {
+              "articles": "Articles",
+              "events": "Events",
+              "press": "Press"
+            }
+          }
+        },
+        "partners_title": "Kids First Partner Institutions",
+        "follow": "Follow @kidsfirstdrc",
+        "email": "Email Kids First",
+        "privacy": "Privacy Policy",
+        "cookies": "Cookies",
+        "disclaimer": "The Kids First Data Resource Center (\"DRC\") comprises partnered institutions supported by the NIH Common Fund under Award Number U2CHL138346 as part of the Common Fund's Gabriella Miller Kids First Pediatric Research Program (\"Kids First\"). All content, terms and conditions and policies associated with the DRC Portal and Website (the \"Services\") are produced by the DRC. The views and opinions of authors expressed on the Services do not necessarily state or reflect those of the National Institutes of Health (\"NIH\") or the U.S. government. Furthermore, the NIH does not endorse or promote any DRC entity or any of its products or services nor guarantees the products, services, or information provided by the DRC.",
+        "copyright": "© 2024 Gabriella Miller Kids First Data Resource Center. All rights reserved."
+      }
+    }
+  },
+  "interpretation": {
+    "title": "Clinical Interpretation"
+  },
+  "query_filters": {
+    "sidebar_panel": {
+      "collapse": "Collapse",
+      "expand": "Expand",
+      "organization": "RQDM Panel",
+      "filters": {
+        "panel": "Panel",
+        "variant": "Variant",
+        "gene": "Gene",
+        "frequency": "Frequency",
+        "pathogenicity": "Pathogenicity",
+        "occurrence": "Occurrence",
+        "organization": "My Organization",
+        "metric_qc": "Metric QC"
+      }
+    }
+  },
+  "variant": {
+    "no_data_for_variant": "No data for this variant.",
+    "report": {
+      "download": "Download report",
+      "select_at_least_one": "Select at least one item",
+      "max_exceeded": {
+        "title": "Maximum number exceeded",
+        "description": "A maximum of 100 items can be exported at a time. Please narrow your selection and try again."
+      },
+      "toast": {
+        "loading": "Generating report…",
+        "success": "Report downloaded",
+        "error": "Unable to download the report. Please try again."
+      }
+    },
+    "headers": {
+      "aa_change": "AA",
+      "aa_change_tooltip": "Amino acid change",
+      "ad_ratio": "AD Ratio",
+      "ad_ratio_tooltip": "Allele depth ratio ALT/(ALT+REF)",
+      "aq": "AQ",
+      "aq_tooltip": "Systematic noise score (AQ)",
+      "bc": "BC",
+      "bc_tooltip": "Number of bins in the region",
+      "calls": "GT",
+      "calls_tooltip": "Genotype",
+      "chromosome": "Chr",
+      "chromosome_tooltip": "Chromosome",
+      "clinical_interpretation": "Clinical Interpretation",
+      "clingen": "ClinGen",
+      "clinvar": "ClinVar",
+      "cmc_sample_mutated": "CMC",
+      "cmc_sample_mutated_tooltip": "Number of samples in COSMIC with this mutation followed by its ratio",
+      "cmc_tier": "Tier",
+      "cmc_tier_tooltip": "CMC Tier. Mutation significance. 1 - high significance, 2 - medium significance, 3 - low significance, Other - No predicted significance (other mutations)",
+      "comphet_genes": "CH",
+      "comphet_genes_tooltip": "Compound heterozygous (slivar): only PASS, impactful variants (LoF, Missense, Inframe, Splice Region) heterozygous in the proband with GQ ≥ 20, depth ≥ 6 and allele balance between 0.2 and 0.8 are considered. In trios, exactly one parent must carry the variant and neither may be homozygous.",
+      "cn": "CN",
+      "cn_tooltip": "Estimated copy number",
+      "cytoband": "Cytoband",
+      "dbSNP": "dbSNP",
+      "end": "End",
+      "exomiser_acmg_classification": "ACMG Exo.",
+      "exomiser_acmg_classification_tooltip": "Exomiser ACMG",
+      "exomiser_gene_combined_score": "Exo.",
+      "exomiser_gene_combined_score_tooltip": "Exomiser score based on variant properties and patient phenotypes",
+      "filter": "Filter",
+      "freq_tn": "Freq. TN",
+      "freq_tn_tooltip": "Number of tumor-normal genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.",
+      "freq_to": "Freq. TO",
+      "freq_to_tooltip": "Number of tumor-only genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.",
+      "freq_g": "Freq. G",
+      "freq_g_tooltip": "Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
+      "gene_length": "Length",
+      "gene_length_tooltip": "Gene base length",
+      "genotype_quality": "GQ",
+      "genotype_quality_tooltip": "Genotype quality: only occurrences with GQ ≥ 20 are taken into account for frequency calculation.",
+      "gnomad_sf": "gnomAD SF",
+      "gnomad_sf_tooltip": "gnomAD 4.1.0 (Site Frequency)",
+      "gnomad_sv_ac": "gnomAD AC",
+      "gnomad_sv_ac_tooltip": "gnomAD 4.1.0 (Allele Count)",
+      "gnomad_sv_af": "gnomAD AF",
+      "gnomad_sv_af_tooltip": "gnomAD 4.1.0 (Allele Frequency)",
+      "gnomad_sv_sc": "gnomAD SC",
+      "gnomad_sv_sc_tooltip": "gnomAD 4.1.0 (Site Count)",
+      "gnomad_v3_af": "gnomAD",
+      "gnomad_v3_af_tooltip": "gnomAD 4.1.0 Joint (Frequency)",
+      "hgvsg": "Variant",
+      "hotspot": "Hotspot",
+      "hotspot_tooltip": "Hotspot Cancer",
+      "is_mane_select": "MANE",
+      "length": "Length",
+      "length_tooltip": "CNV bases length",
+      "name": "Variant",
+      "nb_exons": "# Exons",
+      "nb_exons_tooltip": "Overlapped exon number",
+      "nb_genes": "# Genes",
+      "nb_genes_tooltip": "Number of genes overlapped by CNV",
+      "nb_overlap_bases": "# Bases",
+      "nb_overlap_bases_tooltip": "Overlap in bases",
+      "nb_snv": "# SNVs",
+      "nb_snv_tooltip": "Number of SNVs included in the CNV",
+      "omim_inheritance_code": "OMIM",
+      "omim_inheritance_code_tooltip": "MIM inheritance modes for the gene associated with the most deleterious consequence",
+      "overlapping_gene_percent": "% Gene",
+      "overlapping_gene_percent_tooltip": "% overlapped gene length",
+      "overlapping_cnv_percent": "% CNV",
+      "overlapping_cnv_percent_tooltip": "% overlapped CNV length",
+      "overlap_type": "Type",
+      "overlap_type_tooltip": "Gene and CNV overlapping type",
+      "panels": "Overlapping with CNV",
+      "pe": "PE",
+      "pe_tooltip": "Number of improperly paired end reads at start and stop breakpoints",
+      "germline_pf_wgs": "Freq.",
+      "germline_pf_wgs_tooltip": "Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
+      "picked_consequences": "Consequence",
+      "picked_consequences_tooltip": "Most deleterious consequence annotated using VEP",
+      "quality": "Qual.",
+      "quality_tooltip": "CNV Quality",
+      "sq": "SQ",
+      "sq_tooltip": "Somatic Quality",
+      "start": "Start",
+      "symbol": "Gene",
+      "symbols": "Genes",
+      "symbol_overlapping": "Gene",
+      "symbol_tooltip": "List of genes overlapped by CNV",
+      "type": "Type",
+      "variant_class": "Type",
+      "zygosity": "Zyg.",
+      "zygosity_tooltip": "Zygosity"
+    },
+    "actions": {
+      "preview": "Preview",
+      "open_in_igv": "Open in IGV ",
+      "open_in_igv_disabled_tooltip": "No alignment file available for this case",
+      "ucsc": "UCSC",
+      "litvar": "LitVar",
+      "view_variant": "View variant"
+    },
+    "splice_ai": {
+      "AG": "Acceptor Gain",
+      "AL": "Acceptor Loss",
+      "DG": "Donor Gain",
+      "DL": "Donor Loss"
+    },
+    "interpretation": {
+      "tooltip": {
+        "add": "Add variant interpretation",
+        "view": "View interpretation",
+        "none": "No interpretation for this variant"
+      },
+      "classifications": {
+        "all_classifications": "All Classifications",
+        "pathogenic": "Pathogenic",
+        "likelyPathogenic": "Likely Pathogenic",
+        "likelyPathogenic_tooltip": "Probably Pathogenic",
+        "vus": "VUS",
+        "vus_tooltip": "Variant of Uncertain Significance",
+        "likelyBenign": "Likely Benign",
+        "likelyBenign_tooltip": "Probably Benign",
+        "benign": "Benign"
+      }
+    },
+    "omim": {
+      "AD": "Autosomal Dominant",
+      "AR": "Autosomal Recessive",
+      "DD": "Digenic Dominant",
+      "DR": "Digenic Recessive",
+      "IC": "Isolated Cases",
+      "Mi": "Mitochondrial",
+      "Mu": "Multifactorial",
+      "NA": "Not Applicable",
+      "NRT": "No Reported Transmission",
+      "null": "-",
+      "SMo": "Somatic Mosaicism",
+      "Smu": "Somatic Mutation",
+      "XL": "X-Linked",
+      "XLD": "X-Linked Dominant",
+      "XLR": "X-Linked Recessive",
+      "YL": "Y-Linked"
+    },
+    "predictions": {
+      "sift": "SIFT",
+      "revel": "REVEL",
+      "loeuf": "LOEUF",
+      "splice_ai": "SpliceAI",
+      "fathmm": "FATHMM",
+      "cadd_raw": "CADD (Raw)",
+      "cadd_phred": "CADD (Phred)",
+      "dann": "DANN",
+      "lrt": "LRT",
+      "polyphen2hvar": "PolyPhen-2 HVAR",
+      "phylop17way": "PhyloP17Way",
+      "pli": "pLI",
+      "no_prediction": "No prediction"
+    },
+    "cmc_tiers": {
+      "1": "Tier 1",
+      "2": "Tier 2",
+      "3": "Tier 3",
+      "other": "Other",
+      "no_data": "ND"
+    },
+    "classes": {
+      "indel": "Indel",
+      "insertion": "Insertion",
+      "snv": "SNV",
+      "deletion": "Deletion",
+      "sequence_alteration": "Sequence Alteration",
+      "substitution": "Substitution"
+    },
+    "canonical_transcript": "Canonical transcript",
+    "igv": {
+      "title": "Alignment and variant",
+      "dense_reads_hidden": {
+        "title": "Reads hidden in a dense region",
+        "description": "Some tracks are very deep here. To keep IGV responsive, their reads show only in views of {{window}} bp or less. Zoom in to see them."
+      },
+      "failed_tracks": {
+        "title_one": "A track could not be loaded",
+        "title_other": "{{count}} tracks could not be loaded"
+      },
+      "public_tracks": {
+        "menu": "Tracks",
+        "clinvar": "ClinVar",
+        "dgv": "DGV",
+        "clinvar_sv": "ClinVar SVs",
+        "clingen_region_haploinsufficiency": "ClinGen region haploinsufficiency",
+        "clingen_region_triplosensitivity": "ClinGen region triplosensitivity",
+        "gnomad_sv": "gnomAD SV v4.1",
+        "gnomad_cnv": "gnomAD CNV v4.1",
+        "clingen_gene_haploinsufficiency": "ClinGen gene haploinsufficiency",
+        "clingen_gene_triplosensitivity": "ClinGen gene triplosensitivity",
+        "segmental_duplications": "Segmental duplications",
+        "repeat_masker": "RepeatMasker",
+        "simple_repeats": "Simple repeats",
+        "self_chain": "Self chain"
+      }
+    },
+    "interpretation_form": {
+      "alert": {
+        "cancel": "Go back",
+        "description": "Saving these changes will overwrite the existing variant interpretation within your organization. This action cannot be undone.",
+        "save": "Save changes",
+        "title": "Overwrite interpretation?"
+      },
+      "title": "Clinical Interpretation",
+      "cancel_text": "Cancel",
+      "ok_text": "Save interpretation",
+      "last_update": "<strong>Last updated:</strong> {{name}} on <date/>",
+      "header": {
+        "germline": "Germline",
+        "germline_family": "Germline",
+        "patient": "Patient",
+        "sequencing": "Sequencing",
+        "somatic": "Somatic"
+      },
+      "transcript": {
+        "exon": "Exon"
+      },
+      "notification": {
+        "success": {
+          "title": "Interpretation saved",
+          "button": "View interpretation"
+        },
+        "error": {
+          "title": "Failed to save interpretation",
+          "text": "Failed to save interpretation. Please try again."
+        }
+      },
+      "generic": {
+        "interpretation": "Interpretation",
+        "pub_med_publication": "PubMed Publication",
+        "pub_med_publication_popover": {
+          "enter": "Enter a",
+          "pmid": "PMID"
+        },
+        "pub_med_id_not_found": "Invalid or unknown PMID",
+        "citation_placeholder": "e.g. 25741868",
+        "add_citation": "Add a publication",
+        "ensembl_gene_id": "Ensembl",
+        "transcript_id": "Transcript ID"
+      },
+      "germline": {
+        "condition": "MONDO Condition",
+        "condition_placeholder": "e.g. muscular dystrophy",
+        "condition_popover": "Search for a medical condition in",
+        "condition_popover_link": "MONDO Ontology",
+        "condition_empty_indicator": "No results found",
+        "condition_no_search_indicator": "Minimum 3 characters",
+        "classification": "ACMG/AMP Classification",
+        "classification_popover": {
+          "consult": "Consult",
+          "standards_and_guidelines": "standards and guidelines",
+          "variant_interpretation": "for variant interpretation",
+          "full_text": "Consult <guides>standards and guidelines</guides> for variant interpretation"
+        },
+        "classification_criteria": "Classification Criteria",
+        "classification_criteria_placeholder": "e.g. PM1, PS2",
+        "mode_of_transmission": "Mode of inheritance",
+        "mode_of_transmission_placeholder": "e.g. Autosomal dominant de novo",
+        "no_results": "No results found"
+      },
+      "somatic": {
+        "tumoral_type": "Tumor Type",
+        "tumoral_type_placeholder": "e.g. colon sarcoma",
+        "oncogenicity": "Oncogenicity ClinGen/CGC/VICC",
+        "oncogenicity_options": {
+          "oncogenic": "Oncogenic",
+          "likely_oncogenic": "Likely Oncogenic",
+          "likely_oncogenic_tooltip": "Probably Oncogenic",
+          "vus": "VUS",
+          "vus_tooltip": "Variant of Uncertain Significance",
+          "likely_benign": "Likely Benign",
+          "likely_benign_tooltip": "Probably Benign",
+          "benign": "Benign"
+        },
+        "oncogenicity_popover": {
+          "full_text": "Consult <guides>standards and guidelines</guides> for variant interpretation"
+        },
+        "classification_criteria": "Classification Criteria",
+        "classification_criteria_placeholder": "e.g. OS1, OM2",
+        "clinical_utility": "Clinical Utility",
+        "clinical_utility_placeholder": "Select",
+        "clinical_utility_options": {
+          "category_ia": "Tier IA",
+          "category_ib": "Tier IB",
+          "category_iic": "Tier IIC",
+          "category_iid": "Tier IID",
+          "category_iii": "Tier III"
+        },
+        "sections": {
+          "cancer": {
+            "title": "Cancer Hotspot",
+            "hotspot": "Hotspot"
+          },
+          "annotations_variant": {
+            "title": "Variant annotations"
+          },
+          "annotations_gene": {
+            "title": "Gene annotations"
+          }
+        },
+        "no_results": "No results found"
+      }
+    }
+  },
+  "preview_sheet": {
+    "header": {
+      "germline": "Germline",
+      "germline_family": "Germline",
+      "somatic": "Somatic"
+    },
+    "actions": {
+      "download_report": "Download report",
+      "open_igv": "Open IGV",
+      "interpret": "Interpret",
+      "interpretation": "Interpret Variant",
+      "view_all_variants": "View all variants",
+      "view_in_case": "View in case"
+    },
+    "interpretation_details": {
+      "title": "Variant Interpretation",
+      "fields": {
+        "gene": "Gene",
+        "transcript": "Transcript",
+        "classification": "Classification",
+        "primary_condition": "Primary Condition",
+        "classification_criteria": "Classification Criteria",
+        "clinical_utility": "Clinical Utility",
+        "interpretation": "Interpretation",
+        "references": "{{count}} references",
+        "tumoral_type": "Tumor Type",
+        "updated_at_tooltip": "Last interpretation date",
+        "updated_by_name_tooltip": "Authored by"
+      }
+    },
+    "variant_details": {
+      "title": "Variant Details",
+      "actions": {
+        "ucsc": "UCSC",
+        "litvar": "LitVar",
+        "ensembl": "Ensembl"
+      },
+      "sections": {
+        "gene": {
+          "title": "Gene",
+          "pli": "pLI",
+          "loeuf": "LOEUF",
+          "splice_ai": "SpliceAI",
+          "no_data": "No gene data reported"
+        },
+        "interpretations": {
+          "title": "Interpretations",
+          "my_network": "My Network",
+          "no_data": "No interpretation data reported"
+        },
+        "classification": {
+          "title": "Classification",
+          "exomiser": "Exomiser",
+          "clinvar": "ClinVar",
+          "cosmic": "COSMIC",
+          "hotspot": "Hotspot",
+          "no_data": "No classification data reported"
+        },
+        "frequencies": {
+          "title": "Frequencies",
+          "affected": "Affected",
+          "to": "Tumor-only",
+          "tn": "Tumor-normal",
+          "cosmic": "COSMIC",
+          "cosmic_tooltip": "Number of samples in COSMIC with this mutation followed by its ratio",
+          "gnomad": "gnomAD"
+        },
+        "functional_scores": {
+          "title": "Functional Scores",
+          "no_data": "No functional scores data reported"
+        },
+        "clinical_associations": {
+          "title": "Clinical Associations (OMIM)",
+          "no_data": "No clinical associations data reported"
+        },
+        "gene_card": {
+          "consequence": "Consequence",
+          "cdna_change": "cDNA Change",
+          "transcript_id": "Transcript ID",
+          "exon": "Exon",
+          "dbsnp_id": "dbSNP ID"
+        }
+      }
+    },
+    "occurrence_details": {
+      "title": "Occurrence Details",
+      "patient": "Patient",
+      "sequencing": "Sequencing",
+      "actions": {
+        "view_in_igv": "View in IGV"
+      },
+      "sections": {
+        "inheritance": {
+          "title": "Inheritance",
+          "zygosity": "Zygosity",
+          "compound_het": "Compound Het.",
+          "potential_compound_het": "Potential Compound Het.",
+          "inheritance": "Inheritance",
+          "parental_origin": "Parental Origin"
+        },
+        "family": {
+          "title": "Family",
+          "mother_genotype": "Mother's Genotype",
+          "father_genotype": "Father's Genotype",
+          "affected_tooltip": "Affected",
+          "not_affected_tooltip": "Not affected"
+        },
+        "metrics": {
+          "title": "Metrics",
+          "quality_depth": "Quality Depth",
+          "allele_depth_alt": "Allele Depth ALT",
+          "total_depth_alt_ref": "Total Depth ALT + REF",
+          "sq": "Somatic Quality",
+          "aq": "Systematic Noise (AQ)",
+          "genotype_quality": "Genotype Quality",
+          "filter": "Filter",
+          "pass": "Pass",
+          "fail": "Fail"
+        }
+      }
+    },
+    "case": {
+      "title": "Case {{id}}",
+      "actions": {
+        "open_case": "Open Case"
+      },
+      "details": {
+        "sex": "Sex",
+        "dob": "DOB",
+        "ethnicity": "Ethnicity",
+        "primary_condition": "Primary Condition",
+        "no_primary_condition": "No primary condition reported",
+        "phenotypes": "Phenotypes (HPO)",
+        "no_phenotype": "No phenotype reported",
+        "non_observed_phenotypes": "Non-observed Phenotypes (HPO)",
+        "no_non_observed_phenotype": "No non-observed phenotype reported"
+      },
+      "empty": {
+        "title": "No case data found",
+        "description": "No case data found"
+      }
+    }
+  },
+  "occurrence_expand": {
+    "classifications": {
+      "title": "Classifications",
+      "clinvar": "ClinVar"
+    },
+    "predictions": {
+      "title": "Predictions",
+      "franklin": "Franklin",
+      "exomiser": "Exomiser"
+    },
+    "gene": {
+      "title": "Gene",
+      "pli": "pLI",
+      "loeuf": "LOEUF",
+      "revel": "REVEL",
+      "splice_ai": "SpliceAI"
+    },
+    "frequencies": {
+      "title": "Frequencies",
+      "affected": "Affected",
+      "non_affected": "Non-affected",
+      "affected_tooltip": "Affected patients",
+      "non_affected_tooltip": "Unaffected patients",
+      "gnomad": "gnomAD"
+    },
+    "functional_scores": {
+      "cadd_phred": "CADD (Phred)",
+      "cadd_raw": "CADD (Raw)",
+      "dann": "DANN",
+      "fathmm": "FATHMM",
+      "lrt": "LRT",
+      "polyphen2_hvar": "PolyPhen-2 HVAR",
+      "revel": "REVEL",
+      "sift": "SIFT",
+      "title": "Functional Scores"
+    },
+    "zygosity": {
+      "title": "Zygosity",
+      "zygosity": "Zygosity",
+      "compound_het": "Compound Het.",
+      "potential_compound_het": "Potential Compound Het.",
+      "inheritance": "Inheritance",
+      "parental_origin": "Parental Origin"
+    },
+    "inheritance": {
+      "title": "Inheritance",
+      "zygosity": "Zygosity",
+      "compound_het": "Compound Het.",
+      "potential_compound_het": "Potential Compound Het.",
+      "inheritance": "Inheritance",
+      "parental_origin": "Parental Origin"
+    },
+    "clinical_association": {
+      "title": "Clinical Associations (OMIM)"
+    },
+    "family": {
+      "title": "Family",
+      "mother_genotype": "Mother's Genotype",
+      "father_genotype": "Father's Genotype",
+      "affected_tooltip": "Affected",
+      "not_affected_tooltip": "Not affected"
+    },
+    "metrics": {
+      "title": "Metrics",
+      "filter": "Filter"
+    }
+  },
+  "case_entity": {
+    "not_found": "Case not found",
+    "not_found.button": "Back to case list",
+    "header": {
+      "case": "Case",
+      "cases": "Cases",
+      "germline": "Germline Solo",
+      "germline_family": "Germline Family",
+      "somatic": "Somatic",
+      "priority_tooltip": "Priority",
+      "status_tooltip": "Status",
+      "unknown": "Unknown"
+    },
+    "patient_information": {
+      "dob": "DOB",
+      "estimated_due_date": "Estimated Due Date",
+      "father": "Father",
+      "id": "ID",
+      "jhn": "JHN",
+      "last_menstrual_period": "Last Menstrual Period",
+      "life_status": "Vital Status",
+      "managing_org": "Managing Org.",
+      "managing_org_tooltip": "Organization managing the patient’s file",
+      "mother": "Mother",
+      "name": "Name (First / Last)",
+      "no_patient": "No patient information available",
+      "proband": "Proband",
+      "sex": "Sex",
+      "submitter_patient_id": "Org. patient ID",
+      "submitter_patient_id_tooltip": "Organisation patient ID",
+      "title": "Patient Information",
+      "view_patient": "View Patient"
+    },
+    "details": {
+      "aliquot": "Aliquot",
+      "assigned_to": "Assigned to",
+      "bioinformatics": "Bioinformatics",
+      "capture_kit": "Capture Kit",
+      "case_id": "Case ID",
+      "case_note": "Note",
+      "case_overview": "Case Overview",
+      "case_type": "Type",
+      "clinical_note": "Clinical Note",
+      "clinical_overview": "Clinical",
+      "consanguinity": "Consanguinity",
+      "created_on_female": "Created On",
+      "created_on_male": "Created On",
+      "date_format_tooltip": "yyyy-mm-dd",
+      "description": "Description",
+      "diag_lab": "Diag. Lab",
+      "diag_lab_tooltip": "Molecular diagnostic laboratory",
+      "diagnosis_hypothesis": "Diagnosis Hypothesis",
+      "ethnicity": "Ethnicity",
+      "exam_interpretation": {
+        "abnormal": "Abnormal",
+        "normal": "Normal"
+      },
+      "experiment": "Experiment Details",
+      "experimental_strategy_code": "Exp. Strat.",
+      "experimental_strategy_code_tooltip": "Experimental Strategy",
+      "family_history": "Family History",
+      "fetus_numbered": "Fetus {{index}}",
+      "histology_code": "Histology",
+      "last_update": "Last Update",
+      "no_phenotype": "No phenotype reported",
+      "no_task_found": "No Task Found",
+      "no_variants": "No variants for this case",
+      "observations": "Observations",
+      "panel": "Panel",
+      "patient": "Patient",
+      "patient_id": "Patient ID",
+      "phenotypes": "Phenotypes",
+      "phenotypes_non_observed": "Non-Observed",
+      "phenotypes_observed": "Observed",
+      "platform": "Platform",
+      "pre_postnatal": "Pre/Postnatal",
+      "prescriber": "Prescriber",
+      "prescriber_tooltip": "Prescribing doctor",
+      "prescribing_inst": "Prescribing Inst.",
+      "prescribing_inst_tooltip": "Prescribing institution",
+      "primary_condition": "Primary Condition",
+      "priority": "Priority",
+      "project_code": "Project",
+      "read_technology": "Read Technology",
+      "requested_analysis": "Requested Analysis",
+      "run_alias": "Run Alias",
+      "run_date": "Run Date",
+      "run_name": "Run Name",
+      "sample_id": "Sample ID",
+      "sample_submitter_id": "Sample ID {{sampleId}}",
+      "sample_type_code": "Sample Type",
+      "sequencing": "Sequencing ID {{seqId}}",
+      "sequencing_details": "Details",
+      "sequencing_details_dialog": "Sequencing Details",
+      "sequencing_id": "Seq. ID",
+      "sequencing_id_tooltip": "Sequencing Experiment ID",
+      "sequencing_overview": "Sequencing",
+      "status": "Status",
+      "status_code": "Seq. Status",
+      "status_code_tooltip": "Sequencing Experiment Status",
+      "status_options": {
+        "completed": "Completed",
+        "draft": "Draft",
+        "in_progress": "In Progress",
+        "incomplete": "Incomplete",
+        "revoke": "Revoke",
+        "submitted": "Submitted",
+        "unknown": "Unknown"
+      },
+      "task_id": "Task ID",
+      "tissue_site": "Tissue Site",
+      "title": "Case Details",
+      "type": "Type",
+      "updated_on": "Last Update",
+      "view_variants": "View Variants"
+    },
+    "variants": {
+      "title": "Variants",
+      "filters": {
+        "proband": "Proband",
+        "affected_status_code": {
+          "affected": "Affected",
+          "non_affected": "Unaffected",
+          "unknown": "Unknown"
+        },
+        "cnv_type": {
+          "full_gene": "Gene falls entirely within the CNV",
+          "partial": "Gene overlaps the CNV",
+          "full_cnv": "Gene contains the CNV entirely"
+        },
+        "cnv": "CNV",
+        "cnv_to": "CNV (TO)",
+        "latest": "Latest",
+        "sample_submitter_id": "Submitter sample ID:",
+        "sample_id": "Sample ID",
+        "select_task_label": "Pipeline run producing aligned reads and called variants.",
+        "sequencing_id": "Seq. ID",
+        "snv": "SNV",
+        "snv_tn": "SNV (TN)",
+        "snv_tn_tooltip": "SNV (tumor-normal)",
+        "snv_to": "SNV (TO)",
+        "snv_to_tooltip": "SNV (tumor-only)",
+        "show_only_interpreted": "Show only interpreted",
+        "show_only_commented": "Show only commented",
+        "filter_by_flag": "Filter by flag"
+      },
+      "dialog": {
+        "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
+      }
+    },
+    "files": {
+      "title": "Files"
+    }
+  },
+  "file_entity": {
+    "count_one": "{{total}} File",
+    "count_other": "{{total}} Files",
+    "search_by_id_placeholder": "File, sample, patient, case, run, or sequencing",
+    "name": "File Name",
+    "format_code": "Format",
+    "data_type_code": "Type",
+    "size": "Size",
+    "case_id": "Case",
+    "diagnosis_lab": "Diag. Lab",
+    "patient_id": "Patient",
+    "relationship_to_proband_code": "Relationship",
+    "submitter_sample_id": "Sample",
+    "task_id": "Task",
+    "seq_id": "Sequencing",
+    "hash": "Hash",
+    "run_alias": "Run"
+  },
+  "variant_entity": {
+    "not_found": "Variant not found",
+    "not_found.button": "Back to variant list",
+    "header": {
+      "variants": "Variants",
+      "germline": "Germline"
+    },
+    "overview": {
+      "title": "Overview",
+      "interpretation": "Interpretation",
+      "my_network": "My Network",
+      "classification": "Classifications",
+      "exomiser": "Exomiser",
+      "details": "Details",
+      "radiant": "Radiant",
+      "consequence": "Consequence",
+      "clin_var": "ClinVar",
+      "patients": "Patients",
+      "patients_tooltip": "Number of germline genomes containing this variant and their frequency across this organization. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
+      "gnom_ad": "gnomAD",
+      "gnom_ad_info_tooltip": "gnomAD 4.1.0 Joint (Frequency)",
+      "exon": "Exon",
+      "most_deleterious_consequence_notice": "This transcript was selected because it represents the most deleterious consequence.",
+      "view_all_transcripts": "View all transcripts",
+      "prediction_scores": "Prediction Scores",
+      "sift": "SIFT",
+      "revel": "REVEL",
+      "loeuf": "LOEUF",
+      "splice_ai": "SpliceAI",
+      "fathmm": "FATHMM",
+      "cadd_raw": "CADD (raw)",
+      "cadd_phred": "CADD (phred)",
+      "dann": "DANN",
+      "lrt": "LRT",
+      "polyphen2hvar": "PolyPhen-2 HVAR",
+      "phylop17way": "PhyloP17Way",
+      "pli": "pLI",
+      "associated_conditions_omim": "Associated Conditions (OMIM)",
+      "external_references": "External References",
+      "dbSNP": "dbSNP",
+      "no_exomiser_score": "This variant does not have an Exomiser score.",
+      "no_interpretation_network": "This variant has not been interpreted within your network.",
+      "no_clin_var_interpretation": "This variant has not been submitted to ClinVar."
+    },
+    "evidence": {
+      "title": "Evidence and conditions",
+      "clin_var": {
+        "title": "ClinVar",
+        "description": "Pathogenic evidence provided by ClinVar",
+        "filters": {
+          "search_placeholder": "Filter Conditions"
+        },
+        "table": {
+          "headers": {
+            "evaluated": "Evaluated",
+            "evaluated.tooltip": "Latest submission for this variant/condition",
+            "condition": "Condition",
+            "classification": "Classification",
+            "submission_count": "Submissions",
+            "submission_count.tooltip": "Number of submitted interpretations for this variant/condition (RCV)",
+            "status": "Status",
+            "origin": "Origin"
+          }
+        },
+        "origin": {
+          "germline": "Germline",
+          "inherited": "Inherited",
+          "paternal": "Paternal",
+          "biparental": "Biparental",
+          "not_applicable": "Not Applicable",
+          "maternal": "Maternal",
+          "uniparental": "Uniparental",
+          "tested_inconclusive": "Tested inconclusive",
+          "de_novo": "DeNovo",
+          "not_reported": "Not Reported",
+          "not_provided": "Not Provided",
+          "unknown": "Unknown",
+          "somatic": "Somatic"
+        }
+      },
+      "gene": {
+        "title": "Associated Conditions and Phenotypes by Gene",
+        "filters": {
+          "search_placeholder": "Filter condition or phenotype",
+          "omim": "OMIM ({{value}})",
+          "orphanet": "Orphanet ({{value}})",
+          "hpo": "HPO ({{value}})"
+        },
+        "table": {
+          "headers": {
+            "condition": "Condition",
+            "inheritance": "Inheritance",
+            "classification": "Classification",
+            "status": "Status",
+            "status.tooltip": "TODO",
+            "origin": "Origin"
+          },
+          "empty": {
+            "description": "No conditions for this gene. Try resetting your tabs and filters above."
+          }
+        }
+      }
+    },
+    "frequency": {
+      "title": "Frequency",
+      "my_network": {
+        "title": "My Network",
+        "description": "Frequencies within the network showing the number of variant carriers within each category, along with the number of homozygous individuals for the alternate allele.",
+        "primary_condition": "Primary Condition",
+        "project": "Project",
+        "analysis": "Analysis",
+        "global_frequencies": {
+          "all_patients": "Global",
+          "all_patients_tooltip": "Number and proportion of patients who carry this variant across the network. The fraction represents all patients with the variant / total patients in the network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
+          "affected": "Affected",
+          "affected_tooltip": "Number and proportion of patients affected by the primary condition who carry this variant in the network. The fraction represents affected patients with the variant / total affected patients. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
+          "non_affected": "Non-Affected",
+          "non_affected_tooltip": "Number and proportion of patients not affected by the primary condition who carry this variant in the network. The fraction represents non-affected patients with the variant / total non-affected patients. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation."
+        },
+        "all_patients": "All Patients",
+        "affected_patients": "Affected Patients",
+        "non_affected_patients": "Non-Affected Patients",
+        "frequency": "Frequency",
+        "homozygotes": "Homozygotes"
+      },
+      "public_cohorts": {
+        "title": "Public Cohorts",
+        "cohort": "Cohort",
+        "ac": "# ALT Alleles",
+        "ac_tooltip": "Number of alternative alleles",
+        "an": "# Alleles (ALT + REF)",
+        "an_tooltip": "Number of alternative alleles + reference alleles",
+        "hom": "# Homo",
+        "hom_tooltip": "Number of homozygote variants",
+        "af": "Frequency",
+        "af_tooltip": "Allele Frequency",
+        "topmed_bravo": "TopMed",
+        "gnomad_genomes_v3": "gnomAD 4.1.0 Joint",
+        "1000_genomes": "1000 Genomes"
+      }
+    },
+    "transcripts": {
+      "title": "Transcripts",
+      "amino_acid_substitution": "Amino acid substitution"
+    },
+    "cases": {
+      "title": "{{count}} Cases",
+      "tab": "Cases",
+      "description": "Network cases carrying this variant, split by interpretation status.",
+      "affected_status": {
+        "affected": "Affected",
+        "non_affected": "Unaffected",
+        "unknown": "Unknown"
+      },
+      "common_headers": {
+        "patient_id": "Patient",
+        "relationship_to_proband": "Relation"
+      },
+      "common_filters": {
+        "institutions": {
+          "all_institutions": "All Diagnostic Labs"
+        },
+        "tests": {
+          "all_tests": "All Analyses"
+        },
+        "created_on": {
+          "most_recent": "Most recent",
+          "least_recent": "Least recent"
+        }
+      },
+      "status": {
+        "active": "Active",
+        "completed": "Completed"
+      },
+      "interpreted_table": {
+        "title": "Interpreted ({{count}})",
+        "headers": {
+          "case": "Case",
+          "date": "Date",
+          "date_tooltip": "Last intepretation date",
+          "mondo": "Condition (Mondo)",
+          "classification": "Classification",
+          "zygosity": "Zygosity",
+          "inheritance": "Inheritance",
+          "institution": "Diagnostic Lab",
+          "institution_tooltip": "Molecular diagnostic laboratory",
+          "test": "Analysis",
+          "status": "Status"
+        },
+        "filters": {
+          "classification": "Classification",
+          "institution": "Diagnostic Lab",
+          "search_condition": "Condition",
+          "search_condition_placeholder": "Filter MONDO conditions",
+          "test": "Analysis"
+        },
+        "expand": {
+          "patient_id": "Case's proband ID",
+          "copy": "Copy",
+          "copy_success": "Copied to clipboard"
+        }
+      },
+      "other_table": {
+        "title": "Non-interpreted ({{count}})",
+        "headers": {
+          "ad_alt": "ALT",
+          "ad_alt_tooltip": "Allele Depth ALT",
+          "ad_ratio": "ALT / (ALT + REF)",
+          "ad_ratio_tooltip": "Allelic Ratio ALT/(ALT+REF)",
+          "ad_total": "ALT + REF",
+          "ad_total_tooltip": "Total Depth ALT + REF",
+          "affected_status": "Aff. Status",
+          "affected_status_tooltip": "Affected status",
+          "case": "Case",
+          "case_tooltip": "Case and sequencing IDs",
+          "date": "Date",
+          "date_tooltip": "Date of last case modification (yyyy-mm-dd)",
+          "filter_fail": "Fail",
+          "filter_is_pass": "Filter",
+          "filter_pass": "Pass",
+          "gq": "GQ",
+          "gq_tooltip": "Genotype Quality",
+          "inheritance": "Inheritance",
+          "institution": "Diag. Lab",
+          "institution_tooltip": "Molecular diagnostic laboratory",
+          "mondo": "Condition (Mondo)",
+          "patient_id": "Patient",
+          "phenotypes_hpo": "Phenotype (HPO)",
+          "primary_condition": "Primary Condition",
+          "qd": "QD",
+          "qd_tooltip": "Quality Depth",
+          "relationship_to_proband": "Relationship",
+          "sample": "Sample",
+          "sex": "Sex",
+          "status": "Status",
+          "test": "Analysis",
+          "transmission_mode": "Transmission",
+          "zygosity": "Zygosity",
+          "zygosity_tooltip": "Zygosity"
+        },
+        "filters": {
+          "analysis_catalog_code": "Analysis",
+          "diagnosis_lab_code": "Diagnostic Lab",
+          "filter_fail": "Fail",
+          "filter_is_pass": "Filter",
+          "filter_pass": "Pass",
+          "search_hpo": "Search by phenotype",
+          "search_hpo_placeholder": "Filter by HPO phenotype",
+          "sex_code": "Sex",
+          "transmission_mode": "Transmission",
+          "zygosity": "Zygosity"
+        },
+        "seq_id_abrv": "Seq.",
+        "view_case": "View Case",
+        "view_variants": "View Variants"
+      }
+    }
+  },
+  "occurrence_flag": {
+    "flag": "Flag",
+    "pin": "Pin",
+    "star": "Star",
+    "error": "Update failed. Please try again.",
+    "tooltip": {
+      "flagged": "Flagged variant",
+      "unflagged": "Unflagged variant"
+    }
+  },
+  "notes": {
+    "variant": {
+      "title": "Variant Comments",
+      "button": "Comments",
+      "empty_title": "No comment yet",
+      "empty_description": "Use comments to add notes about your case analysis and document decisions. Comments are visible to all users with access to this case.",
+      "editor_placeholder": "Add your comment",
+      "edited": "(edited)",
+      "char_limit": "{{count}}/{{max}}",
+      "delete_dialog": {
+        "title": "Delete comment?",
+        "description": "Are you sure you want to delete this comment? This cannot be undone."
+      },
+      "tooltip": {
+        "add": "Add a comment",
+        "view": "View comments",
+        "none": "No comments for this variant"
+      }
+    }
+  },
+  "main_navbar": {
+    "user_details": {
+      "profile": "Profile",
+      "sign_out": "Sign out"
+    },
+    "links": {
+      "admin": "Admin",
+      "analysis": "Analysis",
+      "cases": "Cases",
+      "files": "File Archive",
+      "patients": "Patients",
+      "dashboard": "Dashboard",
+      "data_exploration": "Data Exploration",
+      "studies": "Studies",
+      "variants": "Variants"
+    },
+    "actions": {
+      "community": "Community",
+      "resources": "Resources",
+      "website": "Website",
+      "documentation": "Documentation",
+      "contact": "Contact"
+    },
+    "tenant_switcher": {
+      "title": "Switch Tenant"
+    }
+  },
+  "occurrence": {
+    "canonical": "Canonical transcript",
+    "mane_select": "Mane Select",
+    "mane_plus": "Mane Plus"
+  },
+  "pubmed_list_dialog": {
+    "title": "PubMed Publications"
+  },
+  "errors": {
+    "forbidden": {
+      "title": "You don't have access to RADIANT",
+      "body": "To get access, contact your organization's RADIANT administrator.",
+      "cta": "Back to sign in"
+    }
+  },
+  "librechat": {
+    "david": {
+      "title": "D.A.V.I.D",
+      "badge": "AI assistant",
+      "description": "AI-driven predictive analytics for personalized cancer care",
+      "frame_title": "D.A.V.I.D assistant",
+      "new_analysis": "New analysis",
+      "not_configured": "D.A.V.I.D is not configured for this environment.",
+      "open_in_new_tab": "Open in tab",
+      "resume_history": "Resume history",
+      "tooltip": "Ask D.A.V.I.D anything about your patients, cases, and files, starting from what's on screen",
+      "prompt_case": "Context: case {{caseId}} (tenant {{tenant}}). Load this case's context and give a brief clinical summary (family structure, HPO phenotypes). Then wait for the user's questions.",
+      "prompt_patient": "Context: patient key {{patientKey}} (tenant {{tenant}}). Load this patient's clinical context and give a brief clinical summary. Then wait for the user's questions.",
+      "prompt_cohort": "Context: the patient cohort of tenant {{tenant}}. In two sentences, say what you can answer about this cohort. Then wait for the user's questions."
+    }
+  }
+}

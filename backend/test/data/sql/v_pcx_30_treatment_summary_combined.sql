@@ -1,0 +1,27 @@
+create table v_pcx_30_treatment_summary_combined
+(
+    patient_id varchar(256) NULL,
+    patient_id_type varchar(20) NULL,
+    radiant_patient_id int NULL,
+    organization_name varchar(256) NULL,
+    organization_code varchar(64) NULL,
+    initial_dx_date datetime NULL,
+    age_at_initial_dx_days int NULL,
+    first_event_date datetime NULL,
+    age_at_first_event_days int NULL,
+    first_radiation_ever_date datetime NULL,
+    age_at_first_radiation_ever_days int NULL,
+    initial_radiation_date datetime NULL,
+    age_at_initial_radiation_days int NULL,
+    first_chemo_ever_date datetime NULL,
+    age_at_first_chemo_ever_days int NULL,
+    initial_chemo_date datetime NULL,
+    age_at_initial_chemo_days int NULL,
+    first_methotrexate_ever_date datetime NULL,
+    age_at_first_methotrexate_ever_days int NULL,
+    had_initial_radiation varchar(16) NULL,
+    had_initial_chemo varchar(16) NULL,
+    had_initial_methotrexate varchar(16) NULL,
+    initial_treatment_order varchar(128) NULL,
+    can_read_phi boolean NULL
+);

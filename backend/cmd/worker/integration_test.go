@@ -1,0 +1,1910 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/radiant-network/radiant-api/internal/batchval"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
+)
+
+func insertPayloadAndProcessBatch(db *gorm.DB, payload string, status types.BatchStatus, batchType string, dryRun bool, username string, createdOn string) string {
+	var id string
+	initErr := db.Raw(`
+   		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+   		VALUES (?, ?, ?, ?, ?, ?, 'radiant')
+   		RETURNING id;
+		`, payload, string(status), batchType, dryRun, username, createdOn).Scan(&id).Error
+	if initErr != nil {
+		panic(fmt.Sprintf("failed to insert payload into table %v", initErr))
+	}
+	ctx, _ := batchval.NewBatchValidationContext(db)
+	processBatch(context.Background(), db, ctx)
+	return id
+}
+
+func assertBatchProcessing(t *testing.T, db *gorm.DB, id string, expectedStatus types.BatchStatus, dryRun bool, username string, expectInfos []types.BatchMessage, expectWarnings []types.BatchMessage, expectErrors []types.BatchMessage) postgres.Batch {
+	resultBatch := postgres.Batch{}
+	db.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+	assert.Equal(t, expectedStatus, resultBatch.Status)
+	assert.Equal(t, dryRun, resultBatch.DryRun)
+	assert.Equal(t, username, resultBatch.Username)
+	assert.NotNil(t, resultBatch.CreatedOn)
+	assert.NotNil(t, resultBatch.StartedOn)
+	assert.NotNil(t, resultBatch.FinishedOn)
+	assert.Equal(t, expectWarnings, resultBatch.Report.Warnings)
+	assert.Equal(t, expectInfos, resultBatch.Report.Infos)
+	assert.Equal(t, expectErrors, resultBatch.Report.Errors)
+	return resultBatch
+}
+
+func Test_ProcessBatch_Patient_Success_Dry_Run(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+			{
+				"submitter_patient_id": "MRN-TEST-123",
+				"submitter_patient_id_type" : "mrn",
+				"patient_organization_code": "CHOP",
+				"sex_code": "female",
+				"life_status_code": "alive",
+				"date_of_birth": "2010-05-15"
+			}
+		]
+		`
+		var id string
+		initErr := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09', 'radiant')
+    		RETURNING id;
+		`, payload, types.CreatePatientBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
+		assert.Equal(t, true, resultBatch.DryRun)
+		assert.Equal(t, types.CreatePatientBatchType, resultBatch.BatchType)
+		assert.Equal(t, "user999", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var countPatient int64
+		countPatientErr := env.Postgres.Table("patient").Where("submitter_patient_id = ? AND organization_code = ?", "MRN-TEST-123", "CHOP").Count(&countPatient).Error
+		if countPatientErr != nil {
+			t.Fatal("failed to count patient :", countPatientErr)
+		}
+		assert.Equal(t, int64(0), countPatient)
+
+	})
+
+}
+
+func Test_ProcessBatch_Patient_Skipped(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+			{
+				"submitter_patient_id": "MRN-283773",
+				"submitter_patient_id_type" : "mrn",
+				"patient_organization_code": "CHUSJ",
+				"sex_code": "male",
+				"life_status_code": "alive",
+				"last_name": "Gagnon",
+				"first_name": "Juliette",
+				"jhn": "GAG1202030277",
+				"date_of_birth": "2012-02-03"
+			}
+		]
+		`
+		var id string
+		initErr := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09', 'radiant')
+    		RETURNING id;
+		`, payload, types.CreatePatientBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
+		assert.Equal(t, true, resultBatch.DryRun)
+		assert.Equal(t, types.CreatePatientBatchType, resultBatch.BatchType)
+		assert.Equal(t, "user999", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Equal(t, resultBatch.Summary.Skipped, 1)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Warnings, 1)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+	})
+
+}
+
+func Test_ProcessBatch_Patient_Errors(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+			{
+				"submitter_patient_id": "MRN-283773",
+				"submitter_patient_id_type" : "mrn",
+				"patient_organization_code": "UNKNOWN_ORG",
+				"sex_code": "male",
+				"life_status_code": "alive",
+				"last_name": "Gagnon",
+				"first_name": "Juliette",
+				"jhn": "GAG1202030277",
+				"date_of_birth": "2012-02-03"
+			}
+		]
+		`
+		var id string
+		initErr := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09', 'radiant')
+    		RETURNING id;
+		`, payload, types.CreatePatientBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		assert.Equal(t, true, resultBatch.DryRun)
+		assert.Equal(t, types.CreatePatientBatchType, resultBatch.BatchType)
+		assert.Equal(t, "user999", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Equal(t, 0, resultBatch.Summary.Skipped)
+		assert.Equal(t, 1, resultBatch.Summary.Errors)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Errors, 1)
+
+		var countPatient int64
+		countPatientErr := env.Postgres.Table("patient").Where("submitter_patient_id = ? AND organization_code = ?", "MRN-TEST-123", "CHOP").Count(&countPatient).Error
+		if countPatientErr != nil {
+			t.Fatal("failed to count patient :", countPatientErr)
+		}
+		assert.Equal(t, int64(0), countPatient)
+
+	})
+
+}
+
+func Test_ProcessBatch_Patient_All_Codes(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, _ := testutils.LoadScenario("patient_all_codes")
+		payload, _ := json.Marshal(scenario.Patients)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreatePatientBatchType, false, "user123", "2025-10-10")
+
+		infos := []types.BatchMessage{
+			{
+				Code:    "PATIENT-001",
+				Message: "Patient (CHUSJ / MRN-283773) already exists, skipped.",
+				Path:    "patient[0]",
+			},
+		}
+		warnings := []types.BatchMessage{
+			{
+				Code:    "PATIENT-002",
+				Message: "A patient with same ids (CHUSJ / MRN-283774) has been found but with a different sex_code (male <> female).",
+				Path:    "patient[2].sex_code",
+			},
+			{
+				Code:    "PATIENT-002",
+				Message: "A patient with same ids (CHUSJ / MRN-283774) has been found but with a different date_of_birth (1970-01-30 00:00:00 +0000 UTC <> 2025-01-30 00:00:00 +0000 UTC).",
+				Path:    "patient[2].date_of_birth",
+			},
+		}
+		errors := []types.BatchMessage{
+			{
+				Code:    "PATIENT-004",
+				Message: "Invalid field submitter_patient_id for patient (ORG001 / 123456789!@#$%?&*()_+). Reason: does not match the regular expression `^[a-zA-Z0-9\\- ._'À-ÿ]*$`.",
+				Path:    "patient[1].submitter_patient_id",
+			},
+			{
+				Code:    "PATIENT-004",
+				Message: "Invalid field submitter_patient_id_type for patient (ORG001 / 123456789!@#$%?&*()_+). Reason: field is too long, maximum length allowed is 100.",
+				Path:    "patient[1].submitter_patient_id_type",
+			},
+			{
+				Code:    "PATIENT-003",
+				Message: "Organization ORG001 for patient 123456789!@#$%?&*()_+ does not exist.",
+				Path:    "patient[1].patient_organization_code",
+			},
+			{
+				Code:    "PATIENT-004",
+				Message: "Invalid field date_of_birth for patient (CQGC / ABC123456). Reason: missing value, date of birth is required.",
+				Path:    "patient[3].date_of_birth",
+			},
+			{
+				Code:    "PATIENT-005",
+				Message: "Organization type (sequencing_center) defined for patient (CQGC / ABC123456) is not in this list : healthcare_provider, research_institute.",
+				Path:    "patient[3].patient_organization_code",
+			},
+			{
+				Code:    "PATIENT-006",
+				Message: "Patient (CHUSJ / ABC123457) appears multiple times in the batch.",
+				Path:    "patient[5]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", infos, warnings, errors)
+	})
+}
+
+func Test_ProcessBatch_Patient_Success_Not_Dry_Run(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+			{
+				"submitter_patient_id": "MRN-TEST-123",
+				"submitter_patient_id_type" : "mrn",
+				"patient_organization_code": "CHOP",
+				"sex_code": "female",
+				"life_status_code": "alive",
+				"date_of_birth": "2010-05-15",
+				"last_name": "(D)o-e"
+			}
+		]
+		`
+		var id string
+		initErr := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+    		RETURNING id;
+		`, payload, types.CreatePatientBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, types.CreatePatientBatchType, resultBatch.BatchType)
+		assert.Equal(t, "user999", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var countPatient int64
+		countPatientErr := env.Postgres.Table("patient").Where("submitter_patient_id = ? AND organization_code = ?", "MRN-TEST-123", "CHOP").Count(&countPatient).Error
+		if countPatientErr != nil {
+			t.Fatal("failed to count patient :", countPatientErr)
+		}
+		assert.Equal(t, int64(1), countPatient)
+
+	})
+
+}
+
+func Test_ProcessBatch_Sample_Success_Dry_Run(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-001",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, true, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
+		assert.Equal(t, true, resultBatch.DryRun)
+		assert.Equal(t, types.CreateSampleBatchType, resultBatch.BatchType)
+		assert.Equal(t, "user999", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var countSample int64
+		countSampleErr := env.Postgres.Table("sample").Where("submitter_sample_id = ? AND organization_code = ?", "SAMPLE-001", "UCSF").Count(&countSample).Error
+		if countSampleErr != nil {
+			t.Fatal("failed to count sample:", countSampleErr)
+		}
+		assert.Equal(t, int64(0), countSample)
+	})
+}
+
+func Test_ProcessBatch_Sample_Success_Not_Dry_Run(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-NEW-001",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, types.CreateSampleBatchType, resultBatch.BatchType)
+		assert.Equal(t, "user999", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var countSample int64
+		countSampleErr := env.Postgres.Table("sample").Where("submitter_sample_id = ? AND organization_code = 'CHUSJ'", "SAMPLE-NEW-001").Count(&countSample).Error
+		if countSampleErr != nil {
+			t.Fatal("failed to count sample:", countSampleErr)
+		}
+		assert.Equal(t, int64(1), countSample)
+	})
+}
+
+func Test_ProcessBatch_Sample_Already_Exists_Skipped(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		env.Postgres.Exec(`
+            INSERT INTO sample (submitter_sample_id, type_code, tissue_site, histology_code, organization_code, tenant_code, patient_id)
+            VALUES ('SAMPLE-EXISTS', 'dna', 'blood', 'normal', 'CHUSJ', 'radiant', 1)
+        `)
+
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-EXISTS",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
+		assert.Equal(t, 1, resultBatch.Summary.Skipped)
+		assert.Len(t, resultBatch.Report.Infos, 1)
+		assert.Equal(t, SampleAlreadyExistCode, resultBatch.Report.Infos[0].Code)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+	})
+}
+
+func Test_ProcessBatch_Sample_Existing_Different_Field_Warning(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		env.Postgres.Exec(`
+            INSERT INTO sample (submitter_sample_id, type_code, tissue_site, histology_code, organization_code, tenant_code, patient_id)
+            VALUES ('SAMPLE-DIFF', 'dna', 'liver', 'normal', 'CHUSJ', 'radiant', 1)
+        `)
+
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-DIFF",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
+		assert.Equal(t, 1, resultBatch.Summary.Skipped)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Warnings, 1)
+		assert.Equal(t, SampleExistingSampleDifferentFieldCode, resultBatch.Report.Warnings[0].Code)
+		assert.Contains(t, resultBatch.Report.Warnings[0].Message, "tissue_site")
+	})
+}
+
+func Test_ProcessBatch_Sample_Patient_Not_Exist(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-003",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "UNKNOWN-PATIENT",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		assert.Equal(t, 1, resultBatch.Summary.Errors)
+		assert.Len(t, resultBatch.Report.Errors, 1)
+		assert.Equal(t, SamplePatientNotExistCode, resultBatch.Report.Errors[0].Code)
+	})
+}
+
+func Test_ProcessBatch_Sample_Fetus_Success_Not_Dry_Run(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		// MRN-283835 (patient 63) is fetus 1's mother.
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-FETUS-001",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283835",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal",
+                "submitter_fetus_id": "F-72-1"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var sample postgres.Sample
+		findErr := env.Postgres.Table("sample").Where("submitter_sample_id = ? AND organization_code = 'CHUSJ'", "SAMPLE-FETUS-001").Scan(&sample).Error
+		if findErr != nil {
+			t.Fatal("failed to find sample:", findErr)
+		}
+		assert.Equal(t, 63, sample.PatientID, "patient_id stays the mother the sample was physically drawn from")
+		if assert.NotNil(t, sample.FetusID, "fetus_id says whose genome the sample's sequencing data represents") {
+			assert.Equal(t, 1, *sample.FetusID)
+		}
+	})
+}
+
+func Test_ProcessBatch_Sample_Fetus_Not_Exist(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-FETUS-002",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283835",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal",
+                "submitter_fetus_id": "F-UNKNOWN"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		if assert.Len(t, resultBatch.Report.Errors, 1) {
+			assert.Equal(t, SampleFetusNotExistCode, resultBatch.Report.Errors[0].Code)
+		}
+	})
+}
+
+// Referencing another patient's fetus resolves to nothing rather than to a distinct error: the
+// lookup is scoped to the mother, so the key is simply absent for this patient.
+func Test_ProcessBatch_Sample_Fetus_Wrong_Mother(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		// F-72-1's mother is patient 63 (MRN-283835), not MRN-283836 (patient 64).
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-FETUS-003",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283836",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal",
+                "submitter_fetus_id": "F-72-1"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		if assert.Len(t, resultBatch.Report.Errors, 1) {
+			assert.Equal(t, SampleFetusNotExistCode, resultBatch.Report.Errors[0].Code)
+		}
+	})
+}
+
+func Test_ProcessBatch_Sample_Organization_Not_Exist(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-004",
+                "sample_organization_code": "UNKNOWN-ORG",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		assert.Equal(t, 1, resultBatch.Summary.Errors)
+		assert.Len(t, resultBatch.Report.Errors, 1)
+		assert.Equal(t, SampleOrgNotExistCode, resultBatch.Report.Errors[0].Code)
+	})
+}
+
+func Test_ProcessBatch_Sample_Parent_Sample_In_Batch(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-PARENT",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            },
+            {
+                "submitter_sample_id": "SAMPLE-CHILD",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "submitter_parent_sample_id": "SAMPLE-PARENT",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+
+		var childSample postgres.Sample
+		childSampleErr := env.Postgres.Table("sample").Where("submitter_sample_id = ? AND organization_code = ?", "SAMPLE-CHILD", "CHUSJ").First(&childSample).Error
+		if childSampleErr != nil {
+			t.Fatal("failed to retrieve child sample:", childSampleErr)
+		}
+		assert.Equal(t, "SAMPLE-CHILD", childSample.SubmitterSampleId)
+		assert.Equal(t, 1, childSample.PatientID)
+		assert.Equal(t, "CHUSJ", childSample.OrganizationCode)
+		assert.NotNil(t, childSample.ParentSampleID)
+
+		var parentSample postgres.Sample
+		parentSampleErr := env.Postgres.Table("sample").Where("submitter_sample_id = ? AND organization_code = ?", "SAMPLE-PARENT", "CHUSJ").First(&parentSample).Error
+		if parentSampleErr != nil {
+			t.Fatal("failed to retrieve parent sample:", parentSampleErr)
+		}
+		assert.Equal(t, *childSample.ParentSampleID, parentSample.ID)
+	})
+}
+
+func Test_ProcessBatch_Sample_Parent_Sample_In_Db(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-CHILD-DB-PARENT",
+                "sample_organization_code": "CQGC",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "submitter_parent_sample_id": "B-803.2",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusSuccess, resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, types.CreateSampleBatchType, resultBatch.BatchType)
+		assert.Equal(t, "user999", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var childSample postgres.Sample
+		childSampleErr := env.Postgres.Table("sample").Where("submitter_sample_id = ? AND organization_code = ?", "SAMPLE-CHILD-DB-PARENT", "CQGC").First(&childSample).Error
+		if childSampleErr != nil {
+			t.Fatal("failed to retrieve child sample:", childSampleErr)
+		}
+		assert.Equal(t, "SAMPLE-CHILD-DB-PARENT", childSample.SubmitterSampleId)
+		assert.Equal(t, 1, childSample.PatientID)
+		assert.Equal(t, "CQGC", childSample.OrganizationCode)
+		assert.NotNil(t, childSample.ParentSampleID)
+		assert.Equal(t, 63, *childSample.ParentSampleID)
+	})
+}
+
+func Test_ProcessBatch_Sample_Unknown_Parent_Sample(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-CHILD-ORPHAN",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "submitter_parent_sample_id": "UNKNOWN-PARENT",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		assert.Equal(t, 1, resultBatch.Summary.Errors)
+		assert.Len(t, resultBatch.Report.Errors, 1)
+		assert.Equal(t, SampleUnknownParentSubmitterSampleIdCode, resultBatch.Report.Errors[0].Code)
+		assert.Contains(t, resultBatch.Report.Errors[0].Message, "UNKNOWN-PARENT")
+	})
+}
+
+func Test_ProcessBatch_Sample_Invalid_Patient_For_Parent_Sample(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		// Insert parent sample for a different patient
+		env.Postgres.Exec(`
+            INSERT INTO sample (submitter_sample_id, type_code, tissue_site, histology_code, organization_code, tenant_code, patient_id)
+            VALUES ('SAMPLE-PARENT-OTHER', 'dna', 'blood', 'normal', 'CHUSJ', 'radiant', 2)
+        `)
+
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-INVALID-PARENT",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "submitter_parent_sample_id": "SAMPLE-PARENT-OTHER",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		assert.Equal(t, 1, resultBatch.Summary.Errors)
+		assert.Len(t, resultBatch.Report.Errors, 1)
+		assert.Equal(t, SampleInvalidPatientForParentSampleCode, resultBatch.Report.Errors[0].Code)
+	})
+}
+
+func Test_ProcessBatch_Sample_Duplicate_In_Batch(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+            {
+                "submitter_sample_id": "SAMPLE-DUP",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            },
+            {
+                "submitter_sample_id": "SAMPLE-DUP",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            }
+        ]
+        `
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		assert.Equal(t, 1, resultBatch.Summary.Errors)
+		assert.Len(t, resultBatch.Report.Errors, 1)
+		assert.Equal(t, SampleDuplicateInBatchCode, resultBatch.Report.Errors[0].Code)
+	})
+}
+
+func Test_ProcessBatch_Sample_Field_Too_Long(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		longString := strings.Repeat("a", TextMaxLength+1)
+		payload := fmt.Sprintf(`[
+            {
+                "submitter_sample_id": "%s",
+                "sample_organization_code": "CHUSJ",
+                "patient_organization_code": "CHUSJ",
+                "submitter_patient_id": "MRN-283773",
+                "type_code": "dna",
+                "tissue_site": "blood",
+                "histology_code": "normal"
+            }
+        ]
+        `, longString)
+		var id string
+		initErr := env.Postgres.Raw(`
+            INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+            VALUES (?, 'PENDING', ?, false, 'user999', '2025-10-09', 'radiant')
+            RETURNING id;
+        `, payload, types.CreateSampleBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		assert.Equal(t, 1, resultBatch.Summary.Errors)
+		assert.Len(t, resultBatch.Report.Errors, 1)
+		assert.Equal(t, SampleInvalidValueCode, resultBatch.Report.Errors[0].Code)
+		assert.Contains(t, resultBatch.Report.Errors[0].Message, "submitter_sample_id")
+	})
+}
+
+func Test_ProcessBatch_Sample_All_Codes(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, _ := testutils.LoadScenario("sample_all_codes")
+		payload, _ := json.Marshal(scenario.Samples)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateSampleBatchType, false, "user123", "2025-10-10")
+
+		infos := []types.BatchMessage{
+			{
+				Code:    "SAMPLE-001",
+				Message: "Sample (CQGC / S13224) already exists, skipped.",
+				Path:    "sample[0]",
+			},
+		}
+		warnings := []types.BatchMessage{
+			{
+				Code:    "SAMPLE-002",
+				Message: "A sample with same ids (CQGC / S13226) has been found but with a different tissue_site ( <> blood).",
+				Path:    "sample[1].tissue_site",
+			},
+		}
+		errors := []types.BatchMessage{
+			{
+				Code:    "SAMPLE-006",
+				Message: "Invalid field tissue_site for sample (CCMG / ABCD1). Reason: field is too long, maximum length allowed is 100.",
+				Path:    "sample[2].tissue_site",
+			},
+			{
+				Code:    "SAMPLE-006",
+				Message: "Invalid field type_code for sample (CCMG / ABCD1). Reason: \"dna!\" is not a valid type code. Valid values [blood, brain, buccal_swab, buffy_coat, dna, not_reported, rna, saliva, solid_tissue, spinal_cord].",
+				Path:    "sample[2].type_code",
+			},
+			{
+				Code:    "SAMPLE-004",
+				Message: "Patient (CHUSJJ / MRN-283775) for sample ABCD1 does not exist.",
+				Path:    "sample[2].submitter_patient_id",
+			},
+			{
+				Code:    "SAMPLE-003",
+				Message: "Organization CCMG for sample ABCD1 does not exist.",
+				Path:    "sample[2].sample_organization_code",
+			},
+			{
+				Code:    "SAMPLE-007",
+				Message: "Invalid field submitter_parent_sample_id for sample (CQGC / ABCD2). Reason: Invalid parent sample B-950.1 for this sample.",
+				Path:    "sample[3].submitter_parent_sample_id",
+			},
+			{
+				Code:    "SAMPLE-008",
+				Message: "Sample (CQGC / ABCD3) appears multiple times in the batch.",
+				Path:    "sample[5]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", infos, warnings, errors)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_Success_Dry_Run(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2020-01-01T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			}
+		]
+		`
+		var id string
+		initErr := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, true, 'user123', '2025-12-04', 'radiant')
+    		RETURNING id;
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
+		assert.Equal(t, true, resultBatch.DryRun)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var count int64
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2020-01-01T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			}
+		]
+		`
+		var id string
+		initErr := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
+    		RETURNING id;
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+
+		// Make sure DB is clean before running the import
+		var count int64
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		processBatch(t.Context(), env.Postgres, context)
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(1), count)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var seqExp types.SequencingExperiment
+		assert.Nil(t, env.Postgres.Table("sequencing_experiment").Where("aliquot = 'ALIQUOT-12345'").First(&seqExp).Error)
+
+		assert.Equal(t, 1000, seqExp.ID)
+		assert.Equal(t, "ALIQUOT-12345", seqExp.Aliquot)
+		assert.Equal(t, 1, seqExp.SampleID)
+		assert.Equal(t, "wgs", seqExp.ExperimentalStrategyCode)
+		assert.Equal(t, "short_read", seqExp.SequencingReadTechnologyCode)
+		assert.Equal(t, "illumina", seqExp.PlatformCode)
+		assert.Equal(t, "CHUSJ", seqExp.SequencingLabCode)
+		assert.Equal(t, "Agilent V6", seqExp.CaptureKit)
+		assert.Equal(t, "RUN-001", seqExp.RunAlias)
+		expectedRunDate, _ := time.Parse(time.RFC3339, "2020-01-01T00:00:00Z")
+		assert.True(t, seqExp.RunDate.Equal(expectedRunDate))
+		assert.Equal(t, "Run Name 1", seqExp.RunName)
+		assert.Equal(t, "in_progress", seqExp.StatusCode)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_Info_Skipped(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2020-01-01T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			}
+		]
+		`
+		var id string
+		initErr := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
+    		RETURNING id;
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		// Make sure DB is clean before running the import
+		var count int64
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(1), count)
+
+		if err := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
+    		RETURNING id;
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error; err != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		processBatch(t.Context(), env.Postgres, context)
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(1), count)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 1)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_Warning_Skipped(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2020-01-01T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			}
+		]
+		`
+		var id string
+		initErr := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
+    		RETURNING id;
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		// Make sure DB is clean before running the import
+		var count int64
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(1), count)
+
+		// // Changed sequencing_read_technology_code to `long_read` to trigger warning
+		diff := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "long_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2020-01-01T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			}
+		]
+		`
+		if err := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
+    		RETURNING id;
+		`, diff, types.CreateSequencingExperimentBatchType).Scan(&id).Error; err != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		processBatch(t.Context(), env.Postgres, context)
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(1), count)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("SUCCESS"), resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 1)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 0)
+
+		var seqExp types.SequencingExperiment
+		assert.Nil(t, env.Postgres.Table("sequencing_experiment").Where("aliquot = 'ALIQUOT-12345'").First(&seqExp).Error)
+		assert.Equal(t, "short_read", seqExp.SequencingReadTechnologyCode)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_Errors(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "WGS_INVALID",
+				"sequencing_read_technology_code": "mini_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2020-01-01T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_slow_progress"
+			}
+		]
+		`
+		var id string
+		initErr := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
+    		RETURNING id;
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		// Make sure DB is clean before running the import
+		var count int64
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("ERROR"), resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 3)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_Errors_UnknownStatusCode(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2020-01-01T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_slow_progress"
+			}
+		]
+		`
+
+		var count int64
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		id := insertPayloadAndProcessBatch(env.Postgres, payload, types.BatchStatusPending, types.CreateSequencingExperimentBatchType, false, "user123", "2025-12-04")
+
+		errors := []types.BatchMessage{
+			{
+				Code:    "SEQ-002",
+				Message: `Invalid field status_code for sequencing_experiment (CQGC / S13224 / ALIQUOT-12345). Reason: "in_slow_progress" is not a valid status code. Valid values [completed, draft, inconclusive, in_progress, in_review, processing, reopened, resolved, revoked, submitted, unresolved].`,
+				Path:    "sequencing_experiment[0].status_code",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, types.BatchStatusError, false, "user123", emptyMsgs, emptyMsgs, errors)
+
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_Errors_InvalidOrgs(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "DOESNTEXIST-1",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "DOESNTEXIST-2",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2020-01-01T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_slow_progress"
+			}
+		]
+		`
+		var id string
+		initErr := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
+    		RETURNING id;
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		// Make sure DB is clean before running the import
+		var count int64
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("ERROR"), resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 3)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_DuplicateInBatch(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+
+		payload := `[
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2020-01-01T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			},
+			{
+				"aliquot": "ALIQUOT-12345",
+				"sample_organization_code": "CQGC",
+				"submitter_sample_id": "S13224",
+				"experimental_strategy_code": "wgs",
+				"sequencing_read_technology_code": "short_read",
+				"platform_code": "illumina",
+				"sequencing_lab_code": "CHUSJ",
+				"capture_kit": "Agilent V6",
+				"run_alias": "RUN-001",
+				"run_date": "2020-01-01T00:00:00Z",
+				"run_name": "Run Name 1",
+				"status_code": "in_progress"
+			}
+		]
+		`
+		var id string
+		initErr := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', ?, false, 'user123', '2025-12-04', 'radiant')
+    		RETURNING id;
+		`, payload, types.CreateSequencingExperimentBatchType).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		// Make sure DB is clean before running the import
+		var count int64
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+		if err := env.Postgres.Table("sequencing_experiment").Where("aliquot = ?", "ALIQUOT-12345").Count(&count).Error; err != nil {
+			t.Fatal("failed to count sequencing_experiment:", err)
+		}
+		assert.Equal(t, int64(0), count)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatus("ERROR"), resultBatch.Status)
+		assert.Equal(t, false, resultBatch.DryRun)
+		assert.Equal(t, "create_sequencing_experiment", resultBatch.BatchType)
+		assert.Equal(t, "user123", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Errors, 1)
+	})
+}
+
+func Test_ProcessBatch_SequencingExperiment_All_Codes(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres, ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		scenario, _ := testutils.LoadScenario("sequencing_experiment_all_codes")
+		payload, _ := json.Marshal(scenario.SequencingExperiments)
+		id := insertPayloadAndProcessBatch(env.Postgres, string(payload), types.BatchStatusPending, types.CreateSequencingExperimentBatchType, false, "user123", "2025-10-10")
+
+		infos := []types.BatchMessage{
+			{
+				Code:    "SEQ-001",
+				Message: "Sequencing (CQGC / S13224 / NA12892) already exists, skipped.",
+				Path:    "sequencing_experiment[0]",
+			},
+		}
+		warnings := []types.BatchMessage{
+			{
+				Code:    "SEQ-004",
+				Message: "A sequencing with same ids (CQGC / S13225 / NA12891) has been found but with a different status_code (completed <> submitted).",
+				Path:    "sequencing_experiment[2].status_code",
+			},
+			{
+				Code:    "SEQ-004",
+				Message: "A sequencing with same ids (CQGC / S13225 / NA12891) has been found but with a different run_date (2021-08-17 00:00:00 +0000 UTC <> 0001-01-01 00:00:00 +0000 UTC).",
+				Path:    "sequencing_experiment[2].run_date",
+			},
+			{
+				Code:    "SEQ-004",
+				Message: "A sequencing with same ids (CQGC / S13224 / NA12892) has been found but with a different run_date (2021-08-17 00:00:00 +0000 UTC <> 2025-01-01 00:00:00 +0000 UTC).",
+				Path:    "sequencing_experiment[5].run_date",
+			},
+		}
+		errors := []types.BatchMessage{
+			{
+				Code:    "SEQ-002",
+				Message: "Invalid field platform_code for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: does not match the regular expression `^[A-Za-z0-9\\-\\_\\.\\,\\: ]+$`.",
+				Path:    "sequencing_experiment[1].platform_code",
+			},
+			{
+				Code:    "SEQ-002",
+				Message: "Invalid field platform_code for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: \"!@#$%^&\" is not a valid platform code. Valid values [illumina, nanopore, pacbio].",
+				Path:    "sequencing_experiment[1].platform_code",
+			},
+			{
+				Code:    "SEQ-002",
+				Message: "Invalid field run_alias for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: field is too long, maximum length allowed is 100.",
+				Path:    "sequencing_experiment[1].run_alias",
+			},
+			{
+				Code:    "SEQ-002",
+				Message: "Invalid field run_date for sequencing_experiment (CQGC / S13224 / ABCD1). Reason: must be a past date.",
+				Path:    "sequencing_experiment[1].run_date",
+			},
+			{
+				Code:    "SEQ-003",
+				Message: "Sequencing lab CQGCC for sequencing ABCD1 does not exist.",
+				Path:    "sequencing_experiment[1].sequencing_lab_code",
+			},
+			{
+				Code:    "SEQ-005",
+				Message: "Sample (CHUSJ / S13224) does not exist.",
+				Path:    "sequencing_experiment[3]",
+			},
+			{
+				Code:    "SEQ-006",
+				Message: "Sequencing_experiment (CQGC / S13224 / ABCD1) appears multiple times in the batch.",
+				Path:    "sequencing_experiment[4]",
+			},
+			{
+				Code:    "SEQ-006",
+				Message: "Sequencing_experiment (CQGC / S13224 / NA12892) appears multiple times in the batch.",
+				Path:    "sequencing_experiment[5]",
+			},
+		}
+		assertBatchProcessing(t, env.Postgres, id, "ERROR", false, "user123", infos, warnings, errors)
+	})
+}
+
+func Test_ProcessBatch_Using_Cache(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewValueSetsRepository(database.PostgresDB{DB: env.Postgres})
+		bv := batchval.BatchValidationContext{
+			ValueSetsRepo: repo,
+		}
+		cache := batchval.NewBatchValidationCache(&bv)
+		expected := []string{"completed", "draft", "inconclusive", "in_progress", "in_review", "processing", "reopened", "resolved", "revoked", "submitted", "unresolved"}
+
+		vc, err := cache.GetValueSetCodes(t.Context(), postgres.ValueSetStatus)
+		assert.NoError(t, err)
+		assert.Equal(t, expected, vc)
+
+		// Insert a value into the value set
+		if err := env.Postgres.Exec(`
+			INSERT INTO status (code, name_en) VALUES ('foo', 'bar');
+		`).Error; err != nil {
+			t.Fatal("failed to insert status code:", err)
+		}
+
+		codes, err := repo.GetCodes(t.Context(), postgres.ValueSetStatus)
+		assert.NoError(t, err)
+		assert.Contains(t, codes, "foo") // Make sure the new code is in the DB
+
+		// We should not get the new value, since we use the cache
+		vc, err = cache.GetValueSetCodes(t.Context(), postgres.ValueSetStatus)
+		assert.NoError(t, err)
+		assert.Equal(t, expected, vc)
+
+		// Cleanup
+		if err := env.Postgres.Exec(`
+			DELETE FROM status WHERE code = 'foo';
+		`).Error; err != nil {
+			t.Fatal("failed to delete status code:", err)
+		}
+	})
+}
+
+func insertPayloadAndProcessBatchForTenant(db *gorm.DB, payload string, status types.BatchStatus, batchType string, dryRun bool, username string, createdOn string, tenantCode string) string {
+	var id string
+	initErr := db.Raw(`
+   		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+   		VALUES (?, ?, ?, ?, ?, ?, ?)
+   		RETURNING id;
+		`, payload, string(status), batchType, dryRun, username, createdOn, tenantCode).Scan(&id).Error
+	if initErr != nil {
+		panic(fmt.Sprintf("failed to insert payload into table %v", initErr))
+	}
+	ctx, _ := batchval.NewBatchValidationContext(db)
+	processBatch(context.Background(), db, ctx)
+	return id
+}
+
+// Test_ProcessBatch_Patient_TenantIsolation_CreatesSeparatePatientPerTenant reproduces CLIN-6157:
+// (organization_code, submitter_patient_id) is not unique across tenants, so a patient batch for
+// tenant_b must not resolve to a patient already created under the same natural key by "radiant".
+// The payload also carries a jhn shared by both tenants: patient_jhn_key was global (no
+// tenant_code) until it was widened, so without that fix tenant_b's insert would fail outright on
+// a raw duplicate-key error instead of creating its own patient row.
+func Test_ProcessBatch_Patient_TenantIsolation_CreatesSeparatePatientPerTenant(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		const orgCode = "TENANT-ISO-ORG"
+		const submitterPatientId = "MRN-TENANT-ISO-1"
+		const sharedJhn = "JHN-TENANT-ISO-1"
+
+		// Both tenants need their own (code, tenant_code) organization row — organization is
+		// (code, tenant_code) keyed, and patient.organization_code has a compound FK to it.
+		if err := env.Postgres.Exec(`
+			INSERT INTO organization (code, name, category_code, tenant_code)
+			VALUES (?, 'Tenant Isolation Test Org (radiant)', 'healthcare_provider', 'radiant')
+			ON CONFLICT (code, tenant_code) DO NOTHING
+		`, orgCode).Error; err != nil {
+			t.Fatal("failed to insert radiant organization:", err)
+		}
+		if err := env.Postgres.Exec(`
+			INSERT INTO organization (code, name, category_code, tenant_code)
+			VALUES (?, 'Tenant Isolation Test Org (tenant_b)', 'healthcare_provider', 'tenant_b')
+			ON CONFLICT (code, tenant_code) DO NOTHING
+		`, orgCode).Error; err != nil {
+			t.Fatal("failed to insert tenant_b organization:", err)
+		}
+		defer env.Postgres.Exec(`DELETE FROM organization WHERE code = ?`, orgCode)
+		defer env.Postgres.Exec(`DELETE FROM patient WHERE organization_code = ? AND submitter_patient_id = ?`, orgCode, submitterPatientId)
+
+		payload := fmt.Sprintf(`[
+			{
+				"submitter_patient_id": %q,
+				"submitter_patient_id_type": "mrn",
+				"patient_organization_code": %q,
+				"jhn": %q,
+				"sex_code": "female",
+				"life_status_code": "alive",
+				"date_of_birth": "2010-05-15"
+			}
+		]`, submitterPatientId, orgCode, sharedJhn)
+
+		idA := insertPayloadAndProcessBatchForTenant(env.Postgres, payload, types.BatchStatusPending, types.CreatePatientBatchType, false, "user999", "2025-10-09", types.DefaultTenantCode)
+		batchA := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", idA).Scan(&batchA)
+		assert.Equal(t, types.BatchStatusSuccess, batchA.Status)
+		assert.Len(t, batchA.Report.Errors, 0)
+
+		var patientA postgres.Patient
+		if err := env.Postgres.Table("patient").Where("submitter_patient_id = ? AND organization_code = ? AND tenant_code = ?", submitterPatientId, orgCode, types.DefaultTenantCode).First(&patientA).Error; err != nil {
+			t.Fatal("failed to find patient created for tenant radiant:", err)
+		}
+
+		// Same (organization_code, submitter_patient_id), a different tenant: must create a new
+		// patient, not silently resolve to tenant "radiant"'s row.
+		idB := insertPayloadAndProcessBatchForTenant(env.Postgres, payload, types.BatchStatusPending, types.CreatePatientBatchType, false, "user999", "2025-10-09", "tenant_b")
+		batchB := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", idB).Scan(&batchB)
+		assert.Equal(t, types.BatchStatusSuccess, batchB.Status)
+		assert.Len(t, batchB.Report.Errors, 0)
+		assert.Len(t, batchB.Report.Infos, 0, "must not be reported as already-existing — it belongs to a different tenant")
+
+		var patientB postgres.Patient
+		if err := env.Postgres.Table("patient").Where("submitter_patient_id = ? AND organization_code = ? AND tenant_code = ?", submitterPatientId, orgCode, "tenant_b").First(&patientB).Error; err != nil {
+			t.Fatal("failed to find patient created for tenant tenant_b:", err)
+		}
+		assert.NotEqual(t, patientA.ID, patientB.ID, "each tenant must get its own patient row")
+
+		// Non-regression: resubmitting within the SAME tenant must still reuse the existing row.
+		idB2 := insertPayloadAndProcessBatchForTenant(env.Postgres, payload, types.BatchStatusPending, types.CreatePatientBatchType, false, "user999", "2025-10-09", "tenant_b")
+		batchB2 := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", idB2).Scan(&batchB2)
+		assert.Equal(t, 1, batchB2.Summary.Skipped)
+		if assert.Len(t, batchB2.Report.Infos, 1) {
+			assert.Equal(t, PatientAlreadyExistCode, batchB2.Report.Infos[0].Code)
+		}
+
+		var countB int64
+		env.Postgres.Table("patient").Where("submitter_patient_id = ? AND organization_code = ? AND tenant_code = ?", submitterPatientId, orgCode, "tenant_b").Count(&countB)
+		assert.Equal(t, int64(1), countB, "resubmitting within the same tenant must not create a duplicate")
+	})
+}
+
+func Test_ProcessBatch_Unsupported_Type(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		payload := `[
+			{
+				"batch": "fake"
+			}
+		]
+		`
+		var id string
+		initErr := env.Postgres.Raw(`
+    		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+    		VALUES (?, 'PENDING', 'unsupported_type', true, 'user999', '2025-10-09', 'radiant')
+    		RETURNING id;
+		`, payload).Scan(&id).Error
+		if initErr != nil {
+			t.Fatal("failed to insert data:", initErr)
+		}
+
+		context, _ := batchval.NewBatchValidationContext(env.Postgres)
+		processBatch(t.Context(), env.Postgres, context)
+
+		resultBatch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&resultBatch)
+		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		assert.Equal(t, true, resultBatch.DryRun)
+		assert.Equal(t, "unsupported_type", resultBatch.BatchType)
+		assert.Equal(t, "user999", resultBatch.Username)
+		assert.NotNil(t, resultBatch.StartedOn)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Len(t, resultBatch.Report.Infos, 0)
+		assert.Len(t, resultBatch.Report.Warnings, 0)
+		assert.Len(t, resultBatch.Report.Errors, 1)
+	})
+}
+
+func TestMain(m *testing.M) {
+	testutils.StartPostgresContainer()
+	testutils.StartObjectStoreContainer()
+	code := m.Run()
+	testutils.StopAllContainers()
+	os.Exit(code)
+}
+
+// Test_ProcessBatch_Sample_TenantIsolation_CreatesSeparateSamplePerTenant is the sample counterpart
+// of the patient case above: (organization_code, submitter_sample_id) repeats across tenants —
+// sample carries no unique constraint on it at all — so a create_sample batch for tenant_b must
+// create its own row instead of reporting the radiant row as already existing.
+func Test_ProcessBatch_Sample_TenantIsolation_CreatesSeparateSamplePerTenant(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		const orgCode = "SAMPLE-ISO-ORG"
+		const submitterPatientId = "MRN-SAMPLE-ISO"
+		const submitterSampleId = "S-SAMPLE-ISO"
+
+		for _, tenant := range []string{types.DefaultTenantCode, "tenant_b"} {
+			if err := env.Postgres.Exec(`
+				INSERT INTO organization (code, name, category_code, tenant_code)
+				VALUES (?, 'Sample Isolation Test Org', 'healthcare_provider', ?)
+				ON CONFLICT (code, tenant_code) DO NOTHING
+			`, orgCode, tenant).Error; err != nil {
+				t.Fatal("failed to insert organization:", err)
+			}
+		}
+		defer env.Postgres.Exec(`DELETE FROM sample WHERE submitter_sample_id = ?`, submitterSampleId)
+		defer env.Postgres.Exec(`DELETE FROM patient WHERE organization_code = ?`, orgCode)
+		defer env.Postgres.Exec(`DELETE FROM organization WHERE code = ?`, orgCode)
+
+		patientPayload := fmt.Sprintf(`[
+			{
+				"submitter_patient_id": %q,
+				"submitter_patient_id_type": "mrn",
+				"patient_organization_code": %q,
+				"sex_code": "female",
+				"life_status_code": "alive",
+				"date_of_birth": "2010-05-15"
+			}
+		]`, submitterPatientId, orgCode)
+		samplePayload := fmt.Sprintf(`[
+			{
+				"submitter_sample_id": %q,
+				"sample_organization_code": %q,
+				"patient_organization_code": %q,
+				"submitter_patient_id": %q,
+				"type_code": "dna",
+				"tissue_site": "blood",
+				"histology_code": "normal"
+			}
+		]`, submitterSampleId, orgCode, orgCode, submitterPatientId)
+
+		sampleIDs := map[string]int{}
+		for _, tenant := range []string{types.DefaultTenantCode, "tenant_b"} {
+			insertPayloadAndProcessBatchForTenant(env.Postgres, patientPayload, types.BatchStatusPending, types.CreatePatientBatchType, false, "user999", "2025-10-09", tenant)
+
+			id := insertPayloadAndProcessBatchForTenant(env.Postgres, samplePayload, types.BatchStatusPending, types.CreateSampleBatchType, false, "user999", "2025-10-09", tenant)
+			batch := postgres.Batch{}
+			env.Postgres.Table("batch").Where("id = ?", id).Scan(&batch)
+			assert.Equal(t, types.BatchStatusSuccess, batch.Status, "tenant %s", tenant)
+			assert.Len(t, batch.Report.Errors, 0, "tenant %s", tenant)
+			assert.Len(t, batch.Report.Infos, 0, "tenant %s must not be told the sample already exists", tenant)
+
+			var sample postgres.Sample
+			if err := env.Postgres.Table("sample").
+				Where("submitter_sample_id = ? AND organization_code = ? AND tenant_code = ?", submitterSampleId, orgCode, tenant).
+				First(&sample).Error; err != nil {
+				t.Fatalf("failed to find sample created for tenant %s: %v", tenant, err)
+			}
+			sampleIDs[tenant] = sample.ID
+		}
+		assert.NotEqual(t, sampleIDs[types.DefaultTenantCode], sampleIDs["tenant_b"], "each tenant must get its own sample row")
+	})
+}
+
+// Test_ProcessBatch_UpdateSample_TenantIsolation_DoesNotModifyAnotherTenantsSample covers the
+// write side: PUT /{tenant}/samples/batch matches on (organization_code, submitter_sample_id), a
+// key another tenant can hold, so the update must leave that tenant's row untouched.
+func Test_ProcessBatch_UpdateSample_TenantIsolation_DoesNotModifyAnotherTenantsSample(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		const submitterSampleId = "S-UPDATE-TENANT-ISO"
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO patient (id, organization_code, tenant_code, sex_code, life_status_code, submitter_patient_id, submitter_patient_id_type)
+			VALUES (1060, 'TENANT_B_ORG', 'tenant_b', 'male', 'alive', 'P-UPDATE-TENANT-ISO', 'mrn')
+		`).Error)
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO sample (id, type_code, tissue_site, histology_code, submitter_sample_id, patient_id, organization_code, tenant_code)
+			VALUES (1060, 'blood', NULL, 'normal', ?, 1060, 'TENANT_B_ORG', 'tenant_b')
+		`, submitterSampleId).Error)
+
+		payload := fmt.Sprintf(`[
+			{
+				"submitter_sample_id": %q,
+				"sample_organization_code": "TENANT_B_ORG",
+				"patient_organization_code": "TENANT_B_ORG",
+				"submitter_patient_id": "P-UPDATE-TENANT-ISO",
+				"type_code": "dna",
+				"tissue_site": "blood",
+				"histology_code": "tumoral"
+			}
+		]`, submitterSampleId)
+
+		id := insertPayloadAndProcessBatchForTenant(env.Postgres, payload, types.BatchStatusPending, types.UpdateSampleBatchType, false, "user999", "2025-10-09", types.DefaultTenantCode)
+		batch := postgres.Batch{}
+		env.Postgres.Table("batch").Where("id = ?", id).Scan(&batch)
+		assert.Equal(t, types.BatchStatusError, batch.Status, "radiant holds no such sample — the batch must fail, not reach across tenants")
+
+		var sample postgres.Sample
+		require.NoError(t, env.Postgres.Table("sample").Where("id = 1060").First(&sample).Error)
+		assert.Equal(t, "blood", sample.TypeCode, "tenant_b's row must not be modified by a radiant batch")
+		assert.Equal(t, "normal", sample.HistologyCode, "tenant_b's row must not be modified by a radiant batch")
+	})
+}

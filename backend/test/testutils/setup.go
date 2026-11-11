@@ -1,0 +1,287 @@
+package testutils
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"sync"
+	"time"
+
+	"github.com/testcontainers/testcontainers-go/network"
+
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/wait"
+)
+
+const (
+	StarrocksContainerName   = "starrocks_radiant"
+	PostgresContainerName    = "postgres_radiant"
+	ObjectStoreContainerName = "object_store_radiant"
+)
+
+// TestResources is the absolute path to backend/test/data. It is resolved from the module root
+// (the directory holding go.mod) rather than a fixed relative path so it works no matter how deep
+// the test package lives under backend/ (e.g. internal/repository/postgres/ vs cmd/api/).
+var TestResources = filepath.Join(ModuleRoot(), "test", "data")
+
+// ModuleRoot walks up from the test's working directory (Go sets it to the package dir) to the
+// directory containing go.mod, i.e. backend/.
+func ModuleRoot() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("testutils: getwd: %v", err)
+	}
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			log.Fatal("testutils: go.mod not found above test working directory")
+		}
+		dir = parent
+	}
+}
+
+var (
+	PostgresContainerSetup    *ContainerConf
+	StarrocksContainerSetup   *ContainerConf
+	ObjectStoreContainerSetup *ContainerConf
+	Network                   *testcontainers.DockerNetwork
+)
+
+func StartAllContainers() {
+	StartPostgresContainer()
+	StartStarrocksContainer()
+	StartObjectStoreContainer()
+}
+
+func StartPostgresContainer() {
+	if Network == nil {
+		Network = createNetwork()
+	}
+	if PostgresContainerSetup == nil {
+		PostgresContainerSetup = newContainerSetup(PostgresContainerName, startPostgresContainer)
+		PostgresContainerSetup.setupContainer()
+	}
+}
+
+func StartStarrocksContainer() {
+	if Network == nil {
+		Network = createNetwork()
+	}
+	if StarrocksContainerSetup == nil {
+		StarrocksContainerSetup = newContainerSetup(StarrocksContainerName, startStarRocksContainer)
+		StarrocksContainerSetup.setupContainer()
+	}
+}
+
+func StartObjectStoreContainer() {
+	if Network == nil {
+		Network = createNetwork()
+	}
+	if ObjectStoreContainerSetup == nil {
+		ObjectStoreContainerSetup = newContainerSetup(ObjectStoreContainerName, startObjectStoreContainer)
+		ObjectStoreContainerSetup.setupContainer()
+	}
+}
+
+func StopAllContainers() {
+	if PostgresContainerSetup != nil {
+		PostgresContainerSetup.stopContainer()
+	}
+	if StarrocksContainerSetup != nil {
+		StarrocksContainerSetup.stopContainer()
+	}
+	if ObjectStoreContainerSetup != nil {
+		ObjectStoreContainerSetup.stopContainer()
+	}
+	if Network != nil {
+		deleteNetwork()
+	}
+}
+
+func (c *ContainerConf) stopContainer() {
+	if c.ContainerStarted {
+		fmt.Println("Stopping " + c.ContainerName + " container..")
+		if err := c.Container.Terminate(context.Background()); err != nil {
+			log.Fatal("Failed to stop "+c.ContainerName+" container: ", err)
+		}
+		fmt.Println(c.ContainerName + " container stopped")
+	} else {
+		fmt.Println(c.ContainerName + " container is still running because it was started outside the tests")
+	}
+}
+
+func createNetwork() *testcontainers.DockerNetwork {
+	ctx := context.Background()
+
+	newNetwork, err := network.New(ctx)
+
+	if err != nil {
+		log.Fatal("Failed to create network: ", err)
+	}
+	return newNetwork
+}
+
+func deleteNetwork() {
+	ctx := context.Background()
+	err := Network.Remove(ctx)
+	if err != nil {
+		log.Fatal("Failed to delete network: ", err)
+	}
+	Network = nil
+}
+
+func startStarRocksContainer() (testcontainers.Container, error) {
+	ctx := context.Background()
+	networkName := Network.Name
+	aliases := []string{StarrocksContainerName}
+
+	req := testcontainers.ContainerRequest{
+		Image:        "starrocks/allin1-ubuntu:3.4.2",
+		ExposedPorts: []string{"9030/tcp", "8030/tcp", "8040/tcp"},
+		WaitingFor: wait.ForAll(
+			wait.ForListeningPort("9030/tcp"),
+			wait.ForListeningPort("8030/tcp"),
+			wait.ForListeningPort("8040/tcp"),
+			wait.ForLog("Enjoy the journey to StarRocks").WithPollInterval(1*time.Second),
+		),
+		Networks: []string{
+			networkName,
+		},
+		NetworkAliases: map[string][]string{
+			networkName: aliases,
+		},
+	}
+
+	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return container, nil
+}
+
+func startPostgresContainer() (testcontainers.Container, error) {
+	ctx := context.Background()
+	networkName := Network.Name
+	aliases := []string{PostgresContainerName}
+
+	req := testcontainers.ContainerRequest{
+		Image:        "postgres",
+		ExposedPorts: []string{"5432/tcp"},
+		Env: map[string]string{
+			"POSTGRES_USER":     "radiant",
+			"POSTGRES_PASSWORD": "radiant",
+			"POSTGRES_DB":       "radiant",
+		},
+		Networks: []string{
+			networkName,
+		},
+		NetworkAliases: map[string][]string{
+			networkName: aliases,
+		},
+		WaitingFor: wait.ForAll(
+			wait.ForListeningPort("5432/tcp"),
+			wait.ForLog("PostgreSQL init process complete").WithPollInterval(1*time.Second),
+		),
+	}
+
+	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return container, nil
+}
+
+func startObjectStoreContainer() (testcontainers.Container, error) {
+	ctx := context.Background()
+	networkName := Network.Name
+	aliases := []string{ObjectStoreContainerName}
+
+	// RustFS rather than MinIO: MinIO's images stopped being anonymously pullable from every
+	// public registry, so a clean CI runner cannot start them. RustFS is S3-compatible, serves
+	// the same port, and its image is public (Apache-2.0). The entrypoint defaults to the
+	// RUSTFS_VOLUMES baked into the image, so no command is needed.
+	req := testcontainers.ContainerRequest{
+		Image:        "rustfs/rustfs:latest",
+		ExposedPorts: []string{"9000/tcp"},
+		Env: map[string]string{
+			"RUSTFS_ACCESS_KEY": objectStoreAccessKey,
+			"RUSTFS_SECRET_KEY": objectStoreSecretKey,
+		},
+		Networks: []string{networkName},
+		NetworkAliases: map[string][]string{
+			networkName: aliases,
+		},
+		WaitingFor: wait.ForListeningPort("9000/tcp"),
+	}
+
+	container, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+		ContainerRequest: req,
+		Started:          true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return container, nil
+}
+
+type ContainerConf struct {
+	ContainerName          string
+	ContainerStartFunction func() (testcontainers.Container, error)
+	once                   sync.Once
+	Container              testcontainers.Container
+	ContainerStarted       bool
+}
+
+func newContainerSetup(containerName string, containerStartFunction func() (testcontainers.Container, error)) *ContainerConf {
+	return &ContainerConf{ContainerName: containerName, ContainerStartFunction: containerStartFunction}
+}
+
+func (c *ContainerConf) setupContainer() {
+	c.once.Do(func() {
+		// Run the script to start the container if it's not already running
+		cmd := exec.Command("docker", "ps", "-q", "-f", fmt.Sprintf("name=%s", c.ContainerName))
+		output, err := cmd.Output()
+		if err != nil {
+			log.Fatal("Failed to check if "+c.ContainerName+" container is running: ", err)
+		}
+
+		if len(output) == 0 {
+			// Container is not running, start a new one
+			c.Container, err = c.ContainerStartFunction()
+			if err != nil {
+				log.Fatal("Failed to start "+c.ContainerName+" container: ", err)
+			}
+			c.ContainerStarted = true
+		} else {
+			// Container is already running, attach to it
+			fmt.Println(c.ContainerName + " container is already running.")
+			ctx := context.Background()
+			c.Container, err = testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
+				ContainerRequest: testcontainers.ContainerRequest{
+					Name: c.ContainerName,
+				},
+				Started: true,
+				Reuse:   true,
+			})
+			if err != nil {
+				log.Fatal("Failed to attach to Postgres container: ", err)
+			}
+			c.ContainerStarted = false
+		}
+	})
+}

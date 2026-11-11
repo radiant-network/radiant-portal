@@ -1,0 +1,56 @@
+import { z } from 'zod';
+
+import type { InterpretationGermline, InterpretationPubmed, InterpretationSomatic } from '@/api/api';
+import { isEditorHasEmptyContent } from '@/components/base/data-entry/rich-text-editor/rich-text-editor';
+import type { ZodSchema } from '@/components/lib/zod';
+
+export interface InterpretationFormRef {
+  submit: () => void;
+  isDirty: boolean;
+}
+
+export type Interpretation = InterpretationSomatic | InterpretationGermline;
+
+export type InterpretationDialogMode = 'create' | 'edit' | 'view';
+
+export type InterpretationFormProps<T> = {
+  interpretation: T | undefined;
+  saveInterpretation: (data: T) => void;
+  onDirtyChange: (isDirty: boolean) => void;
+};
+
+export const genericInterpretationFormSchema = z.object({
+  interpretation: z.string().refine(val => !isEditorHasEmptyContent(val), { message: 'required' }),
+  pubmed: (
+    z.object({
+      citation: z.string(),
+      citation_id: z.string(),
+    }) satisfies ZodSchema<InterpretationPubmed>
+  )
+    .array()
+    .optional(),
+}) satisfies ZodSchema<Pick<InterpretationGermline, 'interpretation' | 'pubmed'>>;
+
+export type GenericInterpretationSchemaType = z.infer<typeof genericInterpretationFormSchema>;
+
+export const germlineInterpretationFormSchema = (
+  z.object({
+    classification: z.string().min(1, 'required'),
+    classification_criterias: z.string().array().min(1, 'required'),
+    condition: z.string().min(1, 'required'),
+    transmission_modes: z.string().array().min(1, 'required'),
+  }) satisfies ZodSchema<InterpretationGermline>
+).merge(genericInterpretationFormSchema);
+
+export type GermlineInterpretationSchemaType = z.infer<typeof germlineInterpretationFormSchema>;
+
+export const somaticInterpretationFormSchema = (
+  z.object({
+    tumoral_type: z.string().min(1, 'required'),
+    clinical_utility: z.string().min(1, 'required'),
+    oncogenicity: z.string().optional(),
+    oncogenicity_classification_criterias: z.string().array().optional(),
+  }) satisfies ZodSchema<InterpretationSomatic>
+).merge(genericInterpretationFormSchema);
+
+export type SomaticInterpretationSchemaType = z.infer<typeof somaticInterpretationFormSchema>;

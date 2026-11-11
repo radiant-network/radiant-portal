@@ -1,0 +1,125 @@
+package testutils
+
+import (
+	"context"
+	"log"
+	"testing"
+
+	"github.com/minio/minio-go/v7"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"gorm.io/gorm"
+)
+
+// =============================================================================
+// RunTest is the single entry point for setting up an integration test.
+// Callers describe what they need via Need; RunTest figures out the rest:
+//   - which resources to initialize
+//   - whether the test can run in parallel
+//   - whether to clean up Postgres after the test
+//
+// Resources requested via Need are exposed on Env. Unrequested fields are nil.
+// =============================================================================
+
+// PostgresMode describes how a test interacts with Postgres.
+type PostgresMode int
+
+const (
+	NoPostgres        PostgresMode = iota
+	ReadPostgres                   // exposed; test must not write
+	WritePostgres                  // writes with unique keys; cleanUp runs; can run in parallel
+	ExclusivePostgres              // writes to shared state; cleanUp runs; forces serial execution
+)
+
+// Need declares which test resources are required.
+type Need struct {
+	Starrocks        string       // fixture folder name under test/data/; "" = no StarRocks
+	Postgres         PostgresMode // see PostgresMode constants
+	ObjectStore      bool         // spin up a per-test S3-compatible object store container
+	Tenants          []string     // When non-empty, provisions multi-tenant databases
+	TenantKeyColumns []string     // The specific columns to increment between tenants (defaults to empty)
+}
+
+// ObjectStoreEnv groups the object store connection details exposed to a test.
+type ObjectStoreEnv struct {
+	Client   *minio.Client
+	Endpoint string
+}
+
+// Env holds the resources requested via Need. Unrequested fields are nil.
+type Env struct {
+	Ctx         context.Context
+	Starrocks   *gorm.DB
+	Postgres    *gorm.DB
+	ObjectStore *ObjectStoreEnv
+}
+
+// TenantCtx returns Ctx with the tenant
+func (e *Env) TenantCtx(code string) context.Context {
+	return types.ContextWithTenant(e.Ctx, code)
+}
+
+// RunTest sets up the requested resources and runs the test body.
+//
+// The test runs in parallel UNLESS one of the following makes that unsafe:
+//   - ExclusivePostgres: the test touches shared rows (seed data, count
+//     assertions on shared keys) and needs the database to itself.
+//   - ObjectStore: the helper sets AWS_* env vars via t.Setenv, which is mutually
+//     exclusive with t.Parallel.
+func RunTest(t *testing.T, need Need, fn func(t *testing.T, env *Env)) {
+	serial := need.Postgres == ExclusivePostgres || need.ObjectStore
+	if !serial {
+		t.Parallel()
+	}
+
+	env := &Env{Ctx: context.Background()}
+
+	// StarRocks (always pulls Postgres up alongside it for the federation catalog).
+	if need.Starrocks != "" {
+		if len(need.Tenants) > 0 {
+			sr, err := initStarrocksMultiTenant(need.Starrocks, need.Tenants, need.TenantKeyColumns)
+			if err != nil {
+				log.Fatal("Failed to init multi-tenant StarRocks: ", err)
+			}
+			env.Starrocks = sr
+		} else {
+			sr, _, err := initStarrocksDb(need.Starrocks)
+			if err != nil {
+				log.Fatal("Failed to init StarRocks: ", err)
+			}
+			env.Starrocks = sr
+		}
+	}
+
+	// Postgres (always required when StarRocks is requested, even if not exposed).
+	if need.Postgres != NoPostgres || need.Starrocks != "" {
+		pg, err := initPostgresDb()
+		if err != nil {
+			log.Fatal("Failed to init Postgres: ", err)
+		}
+		if need.Postgres != NoPostgres {
+			env.Postgres = pg
+		}
+		if need.Postgres == WritePostgres || need.Postgres == ExclusivePostgres {
+			defer cleanUp(pg)
+		}
+	}
+
+	// Object store (per-test container; AWS_* env vars are exported via t.Setenv).
+	if need.ObjectStore {
+		minioC, err := initObjectStoreContainer(env.Ctx)
+		if err != nil {
+			log.Fatalf("Failed to start object store container: %v", err)
+		}
+		client, err := initS3Client(minioC.Endpoint)
+		if err != nil {
+			log.Fatalf("Failed to init S3 bucket: %v", err)
+		}
+		t.Setenv("AWS_ENDPOINT_URL", minioC.Endpoint)
+		t.Setenv("AWS_ACCESS_KEY_ID", "admin")
+		t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
+		t.Setenv("AWS_USE_SSL", "false")
+		env.ObjectStore = &ObjectStoreEnv{Client: client, Endpoint: minioC.Endpoint}
+	}
+
+	fn(t, env)
+}

@@ -1,0 +1,144 @@
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router';
+import useSWR from 'swr';
+
+import type { ApiError, VariantHeader } from '@/api/api';
+import Container from '@/components/base/container';
+import Error404 from '@/components/base/errors/404';
+import HeaderNavigation from '@/components/base/navigation/header-navigation';
+import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
+import type { BadgeProps } from '@/components/base/shadcn/badge';
+import { Button } from '@/components/base/shadcn/button';
+import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
+import { useI18n } from '@/components/hooks/i18n';
+import { useLocalPath } from '@/components/hooks/use-local-path';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { variantsApi } from '@/utils/api';
+
+import CasesTab from './cases/cases-tab';
+import EvidenceTab from './evidence/evidence-tab';
+import FrequencyTab from './frequency/frequency-tab';
+import OverviewTab from './overview/overview-tab';
+import TranscriptsTab from './transcripts/transcripts-tab';
+
+export const VARIANT_ENTITY_TAB_PARAM = 'tab';
+
+type VariantHeaderInput = {
+  key: string;
+  locusId: string;
+};
+
+async function fetchVariantHeader(input: VariantHeaderInput, tenant: string) {
+  const response = await variantsApi.getGermlineVariantHeader(tenant, input.locusId);
+  return response.data;
+}
+
+export default function App() {
+  const { t } = useI18n();
+  const localPath = useLocalPath();
+  const { tenant } = useTenant();
+  const params = useParams<{ locusId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<VariantEntityTabs>(
+    (searchParams.get(VARIANT_ENTITY_TAB_PARAM) as VariantEntityTabs) ?? VariantEntityTabs.Overview,
+  );
+
+  const { data, error, isLoading } = useSWR<VariantHeader, ApiError, VariantHeaderInput>(
+    {
+      key: 'variant-header',
+      locusId: params.locusId!,
+    },
+    input => fetchVariantHeader(input, tenant),
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    },
+  );
+
+  /**
+   * Set active tab by searchParams (from urls)
+   */
+  useEffect(() => {
+    setActiveTab((searchParams.get(VARIANT_ENTITY_TAB_PARAM) as VariantEntityTabs) ?? VariantEntityTabs.Overview);
+  }, [searchParams]);
+
+  const handleOnTabChange = useCallback(
+    (value: VariantEntityTabs) => {
+      setSearchParams({ tab: value });
+      setActiveTab(value);
+    },
+    [setSearchParams],
+  );
+
+  if (!isLoading && error?.status === 404) {
+    return (
+      <Error404
+        message={t('variant_entity.not_found')}
+        extra={
+          <Button asChild>
+            <Link to={localPath('/')}>{t('variant_entity.not_found.button')}</Link>
+          </Button>
+        }
+      />
+    );
+  }
+
+  const pageHeaderBadges: BadgeProps[] = [];
+  if (data?.assembly_version) {
+    pageHeaderBadges.push({ variant: 'outline', children: data?.assembly_version });
+  }
+  pageHeaderBadges.push({ children: t('variant_entity.header.germline') });
+
+  // To avoid hydration mismatch with search params in ssr
+  if (!activeTab) {
+    return null;
+  }
+
+  return (
+    <main className="bg-muted h-screen overflow-auto">
+      <HeaderNavigation isLoading={isLoading} title={data?.hgvsg} badges={pageHeaderBadges} />
+      <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
+        <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
+          <TabsListItem data-cy="overview-tab" value={VariantEntityTabs.Overview}>
+            {t('variant_entity.overview.title')}
+          </TabsListItem>
+          <TabsListItem data-cy="frequency-tab" value={VariantEntityTabs.Frequency}>
+            {t('variant_entity.frequency.title')}
+          </TabsListItem>
+          <TabsListItem data-cy="evidence-tab" value={VariantEntityTabs.EvidenceAndConditions}>
+            {t('variant_entity.evidence.title')}
+          </TabsListItem>
+          <TabsListItem data-cy="transcripts-tab" value={VariantEntityTabs.Transcripts}>
+            {t('variant_entity.transcripts.title')}
+          </TabsListItem>
+          <TabsListItem data-cy="cases-tab" value={VariantEntityTabs.Cases}>
+            {t('variant_entity.cases.tab')}
+          </TabsListItem>
+        </TabsList>
+        <div className="px-0 sm:px-3">
+          <Container>
+            <div className="max-w-8xl mx-auto w-full">
+              <TabsContent value={VariantEntityTabs.Overview} className="p-0 sm:py-3">
+                <OverviewTab />
+              </TabsContent>
+              <TabsContent value={VariantEntityTabs.Frequency} className="p-0 sm:py-3">
+                <FrequencyTab />
+              </TabsContent>
+              <TabsContent value={VariantEntityTabs.EvidenceAndConditions} className="p-0 sm:py-3">
+                <EvidenceTab />
+              </TabsContent>
+              <TabsContent value={VariantEntityTabs.Transcripts} className="p-0 sm:py-3">
+                <TranscriptsTab />
+              </TabsContent>
+            </div>
+            <div className="mx-auto w-full">
+              <TabsContent value={VariantEntityTabs.Cases} className="p-0 sm:py-3">
+                <CasesTab />
+              </TabsContent>
+            </div>
+          </Container>
+        </div>
+      </TabsNav>
+    </main>
+  );
+}

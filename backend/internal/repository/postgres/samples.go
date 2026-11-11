@@ -1,0 +1,105 @@
+package postgres
+
+import (
+	"context"
+	"errors"
+	"fmt"
+
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"gorm.io/gorm"
+)
+
+type Sample = types.Sample
+
+type SamplesRepository struct {
+	db *gorm.DB
+}
+
+func NewSamplesRepository(db database.PostgresDB) *SamplesRepository {
+	return &SamplesRepository{db: db.DB}
+}
+
+// GetFetusIDsWithSamples narrows fetusIDs down to those a sample still points at. A fetus cannot be
+// deleted while one does: sample.fetus_id has no ON DELETE CASCADE, so the delete would fail as a
+// raw FK violation instead of a reportable validation error.
+func (r *SamplesRepository) GetFetusIDsWithSamples(ctx context.Context, fetusIDs []int) ([]int, error) {
+	if len(fetusIDs) == 0 {
+		return nil, nil
+	}
+	var found []int
+	if err := r.db.WithContext(ctx).
+		Table(types.SampleTable.Name).
+		Distinct().
+		Where("fetus_id IN ?", fetusIDs).
+		Pluck("fetus_id", &found).Error; err != nil {
+		return nil, fmt.Errorf("error while checking samples for fetuses %v: %w", fetusIDs, err)
+	}
+	return found, nil
+}
+
+func (r *SamplesRepository) GetSampleById(ctx context.Context, id int) (*Sample, error) {
+	var sample Sample
+	tx := r.db.WithContext(ctx).Table(types.SampleTable.Name).Where("id = ?", id)
+	if err := tx.First(&sample).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error retrieving sample by id: %w", err)
+		}
+		return nil, nil
+	}
+	return &sample, nil
+}
+
+func (r *SamplesRepository) GetSampleByOrgCodeAndSubmitterSampleId(ctx context.Context, organizationCode string, submitterSampleId string, tenantCode string) (*Sample, error) {
+	var sample Sample
+	tx := r.db.WithContext(ctx).
+		Table(types.SampleTable.Name).
+		Where("submitter_sample_id = ? AND organization_code = ? AND tenant_code = ?", submitterSampleId, organizationCode, tenantCode)
+	if err := tx.First(&sample).Error; err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("error retrieving sample by org code and submitter sample id: %w", err)
+		} else {
+			return nil, nil
+		}
+	}
+	return &sample, nil
+}
+
+func (r *SamplesRepository) CreateSample(ctx context.Context, newSample *Sample) (*Sample, error) {
+	err := r.db.WithContext(ctx).Table(types.SampleTable.Name).Create(newSample).Error
+	return newSample, err
+}
+
+func (r *SamplesRepository) UpdateSample(ctx context.Context, sample *Sample) error {
+	// The natural key (organization_code, submitter_sample_id) is the lookup key and is never
+	// updated; neither is tenant_code. patient_id is the resolved owning patient — it is
+	// deliberately NOT updated here: a sample must not be re-pointed to a different patient
+	// (equivalent to changing submitter_patient_id), which is immutable across updates.
+	// fetus_id, unlike patient_id, is updatable — it's often attached after creation. Careful:
+	// this is a full replace, not a merge, so a batch that omits fetus_id clears it (like
+	// parent_sample_id).
+	tx := r.db.WithContext(ctx).
+		Table(types.SampleTable.Name).
+		Where("organization_code = ? AND submitter_sample_id = ? AND tenant_code = ?", sample.OrganizationCode, sample.SubmitterSampleId, sample.TenantCode).
+		Updates(map[string]any{
+			"type_code":        sample.TypeCode,
+			"tissue_site":      sample.TissueSite,
+			"histology_code":   sample.HistologyCode,
+			"parent_sample_id": sample.ParentSampleID,
+			"fetus_id":         sample.FetusID,
+		})
+	if tx.Error != nil {
+		return fmt.Errorf("error updating sample: %w", tx.Error)
+	}
+	return nil
+}
+
+func (r *SamplesRepository) GetTypeCodes(ctx context.Context) ([]string, error) {
+	var typeCodes []string
+	tx := r.db.WithContext(ctx).
+		Table(types.SampleTypeTable.Name).Select("code").Order("lower(code) asc")
+	if err := tx.Find(&typeCodes).Error; err != nil {
+		return nil, fmt.Errorf("error retrieving sample type codes: %w", err)
+	}
+	return typeCodes, nil
+}

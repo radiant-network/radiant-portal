@@ -1,0 +1,174 @@
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router';
+import { AudioWaveform, ClipboardList, FileIcon } from 'lucide-react';
+import useSWR from 'swr';
+
+import type { ApiError, CaseEntity } from '@/api/api';
+import Container from '@/components/base/container';
+import Error404 from '@/components/base/errors/404';
+import TabsNav, { TabsContent, TabsList, TabsListItem } from '@/components/base/navigation/tabs-nav/tabs-nav';
+import { Button } from '@/components/base/shadcn/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { CaseEntityTabs } from '@/components/cores/types/case-tabs';
+import { useI18n } from '@/components/hooks/i18n';
+import { useLocalPath } from '@/components/hooks/use-local-path';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { caseApi } from '@/utils/api';
+import { useCaseIdFromParam } from '@/utils/helper';
+
+import DetailsTab from './details/details-tab';
+import FilesTab from './files/files-tab';
+import Header from './layout/header';
+import GermlineVariantsTab from './variants/germline-variants-tab';
+import SomaticVariantsTab from './variants/somatic-variants-tab';
+import { CaseEntityContext } from './case-entity-context';
+
+type CaseEntityInput = {
+  key: string;
+  caseId: number;
+};
+
+async function fetchCaseEntity(input: CaseEntityInput, tenant: string) {
+  const response = await caseApi.caseEntity(tenant, input.caseId);
+  return response.data;
+}
+
+export default function App() {
+  const { t } = useI18n();
+  const localPath = useLocalPath();
+  const { tenant } = useTenant();
+  const caseId = useCaseIdFromParam();
+  const mainRef = useRef<HTMLDivElement>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState<CaseEntityTabs>(
+    (searchParams.get('tab') as CaseEntityTabs) ?? CaseEntityTabs.Details,
+  );
+
+  const { data, error, isLoading, mutate } = useSWR<CaseEntity, ApiError, CaseEntityInput>(
+    {
+      key: 'case-entity',
+      caseId,
+    },
+    input => fetchCaseEntity(input, tenant),
+    {
+      revalidateOnFocus: false,
+      shouldRetryOnError: false,
+    },
+  );
+
+  const hasVariants = (data?.sequencing_experiments ?? []).some(seqExp => seqExp.has_variants);
+  const handleOnTabChange = useCallback(
+    (value: CaseEntityTabs) => {
+      if (value == CaseEntityTabs.Variants) {
+        const defaultSeqId = (data?.sequencing_experiments ?? []).filter(seqExp => seqExp.has_variants)[0].seq_id ?? -1;
+        setSearchParams({
+          tab: value,
+          seq_id: defaultSeqId.toString(),
+        });
+      } else {
+        setSearchParams({ tab: value });
+      }
+      setActiveTab(value);
+    },
+    [data],
+  );
+
+  /**
+   * Set active tab by searchParams (from urls)
+   */
+  useEffect(() => {
+    if (searchParams.get('tab') != null) {
+      setActiveTab(searchParams.get('tab') as CaseEntityTabs);
+      return;
+    }
+
+    setActiveTab(CaseEntityTabs.Details);
+    setSearchParams({ tab: CaseEntityTabs.Details });
+  }, []);
+
+  useEffect(() => {
+    if (searchParams.get('tab') != null) {
+      setActiveTab(searchParams.get('tab') as CaseEntityTabs);
+      return;
+    }
+  }, [searchParams.get('tab')]);
+
+  /**
+   * Reset scroll position when changing tab
+   */
+  useEffect(() => {
+    if (mainRef.current) {
+      mainRef.current.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [activeTab]);
+
+  if (!isLoading && error?.status === 404) {
+    return (
+      <Error404
+        message={t('case_entity.not_found')}
+        extra={
+          <Button asChild>
+            <Link to={localPath('/')}>{t('case_entity.not_found.button')}</Link>
+          </Button>
+        }
+      />
+    );
+  }
+
+  // To avoid hydration mismatch with hash in ssr
+  if (!activeTab) {
+    return null;
+  }
+  return (
+    <CaseEntityContext value={data}>
+      <main ref={mainRef} className="bg-muted h-screen overflow-auto">
+        <Header data={data} isLoading={isLoading} onStatusChange={mutate} onAssignmentChange={mutate} />
+        <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
+          <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
+            <TabsListItem data-cy="details-tab" value={CaseEntityTabs.Details}>
+              <ClipboardList />
+              {t('case_entity.details.title')}
+            </TabsListItem>
+            {hasVariants ? (
+              <TabsListItem data-cy="variants-tab" value={CaseEntityTabs.Variants}>
+                <AudioWaveform />
+                {t('case_entity.variants.title')}
+              </TabsListItem>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <TabsListItem disabled value={CaseEntityTabs.Variants}>
+                    <AudioWaveform />
+                    {t('case_entity.variants.title')}
+                    <span className="sr-only">{t('case_entity.details.no_variants')}</span>
+                  </TabsListItem>
+                </TooltipTrigger>
+                <TooltipContent>{t('case_entity.details.no_variants')}</TooltipContent>
+              </Tooltip>
+            )}
+            <TabsListItem data-cy="files-tab" value={CaseEntityTabs.Files}>
+              <FileIcon />
+              {t('case_entity.files.title')}
+            </TabsListItem>
+          </TabsList>
+          <Container>
+            <TabsContent value={CaseEntityTabs.Details} className="p-0 md:p-3">
+              <DetailsTab caseEntity={data} isLoading={isLoading} />
+            </TabsContent>
+          </Container>
+          <TabsContent value={CaseEntityTabs.Variants} className="py-0">
+            {data &&
+              (data.case_type === 'somatic' ? (
+                <SomaticVariantsTab isLoading={isLoading} caseEntity={data} />
+              ) : (
+                <GermlineVariantsTab isLoading={isLoading} caseEntity={data} />
+              ))}
+          </TabsContent>
+          <TabsContent value={CaseEntityTabs.Files} className="p-0 md:p-3">
+            <FilesTab />
+          </TabsContent>
+        </TabsNav>
+      </main>
+    </CaseEntityContext>
+  );
+}

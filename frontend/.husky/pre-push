@@ -1,0 +1,2 @@
+# Verify that the nightly (and ferlease-pr) workflow shards cover all specs.
+node cypress/scripts/check-shards.mjs

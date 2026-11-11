@@ -1,0 +1,829 @@
+package server
+
+import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+func (m *MockRepository) SearchCases(ctx context.Context, userQuery types.ListQuery) (*[]types.CaseResult, *int64, error) {
+	var count = int64(1)
+	return &[]types.CaseResult{
+		{
+			CaseID:                    1,
+			ProbandID:                 3,
+			SubmitterProbandId:        "MRN-283775",
+			ProbandSubmitterSampleIds: types.JsonArray[string]{"S13224"},
+			RunNames:                  types.JsonArray[string]{"1617"},
+			PriorityCode:              "routine",
+			StatusCode:                "in_progress",
+			CaseTypeCode:              "germline",
+			CaseType:                  "germline_family",
+			AnalysisCatalogCode:       "WGA",
+			AnalysisCatalogName:       "Whole Genome Analysis",
+			PrimaryConditionID:        "MONDO:0700092",
+			PrimaryConditionName:      "neurodevelopmental disorder",
+			OrderingOrganizationCode:  "CHUSJ",
+			OrderingOrganizationName:  "Centre hospitalier universitaire Sainte-Justine",
+			ProjectCode:               "N1",
+			ProjectName:               "NeuroDev Phase I",
+			CreatedOn: time.Date(
+				2000, 1, 1, 0, 0, 0, 0, time.UTC),
+			UpdatedOn: time.Date(
+				2000, 2, 2, 0, 0, 0, 0, time.UTC),
+			Prescriber:       "Felix Laflamme",
+			DiagnosisLabCode: "CQGC",
+			DiagnosisLabName: "Quebec Clinical Genomic Center",
+			OrganizationCode: "CHUSJ",
+			OrganizationName: "Centre hospitalier universitaire Sainte-Justine",
+			HasVariants:      true,
+		},
+	}, &count, nil
+}
+
+// ListForCases stands in for the case assignments repository. Only case 1 is assigned, so the
+// handler tests cover both a populated avatar stack and the unassigned state.
+func (m *MockRepository) ListForCases(ctx context.Context, caseIDs []int) (map[int][]types.CaseAssignee, error) {
+	assignees := map[int][]types.CaseAssignee{}
+	for _, caseID := range caseIDs {
+		if caseID == 1 {
+			assignees[caseID] = []types.CaseAssignee{
+				{UserID: "79a8855e-3782-4dc8-be2a-8afdb34d6359", FirstName: "Wendy", LastName: "Walsh", Email: "wendy@test.authz"},
+			}
+		}
+	}
+	return assignees, nil
+}
+
+func (m *MockRepository) SearchById(ctx context.Context, prefix string, limit int) (*[]types.AutocompleteResult, error) {
+	var result = []types.AutocompleteResult{
+		{Type: "case_id", Value: "1"},
+		{Type: "patient_id", Value: "10"},
+		{Type: "case_id", Value: "10"},
+	}
+	return &result, nil
+}
+
+func (m *MockRepository) GetCasesFilters(ctx context.Context) (*types.CaseFilters, error) {
+	var result = types.CaseFilters{
+		Status: []types.FiltersValue{
+			{Key: "in_review", Label: "In Review"},
+			{Key: "in_progress", Label: "In Progress"},
+			{Key: "revoked", Label: "Cancelled"},
+		},
+		Priority: []types.FiltersValue{
+			{Key: "routine", Label: "Routine"},
+			{Key: "asap", Label: "Asap"},
+			{Key: "stat", Label: "Stat"},
+		},
+		AnalysisCatalog: []types.FiltersValue{
+			{Key: "WGA", Label: "Whole Genome Analysis"},
+			{Key: "IDGD", Label: "Intellectual Deficiency and Global Developmental Delay"},
+		},
+		Project: []types.FiltersValue{
+			{Key: "N1", Label: "NeuroDev Phase I"},
+			{Key: "N2", Label: "NeuroDev Phase II"},
+		},
+		DiagnosisLab: []types.FiltersValue{
+			{Key: "CHOP", Label: "Children Hospital of Philadelphia"},
+			{Key: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
+		},
+		OrderingOrganization: []types.FiltersValue{
+			{Key: "CHOP", Label: "Children Hospital of Philadelphia"},
+			{Key: "CHUSJ", Label: "Centre hospitalier universitaire Sainte-Justine"},
+		},
+		Panel: []types.FiltersValue{
+			{Key: "EPILEP", Label: "Epilepsy"},
+			{Key: "HEART", Label: "Heart diseases"},
+		},
+		LifeStatus: []types.FiltersValue{
+			{Key: "alive", Label: "Alive"},
+			{Key: "deceased", Label: "Deceased"},
+			{Key: "unknown", Label: "Unknown"},
+		},
+		CaseCategory: []types.FiltersValue{
+			{Key: "prenatal", Label: "Prenatal"},
+			{Key: "postnatal", Label: "Postnatal"},
+		},
+		CaseType: []types.FiltersValue{
+			{Key: "germline", Label: "Germline"},
+			{Key: "somatic", Label: "Somatic"},
+		},
+	}
+	return &result, nil
+}
+
+func (m *MockRepository) GetCaseEntity(ctx context.Context, caseId int) (*types.CaseEntity, error) {
+	return &types.CaseEntity{
+		CaseID:              1,
+		AnalysisCatalogCode: "WGA",
+		AnalysisCatalogName: "Whole Genome Analysis",
+		CaseType:            "germline_family",
+		CaseCategoryCode:    "postnatal",
+		CaseCategoryName:    "Postnatal",
+		CreatedOn: time.Date(
+			2000, 1, 1, 0, 0, 0, 0, time.UTC),
+		UpdatedOn: time.Date(
+			2000, 2, 2, 0, 0, 0, 0, time.UTC),
+		Prescriber:               "Felix Laflamme",
+		DiagnosisLabCode:         "CQGC",
+		DiagnosisLabName:         "Quebec Clinical Genomic Center",
+		PrimaryConditionID:       "MONDO:0700092",
+		PrimaryConditionName:     "neurodevelopmental disorder",
+		OrderingOrganizationCode: "CHUSJ",
+		OrderingOrganizationName: "Centre hospitalier universitaire Sainte-Justine",
+		ProjectCode:              "N1",
+		ProjectName:              "NeuroDev Phase I",
+		PanelCode:                "EPILEP",
+		PanelName:                "Epilepsy",
+		SequencingExperiments: types.JsonArray[types.CaseSequencingExperiment]{
+			{SeqID: 1, PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", SampleID: 1, SampleSubmitterID: "S13224", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
+			{SeqID: 2, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2, SampleSubmitterID: "S13225", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
+			{SeqID: 3, PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SampleID: 3, SampleSubmitterID: "S13226", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: false},
+		},
+		Tasks: types.JsonArray[types.CaseTask]{
+			{ID: 1, TypeCode: "alignment", TypeName: "Alignment", CreatedOn: time.Date(2021, 10, 12, 13, 8, 0, 0, time.UTC), PatientCount: 3, PatientsUnparsed: "proband, mother, father", Patients: types.JsonArray[string]{"father", "mother", "proband"}},
+		},
+		Members: types.JsonArray[types.CasePatientClinicalInformation]{
+			{PatientID: utils.IntPtr(3), FirstName: "Marie", LastName: "Lambert", RelationshipToProband: "proband", AffectedStatusCode: "affected", LifeStatusCode: "alive", SubmitterPatientId: "MRN-283775", Jhn: "LAM7303233380", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: utils.TimePtr(time.Date(1973, 3, 23, 0, 0, 0, 0, time.UTC)), NonObservedPhenotypes: types.JsonArray[types.Term]{{ID: "HP:0000717", Name: "Autism", OnsetCode: "childhood"}, {ID: "HP:0001263", Name: "Global developmental delay", OnsetCode: "childhood"}}},
+			{PatientID: utils.IntPtr(1), FirstName: "Juliette", LastName: "Gagnon", RelationshipToProband: "mother", AffectedStatusCode: "affected", LifeStatusCode: "alive", SubmitterPatientId: "MRN-283773", Jhn: "GAG1202030277", SexCode: "female", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: utils.TimePtr(time.Date(2012, 2, 3, 0, 0, 0, 0, time.UTC))},
+			{PatientID: utils.IntPtr(2), FirstName: "Antoine", LastName: "Lefebvre", RelationshipToProband: "father", AffectedStatusCode: "non_affected", LifeStatusCode: "alive", SubmitterPatientId: "MRN-283774", Jhn: "LEF7001303889", SexCode: "male", OrganizationCode: "CHUSJ", OrganizationName: "Centre hospitalier universitaire Sainte-Justine", DateOfBirth: utils.TimePtr(time.Date(1970, 1, 30, 0, 0, 0, 0, time.UTC))},
+		},
+	}, nil
+}
+
+func (m *MockRepository) CreateCase(*types.Case) error { return nil }
+
+func (m *MockRepository) UpdateCaseDiagnosisLabCode(caseID int, code string) error { return nil }
+
+func Test_SearchCasesHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/cases/search", SearchCasesHandler(repo, repo))
+	body := `{
+			"additional_fields":[]
+	}`
+	req, _ := http.NewRequest("POST", "/radiant/cases/search", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"list": [{
+			"analysis_catalog_code":"WGA",
+			"analysis_catalog_name":"Whole Genome Analysis",
+			"case_type": "germline_family",
+			"assignees":[{"user_id":"79a8855e-3782-4dc8-be2a-8afdb34d6359","first_name":"Wendy","last_name":"Walsh","email":"wendy@test.authz"}], "case_id":1,
+			"created_on":"2000-01-01T00:00:00Z",
+			"ordering_organization_code":"CHUSJ",
+			"ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine",
+			"submitter_proband_id":"MRN-283775",
+			"proband_submitter_sample_ids":["S13224"],
+			"run_names":["1617"],
+			"proband_id":3,
+			"diagnosis_lab_code":"CQGC",
+			"diagnosis_lab_name":"Quebec Clinical Genomic Center",
+			"prescriber":"Felix Laflamme",
+			"primary_condition_id":"MONDO:0700092",
+			"primary_condition_name":"neurodevelopmental disorder",
+			"priority_code":"routine",
+			"project_code":"N1",
+			"project_name":"NeuroDev Phase I",
+			"organization_code":"CHUSJ",
+			"organization_name":"Centre hospitalier universitaire Sainte-Justine",
+			"status_code":"in_progress",
+			"updated_on":"2000-02-02T00:00:00Z",
+			"has_variants": true
+		}],
+		"count": 1
+	}`, w.Body.String())
+}
+
+func Test_CasesAutocompleteHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/:tenant/cases/autocomplete", CasesAutocompleteHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/autocomplete?prefix=1&limit=5", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `[
+		{"type":"case_id", "value":"1"},
+		{"type":"patient_id", "value":"10"},
+		{"type":"case_id", "value":"10"}
+	]`, w.Body.String())
+}
+
+func Test_CasesFiltersHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/:tenant/cases/filters", CasesFiltersHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/filters", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"analysis_catalog_code":[
+			{"key":"WGA", "label":"Whole Genome Analysis"},
+			{"key":"IDGD", "label":"Intellectual Deficiency and Global Developmental Delay"}
+		], "diagnosis_lab_code":[
+			{"key":"CHOP", "label":"Children Hospital of Philadelphia"},
+			{"key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
+		], "priority_code":[
+			{"key":"routine", "label":"Routine"},
+			{"key":"asap", "label":"Asap"},
+			{"key":"stat", "label":"Stat"}
+		], "project_code":[
+			{"key":"N1", "label":"NeuroDev Phase I"},
+			{"key":"N2", "label":"NeuroDev Phase II"}
+		], "ordering_organization_code":[
+			{"key":"CHOP", "label":"Children Hospital of Philadelphia"},
+			{"key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
+		], "status_code":[
+			{"key":"in_review", "label":"In Review"},
+			{"key":"in_progress", "label":"In Progress"},
+			{"key":"revoked", "label":"Cancelled"}
+		], "life_status_code":[
+			{"key":"alive", "label":"Alive"},
+			{"key":"deceased", "label":"Deceased"},
+			{"key":"unknown", "label":"Unknown"}
+		], "case_category_code":[
+			{"key":"prenatal", "label":"Prenatal"},
+			{"key":"postnatal", "label":"Postnatal"}
+		], "panel_code":[
+			{"key":"EPILEP", "label":"Epilepsy"},
+			{"key":"HEART", "label":"Heart diseases"}
+		], "case_type_code":[
+			{"key":"germline", "label":"Germline"},
+			{"key":"somatic", "label":"Somatic"}
+		]
+	}`, w.Body.String())
+}
+
+func Test_CaseEntityHandler(t *testing.T) {
+	repo := &MockRepository{}
+
+	igvRepo := &MockIGVRepository{
+		// Return one IGV track to test that has_igv_files is set to true
+		igvTracks: []types.IGVTrack{{
+			SequencingExperimentId: 1,
+			SampleId:               "sample_123",
+			PatientId:              1,
+			FamilyRole:             "proband",
+			SexCode:                "male",
+			DataTypeCode:           "alignment",
+			FormatCode:             "cram",
+			URL:                    "s3://example.com/file.cram",
+		}, {
+			SequencingExperimentId: 1,
+			SampleId:               "sample_123",
+			PatientId:              1,
+			FamilyRole:             "proband",
+			SexCode:                "male",
+			DataTypeCode:           "alignment",
+			FormatCode:             "crai",
+			URL:                    "s3://example.com/file.crai",
+		},
+		},
+	}
+
+	router := gin.Default()
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo, repo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"sequencing_experiments":[
+			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true},
+			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":1, "relationship_to_proband":"mother", "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true},
+			{"affected_status_code":"non_affected", "experimental_strategy_code":"", "patient_id":2, "relationship_to_proband":"father", "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": false}
+		],
+		"analysis_catalog_code":"WGA",
+		"analysis_catalog_name":"Whole Genome Analysis",
+		"case_category_code": "postnatal",
+		"case_category_name": "Postnatal",
+		"assignees":[{"user_id":"79a8855e-3782-4dc8-be2a-8afdb34d6359","first_name":"Wendy","last_name":"Walsh","email":"wendy@test.authz"}],
+		"case_id":1,
+		"case_type":"germline_family",
+		"created_on":"2000-01-01T00:00:00Z",
+		"members":[
+			{
+				"affected_status_code":"affected",
+				"date_of_birth":"1973-03-23T00:00:00Z",
+				"organization_code":"CHUSJ",
+				"organization_name":"Centre hospitalier universitaire Sainte-Justine",
+				"submitter_patient_id":"MRN-283775",
+				"patient_id":3,
+				"relationship_to_proband":"proband",
+				"sex_code":"male",
+				"first_name":"Marie",
+				"jhn":"LAM7303233380",
+				"last_name":"Lambert",
+				"life_status_code":"alive",
+				"non_observed_phenotypes": [{"id": "HP:0000717", "name": "Autism", "onset_code": "childhood"}, {"id": "HP:0001263", "name": "Global developmental delay", "onset_code": "childhood"}]
+			},
+			{
+				"affected_status_code":"affected",
+				"date_of_birth":"2012-02-03T00:00:00Z",
+				"organization_code":"CHUSJ",
+				"organization_name":"Centre hospitalier universitaire Sainte-Justine",
+				"submitter_patient_id":"MRN-283773",
+				"patient_id":1,
+				"relationship_to_proband":"mother",
+				"sex_code":"female",
+				"first_name":"Juliette",
+				"jhn":"GAG1202030277",
+				"last_name":"Gagnon",
+				"life_status_code":"alive"
+			},
+			{
+				"affected_status_code":"non_affected",
+				"date_of_birth":"1970-01-30T00:00:00Z",
+				"organization_code":"CHUSJ",
+				"organization_name":"Centre hospitalier universitaire Sainte-Justine",
+				"submitter_patient_id":"MRN-283774",
+				"patient_id":2,
+				"relationship_to_proband":"father",
+				"sex_code":"male",
+				"first_name":"Antoine",
+				"jhn":"LEF7001303889",
+				"last_name":"Lefebvre",
+				"life_status_code":"alive"
+			}
+		],
+		"diagnosis_lab_code":"CQGC",
+		"diagnosis_lab_name":"Quebec Clinical Genomic Center",
+		"has_igv_files":true,
+		"panel_code": "EPILEP",
+		"panel_name": "Epilepsy",
+		"prescriber":"Felix Laflamme",
+		"primary_condition_id":"MONDO:0700092",
+		"primary_condition_name":"neurodevelopmental disorder",
+		"project_code": "N1",
+		"project_name": "NeuroDev Phase I",
+		"ordering_organization_code":"CHUSJ",
+		"ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine",
+		"status_code":"",
+		"tasks":[
+			{"id": 1, "type_code": "alignment", "type_name": "Alignment", "created_on": "2021-10-12T13:08:00Z", "patients": ["father", "mother", "proband"]}
+		],
+		"updated_on":"2000-02-02T00:00:00Z"
+	}`, w.Body.String())
+}
+
+func Test_CaseEntityHandler_NoIGVTracks(t *testing.T) {
+	repo := &MockRepository{}
+
+	// will return nil IGV tracks
+	igvRepo := &MockIGVRepository{}
+
+	router := gin.Default()
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo, repo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var resp map[string]interface{}
+	err := json.Unmarshal(w.Body.Bytes(), &resp)
+	if err != nil {
+		t.Fatalf("Failed to unmarshal response: %v", err)
+	}
+	assert.False(t, resp["has_igv_files"].(bool))
+}
+
+func Test_CaseEntityHandler_OnlyUnusableIGVFiles(t *testing.T) {
+	repo := &MockRepository{}
+
+	igvRepo := &MockIGVRepository{
+		igvTracks: []types.IGVTrack{
+			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "igv", FormatCode: "bw", DocumentName: "sample_123.coverage.bw", URL: "s3://example.com/sample_123.coverage.bw"},
+			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "igv", FormatCode: "bed", DocumentName: "sample_123_targets.bed", URL: "s3://example.com/sample_123_targets.bed"},
+		},
+	}
+
+	router := gin.Default()
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo, repo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var resp map[string]interface{}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+	assert.False(t, resp["has_igv_files"].(bool))
+}
+
+func Test_CaseEntityHandler_CNVOnlyHasIGVFiles(t *testing.T) {
+	repo := &MockRepository{}
+
+	igvRepo := &MockIGVRepository{
+		igvTracks: []types.IGVTrack{
+			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "gcnv", FormatCode: "vcf", DocumentName: "sample_123.cnv.vcf.gz", URL: "s3://example.com/sample_123.cnv.vcf.gz"},
+			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "gcnv", FormatCode: "tbi", DocumentName: "sample_123.cnv.vcf.gz.tbi", URL: "s3://example.com/sample_123.cnv.vcf.gz.tbi"},
+		},
+	}
+
+	router := gin.Default()
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo, repo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var resp map[string]interface{}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+	assert.True(t, resp["has_igv_files"].(bool))
+}
+
+func Test_CaseEntityHandler_CNVWithoutIndexHasNoIGVFiles(t *testing.T) {
+	repo := &MockRepository{}
+
+	igvRepo := &MockIGVRepository{
+		igvTracks: []types.IGVTrack{
+			{SequencingExperimentId: 1, SampleId: "sample_123", FamilyRole: "proband", DataTypeCode: "gcnv", FormatCode: "tbi", DocumentName: "sample_123.cnv.vcf.gz.tbi", URL: "s3://example.com/sample_123.cnv.vcf.gz.tbi"},
+		},
+	}
+
+	router := gin.Default()
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo, repo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+
+	var resp map[string]interface{}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+	assert.False(t, resp["has_igv_files"].(bool))
+}
+
+func Test_CaseEntityHandler_IGVRepositoryError(t *testing.T) {
+	repo := &MockRepository{}
+
+	igvRepo := &MockIGVRepository{
+		err: assert.AnError,
+	}
+
+	router := gin.Default()
+	router.GET("/:tenant/cases/:case_id", CaseEntityHandler(repo, igvRepo, repo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/1", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func Test_CaseEntityDocumentsSearchHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/cases/:case_id/documents/search", CaseEntityDocumentsSearchHandler(repo))
+	body := `{
+			"additional_fields":[]
+	}`
+	req, _ := http.NewRequest("POST", "/radiant/cases/1/documents/search", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"list": [{
+			"case_id":20,
+			"created_on": "2000-01-01T00:00:00Z",
+			"data_type_code":"snv",
+			"document_id":203,
+			"format_code":"vcf",
+			"hash":"5d41402abc4b2a76b9719d911017c794",
+			"name":"FI0037905.S14786.vcf.gz",
+			"patient_id":58,
+			"diagnosis_lab_code":"CQGC",
+			"diagnosis_lab_name":"Quebec Clinical Genomic Center",
+			"relationship_to_proband_code":"proband",
+			"run_alias":"A00516_0224",
+			"submitter_sample_id":"S14786",
+			"seq_id":56,
+			"size":325362647,
+			"task_id":20
+		}],
+		"count": 1
+	}`, w.Body.String())
+}
+
+func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/:tenant/cases/:case_id/documents/filters", CaseEntityDocumentsFiltersHandler(repo))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/1/documents/filters", bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"data_type_code":[
+			{"key":"alignment", "label":"Aligned Reads"},
+			{"key":"snv", "label":"Germline SNV"},
+			{"key":"ssnv", "label":"Somatic SNV"}
+		],
+		"format_code":[
+			{"key":"cram", "label":"CRAM File"},
+			{"key":"vcf", "label":"VCF File"}
+		],
+		"diagnosis_lab_code":[
+			{"key":"CHOP", "label":"Children Hospital of Philadelphia"},
+			{"key":"CHUSJ", "label":"Centre hospitalier universitaire Sainte-Justine"}
+		],
+		"project_code":[
+			{"key":"N1", "label":"NeuroDev Phase I"},
+			{"key":"N2", "label":"NeuroDev Phase II"}
+		],
+		"relationship_to_proband_code":[
+			{"key":"proband", "label":"Proband"},
+			{"key":"father", "label":"Father"},
+			{"key":"mother", "label":"Mother"}
+		]}`, w.Body.String())
+}
+
+type casePatcherMock struct {
+	found     bool
+	err       error
+	calls     int
+	gotCaseId int
+	gotCase   *types.Case
+}
+
+func (m *casePatcherMock) PatchCase(_ context.Context, caseId int, c *types.Case) (bool, error) {
+	m.calls++
+	m.gotCaseId = caseId
+	m.gotCase = c
+	return m.found, m.err
+}
+
+func servePatchCase(repo casePatcher, path string, body string) *httptest.ResponseRecorder {
+	router := gin.Default()
+	router.PATCH("/:tenant/cases/:case_id", PatchCaseHandler(repo))
+
+	req, _ := http.NewRequest("PATCH", path, bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_PatchCaseHandler_AppliesUserStatus(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"in_review"}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Empty(t, w.Body.String(), "a successful patch answers 200 with no body")
+	assert.Equal(t, 1, repo.gotCaseId)
+	assert.Equal(t, "in_review", repo.gotCase.StatusCode)
+}
+
+func Test_PatchCaseHandler_AppliesStatusesInAnyOrder(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"reopened"}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "reopened", repo.gotCase.StatusCode)
+}
+
+func Test_PatchCaseHandler_RejectsBodyWithNoPatchableField(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"note":"not patchable here"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PatchCaseHandler_RejectsEmptyBody(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"status_code is required, expected one of: in_progress, in_review, completed, resolved, unresolved, inconclusive, reopened, revoked"}`, w.Body.String())
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PatchCaseHandler_RejectsSubmitted(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"submitted"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"status_code \"submitted\" is system-applied and cannot be set by a user"}`, w.Body.String())
+	assert.Zero(t, repo.calls, "a rejected status must not reach the database")
+}
+
+func Test_PatchCaseHandler_RejectsProcessing(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"processing"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Zero(t, repo.calls, "a rejected status must not reach the database")
+}
+
+func Test_PatchCaseHandler_RejectsUnknownStatus(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"archived"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Zero(t, repo.calls, "a rejected status must not reach the database")
+}
+
+func Test_PatchCaseHandler_RejectsMalformedBody(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", "not json")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PatchCaseHandler_UnmatchedCaseNotFound(t *testing.T) {
+	repo := &casePatcherMock{found: false}
+	w := servePatchCase(repo, "/radiant/cases/999999", `{"status_code":"in_review"}`)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"case not found"}`, w.Body.String())
+}
+
+func Test_PatchCaseHandler_MalformedCaseIdNotFound(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/not-a-number", `{"status_code":"in_review"}`)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"case_id not found"}`, w.Body.String())
+	assert.Zero(t, repo.calls)
+}
+
+func Test_PatchCaseHandler_RepositoryErrorIsInternal(t *testing.T) {
+	repo := &casePatcherMock{err: errors.New("connection refused")}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"in_review"}`)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.NotContains(t, w.Body.String(), "connection refused")
+}
+
+type caseStatusSetterMock struct {
+	results map[int]*types.CaseStatusChangeResult
+	err     error
+	calls   []types.CaseStatusChange
+	tenant  string
+}
+
+func (m *caseStatusSetterMock) SetCaseStatusIfExpected(_ context.Context, tenantCode string, caseID int, status string, expected []string) (*types.CaseStatusChangeResult, error) {
+	m.tenant = tenantCode
+	m.calls = append(m.calls, types.CaseStatusChange{CaseID: caseID, StatusCode: status, ExpectedStatusCodes: expected})
+	if m.err != nil {
+		return nil, m.err
+	}
+	return m.results[caseID], nil
+}
+
+func servePatchCasesStatus(repo caseStatusSetter, body string) *httptest.ResponseRecorder {
+	router := tenantRouter()
+	router.PATCH("/:tenant/cases/status", PatchCasesStatusHandler(repo))
+
+	req, _ := http.NewRequest("PATCH", "/radiant/cases/status", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_PatchCasesStatusHandler_ReportsEachCase(t *testing.T) {
+	repo := &caseStatusSetterMock{results: map[int]*types.CaseStatusChangeResult{
+		123: {CaseID: 123, Updated: true, CurrentStatusCode: "in_progress"},
+		456: {CaseID: 456, Updated: false, CurrentStatusCode: "revoked"},
+	}}
+	w := servePatchCasesStatus(repo, `{"cases":[
+		{"case_id":123,"status_code":"in_progress","expected_status_codes":["processing"]},
+		{"case_id":456,"status_code":"in_progress","expected_status_codes":["processing"]}]}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"cases":[
+		{"case_id":123,"updated":true,"current_status_code":"in_progress"},
+		{"case_id":456,"updated":false,"current_status_code":"revoked"}]}`, w.Body.String())
+	assert.Equal(t, "radiant", repo.tenant)
+	assert.Equal(t, []types.CaseStatusChange{
+		{CaseID: 123, StatusCode: "in_progress", ExpectedStatusCodes: []string{"processing"}},
+		{CaseID: 456, StatusCode: "in_progress", ExpectedStatusCodes: []string{"processing"}},
+	}, repo.calls)
+}
+
+func Test_PatchCasesStatusHandler_SubmittedToProcessing(t *testing.T) {
+	repo := &caseStatusSetterMock{results: map[int]*types.CaseStatusChangeResult{
+		1: {CaseID: 1, Updated: true, CurrentStatusCode: "processing"},
+	}}
+	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":1,"status_code":"processing","expected_status_codes":["submitted"]}]}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"cases":[{"case_id":1,"updated":true,"current_status_code":"processing"}]}`, w.Body.String())
+}
+
+func Test_PatchCasesStatusHandler_RejectsDisallowedChange(t *testing.T) {
+	repo := &caseStatusSetterMock{}
+	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":1,"status_code":"in_progress","expected_status_codes":["submitted"]}]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"case 1: submitted -> in_progress is not an allowed change, the only changes involving a system status are submitted -> processing and processing -> in_progress"}`, w.Body.String())
+	assert.Empty(t, repo.calls)
+}
+
+func Test_PatchCasesStatusHandler_RejectsUnknownTargetStatus(t *testing.T) {
+	repo := &caseStatusSetterMock{}
+	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":1,"status_code":"archived","expected_status_codes":["in_progress"]}]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"case 1: unknown status_code \"archived\""}`, w.Body.String())
+	assert.Empty(t, repo.calls)
+}
+
+func Test_PatchCasesStatusHandler_AppliesUserChange(t *testing.T) {
+	repo := &caseStatusSetterMock{results: map[int]*types.CaseStatusChangeResult{
+		1: {CaseID: 1, Updated: true, CurrentStatusCode: "completed"},
+	}}
+	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":1,"status_code":"completed","expected_status_codes":["in_progress","in_review"]}]}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"cases":[{"case_id":1,"updated":true,"current_status_code":"completed"}]}`, w.Body.String())
+	assert.Equal(t, []types.CaseStatusChange{{CaseID: 1, StatusCode: "completed", ExpectedStatusCodes: []string{"in_progress", "in_review"}}}, repo.calls)
+}
+
+func Test_PatchCasesStatusHandler_OneInvalidChangeWritesNothing(t *testing.T) {
+	repo := &caseStatusSetterMock{}
+	w := servePatchCasesStatus(repo, `{"cases":[
+		{"case_id":1,"status_code":"processing","expected_status_codes":["submitted"]},
+		{"case_id":2,"status_code":"revoked","expected_status_codes":["processing"]}]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Empty(t, repo.calls, "the valid change listed first must not be applied either")
+}
+
+func Test_PatchCasesStatusHandler_RejectsDuplicateCase(t *testing.T) {
+	repo := &caseStatusSetterMock{}
+	w := servePatchCasesStatus(repo, `{"cases":[
+		{"case_id":1,"status_code":"processing","expected_status_codes":["submitted"]},
+		{"case_id":1,"status_code":"in_progress","expected_status_codes":["processing"]}]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"case 1 is listed more than once"}`, w.Body.String())
+	assert.Empty(t, repo.calls)
+}
+
+func Test_PatchCasesStatusHandler_RejectsEmptyCases(t *testing.T) {
+	repo := &caseStatusSetterMock{}
+	w := servePatchCasesStatus(repo, `{"cases":[]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"cases is required"}`, w.Body.String())
+}
+
+func Test_PatchCasesStatusHandler_RejectsMalformedBody(t *testing.T) {
+	repo := &caseStatusSetterMock{}
+	w := servePatchCasesStatus(repo, "not json")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Empty(t, repo.calls)
+}
+
+func Test_PatchCasesStatusHandler_CaseGoneSinceTheGateIsNotFound(t *testing.T) {
+	repo := &caseStatusSetterMock{results: map[int]*types.CaseStatusChangeResult{}}
+	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":7,"status_code":"processing","expected_status_codes":["submitted"]}]}`)
+
+	assert.Equal(t, http.StatusNotFound, w.Code)
+	assert.JSONEq(t, `{"status":404,"message":"case 7 not found"}`, w.Body.String())
+}
+
+func Test_PatchCasesStatusHandler_RepositoryErrorIsInternal(t *testing.T) {
+	repo := &caseStatusSetterMock{err: errors.New("connection refused")}
+	w := servePatchCasesStatus(repo, `{"cases":[{"case_id":1,"status_code":"processing","expected_status_codes":["submitted"]}]}`)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}

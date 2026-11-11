@@ -1,0 +1,115 @@
+package batchval
+
+import (
+	"context"
+
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
+	"gorm.io/gorm"
+)
+
+type batchProcessor interface {
+	ClaimNextBatch(ctx context.Context) (*types.Batch, error)
+	UpdateBatch(ctx context.Context, batch types.Batch) (int64, error)
+	ReleaseBatch(ctx context.Context, batchId string) (int64, error)
+}
+
+type casesReader interface {
+	GetCaseAnalysisCatalogIdByCode(ctx context.Context, code string, tenantCode string) (*types.AnalysisCatalog, error)
+	GetCaseBySubmitterCaseIdAndProjectId(ctx context.Context, submitterCaseId string, projectId int, tenantCode string) (*types.Case, error)
+}
+
+type documentsReader interface {
+	GetDocumentByUrl(ctx context.Context, url string, tenantCode string) (*types.Document, error)
+}
+
+type sequencingExperimentReader interface {
+	GetSequencingExperimentByAliquot(ctx context.Context, aliquot string, tenantCode string) ([]types.SequencingExperiment, error)
+	GetSequencingExperimentByAliquotAndSubmitterSample(ctx context.Context, aliquot string, submitterSampleId string, sampleOrganizationCode string, tenantCode string) (*types.SequencingExperiment, error)
+	GetSequencingExperimentsByCaseId(ctx context.Context, caseID int) ([]types.SequencingExperiment, error)
+}
+
+type taskReader interface {
+	GetTaskById(ctx context.Context, taskId int) (*types.Task, error)
+	GetTaskHasDocumentByTaskId(ctx context.Context, taskId int) ([]*types.TaskHasDocument, error)
+	GetTaskContextBySequencingExperimentId(ctx context.Context, seqExpId int) ([]*types.TaskContext, error)
+	GetTaskHasDocumentByDocumentId(ctx context.Context, documentId int, tenantCode string) ([]*types.TaskHasDocument, error)
+}
+
+type familyStore interface {
+	CreateFamily(ctx context.Context, family *types.Family) error
+}
+
+type fetusReader interface {
+	GetFetusById(ctx context.Context, id int) (*types.Fetus, error)
+	GetFetusesByCaseID(ctx context.Context, caseID int) ([]*types.Fetus, error)
+	GetFetusByMotherAndSubmitterId(ctx context.Context, motherID int, submitterFetusId string) (*types.Fetus, error)
+	GetFetusByOrganizationAndSubmitterId(ctx context.Context, organizationCode, submitterFetusId, tenantCode string) (*types.Fetus, error)
+}
+
+type organizationReader interface {
+	GetOrganizationByCode(ctx context.Context, organizationCode string, tenantCode string) (*types.Organization, error)
+}
+
+type patientReader interface {
+	GetPatientByOrgCodeAndSubmitterPatientId(ctx context.Context, organizationCode string, submitterPatientId string, tenantCode string) (*types.Patient, error)
+}
+
+type projectReader interface {
+	GetProjectByCode(ctx context.Context, code string, tenantCode string) (*types.Project, error)
+}
+
+type sampleReader interface {
+	GetSampleById(ctx context.Context, id int) (*types.Sample, error)
+	GetSampleByOrgCodeAndSubmitterSampleId(ctx context.Context, organizationCode string, submitterSampleId string, tenantCode string) (*types.Sample, error)
+	GetFetusIDsWithSamples(ctx context.Context, fetusIDs []int) ([]int, error)
+}
+
+type valueSetsReader interface {
+	GetCodes(ctx context.Context, vsType postgres.ValueSetType) ([]string, error)
+	GetExamCodes(ctx context.Context, tenantCode string) ([]string, error)
+}
+
+type BatchValidationContext struct {
+	BatchRepo     batchProcessor
+	CasesRepo     casesReader
+	DocRepo       documentsReader
+	FamilyRepo    familyStore
+	FetusRepo     fetusReader
+	OrgRepo       organizationReader
+	PatientRepo   patientReader
+	ProjectRepo   projectReader
+	SampleRepo    sampleReader
+	SeqExpRepo    sequencingExperimentReader
+	TaskRepo      taskReader
+	ValueSetsRepo valueSetsReader
+	S3FS          utils.FileMetadataGetter
+}
+
+func NewBatchValidationContext(db *gorm.DB) (*BatchValidationContext, error) {
+
+	s3fs, err := utils.NewS3Store()
+	if err != nil {
+		return nil, err
+	}
+
+	postgresDB := database.PostgresDB{DB: db}
+
+	return &BatchValidationContext{
+		BatchRepo:     postgres.NewBatchRepository(postgresDB),
+		OrgRepo:       postgres.NewOrganizationRepository(postgresDB),
+		PatientRepo:   postgres.NewPatientsRepository(postgresDB),
+		ProjectRepo:   postgres.NewProjectRepository(postgresDB),
+		SampleRepo:    postgres.NewSamplesRepository(postgresDB),
+		SeqExpRepo:    postgres.NewSequencingExperimentRepository(postgresDB),
+		ValueSetsRepo: postgres.NewValueSetsRepository(postgresDB),
+		CasesRepo:     postgres.NewCasesRepository(postgresDB),
+		DocRepo:       postgres.NewDocumentsRepository(postgresDB),
+		FamilyRepo:    postgres.NewFamilyRepository(postgresDB),
+		FetusRepo:     postgres.NewFetusRepository(postgresDB),
+		TaskRepo:      postgres.NewTaskRepository(postgresDB),
+		S3FS:          s3fs,
+	}, nil
+}

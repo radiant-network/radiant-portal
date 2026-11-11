@@ -1,0 +1,414 @@
+{
+  "cases": [
+    {
+      "submitter_case_id": "CASE-TRIO-001",
+      "type": "germline",
+      "category_code": "postnatal",
+      "project_code": "N1",
+      "analysis_code": "WGA",
+      "status_code": "in_progress",
+      "priority_code": "routine",
+      "ordering_organization_code": "CHUSJ",
+      "ordering_physician": "Dr. Dupont",
+      "diagnostic_lab_code": "CHUSJ-LAB",
+      "primary_condition_value": "MONDO:0700092",
+      "primary_condition_code_system": "MONDO",
+      "note": "Germline trio analysis for epilepsy workup",
+      "diagnosis_hypothesis": "Refractory epilepsy with global developmental delay, suspected channelopathy",
+      "patients": [
+        {
+          "submitter_patient_id": "MRN-001",
+          "patient_organization_code": "CHUSJ",
+          "relation_to_proband_code": "proband",
+          "affected_status_code": "affected",
+          "observations_categorical": [
+            {
+              "code": "phenotype",
+              "system": "HPO",
+              "value": "HP:0001250",
+              "onset_code": "infantile",
+              "interpretation_code": "positive",
+              "note": "Onset at age 3"
+            },
+            {
+              "code": "phenotype",
+              "system": "HPO",
+              "value": "HP:0001249",
+              "onset_code": "infantile",
+              "interpretation_code": "positive"
+            },
+            {
+              "code": "exam",
+              "system": "HPO",
+              "value": "HP:0002353",
+              "exam_code": "eeg",
+              "interpretation_code": "abnormal"
+            }
+          ],
+          "observations_text": [
+            {
+              "code": "note",
+              "value": "Patient presents with refractory epilepsy and global developmental delay."
+            },
+            {
+              "code": "exam",
+              "value": "normal",
+              "exam_code": "irmc",
+              "interpretation_code": "normal"
+            },
+            {
+              "code": "exam",
+              "value": "Ophthalmology consult 2024",
+              "exam_code": "other"
+            }
+          ],
+          "family_history": [
+            {
+              "condition": "Epilepsy",
+              "family_member_code": "uncle"
+            }
+          ]
+        },
+        {
+          "submitter_patient_id": "MRN-002",
+          "patient_organization_code": "CHUSJ",
+          "relation_to_proband_code": "mother",
+          "affected_status_code": "non_affected",
+          "observations_categorical": [],
+          "observations_text": [],
+          "family_history": [
+            {
+              "condition": "Febrile seizures",
+              "family_member_code": "uncle"
+            }
+          ]
+        },
+        {
+          "submitter_patient_id": "MRN-003",
+          "patient_organization_code": "CHUSJ",
+          "relation_to_proband_code": "father",
+          "affected_status_code": "non_affected",
+          "observations_categorical": [],
+          "observations_text": [],
+          "family_history": []
+        }
+      ],
+      "sequencing_experiments": [
+        {
+          "submitter_sample_id": "SP-PROBAND-001",
+          "sample_organization_code": "CHUSJ",
+          "aliquot": "ALQ-PROBAND-001"
+        },
+        {
+          "submitter_sample_id": "SP-MOTHER-001",
+          "sample_organization_code": "CHUSJ",
+          "aliquot": "ALQ-MOTHER-001"
+        },
+        {
+          "submitter_sample_id": "SP-FATHER-001",
+          "sample_organization_code": "CHUSJ",
+          "aliquot": "ALQ-FATHER-001"
+        }
+      ],
+      "tasks": [
+        {
+          "type_code": "alignment_germline_variant_calling",
+          "aliquots": [
+            "ALQ-PROBAND-001",
+            "ALQ-MOTHER-001",
+            "ALQ-FATHER-001"
+          ],
+          "pipeline_name": "dragen-germline",
+          "pipeline_version": "4.2.4",
+          "genome_build": "GRCh38",
+          "input_documents": [],
+          "output_documents": [
+            {
+              "name": "trio001_proband.snv.vcf.gz",
+              "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz",
+              "format_code": "vcf",
+              "data_type_code": "snv",
+              "data_category_code": "genomic",
+              "size": 524288000,
+              "hash": "sha256:aaa111..."
+            },
+            {
+              "name": "trio001_proband.snv.vcf.gz.tbi",
+              "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz.tbi",
+              "format_code": "tbi",
+              "data_type_code": "snv",
+              "data_category_code": "genomic",
+              "size": 512000,
+              "hash": "sha256:aaa112..."
+            },
+            {
+              "name": "trio001_mother.snv.vcf.gz",
+              "url": "s3://bucket/variants/trio001_mother.snv.vcf.gz",
+              "format_code": "vcf",
+              "data_type_code": "snv",
+              "data_category_code": "genomic",
+              "size": 498073600,
+              "hash": "sha256:bbb111..."
+            },
+            {
+              "name": "trio001_mother.snv.vcf.gz.tbi",
+              "url": "s3://bucket/variants/trio001_mother.snv.vcf.gz.tbi",
+              "format_code": "tbi",
+              "data_type_code": "snv",
+              "data_category_code": "genomic",
+              "size": 512000,
+              "hash": "sha256:bbb112..."
+            },
+            {
+              "name": "trio001_father.snv.vcf.gz",
+              "url": "s3://bucket/variants/trio001_father.snv.vcf.gz",
+              "format_code": "vcf",
+              "data_type_code": "snv",
+              "data_category_code": "genomic",
+              "size": 510000000,
+              "hash": "sha256:ccc111..."
+            },
+            {
+              "name": "trio001_father.snv.vcf.gz.tbi",
+              "url": "s3://bucket/variants/trio001_father.snv.vcf.gz.tbi",
+              "format_code": "tbi",
+              "data_type_code": "snv",
+              "data_category_code": "genomic",
+              "size": 512000,
+              "hash": "sha256:ccc112..."
+            }
+          ]
+        },
+        {
+          "type_code": "radiant_germline_annotation",
+          "aliquots": [
+            "ALQ-PROBAND-001",
+            "ALQ-MOTHER-001",
+            "ALQ-FATHER-001"
+          ],
+          "pipeline_name": "radiant-annotation",
+          "pipeline_version": "1.3.0",
+          "genome_build": "GRCh38",
+          "input_documents": [
+            {
+              "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz"
+            },
+            {
+              "url": "s3://bucket/variants/trio001_proband.snv.vcf.gz.tbi"
+            },
+            {
+              "url": "s3://bucket/variants/trio001_mother.snv.vcf.gz"
+            },
+            {
+              "url": "s3://bucket/variants/trio001_mother.snv.vcf.gz.tbi"
+            },
+            {
+              "url": "s3://bucket/variants/trio001_father.snv.vcf.gz"
+            },
+            {
+              "url": "s3://bucket/variants/trio001_father.snv.vcf.gz.tbi"
+            }
+          ],
+          "output_documents": [
+            {
+              "name": "trio001.joint.snv.vcf.gz",
+              "url": "s3://bucket/annotated/trio001.joint.snv.vcf.gz",
+              "format_code": "vcf",
+              "data_type_code": "snv",
+              "data_category_code": "genomic",
+              "size": 1258291200,
+              "hash": "sha256:ddd111..."
+            },
+            {
+              "name": "trio001.joint.snv.vcf.gz.tbi",
+              "url": "s3://bucket/annotated/trio001.joint.snv.vcf.gz.tbi",
+              "format_code": "tbi",
+              "data_type_code": "snv",
+              "data_category_code": "genomic",
+              "size": 512000,
+              "hash": "sha256:ddd112..."
+            },
+            {
+              "name": "trio001_proband.exomiser.csv",
+              "url": "s3://bucket/exomiser/trio001_proband.exomiser.csv",
+              "format_code": "csv",
+              "data_type_code": "exomiser",
+              "data_category_code": "genomic",
+              "size": 2048000,
+              "hash": "sha256:eee111..."
+            },
+            {
+              "name": "trio001_proband.exomiser.html",
+              "url": "s3://bucket/exomiser/trio001_proband.exomiser.html",
+              "format_code": "html",
+              "data_type_code": "exomiser",
+              "data_category_code": "genomic",
+              "size": 4096000,
+              "hash": "sha256:eee112..."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "submitter_case_id": "CASE-PRENATAL-001",
+      "type": "germline",
+      "category_code": "prenatal",
+      "project_code": "N1",
+      "analysis_code": "WGA",
+      "status_code": "in_progress",
+      "priority_code": "asap",
+      "ordering_organization_code": "CHUSJ",
+      "ordering_physician": "Dr. Dupont",
+      "diagnostic_lab_code": "CHUSJ-LAB",
+      "primary_condition_value": "MONDO:0700092",
+      "primary_condition_code_system": "MONDO",
+      "note": "Prenatal trio analysis — mother, father and fetus",
+      "diagnosis_hypothesis": "Ventriculomegaly on the anatomy scan, suspected neurodevelopmental disorder",
+      "patients": [
+        {
+          "submitter_patient_id": "MRN-004",
+          "patient_organization_code": "CHUSJ",
+          "relation_to_proband_code": "proband",
+          "affected_status_code": "unknown",
+          "observations_categorical": [],
+          "observations_text": [],
+          "family_history": []
+        },
+        {
+          "submitter_patient_id": "MRN-005",
+          "patient_organization_code": "CHUSJ",
+          "relation_to_proband_code": "father",
+          "affected_status_code": "non_affected",
+          "observations_categorical": [],
+          "observations_text": [],
+          "family_history": []
+        }
+      ],
+      "fetuses": [
+        {
+          "submitter_fetus_id": "FETUS-001",
+          "sex_code": "male",
+          "life_status_code": "alive",
+          "affected_status_code": "unknown",
+          "last_menstrual_period": "2026-02-01",
+          "observations_categorical": [
+            {
+              "code": "phenotype",
+              "system": "HPO",
+              "value": "HP:0002119",
+              "onset_code": "antenatal",
+              "interpretation_code": "positive",
+              "note": "Seen on 20-week anatomy scan"
+            }
+          ],
+          "observations_text": [
+            {
+              "code": "note",
+              "value": "Findings on the second-trimester ultrasound"
+            }
+          ]
+        },
+        {
+          "submitter_fetus_id": "FETUS-002",
+          "sex_code": "female",
+          "life_status_code": "alive",
+          "affected_status_code": "unknown",
+          "estimated_due_date": "2026-11-08",
+          "observations_categorical": [],
+          "observations_text": []
+        }
+      ],
+      "sequencing_experiments": [
+        {
+          "submitter_sample_id": "SP-PRENATAL-MOTHER-FETAL-001",
+          "sample_organization_code": "CHUSJ",
+          "aliquot": "ALQ-PRENATAL-MOTHER-FETAL-001"
+        },
+        {
+          "submitter_sample_id": "SP-PRENATAL-MOTHER-001",
+          "sample_organization_code": "CHUSJ",
+          "aliquot": "ALQ-PRENATAL-MOTHER-001"
+        },
+        {
+          "submitter_sample_id": "SP-PRENATAL-FATHER-001",
+          "sample_organization_code": "CHUSJ",
+          "aliquot": "ALQ-PRENATAL-FATHER-001"
+        }
+      ],
+      "tasks": [
+        {
+          "type_code": "alignment_germline_variant_calling",
+          "aliquots": [
+            "ALQ-PRENATAL-MOTHER-FETAL-001",
+            "ALQ-PRENATAL-MOTHER-001",
+            "ALQ-PRENATAL-FATHER-001"
+          ],
+          "pipeline_name": "dragen-germline",
+          "pipeline_version": "4.2.4",
+          "genome_build": "GRCh38",
+          "input_documents": [],
+          "output_documents": [
+            {
+              "name": "prenatal001_mother_fetal.snv.vcf.gz",
+              "url": "s3://bucket/variants/prenatal001_mother_fetal.snv.vcf.gz",
+              "format_code": "vcf",
+              "data_type_code": "snv",
+              "data_category_code": "genomic",
+              "size": 524288000,
+              "hash": "sha256:fff111..."
+            },
+            {
+              "name": "prenatal001_mother_fetal.snv.vcf.gz.tbi",
+              "url": "s3://bucket/variants/prenatal001_mother_fetal.snv.vcf.gz.tbi",
+              "format_code": "tbi",
+              "data_type_code": "snv",
+              "data_category_code": "genomic",
+              "size": 512000,
+              "hash": "sha256:fff112..."
+            }
+          ]
+        },
+        {
+          "type_code": "radiant_germline_annotation",
+          "aliquots": [
+            "ALQ-PRENATAL-MOTHER-FETAL-001",
+            "ALQ-PRENATAL-MOTHER-001",
+            "ALQ-PRENATAL-FATHER-001"
+          ],
+          "pipeline_name": "radiant-annotation",
+          "pipeline_version": "1.3.0",
+          "genome_build": "GRCh38",
+          "input_documents": [
+            {
+              "url": "s3://bucket/variants/prenatal001_mother_fetal.snv.vcf.gz"
+            },
+            {
+              "url": "s3://bucket/variants/prenatal001_mother_fetal.snv.vcf.gz.tbi"
+            }
+          ],
+          "output_documents": [
+            {
+              "name": "prenatal001.joint.snv.vcf.gz",
+              "url": "s3://bucket/annotated/prenatal001.joint.snv.vcf.gz",
+              "format_code": "vcf",
+              "data_type_code": "snv",
+              "data_category_code": "genomic",
+              "size": 1258291200,
+              "hash": "sha256:ggg111..."
+            },
+            {
+              "name": "prenatal001.joint.snv.vcf.gz.tbi",
+              "url": "s3://bucket/annotated/prenatal001.joint.snv.vcf.gz.tbi",
+              "format_code": "tbi",
+              "data_type_code": "snv",
+              "data_category_code": "genomic",
+              "size": 512000,
+              "hash": "sha256:ggg112..."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

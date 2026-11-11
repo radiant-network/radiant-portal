@@ -1,0 +1,1312 @@
+import { type CSSProperties, Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { useCreateAtom, useSelector } from '@tanstack/react-store';
+import {
+  type CellContext,
+  type Column,
+  type ColumnDef,
+  columnFilteringFeature,
+  columnGroupingFeature,
+  columnOrderingFeature,
+  type ColumnOrderState,
+  columnPinningFeature,
+  type ColumnPinningPosition,
+  type ColumnPinningState,
+  columnResizingFeature,
+  columnSizingFeature,
+  type ColumnSort,
+  columnVisibilityFeature,
+  createExpandedRowModel,
+  createFilteredRowModel,
+  createGroupedRowModel,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  createTableHook,
+  type ExpandedState,
+  FlexRender,
+  type GroupingState,
+  type Header,
+  type HeaderContext,
+  metaHelper,
+  type OnChangeFn,
+  type PaginationState,
+  type ReactTable,
+  type Row,
+  rowAggregationFeature,
+  type RowData,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowPinningFeature,
+  type RowPinningState,
+  rowSelectionFeature,
+  type RowSelectionState,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_datetime,
+  sortFn_text,
+  type SortingState,
+  tableFeatures,
+} from '@tanstack/react-table';
+import type { TFunction } from 'i18next';
+import isEqual from 'lodash/isEqual';
+import { AlertCircle, ChevronDown, ChevronRight, SearchIcon } from 'lucide-react';
+
+import { type SortBody, SortBodyOrderEnum } from '@/api/api';
+import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
+import TableColumnSettings from '@/components/base/data-table/data-table-column-settings';
+import DataTableFullscreenButton from '@/components/base/data-table/data-table-fullscreen-button';
+import TableHeaderActions from '@/components/base/data-table/data-table-header-actions';
+import TableIndexResult from '@/components/base/data-table/data-table-index-result';
+import DataTableSkeletonLoading from '@/components/base/data-table/data-table-skeleton-loading';
+import RowSelectionHeader from '@/components/base/data-table/headers/table-row-selection-header';
+import { Button } from '@/components/base/shadcn/button';
+import { Card } from '@/components/base/shadcn/card';
+import {
+  DEFAULT_PAGE_SIZE,
+  Pagination,
+  PaginationContent,
+  PaginationFirst,
+  PaginationItem,
+  PaginationNext,
+  PaginationPageSize,
+  PaginationPrevious,
+} from '@/components/base/shadcn/pagination';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/base/shadcn/table';
+import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/lib/utils';
+
+import Empty from '../empties/empty';
+
+import { useDataTable } from './hooks/use-data-table';
+import {
+  DataTableState,
+  useTableGetPreferenceEffect,
+  useTableSizingEffect,
+  useTableState,
+  useTableUpdatePreferenceEffect,
+} from './hooks/use-table-state';
+import { getFlatSubheaders } from './libs/header-group';
+import DataTableGroupBy from './data-table-group-by';
+import { getFilteredAdditionalFields, updateAdditionalField } from './utils';
+
+/**
+ * Static value for header and row height
+ * @note must be update if design change
+ */
+export const HEADER_HEIGHT = 43;
+export const ROW_HEIGHT = 41;
+
+export { DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE_OPTIONS } from '@/components/base/shadcn/pagination';
+
+/**
+ * Type of `columnDef.meta`, shared by every data table in the app.
+ */
+export type TableColumnMeta = {
+  footerColSpan?: number;
+};
+
+/**
+ * Tanstack v9 feature registry shared by every data table in the app.
+ * Kept here rather than in a separate module so callers only need to reach
+ * into `@/components/base/data-table/data-table` for both the component and
+ * its helpers.
+ */
+export const features = tableFeatures({
+  columnFilteringFeature,
+  columnGroupingFeature,
+  columnOrderingFeature,
+  columnPinningFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  rowAggregationFeature,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowPinningFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  sortedRowModel: createSortedRowModel(),
+  // sort functions resolved by name when a column's sortFn is 'auto'
+  sortFns: { alphanumeric: sortFn_alphanumeric, datetime: sortFn_datetime, text: sortFn_text },
+  filteredRowModel: createFilteredRowModel(),
+  expandedRowModel: createExpandedRowModel(),
+  groupedRowModel: createGroupedRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  columnMeta: metaHelper<TableColumnMeta>(),
+});
+
+export type AppFeatures = typeof features;
+
+export const { createAppColumnHelper, useAppTable, useTableContext } = createTableHook({
+  features,
+});
+
+// Re-export common tanstack v9 types so apps (which do not depend on
+// @tanstack/react-table directly) can reach them through this module.
+export type {
+  CellContext,
+  ColumnPinningPosition,
+  Header,
+  HeaderContext,
+  OnChangeFn,
+  PaginationState,
+  Row,
+  RowData,
+  RowSelectionState,
+  SortDirection,
+  Table,
+  TableState,
+} from '@tanstack/react-table';
+
+/**
+ * Interface and types
+ */
+export interface TableColumnDef<TData extends RowData, TValue> extends Omit<
+  ColumnDef<AppFeatures, TData, TValue>,
+  'id'
+> {
+  id: string;
+  subComponent?: string;
+}
+type SubComponentProps<TData> = (data: TData) => React.JSX.Element;
+
+type PaginationSettings = {
+  type: 'server' | 'locale' | 'hidden';
+  state?: PaginationState;
+  onPaginationChange?: OnChangeFn<PaginationState>;
+};
+
+type ServerOptions = {
+  setAdditionalFields?: (fields: string[]) => void;
+  defaultSorting?: SortBody[];
+  onSortingChange?: (sorting: SortBody[]) => void;
+};
+
+export type LoadingStates = {
+  total?: boolean;
+  list?: boolean;
+};
+
+export type QuickfiltersProps = {
+  enabled: boolean;
+  total?: number;
+};
+
+export type TableProps<TData extends RowData> = {
+  id: string;
+  columns: TableColumnDef<TData, any>[];
+  className?: string;
+  data: TData[];
+  hasError?: boolean;
+  defaultColumnSettings: ColumnSettings[];
+  loadingStates?: LoadingStates;
+  subComponent?: SubComponentProps<TData>;
+  TableFilters?: React.JSX.Element;
+  quickfilters?: QuickfiltersProps;
+  total?: number;
+  enableColumnOrdering?: boolean;
+  enableFullscreen?: boolean;
+  tableIndexResultPosition?: 'top' | 'bottom' | 'hidden';
+  rowSelection?: RowSelectionState;
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+  getRowId?: (row: TData) => string;
+  enableRowSelectionColumn?: boolean;
+  toolbarActions?: React.ReactNode;
+  selectionSummary?: React.ReactNode;
+  pagination: PaginationSettings;
+  serverOptions?: ServerOptions;
+  extras?: React.ReactElement[];
+  emptyState?: React.ReactNode;
+};
+
+export interface BaseColumnSettings {
+  id: string;
+  visible: boolean;
+  fixed?: boolean;
+  size?: number;
+  pinningPosition?: ColumnPinningPosition;
+  header?: string;
+  label?: string;
+  additionalFields?: string[];
+  variant?: 'default' | 'ghost';
+}
+
+export interface ColumnSettings extends BaseColumnSettings {
+  index: number;
+  header?: string;
+}
+
+export type ColumnVisiblity = {
+  [id: string]: boolean;
+};
+
+export type DefaultColumnTableState = {
+  columnOrder: ColumnOrderState;
+  columnPinning: ColumnPinningState;
+  columnVisibility: ColumnVisiblity;
+  columnSizing: Record<string, number>;
+};
+
+/**
+ * Automate index creation for column settings
+ * @param settings BaseColumnSettings[]
+ * @returns ColumnSettings[]
+ */
+export function createColumnSettings(settings: BaseColumnSettings[]): ColumnSettings[] {
+  return settings.map((setting, index) => ({
+    ...setting,
+    index,
+  }));
+}
+
+/**
+ * Read a settings config to produce an object with column visibility value
+ * @param settings
+ * @returns {
+ *  column.id: visibility,
+ * }
+ */
+function deserializeColumnVisibility(settings: ColumnSettings[]): ColumnVisiblity {
+  const result: ColumnVisiblity = {};
+  settings.forEach(setting => {
+    result[setting.id] = setting.visible;
+  });
+  return result;
+}
+
+/**
+ * Read a settings config to return column order (in asc)
+ * @param settings
+ * @returns [{ column.id: visibility }]
+ */
+function deserializeColumnOrder(settings: ColumnSettings[]): ColumnOrderState {
+  return settings.sort((a, b) => a.index - b.index).map(setting => setting.id);
+}
+
+/**
+ * Read a settings config to return isPinned value
+ * @param settings
+ */
+function deserializeColumnPinning(settings: ColumnSettings[]): ColumnPinningState {
+  const result: ColumnPinningState = {
+    start: [],
+    end: [],
+  };
+  settings.forEach(setting => {
+    if (setting.pinningPosition == 'start') {
+      result.start.push(setting.id);
+    } else if (setting.pinningPosition == 'end') {
+      result.end.push(setting.id);
+    }
+  });
+  return result;
+}
+
+/**
+ * Read a settings config to return the variant for a given id
+ * @param settings
+ */
+function getColumnSettingsVariant(settings: ColumnSettings[], id: string) {
+  return settings.find(setting => setting.id === id)?.variant ?? 'default';
+}
+
+/**
+ * @param pagination
+ * @param total
+ */
+function getPageCount(pagination: PaginationState, total: number) {
+  return Math.ceil(total / pagination.pageSize);
+}
+
+/**
+ * <TableHead /> specific function to return the needed tailwind class when pinned. Must be applied to <TableCell />
+ *
+ * @DESCRIPTION:
+ * When a Row is pinned and this row is contained in a header group. All depth of the group are considered pinned.
+ * So if Header > SubHeader > Sub SubHeader is pinned, [Header, SubHeader, Sub SubHeader] are considered pinned.
+ *
+ * But if the header is on the far left, there is another group in the center and we pin it to the right. Two groups are
+ * created with the same name.
+ *
+ * | Left Header | Middle Header | Right Header |
+ * - User pin a left header column to the right
+ * | Left Header | Middle Header | Right Header | Left Header |
+ *
+ * So Left Header and his duplicate Left Header (pinned to the right) are both considered pin since they share the same columns.
+ * That why we must determ in witch header the pinned column is displayed to applied the correct css class
+ * For that, we use subheaders property.
+ */
+function getColumnHeaderPinningExtraCN<TData extends RowData>(header: Header<AppFeatures, TData, unknown>): string {
+  const column = header.column;
+  const isPinned = column.getIsPinned();
+  if (!isPinned) return '';
+
+  const isStartPinned = isPinned === 'start';
+  const isEndPinned = isPinned === 'end';
+
+  // Column is a common header, not a headerGroup
+  if (header.subHeaders.length === 0) {
+    return cn('sticky z-10 group-data-[state=selected]:bg-table-active', {
+      'border-r-[3px]': isStartPinned && column.getIsLastColumn('start'),
+      'border-l-[3px]': isEndPinned && column.getIsFirstColumn('end'),
+    });
+  }
+
+  let isLastStartPinnedColumn = false;
+  let isFirstEndPinnedColumn = false;
+  const targetPinnedColumn = column.getFlatColumns().find(c => {
+    if (c.getIsPinned()) {
+      if (isStartPinned) {
+        isLastStartPinnedColumn = true;
+        return c.getIsLastColumn('start');
+      }
+      if (isEndPinned) {
+        isFirstEndPinnedColumn = true;
+        return c.getIsFirstColumn('end');
+      }
+    }
+    return false;
+  });
+
+  if (!targetPinnedColumn || !getFlatSubheaders(header).some(header => header.id === targetPinnedColumn.id)) {
+    return '';
+  }
+
+  return cn('sticky z-10 group-data-[state=selected]:bg-table-active', {
+    'border-r-[3px]': isLastStartPinnedColumn,
+    'border-l-[3px]': isFirstEndPinnedColumn,
+  });
+}
+
+/**
+ * Return the needed style to pin a column. Must be applied to <Ta
+  bleHead />,
+
+ * @see https://tanstack.com/table/latest/docs/framework/react/examples/column-pinning-sticky
+ */
+function getColumnHeaderPinningExtraStyles<TData extends RowData>(
+  header: Header<AppFeatures, TData, unknown>,
+): CSSProperties {
+  const column = header.column;
+  const isPinned = column.getIsPinned();
+
+  const isStartPinned = isPinned === 'start';
+  const isEndPinned = isPinned === 'end';
+
+  if (header.subHeaders.length > 0) {
+    return {
+      left: isStartPinned ? `0px` : undefined,
+      right: isEndPinned ? `0px` : undefined,
+      width: header.getSize(),
+    };
+  }
+
+  return {
+    left: isStartPinned ? `${column.getStart('start')}px` : undefined,
+    right: isEndPinned ? `${column.getAfter('end')}px` : undefined,
+    width: header.getSize(),
+  };
+}
+
+/**
+ * Return the data-cy attribute for a pinned column header, undefined otherwise.
+ */
+function getColumnHeaderPinningDataCy<TData extends RowData>(
+  header: Header<AppFeatures, TData, unknown>,
+): string | undefined {
+  const isPinned = header.column.getIsPinned();
+  return isPinned ? `pinned-${isPinned}` : undefined;
+}
+
+/**
+ * <TableCell /> specific function to return the needed tailwind class when pinned.
+ */
+function getColumnRowPinningExtraCN<TData extends RowData>(column: Column<AppFeatures, TData>): string {
+  const isPinned = column.getIsPinned();
+  if (!isPinned) return '';
+
+  const isLastStartPinnedColumn = isPinned === 'start' && column.getIsLastColumn('start');
+  const isFirstEndPinnedColumn = isPinned === 'end' && column.getIsFirstColumn('end');
+
+  return cn('sticky z-10 group-data-[state=selected]:bg-table-active bg-background', {
+    'border-r-[3px]': isLastStartPinnedColumn,
+    'border-l-[3px]': isFirstEndPinnedColumn,
+  });
+}
+
+/**
+ * Return the needed style to pin a column. Must be applied to <TableCell />
+ * @see https://tanstack.com/table/latest/docs/framework/react/examples/column-pinning-sticky
+ */
+function getColumnRowPinningExtraStyles<TData extends RowData>(column: Column<AppFeatures, TData>): CSSProperties {
+  const isPinned = column.getIsPinned();
+
+  return {
+    left: isPinned === 'start' ? `${column.getStart('start')}px` : undefined,
+    right: isPinned === 'end' ? `${column.getAfter('end')}px` : undefined,
+    width: column.getSize(),
+  };
+}
+
+/**
+ * Return the needed tailwind class to pin a row. Must be applied to <TableRow />
+ */
+function getRowPinningExtraCN<TData extends RowData>(row: Row<AppFeatures, TData>): string {
+  return cn({ 'sticky z-20 bg-muted': row.getIsPinned() });
+}
+
+/**
+ * Return the needed style to pin a row. Must be applied to <TableRow />
+ * @see https://tanstack.com/table/v8/docs/framework/react/examples/row-pinning
+ */
+function getRowPinningExtraStyles<TData extends RowData>(row: Row<AppFeatures, TData>): CSSProperties {
+  const isPinned = row.getIsPinned();
+  if (!isPinned) return {};
+
+  return {
+    top: `${row.getPinnedIndex() * ROW_HEIGHT + HEADER_HEIGHT}px`,
+  };
+}
+
+/**
+ * Return the needed tailwind class to pin a row. Must be applied to <TableCell />
+ */
+function getRowPinningCellExtraCN<TData extends RowData>(row: Row<AppFeatures, TData>): string {
+  return cn({ 'bg-muted': row.getIsPinned() });
+}
+
+/**
+ * Reusable flex header function
+ * Used to render header group and header
+ */
+function getHeaderFlexRender<TData extends RowData>(
+  table: ReactTable<AppFeatures, TData>,
+  header: Header<AppFeatures, TData, unknown>,
+  defaultSort?: ColumnSort,
+) {
+  if (header.isPlaceholder) return null;
+  return (
+    <>
+      <div className="flex items-center justify-between gap-1">
+        {/* Header rendering */}
+        <div className="flex-1 whitespace-nowrap overflow-hidden text-ellipsis">
+          <FlexRender header={header} />
+        </div>
+
+        {/* Table Header Actions, only display on hover */}
+        <TableHeaderActions header={header} defaultSort={defaultSort} />
+      </div>
+
+      {/* Resize Grip */}
+      {header.column.getCanResize() && (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions -- mouse-only column resize
+        <div
+          onDoubleClick={() => header.column.resetSize()}
+          onMouseDown={header.getResizeHandler()}
+          onTouchStart={header.getResizeHandler()}
+          className={cn(
+            'absolute top-0 h-full w-1 right-0 bg-black/50 cursor-col-resize select-none touch-none opacity-0 hover:opacity-50',
+            table.options.columnResizeDirection,
+            {
+              'opacity-100': header.column.getIsResizing(),
+            },
+          )}
+        />
+      )}
+    </>
+  );
+}
+
+/**
+ * Reusable flex row function
+ * Used to render top, centered or bottom rows
+ */
+function getRowFlexRender<T extends RowData>({
+  subComponent,
+  containerWidth,
+  t,
+}: {
+  subComponent?: SubComponentProps<T>;
+  containerWidth: number;
+  t: TFunction<string, undefined>;
+}) {
+  return (row: Row<AppFeatures, T>) => (
+    <Fragment key={row.id}>
+      <TableRow
+        key={`row-${row.id}`}
+        className={cn(getRowPinningExtraCN(row))}
+        style={{
+          ...getRowPinningExtraStyles(row),
+        }}
+        data-state={row.getIsSelected() && 'selected'}
+      >
+        {row.getVisibleCells().map(cell => (
+          <TableCell
+            key={cell.id}
+            className={cn(
+              'overflow-hidden truncate text-nowrap',
+              getColumnRowPinningExtraCN(cell.column),
+              getRowPinningCellExtraCN(cell.row),
+            )}
+            style={getColumnRowPinningExtraStyles(cell.column)}
+          >
+            <>
+              {/* Group By */}
+              {cell.getIsGrouped() && (
+                <Button
+                  className="self-center"
+                  size="xs"
+                  variant="ghost"
+                  iconOnly
+                  aria-label={row.getIsExpanded() ? t('a11y.data_table.collapse_row') : t('a11y.data_table.expand_row')}
+                  aria-expanded={row.getIsExpanded()}
+                  onClick={row.getToggleExpandedHandler()}
+                >
+                  {row.getIsExpanded() ? <ChevronDown /> : <ChevronRight />}
+                </Button>
+              )}
+
+              {/* Aggregated, placeholder and normal rendering are all handled by FlexRender */}
+              <FlexRender cell={cell} />
+            </>
+          </TableCell>
+        ))}
+      </TableRow>
+
+      {/* SubComponent */}
+      {subComponent && row.getIsExpanded() && (
+        <TableRow key={`subcomponent-${row.id}`} className="bg-muted/30">
+          <TableCell colSpan={row.getVisibleCells().length}>
+            <div className="sticky overflow-hidden left-2" style={{ width: containerWidth - 16 }}>
+              {subComponent(row.original)}
+            </div>
+          </TableCell>
+        </TableRow>
+      )}
+    </Fragment>
+  );
+}
+
+/**
+ * Data-Table
+ * Should be used for complex and interactive table.
+ * @SEE: If you needs to only display data in a table without interaction, user-preference or pagination,
+ * use DisplayTable instead
+ * @SEE: Storybook provide an example of all custom cell
+ *
+ * @ISSUE: Because headerGroups, we can't use performance resizing since we don't want a static table total size
+ *
+ * @ISSUE: For full-width table, 'table-fixed` must be used Added in `<Table />` shadcn component
+ * @LINK: https://github.com/TanStack/table/issues/4825#issuecomment-1749665597
+ *
+ * @DESCRIPTION: `columns` define the mapping between the column and the cell component
+ * @LINK: https://tanstack.com/table/latest/docs/guide/column-defs#creating-accessor-columns
+ * @EXAMPLE:
+ *  [
+ *   columnHelper.accessor((row) => row.hgvsg, {
+ *    id: "hgvsg",
+ *    cell: (info) => info.getValue(),
+ *    header: "Variant",
+ *    size: 100,
+ *    minSize: 50,
+ *   })
+ *  ]
+ * @DESCRIPTION: `columnSettings` (saved by user) and defaultColumnSettings manage order, visibility,
+ *              fixed status of each column
+ * @EXAMPLE:
+ *  [{
+ *   "key": "{column.id}",
+ *   "index": 16,
+ *   "visible": {boolean},
+ *   "fixed": {boolean},
+ *  }]
+ *
+ * @DESCRIPTION: add a row selection checkbox for each row
+ * @EXAMPLE:
+ *  [{
+ *   id: "pinRow",
+ *   cell: PinRowCell,
+ *   size: 52,
+ *   enableResizing: false,
+ *   enablePinning: false,
+ *  }]
+ *
+ * @DESCRIPTION: add a row selection checkbox for each row with `enableRowSelectionColumn`: the column stays
+ *              pinned first whatever the saved preferences, and never enters them or the column settings
+ *
+ * @DESCRIPTION: add a `RowExpandCell`, expand a custom subcomponent
+ * @EXAMPLE:
+ *  [{
+ *   id: "rowExpand",
+ *   cell: RowExpandCell
+ *   size: 48,
+ *   enableResizing: false,
+ *   enablePinning: false,
+ *  }]
+ *
+ * @DESCRIPTION: enable groupBy for a columns.
+ *               Accessor must have an id.
+ *               DropdownMenuItem label's is created with defaultColumnSettings
+ * @EXAMPLE:
+ *  [{
+ *   columnHelper.accessor('status', {
+ *     id: "status",
+ *     header: 'Status',
+ *     getGroupingValue: row => `Group By ${row.status}`,
+ *     enableGrouping: true,
+ *   }),
+ *  }]*
+ *
+ * @DESCRIPTION: enable column group.
+ *               Use columnHelper.group
+ *               @see: https://tanstack.com/table/latest/docs/framework/react/examples/column-groups
+ * @EXAMPLE:
+ *  columnHelper.group({
+ *      id: 'group',
+ *      columns: [
+ *        // Row 1
+ *        columnHelper.accessor(row => row.value, { ... }),
+ *      ],
+ *    }),
+ *  }]
+ *
+ * @DESCRIPTION: pagination prop manage the pagination mode and state
+ *                For client side pagination, set type to 'locale' and provide state if override is needed
+ *                For server side pagination, set type to 'server' and provide state and onPaginationChange handler
+ * @EXAMPLE: {
+ *   type: 'server',
+ *   state: {
+ *     pageIndex: 0,
+ *     pageSize: 30,
+ *   },
+ *  onPaginationChange: (newPagination) => { ... },
+ * }
+ *
+ * @DESCRIPTION: additional fields are managed by the table to be able to request extra data from server
+ *              based on the column visibility.
+ *              In defaultColumnSettings, you can enter the IDs of the relevant columns in additionalFields.
+ * @EXAMPLE: {
+ *   additionalFields: ['field1', 'field2'],
+ * }
+ */
+const ROW_SELECTION_COLUMN_ID = 'row-selection';
+
+const rowSelectionColumn = {
+  id: ROW_SELECTION_COLUMN_ID,
+  header: ({ table }: HeaderContext<AppFeatures, any, unknown>) => <RowSelectionHeader table={table} />,
+  cell: ({ row }: CellContext<AppFeatures, any, unknown>) => <RowSelectionCell row={row} />,
+  size: 48,
+  maxSize: 48,
+  enableResizing: false,
+  enablePinning: false,
+  enableSorting: false,
+};
+
+function withRowSelectionPinned(pinning: ColumnPinningState): ColumnPinningState {
+  return { ...pinning, start: [ROW_SELECTION_COLUMN_ID, ...withoutRowSelectionPinned(pinning).start!] };
+}
+
+function withoutRowSelectionPinned(pinning: ColumnPinningState): ColumnPinningState {
+  return { ...pinning, start: (pinning.start ?? []).filter(id => id !== ROW_SELECTION_COLUMN_ID) };
+}
+
+// eslint-disable-next-line complexity
+function DataTable<T extends RowData>({
+  id,
+  columns,
+  className,
+  data,
+  defaultColumnSettings,
+  TableFilters,
+  loadingStates = {
+    total: true,
+    list: true,
+  },
+  quickfilters = {
+    enabled: false,
+  },
+  hasError = false,
+  pagination,
+  subComponent,
+  total = 0,
+  enableColumnOrdering = false,
+  enableFullscreen = false,
+  tableIndexResultPosition = 'top',
+  rowSelection,
+  onRowSelectionChange,
+  getRowId,
+  enableRowSelectionColumn = false,
+  toolbarActions,
+  selectionSummary,
+  serverOptions,
+  extras,
+  emptyState,
+}: TableProps<T>) {
+  const { t } = useI18n();
+
+  const context = useDataTable();
+
+  // default values
+  const defaultColumnTableState = useMemo<DefaultColumnTableState>(
+    () => ({
+      columnOrder: deserializeColumnOrder(defaultColumnSettings) ?? {},
+      columnPinning: deserializeColumnPinning(defaultColumnSettings) ?? {},
+      columnSizing: {},
+      columnVisibility: deserializeColumnVisibility(defaultColumnSettings) ?? [],
+    }),
+    [defaultColumnSettings],
+  );
+
+  // container width
+  const containerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState<number>(0);
+
+  // count used for pageCount: with an active filter, 0 matches must collapse the
+  // pager to a single empty page, not keep the unfiltered page count around.
+  const count = quickfilters.enabled ? (quickfilters.total ?? 0) : total;
+
+  // table interactions
+  const [isUserPreferenceFetched, setIsUserPreferenceFetched] = useState<boolean>(false);
+  const [isTableEmpty, setIsTableEmpty] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [rowPinning, setRowPinning] = useState<RowPinningState>({ top: [], bottom: [] });
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisiblity>(defaultColumnTableState.columnVisibility);
+  const [columnOrder, setColumnOrder] = useState<ColumnOrderState>(defaultColumnTableState.columnOrder);
+  const [columnPinning, setColumnPinning] = useState<ColumnPinningState>(defaultColumnTableState.columnPinning);
+  const [columnSizing, setColumnSizing] = useState<Record<string, number>>(defaultColumnTableState.columnSizing);
+  const [grouping, setGrouping] = useState<GroupingState>([]);
+  const [expanded, setExpanded] = useState<ExpandedState>({});
+  const defaultSortingState = useMemo<SortingState>(
+    () =>
+      (serverOptions?.defaultSorting?.map(serverSorting => ({
+        id: serverSorting.field,
+        desc: serverSorting.order === SortBodyOrderEnum.Desc,
+      })) as SortingState) ?? [],
+    [serverOptions?.defaultSorting],
+  );
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [internalRowSelection, setInternalRowSelection] = useState<RowSelectionState>(rowSelection ?? {});
+
+  // Global Table State
+  const tableState = useTableState({
+    loadingStates,
+    isUserPreferenceFetched,
+    hasError,
+    isTableEmpty,
+  });
+
+  // Default internal pagination state for locale and server pagination
+  const paginationAtom = useCreateAtom<PaginationState>({
+    pageIndex: pagination.state?.pageIndex || 0,
+    pageSize: pagination.state?.pageSize || DEFAULT_PAGE_SIZE,
+  });
+  const internalPagination = useSelector(paginationAtom);
+
+  // 'hidden' renders every row: freeze the slice on a single page as large as the data
+  const hiddenPagination = useMemo<PaginationState>(
+    () => ({ pageIndex: 0, pageSize: Math.max(data.length, 1) }),
+    [data.length],
+  );
+
+  // Key Input Map
+  const handleEscEventListener = () => {
+    setIsFullscreen(false);
+  };
+
+  // Set only additional fields displayed in the table from additionalFields
+  const filteredAdditionalFields = useMemo(
+    () =>
+      getFilteredAdditionalFields({
+        columnVisibility,
+        defaultColumnSettings,
+      }),
+    [columnVisibility],
+  );
+
+  // Ref to update only if additional fields change
+  const lastFilteredAdditionalFields = useRef<string[]>([]);
+
+  const tableColumns = useMemo(
+    () => (enableRowSelectionColumn ? [rowSelectionColumn as TableColumnDef<T, any>, ...columns] : columns),
+    [columns, enableRowSelectionColumn],
+  );
+  const tableColumnPinning = enableRowSelectionColumn ? withRowSelectionPinned(columnPinning) : columnPinning;
+
+  // Initialize tanstack table
+  const table = useAppTable({
+    // 'hidden' drives the slice through state instead, so no atom owns it
+    atoms: pagination.type !== 'hidden' ? { pagination: paginationAtom } : undefined,
+    columns: tableColumns,
+    columnResizeMode: 'onChange',
+    columnResizeDirection: 'ltr',
+    data,
+    enableColumnResizing: true,
+    enableRowSelection: true,
+    getRowCanExpand: () => true,
+    isMultiSortEvent: () => true,
+    keepPinnedRows: false, // prevent crash from pinning row until we have userApi save options
+    manualPagination: pagination.type === 'server',
+    manualSorting: serverOptions?.onSortingChange !== undefined, // client-side sorting when no server callback
+    onColumnPinningChange: enableRowSelectionColumn
+      ? updater =>
+          setColumnPinning(prev =>
+            withoutRowSelectionPinned(typeof updater === 'function' ? updater(withRowSelectionPinned(prev)) : updater),
+          )
+      : setColumnPinning,
+    onColumnOrderChange: setColumnOrder,
+    onColumnVisibilityChange: setColumnVisibility,
+    onExpandedChange: setExpanded,
+    onColumnSizingChange: setColumnSizing,
+    onGroupingChange: setGrouping,
+    // no key for 'locale': the table writes paginationAtom itself (an explicit undefined would freeze the slice)
+    ...(pagination.type === 'locale' ? {} : { onPaginationChange: pagination.onPaginationChange }),
+    onRowPinningChange: setRowPinning,
+    onRowSelectionChange: onRowSelectionChange || setInternalRowSelection,
+    ...(getRowId ? { getRowId: (row: T) => getRowId(row) } : {}),
+    onSortingChange: setSorting,
+    pageCount: pagination.state && pagination.type === 'server' ? getPageCount(pagination.state, count) : undefined,
+    state: {
+      columnOrder,
+      columnVisibility,
+      columnPinning: tableColumnPinning,
+      grouping,
+      columnSizing,
+      expanded,
+      rowPinning,
+      rowSelection: onRowSelectionChange ? rowSelection : internalRowSelection,
+      sorting,
+      ...(pagination.type === 'hidden' ? { pagination: hiddenPagination } : {}),
+    },
+  });
+
+  const groupByColumns = columns.filter(column => column.enableGrouping);
+
+  /**
+   * Cache our row flexRender method
+   */
+  const rowFlexRender = useMemo(
+    () => getRowFlexRender<T>({ subComponent, containerWidth, t }),
+    [subComponent, containerWidth, t],
+  );
+
+  // Table Index display position
+  const hasUpperSettings =
+    tableIndexResultPosition === 'top' || enableColumnOrdering || enableFullscreen || !!toolbarActions;
+
+  // Footer, check if any columns have footer definitions
+  const footerGroups = table.getFooterGroups();
+  const hasFooterDefinitions = useMemo(() => columns.some(column => column.footer !== undefined), [columns]);
+
+  /**
+   * On component mount
+   * - update additional field
+   */
+  useEffect(() => {
+    updateAdditionalField({
+      newAddFields: filteredAdditionalFields,
+      prevAddFields: lastFilteredAdditionalFields,
+      setAdditionalFields: serverOptions?.setAdditionalFields,
+    });
+  }, []);
+
+  /**
+   * Get previously saved user-preference
+   */
+  useTableGetPreferenceEffect({
+    id,
+    setFetched: setIsUserPreferenceFetched,
+    defaultColumnSettings,
+    setColumnOrder,
+    setColumnVisibility,
+    setColumnPinning,
+    setColumnSizing,
+    setPagination: pagination.onPaginationChange ?? paginationAtom.set,
+    setAdditionalFields: serverOptions?.setAdditionalFields,
+  });
+
+  /**
+   * Sync data-table state with user-preference api
+   */
+  useTableUpdatePreferenceEffect({
+    id,
+    columns,
+    columnOrder,
+    columnPinning,
+    columnSizing,
+    columnVisibility,
+    pagination: internalPagination,
+  });
+
+  /**
+   * Update custom Sizing
+   */
+  useTableSizingEffect({
+    state: table.state,
+    columns,
+    setColumnSizing,
+  });
+
+  /**
+   * Synchronyze internal pagination with props state
+   */
+  useEffect(() => {
+    if (pagination.type !== 'hidden' && pagination.state) {
+      paginationAtom.set(pagination.state);
+    }
+  }, [pagination.state, pagination.type]);
+
+  /**
+   * Add 'Esc' keyboard shortcut for fullscreen mode
+   */
+  useEffect(() => {
+    if (isFullscreen) {
+      document.addEventListener('keydown', handleEscEventListener);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscEventListener);
+    };
+  }, [isFullscreen]);
+
+  /**
+   * Fix scrolling when a subcomponent is open by setting a containerWidth
+   */
+  useEffect(() => {
+    const element = containerRef.current;
+    if (!element) return;
+
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        const newWidth = entry.contentRect.width;
+        setContainerWidth(newWidth);
+      }
+    });
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
+  /**
+   * Manage Empty State
+   */
+  useEffect(() => {
+    setIsTableEmpty(table.getRowCount() === 0 && data.length === 0);
+  }, [table.getRowCount(), data.length]);
+
+  /**
+   * Sorting useEffect
+   * Update server-side calls to use the new sorting settings
+   * Reset pagination at the same time
+   */
+  useEffect(() => {
+    if (!serverOptions?.onSortingChange) return;
+    if (sorting.length === 0) {
+      serverOptions.onSortingChange(serverOptions.defaultSorting || []);
+    } else {
+      serverOptions.onSortingChange(
+        sorting.map(s => ({
+          field: s.id,
+          order: s.desc ? SortBodyOrderEnum.Desc : SortBodyOrderEnum.Asc,
+        })),
+      );
+    }
+
+    setExpanded({});
+
+    if (pagination.type !== 'hidden' && pagination.onPaginationChange) {
+      pagination.onPaginationChange({
+        pageIndex: 0,
+        pageSize: pagination.state?.pageSize || DEFAULT_PAGE_SIZE,
+      });
+    }
+  }, [sorting]);
+
+  /**
+   * Reset expanded sub-component on pagination change
+   */
+  useEffect(() => {
+    if (pagination.type !== 'hidden') {
+      setExpanded({});
+    }
+  }, [pagination.state, pagination.type]);
+
+  /**
+   * Sync internal row selection with prop when it changes
+   */
+  useEffect(() => {
+    if (rowSelection && !onRowSelectionChange) {
+      setInternalRowSelection(rowSelection);
+    }
+  }, [rowSelection, onRowSelectionChange]);
+
+  useEffect(() => {
+    if (context.rowSelection) {
+      setInternalRowSelection(context.rowSelection);
+    }
+  }, [context.rowSelection]);
+
+  return (
+    <div
+      className={cn('w-full', className, {
+        'absolute top-0 right-0 bottom-0 left-0 bg-background z-50 p-4 overflow-y-scroll': isFullscreen,
+      })}
+    >
+      <div className={cn('w-full', { 'mb-4': hasUpperSettings })}>
+        {/* Results with TableFilters */}
+        {tableIndexResultPosition === 'top' && TableFilters !== undefined && (
+          <div className={cn('mb-2', { invisible: pagination.type === 'hidden' })}>
+            {selectionSummary ?? (
+              <TableIndexResult
+                loading={loadingStates?.total}
+                pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
+                pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
+                total={total}
+                quickfilters={quickfilters}
+              />
+            )}
+          </div>
+        )}
+
+        <div className="w-full flex text-left justify-between items-end">
+          {/* Results without TableFilters */}
+          {tableIndexResultPosition === 'top' && TableFilters === undefined && (
+            <div className={cn('flex-1', { invisible: pagination.type === 'hidden' })}>
+              {selectionSummary ?? (
+                <TableIndexResult
+                  loading={loadingStates?.total}
+                  pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
+                  pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
+                  total={total}
+                  quickfilters={quickfilters}
+                />
+              )}
+            </div>
+          )}
+
+          {/* FiltersGroup */}
+          {TableFilters && <div className="flex-1">{TableFilters}</div>}
+
+          {/* Right Menu Options */}
+          <div className="flex justify-end">
+            {toolbarActions && <div className="flex items-center gap-2 mr-2">{toolbarActions}</div>}
+
+            {/* GroupBy */}
+            {groupByColumns.length > 0 && (
+              <DataTableGroupBy
+                grouping={grouping}
+                table={table}
+                groupByColumns={groupByColumns}
+                defaultColumnSettings={defaultColumnSettings}
+              />
+            )}
+
+            {/* columns order and visibility */}
+            {enableColumnOrdering && (
+              <>
+                <TableColumnSettings
+                  columnPinning={columnPinning}
+                  columnOrder={columnOrder}
+                  setColumnOrder={setColumnOrder}
+                  defaultSettings={defaultColumnSettings}
+                  visiblitySettings={columnVisibility}
+                  handleVisiblityChange={(target: string, checked: boolean) => {
+                    setColumnVisibility({ ...columnVisibility, [target]: checked });
+                    const newAdditionalFields = getFilteredAdditionalFields({
+                      columnVisibility: { ...columnVisibility, [target]: checked },
+                      defaultColumnSettings,
+                    });
+                    updateAdditionalField({
+                      newAddFields: newAdditionalFields,
+                      prevAddFields: lastFilteredAdditionalFields,
+                      setAdditionalFields: serverOptions?.setAdditionalFields,
+                    });
+                  }}
+                  handleOrderChange={setColumnOrder}
+                  pristine={
+                    JSON.stringify(defaultColumnTableState.columnOrder) === JSON.stringify(columnOrder) &&
+                    JSON.stringify(defaultColumnTableState.columnPinning) === JSON.stringify(columnPinning) &&
+                    isEqual(defaultColumnTableState.columnSizing, columnSizing) &&
+                    isEqual(defaultColumnTableState.columnVisibility, columnVisibility)
+                  }
+                  handleReset={() => {
+                    setColumnOrder(defaultColumnTableState.columnOrder);
+                    setColumnSizing({});
+                    setColumnPinning(defaultColumnTableState.columnPinning);
+                    setColumnVisibility(defaultColumnTableState.columnVisibility);
+                    const allAdditionalFields = getFilteredAdditionalFields({
+                      columnVisibility: defaultColumnTableState.columnVisibility,
+                      defaultColumnSettings,
+                    });
+                    serverOptions?.setAdditionalFields?.(allAdditionalFields);
+                  }}
+                />
+              </>
+            )}
+
+            {/* fullscreen toggle */}
+            {enableFullscreen && <DataTableFullscreenButton active={isFullscreen} handleClick={setIsFullscreen} />}
+          </div>
+        </div>
+      </div>
+
+      {/* Skeleton */}
+      {tableState === DataTableState.LOADING && (
+        <DataTableSkeletonLoading
+          headerGroups={table.getHeaderGroups()}
+          pagination={pagination.state || { pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE }}
+          columnSettings={defaultColumnSettings}
+        />
+      )}
+
+      {/* Empty State */}
+      {tableState === DataTableState.EMPTY && (
+        <Card className="shadow-none">
+          {emptyState ?? (
+            <Empty
+              title={t('common.table.no_result')}
+              description={t('common.table.no_result_description')}
+              iconType="custom"
+              icon={SearchIcon}
+              size="mini"
+            />
+          )}
+        </Card>
+      )}
+
+      {/* Error state */}
+      {tableState === DataTableState.ERROR && (
+        <Card className="w-full shadow-none">
+          <Empty
+            title={t('common.table.has_error')}
+            description={t('common.table.has_error_description')}
+            size="default"
+            iconType="custom"
+            icon={AlertCircle}
+          />
+        </Card>
+      )}
+
+      <div ref={containerRef}>
+        {tableState === DataTableState.READY && (
+          <Table id={id}>
+            <TableHeader className={cn({ 'sticky top-0 bg-background z-20': table.getTopRows().length > 0 })}>
+              {table.getHeaderGroups().map(headerGroup => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <TableHead
+                      key={header.id}
+                      data-cy={getColumnHeaderPinningDataCy(header)}
+                      className={cn('group/header', getColumnHeaderPinningExtraCN(header), {
+                        'text-center': header.subHeaders.length > 0, // center header group with subheader
+                      })}
+                      style={getColumnHeaderPinningExtraStyles(header)}
+                      colSpan={header.colSpan}
+                      variant={getColumnSettingsVariant(defaultColumnSettings, header.id)}
+                    >
+                      {getHeaderFlexRender(
+                        table,
+                        header,
+                        sorting.length === 0
+                          ? defaultSortingState.find(sort => sort.id === header.column.id)
+                          : undefined,
+                      )}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {/* Render pinned rows */}
+              {table.getTopRows().map(rowFlexRender)}
+
+              {/* Render table content */}
+              {table.getCenterRows().map(rowFlexRender)}
+            </TableBody>
+            {hasFooterDefinitions && (
+              <TableFooter>
+                {footerGroups.map(footerGroup => (
+                  <TableRow key={footerGroup.id}>
+                    {footerGroup.headers.map(header => (
+                      <TableCell key={header.id}>
+                        {header.isPlaceholder ? null : <FlexRender footer={header} />}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableFooter>
+            )}
+          </Table>
+        )}
+      </div>
+      {pagination.type !== 'hidden' && (
+        <div className={'flex items-center justify-between py-3 '}>
+          <div>
+            {tableIndexResultPosition === 'bottom' &&
+              (selectionSummary ?? (
+                <TableIndexResult
+                  loading={loadingStates?.total}
+                  pageIndex={(table.state.pagination?.pageIndex ?? 0) + 1}
+                  pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
+                  total={total}
+                  quickfilters={quickfilters}
+                />
+              ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <div>
+              {/* PageSize select */}
+              <PaginationPageSize
+                pageSize={table.state.pagination?.pageSize ?? DEFAULT_PAGE_SIZE}
+                onPageSizeChange={pageSize => {
+                  table.setPageSize(pageSize);
+                }}
+              />
+            </div>
+            <div>
+              {/* Pagination */}
+              <Pagination className="w-auto">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationFirst disabled={!table.getCanPreviousPage()} onClick={() => table.firstPage()} />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      disabled={!table.getCanPreviousPage()}
+                      onClick={() => {
+                        if (!table.getCanPreviousPage()) return;
+                        table.previousPage();
+                      }}
+                    />
+                  </PaginationItem>
+                  <PaginationItem>
+                    <PaginationNext
+                      disabled={!table.getCanNextPage()}
+                      onClick={() => {
+                        if (!table.getCanNextPage()) return;
+                        table.nextPage();
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {(extras ?? []).map(extra => extra)}
+    </div>
+  );
+}
+
+export default DataTable;

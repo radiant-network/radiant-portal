@@ -1,0 +1,180 @@
+/* eslint-disable complexity */
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
+import useSWR from 'swr';
+
+import type { CaseFilters, SearchCriterion } from '@/api/api';
+import type { IFilterButton, PopoverSize } from '@/components/base/buttons/filter-button';
+import DataTableFilters, {
+  getSortedCriterias,
+  getVisibleFiltersByCriterias,
+  sortOptions,
+} from '@/components/base/data-table/filters/data-table-filters';
+import getItemPriority, { PRIORITY_ORDER } from '@/components/base/data-table/filters/options/option-priority';
+import getItemStatus from '@/components/base/data-table/filters/options/option-status';
+import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
+import usePersistedFilters, { type StringArrayRecord } from '@/components/hooks/usePersistedFilters';
+import { caseApi } from '@/utils/api';
+
+type FiltersGroupFormProps = {
+  loading?: boolean;
+  setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
+  extraFilters?: ReactNode;
+  onClear?: () => void;
+};
+
+const CRITERIAS = {
+  priority_code: { key: 'priority_code', weight: 1, visible: true },
+  status_code: { key: 'status_code', weight: 2, visible: true },
+  case_type_code: { key: 'case_type_code', weight: 3, visible: true },
+  diagnosis_lab_code: { key: 'diagnosis_lab_code', weight: 4, visible: true },
+  project_code: { key: 'project_code', visible: false },
+  analysis_catalog_code: { key: 'analysis_catalog_code', visible: false },
+  ordering_organization_code: { key: 'ordering_organization_code', visible: false },
+  panel_code: { key: 'panel_code', visible: false },
+  life_status_code: { key: 'proband_life_status_code', visible: false },
+  case_category_code: { key: 'case_category_code', visible: false },
+};
+
+export const FILTER_DEFAULTS = {
+  priority_code: [],
+  status_code: [],
+  case_type_code: [],
+  project_code: [],
+  analysis_catalog_code: [],
+  diagnosis_lab_code: [],
+  ordering_organization_code: [],
+  panel_code: [],
+  life_status_code: [],
+  case_category_code: [],
+};
+
+const PRIORITY_PARAM = 'priority';
+
+async function fetchFilters(tenant: string) {
+  const response = await caseApi.casesFilters(tenant);
+  return response.data;
+}
+
+function FiltersGroupForm({ loading = true, setSearchCriteria, extraFilters, onClear }: FiltersGroupFormProps) {
+  const { t } = useI18n();
+  const { tenant } = useTenant();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
+  const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
+  const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-exploration-filters', {
+    ...FILTER_DEFAULTS,
+  });
+
+  useEffect(() => {
+    const priority = searchParams.get(PRIORITY_PARAM);
+    if (priority === null) return;
+    if (PRIORITY_ORDER.includes(priority)) setFilters({ ...FILTER_DEFAULTS, priority_code: [priority] });
+    setSearchParams(
+      params => {
+        params.delete(PRIORITY_PARAM);
+        return params;
+      },
+      { replace: true },
+    );
+  }, [searchParams, setSearchParams, setFilters]);
+
+  const { data: apiFilters } = useSWR<CaseFilters>('case-filters', () => fetchFilters(tenant), {
+    revalidateOnFocus: false,
+    revalidateOnMount: true,
+    revalidateIfStale: false,
+    revalidateOnReconnect: false,
+  });
+
+  // Memoize filter buttons to prevent unnecessary re-renders
+  const filterButtons = useMemo(() => {
+    if (!apiFilters) return [];
+
+    // Order by weight defined in CRITERIAS
+    const sortedKeys = getSortedCriterias(CRITERIAS).filter(key => key in apiFilters);
+
+    return sortedKeys.map(key => {
+      const baseOption: IFilterButton = {
+        key,
+        label: t(`case_exploration.case.filters.${key}`),
+        isVisible: getVisibleFiltersByCriterias(CRITERIAS).includes(key),
+        isOpen: openFilters[key] || false,
+        selectedItems: filters[key] || [],
+        options: [],
+      };
+
+      switch (key) {
+        case 'priority_code':
+          return {
+            ...baseOption,
+            options: getItemPriority(apiFilters[key] || []),
+          };
+        case 'status_code':
+          return {
+            ...baseOption,
+            options: sortOptions(getItemStatus(apiFilters[key] || [], t)),
+          };
+        case 'case_type_code':
+          return {
+            ...baseOption,
+            options: sortOptions(apiFilters[key] || []),
+          };
+        case 'diagnosis_lab_code':
+          return {
+            ...baseOption,
+            popoverSize: 'lg' as PopoverSize,
+            options: sortOptions(apiFilters[key] || []),
+            showKey: true,
+            withTooltip: true,
+          };
+        case 'project_code':
+        case 'analysis_catalog_code':
+        case 'ordering_organization_code':
+        case 'panel_code':
+          return {
+            ...baseOption,
+            popoverSize: 'lg' as PopoverSize,
+            isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
+            options: sortOptions(apiFilters[key] || []),
+            showKey: true,
+            withTooltip: true,
+          };
+        case 'life_status_code':
+        case 'case_category_code':
+          return {
+            ...baseOption,
+            isVisible: (filters[key] && filters[key].length > 0) || changedFilterButtons.includes(key) || false,
+            options: sortOptions(apiFilters[key] || []),
+          };
+        default:
+          return baseOption;
+      }
+    });
+  }, [apiFilters, filters, changedFilterButtons, openFilters, t]);
+
+  return (
+    <DataTableFilters
+      filterSearch={{
+        placeholder: t('case_exploration.filters_group.search_placeholder'),
+        minSearchLength: 1,
+        api: (prefix: string) => caseApi.autocompleteCases(tenant, prefix, '10'),
+      }}
+      filterButtons={filterButtons}
+      changedFilterButtons={changedFilterButtons}
+      setChangedFilterButtons={setChangedFilterButtons}
+      filters={filters}
+      setFilters={setFilters}
+      openFilters={openFilters}
+      setOpenFilters={setOpenFilters}
+      loading={loading}
+      setSearchCriteria={setSearchCriteria}
+      criterias={CRITERIAS}
+      defaultFilters={FILTER_DEFAULTS}
+      extraFilters={extraFilters}
+      onClear={onClear}
+    />
+  );
+}
+
+export default FiltersGroupForm;

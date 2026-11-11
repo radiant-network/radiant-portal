@@ -1,0 +1,79 @@
+package types
+
+type ObsCategorical struct {
+	ID                 int `gorm:"unique;primaryKey;autoIncrement"`
+	CaseID             int
+	Case               Case `gorm:"foreignKey:ID;references:CaseID"`
+	PatientID          *int
+	Patient            Patient `gorm:"foreignKey:ID;references:PatientID"`
+	FetusID            *int
+	Fetus              Fetus `gorm:"foreignKey:ID;references:FetusID"`
+	ObservationCode    string
+	Observation        Observation `gorm:"foreignKey:code;references:ObservationCode"`
+	CodingSystem       string
+	CodeValue          string
+	OnsetCode          *string
+	Onset              Onset `gorm:"foreignKey:code;references:OnsetCode"`
+	InterpretationCode *string
+	Interpretation     ObservationInterpretation `gorm:"foreignKey:code;references:InterpretationCode"`
+	Note               string
+	ExamCode           *string
+	Exam               Exam `gorm:"foreignKey:ExamCode,TenantCode;references:Code,TenantCode"`
+	TenantCode         string
+}
+
+type PhenotypeObsCategorical struct {
+	PatientID          *int
+	FetusID            *int
+	OnsetCode          string
+	InterpretationCode string
+	PhenotypeID        string
+	PhenotypeName      string
+}
+
+type ValueSetObsCategorical struct {
+	PatientID       *int
+	FetusID         *int
+	ObservationCode string
+	ValueSetItem
+}
+
+type SubjectNote struct {
+	PatientID *int
+	FetusID   *int
+	Value     string
+}
+
+type SubjectFamilyHistory struct {
+	PatientID int
+	CaseFamilyHistory
+}
+
+var ObsCategoricalTable = Table{
+	Name:           "obs_categorical",
+	FederationName: "radiant_jdbc.public.obs_categorical",
+	Alias:          "obs",
+}
+
+var ObsCategoricalAggregatedTmpTable = Table{
+	Name:  "agg_phenotypes",
+	Alias: "agg_phenotypes",
+}
+
+var AggregatedPhenotypeTermField = Field{
+	Name:          "phenotypes_term",
+	Alias:         "phenotypes_term",
+	CanBeFiltered: true,
+	Table:         ObsCategoricalAggregatedTmpTable,
+}
+
+var AggregatedPhenotypeUnparsedField = Field{
+	Name:          "phenotypes_term",
+	Alias:         "phenotypes_unparsed",
+	CanBeSelected: true,
+	Table:         ObsCategoricalAggregatedTmpTable,
+}
+
+func (ObsCategorical) TableName() string {
+	return ObsCategoricalTable.Name
+}

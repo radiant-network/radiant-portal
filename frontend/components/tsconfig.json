@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "types": ["react", "react-dom"],
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": false,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/api/*": ["../api/*"],
+      "@/components/*": ["./*"],
+      "@/lib/*": ["./lib/*"],
+      "@/base/*": ["./base/*"],
+      "@/utils/*": ["../utils/*"],
+      "@/hooks/*": ["./hooks/*"],
+      "@/*": ["./*"],
+      "@/apps/*": ["../apps/*"]
+    }
+  },
+  "include": ["base/**/*", "hooks/**/*", "utils/**/*", "lib/**/*", "types/**/*", "stories/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

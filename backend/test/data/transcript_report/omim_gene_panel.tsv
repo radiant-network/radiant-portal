@@ -1,0 +1,5 @@
+symbol	panel	omim_gene_id	omim_phenotype_id	inheritance_code	inheritance
+BRAF	Noonan syndrome 7	164757	613706	["AD"]	["Autosomal dominant"]
+BRAF	LEOPARD syndrome 3	164757	613707	["AD"]	["Autosomal dominant"]
+BRAF	Gene only	164757	NULL	NULL	NULL
+TP53	Li-Fraumeni syndrome 1	191170	151623	["AD"]	["Autosomal dominant"]

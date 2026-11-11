@@ -1,0 +1,515 @@
+package starrocks
+
+import (
+	"testing"
+
+	"github.com/Goldziher/go-utils/sliceutils"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+var allDocumentsFields = sliceutils.Map(types.DocumentFields, func(value types.Field, index int, slice []types.Field) string {
+	return value.GetAlias()
+})
+
+var defaultDocumentFieldsForTest = []types.Field{
+	types.DocumentIdField,
+}
+
+var DocumentsQueryConfigForTest = types.QueryConfig{
+	AllFields:     types.DocumentFields,
+	DefaultFields: defaultDocumentFieldsForTest,
+	DefaultSort:   types.DocumentsDefaultSort,
+	IdField:       types.DocumentIdField,
+}
+
+func Test_SearchDocumentsNoFilters(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, nil, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 10)
+		assert.Equal(t, int64(171), *count)
+
+		// Default sort is document_id DESC.
+		assert.Equal(t, 294, (*documents)[0].DocumentID)
+	})
+}
+
+func Test_SearchDocumentsPrenatalDocumentFields(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CaseIdField.GetAlias(),
+				Value:     []interface{}{72},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, _, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		require.NotEmpty(t, *documents)
+
+		// CLIN-6117 prenatal fixture: document 272 (case 72's fetus alignment) is the highest id of
+		// case 72, so it sorts first under the default document_id DESC.
+		document272 := (*documents)[0]
+		assert.Equal(t, 272, document272.DocumentID)
+		assert.Equal(t, "S-PRENAT-72.recal.cram", document272.Name)
+		assert.Equal(t, "cram", document272.FormatCode)
+		assert.Equal(t, "alignment", document272.DataTypeCode)
+		assert.Equal(t, 50243021081, document272.Size)
+		assert.Equal(t, 72, document272.CaseID)
+		assert.Equal(t, "CQGC", document272.DiagnosisLabCode)
+		assert.Equal(t, "Quebec Clinical Genomic Center", document272.DiagnosisLabName)
+		assert.Equal(t, "fetus", document272.RelationshipToProbandCode)
+		assert.Equal(t, 63, document272.PatientID)
+		assert.Equal(t, "S-PRENAT-72", document272.SubmitterSampleID)
+		assert.Equal(t, 83, document272.TaskID)
+		assert.Equal(t, 75, document272.SeqID)
+		assert.Equal(t, "9d7fa39c3ab46a21c649e057482b8911-9585", document272.Hash)
+		assert.Equal(t, "A00516_0201", document272.RunAlias)
+		assert.NotNil(t, document272.CreatedOn)
+	})
+}
+
+func Test_SearchDocumentsCustomSort(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, nil, nil, []types.SortBody{{Field: types.DocumentNameField.Name, Order: "asc"}})
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 10)
+		assert.Equal(t, int64(171), *count)
+
+		document135 := (*documents)[0]
+		assert.Equal(t, 135, document135.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnDocumentId(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.DocumentIdField.GetAlias(),
+				Value:     []interface{}{257},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 3)
+		assert.Equal(t, int64(3), *count)
+
+		document257 := (*documents)[0]
+		assert.Equal(t, 257, document257.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnDocumentName(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.DocumentNameField.GetName(),
+				Value:     []interface{}{"FI0005566.S14029.vcf.gz"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 3)
+		assert.Equal(t, int64(3), *count)
+
+		document257 := (*documents)[0]
+		assert.Equal(t, 257, document257.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnRunName(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.SequencingExperimentRunNameField.GetName(),
+				Value:     []interface{}{"1621"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 2)
+		assert.Equal(t, int64(2), *count)
+
+		document127 := (*documents)[0]
+		assert.Equal(t, 127, document127.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnSampleId(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.SampleIdField.GetAlias(),
+				Value:     []interface{}{12},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 2)
+		assert.Equal(t, int64(2), *count)
+
+		document239 := (*documents)[0]
+		assert.Equal(t, 239, document239.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnPatientId(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.SamplePatientIdField.GetAlias(),
+				Value:     []interface{}{6},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 2)
+		assert.Equal(t, int64(2), *count)
+
+		document127 := (*documents)[0]
+		assert.Equal(t, 127, document127.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnCaseId(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CaseIdField.GetAlias(),
+				Value:     []interface{}{8},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 6)
+		assert.Equal(t, int64(6), *count)
+
+		document264 := (*documents)[0]
+		assert.Equal(t, 264, document264.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnSeqId(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.SequencingExperimentIdField.GetAlias(),
+				Value:     []interface{}{5},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 2)
+		assert.Equal(t, int64(2), *count)
+
+		document127 := (*documents)[0]
+		assert.Equal(t, 127, document127.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnTaskId(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.TaskHasDocumentTaskIdField.GetName(),
+				Value:     []interface{}{2},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 3)
+		assert.Equal(t, int64(3), *count)
+
+		document252 := (*documents)[0]
+		assert.Equal(t, 252, document252.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnProjectCode(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.ProjectCodeField.GetAlias(),
+				Value:     []interface{}{"N1"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 10)
+		assert.Equal(t, int64(93), *count)
+
+		document294 := (*documents)[0]
+		assert.Equal(t, 294, document294.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnDiagnosisLabCode(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.CaseDiagnosisLabCodeField.GetAlias(),
+				Value:     []interface{}{"CQGC"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 10)
+		assert.Equal(t, int64(171), *count)
+
+		document294 := (*documents)[0]
+		assert.Equal(t, 294, document294.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnRelationshipToProbandMother(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.FamilyRelationshipToProbandCodeField.GetName(),
+				Value:     []interface{}{"mother"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 10)
+		assert.Equal(t, int64(52), *count)
+
+		document293 := (*documents)[0]
+		assert.Equal(t, 293, document293.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnRelationshipToProbandFather(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.FamilyRelationshipToProbandCodeField.GetName(),
+				Value:     []interface{}{"father"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 10)
+		assert.Equal(t, int64(48), *count)
+
+		document293 := (*documents)[0]
+		assert.Equal(t, 293, document293.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnRelationshipToProbandProband(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.FamilyRelationshipToProbandCodeField.GetName(),
+				Value:     []interface{}{"proband"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 10)
+		assert.Equal(t, int64(70), *count)
+
+		document294 := (*documents)[0]
+		assert.Equal(t, 294, document294.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnFormatCode(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.DocumentFormatCodeField.GetName(),
+				Value:     []interface{}{"vcf"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 10)
+		assert.Equal(t, int64(78), *count)
+
+		document294 := (*documents)[0]
+		assert.Equal(t, 294, document294.DocumentID)
+	})
+}
+
+func Test_SearchDocumentsFilterOnDataTypeCode(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.DocumentDataTypeCodeField.GetName(),
+				Value:     []interface{}{"snv"},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		assert.NoError(t, err)
+		assert.Len(t, *documents, 10)
+		assert.Equal(t, int64(82), *count)
+
+		document266 := (*documents)[0]
+		assert.Equal(t, 266, document266.DocumentID)
+	})
+}
+
+func Test_Documents_SearchById(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		autocompleteResult, err := repo.SearchById(t.Context(), "1", 10)
+		assert.NoError(t, err)
+		assert.Equal(t, len(*autocompleteResult), 10)
+		assert.Equal(t, (*autocompleteResult)[0].Type, "case_id")
+		assert.Equal(t, (*autocompleteResult)[0].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[1].Type, "document_id")
+		assert.Equal(t, (*autocompleteResult)[1].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[2].Type, "patient_id")
+		assert.Equal(t, (*autocompleteResult)[2].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[3].Type, "sample_id")
+		assert.Equal(t, (*autocompleteResult)[3].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[4].Type, "seq_id")
+		assert.Equal(t, (*autocompleteResult)[4].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[5].Type, "task_id")
+		assert.Equal(t, (*autocompleteResult)[5].Value, "1")
+		assert.Equal(t, (*autocompleteResult)[6].Type, "case_id")
+		assert.Equal(t, (*autocompleteResult)[6].Value, "10")
+		assert.Equal(t, (*autocompleteResult)[7].Type, "patient_id")
+		assert.Equal(t, (*autocompleteResult)[7].Value, "10")
+		assert.Equal(t, (*autocompleteResult)[8].Type, "sample_id")
+		assert.Equal(t, (*autocompleteResult)[8].Value, "10")
+		assert.Equal(t, (*autocompleteResult)[9].Type, "seq_id")
+		assert.Equal(t, (*autocompleteResult)[9].Value, "10")
+	})
+}
+
+func Test_GetDocumentsFilters_WithLabAndProject(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		filters, err := repo.GetDocumentsFilters(t.Context(), true)
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len((*filters).Project))
+		assert.Equal(t, 2, len((*filters).DiagnosisLab))
+		assert.Equal(t, 7, len((*filters).RelationshipToProband))
+		assert.Equal(t, 16, len((*filters).Format))
+		assert.Equal(t, 22, len((*filters).DataType))
+	})
+}
+
+func Test_GetDocumentsFilters_WithoutLabAndProject(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		filters, err := repo.GetDocumentsFilters(t.Context(), false)
+		assert.NoError(t, err)
+		assert.Nil(t, (*filters).Project)
+		assert.Nil(t, (*filters).DiagnosisLab)
+		assert.Equal(t, 7, len((*filters).RelationshipToProband))
+		assert.Equal(t, 16, len((*filters).Format))
+		assert.Equal(t, 22, len((*filters).DataType))
+	})
+}
+
+func Test_GetById_Success(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		document, err := repo.GetById(t.Context(), 264)
+		assert.NoError(t, err)
+		assert.NotNil(t, document)
+		assert.Equal(t, 264, document.ID)
+		assert.Equal(t, "FI0005568.S14359.vcf.gz", document.Name)
+		assert.Equal(t, "vcf", document.FileFormatCode)
+	})
+}
+
+func Test_GetById_NotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		document, err := repo.GetById(t.Context(), 999999)
+		assert.NoError(t, err)
+		assert.Nil(t, document)
+	})
+}
+
+func Test_GetById_IndexFile(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		document, err := repo.GetById(t.Context(), 2)
+		assert.NoError(t, err)
+		assert.NotNil(t, document)
+		assert.Equal(t, "FI0037662.S13230.cram.crai", document.Name)
+		assert.Equal(t, "crai", document.FileFormatCode)
+	})
+}
+
+func Test_SearchDocuments_QCMetricsJSONHidden(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		testutils.InsertQCTaskDocuments(t, env.Postgres)
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.TaskHasDocumentTaskIdField.GetName(),
+				Value:     []interface{}{testutils.QCTaskID},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		require.NoError(t, err)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		require.NoError(t, err)
+		require.Len(t, *documents, 1)
+		assert.Equal(t, int64(1), *count)
+		assert.Equal(t, testutils.QCReportDocumentID, (*documents)[0].DocumentID)
+	})
+}
+
+func Test_Documents_SearchById_QCMetricsJSONHidden(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		testutils.InsertQCTaskDocuments(t, env.Postgres)
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		byName, err := repo.SearchById(t.Context(), "RAD179", 10)
+		require.NoError(t, err)
+		assert.Equal(t, []AutocompleteResult{{Type: "name", Value: "RAD179_multiqc_report.html"}}, *byName)
+
+		byID, err := repo.SearchById(t.Context(), "1791", 10)
+		require.NoError(t, err)
+		for _, result := range *byID {
+			assert.NotEqual(t, AutocompleteResult{Type: "document_id", Value: "1791"}, result)
+		}
+	})
+}

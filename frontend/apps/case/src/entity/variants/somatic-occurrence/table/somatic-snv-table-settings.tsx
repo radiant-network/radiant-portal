@@ -1,0 +1,462 @@
+import type { TFunction } from 'i18next';
+
+import type { CaseEntity, GermlineSNVOccurrence, SomaticSNVOccurrence } from '@/api/api';
+import CmcTierBadge from '@/components/base/badges/cmc-tier-badge';
+import AminoAcidChangeCell from '@/components/base/data-table/cells/amino-acid-change-cell';
+import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
+import ClinvarCell from '@/components/base/data-table/cells/clinvar-cell';
+import CmcCell from '@/components/base/data-table/cells/cmc-cell';
+import GeneCell from '@/components/base/data-table/cells/gene-cell';
+import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
+import ManeCell from '@/components/base/data-table/cells/mane-cell';
+import MostDeleteriousConsequenceCell from '@/components/base/data-table/cells/most-deleterious-consequence-cell';
+import NumberCell from '@/components/base/data-table/cells/number-cell';
+import OmimCell from '@/components/base/data-table/cells/omim-cell';
+import SomaticFrequencyCell from '@/components/base/data-table/cells/somatic-frequency-cell';
+import SomaticGermlineFrequencyCell from '@/components/base/data-table/cells/somatic-germline-frequency-cell';
+import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
+import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
+import { Badge } from '@/components/base/shadcn/badge';
+import { getFranklinSnvUrl } from '@/components/base/variant/utils';
+
+import InterpretationCell from '../../interpretation/interpretation-cell';
+import HgvsgCell from '../../table/cells/hgvsg-cell';
+import OccurrenceActionsCell from '../../table/cells/occurrence-actions-cell';
+import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
+import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
+import SomaticInterpretationDialog from '../interpretation/somatic-interpretation-dialog';
+
+import SomaticHotspotCell from './cells/somatic-hotspot-cell';
+
+const columnHelper = createAppColumnHelper<SomaticSNVOccurrence>();
+
+type SomaticSNVOccurrenceTableSettingsProps = {
+  caseEntity?: CaseEntity;
+  patientId?: number;
+  canDownloadReport?: boolean;
+  t: TFunction<string, undefined>;
+};
+
+function getSomaticSNVColumns({ t, caseEntity, patientId, canDownloadReport }: SomaticSNVOccurrenceTableSettingsProps) {
+  return [
+    // interpretation and note cell
+    columnHelper.accessor(row => row, {
+      id: 'row-info',
+      cell: info => (
+        <div id="data-table-occurrence-interpretation-note-flag" className="flex items-center gap-1">
+          <InterpretationCell
+            locusId={info.getValue().locus_id}
+            taskId={info.getValue().task_id}
+            transcriptId={info.getValue().transcript_id}
+            hasInterpretation={info.getValue().has_interpretation}
+            patientId={patientId}
+            InterpretationDialog={SomaticInterpretationDialog}
+          />
+          <OccurrenceNoteCell
+            taskId={info.row.original.task_id}
+            seqId={info.row.original.seq_id}
+            occurrenceId={info.row.original.locus_id}
+            hasNote={info.row.original.has_note}
+          />
+          <OccurrenceFlagCell
+            caseId={caseEntity?.case_id}
+            taskId={info.row.original.task_id}
+            seqId={info.row.original.seq_id}
+            occurrenceId={info.row.original.locus_id}
+            flag={info.row.original.flag_type}
+          />
+        </div>
+      ),
+      header: () => null,
+      size: 84,
+      enablePinning: false,
+      enableResizing: false,
+      enableSorting: false,
+    }),
+    // Variant
+    columnHelper.accessor(row => row.hgvsg, {
+      id: 'hgvsg',
+      cell: info => <HgvsgCell locusId={info.row.original.locus_id} hgvsg={info.getValue()} />,
+      header: t('variant.headers.hgvsg'),
+      size: 70,
+      minSize: 40,
+    }),
+    // Gene
+    columnHelper.accessor(row => row.symbol, {
+      id: 'symbol',
+      cell: info => <GeneCell symbol={info.getValue()} />,
+      header: t('variant.headers.symbol'),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // AA Change
+    columnHelper.accessor(row => row.aa_change, {
+      id: 'aa_change',
+      cell: info => <AminoAcidChangeCell value={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.aa_change_tooltip')}>{t('variant.headers.aa_change')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // Type
+    columnHelper.accessor(row => row.variant_class, {
+      id: 'variant_class',
+      cell: info => (
+        <TextTooltipCell tooltipText={info.getValue()}>
+          <Badge variant="outline">{t(`variant.classes.${info.getValue()?.toLowerCase()}`)}</Badge>
+        </TextTooltipCell>
+      ),
+      header: t('variant.headers.variant_class'),
+      size: 96,
+      minSize: 40,
+    }),
+    // Consequence
+    columnHelper.accessor(row => row, {
+      id: 'max_impact_score',
+      cell: info => (
+        <MostDeleteriousConsequenceCell
+          vepImpact={info.getValue().vep_impact}
+          consequences={info.getValue().picked_consequences}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.picked_consequences_tooltip')}>
+          {t('variant.headers.picked_consequences')}
+        </TooltipHeader>
+      ),
+      size: 225,
+      minSize: 40,
+    }),
+    // Mane
+    columnHelper.accessor(row => row, {
+      id: 'is_mane_select',
+      cell: info => (
+        <ManeCell
+          isManePlus={info.getValue().is_mane_plus}
+          isManeSelect={info.getValue().is_mane_select}
+          isCanonical={info.getValue().is_canonical}
+        />
+      ),
+      header: t('variant.headers.is_mane_select'),
+      enableSorting: false,
+      size: 124,
+      minSize: 40,
+    }),
+    // dbSNP
+    columnHelper.accessor(row => row.rsnumber, {
+      id: 'dbSNP',
+      cell: info => (
+        <AnchorLinkCell
+          href={info.getValue() ? `https://www.ncbi.nlm.nih.gov/snp/${info.getValue()}` : undefined}
+          target="_blank"
+          external
+        >
+          {info.getValue() && <span className="overflow-hidden text-ellipsis">{info.getValue()}</span>}
+        </AnchorLinkCell>
+      ),
+      header: t('variant.headers.dbSNP'),
+      size: 96,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // OMIM
+    columnHelper.accessor(row => row.omim_inheritance_code, {
+      id: 'omim_inheritance_code',
+      cell: info => <OmimCell codes={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.omim_inheritance_code_tooltip')}>
+          {t('variant.headers.omim_inheritance_code')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // Hotspot
+    columnHelper.accessor(row => row.hotspot, {
+      id: 'hotspot',
+      cell: info => <SomaticHotspotCell value={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.hotspot_tooltip')}>{t('variant.headers.hotspot')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    // Tier
+    columnHelper.accessor(row => row, {
+      id: 'cmc_tier',
+      cell: info => (
+        <CmcTierBadge
+          value={info.getValue().cmc_tier}
+          href={getFranklinSnvUrl(
+            `${info.getValue().chromosome}-${info.getValue().start}-${info.getValue().reference}-${info.getValue().alternate}`,
+          )}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.cmc_tier_tooltip')}>{t('variant.headers.cmc_tier')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // CMC
+    columnHelper.accessor(row => row, {
+      id: 'cmc_sample_mutated',
+      cell: info => (
+        <CmcCell
+          sampleMutated={info.getValue().cmc_sample_mutated}
+          sampleRatio={info.getValue().cmc_sample_ratio}
+          mutationUrl={info.getValue().cmc_mutation_url}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.cmc_sample_mutated_tooltip')}>
+          {t('variant.headers.cmc_sample_mutated')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // ClinVar
+    columnHelper.accessor(row => row.clinvar, {
+      id: 'clinvar',
+      cell: info => <ClinvarCell codes={info.getValue()} />,
+      header: t('variant.headers.clinvar'),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // gnomAD
+    columnHelper.accessor(row => row.gnomad_v3_af, {
+      id: 'gnomad_v3_af',
+      cell: info => <GnomadCell value={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.gnomad_v3_af_tooltip')}>
+          {t('variant.headers.gnomad_v3_af')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // Freq. TO
+    columnHelper.accessor(row => row, {
+      id: 'somatic_pf_to_wgs',
+      cell: info => (
+        <SomaticFrequencyCell
+          locusId={info.row.original.locus_id}
+          pc={info.row.original.somatic_pc_to_wgs}
+          pf={info.row.original.somatic_pf_to_wgs}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.freq_to_tooltip')}>{t('variant.headers.freq_to')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // Freq. TN
+    columnHelper.accessor(row => row, {
+      id: 'somatic_pf_tn_wgs',
+      cell: info => (
+        <SomaticFrequencyCell
+          locusId={info.row.original.locus_id}
+          pc={info.row.original.somatic_pc_tn_wgs}
+          pf={info.row.original.somatic_pf_tn_wgs}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.freq_tn_tooltip')}>{t('variant.headers.freq_tn')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // Freq. G
+    columnHelper.accessor(row => row, {
+      id: 'germline_pf_wgs',
+      cell: info => (
+        <SomaticGermlineFrequencyCell
+          locusId={info.row.original.locus_id}
+          pc={info.row.original.germline_pc_wgs}
+          pf={info.row.original.germline_pf_wgs}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.freq_g_tooltip')}>{t('variant.headers.freq_g')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // SQ
+    columnHelper.accessor(row => row.sq, {
+      id: 'sq',
+      cell: info => <NumberCell value={info.getValue()} />,
+      header: () => <TooltipHeader tooltip={t('variant.headers.sq_tooltip')}>{t('variant.headers.sq')}</TooltipHeader>,
+      size: 124,
+      minSize: 40,
+    }),
+    // AQ
+    columnHelper.accessor(row => row.aq, {
+      id: 'aq',
+      cell: info => <NumberCell value={info.getValue()} />,
+      header: () => <TooltipHeader tooltip={t('variant.headers.aq_tooltip')}>{t('variant.headers.aq')}</TooltipHeader>,
+      size: 124,
+      minSize: 40,
+    }),
+    // @TODO: Zyg. is missing in somatic api
+    // Ratio AD
+    columnHelper.accessor(row => row.ad_ratio, {
+      id: 'ad_ratio',
+      cell: info => <NumberCell value={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.ad_ratio_tooltip')}>{t('variant.headers.ad_ratio')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+    }),
+    // Actions Buttons
+    {
+      id: 'actions',
+      cell: info => (
+        <OccurrenceActionsCell
+          row={info.row}
+          caseEntity={caseEntity}
+          reportKind={canDownloadReport ? 'somatic' : undefined}
+        />
+      ),
+      size: 86,
+      enableResizing: false,
+      enablePinning: true,
+    },
+  ] as TableColumnDef<GermlineSNVOccurrence, any>[];
+}
+
+const defaultSomaticSNVSettings = createColumnSettings([
+  {
+    id: 'row-info',
+    visible: true,
+    fixed: true,
+    pinningPosition: 'start',
+    additionalFields: ['transcript_id', 'has_interpretation'],
+  },
+  {
+    id: 'hgvsg',
+    visible: true,
+    pinningPosition: 'start',
+    label: 'variant.headers.hgvsg',
+  },
+  {
+    id: 'symbol',
+    visible: true,
+    label: 'variant.headers.symbol',
+    additionalFields: ['symbol'],
+  },
+  {
+    id: 'aa_change',
+    visible: true,
+    label: 'variant.headers.aa_change',
+  },
+  {
+    id: 'variant_class',
+    visible: true,
+    label: 'variant.headers.variant_class',
+  },
+  {
+    id: 'max_impact_score',
+    visible: true,
+    label: 'variant.headers.picked_consequences',
+    additionalFields: ['vep_impact'],
+  },
+  {
+    id: 'is_mane_select',
+    visible: true,
+    label: 'variant.headers.is_mane_select',
+    additionalFields: ['is_mane_select', 'is_canonical'],
+  },
+  {
+    id: 'dbSNP',
+    visible: true,
+    label: 'variant.headers.dbSNP',
+    additionalFields: ['rsnumber'],
+  },
+  {
+    id: 'omim_inheritance_code',
+    visible: true,
+    label: 'variant.headers.omim_inheritance_code',
+    additionalFields: ['omim_inheritance_code'],
+  },
+  {
+    id: 'hotspot',
+    visible: true,
+    label: 'variant.headers.hotspot',
+    additionalFields: ['hotspot'],
+  },
+  {
+    id: 'cmc_tier',
+    visible: true,
+    label: 'variant.headers.cmc_tier',
+  },
+  {
+    id: 'cmc_sample_mutated',
+    visible: true,
+    label: 'variant.headers.cmc_sample_mutated',
+  },
+  {
+    id: 'clinvar',
+    visible: true,
+    label: 'variant.headers.clinvar',
+    additionalFields: ['clinvar'],
+  },
+  {
+    id: 'gnomad_v3_af',
+    visible: true,
+    label: 'variant.headers.gnomad_v3_af',
+  },
+  {
+    id: 'somatic_pf_to_wgs',
+    visible: true,
+    label: 'variant.headers.freq_to',
+  },
+  {
+    id: 'somatic_pf_tn_wgs',
+    visible: true,
+    label: 'variant.headers.freq_tn',
+  },
+  {
+    id: 'germline_pf_wgs',
+    visible: true,
+    label: 'variant.headers.freq_g',
+    additionalFields: ['germline_pf_wgs'],
+  },
+  {
+    id: 'sq',
+    visible: true,
+    label: 'variant.headers.sq',
+    additionalFields: ['sq'],
+  },
+  {
+    id: 'aq',
+    visible: true,
+    label: 'variant.headers.aq',
+    additionalFields: ['aq'],
+  },
+  {
+    id: 'ad_ratio',
+    visible: false,
+    label: 'variant.headers.ad_ratio',
+    additionalFields: ['ad_ratio'],
+  },
+  {
+    id: 'actions',
+    visible: true,
+    fixed: true,
+    pinningPosition: 'end',
+  },
+]);
+
+export { defaultSomaticSNVSettings, getSomaticSNVColumns };

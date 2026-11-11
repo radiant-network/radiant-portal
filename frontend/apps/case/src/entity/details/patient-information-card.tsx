@@ -1,0 +1,182 @@
+import { type ComponentProps, useEffect, useState } from 'react';
+import { Link } from 'react-router';
+import { ArrowUpRightIcon, UserIcon } from 'lucide-react';
+
+import type { CaseEntity, CasePatientClinicalInformation } from '@/api/api';
+import { CopyButton } from '@/components/base/buttons/copy-button';
+import InformationField from '@/components/base/information/information-field';
+import ScrollableTabsList from '@/components/base/navigation/scrollable-tabs-list';
+import { Button } from '@/components/base/shadcn/button';
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
+import { Tabs, TabsContent, TabsTrigger } from '@/components/base/shadcn/tabs';
+import { useI18n } from '@/components/hooks/i18n';
+import { useLocalPath } from '@/components/hooks/use-local-path';
+import { byProbandFirst, getFetusRank, getMemberKey, isPrenatalMother } from '@/components/lib/case-entity';
+import { formatDate } from '@/components/lib/date';
+import { titleCase } from '@/components/lib/string-format';
+
+enum CaseType {
+  germline_solo = 'germline_solo',
+  germline_family = 'germline_family',
+}
+
+interface PatientInfoDisplayProps {
+  member: CasePatientClinicalInformation | undefined;
+}
+
+function PatientInfoDisplay({ member }: PatientInfoDisplayProps) {
+  const { t } = useI18n();
+
+  if (!member) {
+    return <div className="text-muted-foreground text-sm">{t('case_entity.patient_information.no_patient')}</div>;
+  }
+
+  return (
+    <div className="flex w-full justify-between gap-4">
+      <div className="flex flex-col gap-2 flex-1">
+        <InformationField label={t('case_entity.patient_information.id')}>
+          {member.patient_id ?? member.fetus_id}
+        </InformationField>
+
+        {(member.first_name || member.last_name) && (
+          <InformationField label={t('case_entity.patient_information.name')}>
+            {member.first_name} <span className="uppercase">{member.last_name}</span>
+          </InformationField>
+        )}
+
+        {member.life_status_code && (
+          <InformationField label={t('case_entity.patient_information.life_status')}>
+            {member.life_status_code}
+          </InformationField>
+        )}
+
+        {member.date_of_birth && (
+          <InformationField
+            label={t('case_entity.patient_information.dob')}
+            labelTooltipText={t('case_entity.details.date_format_tooltip')}
+          >
+            {formatDate(member.date_of_birth, t('common.date.year_month_day'), true)}
+          </InformationField>
+        )}
+
+        {/* A living fetus carries one gestational date or the other, never both; a deceased one has neither */}
+        {member.last_menstrual_period && (
+          <InformationField
+            label={t('case_entity.patient_information.last_menstrual_period')}
+            labelTooltipText={t('case_entity.details.date_format_tooltip')}
+          >
+            {formatDate(member.last_menstrual_period, t('common.date.year_month_day'), true)}
+          </InformationField>
+        )}
+
+        {member.estimated_due_date && (
+          <InformationField
+            label={t('case_entity.patient_information.estimated_due_date')}
+            labelTooltipText={t('case_entity.details.date_format_tooltip')}
+          >
+            {formatDate(member.estimated_due_date, t('common.date.year_month_day'), true)}
+          </InformationField>
+        )}
+
+        <InformationField label={t('case_entity.patient_information.sex')}>
+          {titleCase(member.sex_code)}
+        </InformationField>
+
+        {member.submitter_patient_id && (
+          <InformationField
+            label={t('case_entity.patient_information.submitter_patient_id')}
+            labelTooltipText={t('case_entity.patient_information.submitter_patient_id_tooltip')}
+          >
+            <CopyButton value={member.submitter_patient_id} label={member.submitter_patient_id} className="-m-2" />
+          </InformationField>
+        )}
+
+        {member.jhn && (
+          <InformationField label={t('case_entity.patient_information.jhn')}>{member.jhn}</InformationField>
+        )}
+
+        {member.organization_code && (
+          <InformationField
+            label={t('case_entity.patient_information.managing_org')}
+            labelTooltipText={t('case_entity.patient_information.managing_org_tooltip')}
+            tooltipText={member.organization_name}
+          >
+            {member.organization_code}
+          </InformationField>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PatientInformationCard({ data, ...props }: { data: CaseEntity } & ComponentProps<'div'>) {
+  const { t } = useI18n();
+  const localPath = useLocalPath();
+
+  const isFamilyCase = data.case_type === CaseType.germline_family;
+  const members = [...(data.members || [])].sort(byProbandFirst);
+  const [activeTab, setActiveTab] = useState<string>(() => (members[0] ? getMemberKey(members[0]) : ''));
+
+  useEffect(() => {
+    if (members.length > 0 && !members.find(m => getMemberKey(m) === activeTab)) {
+      setActiveTab(getMemberKey(members[0]));
+    }
+  }, [members, activeTab]);
+
+  const activeMember =
+    isFamilyCase && members.length > 1 ? members.find(m => getMemberKey(m) === activeTab) : members[0];
+
+  const headerAction = activeMember?.patient_key && (
+    <CardAction>
+      <Button asChild>
+        <Link to={localPath(`/patient/entity/${activeMember.patient_key}?tab=overview`)}>
+          <UserIcon /> {t('case_entity.patient_information.view_patient')} <ArrowUpRightIcon />
+        </Link>
+      </Button>
+    </CardAction>
+  );
+
+  if (isFamilyCase && members.length > 1) {
+    return (
+      <Card data-cy="patient-information-card" {...props}>
+        <CardHeader bordered>
+          <CardTitle size="xl">{t('case_entity.patient_information.title')}</CardTitle>
+          {headerAction}
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <ScrollableTabsList>
+              {members.map(member => (
+                <TabsTrigger key={getMemberKey(member)} value={getMemberKey(member)}>
+                  {getFetusRank(member, members)
+                    ? t('case_entity.details.fetus_numbered', { index: getFetusRank(member, members) })
+                    : t(`common.relationships.${member.relationship_to_proband}`)}
+                  {isPrenatalMother(member, members) && ` (${t('common.relationships.mother')})`}
+                </TabsTrigger>
+              ))}
+            </ScrollableTabsList>
+            {members.map(member => (
+              <TabsContent key={getMemberKey(member)} value={getMemberKey(member)}>
+                <PatientInfoDisplay member={member} />
+              </TabsContent>
+            ))}
+          </Tabs>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card data-cy="patient-information-card" {...props}>
+      <CardHeader bordered>
+        <CardTitle size="xl">{t('case_entity.patient_information.title')}</CardTitle>
+        {headerAction}
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <PatientInfoDisplay member={activeMember} />
+      </CardContent>
+    </Card>
+  );
+}
+
+export default PatientInformationCard;

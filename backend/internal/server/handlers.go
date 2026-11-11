@@ -1,0 +1,144 @@
+package server
+
+import (
+	"context"
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/types"
+)
+
+type dbHealthChecker interface {
+	CheckDatabaseConnection() string
+}
+
+type templateStatusReporter interface {
+	Status() string
+}
+
+// StatusHandler handles the status endpoint
+// @Summary Get API status
+// @Description Returns the current status of the API
+// @Tags status
+// @Produce json
+// @Success 200 {object} map[string]string
+// @Router /status [get]
+func StatusHandler(repoStarrocks dbHealthChecker, repoPostgres dbHealthChecker, notificationTemplates templateStatusReporter, reportTemplates templateStatusReporter) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status": gin.H{
+				"starrocks":              repoStarrocks.CheckDatabaseConnection(),
+				"postgres":               repoPostgres.CheckDatabaseConnection(),
+				"notification_templates": notificationTemplates.Status(),
+				"report_templates":       reportTemplates.Status(),
+			},
+		})
+	}
+}
+
+func extractUserSetParams(c *gin.Context) string {
+	userSetId := c.Param("user_set_id")
+	return userSetId
+}
+
+type userSetReader interface {
+	GetUserSet(ctx context.Context, userSetId string) (*types.UserSet, error)
+}
+
+// GetUserSet
+// @Summary Get user set by id
+// @Id GetUserSet
+// @Description Get user set
+// @Tags user_sets
+// @Security bearerauth
+// @Param user_set_id path string true "UserSet ID"
+// @Produce json
+// @Success 200 {object} types.UserSet
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /users/sets/{user_set_id} [get]
+func GetUserSet(repo userSetReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userSetId := extractUserSetParams(c)
+		userSet, err := repo.GetUserSet(c.Request.Context(), userSetId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if userSet == nil {
+			HandleNotFoundError(c, "user")
+			return
+		}
+		c.JSON(http.StatusOK, userSet)
+	}
+}
+
+type termAutoCompleter interface {
+	GetTermAutoComplete(ctx context.Context, termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error)
+}
+
+// GetMondoTermAutoComplete handles retrieving mondo terms by autocomplete
+// @Summary Get AutoCompleteTerm list of matching input string with highlighted
+// @Id mondoTermAutoComplete
+// @Description Retrieve AutoCompleteTerm list of mondo terms matching input string with highlighted
+// @Tags mondo
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param prefix query string true "Prefix"
+// @Param limit query string false "Limit"
+// @Produce json
+// @Success 200 {array} types.AutoCompleteTerm
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/mondo/autocomplete [get]
+func GetMondoTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		prefix := c.Query("prefix")
+		limit, err := strconv.Atoi(c.Query("limit"))
+		if err != nil {
+			limit = 25
+		}
+		mondoTerms, err := repo.GetTermAutoComplete(c.Request.Context(), types.MondoTable.TenantQualifiedName(c.Request.Context()), prefix, limit)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, mondoTerms)
+	}
+}
+
+// GetHPOTermAutoComplete handles retrieving HPO terms by autocomplete
+// @Summary Get AutoCompleteTerm list of matching input string with highlighted
+// @Id hpoTermAutoComplete
+// @Description Retrieve AutoCompleteTerm list of HPO terms matching input string with highlighted
+// @Tags hpo
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param prefix query string true "Prefix"
+// @Param limit query string false "Limit"
+// @Produce json
+// @Success 200 {array} types.AutoCompleteTerm
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/hpo/autocomplete [get]
+func GetHPOTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		prefix := c.Query("prefix")
+		limit, err := strconv.Atoi(c.Query("limit"))
+		if err != nil {
+			limit = 25
+		}
+		hpoTerms, err := repo.GetTermAutoComplete(c.Request.Context(), types.HPOTable.TenantQualifiedName(c.Request.Context()), prefix, limit)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, hpoTerms)
+	}
+}

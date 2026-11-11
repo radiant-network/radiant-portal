@@ -1,0 +1,19 @@
+language: 'go'
+layer: 'application'
+stack: 'backend'
+
+fileGroups:
+  sources: ['**/*.go', 'go.mod', 'go.sum']
+  # Published to the frontend (generated TS client in frontend/api).
+  openapi: ['docs/swagger.yaml']
+
+tasks:
+  build:
+    command: 'go build ./...'
+    inputs: ['@group(sources)']
+  test:
+    # Same selection as backend.yml: everything except internal/repository (testcontainers).
+    script: 'go test -timeout 30m $(go list ./... | grep -v ./internal/repository)'
+    inputs: ['@group(sources)', 'test/**/*']
+    deps: ['build']
+

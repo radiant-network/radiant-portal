@@ -1,0 +1,78 @@
+import { BrowserRouter } from 'react-router';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+
+import { SavedFilterType } from '@/api/api';
+import RelationshipToProbandField from '@/components/base/information/relationship-to-proband-field';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
+
+import { StorySection } from '../story-section';
+
+const config: PortalConfig = {
+  variant_entity: {
+    app_id: ApplicationId.variant_entity,
+  },
+  germline_snv_occurrence: {
+    app_id: ApplicationId.germline_snv_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
+  },
+  germline_cnv_occurrence: {
+    app_id: ApplicationId.germline_cnv_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.GERMLINE_CNV_OCCURRENCE,
+  },
+  somatic_snv_to_occurrence: {
+    app_id: ApplicationId.somatic_snv_to_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+  },
+  somatic_snv_tn_occurrence: {
+    app_id: ApplicationId.somatic_snv_tn_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+  },
+  somatic_cnv_to_occurrence: {
+    app_id: ApplicationId.somatic_cnv_to_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_CNV_OCCURRENCE,
+  },
+  admin: {
+    admin_code: 'admin',
+    app_id: ApplicationId.admin,
+  },
+  portal: {
+    name: '',
+    navigation: {},
+  },
+};
+
+const meta = {
+  title: 'Features/Informations/Relationship To Proband Field',
+  component: RelationshipToProbandField,
+  args: { relationship: 'proband' },
+  decorators: [
+    Story => (
+      <BrowserRouter>
+        <ConfigProvider config={config}>
+          <Story />
+        </ConfigProvider>
+      </BrowserRouter>
+    ),
+  ],
+} satisfies Meta<typeof RelationshipToProbandField>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  render: () => (
+    <StorySection title="Relationship to proband">
+      <div className="flex flex-col gap-6">
+        {['proband', 'mother', 'father', 'sister', 'brother', 'sibling'].map(relationship => (
+          <RelationshipToProbandField key={relationship} relationship={relationship} />
+        ))}
+      </div>
+    </StorySection>
+  ),
+};

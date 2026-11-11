@@ -1,0 +1,478 @@
+package server
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
+	"github.com/radiant-network/radiant-api/internal/types"
+)
+
+type casesReader interface {
+	SearchCases(ctx context.Context, userQuery types.ListQuery) (*[]types.CaseResult, *int64, error)
+	SearchById(ctx context.Context, prefix string, limit int) (*[]types.AutocompleteResult, error)
+	GetCasesFilters(ctx context.Context) (*types.CaseFilters, error)
+	GetCaseEntity(ctx context.Context, caseId int) (*types.CaseEntity, error)
+}
+
+type caseDocumentsReader interface {
+	SearchDocuments(ctx context.Context, userQuery types.ListQuery) (*[]types.DocumentResult, *int64, error)
+	GetDocumentsFilters(ctx context.Context, withProjectAndLab bool) (*types.DocumentFilters, error)
+}
+
+// caseAssignmentsReader loads the users assigned to a set of cases. Assignments live in
+// PostgreSQL while the cases themselves are read from StarRocks, so the two are joined here in
+// the handler rather than in a query.
+type caseAssignmentsReader interface {
+	ListForCases(ctx context.Context, caseIDs []int) (map[int][]types.CaseAssignee, error)
+}
+
+// assigneesOf reads one case out of the map, as a list that is empty rather than null so the
+// unassigned state serializes the same way as the assigned one.
+func assigneesOf(byCase map[int][]types.CaseAssignee, caseID int) types.JsonArray[types.CaseAssignee] {
+	if assignees := byCase[caseID]; len(assignees) > 0 {
+		return assignees
+	}
+	return types.JsonArray[types.CaseAssignee]{}
+}
+
+type caseTasksReader interface {
+	ListTasksByCaseAndSequencing(ctx context.Context, caseId int, seqId int, selector types.TaskSelector) ([]types.TaskOccurrenceType, error)
+}
+
+type casePatcher interface {
+	PatchCase(ctx context.Context, caseId int, c *types.Case) (bool, error)
+}
+
+// SearchCasesHandler handles search of cases
+// @Summary Search cases
+// @Id searchCases
+// @Description Search cases
+// @Tags cases
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param			message	body		types.ListBodyWithCriteria	true	"List Body"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.CasesSearchResponse
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/cases/search [post]
+func SearchCasesHandler(repo casesReader, assignmentsRepo caseAssignmentsReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body types.ListBodyWithCriteria
+		)
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
+		query, err := types.NewListQueryFromCriteria(types.CasesQueryConfig, body.AdditionalFields, body.SearchCriteria, p, body.Sort)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		cases, count, err := repo.SearchCases(c.Request.Context(), query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		// One lookup for the whole page, whatever its size.
+		caseIDs := make([]int, len(*cases))
+		for i, caseResult := range *cases {
+			caseIDs[i] = caseResult.CaseID
+		}
+		assigneesByCase, err := assignmentsRepo.ListForCases(c.Request.Context(), caseIDs)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		for i := range *cases {
+			(*cases)[i].Assignees = assigneesOf(assigneesByCase, (*cases)[i].CaseID)
+		}
+
+		searchResponse := types.SearchResponse[types.CaseResult]{List: *cases, Count: *count}
+		c.JSON(http.StatusOK, searchResponse)
+	}
+}
+
+// CasesAutocompleteHandler handles retrieving ids by autocomplete
+// @Summary Get types.AutocompleteResult list of matching prefix
+// @Id autocompleteCases
+// @Description Retrieve types.AutocompleteResult list of ids matching prefix
+// @Tags cases
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param prefix query string true "Prefix"
+// @Param limit query string false "Limit"
+// @Produce json
+// @Success 200 {array} types.AutocompleteResult
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/cases/autocomplete [get]
+func CasesAutocompleteHandler(repo casesReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		prefix := c.Query("prefix")
+		limit, err := strconv.Atoi(c.Query("limit"))
+		if err != nil {
+			limit = 25
+		}
+		ids, err := repo.SearchById(c.Request.Context(), prefix, limit)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, ids)
+	}
+}
+
+// CasesFiltersHandler handles retrieving cases filters
+// @Summary Get types.CaseFilters cases filters
+// @Id casesFilters
+// @Description Retrieve types.CaseFilters cases filters
+// @Tags cases
+// @Security bearerauth
+// @Produce json
+// @Success 200 {object} types.CaseFilters
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Param tenant path string true "Tenant code"
+// @Router /{tenant}/cases/filters [get]
+func CasesFiltersHandler(repo casesReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		filters, err := repo.GetCasesFilters(c.Request.Context())
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, filters)
+	}
+}
+
+// CaseEntityHandler handles retrieving a case by its ID
+// @Summary Get types.CaseEntity case entity
+// @Id caseEntity
+// @Description Retrieve types.CaseEntity by its ID
+// @Tags cases
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param case_id path int true "Case ID"
+// @Produce json
+// @Success 200 {object} types.CaseEntity
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/cases/{case_id} [get]
+func CaseEntityHandler(repo casesReader, igvRepo igvReader, assignmentsRepo caseAssignmentsReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		caseId, errCaseId := strconv.Atoi(c.Param("case_id"))
+		if errCaseId != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+		caseEntity, err := repo.GetCaseEntity(c.Request.Context(), caseId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if caseEntity == nil {
+			HandleNotFoundError(c, "case")
+			return
+		}
+		igvTracks, err := igvRepo.GetIGV(c.Request.Context(), caseId)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		caseEntity.HasIGVFiles = starrocks.HasIgvTracks(igvTracks)
+
+		assigneesByCase, err := assignmentsRepo.ListForCases(c.Request.Context(), []int{caseId})
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		caseEntity.Assignees = assigneesOf(assigneesByCase, caseId)
+
+		c.JSON(http.StatusOK, caseEntity)
+	}
+}
+
+// PatchCaseHandler applies a partial update to a case. Only the fields the body carries are
+// written, so the endpoint takes another patchable field without a new route.
+//
+// The only field so far is status_code
+// @Summary Update a case
+// @Id patchCase
+// @Description Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+// @Tags cases
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param case_id path int true "Case ID"
+// @Param message body types.PatchCase true "Fields to change"
+// @Accept json
+// @Success 200
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/cases/{case_id} [patch]
+func PatchCaseHandler(repo casePatcher) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		caseId, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+
+		var patch types.PatchCase
+		if err := c.ShouldBindJSON(&patch); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		if err := types.ValidateUserAppliedCaseStatus(patch.StatusCode); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		found, err := repo.PatchCase(c.Request.Context(), caseId, &types.Case{StatusCode: patch.StatusCode})
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if !found {
+			HandleNotFoundError(c, "case")
+			return
+		}
+
+		c.Status(http.StatusOK)
+	}
+}
+
+type caseStatusSetter interface {
+	SetCaseStatusIfExpected(ctx context.Context, tenantCode string, caseID int, status string, expected []string) (*types.CaseStatusChangeResult, error)
+}
+
+// PatchCasesStatusHandler applies conditional status changes to several cases: those the
+// pipeline makes as it processes a case, and those a geneticist makes afterwards. The whole
+// request is validated before any case is written, so a rejected change leaves every case of the
+// request untouched.
+// @Summary Set the status of cases
+// @Id patchCasesStatus
+// @Description Change the status of several cases. A change between two user statuses needs can_edit_case at the case's diagnosis lab. A change involving a system status (draft, submitted, processing) needs can_ingest_data there, and only submitted -> processing and processing -> in_progress are allowed; any other change is rejected with a 400. A single missing permission, or a case the tenant does not hold, refuses the whole request with a 403. Each change applies only if the case is still in one of expected_status_codes; otherwise the case is left unchanged and returned with updated false and its current status.
+// @Tags cases
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param message body types.CasesStatusRequest true "Status changes"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.CasesStatusResponse
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/cases/status [patch]
+func PatchCasesStatusHandler(repo caseStatusSetter) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		var body types.CasesStatusRequest
+		if err := c.ShouldBindBodyWithJSON(&body); err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		if len(body.Cases) == 0 {
+			HandleValidationError(c, errors.New("cases is required"))
+			return
+		}
+		seen := map[int]bool{}
+		for _, change := range body.Cases {
+			if err := types.ValidateCaseStatusChange(change); err != nil {
+				HandleValidationError(c, err)
+				return
+			}
+			if seen[change.CaseID] {
+				HandleValidationError(c, fmt.Errorf("case %d is listed more than once", change.CaseID))
+				return
+			}
+			seen[change.CaseID] = true
+		}
+
+		results := make([]types.CaseStatusChangeResult, 0, len(body.Cases))
+		for _, change := range body.Cases {
+			result, err := repo.SetCaseStatusIfExpected(c.Request.Context(), *tenant, change.CaseID, change.StatusCode, change.ExpectedStatusCodes)
+			if err != nil {
+				HandleError(c, err)
+				return
+			}
+			if result == nil {
+				// The gate resolved every case, so this one was deleted since.
+				HandleNotFoundError(c, fmt.Sprintf("case %d", change.CaseID))
+				return
+			}
+			results = append(results, *result)
+		}
+
+		c.JSON(http.StatusOK, types.CasesStatusResponse{Cases: results})
+	}
+}
+
+// CaseEntityDocumentsSearchHandler handles searching for documents for specific case
+// @Summary Search types.DocumentResult list for a case entity
+// @Id caseEntityDocumentsSearch
+// @Description Search for types.DocumentResult list for a case entity
+// @Tags cases
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param case_id path int true "Case ID"
+// @Param			message	body		types.ListBodyWithCriteria	true	"List Body"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.DocumentsSearchResponse
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/cases/{case_id}/documents/search [post]
+func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var (
+			body types.ListBodyWithCriteria
+		)
+		caseId, errCaseId := strconv.Atoi(c.Param("case_id"))
+		if errCaseId != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		var p = types.ResolvePagination(body.Limit, body.Offset, body.PageIndex)
+		var caseIdFilter = types.SearchCriterion{FieldName: types.CaseIdField.Alias, Value: []interface{}{caseId}}
+		var criteria = append(body.SearchCriteria, caseIdFilter)
+		query, err := types.NewListQueryFromCriteria(types.DocumentsQueryConfig, body.AdditionalFields, criteria, p, body.Sort)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		documents, count, err := repo.SearchDocuments(c.Request.Context(), query)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+
+		searchResponse := types.DocumentsSearchResponse{List: *documents, Count: *count}
+		c.JSON(http.StatusOK, searchResponse)
+	}
+}
+
+// CaseOccurrenceTasksHandler returns the tasks attached to a (case, sequencing) pair
+// whose task type produces occurrences of the requested OccurrenceType. Used to
+// populate the task dropdown of the Variants tab header.
+//
+// The task_type that produces each occurrence type is resolved server-side; clients only
+// need to pass the occurrence type. That resolution is more than a lookup for the somatic
+// types: somatic_snv_tn and somatic_snv_to share one task_type_code and are told apart by
+// the tumor/normal makeup of the task, which no client can compute.
+// @Summary List tasks producing occurrences of a given type for a (case, sequencing) pair
+// @Id caseTasksWithOccurrences
+// @Description Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+// @Tags cases
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Sequencing Experiment ID"
+// @Param data_type query string true "Occurrence type. somatic_snv is deprecated: it is an alias of somatic_snv_tn, kept until every client sends an explicit somatic cohort." Enums(germline_snv, germline_cnv, somatic_snv, somatic_snv_tn, somatic_snv_to, somatic_cnv)
+// @Produce json
+// @Success 200 {array} types.TaskOccurrenceType
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences [get]
+func CaseOccurrenceTasksHandler(repo caseTasksReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		caseId, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+		seqId, err := strconv.Atoi(c.Param("seq_id"))
+		if err != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+		selector, err := types.OccurrenceType(c.Query("data_type")).TaskSelector()
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		tasks, err := repo.ListTasksByCaseAndSequencing(c.Request.Context(), caseId, seqId, selector)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		if tasks == nil {
+			tasks = []types.TaskOccurrenceType{}
+		}
+		c.JSON(http.StatusOK, tasks)
+	}
+}
+
+// CaseEntityDocumentsFiltersHandler handles retrieving documents filters for a specific case
+// @Summary Get types.DocumentFilters documents filters for a specific case
+// @Id caseEntityDocumentsFilters
+// @Description Retrieve types.DocumentFilters documents filters for a specific case
+// @Tags cases
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param case_id path int true "Case ID"
+// @Produce json
+// @Success 200 {object} types.DocumentFilters
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/cases/{case_id}/documents/filters [get]
+func CaseEntityDocumentsFiltersHandler(repo caseDocumentsReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		filters, err := repo.GetDocumentsFilters(c.Request.Context(), false)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, filters)
+	}
+}

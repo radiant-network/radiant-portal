@@ -1,0 +1,622 @@
+package starrocks
+
+import (
+	"testing"
+
+	"github.com/Goldziher/go-utils/sliceutils"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+var allSomaticSNVFields = sliceutils.Map(types.SomaticSNVOccurrencesFields, func(value types.Field, index int, slice []types.Field) string {
+	return value.GetAlias()
+})
+
+var defaultSomaticSNVFieldsForTest = []types.Field{
+	types.SomaticSNVLocusIdField,
+}
+
+var SomaticSNVQueryConfigForTest = types.QueryConfig{
+	AllFields:     types.SomaticSNVOccurrencesFields,
+	DefaultFields: defaultSomaticSNVFieldsForTest,
+	DefaultSort:   types.SomaticSNVOccurrencesDefaultSort,
+	IdField:       types.SomaticSNVLocusIdField,
+}
+
+func Test_Somatic_SNV_GetOccurrences(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
+			assert.Equal(t, "1", occurrences[0].Chromosome)
+			assert.Equal(t, int64(1111), occurrences[0].Start)
+			assert.Equal(t, int64(0), occurrences[0].End)
+			assert.Equal(t, 74, occurrences[0].SeqId)
+			assert.Equal(t, 74, occurrences[0].TaskId)
+			assert.False(t, occurrences[0].HasInterpretation)
+			assert.True(t, occurrences[0].HasNote)
+			assert.Equal(t, "hgvsg1", occurrences[0].Hgvsg)
+			assert.Equal(t, "BRAF", occurrences[0].Symbol)
+			assert.Equal(t, "p.Arg19His", occurrences[0].AaChange)
+			assert.Equal(t, "class1", occurrences[0].VariantClass)
+			assert.Equal(t, types.MODIFIER, occurrences[0].VepImpact)
+			assert.Equal(t, 1, len(occurrences[0].PickedConsequences))
+			assert.True(t, *(occurrences[0].IsCanonical))
+			assert.True(t, *(occurrences[0].IsManeSelect))
+			assert.Nil(t, occurrences[0].IsManePlus)
+			assert.Equal(t, "rs111111111", occurrences[0].Rsnumber)
+			assert.Equal(t, 1, len(occurrences[0].OmimInheritanceCode))
+			assert.True(t, *(occurrences[0].Hotspot))
+			assert.Equal(t, 2, len(occurrences[0].Clinvar))
+			assert.Equal(t, float64(0.001), *(occurrences[0].GnomadV3Af))
+			assert.Equal(t, float64(0.99), *(occurrences[0].GermlinePfWgs))
+			assert.Equal(t, 3, *(occurrences[0].GermlinePcWgs))
+			assert.Equal(t, float64(0.55), *(occurrences[0].SomaticPfTnWgs))
+			assert.Equal(t, 6, *(occurrences[0].SomaticPcTnWgs))
+			assert.Equal(t, float64(0.42), *(occurrences[0].SomaticPfToWgs))
+			assert.Equal(t, 21, *(occurrences[0].SomaticPcToWgs))
+			assert.Equal(t, float32(0.66), *(occurrences[0].AdRatio))
+			assert.Equal(t, float32(31.5), *(occurrences[0].Sq))
+			assert.Equal(t, float32(4.2), *(occurrences[0].Aq))
+			assert.Equal(t, "T001", occurrences[0].TranscriptId)
+		}
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Return_Selected_Columns_Only(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		selectedFields := []string{"seq_id", "locus_id", "ad_ratio", "symbol"}
+
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, selectedFields, nil, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, 74, occurrences[0].SeqId)
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
+			assert.Equal(t, "BRAF", occurrences[0].Symbol)
+			assert.Empty(t, occurrences[0].VepImpact)
+		}
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Return_Default_Column_If_No_One_Specified(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, nil, nil, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		assert.Len(t, occurrences, 1)
+
+		if assert.Len(t, occurrences, 1) {
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
+			assert.Empty(t, occurrences[0].Hgvsg)
+		}
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Return_A_Proper_Array_Column(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		selectedFields := []string{"clinvar"}
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, selectedFields, nil, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, types.JsonArray[string]{"Benign", "Pathogenic"}, occurrences[0].Clinvar)
+
+		}
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Return_Occurrences_That_Match_Filters(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{
+			Content: types.SqonArray{
+				{Op: "in", Content: &types.LeafContent{Field: "symbol", Value: []interface{}{"BRAF"}}},
+				{Op: ">", Content: &types.LeafContent{Field: "ad_ratio", Value: []interface{}{0.7}}},
+			},
+			Op: "and",
+		}
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, sqon, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, 74, occurrences[0].SeqId)
+			assert.EqualValues(t, "2000", occurrences[0].LocusId)
+		}
+	})
+}
+
+// Reproduces the cross-task leak scenario: the `multiple` fixture has, at the
+// same tumor_seq_id=74/part, locus 2000 under BOTH task_id=74 (case 71's
+// somatic annotation) and task_id=202 (a second case 72 reusing the same
+// sequencing). Because the list query's outer SELECT re-joins the occurrence
+// table, filtering only on tumor_seq_id + `locus_id IN (<task-filtered subquery>)`
+// is not enough — locus 2000 is IN both subqueries, so without an explicit
+// task_id on the outer query, each case leaks the other's row for that locus.
+func Test_Somatic_SNV_GetOccurrences_TaskIdScopesToOwningCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+
+		// Case 71 (task_id=74) sees only its own loci {1000,2000,3000}, each
+		// stamped task_id=74 — never the task_id=202 row for shared locus 2000.
+		case71Occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		case71LocusIds := make([]string, 0, len(case71Occurrences))
+		for _, occ := range case71Occurrences {
+			assert.Equal(t, 74, occ.TaskId, "task_id=74 query leaked an occurrence from another task")
+			case71LocusIds = append(case71LocusIds, occ.LocusId)
+		}
+		assert.ElementsMatch(t, []string{"1000", "2000", "3000"}, case71LocusIds)
+
+		// Case 72 (task_id=202, reusing tumor_seq_id=74) sees only its locus_ids(s) {2000,5000},
+		// each stamped task_id=202 — never case 71's task_id=74 row for shared locus 2000.
+		case72Occurrences, err := repo.GetOccurrences(t.Context(), 72, 74, 202, query)
+		assert.NoError(t, err)
+		case72LocusIds := make([]string, 0, len(case72Occurrences))
+		for _, occ := range case72Occurrences {
+			assert.Equal(t, 202, occ.TaskId, "task_id=202 query leaked an occurrence from another task")
+			case72LocusIds = append(case72LocusIds, occ.LocusId)
+		}
+		assert.ElementsMatch(t, []string{"2000", "5000"}, case72LocusIds)
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_HasNote_False_When_Note_Is_Deleted(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		notesRepo := postgres.NewOccurrenceNotesRepository(database.PostgresDB{DB: env.Postgres})
+
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+
+		note, err := notesRepo.Create(t.Context(), types.OccurrenceNote{
+			CaseID:       70,
+			SeqID:        74,
+			TaskID:       74,
+			OccurrenceID: "1000",
+			UserID:       "11111111-1111-1111-1111-111111111111",
+			UserName:     "Test User",
+			TenantCode:   types.DefaultTenantCode,
+			Content:      "Test note",
+		})
+		assert.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 74, 74, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.True(t, occurrences[0].HasNote)
+		}
+
+		err = notesRepo.Delete(t.Context(), note.ID)
+		assert.NoError(t, err)
+
+		occurrences, err = repo.GetOccurrences(t.Context(), 70, 74, 74, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.False(t, occurrences[0].HasNote)
+		}
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Return_Expected_Occurrences_When_Limit_And_Offset_Specified(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		sortedBody := []types.SortBody{
+			{
+				Field: "germline_pf_wgs",
+				Order: "desc",
+			},
+		}
+		pagination := &types.Pagination{
+			Limit:  12,
+			Offset: 5,
+		}
+
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, pagination, sortedBody)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 12) {
+			assert.EqualValues(t, "1023", occurrences[0].LocusId)
+			assert.EqualValues(t, "1012", occurrences[len(occurrences)-1].LocusId)
+		}
+	})
+}
+
+func Test_Somatic_SNV_GetExpandedOccurrence(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		expandedOccurrence, err := repo.GetExpandedOccurrence(t.Context(), 71, 74, 74, 1000)
+		assert.NoError(t, err)
+		assert.Equal(t, "1000", expandedOccurrence.LocusId)
+		assert.Equal(t, "locus1", expandedOccurrence.Locus)
+		assert.Equal(t, "1", expandedOccurrence.Chromosome)
+		assert.Equal(t, "hgvsg1", expandedOccurrence.Hgvsg)
+		assert.Equal(t, "BRAF", expandedOccurrence.Symbol)
+		assert.Equal(t, "T001", expandedOccurrence.TranscriptId)
+		assert.Equal(t, float32(0.1), *expandedOccurrence.SiftScore)
+		assert.Equal(t, "T", expandedOccurrence.SiftPred)
+		assert.Equal(t, float32(0.01), *expandedOccurrence.LrtScore)
+		assert.Equal(t, "U", expandedOccurrence.LrtPred)
+		assert.Equal(t, float32(0.991), *expandedOccurrence.Polyphen2HvarScore)
+		assert.Equal(t, "D", expandedOccurrence.Polyphen2HvarPred)
+		assert.Equal(t, 6, *expandedOccurrence.SomaticPcTnWgs)
+		assert.Equal(t, float64(0.55), *expandedOccurrence.SomaticPfTnWgs)
+		assert.Equal(t, 21, *expandedOccurrence.SomaticPcToWgs)
+		assert.Equal(t, 50, *expandedOccurrence.SomaticPnToWgs)
+		assert.Equal(t, float64(0.42), *expandedOccurrence.SomaticPfToWgs)
+		assert.Equal(t, 11, *expandedOccurrence.SomaticPnTnWgs)
+		assert.Equal(t, 5, *expandedOccurrence.SomaticHomTnWgs)
+		assert.Equal(t, 0.5, *expandedOccurrence.SomaticAfTnWgs)
+		assert.Equal(t, 2, *expandedOccurrence.SomaticPcTnWxs)
+		assert.Equal(t, 8, *expandedOccurrence.SomaticPnTnWxs)
+		assert.Equal(t, 0.25, *expandedOccurrence.SomaticPfTnWxs)
+		assert.Equal(t, 0, *expandedOccurrence.SomaticHomTnWxs)
+		assert.Equal(t, 0.125, *expandedOccurrence.SomaticAfTnWxs)
+		assert.Equal(t, 4, *expandedOccurrence.SomaticHomToWgs)
+		assert.Equal(t, 0.25, *expandedOccurrence.SomaticAfToWgs)
+		assert.Equal(t, 3, *expandedOccurrence.SomaticPcToWxs)
+		assert.Equal(t, 12, *expandedOccurrence.SomaticPnToWxs)
+		assert.Equal(t, 0.25, *expandedOccurrence.SomaticPfToWxs)
+		assert.Equal(t, 3, *expandedOccurrence.SomaticHomToWxs)
+		assert.Equal(t, 0.25, *expandedOccurrence.SomaticAfToWxs)
+		assert.Equal(t, float64(0.99), *expandedOccurrence.GermlinePfWgs)
+		assert.Equal(t, 3, *expandedOccurrence.GermlinePcWgs)
+		assert.Nil(t, expandedOccurrence.GermlinePnWgs)
+		assert.Equal(t, 2, *expandedOccurrence.GermlineHomWgs)
+		assert.Equal(t, 0.5, *expandedOccurrence.GermlineAfWgs)
+		assert.Equal(t, 3, *expandedOccurrence.GermlinePcWgsAffected)
+		assert.Equal(t, 1.0, *expandedOccurrence.GermlineAfWgsAffected)
+		assert.Equal(t, 0, *expandedOccurrence.GermlinePnWgsNotAffected)
+		assert.Equal(t, 0.6, *expandedOccurrence.GermlinePfWxsAffected)
+		assert.Equal(t, 0.4, *expandedOccurrence.GermlineAfWxsAffected)
+		assert.Equal(t, float64(0.001), *expandedOccurrence.GnomadV3Af)
+		assert.Equal(t, float32(0.66), *expandedOccurrence.AdRatio)
+		assert.Equal(t, float32(31.5), *expandedOccurrence.Sq)
+		assert.Equal(t, float32(4.2), *expandedOccurrence.Aq)
+		assert.Equal(t, "ENSG00000157764", expandedOccurrence.EnsemblGeneId)
+		assert.Equal(t, 12, *expandedOccurrence.CmcSampleMutated)
+		assert.Equal(t, 0.0012, *expandedOccurrence.CmcSampleRatio)
+		assert.Equal(t, "1", *expandedOccurrence.CmcTier)
+		assert.Equal(t, "https://cancer.sanger.ac.uk/cosmic/search?q=COSV1000", *expandedOccurrence.CmcMutationUrl)
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_WithNote_Keeps_Only_Occurrences_Having_A_Note(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		assert.Len(t, occurrences, 3)
+
+		queryWithNote, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil, types.WithNoteFilter(true))
+		assert.NoError(t, err)
+		occurrences, err = repo.GetOccurrences(t.Context(), 71, 74, 74, queryWithNote)
+		assert.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.EqualValues(t, "1000", occurrences[0].LocusId)
+			assert.True(t, occurrences[0].HasNote)
+		}
+	})
+}
+
+func Test_Somatic_SNV_CountOccurrences_WithNote_Counts_Only_Occurrences_Having_A_Note(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		query, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields)
+		assert.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 3, count.Count)
+		assert.EqualValues(t, 3, count.FilteredCount)
+
+		queryWithNote, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields, types.WithNoteFilter(true))
+		assert.NoError(t, err)
+		count, err = repo.CountOccurrences(t.Context(), 71, 74, 74, queryWithNote)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, count.FilteredCount)
+		assert.EqualValues(t, 3, count.Count)
+	})
+}
+
+func Test_Somatic_SNV_CountOccurrences_WithFlag_Counts_Only_Occurrences_Flagged_With_A_Listed_Type(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		flagsRepo := postgres.NewOccurrenceFlagsRepository(database.PostgresDB{DB: env.Postgres})
+
+		_, err := flagsRepo.Upsert(t.Context(), types.OccurrenceFlag{
+			CaseID:       2,
+			SeqID:        74,
+			TaskID:       74,
+			OccurrenceID: "1000",
+			FlagType:     types.OccurrenceFlagTypeStar,
+			TenantCode:   types.DefaultTenantCode,
+		})
+		assert.NoError(t, err)
+
+		baseline, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields)
+		assert.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 2, 74, 74, baseline)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 3, count.Count)
+
+		starred, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields, types.WithFlagFilter([]types.OccurrenceFlagType{types.OccurrenceFlagTypeStar}))
+		assert.NoError(t, err)
+		count, err = repo.CountOccurrences(t.Context(), 2, 74, 74, starred)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, count.FilteredCount)
+		assert.EqualValues(t, 3, count.Count)
+	})
+}
+
+// The somatic interpretation fixtures key on sequencing 1, which no somatic occurrence uses, so the
+// row is seeded here; cleanUp drops it afterwards because its case is not 1.
+func Test_Somatic_SNV_CountOccurrences_WithInterpretation_Counts_Only_Interpreted_Occurrences(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		err := env.Postgres.Exec(`INSERT INTO interpretation_somatic (sequencing_id, case_id, locus_id, transcript_id, tenant_code) VALUES ('74', '2', '1000', 'T999', ?)`, types.DefaultTenantCode).Error
+		assert.NoError(t, err)
+
+		baseline, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields)
+		assert.NoError(t, err)
+		count, err := repo.CountOccurrences(t.Context(), 2, 74, 74, baseline)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 3, count.Count)
+
+		interpreted, err := types.NewOccurrenceCountQueryFromSqon(nil, types.SomaticSNVOccurrencesFields, types.WithInterpretationFilter(true))
+		assert.NoError(t, err)
+		count, err = repo.CountOccurrences(t.Context(), 2, 74, 74, interpreted)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 1, count.FilteredCount)
+		assert.EqualValues(t, 3, count.Count)
+	})
+}
+
+func somaticLocusIds(occurrences []SomaticSNVOccurrence) []string {
+	return sliceutils.Map(occurrences, func(o SomaticSNVOccurrence, _ int, _ []SomaticSNVOccurrence) string {
+		return o.LocusId
+	})
+}
+
+func getSomaticCmcOccurrences(t *testing.T, env *testutils.Env, sqon *types.Sqon, pagination *types.Pagination, sorted []types.SortBody) []SomaticSNVOccurrence {
+	t.Helper()
+	repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+	query, err := types.NewOccurrenceListQueryFromSqon(types.SomaticSNVOccurrencesQueryConfig, nil, sqon, pagination, sorted)
+	require.NoError(t, err)
+	occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+	require.NoError(t, err)
+	return occurrences
+}
+
+func Test_Somatic_SNV_GetOccurrences_Default_Fields_Return_Reference_Alternate_And_Cmc(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		occurrences := getSomaticCmcOccurrences(t, env, nil, nil, nil)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "A", occurrences[0].Reference)
+			assert.Equal(t, "T", occurrences[0].Alternate)
+			assert.Equal(t, 12, *occurrences[0].CmcSampleMutated)
+			assert.Equal(t, 0.0012, *occurrences[0].CmcSampleRatio)
+			assert.Equal(t, "1", *occurrences[0].CmcTier)
+			assert.Equal(t, "https://cancer.sanger.ac.uk/cosmic/search?q=COSV1000", *occurrences[0].CmcMutationUrl)
+		}
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Filter_By_Cmc_Tier(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "aggregation"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: "in", Content: &types.LeafContent{Field: "cmc_tier", Value: []interface{}{"2"}}}
+		occurrences := getSomaticCmcOccurrences(t, env, sqon, nil, nil)
+		assert.Equal(t, []string{"2000"}, somaticLocusIds(occurrences))
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Filter_By_Cmc_Sample_Mutated(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "aggregation"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: ">", Content: &types.LeafContent{Field: "cmc_sample_mutated", Value: []interface{}{2}}}
+		occurrences := getSomaticCmcOccurrences(t, env, sqon, nil, nil)
+		assert.Equal(t, []string{"1000"}, somaticLocusIds(occurrences))
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Filter_By_Cmc_Sample_Ratio(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "aggregation"}, func(t *testing.T, env *testutils.Env) {
+		sqon := &types.Sqon{Op: "<", Content: &types.LeafContent{Field: "cmc_sample_ratio", Value: []interface{}{0.0003}}}
+		occurrences := getSomaticCmcOccurrences(t, env, sqon, nil, nil)
+		assert.Equal(t, []string{"2000"}, somaticLocusIds(occurrences))
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Sort_By_Cmc_Sample_Mutated_Asc_Puts_Nulls_Last(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		sorted := []types.SortBody{{Field: "cmc_sample_mutated", Order: "asc"}}
+		occurrences := getSomaticCmcOccurrences(t, env, nil, &types.Pagination{Limit: 50}, sorted)
+		ids := somaticLocusIds(occurrences)
+		if assert.Len(t, ids, 29) {
+			assert.Equal(t, []string{"1003", "1004"}, ids[:2])
+			assert.ElementsMatch(t, []string{"1000", "1001", "1002"}, ids[26:])
+			last := occurrences[28]
+			assert.Nil(t, last.CmcSampleMutated)
+			assert.Nil(t, last.CmcSampleRatio)
+			assert.Nil(t, last.CmcTier)
+			assert.Nil(t, last.CmcMutationUrl)
+		}
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Sort_By_Cmc_Sample_Mutated_Desc_Puts_Nulls_Last(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		sorted := []types.SortBody{{Field: "cmc_sample_mutated", Order: "desc"}}
+		occurrences := getSomaticCmcOccurrences(t, env, nil, &types.Pagination{Limit: 50}, sorted)
+		ids := somaticLocusIds(occurrences)
+		if assert.Len(t, ids, 29) {
+			assert.Equal(t, []string{"1028", "1027"}, ids[:2])
+			assert.ElementsMatch(t, []string{"1000", "1001", "1002"}, ids[26:])
+		}
+	})
+}
+
+func Test_Somatic_SNV_AggregateOccurrences_By_Cmc_Tier(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "aggregation"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("cmc_tier", nil, types.SomaticSNVOccurrencesFields)
+		assert.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		assert.Equal(t, []Aggregation{
+			{Bucket: "1", Count: 1},
+			{Bucket: "2", Count: 1},
+		}, aggregate)
+	})
+}
+
+func Test_Somatic_SNV_GetStatisticsOccurrences_Cmc_Sample_Mutated(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("cmc_sample_mutated", nil, types.SomaticSNVOccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 3, statistics.Min)
+		assert.EqualValues(t, 28, statistics.Max)
+		assert.EqualValues(t, types.IntegerType, statistics.Type)
+	})
+}
+
+func Test_Somatic_SNV_GetStatisticsOccurrences_Cmc_Sample_Ratio(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("cmc_sample_ratio", nil, types.SomaticSNVOccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 0.0003, statistics.Min)
+		assert.EqualValues(t, 0.0028, statistics.Max)
+		assert.EqualValues(t, types.DecimalType, statistics.Type)
+	})
+}
+
+func Test_Somatic_SNV_CountOccurrences_Return_Number_Occurrences_Matching_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"ONCO"}}}
+		query, err := types.NewOccurrenceCountQueryFromSqon(sqon, types.SomaticSNVOccurrencesFields)
+		require.NoError(t, err)
+		c, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		assert.EqualValues(t, 2, c.Count)
+	})
+}
+
+func Test_Somatic_SNV_CountOccurrences_Return_Zero_When_Unknown_Tenant_Gene_Panel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{Op: "in", Content: types.LeafContent{Field: "tenant_gene_panel", Value: []interface{}{"UNKNOWN"}}}
+		query, err := types.NewOccurrenceCountQueryFromSqon(sqon, types.SomaticSNVOccurrencesFields)
+		require.NoError(t, err)
+		c, err := repo.CountOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		assert.EqualValues(t, 0, c.Count)
+	})
+}
+
+func Test_Somatic_SNV_AggregateOccurrences_Return_Only_Tenant_Gene_Panels_With_Hits(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "gene_panels"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("tenant_gene_panel", nil, types.SomaticSNVOccurrencesFields)
+		require.NoError(t, err)
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 1, 1, 1, query)
+		require.NoError(t, err)
+		assert.Equal(t, []Aggregation{{Bucket: "EPILEP", Count: 1}, {Bucket: "ONCO", Count: 2}}, aggregate)
+	})
+}
+
+func Test_Somatic_SNV_GetStatisticsOccurrences_Germline_Af_Wgs_Affected(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("germline_af_wgs_affected", nil, types.SomaticSNVOccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 0.05, statistics.Min)
+		assert.EqualValues(t, 0.5, statistics.Max)
+		assert.EqualValues(t, types.DecimalType, statistics.Type)
+	})
+}
+
+func Test_Somatic_SNV_GetStatisticsOccurrences_Somatic_Hom_To_Wxs(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("somatic_hom_to_wxs", nil, types.SomaticSNVOccurrencesFields)
+		assert.NoError(t, err)
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 71, 74, 74, query)
+		assert.NoError(t, err)
+		assert.EqualValues(t, 0, statistics.Min)
+		assert.EqualValues(t, 6, statistics.Max)
+		assert.EqualValues(t, types.IntegerType, statistics.Type)
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Filter_By_Somatic_Hom_To_Wxs_Returns_The_Selected_Field(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{Op: ">", Content: &types.LeafContent{Field: "somatic_hom_to_wxs", Value: []interface{}{5}}}
+		query, err := types.NewOccurrenceListQueryFromSqon(types.SomaticSNVOccurrencesQueryConfig, []string{"somatic_hom_to_wxs"}, sqon, &types.Pagination{Limit: 50}, nil)
+		require.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+		require.NoError(t, err)
+		assert.ElementsMatch(t, []string{"1006", "1013", "1020", "1027"}, somaticLocusIds(occurrences))
+		for _, o := range occurrences {
+			assert.Equal(t, 6, *o.SomaticHomToWxs)
+			assert.Nil(t, o.GermlineAfWgsAffected)
+		}
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Sort_By_Germline_Af_Wgs_Affected_Asc(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pagination"}, func(t *testing.T, env *testutils.Env) {
+		sorted := []types.SortBody{{Field: "germline_af_wgs_affected", Order: "asc"}}
+		occurrences := getSomaticCmcOccurrences(t, env, nil, &types.Pagination{Limit: 3}, sorted)
+		assert.ElementsMatch(t, []string{"1000", "1010", "1020"}, somaticLocusIds(occurrences))
+	})
+}
+
+// TOPMed is joined only when the query uses one of its fields: a sort alone must be enough, on the inner and the
+// outer query of the TOP-N list.
+func Test_Somatic_SNV_GetOccurrences_Sort_By_Topmed_Af_Without_Selecting_It(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sort := []types.SortBody{{Field: "topmed_af", Order: "desc"}}
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, nil, nil, nil, sort)
+		require.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 74, query)
+		require.NoError(t, err)
+		locusIds := sliceutils.Map(occurrences, func(o SomaticSNVOccurrence, _ int, _ []SomaticSNVOccurrence) string { return o.LocusId })
+		assert.Equal(t, []string{"2000", "1000", "3000"}, locusIds, "3000 has no TOPMed row: NULL last in descending order")
+	})
+}

@@ -1,0 +1,1929 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"log/slog"
+	"maps"
+	"regexp"
+	"slices"
+	"strings"
+
+	"github.com/radiant-network/radiant-api/internal/batchval"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
+	"gorm.io/gorm"
+)
+
+const TextMaxLength = 100
+
+const FreeTextMaxLength = 2000
+
+// Regular expressions for external IDs (Ex: SubmitterPatientId, JHN).
+const ExternalIdRegexp = `^[a-zA-Z0-9\- ._'À-ÿ]*$`
+
+var ExternalIdRegexpCompiled = regexp.MustCompile(ExternalIdRegexp)
+
+// FamilyMemberCodeRegExp defines a regular expression pattern that matches strings containing
+// uppercase and lowercase letters (A-Z, a-z) and hyphens.
+const FamilyMemberCodeRegExp = `^[A-Za-z\- ]+$`
+
+var FamilyMemberCodeRegExpCompiled = regexp.MustCompile(FamilyMemberCodeRegExp)
+
+// TextRegExp defines a regular expression pattern that matches strings containing
+// alphanumeric characters (A-Z, a-z, 0-9), hyphens, underscores, periods, commas, colons, and spaces.
+const TextRegExp = `^[A-Za-z0-9\-\_\.\,\: ]+$`
+
+var TextRegExpCompiled = regexp.MustCompile(TextRegExp)
+
+const (
+	CaseAlreadyExists               = "CASE-001"
+	CaseInvalidField                = "CASE-002"
+	CaseUnknownProject              = "CASE-003"
+	CaseUnknownDiagnosticLab        = "CASE-004"
+	CaseUnknownAnalysisCode         = "CASE-005"
+	CaseUnknownOrderingOrganization = "CASE-006"
+	CaseInvalidNumberOfProbands     = "CASE-007"
+	CaseDuplicatePatient            = "CASE-008"
+	CaseSeqExpNotFoundForPatient    = "CASE-009"
+	CaseInvalidSeqExpForType        = "CASE-010"
+	CaseIdenticalInBatch            = "CASE-011"
+	CaseNotFoundForAttach           = "CASE-012"
+)
+
+// Patients error codes
+const (
+	PatientInvalidField = "PATIENT-004"
+	PatientNotFound     = "PATIENT-006"
+)
+
+// Observations error codes
+const (
+	ObservationInvalidField = "OBS-001"
+)
+
+// Sequencing Experiments error codes
+const (
+	SequencingExperimentNotFound = "SEQ-007"
+)
+
+// Tasks error codes
+const (
+	TaskInvalidField                            = "TASK-001"
+	TaskUnknownAliquot                          = "TASK-002"
+	TaskMissingInputDocuments                   = "TASK-003"
+	TaskMissingOutputDocuments                  = "TASK-004"
+	TaskInputDocumentNotFound                   = "TASK-005"
+	TaskInputDocumentNotInSequencingExperiments = "TASK-006"
+	TaskTypeDoesNotSupportMultipleAliquots      = "TASK-007"
+	TaskAlreadyAttached                         = "TASK-008"
+)
+
+// Documents error codes
+const (
+	DocumentInvalidField                     = "DOCUMENT-001"
+	DocumentNotFoundAtURL                    = "DOCUMENT-002"
+	DocumentDuplicateInDB                    = "DOCUMENT-003"
+	DocumentDuplicateWithDifferentFieldValue = "DOCUMENT-004"
+	DocumentAlreadyOutputOfAnotherTask       = "DOCUMENT-005"
+	DocumentSizeMismatch                     = "DOCUMENT-006"
+	DocumentHashMismatch                     = "DOCUMENT-007"
+	DocumentDuplicateInBatch                 = "DOCUMENT-008"
+	DocumentNameInconsistency                = "DOCUMENT-009"
+	DocumentDataTypeNotAllowedForTaskType    = "DOCUMENT-010"
+)
+
+const RelationshipProbandCode = "proband"
+
+var CaseRelatedTaskTypes = map[string]struct{}{
+	"family_variant_calling":                {},
+	"somatic_variant_calling":               {},
+	"tumor_only_variant_calling":            {},
+	types.RadiantGermlineAnnotationTask:     {},
+	types.RadiantGermlineCNVAnnotationTask:  {},
+	types.RadiantSomaticAnnotationTask:      {},
+	types.ClinicalReportTaskTypeCode:        {},
+	types.QualityControlMetricsTaskTypeCode: {},
+}
+
+var RequiresInputDocumentsTaskTypes = map[string]struct{}{
+	"family_variant_calling":               {},
+	"somatic_variant_calling":              {},
+	"tumor_only_variant_calling":           {},
+	types.RadiantGermlineAnnotationTask:    {},
+	types.RadiantGermlineCNVAnnotationTask: {},
+	types.RadiantSomaticAnnotationTask:     {},
+}
+
+const VCFFormatCode = "vcf"
+
+var VariantVCFDataTypeCodes = map[string]struct{}{
+	"snv":  {},
+	"ssnv": {},
+	"gcnv": {},
+}
+
+var SingleAliquotTaskTypes = map[string]struct{}{
+	types.AlignmentGermlineVariantCallingTaskTypeCode: {},
+	types.AlignmentSomaticVariantCallingTaskTypeCode:  {},
+}
+
+type CaseKey struct {
+	ProjectCode     string
+	SubmitterCaseID string
+}
+
+type DocumentRelation struct {
+	TaskID int
+	Type   string
+}
+
+type StorageContext struct {
+	CasesRepo         *postgres.CasesRepository
+	DocRepo           *postgres.DocumentsRepository
+	ObsCatRepo        *postgres.ObservationCategoricalRepository
+	ObsStringRepo     *postgres.ObservationStringRepository
+	FamilyHistoryRepo *postgres.FamilyHistoryRepository
+	FamilyRepo        *postgres.FamilyRepository
+	FetusRepo         *postgres.FetusRepository
+	TaskRepo          *postgres.TaskRepository
+	TenantCode        string
+}
+
+func NewStorageContext(db *gorm.DB) *StorageContext {
+	return &StorageContext{
+		CasesRepo:         postgres.NewCasesRepository(database.PostgresDB{DB: db}),
+		DocRepo:           postgres.NewDocumentsRepository(database.PostgresDB{DB: db}),
+		ObsCatRepo:        postgres.NewObservationCategoricalRepository(database.PostgresDB{DB: db}),
+		ObsStringRepo:     postgres.NewObservationStringRepository(database.PostgresDB{DB: db}),
+		FamilyHistoryRepo: postgres.NewFamilyHistoryRepository(database.PostgresDB{DB: db}),
+		FamilyRepo:        postgres.NewFamilyRepository(database.PostgresDB{DB: db}),
+		FetusRepo:         postgres.NewFetusRepository(database.PostgresDB{DB: db}),
+		TaskRepo:          postgres.NewTaskRepository(database.PostgresDB{DB: db}),
+	}
+}
+
+type CaseValidationRecord struct {
+	batchval.BaseValidationRecord
+	Case                       types.CaseBatch
+	CaseID                     *int
+	ProjectID                  *int
+	SubmitterCaseID            string
+	AnalysisCatalogID          *int
+	OrderingOrganizationExists bool
+	DiagnosisLabExists         bool
+
+	// Codes
+	StatusCodes                       []string
+	ObservationCodes                  []string
+	ExamCodes                         []string
+	OnsetCodes                        []string
+	InterpretationCodes               []string
+	AncestryCodes                     []string
+	ConsanguinityCodes                []string
+	TaskTypeCodes                     []string
+	PriorityCodes                     []string
+	CategoryCodes                     []string
+	PatientAffectedStatusCodes        []string
+	PatientRelationshipToProbandCodes []string
+	DocumentDataCategoryCodes         []string
+	DocumentDataTypeCodes             []string
+	DocumentFormatCodes               []string
+	SexCodes                          []string
+	LifeStatusCodes                   []string
+
+	OutputDocuments map[string]struct{}
+
+	// TenantCode is the tenant of the batch being processed. Every natural-key lookup this record
+	// makes must be scoped to it — none of those keys (project code, analysis code, organization
+	// code, submitter patient/sample ids, aliquot, document URL) is unique across tenants.
+	TenantCode string
+
+	// Necessary to persist the case
+	Patients              map[batchval.PatientKey]*types.Patient
+	SequencingExperiments map[int]*types.SequencingExperiment
+	Documents             map[string]*types.Document
+	DocumentsInTasks      map[string][]*DocumentRelation
+	TaskContexts          map[int][]*types.TaskContext
+	ExistingTasks         map[int]*types.Task              // Key: task ID
+	ExistingTaskDocuments map[int][]*types.TaskHasDocument // Key: task ID
+	SkippedTasks          map[int]struct{}                 // Key: index in Case.Tasks
+}
+
+// caseResourceLabel names the entity in report messages. It is deliberately not the batch
+// resource type (create_case/update_case/patch_case), which labels paths only.
+const caseResourceLabel = "case"
+
+func NewCaseValidationRecord(ctx *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, c types.CaseBatch, index int, tenantCode string) *CaseValidationRecord {
+	return &CaseValidationRecord{
+		BaseValidationRecord: batchval.BaseValidationRecord{
+			Context:      ctx,
+			Cache:        cache,
+			Index:        index,
+			ResourceType: caseResourceLabel,
+		},
+		Case:                  c,
+		TenantCode:            tenantCode,
+		OutputDocuments:       make(map[string]struct{}),
+		Patients:              make(map[batchval.PatientKey]*types.Patient),
+		SequencingExperiments: make(map[int]*types.SequencingExperiment),
+		Documents:             make(map[string]*types.Document),
+		DocumentsInTasks:      make(map[string][]*DocumentRelation),
+		TaskContexts:          make(map[int][]*types.TaskContext),
+		ExistingTasks:         make(map[int]*types.Task),
+		ExistingTaskDocuments: make(map[int][]*types.TaskHasDocument),
+		SkippedTasks:          make(map[int]struct{}),
+	}
+}
+
+func (r *CaseValidationRecord) GetBase() *batchval.BaseValidationRecord {
+	return &r.BaseValidationRecord
+}
+
+func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) {
+	for _, p := range r.Case.Patients {
+		if p.RelationToProbandCode != RelationshipProbandCode {
+			continue
+		}
+
+		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId, TenantCode: r.TenantCode}
+		if patient, ok := r.Patients[key]; ok {
+			return patient, nil
+		}
+		return nil, fmt.Errorf("failed to find proband patient %q for case %d", key, r.Index)
+	}
+	return nil, nil
+}
+
+func (r *CaseValidationRecord) fetchStatusCodes(ctx context.Context) error {
+	statusCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetStatus)
+	if err != nil {
+		return fmt.Errorf("error retrieving status codes: %v", err)
+	}
+	r.StatusCodes = statusCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchObservationCodes(ctx context.Context) error {
+	observationCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetObservation)
+	if err != nil {
+		return fmt.Errorf("error retrieving observation codes: %v", err)
+	}
+	r.ObservationCodes = observationCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchExamCodes(ctx context.Context) error {
+	examCodes, err := r.Cache.GetExamCodes(ctx, r.TenantCode)
+	if err != nil {
+		return fmt.Errorf("error retrieving exam codes: %v", err)
+	}
+	r.ExamCodes = examCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchOnsetCodes(ctx context.Context) error {
+	onsetCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetOnset)
+	if err != nil {
+		return fmt.Errorf("error retrieving onset codes: %v", err)
+	}
+	r.OnsetCodes = onsetCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchInterpretationCodes(ctx context.Context) error {
+	interpretationCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetObservationInterpretation)
+	if err != nil {
+		return fmt.Errorf("error retrieving interpretation codes: %v", err)
+	}
+	r.InterpretationCodes = interpretationCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchAncestryCodes(ctx context.Context) error {
+	ancestryCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetAncestry)
+	if err != nil {
+		return fmt.Errorf("error retrieving ancestry codes: %v", err)
+	}
+	r.AncestryCodes = ancestryCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchConsanguinityCodes(ctx context.Context) error {
+	consanguinityCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetConsanguinity)
+	if err != nil {
+		return fmt.Errorf("error retrieving consanguinity codes: %v", err)
+	}
+	r.ConsanguinityCodes = consanguinityCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchPriorityCodes(ctx context.Context) error {
+	priorityCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetPriority)
+	if err != nil {
+		return fmt.Errorf("error retrieving priority codes: %v", err)
+	}
+	r.PriorityCodes = priorityCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchCategoryCodes(ctx context.Context) error {
+	categoryCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetCaseCategory)
+	if err != nil {
+		return fmt.Errorf("error retrieving category codes: %v", err)
+	}
+	r.CategoryCodes = categoryCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchPatientCodes(ctx context.Context) error {
+	affectedStatusCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetAffectedStatus)
+	if err != nil {
+		return fmt.Errorf("error retrieving patient affected status codes: %v", err)
+	}
+	r.PatientAffectedStatusCodes = affectedStatusCodes
+
+	relationshipToProbandCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetFamilyRelationship)
+	if err != nil {
+		return fmt.Errorf("error retrieving patient relationship to proband codes: %v", err)
+	}
+	// "fetus" is set by persistFetuses, never submitted — a patient's relation_to_proband can't
+	// take it, so drop it from the codes accepted here.
+	r.PatientRelationshipToProbandCodes = slices.DeleteFunc(relationshipToProbandCodes, func(code string) bool {
+		return code == RelationshipFetusCode
+	})
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchDocumentCodes(ctx context.Context) error {
+	dataCategoryCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetDataCategory)
+	if err != nil {
+		return fmt.Errorf("error retrieving document data category codes: %v", err)
+	}
+	r.DocumentDataCategoryCodes = dataCategoryCodes
+
+	dataTypeCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetDataType)
+	if err != nil {
+		return fmt.Errorf("error retrieving document data type codes: %v", err)
+	}
+	r.DocumentDataTypeCodes = dataTypeCodes
+
+	formatCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetFileFormat)
+	if err != nil {
+		return fmt.Errorf("error retrieving document format codes: %v", err)
+	}
+	r.DocumentFormatCodes = formatCodes
+
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchCodeInfos(ctx context.Context) error {
+	if err := r.fetchStatusCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve status codes: %w", err)
+	}
+	if err := r.fetchObservationCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve observation codes: %w", err)
+	}
+	if err := r.fetchExamCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve exam codes: %w", err)
+	}
+	if err := r.fetchOnsetCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve onset codes: %w", err)
+	}
+	if err := r.fetchInterpretationCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve interpretation codes: %w", err)
+	}
+	if err := r.fetchAncestryCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve ancestry codes: %w", err)
+	}
+	if err := r.fetchConsanguinityCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve consanguinity codes: %w", err)
+	}
+	if err := r.fetchTaskTypeCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve task type codes: %w", err)
+	}
+	if err := r.fetchPriorityCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve priority codes: %w", err)
+	}
+	if err := r.fetchCategoryCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve category codes: %w", err)
+	}
+	if err := r.fetchPatientCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve patient codes: %w", err)
+	}
+	if err := r.fetchDocumentCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve document codes: %w", err)
+	}
+	if err := r.fetchFetusCodes(ctx); err != nil {
+		return fmt.Errorf("failed to retrieve fetus codes: %w", err)
+	}
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchTaskTypeCodes(ctx context.Context) error {
+	taskTypeCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetTaskType)
+	if err != nil {
+		return fmt.Errorf("error retrieving task type codes: %v", err)
+	}
+	r.TaskTypeCodes = taskTypeCodes
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchProject(ctx context.Context) error {
+	p, err := r.Cache.GetProjectByCode(ctx, r.Case.ProjectCode, r.TenantCode)
+	if err != nil {
+		return fmt.Errorf("get project by code %q: %w", r.Case.ProjectCode, err)
+	}
+	if p != nil {
+		r.ProjectID = &p.ID
+	}
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchAnalysisCatalog(ctx context.Context) error {
+	a, err := r.Cache.GetCaseAnalysisCatalogByCode(ctx, r.Case.AnalysisCode, r.TenantCode)
+	if err != nil {
+		return fmt.Errorf("get analysis catalog by code %q: %w", r.Case.AnalysisCode, err)
+	}
+	if a != nil {
+		r.AnalysisCatalogID = &a.ID
+	}
+	return nil
+}
+
+// resolveOrganizations records whether the case's ordering organization and
+// diagnosis lab codes refer to existing organizations. The codes themselves
+// come straight from the batch payload; this only records existence so
+// validateCase can emit a friendly error before the (code, tenant_code) FK
+// would reject the insert.
+func (r *CaseValidationRecord) resolveOrganizations(ctx context.Context) error {
+	if r.Case.OrderingOrganizationCode != "" {
+		org, err := r.Cache.GetOrganizationByCode(ctx, r.Case.OrderingOrganizationCode, r.TenantCode)
+		if err != nil {
+			return fmt.Errorf("get organization by code %q: %w", r.Case.OrderingOrganizationCode, err)
+		}
+		r.OrderingOrganizationExists = org != nil
+	}
+
+	if r.Case.DiagnosticLabCode != "" {
+		diagnosisLabOrg, err := r.Cache.GetOrganizationByCode(ctx, r.Case.DiagnosticLabCode, r.TenantCode)
+		if err != nil {
+			return fmt.Errorf("get organization by code %q: %w", r.Case.DiagnosticLabCode, err)
+		}
+		r.DiagnosisLabExists = diagnosisLabOrg != nil
+	}
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchPatients(ctx context.Context) error {
+	for _, cp := range r.Case.Patients {
+		patient, err := r.Cache.GetPatientByOrgCodeAndSubmitterPatientId(ctx, cp.PatientOrganizationCode, cp.SubmitterPatientId, r.TenantCode)
+		if err != nil {
+			return fmt.Errorf("failed to get patient by org code %q and submitter patient id %q: %w", cp.PatientOrganizationCode, cp.SubmitterPatientId, err)
+		}
+
+		key := batchval.PatientKey{OrganizationCode: cp.PatientOrganizationCode, SubmitterPatientId: cp.SubmitterPatientId, TenantCode: r.TenantCode}
+		if patient != nil {
+			r.Patients[key] = patient
+		}
+	}
+	return nil
+}
+
+func (r *CaseValidationRecord) fetchFromSequencingExperiments(ctx context.Context) error {
+	for _, se := range r.Case.SequencingExperiments {
+		seqExp, err := r.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode, r.TenantCode)
+		if err != nil {
+			return fmt.Errorf("failed to get sequencing experiment: %w", err)
+		}
+
+		if seqExp != nil {
+			if _, exists := r.SequencingExperiments[seqExp.ID]; !exists {
+				r.SequencingExperiments[seqExp.ID] = seqExp
+			}
+		}
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) fetchSequencingExperimentsInTask(ctx context.Context, task *types.CaseTaskBatch) error {
+	for _, aliquot := range task.Aliquots {
+		seqs, err := cr.Cache.GetSequencingExperimentByAliquot(ctx, aliquot, cr.TenantCode)
+		if err != nil {
+			return fmt.Errorf("failed to get sequencing experiment by aliquot %q: %w", aliquot, err)
+		}
+
+		for i := range seqs {
+			se := seqs[i]
+			if _, exists := cr.SequencingExperiments[se.ID]; !exists {
+				cr.SequencingExperiments[se.ID] = &se
+			}
+		}
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) fetchTaskContextFromSequencingExperiments(ctx context.Context) error {
+	for _, se := range cr.SequencingExperiments {
+		tcs, err := cr.Cache.GetTaskContextBySequencingExperimentId(ctx, se.ID)
+		if err != nil {
+			return err
+		}
+		for _, tc := range tcs {
+			cr.TaskContexts[tc.TaskID] = append(cr.TaskContexts[tc.TaskID], tc)
+		}
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) fetchDocumentsFromURLs(ctx context.Context, urls []string) error {
+	for _, url := range urls {
+		d, err := cr.Cache.GetDocumentByUrl(ctx, url, cr.TenantCode)
+		if err != nil {
+			return fmt.Errorf("failed to get document by url %q: %w", url, err)
+		}
+		if d == nil {
+			continue
+		}
+
+		cr.Documents[url] = d
+		docs, err := cr.Cache.GetTaskHasDocumentByDocumentId(ctx, d.ID, cr.TenantCode)
+		if err != nil {
+			return fmt.Errorf("failed to get task has document by document id %d: %w", d.ID, err)
+		}
+
+		for _, do := range docs {
+			if _, ok := cr.DocumentsInTasks[url]; ok {
+				cr.DocumentsInTasks[url] = append(cr.DocumentsInTasks[url], &DocumentRelation{
+					TaskID: do.TaskID,
+					Type:   do.Type,
+				})
+			} else {
+				cr.DocumentsInTasks[url] = []*DocumentRelation{
+					{
+						TaskID: do.TaskID,
+						Type:   do.Type,
+					},
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) fetchInputDocumentsFromTask(ctx context.Context, task *types.CaseTaskBatch) error {
+	var urls []string
+	for _, doc := range task.InputDocuments {
+		urls = append(urls, doc.Url)
+	}
+	return cr.fetchDocumentsFromURLs(ctx, urls)
+}
+
+func (cr *CaseValidationRecord) fetchOutputDocumentsFromTask(ctx context.Context, task *types.CaseTaskBatch) error {
+	var urls []string
+	for _, doc := range task.OutputDocuments {
+		urls = append(urls, doc.Url)
+	}
+	return cr.fetchDocumentsFromURLs(ctx, urls)
+}
+
+func (cr *CaseValidationRecord) fetchFromTasks(ctx context.Context) error {
+	for _, t := range cr.Case.Tasks {
+		if err := cr.fetchSequencingExperimentsInTask(ctx, t); err != nil {
+			return fmt.Errorf("failed to fetch sequencing experiments from task: %w", err)
+		}
+
+		if err := cr.fetchTaskContextFromSequencingExperiments(ctx); err != nil {
+			return fmt.Errorf("failed to fetch task context from sequencing experiments: %w", err)
+		}
+
+		if err := cr.fetchInputDocumentsFromTask(ctx, t); err != nil {
+			return fmt.Errorf("failed to fetch input documents from task: %w", err)
+		}
+
+		if err := cr.fetchOutputDocumentsFromTask(ctx, t); err != nil {
+			return fmt.Errorf("failed to fetch output documents from task: %w", err)
+		}
+	}
+	return cr.fetchTasksOwningOutputDocuments(ctx)
+}
+
+func (cr *CaseValidationRecord) fetchTasksOwningOutputDocuments(ctx context.Context) error {
+	for _, relations := range cr.DocumentsInTasks {
+		for _, dr := range relations {
+			if dr.Type != "output" {
+				continue
+			}
+			if _, ok := cr.ExistingTasks[dr.TaskID]; ok {
+				continue
+			}
+			task, err := cr.Cache.GetTaskById(ctx, dr.TaskID)
+			if err != nil {
+				return fmt.Errorf("failed to get task by id %d: %w", dr.TaskID, err)
+			}
+			if task == nil {
+				continue
+			}
+			cr.ExistingTasks[dr.TaskID] = task
+			docs, err := cr.Cache.GetTaskHasDocumentByTaskId(ctx, dr.TaskID)
+			if err != nil {
+				return fmt.Errorf("failed to get documents of task %d: %w", dr.TaskID, err)
+			}
+			cr.ExistingTaskDocuments[dr.TaskID] = docs
+		}
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) fetchValidationInfos(ctx context.Context) error {
+	if err := cr.fetchProject(ctx); err != nil {
+		return fmt.Errorf("failed to resolve project: %w", err)
+	}
+	if err := cr.fetchAnalysisCatalog(ctx); err != nil {
+		return fmt.Errorf("failed to resolve analysis catalog: %w", err)
+	}
+	if err := cr.resolveOrganizations(ctx); err != nil {
+		return fmt.Errorf("failed to resolve organizations: %w", err)
+	}
+	if err := cr.fetchPatients(ctx); err != nil {
+		return fmt.Errorf("failed to resolve patients: %w", err)
+	}
+	if err := cr.fetchFromSequencingExperiments(ctx); err != nil {
+		return fmt.Errorf("failed to resolve sequencing experiments: %w", err)
+	}
+	if err := cr.fetchFromTasks(ctx); err != nil {
+		return fmt.Errorf("failed to resolve tasks: %w", err)
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) formatTaskFieldErrorMessage(fieldName string, caseIndex, taskIndex int) string {
+	return fmt.Sprintf("Invalid field %s for case %d - task %d. Reason:", fieldName, caseIndex, taskIndex)
+}
+
+func (cr *CaseValidationRecord) formatFieldPath(entityType string, entityIndex *int, collectionName string, collectionIndex *int) string {
+	var path string
+	if entityType != "" {
+		path = fmt.Sprintf("case[%d].%s", cr.Index, entityType)
+		if entityIndex != nil {
+			path = fmt.Sprintf("%s[%d]", path, *entityIndex)
+		}
+		if collectionName != "" {
+			path = fmt.Sprintf("%s.%s", path, collectionName)
+			if collectionIndex != nil {
+				path = fmt.Sprintf("%s[%d]", path, *collectionIndex)
+			}
+		}
+	} else {
+		path = fmt.Sprintf("case[%d]", cr.Index)
+	}
+	return path
+}
+
+func (cr *CaseValidationRecord) formatPatientsFieldPath(patientIndex *int, collectionName string, collectionIndex *int) string {
+	return cr.formatFieldPath("patients", patientIndex, collectionName, collectionIndex)
+}
+
+func (cr *CaseValidationRecord) formatSeqExpFieldPath(seqExpIndex *int) string {
+	return cr.formatFieldPath("sequencing_experiments", seqExpIndex, "", nil)
+}
+
+// Family History validation
+
+func (cr *CaseValidationRecord) validateFamilyMemberCode(patientIndex int, fhIndex int) {
+	fh := cr.Case.Patients[patientIndex].FamilyHistory[fhIndex]
+	fieldName := "family_member_code"
+	path := cr.formatPatientsFieldPath(&patientIndex, "family_history", &fhIndex)
+	cr.ValidateStringField(fh.FamilyMemberCode, fieldName, path, PatientInvalidField, caseResourceLabel, TextMaxLength, FamilyMemberCodeRegExpCompiled, []string{}, true)
+}
+
+func (cr *CaseValidationRecord) validateCondition(patientIndex int, fhIndex int) {
+	fh := cr.Case.Patients[patientIndex].FamilyHistory[fhIndex]
+	fieldName := "condition"
+	path := cr.formatPatientsFieldPath(&patientIndex, "family_history", &fhIndex)
+	cr.ValidateStringField(fh.Condition, fieldName, path, PatientInvalidField, caseResourceLabel, FreeTextMaxLength, nil, []string{}, true)
+
+}
+
+func (cr *CaseValidationRecord) validateFamilyHistory(patientIndex int) {
+	for fhIndex := range cr.Case.Patients[patientIndex].FamilyHistory {
+		cr.validateFamilyMemberCode(patientIndex, fhIndex)
+		cr.validateCondition(patientIndex, fhIndex)
+	}
+}
+
+// Observations Categorical validation
+
+// observationValueCodes returns the values allowed for this observation code,
+// or nil when the value is validated by format only.
+func (cr *CaseValidationRecord) observationValueCodes(code string) []string {
+	switch code {
+	case types.ObsCodeAncestry:
+		return cr.AncestryCodes
+	case types.ObsCodeConsanguinity:
+		return cr.ConsanguinityCodes
+	default:
+		return nil
+	}
+}
+
+// addNullObservationError flags a null array entry, e.g. `"observations_text": [null]`. `dive`
+// without `required` accepts one, so the payload binds at the API and reaches the worker, which
+// would nil-deref on it. Tightening the tag to `dive,required` is NOT an option: swag v2 reads any
+// `required` in a binding tag as "this field is required" and would wrongly mark these optional
+// arrays required in the generated OpenAPI spec (and in the TS/Python clients).
+func (cr *CaseValidationRecord) addNullObservationError(res, path string) {
+	cr.AddErrors(fmt.Sprintf("Invalid observation for %s. Reason: entry is null.", res), ObservationInvalidField, path)
+}
+
+func (cr *CaseValidationRecord) validateExamCode(obsCode, examCode, path, res string) {
+	cr.ValidateCode(res, path+".exam_code", "exam_code", ObservationInvalidField, examCode, cr.ExamCodes, []string{}, obsCode == types.ObsCodeExam)
+}
+
+func (cr *CaseValidationRecord) validateObservationCategoricalItem(obs *types.ObservationCategoricalBatch, obsPath, res string) {
+	if obs == nil {
+		cr.addNullObservationError(res, obsPath)
+		return
+	}
+	onsetRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code) && obs.ExamCode == ""
+	interpretationRequired := types.ObservationRequiresOnsetAndInterpretation(obs.Code)
+
+	cr.ValidateCode(res, obsPath+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
+	cr.ValidateCode(res, obsPath+".onset_code", "onset_code", ObservationInvalidField, obs.OnsetCode, cr.OnsetCodes, []string{}, onsetRequired)
+	cr.ValidateCode(res, obsPath+".interpretation_code", "interpretation_code", ObservationInvalidField, obs.InterpretationCode, cr.InterpretationCodes, []string{}, interpretationRequired)
+	cr.validateExamCode(obs.Code, obs.ExamCode, obsPath, res)
+
+	cr.ValidateStringField(obs.System, "system", obsPath+".system", ObservationInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
+	if valueCodes := cr.observationValueCodes(obs.Code); valueCodes != nil {
+		cr.ValidateCode(res, obsPath+".value", "value", ObservationInvalidField, obs.Value, valueCodes, []string{}, true)
+	} else {
+		cr.ValidateStringField(obs.Value, "value", obsPath+".value", ObservationInvalidField, res, FreeTextMaxLength, nil, []string{}, true)
+	}
+	cr.ValidateStringField(obs.Note, "note", obsPath+".note", ObservationInvalidField, res, FreeTextMaxLength, nil, []string{}, false)
+}
+
+func (cr *CaseValidationRecord) validateObservationsCategorical(patientIndex int) error {
+	for obsIndex := range cr.Case.Patients[patientIndex].ObservationsCategorical {
+		obsPath := cr.formatPatientsFieldPath(&patientIndex, "observations_categorical", &obsIndex)
+		obs := cr.Case.Patients[patientIndex].ObservationsCategorical[obsIndex]
+		res := fmt.Sprintf("case %d - patient %d - observations_categorical %d", cr.Index, patientIndex, obsIndex)
+		cr.validateObservationCategoricalItem(obs, obsPath, res)
+	}
+	return nil
+}
+
+// Observations Text validation
+
+func (cr *CaseValidationRecord) validateObsTextValue(patientIndex int, obsIndex int) {
+	obs := cr.Case.Patients[patientIndex].ObservationsText[obsIndex]
+	fieldName := "value"
+	path := cr.formatPatientsFieldPath(&patientIndex, "observations_text", &obsIndex)
+	res := fmt.Sprintf("case %d - patient %d - observations_text %d - value: %q", cr.Index, patientIndex, obsIndex, obs.Value)
+	cr.ValidateStringField(obs.Value, fieldName, path, ObservationInvalidField, res, FreeTextMaxLength, nil, []string{}, true)
+}
+
+func (cr *CaseValidationRecord) validateObservationsText(patientIndex int) error {
+	for obsIndex := range cr.Case.Patients[patientIndex].ObservationsText {
+		obs := cr.Case.Patients[patientIndex].ObservationsText[obsIndex]
+		res := fmt.Sprintf("case %d - patient %d - observations_text %d", cr.Index, patientIndex, obsIndex)
+
+		path := cr.formatPatientsFieldPath(&patientIndex, "observations_text", &obsIndex)
+		cr.ValidateCode(res, path+".code", "code", ObservationInvalidField, obs.Code, cr.ObservationCodes, []string{}, true)
+		cr.validateExamCode(obs.Code, obs.ExamCode, path, res)
+		cr.validateObsTextValue(patientIndex, obsIndex)
+	}
+	return nil
+}
+
+// Case patient validation
+
+func (cr *CaseValidationRecord) validatePatient(patientIndex int) {
+	p := cr.Case.Patients[patientIndex]
+	_, exists := cr.Patients[batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId, TenantCode: cr.TenantCode}]
+	if !exists {
+		path := cr.formatPatientsFieldPath(&patientIndex, "", nil)
+		message := fmt.Sprintf("Patient (%s / %s) for case %d - patient %d does not exist.",
+			p.PatientOrganizationCode,
+			p.SubmitterPatientId,
+			cr.Index,
+			patientIndex,
+		)
+		cr.AddErrors(message, PatientNotFound, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validatePatientUniquenessInCase(patientIndex int, visited map[batchval.PatientKey]struct{}) {
+	p := cr.Case.Patients[patientIndex]
+	patientKey := batchval.PatientKey{
+		OrganizationCode:   p.PatientOrganizationCode,
+		SubmitterPatientId: p.SubmitterPatientId,
+		TenantCode:         cr.TenantCode,
+	}
+	if _, exists := visited[patientKey]; exists {
+		path := cr.formatPatientsFieldPath(nil, "", nil)
+		message := fmt.Sprintf("Duplicate patient (%s / %s) for case %d.",
+			p.PatientOrganizationCode,
+			p.SubmitterPatientId,
+			cr.Index,
+		)
+		cr.AddErrors(message, CaseDuplicatePatient, path)
+	}
+	visited[patientKey] = struct{}{}
+}
+
+func (cr *CaseValidationRecord) validateAffectedStatusCode(path string, resourceIds []string, patientIndex int) {
+	cr.ValidateCode("", path, "affected_status_code", PatientInvalidField, cr.Case.Patients[patientIndex].AffectedStatusCode, cr.PatientAffectedStatusCodes, resourceIds, true)
+}
+
+func (cr *CaseValidationRecord) validateRelationshipToProbandCode(path string, resourceIds []string, patientIndex int) {
+	cr.ValidateCode("", path, "relation_to_proband_code", PatientInvalidField, cr.Case.Patients[patientIndex].RelationToProbandCode, cr.PatientRelationshipToProbandCodes, resourceIds, true)
+
+}
+
+func (cr *CaseValidationRecord) validateCasePatients() error {
+	nbProband := 0
+	visitedPatients := map[batchval.PatientKey]struct{}{}
+
+	for patientIndex := range cr.Case.Patients {
+
+		patientPath := cr.formatPatientsFieldPath(&patientIndex, "", nil)
+		res := fmt.Sprintf("case %d - patient %d", cr.Index, patientIndex)
+		cr.ValidateStringField(cr.Case.Patients[patientIndex].SubmitterPatientId, "submitter_patient_id", patientPath+".submitter_patient_id", PatientInvalidField, res, TextMaxLength, TextRegExpCompiled, []string{}, true)
+
+		// Validate uniqueness of patients in case
+		cr.validatePatientUniquenessInCase(patientIndex, visitedPatients)
+
+		// Validate patient exists in organization
+		cr.validatePatient(patientIndex)
+
+		if cr.Case.Patients[patientIndex].RelationToProbandCode == "proband" {
+			nbProband++
+		}
+		cr.validateAffectedStatusCode(patientPath+".affected_status_code", []string{res}, patientIndex)
+		cr.validateRelationshipToProbandCode(patientPath+".relation_to_proband_code", []string{res}, patientIndex)
+
+		// Validate family history
+		cr.validateFamilyHistory(patientIndex)
+
+		// Validate observations categorical
+		err := cr.validateObservationsCategorical(patientIndex)
+		if err != nil {
+			return fmt.Errorf("error validating observations categorical for patient index %d: %v", patientIndex, err)
+		}
+
+		// Validate observations text
+		err = cr.validateObservationsText(patientIndex)
+		if err != nil {
+			return fmt.Errorf("error validating observations text for patient index %d: %v", patientIndex, err)
+		}
+	}
+
+	// Validate number of probands
+	if nbProband != 1 {
+		message := fmt.Sprintf("Case %d must have exactly 1 proband.", cr.Index)
+		path := cr.formatFieldPath("patients", nil, "", nil)
+		cr.AddErrors(message, CaseInvalidNumberOfProbands, path)
+	}
+
+	return nil
+}
+
+func (cr *CaseValidationRecord) validateSeqExpExists(ctx context.Context, seqExpIndex int) (error, bool) {
+	se := cr.Case.SequencingExperiments[seqExpIndex]
+	seqExp, err := cr.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode, cr.TenantCode)
+	if err != nil {
+		return fmt.Errorf("error getting existing sequencing experiment: %v", err), false
+	}
+	if seqExp == nil {
+		path := cr.formatSeqExpFieldPath(&seqExpIndex)
+		message := fmt.Sprintf("Sequencing experiment (%s / %s / %s) does not exist.",
+			se.SampleOrganizationCode,
+			se.SubmitterSampleId,
+			se.Aliquot,
+		)
+		cr.AddErrors(message, SequencingExperimentNotFound, path)
+		return nil, false
+	}
+	return nil, true
+}
+
+func (cr *CaseValidationRecord) validateSeqExpSample(ctx context.Context, seqExpIndex int) (*types.Sample, error) {
+	se := cr.Case.SequencingExperiments[seqExpIndex]
+	sample, err := cr.Cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, se.SampleOrganizationCode, se.SubmitterSampleId, cr.TenantCode)
+	if err != nil {
+		return nil, fmt.Errorf("error getting existing sample: %v", err)
+	}
+	return sample, nil
+}
+
+func (cr *CaseValidationRecord) validateSeqExpPatientInCase(seqExpIndex int, sample *types.Sample) error {
+	if sample == nil {
+		return nil
+	}
+
+	se := cr.Case.SequencingExperiments[seqExpIndex]
+	patientFound := false
+	for key := range cr.Patients {
+		if cr.Patients[key].ID == sample.PatientID {
+			patientFound = true
+			break
+		}
+	}
+	if !patientFound {
+		path := cr.formatSeqExpFieldPath(&seqExpIndex)
+		message := fmt.Sprintf("Sequencing experiment (%s / %s / %s) does not belong to any patient from case %d.",
+			se.SampleOrganizationCode,
+			se.SubmitterSampleId,
+			se.Aliquot,
+			cr.Index,
+		)
+		cr.AddErrors(message, CaseSeqExpNotFoundForPatient, path)
+	}
+
+	return nil
+}
+
+func (cr *CaseValidationRecord) validateSeqExpCaseType(seqExpIndex int, sample *types.Sample) error {
+	if sample == nil {
+		return nil
+	}
+
+	se := cr.Case.SequencingExperiments[seqExpIndex]
+	if cr.Case.Type == "germline" && sample.HistologyCode == "tumoral" {
+		path := cr.formatSeqExpFieldPath(&seqExpIndex)
+		message := fmt.Sprintf("Tumor sequencing experiment (%s / %s / %s) should not be sequenced in a germline case for case %d - sequencing experiment %d.",
+			se.SampleOrganizationCode,
+			se.SubmitterSampleId,
+			se.Aliquot,
+			cr.Index,
+			seqExpIndex,
+		)
+		cr.AddErrors(message, CaseInvalidSeqExpForType, path)
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) validateCaseSequencingExperiments(ctx context.Context) error {
+	for seqExpIndex := range cr.Case.SequencingExperiments {
+		err, exists := cr.validateSeqExpExists(ctx, seqExpIndex)
+		if err != nil {
+			return fmt.Errorf("error validating sequencing experiment in organization for sequencing experiment index %d: %v", seqExpIndex, err)
+		}
+		if !exists {
+			continue
+		}
+		sample, err := cr.validateSeqExpSample(ctx, seqExpIndex)
+		if err != nil {
+			return fmt.Errorf("error validating sequencing experiment sample for sequencing experiment index %d: %v", seqExpIndex, err)
+		}
+		err = cr.validateSeqExpCaseType(seqExpIndex, sample)
+		if err != nil {
+			return fmt.Errorf("error validating sequencing experiment for wrong case type for sequencing experiment index %d: %v", seqExpIndex, err)
+		}
+		err = cr.validateSeqExpPatientInCase(seqExpIndex, sample)
+		if err != nil {
+			return fmt.Errorf("error validating sequencing experiment patient in case for sequencing experiment index %d: %v", seqExpIndex, err)
+		}
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) validateCaseField(value, fieldName, path string, regExp *regexp.Regexp, maxLength int, required bool) {
+	cr.ValidateStringField(value, fieldName, path, CaseInvalidField, fmt.Sprintf("%s %d", caseResourceLabel, cr.Index), maxLength, regExp, []string{}, required)
+}
+
+func (cr *CaseValidationRecord) validateCodes() {
+	resIds := []string{fmt.Sprintf("%d", cr.Index)}
+	path := cr.formatFieldPath("", nil, "", nil)
+	cr.ValidateCode(caseResourceLabel, path+".status_code", "status_code", CaseInvalidField, cr.Case.StatusCode, cr.StatusCodes, resIds, true)
+	cr.ValidateCode(caseResourceLabel, path+".priority_code", "priority_code", CaseInvalidField, cr.Case.PriorityCode, cr.PriorityCodes, resIds, false)
+	cr.ValidateCode(caseResourceLabel, path+".category_code", "category_code", CaseInvalidField, cr.Case.CategoryCode, cr.CategoryCodes, resIds, false)
+}
+
+func (cr *CaseValidationRecord) validateCase(ctx context.Context) error {
+
+	path := batchval.FormatPath(cr, "")
+
+	// Validate case uniqueness in DB
+	if cr.ProjectID != nil && cr.Case.SubmitterCaseId != "" {
+		c, err := cr.Cache.GetCaseBySubmitterCaseIdAndProjectId(ctx, cr.Case.SubmitterCaseId, *cr.ProjectID, cr.TenantCode)
+		if err != nil {
+			return fmt.Errorf("error checking for existing case with submitter_case_id %q and project_id %d: %v", cr.Case.SubmitterCaseId, *cr.ProjectID, err)
+		}
+		if c != nil {
+			cr.Skipped = true
+			message := fmt.Sprintf("Case (%d / %s) already exists, skipped.", *cr.ProjectID, cr.Case.SubmitterCaseId)
+			cr.AddInfos(message, CaseAlreadyExists, path) // CASE-001
+			return nil
+		}
+	}
+
+	// Validate data in DB
+	if cr.ProjectID == nil {
+		message := fmt.Sprintf("Project %s for case %d does not exist.", cr.Case.ProjectCode, cr.Index)
+		cr.AddErrors(message, CaseUnknownProject, path) // CASE-003
+	}
+
+	cr.validateCaseCommonFields(path)
+	return nil
+}
+
+// validateCaseCommonFields validates diagnostic lab/analysis catalog/ordering organization
+// existence and the case's scalar field formats. Shared by the POST (validateCase) and
+// PUT (validateUpdateCaseRecord) paths — these checks apply identically whether the case is
+// being created or updated.
+func (cr *CaseValidationRecord) validateCaseCommonFields(path string) {
+	if !cr.DiagnosisLabExists {
+		message := fmt.Sprintf("Diagnostic lab %q for case %d does not exist.", cr.Case.DiagnosticLabCode, cr.Index)
+		cr.AddErrors(message, CaseUnknownDiagnosticLab, path) // CASE-004
+	}
+	if cr.AnalysisCatalogID == nil {
+		message := fmt.Sprintf("Analysis %q for case %d does not exist.", cr.Case.AnalysisCode, cr.Index)
+		cr.AddErrors(message, CaseUnknownAnalysisCode, path) // CASE-005
+	}
+	if !cr.OrderingOrganizationExists {
+		message := fmt.Sprintf("Ordering organization %q for case %d does not exist.", cr.Case.OrderingOrganizationCode, cr.Index)
+		cr.AddErrors(message, CaseUnknownOrderingOrganization, path) // CASE-006
+	}
+
+	// Validate fields
+	if cr.Case.SubmitterCaseId != "" {
+		cr.validateCaseField(cr.Case.SubmitterCaseId, "submitter_case_id", path, ExternalIdRegexpCompiled, TextMaxLength, false)
+	}
+	cr.validateCodes()
+
+	if cr.Case.PrimaryConditionCodeSystem != "" {
+		cr.validateCaseField(cr.Case.PrimaryConditionCodeSystem, "primary_condition_code_system", path, TextRegExpCompiled, TextMaxLength, false)
+	}
+	if cr.Case.PrimaryConditionValue != "" {
+		cr.validateCaseField(cr.Case.PrimaryConditionValue, "primary_condition_value", path, TextRegExpCompiled, TextMaxLength, false)
+	}
+	if cr.Case.Note != "" {
+		cr.validateCaseField(cr.Case.Note, "note", path, nil, FreeTextMaxLength, false)
+	}
+	if cr.Case.DiagnosisHypothesis != "" {
+		cr.validateCaseField(cr.Case.DiagnosisHypothesis, "diagnosis_hypothesis", path, nil, FreeTextMaxLength, false)
+	}
+	if cr.Case.OrderingPhysician != "" {
+		cr.validateCaseField(cr.Case.OrderingPhysician, "ordering_physician", path, NameRegExpCompiled, TextMaxLength, false)
+	}
+}
+
+// Tasks validation
+
+func (cr *CaseValidationRecord) validateTaskTextField(fieldValue, fieldName string, taskIndex int, regExp *regexp.Regexp, required bool) {
+	path := cr.formatFieldPath("tasks", &taskIndex, fieldName, nil)
+	if !required && fieldValue == "" {
+		return
+	}
+	res := fmt.Sprintf("case %d - task %d", cr.Index, taskIndex)
+	cr.ValidateStringField(fieldValue, fieldName, path, TaskInvalidField, res, TextMaxLength, regExp, []string{}, required)
+}
+
+func (cr *CaseValidationRecord) validateTaskTypeCode(typeCode string, taskIndex int) {
+	if !slices.Contains(cr.TaskTypeCodes, typeCode) {
+		path := cr.formatFieldPath("tasks", &taskIndex, "type_code", nil)
+		msg := cr.formatTaskFieldErrorMessage("type_code", cr.Index, taskIndex) + " invalid task type code `" + typeCode + "`. Valid codes are: [" + strings.Join(cr.TaskTypeCodes, ", ") + "]."
+		cr.AddErrors(msg+"", TaskInvalidField, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateTaskAliquot(taskIndex int) {
+	task := cr.Case.Tasks[taskIndex]
+	if len(task.Aliquots) == 0 {
+		path := cr.formatFieldPath("tasks", &taskIndex, "aliquots", nil)
+		msg := cr.formatTaskFieldErrorMessage("aliquots", cr.Index, taskIndex)
+		cr.AddErrors(fmt.Sprintf("%s aliquots must contain at least one value.", msg), TaskInvalidField, path)
+		return
+	}
+
+	if _, ok := SingleAliquotTaskTypes[task.TypeCode]; ok && len(task.Aliquots) > 1 {
+		path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
+		msg := fmt.Sprintf("Task type %s doesn't support being associated with more than 1 aliquot value.", task.TypeCode)
+		cr.AddErrors(msg, TaskTypeDoesNotSupportMultipleAliquots, path)
+		return
+	}
+
+	existingAliquots := make(map[string]struct{}, len(cr.Case.SequencingExperiments))
+	for _, se := range cr.Case.SequencingExperiments {
+		existingAliquots[se.Aliquot] = struct{}{}
+	}
+
+	for _, aliquot := range task.Aliquots {
+		if _, found := existingAliquots[aliquot]; !found {
+			path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
+			message := fmt.Sprintf("Sequencing %q is not defined for case %d - task %d.", aliquot, cr.Index, taskIndex)
+			cr.AddErrors(message, TaskUnknownAliquot, path)
+		}
+	}
+}
+
+func (cr *CaseValidationRecord) getOriginTaskForInputDocument(url string) (*types.CaseTaskBatch, *types.OutputDocumentBatch) {
+	for _, task := range cr.Case.Tasks {
+		for _, outdoc := range task.OutputDocuments {
+			if outdoc.Url == url {
+				return task, outdoc
+			}
+		}
+	}
+	return nil, nil
+}
+
+func (cr *CaseValidationRecord) addMissingExperimentError(url, baseMsg, path string) {
+	msg := fmt.Sprintf("Input document with URL %s for %s was produced by a sequencing experiment not defined in this case.", url, baseMsg)
+	cr.AddErrors(msg, TaskInputDocumentNotInSequencingExperiments, path)
+}
+
+func (cr *CaseValidationRecord) validateTaskDocumentsContext(url, path, baseMsg string, isOriginMissing bool) {
+	usages, ok := cr.DocumentsInTasks[url]
+	if !ok {
+		return
+	}
+
+	for _, usage := range usages {
+		if usage.Type == "input" {
+			continue
+		}
+
+		contexts, ok := cr.TaskContexts[usage.TaskID]
+
+		if !ok && isOriginMissing {
+			cr.addMissingExperimentError(url, baseMsg, path)
+			break
+		}
+
+		for _, tc := range contexts {
+			if _, exists := cr.SequencingExperiments[tc.SequencingExperimentID]; !exists {
+				cr.addMissingExperimentError(url, baseMsg, path)
+				return
+			}
+		}
+	}
+}
+
+func (cr *CaseValidationRecord) validateTaskDocuments(task *types.CaseTaskBatch, taskIndex int) {
+	path := cr.formatFieldPath("tasks", &taskIndex, "", nil)
+	baseMsg := fmt.Sprintf("case %d - task %d", cr.Index, taskIndex)
+
+	if _, ok := RequiresInputDocumentsTaskTypes[task.TypeCode]; ok {
+		if len(task.InputDocuments) == 0 {
+			message := fmt.Sprintf("Missing input documents for case %d - task %d of type %s.", cr.Index, taskIndex, task.TypeCode)
+			cr.AddErrors(message, TaskMissingInputDocuments, path)
+		}
+	}
+
+	if len(task.OutputDocuments) == 0 {
+		message := fmt.Sprintf("Missing output documents for case %d - task %d of type %s.", cr.Index, taskIndex, task.TypeCode)
+		cr.AddErrors(message, TaskMissingOutputDocuments, path)
+	}
+
+	for _, indoc := range task.InputDocuments {
+		url := indoc.Url
+		_, existsInDocs := cr.Documents[url]
+		_, originTask := cr.getOriginTaskForInputDocument(url)
+
+		if !existsInDocs && originTask == nil {
+			cr.AddErrors(fmt.Sprintf("Input document with URL %s does not exist for %s.", url, baseMsg), TaskInputDocumentNotFound, path)
+			continue
+		}
+		cr.validateTaskDocumentsContext(url, path, baseMsg, originTask == nil)
+	}
+}
+
+func (cr *CaseValidationRecord) validateTasks() error {
+	for taskIndex, task := range cr.Case.Tasks {
+
+		for _, aliquot := range task.Aliquots {
+			cr.validateTaskTextField(aliquot, "aliquots", taskIndex, TextRegExpCompiled, true)
+		}
+
+		cr.validateTaskTextField(task.TypeCode, "type_code", taskIndex, TextRegExpCompiled, true)
+		cr.validateTaskTypeCode(task.TypeCode, taskIndex)
+		cr.validateTaskTextField(task.PipelineVersion, "pipeline_version", taskIndex, TextRegExpCompiled, true)
+		cr.validateTaskAliquot(taskIndex)
+		cr.validateTaskDocuments(task, taskIndex)
+
+		// Optional fields
+		if task.GenomeBuild != "" {
+			cr.validateTaskTextField(task.GenomeBuild, "genome_build", taskIndex, TextRegExpCompiled, true)
+		}
+		if task.PipelineName != "" {
+			cr.validateTaskTextField(task.PipelineName, "pipeline_name", taskIndex, TextRegExpCompiled, true)
+		}
+	}
+	return nil
+}
+
+// Documents validation
+
+type documentFieldDiff struct {
+	name        string
+	existingVal any
+	newVal      any
+}
+
+func documentFieldDiffs(new *types.OutputDocumentBatch, existing *types.Document) []documentFieldDiff {
+	var diffs []documentFieldDiff
+	check := func(name string, newVal, existingVal any) {
+		if newVal != existingVal {
+			diffs = append(diffs, documentFieldDiff{name, existingVal, newVal})
+		}
+	}
+
+	check("format_code", new.FormatCode, existing.FileFormatCode)
+	check("name", new.Name, existing.Name)
+	check("data_type_code", new.DataTypeCode, existing.DataTypeCode)
+	check("data_category_code", new.DataCategoryCode, existing.DataCategoryCode)
+	check("hash", new.Hash, existing.Hash)
+
+	switch {
+	case new.Size == nil:
+		diffs = append(diffs, documentFieldDiff{"size", existing.Size, "nil"})
+	case existing.Size != *new.Size:
+		diffs = append(diffs, documentFieldDiff{"size", existing.Size, *new.Size})
+	}
+	return diffs
+}
+
+func (cr *CaseValidationRecord) validateDocumentExists(new *types.OutputDocumentBatch, existing *types.Document, path string) {
+	diffs := documentFieldDiffs(new, existing)
+	for _, d := range diffs {
+		msg := fmt.Sprintf("A document with same url %s has been found but with a different %s (%v <> %v).",
+			new.Url, d.name, d.existingVal, d.newVal)
+		cr.AddWarnings(msg, DocumentDuplicateWithDifferentFieldValue, path)
+	}
+
+	if len(diffs) == 0 {
+		msg := "Document " + new.Url + " already exists, skipped."
+		cr.AddInfos(msg, DocumentDuplicateInDB, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateDocumentTextField(fieldValue, fieldName string, path string, taskIndex int, documentIndex int, regExp *regexp.Regexp, required bool) {
+	if !required && fieldValue == "" {
+		return
+	}
+	res := fmt.Sprintf("case %d - task %d - output document %d", cr.Index, taskIndex, documentIndex)
+	cr.ValidateStringField(fieldValue, fieldName, path, DocumentInvalidField, res, TextMaxLength, regExp, []string{}, required)
+}
+
+func (cr *CaseValidationRecord) validateDocumentIsOutputOfAnotherTask(doc *types.Document, path string) {
+	relatedDocs := cr.DocumentsInTasks[doc.Url]
+
+	for _, dr := range relatedDocs {
+		if dr.Type == "output" {
+			msg := "A document with same url " + doc.Url + " has been found in the output of a different task."
+			cr.AddErrors(msg, DocumentAlreadyOutputOfAnotherTask, path)
+			return
+		}
+	}
+}
+
+func (cr *CaseValidationRecord) validateDocumentMetadata(doc *types.OutputDocumentBatch, path string, taskIndex, docIndex int) error {
+	metadata, err := cr.Context.S3FS.GetMetadata(doc.Url)
+	if err != nil {
+		return err
+	}
+	if metadata == nil {
+		cr.AddErrors(
+			fmt.Sprintf(
+				"No document can be found on the URL %s for case %d - task %d - output document %d.",
+				doc.Url,
+				cr.Index,
+				taskIndex,
+				docIndex,
+			), DocumentNotFoundAtURL, path)
+		return nil
+	}
+
+	docNameFromUrl, err := utils.ExtractFileName(doc.Url)
+	if err != nil {
+		return err
+	}
+	if *docNameFromUrl != doc.Name {
+		msg := fmt.Sprintf("Document name %s is not consistent with URL %s for case %d - task %d - output document %d.", doc.Name, doc.Url, cr.Index, taskIndex, docIndex)
+		cr.AddErrors(msg, DocumentNameInconsistency, path)
+	}
+
+	if doc.Size == nil || metadata.Size != *doc.Size {
+		msg := fmt.Sprintf("Document size does not match the actual size of the document %s for case %d - task %d - output document %d.", doc.Url, cr.Index, taskIndex, docIndex)
+		cr.AddErrors(msg, DocumentSizeMismatch, path)
+	}
+
+	// Hash is optional, validate only if provided
+	if doc.Hash != "" {
+		if metadata.Hash != doc.Hash {
+			msg := fmt.Sprintf("Document hash does not match the actual hash of the document %s for case %d - task %d - output document %d.", doc.Url, cr.Index, taskIndex, docIndex)
+			cr.AddErrors(msg, DocumentHashMismatch, path)
+		}
+	}
+	return nil
+}
+
+func (cr *CaseValidationRecord) validateDocumentDuplicate(doc *types.OutputDocumentBatch, path string) {
+	if _, exists := cr.OutputDocuments[doc.Url]; exists {
+		msg := fmt.Sprintf("Duplicate output document with URL %s found.", doc.Url)
+		cr.AddErrors(msg, DocumentDuplicateInBatch, path)
+	} else {
+		cr.OutputDocuments[doc.Url] = struct{}{}
+	}
+}
+
+func (cr *CaseValidationRecord) validateDocumentCodes(doc *types.OutputDocumentBatch, taskIndex int, docIndex int) {
+	path := fmt.Sprintf("case[%d].tasks[%d].output_documents[%d]", cr.Index, taskIndex, docIndex)
+
+	if doc.DataTypeCode != "" && !slices.Contains(cr.DocumentDataTypeCodes, doc.DataTypeCode) {
+		msg := fmt.Sprintf("%s data type code %q is not a valid data type code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("data_type_code", fmt.Sprintf("case %d", cr.Index)), doc.DataTypeCode, strings.Join(cr.DocumentDataTypeCodes, ", "))
+		cr.AddErrors(msg, DocumentInvalidField, path)
+	}
+	if doc.DataCategoryCode != "" && !slices.Contains(cr.DocumentDataCategoryCodes, doc.DataCategoryCode) {
+		msg := fmt.Sprintf("%s data category code %q is not a valid data category code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("data_category_code", fmt.Sprintf("case %d", cr.Index)), doc.DataCategoryCode, strings.Join(cr.DocumentDataCategoryCodes, ", "))
+		cr.AddErrors(msg, DocumentInvalidField, path)
+	}
+	if doc.FormatCode != "" && !slices.Contains(cr.DocumentFormatCodes, doc.FormatCode) {
+		msg := fmt.Sprintf("%s format code %q is not a valid format code. Valid values [%s].", cr.FormatCasesInvalidFieldMessage("format_code", fmt.Sprintf("case %d", cr.Index)), doc.FormatCode, strings.Join(cr.DocumentFormatCodes, ", "))
+		cr.AddErrors(msg, DocumentInvalidField, path)
+	}
+}
+
+func (cr *CaseValidationRecord) validateDocumentDataTypeForTaskType(taskTypeCode string, doc *types.OutputDocumentBatch, path string) {
+	if taskTypeCode != types.ClinicalReportTaskTypeCode || doc.FormatCode != VCFFormatCode {
+		return
+	}
+
+	if _, isVariantDataType := VariantVCFDataTypeCodes[doc.DataTypeCode]; isVariantDataType {
+		msg := fmt.Sprintf("A document with a data type %s and format type %s cannot be linked to a task of type %s.", doc.DataTypeCode, doc.FormatCode, taskTypeCode)
+		cr.AddErrors(msg, DocumentDataTypeNotAllowedForTaskType, path)
+	}
+}
+
+// isTaskAlreadyAttached reports whether the incoming task is, field for field, one single existing
+// task: same type, pipeline and genome build, same sequencing experiments (and case, for a
+// case-related type), the same input documents and exactly the same output documents.
+func (cr *CaseValidationRecord) isTaskAlreadyAttached(t *types.CaseTaskBatch) bool {
+	owners := map[int]struct{}{}
+	for _, doc := range t.OutputDocuments {
+		existing, ok := cr.Documents[doc.Url]
+		if !ok || len(documentFieldDiffs(doc, existing)) > 0 {
+			return false
+		}
+		owned := false
+		for _, dr := range cr.DocumentsInTasks[doc.Url] {
+			if dr.Type == "output" {
+				owners[dr.TaskID] = struct{}{}
+				owned = true
+			}
+		}
+		if !owned {
+			return false
+		}
+	}
+	if len(owners) != 1 {
+		return false
+	}
+
+	var taskID int
+	for id := range owners {
+		taskID = id
+	}
+	existing, ok := cr.ExistingTasks[taskID]
+	if !ok || existing.TaskTypeCode != t.TypeCode || existing.PipelineName != t.PipelineName ||
+		existing.PipelineVersion != t.PipelineVersion || existing.GenomeBuild != t.GenomeBuild {
+		return false
+	}
+	if !cr.hasSameDocuments(taskID, t) {
+		return false
+	}
+
+	expected := map[int]struct{}{}
+	for _, se := range cr.SequencingExperiments {
+		if slices.Contains(t.Aliquots, se.Aliquot) {
+			expected[se.ID] = struct{}{}
+		}
+	}
+
+	_, isCaseRelated := CaseRelatedTaskTypes[t.TypeCode]
+	actual := map[int]struct{}{}
+	for _, tc := range cr.TaskContexts[taskID] {
+		// A case-related task attached to another case is not this case's task.
+		if isCaseRelated && (tc.CaseID == nil || cr.CaseID == nil || *tc.CaseID != *cr.CaseID) {
+			return false
+		}
+		actual[tc.SequencingExperimentID] = struct{}{}
+	}
+
+	return len(expected) > 0 && maps.Equal(expected, actual)
+}
+
+// hasSameDocuments: the incoming outputs are already known to be outputs of taskID, so the counts
+// are what rule out an existing task holding more documents than the ones re-sent.
+func (cr *CaseValidationRecord) hasSameDocuments(taskID int, t *types.CaseTaskBatch) bool {
+	inputs, outputs := 0, 0
+	for _, d := range cr.ExistingTaskDocuments[taskID] {
+		switch d.Type {
+		case "input":
+			inputs++
+		case "output":
+			outputs++
+		}
+	}
+	if outputs != len(t.OutputDocuments) || inputs != len(t.InputDocuments) {
+		return false
+	}
+	for _, in := range t.InputDocuments {
+		if !cr.hasDocumentRelation(in.Url, taskID, "input") {
+			return false
+		}
+	}
+	return true
+}
+
+func (cr *CaseValidationRecord) hasDocumentRelation(url string, taskID int, relationType string) bool {
+	for _, dr := range cr.DocumentsInTasks[url] {
+		if dr.TaskID == taskID && dr.Type == relationType {
+			return true
+		}
+	}
+	return false
+}
+
+func (cr *CaseValidationRecord) validateDocuments() error {
+	for tid, t := range cr.Case.Tasks {
+		if cr.isTaskAlreadyAttached(t) {
+			msg := fmt.Sprintf("Task %s on aliquots [%s] is already attached, skipped.", t.TypeCode, strings.Join(t.Aliquots, ", "))
+			cr.AddInfos(msg, TaskAlreadyAttached, cr.formatFieldPath("tasks", &tid, "", nil))
+			cr.SkippedTasks[tid] = struct{}{}
+			continue
+		}
+		for did, doc := range t.OutputDocuments {
+			path := fmt.Sprintf("case[%d].tasks[%d].output_documents[%d]", cr.Index, tid, did)
+			cr.validateDocumentDataTypeForTaskType(t.TypeCode, doc, path)
+			if d, ok := cr.Documents[doc.Url]; ok {
+				cr.validateDocumentExists(doc, d, path)
+				cr.validateDocumentIsOutputOfAnotherTask(d, path)
+				continue
+			}
+
+			if doc.Hash != "" {
+				cr.validateDocumentTextField(doc.Hash, "hash", path, tid, did, TextRegExpCompiled, true)
+			}
+			cr.validateDocumentTextField(doc.Name, "name", path, tid, did, TextRegExpCompiled, true)
+
+			cr.validateDocumentCodes(doc, tid, did)
+			if doc.Size != nil && *doc.Size < 0 {
+				msg := batchval.FormatInvalidField(caseResourceLabel, "size", "size is invalid, must be non-negative", []string{})
+				cr.AddErrors(msg, DocumentInvalidField, path)
+			}
+
+			if err := cr.validateDocumentMetadata(doc, path, tid, did); err != nil {
+				return fmt.Errorf("error validating file metadata for case %d - document %d: %v", cr.Index, tid, err)
+			}
+			cr.validateDocumentDuplicate(doc, path)
+		}
+	}
+	return nil
+}
+
+func validateCaseRecord(
+	ctx context.Context,
+	bv *batchval.BatchValidationContext,
+	cache *batchval.BatchValidationCache,
+	c types.CaseBatch,
+	index int,
+	seenFetuses map[FetusKey]struct{},
+	tenantCode string,
+) (*CaseValidationRecord, error) {
+	cr := NewCaseValidationRecord(bv, cache, c, index, tenantCode)
+
+	// TODO: optimize by fetching all codes at once outside of the record
+	if err := cr.fetchCodeInfos(ctx); err != nil {
+		return nil, fmt.Errorf("error during pre-fetching code infos: %v", err)
+	}
+
+	if err := cr.fetchValidationInfos(ctx); err != nil {
+		return nil, fmt.Errorf("error during pre-fetching case validation info: %v", err)
+	}
+
+	// 1. Validate Case fields
+	if err := cr.validateCase(ctx); err != nil {
+		return nil, fmt.Errorf("error during case validation: %v", err)
+	}
+	if cr.Skipped {
+		return cr, nil
+	}
+
+	// 2. Validate Case Patients
+	if err := cr.validateCasePatients(); err != nil {
+		return nil, fmt.Errorf("error during case patients validation: %v", err)
+	}
+
+	// 2b. Validate Case Fetuses
+	if err := cr.validateCaseFetuses(ctx, seenFetuses, nil); err != nil {
+		return nil, fmt.Errorf("error during case fetuses validation: %v", err)
+	}
+
+	// 3. Validate Case Sequencing Experiments
+	if err := cr.validateCaseSequencingExperiments(ctx); err != nil {
+		return nil, fmt.Errorf("error during case sequencing experiments validation: %v", err)
+	}
+
+	// 4. Validate Case Tasks
+	if err := cr.validateTasks(); err != nil {
+		return nil, fmt.Errorf("error during case tasks validation: %v", err)
+	}
+
+	// 5. Validate Case Documents
+	if err := cr.validateDocuments(); err != nil {
+		return nil, fmt.Errorf("error validating documents: %w", err)
+	}
+
+	return cr, nil
+}
+
+func processCreateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
+	payload := []byte(batch.Payload)
+	var caseBatches []types.CaseBatch
+
+	if unexpectedErr := json.Unmarshal(payload, &caseBatches); unexpectedErr != nil {
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), bv.BatchRepo)
+		return nil
+	}
+
+	records, unexpectedErr := validateCaseBatch(ctx, bv, caseBatches, batch.TenantCode)
+	if unexpectedErr != nil {
+		if errors.Is(unexpectedErr, context.Canceled) {
+			return unexpectedErr
+		}
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), bv.BatchRepo)
+		return nil
+	}
+
+	slog.InfoContext(ctx, "case batch processed", slog.String("batch_id", batch.ID), slog.Int("records", len(records)))
+
+	if err := persistBatchAndCaseRecords(ctx, db, batch, records); err != nil {
+		if errors.Is(err, context.Canceled) {
+			return err
+		}
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing case batch records: %v", err), bv.BatchRepo)
+		return nil
+	}
+	return nil
+}
+
+func persistBatchAndCaseRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*CaseValidationRecord) error {
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		batchRepo := postgres.NewBatchRepository(database.PostgresDB{DB: tx})
+		txCtx := NewStorageContext(tx)
+		txCtx.TenantCode = batch.TenantCode
+		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, batchRepo)
+		if unexpectedErrUpdate != nil {
+			return unexpectedErrUpdate
+		}
+		if rowsUpdated == 0 {
+			return fmt.Errorf("no rows updated when updating case batch %v", batch.ID)
+		}
+		if batch.DryRun || batch.Status != types.BatchStatusSuccess {
+			return nil
+		}
+
+		if err := persistCaseRecords(ctx, txCtx, records); err != nil {
+			return fmt.Errorf("error during case insertion %w", err)
+		}
+
+		return nil
+	})
+}
+
+func persistCase(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
+	if cr.ProjectID == nil {
+		return fmt.Errorf("project ID is nil for case %d", cr.Index)
+	}
+
+	if cr.AnalysisCatalogID == nil {
+		return fmt.Errorf("analysis catalog ID is nil for case %q", cr.Case.SubmitterCaseId)
+	}
+
+	if !cr.OrderingOrganizationExists {
+		return fmt.Errorf("ordering organization is missing or unknown for case %q", cr.Case.SubmitterCaseId)
+	}
+
+	if !cr.DiagnosisLabExists {
+		return fmt.Errorf("diagnosis lab is missing or unknown for case %d", cr.Index)
+	}
+
+	proband, err := cr.getProbandFromPatients()
+	if err != nil {
+		return fmt.Errorf("failed to get proband patient %w", err)
+	}
+	if proband == nil {
+		return fmt.Errorf("proband patient not found for case %d", cr.Index)
+	}
+
+	c := types.Case{
+		ProbandID:                proband.ID,
+		ProjectID:                *cr.ProjectID,
+		AnalysisCatalogID:        *cr.AnalysisCatalogID,
+		CaseTypeCode:             cr.Case.Type,
+		CaseCategoryCode:         cr.Case.CategoryCode,
+		PriorityCode:             cr.Case.PriorityCode,
+		StatusCode:               cr.Case.StatusCode,
+		PrimaryCondition:         cr.Case.PrimaryConditionValue,
+		ConditionCodeSystem:      cr.Case.PrimaryConditionCodeSystem,
+		OrderingPhysician:        cr.Case.OrderingPhysician,
+		SubmitterCaseID:          cr.Case.SubmitterCaseId,
+		Note:                     cr.Case.Note,
+		DiagnosisHypothesis:      cr.Case.DiagnosisHypothesis,
+		TenantCode:               sc.TenantCode,
+		OrderingOrganizationCode: &cr.Case.OrderingOrganizationCode,
+		DiagnosisLabCode:         &cr.Case.DiagnosticLabCode,
+	}
+
+	if err := sc.CasesRepo.CreateCase(ctx, &c); err != nil {
+		return fmt.Errorf("failed to persist case %w", err)
+	}
+
+	cr.CaseID = &c.ID
+
+	return persistCaseHasSequencingExperiments(ctx, sc, cr)
+}
+
+func persistCaseHasSequencingExperiments(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
+	if cr.CaseID == nil {
+		return fmt.Errorf("case ID is nil when persisting case_has_sequencing_experiment for case %d", cr.Index)
+	}
+	for _, se := range cr.SequencingExperiments {
+		chse := types.CaseHasSequencingExperiment{
+			CaseID:                 *cr.CaseID,
+			SequencingExperimentID: se.ID,
+		}
+
+		if err := sc.CasesRepo.CreateCaseHasSequencingExperiment(ctx, &chse); err != nil {
+			return fmt.Errorf("failed to persist case has sequencing experiment for case %d and sequencing experiment %d: %w", cr.Index, se.ID, err)
+		}
+	}
+	return nil
+}
+
+func persistCaseRecords(
+	ctx context.Context,
+	sc *StorageContext,
+	records []*CaseValidationRecord,
+) error {
+	for _, record := range records {
+		if record.Skipped {
+			continue
+		}
+		if err := persistCase(ctx, sc, record); err != nil {
+			return fmt.Errorf("failed to persist case for case %d: %w", record.Index, err)
+		}
+		if record.CaseID == nil {
+			return fmt.Errorf("case ID is nil after persisting case for case %d", record.Index)
+		}
+		if err := persistFamily(ctx, sc, record); err != nil {
+			return fmt.Errorf("failed to persist family for case %d: %w", record.Index, err)
+		}
+		if err := persistFetuses(ctx, sc, record, nil); err != nil {
+			return fmt.Errorf("failed to persist fetuses for case %d: %w", record.Index, err)
+		}
+		if err := persistObservationCategorical(ctx, sc, record); err != nil {
+			return fmt.Errorf("failed to persist observations categorical for case %d: %w", record.Index, err)
+		}
+		if err := persistObservationText(ctx, sc, record); err != nil {
+			return fmt.Errorf("failed to persist observations text for case %d: %w", record.Index, err)
+		}
+		if err := persistFamilyHistory(ctx, sc, record); err != nil {
+			return fmt.Errorf("failed to persist family history for case %d: %w", record.Index, err)
+		}
+		if err := persistTask(ctx, sc, record); err != nil {
+			return fmt.Errorf("failed to persist tasks for case %d: %w", record.Index, err)
+		}
+	}
+	return nil
+}
+
+func persistFamily(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
+	for _, p := range cr.Case.Patients {
+
+		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId, TenantCode: cr.TenantCode}
+		patient, ok := cr.Patients[key]
+		if !ok {
+			return fmt.Errorf("failed to find patient for family member %q in case %d", p.SubmitterPatientId, cr.Index)
+		}
+		familyMember := types.Family{
+			CaseID:                    *cr.CaseID,
+			FamilyMemberID:            utils.IntPtr(patient.ID),
+			RelationshipToProbandCode: p.RelationToProbandCode,
+			AffectedStatusCode:        p.AffectedStatusCode,
+			TenantCode:                sc.TenantCode,
+		}
+		if err := sc.FamilyRepo.CreateFamily(ctx, &familyMember); err != nil {
+			return fmt.Errorf("failed to persist family member %q for case %d: %w", p.SubmitterPatientId, cr.Index, err)
+		}
+	}
+	return nil
+}
+
+func persistObservationCategorical(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
+	for _, p := range cr.Case.Patients {
+
+		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId, TenantCode: cr.TenantCode}
+		patient, ok := cr.Patients[key]
+		if !ok {
+			return fmt.Errorf("failed to find patient for observations categorical for patient %s in case %d", p.SubmitterPatientId, cr.Index)
+		}
+
+		for _, o := range p.ObservationsCategorical {
+			obs := types.ObsCategorical{
+				CaseID:             *cr.CaseID,
+				PatientID:          utils.IntPtr(patient.ID),
+				ObservationCode:    o.Code,
+				CodingSystem:       o.System,
+				CodeValue:          o.Value,
+				OnsetCode:          utils.NilIfEmpty(o.OnsetCode),
+				InterpretationCode: utils.NilIfEmpty(o.InterpretationCode),
+				Note:               o.Note,
+				ExamCode:           utils.NilIfEmpty(o.ExamCode),
+				TenantCode:         sc.TenantCode,
+			}
+			if err := sc.ObsCatRepo.CreateObservationCategorical(ctx, &obs); err != nil {
+				return fmt.Errorf("failed to persist observation categorical for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
+			}
+		}
+	}
+	return nil
+}
+
+func persistObservationText(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
+	for _, p := range cr.Case.Patients {
+
+		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId, TenantCode: cr.TenantCode}
+		patient, ok := cr.Patients[key]
+		if !ok {
+			return fmt.Errorf("failed to find patient for observations text for patient %s in case %d", p.SubmitterPatientId, cr.Index)
+		}
+
+		for _, o := range p.ObservationsText {
+			obs := types.ObsString{
+				CaseID:             *cr.CaseID,
+				PatientID:          utils.IntPtr(patient.ID),
+				ObservationCode:    o.Code,
+				Value:              o.Value,
+				InterpretationCode: utils.NilIfEmpty(o.InterpretationCode),
+				ExamCode:           utils.NilIfEmpty(o.ExamCode),
+				TenantCode:         sc.TenantCode,
+			}
+			if err := sc.ObsStringRepo.CreateObservationString(ctx, &obs); err != nil {
+				return fmt.Errorf("failed to persist observation text for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
+			}
+		}
+	}
+	return nil
+}
+
+func persistFamilyHistory(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
+	for _, p := range cr.Case.Patients {
+
+		key := batchval.PatientKey{OrganizationCode: p.PatientOrganizationCode, SubmitterPatientId: p.SubmitterPatientId, TenantCode: cr.TenantCode}
+		patient, ok := cr.Patients[key]
+		if !ok {
+			return fmt.Errorf("failed to find patient for family history for patient %s in case %d", p.SubmitterPatientId, cr.Index)
+		}
+
+		for _, o := range p.FamilyHistory {
+			familyHistory := types.FamilyHistory{
+				CaseID:           *cr.CaseID,
+				PatientID:        patient.ID,
+				FamilyMemberCode: o.FamilyMemberCode,
+				Condition:        o.Condition,
+				TenantCode:       sc.TenantCode,
+			}
+
+			if err := sc.FamilyHistoryRepo.CreateFamilyHistory(ctx, &familyHistory); err != nil {
+				return fmt.Errorf("failed to persist family history for patient %q in case %d: %w", p.SubmitterPatientId, cr.Index, err)
+			}
+		}
+	}
+	return nil
+}
+
+func persistTask(ctx context.Context, sc *StorageContext, cr *CaseValidationRecord) error {
+	for i, t := range cr.Case.Tasks {
+		if _, skipped := cr.SkippedTasks[i]; skipped {
+			continue
+		}
+		task := types.Task{
+			TaskTypeCode:    t.TypeCode,
+			PipelineName:    t.PipelineName,
+			PipelineVersion: t.PipelineVersion,
+			GenomeBuild:     t.GenomeBuild,
+			TenantCode:      sc.TenantCode,
+		}
+		err := sc.TaskRepo.CreateTask(ctx, &task)
+		if err != nil {
+			return fmt.Errorf("failed to persist task for case %d: %w", cr.Index, err)
+		}
+
+		for _, se := range cr.SequencingExperiments {
+			for _, al := range t.Aliquots {
+
+				if al != se.Aliquot {
+					continue
+				}
+
+				var c *int
+				if _, isCaseRelated := CaseRelatedTaskTypes[t.TypeCode]; isCaseRelated {
+					c = cr.CaseID
+				}
+
+				err := sc.TaskRepo.CreateTaskContext(ctx, &types.TaskContext{
+					TaskID:                 task.ID,
+					SequencingExperimentID: se.ID,
+					CaseID:                 c,
+				})
+				if err != nil {
+					return fmt.Errorf("failed to persist task context for case %d and task %s: %w", cr.Index, t.TypeCode, err)
+				}
+			}
+		}
+
+		for _, doc := range t.InputDocuments {
+			d, ok := cr.Documents[doc.Url]
+			if !ok {
+				return fmt.Errorf("failed to find input document by url %q for task %q in case %d", doc.Url, t.TypeCode, cr.Index)
+			}
+
+			err := sc.TaskRepo.CreateTaskHasDocument(ctx, &types.TaskHasDocument{
+				TaskID:     task.ID,
+				DocumentID: d.ID,
+				Type:       "input",
+			})
+			if err != nil {
+				return fmt.Errorf("failed to persist task has document for case %d and task %q: %w", cr.Index, t.TypeCode, err)
+			}
+		}
+
+		for _, doc := range t.OutputDocuments {
+			d, exists := cr.Documents[doc.Url]
+			if !exists || len(documentFieldDiffs(doc, d)) > 0 {
+				d = &types.Document{
+					Name:             doc.Name,
+					DataCategoryCode: doc.DataCategoryCode,
+					DataTypeCode:     doc.DataTypeCode,
+					FileFormatCode:   doc.FormatCode,
+					Size:             *doc.Size,
+					Url:              doc.Url,
+					Hash:             doc.Hash,
+					TenantCode:       sc.TenantCode,
+				}
+				if err := sc.DocRepo.CreateDocument(ctx, d); err != nil {
+					return fmt.Errorf("failed to persist document %q for case %d: %w", doc.Name, cr.Index, err)
+				}
+				cr.Documents[doc.Url] = d
+			}
+
+			err = sc.TaskRepo.CreateTaskHasDocument(ctx, &types.TaskHasDocument{
+				TaskID:     task.ID,
+				DocumentID: d.ID,
+				Type:       "output",
+			})
+			if err != nil {
+				return fmt.Errorf("failed to persist task has document for case %d and task %q: %w", cr.Index, t.TypeCode, err)
+			}
+			cr.DocumentsInTasks[doc.Url] = append(cr.DocumentsInTasks[doc.Url], &DocumentRelation{task.ID, "output"})
+		}
+	}
+	return nil
+}
+
+func validateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, cases []types.CaseBatch, tenantCode string) ([]*CaseValidationRecord, error) {
+	var records []*CaseValidationRecord
+	cache := batchval.NewBatchValidationCache(bv)
+
+	visited := map[CaseKey]struct{}{}
+	seenFetuses := map[FetusKey]struct{}{}
+
+	for idx, c := range cases {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		key := CaseKey{
+			ProjectCode:     c.ProjectCode,
+			SubmitterCaseID: c.SubmitterCaseId,
+		}
+
+		record, err := validateCaseRecord(ctx, bv, cache, c, idx, seenFetuses, tenantCode)
+		if err != nil {
+			return nil, fmt.Errorf("error during case validation: %v", err)
+		}
+
+		if c.ProjectCode != "" && c.SubmitterCaseId != "" {
+			batchval.ValidateUniquenessInBatch(record, key, visited, CaseIdenticalInBatch, []string{c.ProjectCode, c.SubmitterCaseId})
+		}
+		records = append(records, record)
+	}
+	return records, nil
+}

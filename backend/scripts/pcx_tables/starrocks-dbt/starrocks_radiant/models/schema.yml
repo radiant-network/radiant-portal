@@ -1,0 +1,123 @@
+
+version: 2
+
+sources:
+  - name: radiant_prov
+    database: default_catalog
+    schema: radiant_data_dev
+    description: >
+      Field-level provenance for the pcx_30 release tables. Maintained OUTSIDE
+      dbt by `scripts/crf_coverage/promote_to_pcx30.py` in the
+      RADIANT-Timeline-Abstraction repo, which is the only place that both runs
+      the composite<->pcx_30 comparators and reads the reviewer decisions --
+      re-implementing those comparators in SQL would create a second, silently
+      divergent definition of "exact". A source rather than a ref for that
+      reason.
+    tables:
+      - name: pcx_30_field_provenance
+        description: >
+          One row per (pcx_row_uid, field) whose value is machine-corroborated
+          or reviewer-overridden. `kind='corroborated'` means an automated
+          source independently produced the same value, so the displayed value
+          does NOT change; `kind='override'` means a clinical reviewer accepted
+          a DIFFERENT value, which the deid models apply. Joined on
+          `pcx_row_uid`, an md5 over the release row's own base columns that the
+          models recompute -- the release tables have no row key of their own.
+          An absent or empty table leaves every `field_provenance` NULL and
+          every value as the curator typed it.
+
+  - name: dwh_source
+    database: default_catalog
+    schema: radiant_data_dev
+    description: "Raw data from d3b data warehouses."
+    
+    tables:
+      - name: participants
+        description: "direct copy of d3b dwh table prod_access.participants"
+      - name: diagnosis
+        description: "direct copy of d3b dwh table prod_access.diagnosis"
+      - name: updates
+        description: "direct copy of d3b dwh table prod_access.updates"
+      - name: treatment
+        description: "direct copy of d3b dwh table prod_access.treatment"
+      - name: brim_output
+        description: >
+          BRIM detailed-export rows, append-only across patients and export
+          vintages. NOT a dbt model and must never become one -- it is
+          CREATE-IF-NOT-EXISTS and the only record of its contents, so a table
+          model's drop-and-recreate would destroy it. DDL + loader:
+          radiant-prod/tables/brim_output_table.sql, load_brim_outputs.py.
+      - name: pcx_30_pnoc035_brim_url
+        description: >
+          Curated BRIM UI deep links for the PNOC035 eligibility variable. Same
+          never-a-dbt-model reasoning as brim_output: hand-curated, recorded
+          nowhere else. Both its columns identify, so its ROWS are populated out
+          of band and must never be committed. DDL:
+          radiant-prod/tables/pnoc035_brim_url_table.sql.
+      - name: pcx_30_surgery_brim_url
+        description: >
+          Curated BRIM UI deep links for an individual surgery, joined by
+          v_pcx_30_surgery_level_combined and read by the portal's surgery query
+          as brim_url (SJRA-2018). Same never-a-dbt-model and
+          never-commit-the-rows reasoning as pcx_30_pnoc035_brim_url; keyed on
+          (patient_mrn, age_at_surgery_days) because the grain is one link per
+          surgery rather than one per patient. That key is NOT a unique surgery
+          identifier -- 38 of 9,326 rows share a (patient, age) pair -- which is
+          accepted for the Nov 2026 demo and documented in the DDL. DDL:
+          radiant-prod/tables/surgery_brim_url_table.sql.
+      - name: pcx_30_imaging_link
+        description: >
+          Curated per-session imaging links, joined by
+          v_pcx_30_mri_images_combined. Same never-a-dbt-model and
+          never-commit-the-rows reasoning as its two siblings above. Keyed on
+          session_id, which IS unique in that view (47,167 rows over 47,167
+          distinct ids, measured 2026-11-06), so a row decorates exactly one
+          session. flywheel_url OVERRIDES the view's derived Flywheel deep link;
+          clinical_report_url is a second link the view has no other source for. Both
+          are projected plain, matching flywheel_url. DEMO-ONLY (Nov 2026). DDL:
+          radiant-prod/tables/imaging_link_table.sql.
+      - name: imaging_sessions
+        description: "direct copy of d3b dwh table prod_access.imaging_sessions"
+      - name: stg_cbtn_enrollment_final
+        description: "direct copy of d3b identified warehouse table stg_cbtn.stg_cbtn_enrollment_final"
+      - name: openpedcan_histologies_annotated
+        description: "direct copy of d3b dwh bix table bix_reporting.openpedcan_histologies_annotated"
+
+
+  - name: radiant_fhir
+    database: radiant_iceberg_catalog 
+    schema: fhir_cbtn_tenant_db 
+    description: "Iceberg formatted data created by flattening FHIR resources"
+
+    tables:
+    - name: patient
+    - name: patient_identifier
+    # Observation / DiagnosticReport graph, read by the cbtn_clinical base models
+    # (cbc_latest_results, the two csf_* tables, lansky_karnofsky_latest).
+    - name: observation
+      description: "Scoring / result events. NOTE value_* columns are 0% populated for the Lansky/Karnofsky scales -- the score lives only in observation_component."
+    - name: observation_code_coding
+      description: "Coded identity of an observation. Join on observation_id. One target coding per observation (verified), so it cannot fan out."
+    - name: observation_component
+      description: "Per-component values. Carries the Lansky/Karnofsky score as free text in component_value_string."
+    - name: diagnostic_report
+      description: "Lab/pathology reports. code_text is the report name; effective_date_time is the clinical date."
+    - name: diagnostic_report_result
+      description: "Report -> Observation link. result_reference needs substring_index(...,'/',-1) to yield the observation id."
+    - name: diagnostic_report_category
+      description: "Report categories. Used NEGATIVELY, to exclude Radiology/Imaging reports from the CSF lab cohort."
+    - name: specimen
+      description: "Specimens. collection_collected_date_time dates the draw, used for the same-day CSF cytology attribution tier."
+    - name: specimen_type_coding
+      description: "Specimen type codings. CSF is matched on SNOMED code OR display -- Epic-local OIDs carry 'Cerebrospinal Fluid' under non-SNOMED codes."
+
+models:
+  - name: my_first_dbt_model
+    description: "A starter dbt model"
+    columns:
+      - name: id
+        description: "The primary key for this table"
+        data_tests:
+          - unique
+          - not_null
+

@@ -1,0 +1,474 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"flag"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"os"
+	"os/signal"
+	"strings"
+	"syscall"
+	"time"
+
+	"github.com/radiant-network/radiant-api/internal/authorization"
+	"github.com/radiant-network/radiant-api/internal/observability"
+	"github.com/radiant-network/radiant-api/internal/utils"
+	"gorm.io/gorm"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/gzip"
+	"github.com/gin-gonic/gin"
+	_ "github.com/joho/godotenv/autoload"
+	"github.com/radiant-network/radiant-api/internal/client"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/notification"
+	"github.com/radiant-network/radiant-api/internal/provisioning"
+	"github.com/radiant-network/radiant-api/internal/report"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
+	"github.com/radiant-network/radiant-api/internal/server"
+	"github.com/radiant-network/radiant-api/internal/service"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
+)
+
+// glog (pulled in transitively by gin-keycloak) defaults to writing log files under
+// /tmp. Our container has no writable /tmp, so when gin-keycloak logs an auth error
+// (e.g. an expired token, gin_keycloak.go:217) glog fails to create its file sink and
+// escalates to its own Fatal handler, aborting the whole process (SIGABRT, exit 2).
+// Forcing logtostderr keeps glog off the filesystem and routes those lines to stderr.
+func init() {
+	_ = flag.Set("logtostderr", "true")
+}
+
+// patientViewEnabledEnv turns on the PCX 3.0 patient view routes (/{tenant}/patients/*, except the
+// batches). Off by default: the routes are not registered, so they answer 404.
+const patientViewEnabledEnv = "PATIENT_VIEW_ENABLED"
+
+func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled bool, igvPublicTracksPrefix string) *gin.Engine {
+	// Auth service
+	auth := utils.NewKeycloakAuth()
+
+	// S3 URL Presigner for IGV returned URLs
+	s3Presigner := utils.NewS3PreSigner()
+
+	// One lab notification template per tenant. A bad file warns and is skipped, never fatal:
+	// only that tenant's notify fails. The load outcome is exposed by GET /status.
+	notificationTemplates := notification.LoadTemplates(utils.GetEnvOrDefault(notification.TemplateDirEnv, ""))
+	reportTemplates := report.LoadTemplates(utils.GetEnvOrDefault(report.TemplateDirEnv, ""))
+
+	// Create repository. The named wrappers make each repo's target database part of its
+	// constructor signature; the dual-purpose repos (cases, sequencing experiment, documents)
+	// still take the raw StarRocks handle here (read path) until they are split.
+	starrocksDB := database.StarrocksDB{DB: dbStarrocks}
+	postgresDB := database.PostgresDB{DB: dbPostgres}
+
+	repoStarrocks := starrocks.NewStarrocksRepository(starrocksDB)
+	repoSeqExp := starrocks.NewSequencingExperimentRepository(starrocksDB)
+	repoVariants := starrocks.NewVariantsRepository(starrocksDB)
+	repoExomiser := starrocks.NewExomiserRepository(starrocksDB)
+	repoGenes := starrocks.NewGenesRepository(starrocksDB)
+	repoGermlineCNVOccurrences := starrocks.NewGermlineCNVOccurrencesRepository(starrocksDB)
+	repoGermlineSNVOccurrences := starrocks.NewGermlineSNVOccurrencesRepository(starrocksDB)
+	repoSomaticCNVOccurrences := starrocks.NewSomaticCNVOccurrencesRepository(starrocksDB)
+	repoSomaticSNVOccurrences := starrocks.NewSomaticSNVOccurrencesRepository(starrocksDB)
+	repoTerms := starrocks.NewTermsRepository(starrocksDB)
+	repoPcxPatients := starrocks.NewPcxPatientsRepository(starrocksDB)
+	repoCases := starrocks.NewCasesRepository(starrocksDB).WithPcxPatientKeys(patientViewEnabled)
+	repoGenePanels := starrocks.NewGenePanelsRepository(starrocksDB)
+	pubmedClient := client.NewPubmedClient()
+	repoPostgres := postgres.NewPostgresRepository(postgresDB)
+	repoInterpretations := postgres.NewInterpretationsRepository(postgresDB, pubmedClient)
+	repoTranscriptReport := starrocks.NewTranscriptReportRepository(starrocksDB)
+	reportBuilder := report.NewBuilder(repoTranscriptReport, repoInterpretations)
+	repoUserSets := postgres.NewUserSetsRepository(postgresDB)
+	repoClinvarRCV := starrocks.NewClinvarRCVRepository(starrocksDB)
+	repoIGV := starrocks.NewIGVRepository(starrocksDB)
+	repoDocuments := starrocks.NewDocumentsRepository(starrocksDB)
+	repoOrganizations := starrocks.NewOrganizationsRepository(starrocksDB)
+	repoOrganizationsWrite := postgres.NewOrganizationRepository(postgresDB)
+	repoValueSets := postgres.NewValueSetsRepository(postgresDB)
+	repoOccurrenceNotes := postgres.NewOccurrenceNotesRepository(postgresDB)
+	repoCaseAssignments := postgres.NewCaseAssignmentsRepository(postgresDB)
+	repoOccurrenceFlags := postgres.NewOccurrenceFlagsRepository(postgresDB)
+	repoSavedFilters := postgres.NewSavedFiltersRepository(postgresDB)
+	repoUserPreferences := postgres.NewUserPreferencesRepository(postgresDB)
+	repoFacets := starrocks.NewFacetsRepository()
+	repoBatches := postgres.NewBatchRepository(postgresDB)
+	repoTasks := postgres.NewTaskRepository(postgresDB)
+	repoCasesWrite := postgres.NewCasesRepository(postgresDB)
+	repoAuth := postgres.NewAuthRepository(postgresDB)
+	repoUsers := postgres.NewUsersRepository(postgresDB)
+	repoRoles := postgres.NewRolesRepository(postgresDB)
+	repoCaseGroups := postgres.NewCaseGroupsRepository(postgresDB)
+	repoGenePanelPG := postgres.NewGenePanelsRepository(postgresDB) // We need PG because we write the panels in PG
+	repoTenants := starrocks.NewStarrocksTenantRepository(starrocksDB)
+
+	// SMTP and notification settings are read per request, no restart on a relay change.
+	caseGroupNotifier := notification.NewService(repoCaseGroups, repoOrganizationsWrite, notificationTemplates, notification.NewSMTPMailer())
+
+	genePanelUploader := service.NewGenePanelUploader(repoGenes, repoGenePanelPG, repoTenants)
+
+	// Adding a user provisions them across Keycloak, Postgres, Ranger and StarRocks, exactly as
+	// cmd/create-user does. The clients are lazy, so the Keycloak/Ranger settings only have to be
+	// present in a deployment that actually exposes user administration.
+	userAdmin := service.NewUserAdmin(repoUsers, repoOrganizationsWrite, provisioning.NewAdminDeps(postgresDB, starrocksDB))
+
+	r := newEngine()
+
+	authMiddleware, err := authorization.InitAuthorizer()
+	if err != nil {
+		slog.Error("failed to initialize authorizer", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	// Initialize public routes explicitly
+	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres, notificationTemplates, reportTemplates))
+	r.GET("/config", server.GetClientConfigHandler(server.ClientConfigFromEnv()))
+
+	// Private routes, alphabetically ordered
+	// Use privateRoutes instead of `r` for all private routes to automatically apply the auth middleware
+	privateRoutes := r.Group("/")
+	privateRoutes.Use(authMiddleware)
+
+	// Global routes (not tenant-scoped) stay on privateRoutes: /auth/*, /users/*,
+	// /value_sets/:type (instance-wide reference value sets, e.g. organization_category).
+	authGroup := privateRoutes.Group("/auth")
+	authGroup.GET("/me", server.GetMeHandler(repoAuth, auth))
+
+	privateRoutes.GET("/value_sets/:type", server.ListValueSetHandler(repoValueSets))
+	privateRoutes.GET("/actions", server.ListActionsHandler(repoAuth))
+
+	// Tenant-scoped routes live under /:tenant and require the caller to hold at least one
+	// role in that tenant (cross-tenant access → 403). The resolved tenant is stored in context.
+	tenantRoutes := privateRoutes.Group("/:tenant")
+	tenantRoutes.Use(server.RequireTenantAccess(auth, repoAuth))
+
+	// When enabled, run tenant-scoped StarRocks reads through mysql-proxy as the calling user so
+	// Ranger enforces per-user masking / row-filter / access. Off by default; the routing pool
+	// otherwise falls back to the root connection (today's behavior). Applied at the GROUP level
+	// on purpose: it is what guarantees every /:tenant read has a user pool bound, so the routing
+	// pool's root fallback is never reached for tenant data (see routingConnPool's security note).
+	if utils.GetBoolEnvOrDefault(server.StarrocksProxyReadEnabledEnv, false) {
+		tenantRoutes.Use(server.BindStarrocksUserPool(auth, database.NewStarrocksUserPool))
+	}
+
+	// Tenant-scoped actions ignore the org, so requireAction needs no resource lookup.
+	// Org-scoped actions go through requireActionAt with the resolver that attributes the
+	// target resource to a case, and through it to that case's diagnosis lab.
+	requireAction := func(action string) gin.HandlerFunc {
+		return server.RequireAction(auth, repoAuth, action)
+	}
+	requireAnyAction := func(actions ...string) gin.HandlerFunc {
+		return server.RequireAnyAction(auth, repoAuth, actions...)
+	}
+	requireActionAt := func(action string, resolve server.OrgResolver) gin.HandlerFunc {
+		return server.RequireActionAt(auth, repoAuth, action, resolve)
+	}
+	// For an org-scoped action on a request that names no organization: check it anywhere in
+	// the tenant. requireAction would pass an empty org, which matches only '*' grants.
+	requireActionInTenant := func(action string) gin.HandlerFunc {
+		return server.RequireActionInTenant(auth, repoAuth, action)
+	}
+	orgFromCase := server.OrgFromCaseParam(repoAuth)
+	orgFromCaseBody := server.OrgFromCaseBody(repoAuth)
+	orgFromNote := server.OrgFromNoteParam(repoAuth)
+	orgFromDocument := server.OrgFromDocumentParam(repoAuth)
+	orgFromPatientKey := server.OrgFromPatientKeyParam(repoPcxPatients)
+
+	casesGroup := tenantRoutes.Group("/cases")
+	casesGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchCasesHandler(repoCases, repoCaseAssignments))
+	casesGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.CasesAutocompleteHandler(repoCases))
+	casesGroup.GET("/filters", requireAction(types.ActionSearchCase), server.CasesFiltersHandler(repoCases))
+	casesGroup.GET("/:case_id", requireAction(types.ActionSearchCase), server.CaseEntityHandler(repoCases, repoIGV, repoCaseAssignments))
+	casesGroup.GET("/:case_id/assignment_candidates", requireActionAt(types.ActionEditCase, orgFromCase), server.ListCaseAssignmentCandidatesHandler(repoCaseAssignments, repoAuth, auth))
+	casesGroup.PUT("/:case_id/assignments", requireActionAt(types.ActionEditCase, orgFromCase), server.PutCaseAssignmentsHandler(repoCaseAssignments))
+	casesGroup.POST("/:case_id/documents/search", requireAction(types.ActionSearchCase), server.CaseEntityDocumentsSearchHandler(repoDocuments))
+	casesGroup.GET("/:case_id/documents/filters", requireAction(types.ActionSearchCase), server.CaseEntityDocumentsFiltersHandler(repoDocuments))
+	casesGroup.GET("/:case_id/:seq_id/tasks_with_occurrences", requireAction(types.ActionSearchCase), server.CaseOccurrenceTasksHandler(repoTasks))
+	casesGroup.PATCH("/:case_id", requireActionAt(types.ActionEditCase, orgFromCase), server.PatchCaseHandler(repoCasesWrite))
+
+	genePanelsGroup := tenantRoutes.Group("/gene_panels")
+	genePanelsGroup.PUT("", requireAction(types.ActionManageAnalysisCatalog), server.PutGenePanelsHandler(genePanelUploader))
+
+	geneGroup := tenantRoutes.Group("/genes")
+	geneGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.GetGeneAutoCompleteHandler(repoGenes))
+	geneGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchGenesHandler(repoGenes))
+
+	hpoGroup := tenantRoutes.Group("/hpo")
+	hpoGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.GetHPOTermAutoComplete(repoTerms))
+
+	igvGroup := tenantRoutes.Group("/igv")
+	igvGroup.GET("/:case_id", requireAction(types.ActionSearchCase), server.GetIGVHandler(repoIGV, repoCases, s3Presigner, igvPublicTracksPrefix))
+
+	interpretationsGroup := tenantRoutes.Group("/interpretations")
+	interpretationsGroup.GET("/pubmed/:citation_id", requireAction(types.ActionSearchCase), server.GetPubmedCitation(pubmedClient))
+	interpretationsGroup.GET("/germline", requireAction(types.ActionSearchCase), server.SearchInterpretationGermline(repoInterpretations))
+	interpretationsGroup.GET("/somatic", requireAction(types.ActionSearchCase), server.SearchInterpretationSomatic(repoInterpretations))
+
+	interpretationsGermlineGroup := interpretationsGroup.Group("/v2/germline/:case_id/:sequencing_id/:locus_id/:transcript_id")
+	interpretationsGermlineGroup.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationGermline(repoInterpretations, repoTerms))
+	interpretationsGermlineGroup.POST("", requireActionAt(types.ActionInterpretVariant, orgFromCase), server.PostInterpretationGermline(repoInterpretations))
+
+	interpretationsSomaticGroup := interpretationsGroup.Group("/v2/somatic/:case_id/:sequencing_id/:locus_id/:transcript_id")
+	interpretationsSomaticGroup.GET("", requireAction(types.ActionSearchCase), server.GetInterpretationSomatic(repoInterpretations, repoTerms))
+	interpretationsSomaticGroup.POST("", requireActionAt(types.ActionInterpretVariant, orgFromCase), server.PostInterpretationSomatic(repoInterpretations))
+
+	mondoGroup := tenantRoutes.Group("/mondo")
+	mondoGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.GetMondoTermAutoComplete(repoTerms))
+
+	notesGroup := tenantRoutes.Group("/notes")
+	notesGroup.POST("", requireActionAt(types.ActionCommentVariant, orgFromCaseBody), server.PostOccurrenceNoteHandler(repoOccurrenceNotes, auth))
+	notesGroup.PUT("/:id", requireActionAt(types.ActionCommentVariant, orgFromNote), server.PutOccurrenceNoteHandler(repoOccurrenceNotes, auth))
+	notesGroup.DELETE("/:id", requireActionAt(types.ActionCommentVariant, orgFromNote), server.DeleteOccurrenceNoteHandler(repoOccurrenceNotes, auth))
+	notesGroup.GET("/:case_id/:seq_id/:task_id/:occurrence_id", requireAction(types.ActionSearchCase), server.GetOccurrenceNotesHandler(repoOccurrenceNotes))
+	notesGroup.GET("/:case_id/:seq_id/:task_id/:occurrence_id/count", requireAction(types.ActionSearchCase), server.GetOccurrenceNoteCountHandler(repoOccurrenceNotes))
+
+	occurrencesGroup := tenantRoutes.Group("/occurrences")
+	occurrencesGermlineGroup := occurrencesGroup.Group("/germline")
+	occurrencesSomaticGroup := occurrencesGroup.Group("/somatic")
+
+	occurrenceFlagsGroup := occurrencesGroup.Group("/flags")
+	occurrenceFlagsGroup.POST("/:case_id/:seq_id/:task_id/:occurrence_id", requireActionAt(types.ActionFlagVariant, orgFromCase), server.UpsertOccurrenceFlagHandler(repoOccurrenceFlags))
+	occurrenceFlagsGroup.DELETE("/:case_id/:seq_id/:task_id/:occurrence_id", requireActionAt(types.ActionFlagVariant, orgFromCase), server.DeleteOccurrenceFlagHandler(repoOccurrenceFlags))
+
+	occurrencesGermlineCNVGroup := occurrencesGermlineGroup.Group("/cnv")
+	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/count", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVCountHandler(repoGermlineCNVOccurrences))
+	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/list", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVListHandler(repoGermlineCNVOccurrences))
+	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVAggregateHandler(repoGermlineCNVOccurrences, repoFacets))
+	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVStatisticsHandler(repoGermlineCNVOccurrences))
+	occurrencesGermlineCNVGroup.GET("/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVGenesOverlapHandler(repoGermlineCNVOccurrences))
+
+	occurrencesGermlineSNVGroup := occurrencesGermlineGroup.Group("/snv")
+	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/count", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVCountHandler(repoGermlineSNVOccurrences))
+	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/list", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVListHandler(repoGermlineSNVOccurrences))
+	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVAggregateHandler(repoGermlineSNVOccurrences, repoFacets))
+	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVStatisticsHandler(repoGermlineSNVOccurrences))
+	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", requireAction(types.ActionSearchCase), server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences, repoExomiser, repoInterpretations))
+	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:task_id/reports/transcripts", requireAction(types.ActionSearchCase), server.GetGermlineSNVTranscriptReportsXlsx(reportBuilder, reportTemplates))
+	occurrencesGermlineSNVGroup.GET("/dictionary", requireAction(types.ActionSearchCase), server.GetGermlineSNVDictionary(repoFacets))
+
+	occurrencesSomaticCNVGroup := occurrencesSomaticGroup.Group("/cnv")
+	occurrencesSomaticCNVGroup.POST("/:case_id/:seq_id/:task_id/count", requireAction(types.ActionSearchCase), server.OccurrencesSomaticCNVCountHandler(repoSomaticCNVOccurrences))
+	occurrencesSomaticCNVGroup.POST("/:case_id/:seq_id/:task_id/list", requireAction(types.ActionSearchCase), server.OccurrencesSomaticCNVListHandler(repoSomaticCNVOccurrences))
+	occurrencesSomaticCNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesSomaticCNVAggregateHandler(repoSomaticCNVOccurrences, repoFacets))
+	occurrencesSomaticCNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesSomaticCNVStatisticsHandler(repoSomaticCNVOccurrences))
+	occurrencesSomaticCNVGroup.GET("/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap", requireAction(types.ActionSearchCase), server.OccurrencesSomaticCNVGenesOverlapHandler(repoSomaticCNVOccurrences))
+
+	occurrencesSomaticSNVGroup := occurrencesSomaticGroup.Group("/snv")
+	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/count", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVCountHandler(repoSomaticSNVOccurrences))
+	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/list", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVListHandler(repoSomaticSNVOccurrences))
+	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVAggregateHandler(repoSomaticSNVOccurrences, repoFacets))
+	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVStatisticsHandler(repoSomaticSNVOccurrences))
+	occurrencesSomaticSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", requireAction(types.ActionSearchCase), server.GetExpandedSomaticSNVOccurrence(repoSomaticSNVOccurrences, repoInterpretations))
+	occurrencesSomaticSNVGroup.GET("/:case_id/:seq_id/:task_id/reports/transcripts", requireAction(types.ActionSearchCase), server.GetSomaticSNVTranscriptReportsXlsx(reportBuilder, reportTemplates))
+
+	sequencingGroup := tenantRoutes.Group("/sequencing")
+	sequencingGroup.GET("/:seq_id/details", requireAction(types.ActionSearchCase), server.GetSequencingExperimentDetailByIdHandler(repoSeqExp))
+
+	// Organizations: the list is referential (any tenant member); create/edit are gated per-route
+	// by can_manage_org. No /admin path segment — gating is the RequireAction on each write route.
+	organizationsGroup := tenantRoutes.Group("/organizations")
+	organizationsGroup.GET("", server.ListOrganizationsHandler(repoOrganizations))
+	organizationsGroup.POST("", requireAction(types.ActionManageOrg), server.PostOrganizationHandler(repoOrganizationsWrite))
+	organizationsGroup.PUT("/:code", requireAction(types.ActionManageOrg), server.PutOrganizationHandler(repoOrganizationsWrite))
+
+	// The tenant's role catalog. Read by role management and by the role picker the user
+	// administration screens build, so either action opens it — neither implies the other.
+	rolesGroup := tenantRoutes.Group("/roles")
+	rolesGroup.GET("", requireAnyAction(types.ActionManageRole, types.ActionManageUser), server.ListRolesHandler(repoRoles))
+	rolesGroup.GET("/:code", requireAnyAction(types.ActionManageRole, types.ActionManageUser), server.GetRoleHandler(repoRoles))
+	rolesGroup.POST("", requireAction(types.ActionManageRole), server.PostRoleHandler(repoRoles))
+	rolesGroup.PUT("/:code", requireAction(types.ActionManageRole), server.PutRoleHandler(repoRoles))
+	rolesGroup.DELETE("/:code", requireAction(types.ActionManageRole), server.DeleteRoleHandler(repoRoles))
+
+	// Tenant users administration, gated by can_manage_user. Distinct from the global /users group
+	// below, which serves the caller's own saved filters, sets and preferences.
+	tenantUsersGroup := tenantRoutes.Group("/users")
+	tenantUsersGroup.GET("", requireAction(types.ActionManageUser), server.ListUsersHandler(repoUsers))
+	tenantUsersGroup.POST("", requireAction(types.ActionManageUser), server.PostUserHandler(userAdmin, auth))
+	tenantUsersGroup.PUT("/:user_id", requireAction(types.ActionManageUser), server.PutUserHandler(userAdmin, auth))
+	tenantUsersGroup.DELETE("/:user_id", requireAction(types.ActionManageUser), server.DeleteUserHandler(userAdmin, auth))
+
+	usersGroup := privateRoutes.Group("/users")
+	usersGroup.POST("/saved_filters", server.PostSavedFilterHandler(repoSavedFilters, auth))
+	usersGroup.PUT("/saved_filters/:saved_filter_id", server.PutSavedFilterHandler(repoSavedFilters, auth))
+	usersGroup.DELETE("/saved_filters/:saved_filter_id", server.DeleteSavedFilterHandler(repoSavedFilters, auth))
+	usersGroup.GET("/saved_filters/:saved_filter_id", server.GetSavedFilterByIDHandler(repoSavedFilters))
+	usersGroup.GET("/saved_filters", server.GetSavedFiltersHandler(repoSavedFilters, auth))
+	usersGroup.GET("/sets/:user_set_id", server.GetUserSet(repoUserSets))
+	usersGroup.GET("/preferences/:key", server.GetUserPreferencesHandler(repoUserPreferences, auth))
+	usersGroup.POST("/preferences/:key", server.UpdateUserPreferencesHandler(repoUserPreferences, auth))
+
+	variantsGroup := tenantRoutes.Group("/variants")
+	variantsGermlineGroup := variantsGroup.Group("/germline")
+	variantsGermlineGroup.GET("/:locus_id/header", requireAction(types.ActionSearchCase), server.GetGermlineVariantHeader(repoVariants))
+	variantsGermlineGroup.GET("/:locus_id/overview", requireAction(types.ActionSearchCase), server.GetGermlineVariantOverview(repoVariants, repoExomiser, repoInterpretations))
+	variantsGermlineGroup.GET("/:locus_id/consequences", requireAction(types.ActionSearchCase), server.GetGermlineVariantConsequences(repoVariants))
+	variantsGermlineGroup.POST("/:locus_id/cases/interpreted", requireAction(types.ActionSearchCase), server.GetGermlineVariantInterpretedCases(repoVariants))
+	variantsGermlineGroup.POST("/:locus_id/cases/uninterpreted", requireAction(types.ActionSearchCase), server.GetGermlineVariantUninterpretedCases(repoVariants))
+	variantsGermlineGroup.GET("/:locus_id/cases/count", requireAction(types.ActionSearchCase), server.GetGermlineVariantCasesCount(repoVariants))
+	variantsGermlineGroup.GET("/cases/filters", requireAction(types.ActionSearchCase), server.GetGermlineVariantCasesFilters(repoVariants))
+	variantsGermlineGroup.GET("/:locus_id/conditions/:panel_type", requireAction(types.ActionSearchCase), server.GetGermlineVariantConditions(repoGenePanels))
+	variantsGermlineGroup.GET("/:locus_id/conditions/clinvar", requireAction(types.ActionSearchCase), server.GetGermlineVariantConditionsClinvar(repoClinvarRCV))
+	variantsGermlineGroup.GET("/:locus_id/external_frequencies", requireAction(types.ActionSearchCase), server.GetGermlineVariantExternalFrequenciesHandler(repoVariants))
+	variantsGermlineGroup.GET("/:locus_id/internal_frequencies", requireAction(types.ActionSearchCase), server.GetGermlineVariantInternalFrequenciesHandler(repoVariants))
+	variantsGermlineGroup.GET("/:locus_id/internal_frequencies/global", requireAction(types.ActionSearchCase), server.GetGermlineVariantGlobalInternalFrequenciesHandler(repoVariants))
+
+	documentsGroup := tenantRoutes.Group("/documents")
+	documentsGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchDocumentsHandler(repoDocuments))
+	documentsGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.DocumentsAutocompleteHandler(repoDocuments))
+	documentsGroup.GET("/filters", requireAction(types.ActionSearchCase), server.DocumentsFiltersHandler(repoDocuments))
+	documentsGroup.GET("/:document_id/download_url", requireActionAt(types.ActionDownloadFile, orgFromDocument), server.GetDocumentsDownloadUrlHandler(repoDocuments, s3Presigner))
+
+	caseGroupsGroup := tenantRoutes.Group("/case_groups")
+	caseGroupsGroup.POST("", requireActionInTenant(types.ActionIngestData), server.PostCaseGroupHandler(repoCaseGroups, auth))
+	caseGroupsGroup.GET("/:name", requireAction(types.ActionSearchCase), server.GetCaseGroupHandler(repoCaseGroups))
+	caseGroupsGroup.POST("/:name/notify", requireActionInTenant(types.ActionIngestData), server.PostCaseGroupNotifyHandler(caseGroupNotifier))
+
+	batchesGroup := tenantRoutes.Group("/batches")
+	batchesGroup.GET("/:batch_id", requireActionInTenant(types.ActionIngestData), server.GetBatchHandler(repoBatches))
+
+	patientsGroup := tenantRoutes.Group("/patients")
+	patientsGroup.POST("/batch", requireActionInTenant(types.ActionIngestData), server.PostPatientBatchHandler(repoBatches, auth))
+	patientsGroup.PUT("/batch", requireActionInTenant(types.ActionIngestData), server.PutPatientBatchHandler(repoBatches, auth))
+	if patientViewEnabled {
+		patientsGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchPatientsHandler(repoPcxPatients))
+		patientsGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.PatientsAutocompleteHandler(repoPcxPatients))
+		patientsGroup.GET("/filters", requireAction(types.ActionSearchCase), server.PatientsFiltersHandler(repoPcxPatients))
+		patientsGroup.GET("/:patient_key", requireAction(types.ActionSearchCase), server.PatientEntityHandler(repoPcxPatients))
+		patientsGroup.GET("/:patient_key/treatments", requireAction(types.ActionSearchCase), server.PatientTreatmentsHandler(repoPcxPatients))
+		patientsGroup.GET("/:patient_key/laboratory", requireAction(types.ActionSearchCase), server.PatientLaboratoryHandler(repoPcxPatients))
+		patientsGroup.GET("/:patient_key/imaging", requireAction(types.ActionSearchCase), server.PatientImagingHandler(repoPcxPatients))
+		patientsGroup.GET("/:patient_key/genomics", requireAction(types.ActionSearchCase), server.PatientGenomicsHandler(repoPcxPatients))
+		patientsGroup.GET("/:patient_key/external_records", requireAction(types.ActionSearchCase), server.PatientExternalRecordsHandler(repoPcxPatients))
+		patientsGroup.GET("/:patient_key/processing_report/download_url", requireActionAt(types.ActionReadPII, orgFromPatientKey), server.PatientProcessingReportDownloadURLHandler(repoPcxPatients, s3Presigner))
+		patientsGroup.GET("/:patient_key/trial_eligibilities", requireAction(types.ActionSearchCase), server.PatientTrialEligibilitiesHandler(repoPcxPatients))
+		patientsGroup.GET("/:patient_key/tumor_board", requireAction(types.ActionSearchCase), server.PatientTumorBoardHandler(repoPcxPatients))
+		patientsGroup.GET("/:patient_key/tumor_board/deck/download_url", requireActionAt(types.ActionReadPII, orgFromPatientKey), server.PatientTumorBoardDeckDownloadURLHandler(repoPcxPatients, s3Presigner))
+		patientsGroup.GET("/:patient_key/tumor_board/sessions/:session_id/download_url", requireActionAt(types.ActionReadPII, orgFromPatientKey), server.PatientTumorBoardReportDownloadURLHandler(repoPcxPatients, s3Presigner))
+	}
+
+	samplesGroup := tenantRoutes.Group("/samples")
+	samplesGroup.POST("/batch", requireActionInTenant(types.ActionIngestData), server.PostSampleBatchHandler(repoBatches, auth))
+	samplesGroup.PUT("/batch", requireActionInTenant(types.ActionIngestData), server.PutSampleBatchHandler(repoBatches, auth))
+
+	sequencingGroup.POST("/batch", requireActionInTenant(types.ActionIngestData), server.PostSequencingExperimentBatchHandler(repoBatches, auth))
+	sequencingGroup.PUT("/batch", requireActionInTenant(types.ActionIngestData), server.PutSequencingExperimentBatchHandler(repoBatches, auth))
+
+	// Case batches carry one lab per record, so the caller must hold can_ingest_data at EVERY
+	// lab the payload names — one record outside their remit refuses the batch whole. The other
+	// batch types name no lab, so they are checked across the tenant instead (see above).
+	requireIngestEverywhere := server.RequireActionAtEvery(auth, repoAuth, types.ActionIngestData, server.OrgsFromCaseBatchBody(repoAuth))
+	casesGroup.POST("/batch", requireIngestEverywhere, server.PostCaseBatchHandler(repoBatches, auth))
+	casesGroup.PATCH("/batch", requireIngestEverywhere, server.PatchCaseBatchHandler(repoBatches, auth))
+	casesGroup.PUT("/batch", requireIngestEverywhere, server.PutCaseBatchHandler(repoBatches, auth))
+
+	// Checked change by change at each case's lab: can_ingest_data for a change involving a system
+	// status (the pipeline's), can_edit_case for any other.
+	casesGroup.PATCH("/status", server.RequireCaseStatusChangeActions(auth, repoAuth), server.PatchCasesStatusHandler(repoCasesWrite))
+
+	return r
+}
+
+// newEngine builds the gin engine with the global middleware stack in the correct order.
+//
+// gin.Recovery() MUST be the innermost (last-registered) global middleware. On a handler
+// panic, defers unwind LIFO: the gzip middleware's deferred gz.Close() flushes the gzip
+// footer to the response, which commits a 200 status. If Recovery sits outside gzip (as it
+// did when this used gin.Default(), which registers Recovery before gzip is added), it runs
+// after that flush and can no longer override the status — the client gets 200 instead of
+// 500 ("Headers were already written. Wanted to override status code 200 with 500"). By
+// registering Recovery after gzip, it recovers and sets 500 first, then gzip compresses the
+// 500 response. See SJRA-1578.
+func newEngine() *gin.Engine {
+	r := gin.New()
+	r.Use(server.RequestID())
+	r.Use(server.RequestLogger("/status"))
+	r.Use(gzip.Gzip(gzip.DefaultCompression))
+	r.Use(ginkeycloak.RequestLogger([]string{"uid"}, "data"))
+
+	var corsAllowedOrigins = strings.Split(os.Getenv("CORS_ALLOWED_ORIGINS"), ",")
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     corsAllowedOrigins,
+		AllowMethods:     []string{"GET", "POST", "PUT", "OPTIONS"},
+		AllowHeaders:     []string{"Accept", "Authorization", "Content-Type"},
+		AllowCredentials: true, // Enable cookies/auth
+	}))
+
+	r.Use(gin.Recovery()) // innermost global middleware — see doc comment above
+	return r
+}
+
+// @version 1.0
+// @title Radiant API
+// @description This is the API for Radiant data platform.
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+// @securitydefinitions.bearerauth
+// @BasePath /
+func main() {
+	observability.Setup()
+
+	database.MigrateWithEnvDefault()
+
+	// Initialize database connection
+	dbStarrocks, err := database.NewStarrocksDB()
+	if err != nil {
+		slog.Error("failed to initialize starrocks database", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	dbPostgres, err := database.NewPostgresDB()
+	if err != nil {
+		slog.Error("failed to initialize postgres database", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	p := os.Getenv("API_PORT")
+	if p == "" {
+		p = "8090"
+	}
+
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	if utils.GetBoolEnvOrDefault(viewRefreshOnStartupEnabledEnv, false) {
+		if err := refreshTenantViews(ctx, dbPostgres, dbStarrocks); err != nil {
+			slog.Error("startup tenant view refresh failed", slog.Any("error", err))
+			os.Exit(1)
+		}
+	}
+
+	igvPublicTracksPrefix, err := utils.IGVPublicTracksPrefixFromEnv()
+	if err != nil {
+		slog.Error("failed to read IGV public tracks prefix", slog.Any("error", err))
+		os.Exit(1)
+	}
+
+	r := setupRouter(dbStarrocks, dbPostgres, utils.GetBoolEnvOrDefault(patientViewEnabledEnv, false), igvPublicTracksPrefix)
+	srv := &http.Server{Addr: fmt.Sprintf(":%s", p), Handler: r, ReadHeaderTimeout: 10 * time.Second}
+
+	go func() {
+		slog.Info("API server listening", slog.String("port", p))
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			slog.Error("API server failed", slog.Any("error", err))
+			os.Exit(1)
+		}
+	}()
+
+	<-ctx.Done()
+	stop() // restore default signal handling so a second signal force-quits
+	slog.Info("shutdown signal received, draining connections...")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), utils.ShutdownTimeout())
+	defer cancel()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		slog.Error("API server shutdown error", slog.Any("error", err))
+	}
+	slog.Info("API server shut down cleanly")
+}

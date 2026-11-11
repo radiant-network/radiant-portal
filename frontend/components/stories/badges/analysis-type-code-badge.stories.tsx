@@ -1,0 +1,79 @@
+import { BrowserRouter } from 'react-router';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+
+import { SavedFilterType } from '@/api/api';
+import AnalysisTypeCodeBadge, { type AnalysisTypeCode } from '@/components/base/badges/analysis-type-code-badge';
+import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
+
+import { StorySection } from '../story-section';
+
+const config: PortalConfig = {
+  variant_entity: {
+    app_id: ApplicationId.variant_entity,
+  },
+  germline_snv_occurrence: {
+    app_id: ApplicationId.germline_snv_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.GERMLINE_SNV_OCCURRENCE,
+  },
+  germline_cnv_occurrence: {
+    app_id: ApplicationId.germline_cnv_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.GERMLINE_CNV_OCCURRENCE,
+  },
+  somatic_snv_to_occurrence: {
+    app_id: ApplicationId.somatic_snv_to_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+  },
+  somatic_snv_tn_occurrence: {
+    app_id: ApplicationId.somatic_snv_tn_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_SNV_OCCURRENCE,
+  },
+  somatic_cnv_to_occurrence: {
+    app_id: ApplicationId.somatic_cnv_to_occurrence,
+    aggregations: [] as any,
+    saved_filter_type: SavedFilterType.SOMATIC_CNV_OCCURRENCE,
+  },
+  admin: {
+    admin_code: 'admin',
+    app_id: ApplicationId.admin,
+  },
+  portal: {
+    name: '',
+    navigation: {},
+  },
+};
+
+const meta = {
+  title: 'Components/Badges/Analysis Type Code Badge',
+  component: AnalysisTypeCodeBadge,
+  args: {},
+  decorators: [
+    Story => (
+      <BrowserRouter>
+        <ConfigProvider config={config}>
+          <Story />
+        </ConfigProvider>
+      </BrowserRouter>
+    ),
+  ],
+} satisfies Meta<typeof AnalysisTypeCodeBadge>;
+
+export default meta;
+
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {
+  args: { code: 'somatic' as AnalysisTypeCode },
+  render: _args => (
+    <StorySection title="Default">
+      <div className="flex gap-2">
+        {['somatic', 'germline', 'germline_family'].map((code, index) => (
+          <AnalysisTypeCodeBadge key={index} code={code as AnalysisTypeCode} />
+        ))}
+      </div>
+    </StorySection>
+  ),
+};

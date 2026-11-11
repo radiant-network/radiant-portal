@@ -1,0 +1,36 @@
+/*
+   {{.TenantCode}}_tenant.v_pcx_30_hin_exchange  (VIEW, the health information network exchanges of each PCX patient:
+   one row per document type and class retrieved from an organization, plus one row with no document for an organization
+   linked through TEFCA or Carequality that returned none)
+
+   The source tables are keyed on research_id. Like v_pcx_30_patient_key, the view is built on the secured demographics view,
+   so the caller gets each row under the identifier they can see (MRN with PHI access, research id without); the source
+   join only maps that identifier back to the research id. It adds no PHI rule of its own.
+
+   FULL OUTER JOIN: an organization can be linked with no document, and documents can come from an organization the patient
+   is not linked to (network NULL).
+ */
+CREATE OR REPLACE VIEW {{.TenantCode}}_tenant.v_pcx_30_hin_exchange AS
+SELECT d.organization_code,
+       d.patient_id_type,
+       d.patient_id,
+       h.hin_org_name,
+       h.network,
+       h.document_class_name,
+       h.document_type_name,
+       h.document_count
+FROM {{.TenantCode}}_tenant.v_pcx_30_demographics_combined d
+JOIN radiant_data_dev.v_pcx_30_demographics_combined src
+  ON src.organization_code = d.organization_code
+ AND d.patient_id = CASE d.patient_id_type WHEN 'mrn' THEN src.mrn ELSE src.research_id END
+JOIN (SELECT coalesce(o.research_id, doc.research_id) AS research_id,
+             coalesce(o.hin_org_name, doc.hin_org_name) AS hin_org_name,
+             lower(o.hin_short_code) AS network,
+             doc.document_class_name,
+             doc.document_type_name,
+             doc.`count` AS document_count
+      FROM radiant_data_dev.hin_org_patient o
+      FULL OUTER JOIN radiant_data_dev.hin_document_metadata doc
+        ON doc.research_id = o.research_id
+       AND doc.hin_org_name = o.hin_org_name) h
+  ON h.research_id = src.research_id

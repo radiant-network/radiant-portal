@@ -1,0 +1,35 @@
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/server"
+	"github.com/radiant-network/radiant-api/test/testutils"
+	"github.com/stretchr/testify/assert"
+)
+
+func assertGetUserSet(t *testing.T, repo *postgres.UserSetsRepository, userSetId string, status int, expected string) {
+	router := tenantRouter()
+	router.GET("/users/sets/:user_set_id", server.GetUserSet(repo))
+
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/sets/%s", userSetId), bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, status, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_GetUserSet(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := postgres.NewUserSetsRepository(database.PostgresDB{DB: env.Postgres})
+		// not found
+		assertGetUserSet(t, repo, "bce3b031-c691-4680-878f-f43d661f9a9f", http.StatusNotFound, `{"status": 404, "message":"user not found"}`)
+	})
+}

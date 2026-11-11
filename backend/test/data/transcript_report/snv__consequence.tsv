@@ -1,0 +1,8 @@
+locus_id	symbol	transcript_id	transcript_version	source	is_mane_select	is_mane_plus	is_canonical	is_picked	mane_select	mane_pair_transcript_id	exon_rank	exon_total	dna_change	aa_change	revel_score	cadd_phred	consequences	vep_impact
+1000	BRAF	ENST00000646891	6	Ensembl	true	false	true	true	NM_004333.6	NM_004333	15	18	c.1799T>A	p.Val600Glu	0.931	32	["missense_variant"]	MODERATE
+1000	BRAF	NM_004333	6	RefSeq	true	false	false	false	NM_004333.6	ENST00000646891	15	18	c.1799T>A	p.Val600Glu	0.931	32	["missense_variant"]	MODERATE
+1000	BRAF	ENST00000288602	11	Ensembl	false	false	false	false	NULL	NULL	15	18	c.1799T>A	p.Val600Glu	NULL	NULL	["missense_variant"]	MODERATE
+1000	BRAF	NM_001374258	1	RefSeq	false	false	false	false	NULL	NULL	16	19	c.1919T>A	p.Val640Glu	0.931	32	["missense_variant"]	MODERATE
+1000	BRAF	T001	NULL	NULL	false	false	false	false	NULL	NULL	NULL	NULL	NULL	NULL	NULL	NULL	["intron_variant"]	MODIFIER
+1000	LINC01	NR_027010	2	RefSeq	false	false	false	false	NULL	NULL	NULL	NULL	n.100T>A	NULL	NULL	NULL	["non_coding_transcript_exon_variant"]	MODIFIER
+3000	TP53	ENST00000269305	9	Ensembl	true	false	true	true	NM_000546.6	NM_000546	5	11	c.524G>A	p.Arg175His	0.95	30	["missense_variant"]	MODERATE

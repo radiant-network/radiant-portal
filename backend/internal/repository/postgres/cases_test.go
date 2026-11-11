@@ -1,0 +1,603 @@
+package postgres
+
+import (
+	"fmt"
+	"slices"
+	"testing"
+	"time"
+
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/test/testutils"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
+)
+
+func Test_CreateCases(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		orgCode := "CHOP"
+		labCode := "CQGC"
+		newCase := &types.Case{
+			ID:                       999,
+			ProbandID:                3,
+			ProjectID:                1,
+			StatusCode:               "in_progress",
+			PrimaryCondition:         "MONDO:0000001",
+			DiagnosisLabCode:         &labCode,
+			Note:                     "This is a test",
+			AnalysisCatalogID:        1,
+			AnalysisCatalog:          types.AnalysisCatalog{},
+			PriorityCode:             "routine",
+			CaseTypeCode:             "germline",
+			CaseCategoryCode:         "postnatal",
+			ConditionCodeSystem:      "MONDO",
+			OrderingPhysician:        "Dr. Test",
+			OrderingOrganizationCode: &orgCode,
+			TenantCode:               types.DefaultTenantCode,
+		}
+		err := repo.CreateCase(t.Context(), newCase)
+		assert.NoError(t, err)
+
+		var c types.Case
+		err = repo.db.Raw(`SELECT * FROM cases WHERE id = 999;`).First(&c).Error
+		assert.NoError(t, err)
+		assert.Equal(t, 999, c.ID)
+		assert.Equal(t, 3, c.ProbandID)
+		assert.Equal(t, "Dr. Test", c.OrderingPhysician)
+
+		env.Postgres.Exec("DELETE FROM cases WHERE id = 999")
+	})
+}
+
+func Test_UpdateCase_OK(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewCasesRepository(database.PostgresDB{DB: db})
+
+		diagLab := "CQGC"
+		orgCode := "CQGC"
+		original := &types.Case{
+			ID:                       100010,
+			ProbandID:                1,
+			ProjectID:                1,
+			StatusCode:               "in_progress",
+			PrimaryCondition:         "MONDO:0000001",
+			DiagnosisLabCode:         &diagLab,
+			Note:                     "original note",
+			AnalysisCatalogID:        1,
+			PriorityCode:             "routine",
+			CaseTypeCode:             "germline",
+			CaseCategoryCode:         "postnatal",
+			ConditionCodeSystem:      "MONDO",
+			OrderingPhysician:        "Dr. Original",
+			OrderingOrganizationCode: &orgCode,
+			TenantCode:               types.DefaultTenantCode,
+		}
+		require.NoError(t, repo.CreateCase(t.Context(), original))
+		t.Cleanup(func() { db.Exec("DELETE FROM cases WHERE id = 100010") })
+
+		newDiagLab := "CHUSJ"
+		newOrgCode := "CHUSJ"
+		update := &types.Case{
+			CaseTypeCode:             "somatic",
+			StatusCode:               "completed",
+			DiagnosisLabCode:         &newDiagLab,
+			ConditionCodeSystem:      "OMIM",
+			PrimaryCondition:         "OMIM:0000002",
+			PriorityCode:             "urgent",
+			CaseCategoryCode:         "prenatal",
+			AnalysisCatalogID:        1,
+			Note:                     "updated note",
+			OrderingOrganizationCode: &newOrgCode,
+			OrderingPhysician:        "Dr. Updated",
+		}
+		err := repo.UpdateCase(t.Context(), 100010, update)
+		assert.NoError(t, err)
+
+		var result types.Case
+		err = db.Table("cases").Where("id = ?", 100010).First(&result).Error
+		assert.NoError(t, err)
+		assert.Equal(t, "somatic", result.CaseTypeCode)
+		assert.Equal(t, "completed", result.StatusCode)
+		assert.Equal(t, "CHUSJ", *result.DiagnosisLabCode)
+		assert.Equal(t, "OMIM", result.ConditionCodeSystem)
+		assert.Equal(t, "OMIM:0000002", result.PrimaryCondition)
+		assert.Equal(t, "urgent", result.PriorityCode)
+		assert.Equal(t, "prenatal", result.CaseCategoryCode)
+		assert.Equal(t, "updated note", result.Note)
+		assert.Equal(t, "CHUSJ", *result.OrderingOrganizationCode)
+		assert.Equal(t, "Dr. Updated", result.OrderingPhysician)
+
+		// Immutable identity fields untouched.
+		assert.Equal(t, 1, result.ProbandID)
+		assert.Equal(t, 1, result.ProjectID)
+		assert.Equal(t, types.DefaultTenantCode, result.TenantCode)
+	})
+}
+
+func Test_GetCaseAnalysisCatalogIdByCode(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "WGA", types.DefaultTenantCode)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, analysisCatalog.ID)
+		assert.Equal(t, "WGA", analysisCatalog.Code)
+	})
+}
+
+func Test_GetCaseAnalysisCatalogIdByCode_NotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "NON_EXISTENT_CODE", types.DefaultTenantCode)
+		assert.NoError(t, err)
+		assert.Nil(t, analysisCatalog)
+	})
+}
+
+func Test_CreateDuplicateSubmitterCaseId_Error(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+
+		diagLab := "CQGC"
+		orgCode := "CQGC"
+		newCase := &types.Case{
+			ID:                       1000,
+			ProbandID:                3,
+			ProjectID:                1,
+			StatusCode:               "in_progress",
+			PrimaryCondition:         "MONDO:0000001",
+			DiagnosisLabCode:         &diagLab,
+			Note:                     "This is a test",
+			AnalysisCatalogID:        1,
+			PriorityCode:             "routine",
+			CaseTypeCode:             "germline",
+			CaseCategoryCode:         "postnatal",
+			ConditionCodeSystem:      "MONDO",
+			OrderingPhysician:        "Dr. Test",
+			OrderingOrganizationCode: &orgCode,
+			TenantCode:               types.DefaultTenantCode,
+			SubmitterCaseID:          "1:1", // Duplicate submitter_case_id
+		}
+		err := repo.CreateCase(t.Context(), newCase)
+		assert.Error(t, err)
+		assert.Equal(t, "ERROR: duplicate key value violates unique constraint \"uc_cases_submitter_case_id_filtered\" (SQLSTATE 23505)", err.Error())
+
+		if err != nil {
+			// Cleanup in case the record was created
+			env.Postgres.Exec("DELETE FROM cases WHERE id = 1000 AND submitter_case_id='1:1';")
+		}
+	})
+}
+
+func Test_CreateEmptySubmitterCaseId_Ok(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+
+		diagLab := "CQGC"
+		orgCode := "CQGC"
+		newCase := &types.Case{
+			ID:                       1000,
+			ProbandID:                3,
+			ProjectID:                1,
+			StatusCode:               "in_progress",
+			PrimaryCondition:         "MONDO:0000001",
+			DiagnosisLabCode:         &diagLab,
+			Note:                     "This is a test",
+			AnalysisCatalogID:        1,
+			PriorityCode:             "routine",
+			CaseTypeCode:             "germline",
+			CaseCategoryCode:         "postnatal",
+			ConditionCodeSystem:      "MONDO",
+			OrderingPhysician:        "Dr. Test",
+			OrderingOrganizationCode: &orgCode,
+			TenantCode:               types.DefaultTenantCode,
+			SubmitterCaseID:          "",
+		}
+		err := repo.CreateCase(t.Context(), newCase)
+		assert.NoError(t, err)
+		env.Postgres.Exec("DELETE FROM cases WHERE id = 1000 AND submitter_case_id='';")
+	})
+}
+
+const (
+	seedDiagnosisLab = "LDM-CHUSJ"
+	seedOrderingOrg  = "UCSF"
+)
+
+func seedCaseForStatus(t *testing.T, repo *CasesRepository, db *gorm.DB, caseID int, status string) int {
+	t.Helper()
+	diagLab := seedDiagnosisLab
+	orgCode := seedOrderingOrg
+	require.NoError(t, repo.CreateCase(t.Context(), &types.Case{
+		ID:                       caseID,
+		ProbandID:                1,
+		ProjectID:                1,
+		StatusCode:               status,
+		DiagnosisLabCode:         &diagLab,
+		OrderingOrganizationCode: &orgCode,
+		AnalysisCatalogID:        1,
+		PriorityCode:             "routine",
+		CaseTypeCode:             "germline",
+		CaseCategoryCode:         "postnatal",
+		SubmitterCaseID:          fmt.Sprintf("status-switcher-%d", caseID),
+		TenantCode:               types.DefaultTenantCode,
+	}))
+	t.Cleanup(func() { db.Exec("DELETE FROM cases WHERE id = ?", caseID) })
+	return caseID
+}
+
+func statusPatch(code string) *types.Case {
+	return &types.Case{StatusCode: code}
+}
+
+func statusOfCase(t *testing.T, db *gorm.DB, caseID int) string {
+	t.Helper()
+	var status string
+	require.NoError(t, db.Table("cases").Select("status_code").Where("id = ?", caseID).Scan(&status).Error)
+	return status
+}
+
+func Test_PatchCase_PersistsTheNewStatus(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100020, types.CaseStatusInProgress)
+
+		var before time.Time
+		require.NoError(t, env.Postgres.Table("cases").Select("updated_on").Where("id = ?", caseID).Scan(&before).Error)
+
+		found, err := repo.PatchCase(t.Context(), caseID, statusPatch(types.CaseStatusInReview))
+		assert.NoError(t, err)
+		assert.True(t, found)
+		assert.Equal(t, types.CaseStatusInReview, statusOfCase(t, env.Postgres, caseID))
+
+		var after time.Time
+		require.NoError(t, env.Postgres.Table("cases").Select("updated_on").Where("id = ?", caseID).Scan(&after).Error)
+		assert.True(t, after.After(before), "updated_on did not advance: before %s, after %s", before, after)
+	})
+}
+
+func Test_PatchCase_AppliesStatusesInAnyOrder(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100021, types.CaseStatusInProgress)
+
+		for _, status := range []string{types.CaseStatusCompleted, types.CaseStatusReopened, types.CaseStatusInProgress, types.CaseStatusRevoked} {
+			found, err := repo.PatchCase(t.Context(), caseID, statusPatch(status))
+			assert.NoError(t, err)
+			assert.Truef(t, found, "PatchCase(%q) reported the case missing", status)
+			assert.Equal(t, status, statusOfCase(t, env.Postgres, caseID))
+		}
+	})
+}
+
+func Test_PatchCase_ReapplyingTheSameStatusIsFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100022, types.CaseStatusInReview)
+
+		found, err := repo.PatchCase(t.Context(), caseID, statusPatch(types.CaseStatusInReview))
+		assert.NoError(t, err)
+		assert.True(t, found)
+	})
+}
+
+func Test_PatchCase_EmptyPatchIsRejected(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+
+		found, err := repo.PatchCase(t.Context(), 1, &types.Case{})
+		assert.EqualError(t, err, "no field to update on case 1")
+		assert.False(t, found)
+	})
+}
+
+func Test_PatchCase_UnknownCaseIsNotFound(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+
+		found, err := repo.PatchCase(t.Context(), 999999, statusPatch(types.CaseStatusInReview))
+		assert.NoError(t, err)
+		assert.False(t, found)
+	})
+}
+
+func Test_PatchCase_CrossTenantCaseIsNotFoundAndUnchanged(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100023, types.CaseStatusInProgress)
+
+		ctx := types.ContextWithTenant(t.Context(), "tenant_b")
+		found, err := repo.PatchCase(ctx, caseID, statusPatch(types.CaseStatusRevoked))
+		assert.NoError(t, err)
+		assert.False(t, found, "radiant's case must not be writable from tenant_b")
+		assert.Equal(t, types.CaseStatusInProgress, statusOfCase(t, env.Postgres, caseID), "the status must be left untouched")
+	})
+}
+
+func Test_PatchCase_OwnTenantCaseIsWritable(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100024, types.CaseStatusInProgress)
+
+		ctx := types.ContextWithTenant(t.Context(), types.DefaultTenantCode)
+		found, err := repo.PatchCase(ctx, caseID, statusPatch(types.CaseStatusResolved))
+		assert.NoError(t, err)
+		assert.True(t, found)
+		assert.Equal(t, types.CaseStatusResolved, statusOfCase(t, env.Postgres, caseID))
+	})
+}
+
+func Test_SetCaseStatusIfExpected_MovesSubmittedToProcessing(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100030, types.CaseStatusSubmitted)
+
+		var before time.Time
+		require.NoError(t, env.Postgres.Table("cases").Select("updated_on").Where("id = ?", caseID).Scan(&before).Error)
+
+		result, err := repo.SetCaseStatusIfExpected(t.Context(), types.DefaultTenantCode, caseID, types.CaseStatusProcessing, []string{types.CaseStatusSubmitted})
+		assert.NoError(t, err)
+		assert.Equal(t, &types.CaseStatusChangeResult{CaseID: caseID, Updated: true, CurrentStatusCode: types.CaseStatusProcessing}, result)
+		assert.Equal(t, types.CaseStatusProcessing, statusOfCase(t, env.Postgres, caseID))
+
+		var after time.Time
+		require.NoError(t, env.Postgres.Table("cases").Select("updated_on").Where("id = ?", caseID).Scan(&after).Error)
+		assert.True(t, after.After(before), "updated_on did not advance: before %s, after %s", before, after)
+	})
+}
+
+func Test_SetCaseStatusIfExpected_UnexpectedStatusIsLeftUnchanged(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100031, types.CaseStatusRevoked)
+
+		result, err := repo.SetCaseStatusIfExpected(t.Context(), types.DefaultTenantCode, caseID, types.CaseStatusInProgress, []string{types.CaseStatusProcessing})
+		assert.NoError(t, err)
+		assert.Equal(t, &types.CaseStatusChangeResult{CaseID: caseID, Updated: false, CurrentStatusCode: types.CaseStatusRevoked}, result)
+		assert.Equal(t, types.CaseStatusRevoked, statusOfCase(t, env.Postgres, caseID))
+	})
+}
+
+func Test_SetCaseStatusIfExpected_AlreadyInTargetIsNotUpdated(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100032, types.CaseStatusInProgress)
+
+		result, err := repo.SetCaseStatusIfExpected(t.Context(), types.DefaultTenantCode, caseID, types.CaseStatusInProgress, []string{types.CaseStatusProcessing})
+		assert.NoError(t, err)
+		assert.Equal(t, &types.CaseStatusChangeResult{CaseID: caseID, Updated: false, CurrentStatusCode: types.CaseStatusInProgress}, result)
+	})
+}
+
+// A user's change still uncommitted when the pipeline call arrives: the call must wait for it,
+// then decide on, and report, the status the user committed.
+func Test_SetCaseStatusIfExpected_WaitsForAConcurrentUserChange(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100034, types.CaseStatusProcessing)
+
+		userTx := env.Postgres.Begin()
+		require.NoError(t, userTx.Error)
+		committed := false
+		t.Cleanup(func() {
+			if !committed {
+				userTx.Rollback()
+			}
+		})
+		require.NoError(t, userTx.Exec("UPDATE cases SET status_code = ? WHERE id = ?", types.CaseStatusRevoked, caseID).Error)
+
+		type outcome struct {
+			result *types.CaseStatusChangeResult
+			err    error
+		}
+		done := make(chan outcome, 1)
+		go func() {
+			result, err := repo.SetCaseStatusIfExpected(t.Context(), types.DefaultTenantCode, caseID, types.CaseStatusInProgress, []string{types.CaseStatusProcessing})
+			done <- outcome{result, err}
+		}()
+
+		select {
+		case got := <-done:
+			t.Fatalf("SetCaseStatusIfExpected returned %+v, %v while the user's change still held the row; want it to wait", got.result, got.err)
+		case <-time.After(300 * time.Millisecond):
+		}
+
+		require.NoError(t, userTx.Commit().Error)
+		committed = true
+
+		select {
+		case got := <-done:
+			assert.NoError(t, got.err)
+			assert.Equal(t, &types.CaseStatusChangeResult{CaseID: caseID, Updated: false, CurrentStatusCode: types.CaseStatusRevoked}, got.result)
+		case <-time.After(10 * time.Second):
+			t.Fatal("SetCaseStatusIfExpected did not return after the user's change committed")
+		}
+		assert.Equal(t, types.CaseStatusRevoked, statusOfCase(t, env.Postgres, caseID), "the user's status must not be overwritten")
+	})
+}
+
+func Test_SetCaseStatusIfExpected_UnknownCaseIsNil(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+
+		result, err := repo.SetCaseStatusIfExpected(t.Context(), types.DefaultTenantCode, 999999, types.CaseStatusProcessing, []string{types.CaseStatusSubmitted})
+		assert.NoError(t, err)
+		assert.Nil(t, result)
+	})
+}
+
+func Test_SetCaseStatusIfExpected_CrossTenantCaseIsNilAndUnchanged(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100033, types.CaseStatusSubmitted)
+
+		result, err := repo.SetCaseStatusIfExpected(t.Context(), "tenant_b", caseID, types.CaseStatusProcessing, []string{types.CaseStatusSubmitted})
+		assert.NoError(t, err)
+		assert.Nil(t, result, "radiant's case must not be visible from tenant_b")
+		assert.Equal(t, types.CaseStatusSubmitted, statusOfCase(t, env.Postgres, caseID), "the status must be left untouched")
+	})
+}
+
+func Test_CaseStatusDictionary_MatchesStatusTable(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewValueSetsRepository(database.PostgresDB{DB: env.Postgres})
+
+		codes, err := repo.GetCodes(t.Context(), ValueSetStatus)
+		assert.NoError(t, err)
+
+		declared := append(append([]string{}, types.UserAppliedCaseStatuses...), types.SystemAppliedCaseStatuses...)
+		slices.Sort(codes)
+		slices.Sort(declared)
+		assert.Equal(t, declared, codes, "internal/types case status codes have drifted from the `status` table")
+	})
+}
+
+func Test_GetCaseAnalysisCatalogIdByCode_OtherTenantRow_NotReturned(t *testing.T) {
+	// analysis_catalog is unique per (code, tenant_code) since migration 000013, so 'WGA' exists
+	// once per tenant and the code alone cannot pick the right row.
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewCasesRepository(database.PostgresDB{DB: db})
+		require.NoError(t, db.Exec(`
+			INSERT INTO analysis_catalog (id, code, name, tenant_code)
+			VALUES (9020, 'WGA', 'Whole Genome Analysis', 'tenant_b')
+		`).Error)
+		defer db.Exec(`DELETE FROM analysis_catalog WHERE id = 9020`)
+
+		analysisCatalog, err := repo.GetCaseAnalysisCatalogIdByCode(t.Context(), "WGA", "tenant_b")
+		assert.NoError(t, err)
+		require.NotNil(t, analysisCatalog)
+		assert.Equal(t, 9020, analysisCatalog.ID, "each tenant must resolve its own analysis catalog row")
+	})
+}
+
+func Test_GetCaseBySubmitterCaseIdAndProjectId_OtherTenantRow_NotReturned(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewCasesRepository(database.PostgresDB{DB: db})
+		require.NoError(t, db.Exec(`
+			INSERT INTO project (id, code, name, description, tenant_code)
+			VALUES (9021, 'PROJ-CASE-TENANT-ISO', 'Tenant Isolation Project', '', 'tenant_b')
+		`).Error)
+		defer db.Exec(`DELETE FROM project WHERE id = 9021`)
+		require.NoError(t, db.Exec(`
+			INSERT INTO analysis_catalog (id, code, name, tenant_code)
+			VALUES (9021, 'WGA-ISO', 'Whole Genome Analysis', 'tenant_b')
+		`).Error)
+		defer db.Exec(`DELETE FROM analysis_catalog WHERE id = 9021`)
+		require.NoError(t, db.Exec(`
+			INSERT INTO patient (id, organization_code, tenant_code, sex_code, life_status_code, submitter_patient_id, submitter_patient_id_type)
+			VALUES (1050, 'TENANT_B_ORG', 'tenant_b', 'male', 'alive', 'P-CASE-TENANT-ISO', 'MR')
+		`).Error)
+		require.NoError(t, db.Exec(`
+			INSERT INTO cases (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, created_on, updated_on, priority_code, case_type_code, case_category_code, ordering_organization_code, submitter_case_id)
+			VALUES (1050, 1050, 9021, 9021, 'in_progress', 'TENANT_B_ORG', 'tenant_b', now(), now(), 'routine', 'germline', 'postnatal', 'TENANT_B_ORG', 'CASE-TENANT-ISO')
+		`).Error)
+
+		c, err := repo.GetCaseBySubmitterCaseIdAndProjectId(t.Context(), "CASE-TENANT-ISO", 9021, types.DefaultTenantCode)
+		assert.NoError(t, err)
+		assert.Nil(t, c, "a case that exists only in tenant_b must not resolve for radiant")
+
+		c, err = repo.GetCaseBySubmitterCaseIdAndProjectId(t.Context(), "CASE-TENANT-ISO", 9021, "tenant_b")
+		assert.NoError(t, err)
+		require.NotNil(t, c)
+		assert.Equal(t, 1050, c.ID)
+	})
+}
+
+func Test_CreateCase_CrossTenantProject_Rejected(t *testing.T) {
+	// Migration 000036 makes (project_id, tenant_code) a compound FK, so a case can no longer be
+	// attached to another tenant's project even if a lookup ever hands one over.
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		repo := NewCasesRepository(database.PostgresDB{DB: db})
+		require.NoError(t, db.Exec(`
+			INSERT INTO patient (id, organization_code, tenant_code, sex_code, life_status_code, submitter_patient_id, submitter_patient_id_type)
+			VALUES (1070, 'TENANT_B_ORG', 'tenant_b', 'male', 'alive', 'P-CROSS-TENANT', 'mrn')
+		`).Error)
+		require.NoError(t, db.Exec(`
+			INSERT INTO analysis_catalog (id, code, name, tenant_code)
+			VALUES (9030, 'WGA-CROSS', 'Whole Genome Analysis', 'tenant_b')
+		`).Error)
+		defer db.Exec(`DELETE FROM analysis_catalog WHERE id = 9030`)
+
+		orgCode := "TENANT_B_ORG"
+		// project id 1 belongs to radiant (test/data/clinical fixtures).
+		err := repo.CreateCase(t.Context(), &types.Case{
+			ID:                       1070,
+			ProbandID:                1070,
+			ProjectID:                1,
+			AnalysisCatalogID:        9030,
+			TenantCode:               "tenant_b",
+			StatusCode:               "in_progress",
+			DiagnosisLabCode:         &orgCode,
+			OrderingOrganizationCode: &orgCode,
+			PriorityCode:             "routine",
+			CaseTypeCode:             "germline",
+			CaseCategoryCode:         "postnatal",
+			SubmitterCaseID:          "CASE-CROSS-TENANT",
+		})
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "cases_project_tenant_fkey")
+	})
+}
+
+// lockCaseDiagnosisLab is unexported and composed into the assignment write's transaction, so its
+// contract is pinned here rather than only through that caller's tests.
+func Test_lockCaseDiagnosisLab_ReturnsTheLab(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		lab, err := lockCaseDiagnosisLab(env.Postgres, types.DefaultTenantCode, 1)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "CQGC", lab)
+	})
+}
+
+// The lock is the whole reason this is not a plain read, and no assertion on what the function
+// returns would notice its absence. Nor would a concurrency test: case_assignment's foreign key
+// makes a competing write take its own lock on the case row while inserting, so it blocks either
+// way. What the lock actually buys is that the read happens under it too, which is a property of
+// the statement rather than of any result — hence the assertion on the lock Postgres reports.
+func Test_lockCaseDiagnosisLab_TakesARowLockOnTheCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		tx := env.Postgres.Begin()
+		require.NoError(t, tx.Error)
+		defer tx.Rollback()
+
+		lab, err := lockCaseDiagnosisLab(tx, types.DefaultTenantCode, 1)
+		require.NoError(t, err)
+		require.Equal(t, "CQGC", lab)
+
+		var pid int
+		require.NoError(t, tx.Raw("SELECT pg_backend_pid()").Scan(&pid).Error)
+
+		modes := []string{}
+		require.NoError(t, env.Postgres.Raw(`
+			SELECT mode FROM pg_locks
+			WHERE pid = ? AND locktype = 'relation' AND relation = 'cases'::regclass`, pid).
+			Scan(&modes).Error)
+
+		// A plain SELECT holds AccessShareLock and nothing more; RowShareLock is what FOR UPDATE adds.
+		assert.Contains(t, modes, "RowShareLock", "the case is read without being locked for update")
+	})
+}
+
+func Test_lockCaseDiagnosisLab_UnknownCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		_, err := lockCaseDiagnosisLab(env.Postgres, types.DefaultTenantCode, 999999)
+
+		assert.ErrorIs(t, err, types.ErrCaseNotFound)
+	})
+}
+
+// A case of another tenant is as good as absent: the lab must not leak across tenants, since it
+// is what the assignment write decides eligibility against.
+func Test_lockCaseDiagnosisLab_CaseOfAnotherTenant(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		_, err := lockCaseDiagnosisLab(env.Postgres, "tenant_b", 1)
+
+		assert.ErrorIs(t, err, types.ErrCaseNotFound)
+	})
+}

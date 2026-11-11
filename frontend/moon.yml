@@ -1,0 +1,64 @@
+language: 'typescript'
+layer: 'application'
+stack: 'frontend'
+
+# Consumes the backend OpenAPI spec through the generated TS client in api/.
+dependsOn: ['backend']
+
+fileGroups:
+  sources:
+    - 'apps/**/*'
+    - 'components/**/*'
+    - 'portals/**/*'
+    - 'utils/**/*'
+    - 'themes/**/*'
+    - 'translations/**/*'
+    - 'api/**/*'
+    - '!**/node_modules/**'
+    - '!**/build/**'
+    - '!**/storybook-static/**'
+  configs: ['package.json', 'package-lock.json', 'tsconfig.json', 'vitest.config.ts', '.eslintrc.cjs']
+
+tasks:
+  install:
+    # Skip when node_modules is newer than the lockfile (moon's node toolchain can manage this instead).
+    script: '[ node_modules/.package-lock.json -nt package-lock.json ] || npm ci --no-audit --no-fund'
+    inputs: ['package.json', 'package-lock.json', '*/package.json', '*/*/package.json']
+    outputs: ['node_modules']
+    options:
+      cache: false
+  # Fails when swagger.yaml changed but api/ was not regenerated.
+  api-client-check:
+    script: >-
+      npx -y @openapitools/openapi-generator-cli@2.20.0 version-manager set 7.12.0 >/dev/null &&
+      rm -rf .gen && npx -y @openapitools/openapi-generator-cli@2.20.0 generate -i ../backend/docs/swagger.yaml
+      -g typescript-axios -o .gen >/dev/null &&
+      diff -r -x .openapi-generator -x .openapi-generator-ignore -x .gitignore -x .npmignore -x git_push.sh .gen api
+    inputs: ['/backend/docs/swagger.yaml', 'api/**/*']
+  # Regenerates api/ in place (what a dev runs after changing the API; the portal Makefile's generate-client-typescript).
+  api-client-generate:
+    script: >-
+      npx -y @openapitools/openapi-generator-cli@2.20.0 version-manager set 7.12.0 >/dev/null &&
+      npx -y @openapitools/openapi-generator-cli@2.20.0 generate -i ../backend/docs/swagger.yaml
+      -g typescript-axios -o api >/dev/null && rm -f openapitools.json api/git_push.sh
+    inputs: ['/backend/docs/swagger.yaml']
+    options:
+      cache: false
+      runInCI: false
+  test:
+    command: 'npx vitest run'
+    inputs: ['@group(sources)', '@group(configs)']
+    deps: ['install']
+  lint:
+    # Fails on origin/main today (35 eslint errors; the portal CI never runs eslint).
+    command: 'npx eslint .'
+    inputs: ['@group(sources)', '@group(configs)']
+    deps: ['install']
+    options:
+      runInCI: false
+  build:
+    command: 'npm run build:radiant --workspace portals/radiant'
+    inputs: ['@group(sources)', '@group(configs)']
+    outputs: ['portals/radiant/build']
+    deps: ['install', 'api-client-check']
+

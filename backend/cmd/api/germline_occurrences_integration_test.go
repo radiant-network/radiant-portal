@@ -1,0 +1,655 @@
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
+	"github.com/radiant-network/radiant-api/internal/server"
+	"github.com/radiant-network/radiant-api/test/testutils"
+	"github.com/stretchr/testify/assert"
+)
+
+func testList(t *testing.T, data string, body string, expected string) {
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineSNVListHandler(repo))
+
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/5/list", bytes.NewBufferString(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+func testCount(t *testing.T, data string, body string, expected int, expectedFiltered int) {
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineSNVCountHandler(repo))
+
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/5/count", bytes.NewBufferString(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, fmt.Sprintf(`{"count":%d, "filtered_count":%d}`, expected, expectedFiltered), w.Body.String())
+	})
+}
+func testAggregation(t *testing.T, data string, body string, queryParams []string, expected string) {
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		facetsRepo := starrocks.NewFacetsRepository()
+		router := tenantRouter()
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/aggregate", server.OccurrencesGermlineSNVAggregateHandler(repo, facetsRepo))
+		path := "/radiant/occurrences/germline/snv/1/1/5/aggregate"
+		if len(queryParams) > 0 {
+			path += "?" + strings.Join(queryParams, "&")
+		}
+		req, _ := http.NewRequest("POST", path, bytes.NewBufferString(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+func testStatistics(t *testing.T, data string, body string, expected string) {
+	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/statistics", server.OccurrencesGermlineSNVStatisticsHandler(repo))
+
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/5/statistics", bytes.NewBufferString(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_SNVOccurrences_List(t *testing.T) {
+	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "end": 0, "exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "has_note": true, "hgvsg":"hgvsg1", "locus":"locus1", "locus_id":"1000", "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "max_impact_score":4, "germline_pf_wgs":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "task_id":5, "transcript_id":"T001", "start":1111, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"MODIFIER", "zygosity":"HET"}]`)
+}
+
+func Test_SNVOccurrences_List_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
+	body := `{
+			"additional_fields":[
+				"seq_id","locus_id","filter","zygosity","germline_pf_wgs","germline_pc_wgs","hgvsg","ad_ratio","variant_class"
+			],
+			"sqon":{
+				"op":"in",
+				"content":{
+					"field": "filter",
+					"value": ["PASS"]
+				}
+		}
+		}`
+	expected := `[
+			{
+				"ad_ratio": 1,
+				"chromosome": "1",
+				"filter": "PASS",
+				"end": 0,
+				"exomiser_acmg_classification": "",
+				"exomiser_acmg_evidence": null,
+				"exomiser_gene_combined_score": 0,
+				"exomiser_moi": "",
+				"exomiser_variant_score": 0,
+				"genotype_quality": 100,
+				"gnomad_v3_af": 0.001,
+				"has_interpretation": true,
+				"has_note": true,
+				"hgvsg": "hgvsg1",
+				"locus": "locus_1_1000",
+				"locus_id": "1000",
+				"max_impact_score": 4,
+				"is_canonical": false,
+				"is_mane_plus": false,
+				"is_mane_select": true,
+				"germline_pc_wgs": 3,
+				"germline_pf_wgs": 0.99,
+				"picked_consequences": null,
+				"seq_id": 1,
+				"task_id": 5,
+				"start": 1111,
+				"symbol": "BRAF",
+				"variant_class": "class1",
+				"vep_impact": "MODIFIER",
+				"zygosity": "HET"
+			}
+		]`
+	testList(t, "multiple", body, expected)
+}
+
+func Test_SNVOccurrences_List_Return_Only_Occurrences_Having_A_Note_When_With_Note_Is_True(t *testing.T) {
+	body := `{
+			"additional_fields":[
+				"seq_id","locus_id","filter","zygosity","germline_pf_wgs","germline_pc_wgs","hgvsg","ad_ratio","variant_class"
+			],
+			"with_note": true
+		}`
+	expected := `[
+			{
+				"ad_ratio": 1,
+				"chromosome": "1",
+				"filter": "PASS",
+				"end": 0,
+				"exomiser_acmg_classification": "",
+				"exomiser_acmg_evidence": null,
+				"exomiser_gene_combined_score": 0,
+				"exomiser_moi": "",
+				"exomiser_variant_score": 0,
+				"genotype_quality": 100,
+				"gnomad_v3_af": 0.001,
+				"has_interpretation": true,
+				"has_note": true,
+				"hgvsg": "hgvsg1",
+				"locus": "locus_1_1000",
+				"locus_id": "1000",
+				"max_impact_score": 4,
+				"is_canonical": false,
+				"is_mane_plus": false,
+				"is_mane_select": true,
+				"germline_pc_wgs": 3,
+				"germline_pf_wgs": 0.99,
+				"picked_consequences": null,
+				"seq_id": 1,
+				"task_id": 5,
+				"start": 1111,
+				"symbol": "BRAF",
+				"variant_class": "class1",
+				"vep_impact": "MODIFIER",
+				"zygosity": "HET"
+			}
+		]`
+	testList(t, "multiple", body, expected)
+}
+
+func Test_SNVOccurrences_Count_Narrows_Only_Filtered_Count_When_With_Interpretation_Is_True(t *testing.T) {
+	testCount(t, "multiple", `{"with_interpretation":true}`, 2, 1)
+}
+
+func Test_SNVOccurrences_Count_Return_All_Occurrences_When_With_Interpretation_Is_False(t *testing.T) {
+	testCount(t, "multiple", `{"with_interpretation":false}`, 2, 2)
+}
+
+func Test_SNVOccurrences_Count_Narrows_Only_Filtered_Count_When_With_Note_Is_True(t *testing.T) {
+	testCount(t, "multiple", `{"with_note":true}`, 2, 1)
+}
+
+func Test_SNVOccurrences_Count_Return_All_Occurrences_When_With_Note_Is_False(t *testing.T) {
+	testCount(t, "multiple", `{"with_note":false}`, 2, 2)
+}
+
+func Test_SNVOccurrences_Count(t *testing.T) {
+	testCount(t, "simple", "{}", 1, 1)
+}
+
+func Test_SNVOccurrences_Count_Return_Expected_Count_When_Sqon_Specified(t *testing.T) {
+	body := `{
+			"sqon":{
+				"op":"in",
+				"content":{
+					"field": "filter",
+					"value": ["PASS"]
+				}
+		    }
+		}`
+	testCount(t, "multiple", body, 1, 1)
+}
+
+func Test_SNVOccurrence_Aggregation(t *testing.T) {
+	body := `{
+			"field": "zygosity",
+			"sqon": {
+				"op": "and",
+				"content": [
+					{
+						"op":"in",
+						"content":{
+							"field": "filter",
+							"value": ["PASS"]
+						}
+					},
+					{
+						"op": "in",
+						"content":{
+							"field": "zygosity",
+							"value": ["HOM"]
+						}
+					}            
+		
+				]
+			},
+			"size": 10
+		}`
+	expected := `[{"key": "HOM", "count": 1}, {"key": "HET", "count": 2}]`
+	testAggregation(t, "aggregation", body, []string{}, expected)
+}
+
+func Test_SNVOccurrence_Aggregation_With_Dictionary(t *testing.T) {
+	body := `{
+			"field": "variant_class",
+			"sqon": {
+				"op": "and",
+				"content": []
+			},
+			"size": 10
+		}`
+	expected := `[{"key": "class1", "count": 4}, {"key": "insertion", "count": 0}, {"key": "deletion", "count": 0}, {"key": "SNV", "count": 0}, {"key": "indel", "count": 0}, {"key": "substitution", "count": 0}, {"key": "sequence_alteration", "count": 0}]`
+	testAggregation(t, "aggregation", body, []string{"with_dictionary=true"}, expected)
+}
+
+func Test_SNVOccurrence_Statistics(t *testing.T) {
+	body := `{
+			"field": "germline_pf_wgs",
+			"sqon": {
+				"op": "and",
+				"content": [
+					{
+						"op":"in",
+						"content":{
+							"field": "filter",
+							"value": ["PASS"]
+						}
+					}        
+				]
+			}
+		}`
+	expected := `{"min": 0.01, "max": 0.29, "type": "decimal"}`
+	testStatistics(t, "pagination", body, expected)
+}
+
+func Test_SNVOccurrence_List_Filter_On_Consequence_Column(t *testing.T) {
+	body := `{
+			"additional_fields":[
+				"seq_id","task_id","locus_id","filter","zygosity","germline_pf_wgs","germline_pc_wgs","hgvsg","ad_ratio","variant_class"
+			],
+			"sqon": {
+				"op": "and",
+				"content": [
+					{
+						"op": "in",
+						"content": {
+							"field": "impact_score",
+							"value": ["3"]
+						}
+					}            
+		
+				]
+			},
+			"size": 10
+		}`
+	expected := `[
+		{
+			"ad_ratio": 1,
+			"chromosome": "1",
+			"end": 0,
+			"filter": "PASS",
+			"exomiser_acmg_classification": "",
+			"exomiser_acmg_evidence": null,
+			"exomiser_gene_combined_score": 0,
+			"exomiser_moi": "",
+			"exomiser_variant_score": 0,
+			"genotype_quality": 100,
+			"gnomad_v3_af": 0.001,
+			"has_interpretation": true,
+			"has_note": true,
+			"hgvsg": "hgvsg1",
+			"locus": "locus_1_1000",
+			"locus_id": "1000",
+			"max_impact_score": 4,
+			"is_canonical": false,
+			"is_mane_plus": false,
+			"is_mane_select": true,
+			"germline_pc_wgs": 3,
+			"germline_pf_wgs": 0.99,
+			"picked_consequences": null,
+			"seq_id": 1,
+			"task_id": 5,
+			"start": 1111,
+			"symbol": "BRAF",
+			"variant_class": "class1",
+			"vep_impact": "MODIFIER",
+			"zygosity": "HET"
+		}
+	]`
+	testList(t, "multiple", body, expected)
+}
+
+func Test_CNVOccurrence_List(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineCNVListHandler(repo))
+
+		body := `{}`
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/list", bytes.NewBufferString(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		expected := `[
+			{"chromosome":"1", "cn":2, "end":10500, "length":500, "name":"CNV1", "seq_id":1, "task_id":1, "cnv_id":"1", "start":10000, "type":"DEL", "has_note": false, "nb_snv": 0},
+			{"chromosome":"2", "cn":3, "end":20500, "length":500, "name":"CNV2", "seq_id":1, "task_id":1, "cnv_id":"2", "start":20000, "type":"DUP", "has_note": false, "nb_snv": 1}
+		]`
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_CNVOccurrence_List_Filter_On_Chromosome(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineCNVListHandler(repo))
+
+		body := `
+		{
+			"sqon": {
+				"op": "and",
+				"content": [
+					{
+						"op": "in",
+						"content": {
+							"field": "chromosome",
+							"value": ["2"]
+						}
+					}
+				]
+			}
+		}`
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/list", bytes.NewBufferString(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		expected := `[
+			{
+				"chromosome":"2", 
+				"cn":3, 
+				"end":20500, 
+				"length":500, 
+				"name":"CNV2", 
+				"seq_id":1, 
+				"task_id":1, 
+				"cnv_id":"2", 
+				"start":20000, 
+				"type":"DUP",
+				"nb_snv": 1,
+				"has_note": false
+			}
+		]`
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_CNVOccurrence_Count(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineCNVCountHandler(repo))
+
+		body := `{}`
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/count", bytes.NewBufferString(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		expected := `{"count":2, "filtered_count":2}`
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_CNVOccurrence_Count_Filter_On_Quality(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineCNVCountHandler(repo))
+
+		body := `{
+			"sqon": {
+				"op": "and",
+				"content": [
+					{
+						"op": ">",
+						"content": {
+							"field": "quality",
+							"value": [0.9]
+						}
+					}
+				]
+			}
+		}`
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/count", bytes.NewBufferString(body))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+
+		expected := `{"count":1, "filtered_count":1}`
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func assertGetExpandedOccurrence(t *testing.T, data string, caseId int, seqId int, taskId int, locusId int, expected string) {
+	testutils.RunTest(t, testutils.Need{Starrocks: data, Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		exomiserRepo := starrocks.NewExomiserRepository(database.StarrocksDB{DB: env.Starrocks})
+		pubmedClient := &MockExternalClient{}
+		interpretationRepo := postgres.NewInterpretationsRepository(database.PostgresDB{DB: env.Postgres}, pubmedClient)
+		router := tenantRouter()
+		router.GET("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/:locus_id/expanded", server.GetExpandedGermlineSNVOccurrence(repo, exomiserRepo, interpretationRepo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/occurrences/germline/snv/%d/%d/%d/%d/expanded", caseId, seqId, taskId, locusId), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_GetExpandedOccurrence(t *testing.T) {
+	expected := `{
+		"aa_change":"p.Arg19His", 
+		"ad_alt":5, 
+		"ad_total":5, 
+		"cadd_phred":0.1, 
+		"cadd_score":0.1, 
+		"chromosome":"1", 
+		"clinvar":["Benign", "Pathogenic"], 
+		"ensembl_gene_id": "ENSG00000157764",
+		"exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", 
+		"exomiser_acmg_evidence":["PS1", "PVS2"], 
+		"exomiser_gene_combined_score":0.7, 
+		"fathmm_pred":"T", 
+		"fathmm_score":0.1, 
+		"filter":"PASS", 
+		"genotype_quality":100, 
+		"gnomad_loeuf":0.1, 
+		"gnomad_pli":0.1, 
+		"gnomad_v3_af":0.001, 
+		"hgvsg":"hgvsg1", 
+		"interpretation_classification_counts":{"benign":1, "likelyPathogenic":1, "pathogenic":1},
+		"is_canonical":true, 
+		"is_mane_plus":false, 
+		"is_mane_select":true, 
+		"locus":"locus1", 
+		"locus_id":"1000", 
+		"is_mane_select":true,
+		"omim_conditions":[
+			{"inheritance_code":["AD"], "omim_phenotype_id":"613706", "panel":"Noonan syndrome 7"}, 
+			{"inheritance_code":["AD"], "omim_phenotype_id":"613707", "panel":"LEOPARD syndrome 3"}
+		], 
+		"germline_pc_wgs_affected":3, 
+		"germline_pf_wgs":0.99, 
+		"germline_pf_wgs_affected":1, 
+		"lrt_pred": "U",
+		"lrt_score":0.01,
+		"picked_consequences":["splice acceptor"],
+		"polyphen2_hvar_pred": "D",
+		"polyphen2_hvar_score":0.991,
+		"germline_pn_wgs_affected":3, 
+		"germline_pc_wgs":3,
+		"germline_hom_wgs":2,
+		"germline_af_wgs":0.5,
+		"germline_hom_wgs_affected":3,
+		"germline_af_wgs_affected":1,
+		"germline_pc_wgs_not_affected":0,
+		"germline_pn_wgs_not_affected":0,
+		"germline_pf_wgs_not_affected":0,
+		"germline_hom_wgs_not_affected":0,
+		"germline_af_wgs_not_affected":0,
+		"germline_pc_wxs":4,
+		"germline_pn_wxs":10,
+		"germline_pf_wxs":0.4,
+		"germline_hom_wxs":2,
+		"germline_af_wxs":0.3,
+		"germline_pc_wxs_affected":3,
+		"germline_pn_wxs_affected":5,
+		"germline_pf_wxs_affected":0.6,
+		"germline_hom_wxs_affected":1,
+		"germline_af_wxs_affected":0.4,
+		"germline_pc_wxs_not_affected":1,
+		"germline_pn_wxs_not_affected":5,
+		"germline_pf_wxs_not_affected":0.2,
+		"germline_hom_wxs_not_affected":1,
+		"germline_af_wxs_not_affected":0.2,
+		"somatic_pn_tn_wgs":11,
+		"somatic_hom_tn_wgs":5,
+		"somatic_af_tn_wgs":0.5,
+		"somatic_pc_tn_wxs":2,
+		"somatic_pn_tn_wxs":8,
+		"somatic_pf_tn_wxs":0.25,
+		"somatic_hom_tn_wxs":0,
+		"somatic_af_tn_wxs":0.125,
+		"somatic_hom_to_wgs":4,
+		"somatic_af_to_wgs":0.25,
+		"somatic_pc_to_wxs":3,
+		"somatic_pn_to_wxs":12,
+		"somatic_pf_to_wxs":0.25,
+		"somatic_hom_to_wxs":3,
+		"somatic_af_to_wxs":0.25,
+		"somatic_pc_tn_wgs":6,
+		"somatic_pf_tn_wgs":0.55,
+		"somatic_pc_to_wgs":21,
+		"somatic_pn_to_wgs":50,
+		"somatic_pf_to_wgs":0.42,
+		"qd":0.1, 
+		"revel_score":0.1, 
+		"rsnumber":"rs111111111", 
+		"sift_pred":"T", 
+		"sift_score":0.1, 
+		"spliceai_ds":0.1, 
+		"spliceai_type":["AG"], 
+		"start":1111, 
+		"symbol":"BRAF", 
+		"transcript_id": "T001",
+		"transmission": "autosomal_dominant",
+		"vep_impact":"MODIFIER", 
+		"zygosity":"HET"
+	}`
+	assertGetExpandedOccurrence(t, "simple", 1, 1, 5, 1000, expected)
+}
+func Test_CNVOccurrence_GetGenesOverlap(t *testing.T) {
+	expected := `[
+		  {
+			"cytoband": ["p1.1"],
+			"gene_id": "ENSG00000000003",
+			"gene_length": 200,
+			"nb_exons": 1,
+			"nb_overlap_bases": 200,
+			"overlap_type": "full_gene",
+			"overlapping_cnv_percent": 40,
+			"overlapping_gene_percent": 100,
+			"symbol": "TSPAN6",
+			"tenant_gene_panels": ["EPILEP", "ONCO"]
+		  },
+		  {
+			"cytoband": ["p1.2"],
+			"gene_id": "ENSG00000000419",
+			"gene_length": 500,
+			"nb_exons": 0,
+			"nb_overlap_bases": 250,
+			"overlap_type": "partial",
+			"overlapping_cnv_percent": 50,
+			"overlapping_gene_percent": 50,
+			"symbol": "DPM1",
+			"tenant_gene_panels": ["ONCO"]
+		  },
+		  {
+			"cytoband": ["p1.1", "p1.2"],
+			"gene_id": "ENSG00000000005",
+			"gene_length": 10000,
+			"nb_exons": 3,
+			"nb_overlap_bases": 500,
+			"overlap_type": "full_cnv",
+			"overlapping_cnv_percent": 100,
+			"overlapping_gene_percent": 5,
+			"symbol": "TNMD",
+			"tenant_gene_panels": []
+		  }
+		]`
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.GET("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap", server.OccurrencesGermlineCNVGenesOverlapHandler(repo))
+
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/occurrences/germline/cnv/%d/%d/%d/%d/genes_overlap", 1, 1, 1, 1), bytes.NewBuffer([]byte("{}")))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_SNVOccurrence_Aggregation_By_Cmc_Tier_With_Dictionary(t *testing.T) {
+	body := `{
+			"field": "cmc_tier",
+			"sqon": {
+				"op": "and",
+				"content": []
+			},
+			"size": 10
+		}`
+	expected := `[{"key": "2", "count": 1}, {"key": "Other", "count": 1}, {"key": "1", "count": 2}, {"key": "3", "count": 0}]`
+	testAggregation(t, "aggregation", body, []string{"with_dictionary=true"}, expected)
+}
+
+func Test_SNVOccurrence_Statistics_Cmc_Sample_Ratio(t *testing.T) {
+	body := `{
+			"field": "cmc_sample_ratio",
+			"sqon": {
+				"op": "and",
+				"content": []
+			}
+		}`
+	expected := `{"min": 0.0003, "max": 0.0028, "type": "decimal"}`
+	testStatistics(t, "pagination", body, expected)
+}
+
+func Test_SNVOccurrence_Statistics_Germline_Af_Wgs_Affected(t *testing.T) {
+	body := `{
+			"field": "germline_af_wgs_affected",
+			"sqon": {
+				"op": "and",
+				"content": []
+			}
+		}`
+	expected := `{"min": 0.05, "max": 0.5, "type": "decimal"}`
+	testStatistics(t, "pagination", body, expected)
+}

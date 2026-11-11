@@ -1,0 +1,9 @@
+organization_name,research_id,age_at_surgery_days,extent_of_tumor_resection,is_initial_treatment
+The Children's Hospital of Philadelphia,C1037013,4305,Gross/Near total resection,yes
+The Children's Hospital of Philadelphia,C1037013,5215,Partial resection,no
+The Children's Hospital of Philadelphia,C313158,545,Partial resection,yes
+The Children's Hospital of Philadelphia,C3556914,414,Gross/Near total resection,yes
+The Children's Hospital of Philadelphia,C6389358,3104,Gross/Near total resection,yes
+The Children's Hospital of Philadelphia,C6859095,2203,Gross/Near total resection,yes
+Children's Hospital Los Angeles,C8832261,1105,Gross/Near total resection,yes
+Children's Hospital Los Angeles,C8832261,2010,Partial resection,no

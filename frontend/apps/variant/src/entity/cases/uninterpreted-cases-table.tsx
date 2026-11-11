@@ -1,0 +1,142 @@
+import { useMemo, useState } from 'react';
+import { useParams, useSearchParams } from 'react-router';
+import useSWR from 'swr';
+
+import type {
+  ApiError,
+  ListBodyWithCriteria,
+  SearchCriterion,
+  SortBody,
+  VariantUninterpretedCasesSearchResponse,
+} from '@/api/api';
+import type { PaginationState } from '@/components/base/data-table/data-table';
+import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
+import { useI18n } from '@/components/hooks/i18n';
+import { useTenant } from '@/components/hooks/use-tenant';
+import { variantsApi } from '@/utils/api';
+
+import SliderUninterpretedCaseSheet from './slider/slider-uninterpreted-case-sheet';
+import { useSliderCasePatientIdNavigation } from './slider/use-slider-case-navigation';
+import UninterpretedCasesTableFilters from './table/uninterpreted-cases-table-filters';
+import {
+  getUninterpretedCasesColumns,
+  uninterpretedCasesDefaultSettings,
+} from './table/uninterpreted-cases-table-settings';
+import { UNINTERPRETED_CASE_ID_PARAM, UNINTERPRETED_PATIENT_ID_PARAM } from './constants';
+
+const UNINTERPRETED_CASES_DEFAULT_SORTING: SortBody[] = [
+  { field: 'updated_on', order: 'desc' },
+  { field: 'case_id', order: 'asc' },
+  { field: 'seq_id', order: 'desc' },
+  { field: 'task_id', order: 'desc' },
+];
+
+type UninterpretedCasesSearchInput = {
+  key: string;
+  locusId: string;
+  listBodyWithCriteria: ListBodyWithCriteria;
+};
+
+async function fetchUninterpretedCases(input: UninterpretedCasesSearchInput, tenant: string) {
+  const response = await variantsApi.getGermlineVariantUninterpretedCases(
+    tenant,
+    input.locusId,
+    input.listBodyWithCriteria,
+  );
+  return response.data;
+}
+
+function UninterpretedCasesTable() {
+  const { t } = useI18n();
+  const { tenant } = useTenant();
+  const params = useParams<{ locusId: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [rowSelection, setRowSelection] = useState({});
+  const [sorting, setSorting] = useState<SortBody[]>(UNINTERPRETED_CASES_DEFAULT_SORTING);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: DEFAULT_PAGE_SIZE,
+  });
+  const [additionalFields, setAdditionalFields] = useState<string[]>([]);
+
+  const [searchCriteria, setSearchCriteria] = useState<SearchCriterion[]>([]);
+
+  const { data, isLoading, isValidating } = useSWR<
+    VariantUninterpretedCasesSearchResponse,
+    ApiError,
+    UninterpretedCasesSearchInput
+  >(
+    {
+      key: 'uninterpreted-cases',
+      locusId: params.locusId!,
+      listBodyWithCriteria: {
+        additional_fields: additionalFields,
+        search_criteria: searchCriteria,
+        limit: pagination.pageSize,
+        page_index: pagination.pageIndex,
+        sort: sorting,
+      },
+    },
+    input => fetchUninterpretedCases(input, tenant),
+    {
+      revalidateOnFocus: false,
+    },
+  );
+
+  const casesData = useMemo(() => data?.list || [], [data?.list]);
+  const columns = useMemo(() => getUninterpretedCasesColumns(t), [t]);
+
+  const { selectedCase, hasPrevious, hasNext, handleClosePreview, handlePreviousCase, handleNextCase } =
+    useSliderCasePatientIdNavigation({
+      casesData,
+      searchParams,
+      setSearchParams,
+      searchParamsKey: { patientId: UNINTERPRETED_PATIENT_ID_PARAM, caseId: UNINTERPRETED_CASE_ID_PARAM },
+      setRowSelection,
+    });
+
+  return (
+    <div className="space-y-6 mt-2">
+      <DataTable
+        id="uninterpreted-cases"
+        columns={columns}
+        TableFilters={
+          <UninterpretedCasesTableFilters
+            loading={isLoading && !isValidating}
+            searchCriteria={searchCriteria}
+            setSearchCriteria={setSearchCriteria}
+          />
+        }
+        data={casesData}
+        defaultColumnSettings={uninterpretedCasesDefaultSettings}
+        loadingStates={{
+          total: isLoading,
+          list: isLoading,
+        }}
+        pagination={{ state: pagination, type: 'server', onPaginationChange: setPagination }}
+        total={data?.count || 0}
+        enableColumnOrdering
+        enableFullscreen
+        tableIndexResultPosition="bottom"
+        serverOptions={{
+          setAdditionalFields,
+          defaultSorting: UNINTERPRETED_CASES_DEFAULT_SORTING,
+          onSortingChange: setSorting,
+        }}
+        rowSelection={rowSelection}
+        onRowSelectionChange={setRowSelection}
+      />
+      <SliderUninterpretedCaseSheet
+        open={!!selectedCase}
+        setOpen={() => handleClosePreview()}
+        case={selectedCase!}
+        onPrevious={handlePreviousCase}
+        onNext={handleNextCase}
+        hasPrevious={hasPrevious}
+        hasNext={hasNext}
+      />
+    </div>
+  );
+}
+
+export default UninterpretedCasesTable;

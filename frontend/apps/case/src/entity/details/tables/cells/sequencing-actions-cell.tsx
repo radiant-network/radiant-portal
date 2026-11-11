@@ -1,0 +1,37 @@
+import { useState } from 'react';
+import type { CellContext } from '@/components/base/data-table/data-table';
+
+import { Button } from '@/components/base/shadcn/button';
+import { useI18n } from '@/components/hooks/i18n';
+import SequencingInformationsDialog from 'components/base/sequencing/sequencing-information-dialog';
+
+function SequencingActionsCell({ row }: CellContext<any, any>) {
+  const { t } = useI18n();
+  const [sequencingExperimentDialogOpen, setSequencingExperimentDialogOpen] = useState<boolean>(false);
+
+  return (
+    <>
+      <div className="flex items-center justify-center">
+        {sequencingExperimentDialogOpen && (
+          <SequencingInformationsDialog
+            open={sequencingExperimentDialogOpen}
+            onClose={() => setSequencingExperimentDialogOpen(false)}
+            seqId={row.original.seq_id}
+          />
+        )}
+        <Button
+          data-cy="details-button"
+          onClick={() => {
+            setSequencingExperimentDialogOpen(true);
+          }}
+          variant="outline"
+          size="2xs"
+        >
+          {t('case_entity.details.sequencing_details')}
+        </Button>
+      </div>
+    </>
+  );
+}
+
+export default SequencingActionsCell;

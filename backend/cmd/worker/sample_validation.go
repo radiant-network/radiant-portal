@@ -1,0 +1,638 @@
+package main
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"log/slog"
+	"regexp"
+
+	"github.com/radiant-network/radiant-api/internal/batchval"
+	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/repository/postgres"
+	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
+	"gorm.io/gorm"
+)
+
+const TissueSiteRegExp = `^[A-Za-z\- ]+$`
+
+var TissueSiteRegExpCompiled = regexp.MustCompile(TissueSiteRegExp)
+
+const (
+	SampleAlreadyExistCode                   = "SAMPLE-001"
+	SampleExistingSampleDifferentFieldCode   = "SAMPLE-002"
+	SampleOrgNotExistCode                    = "SAMPLE-003"
+	SamplePatientNotExistCode                = "SAMPLE-004"
+	SampleUnknownParentSubmitterSampleIdCode = "SAMPLE-005"
+	SampleInvalidValueCode                   = "SAMPLE-006"
+	SampleInvalidPatientForParentSampleCode  = "SAMPLE-007"
+	SampleDuplicateInBatchCode               = "SAMPLE-008"
+	SampleNotExistForUpdateCode              = "SAMPLE-009"
+	SampleFetusNotExistCode                  = "SAMPLE-010"
+	// SAMPLE-011 was "fetus does not belong to this patient". Resolving submitter_fetus_id against
+	// the mother made it unreachable: an unrelated key is simply not found. Not reused, so an old
+	// report stays readable.
+)
+
+type SampleKey struct {
+	OrganizationCode  string
+	SubmitterSampleId string
+}
+
+const sampleResourceLabel = "sample"
+
+type SampleValidationRecord struct {
+	batchval.BaseValidationRecord
+	Sample           types.SampleBatch
+	PatientId        int
+	OrganizationCode string
+	ParentSampleId   *int
+	FetusId          *int
+}
+
+func (r *SampleValidationRecord) GetBase() *batchval.BaseValidationRecord {
+	return &r.BaseValidationRecord
+}
+
+func (r *SampleValidationRecord) getUniqueIds() []string {
+	return []string{r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String()}
+}
+
+func (r *SampleValidationRecord) getFormattedPath(fieldName string) string {
+	return batchval.FormatPath(r, fieldName)
+}
+
+func (r *SampleValidationRecord) validatePatient(patient *types.Patient) {
+	if patient == nil {
+		path := r.getFormattedPath("submitter_patient_id")
+		message := fmt.Sprintf("Patient (%s / %s) for sample %s does not exist.", r.Sample.PatientOrganizationCode, r.Sample.SubmitterPatientId, r.Sample.SubmitterSampleId)
+		r.AddErrors(message, SamplePatientNotExistCode, path)
+	} else {
+		r.PatientId = patient.ID
+	}
+}
+
+// validateFetus checks the optional submitter_fetus_id, when provided. The caller resolves it
+// against the sample's own patient (the mother), so a key belonging to another patient's fetus is
+// simply not found — there is no separate "wrong patient" case to report, and no way to probe
+// whether a key exists elsewhere. On success the internal id is what gets stored on the sample.
+func (r *SampleValidationRecord) validateFetus(fetus *types.Fetus) {
+	if r.Sample.SubmitterFetusId == "" {
+		return
+	}
+
+	if fetus == nil {
+		path := r.getFormattedPath("submitter_fetus_id")
+		message := fmt.Sprintf("Fetus %s for sample %s does not exist for patient %s.",
+			r.Sample.SubmitterFetusId, r.Sample.SubmitterSampleId, r.Sample.SubmitterPatientId)
+		r.AddErrors(message, SampleFetusNotExistCode, path)
+		return
+	}
+
+	r.FetusId = utils.IntPtr(fetus.ID)
+}
+
+func (r *SampleValidationRecord) validateOrganization(organization *types.Organization) {
+	if organization == nil {
+		path := r.getFormattedPath("sample_organization_code")
+		message := fmt.Sprintf("Organization %s for sample %s does not exist.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
+		r.AddErrors(message, SampleOrgNotExistCode, path)
+	} else {
+		r.OrganizationCode = organization.Code
+	}
+}
+
+func (r *SampleValidationRecord) validateExistingSampleInDb(existingSample *types.Sample) {
+	if existingSample != nil {
+		r.Skipped = true
+		different := validateIsDifferentExistingSampleField(r, "type_code", existingSample.TypeCode, r.Sample.TypeCode)
+		different = validateIsDifferentExistingSampleField(r, "tissue_site", existingSample.TissueSite, r.Sample.TissueSite.String()) || different
+		different = validateIsDifferentExistingSampleField(r, "histology_code", existingSample.HistologyCode, r.Sample.HistologyCode) || different
+
+		if !different {
+			message := fmt.Sprintf("Sample (%s / %s) already exists, skipped.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
+			r.AddInfos(message, SampleAlreadyExistCode, r.getFormattedPath(""))
+		}
+	}
+}
+
+func (r *SampleValidationRecord) validateExistingParentSampleInDb(existingParentSample *types.Sample) {
+	fieldName := "submitter_parent_sample_id"
+	path := r.getFormattedPath(fieldName)
+	if existingParentSample != nil {
+		if existingParentSample.PatientID != r.PatientId {
+			message := fmt.Sprintf("Invalid field %s for sample (%s / %s). Reason: Invalid parent sample %s for this sample.", fieldName, r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
+			r.AddErrors(message, SampleInvalidPatientForParentSampleCode, path)
+		} else {
+			validateIsDifferentExistingSampleField(r, fieldName, existingParentSample.SubmitterSampleId, r.Sample.SubmitterParentSampleId.String())
+		}
+	}
+}
+
+func (r *SampleValidationRecord) validateExistingSampleForUpdate(existingSample *types.Sample) {
+	if existingSample == nil {
+		message := fmt.Sprintf("Sample (%s / %s) does not exist, cannot update.", r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId)
+		r.AddErrors(message, SampleNotExistForUpdateCode, r.getFormattedPath(""))
+		r.Skipped = true
+	}
+}
+
+func (r *SampleValidationRecord) validateExistingParentSampleInBatch(parentSampleInBatch bool) {
+	fieldName := "submitter_parent_sample_id"
+	path := r.getFormattedPath(fieldName)
+	if !parentSampleInBatch {
+		message := fmt.Sprintf("Sample %s does not exist.", r.Sample.SubmitterParentSampleId)
+		r.AddErrors(message, SampleUnknownParentSubmitterSampleIdCode, path)
+	}
+}
+
+func validateIsDifferentExistingSampleField[T comparable](
+	r *SampleValidationRecord,
+	fieldName string,
+	existingSampleValue T,
+	recordValue T,
+) bool {
+	if existingSampleValue != recordValue {
+		path := r.getFormattedPath(fieldName)
+		message := fmt.Sprintf("A sample with same ids (%s / %s) has been found but with a different %s (%v <> %v).",
+			r.Sample.SampleOrganizationCode,
+			r.Sample.SubmitterSampleId,
+			fieldName,
+			existingSampleValue,
+			recordValue,
+		)
+		r.AddWarnings(message, SampleExistingSampleDifferentFieldCode, path)
+		return true
+	}
+	return false
+}
+
+func processCreateSampleBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
+	payload := []byte(batch.Payload)
+	var samplesbatch []types.SampleBatch
+	cache := batchval.NewBatchValidationCache(bv)
+
+	if unexpectedErr := json.Unmarshal(payload, &samplesbatch); unexpectedErr != nil {
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling sample batch: %v", unexpectedErr), bv.BatchRepo)
+		return nil
+	}
+
+	records, unexpectedErr := validateSamplesBatch(ctx, bv, cache, samplesbatch, batch.TenantCode)
+	if unexpectedErr != nil {
+		if errors.Is(unexpectedErr, context.Canceled) {
+			return unexpectedErr
+		}
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error sample batch validation: %v", unexpectedErr), bv.BatchRepo)
+		return nil
+	}
+
+	slog.InfoContext(ctx, "sample batch processed", slog.String("batch_id", batch.ID), slog.Int("records", len(records)))
+
+	if err := persistBatchAndSampleRecords(ctx, db, batch, records); err != nil {
+		if errors.Is(err, context.Canceled) {
+			return err
+		}
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing sample batch records: %v", err), bv.BatchRepo)
+		return nil
+	}
+	return nil
+}
+
+func persistBatchAndSampleRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SampleValidationRecord) error {
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		txRepoSample := postgres.NewSamplesRepository(database.PostgresDB{DB: tx})
+		txRepoBatch := postgres.NewBatchRepository(database.PostgresDB{DB: tx})
+		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
+		if unexpectedErrUpdate != nil {
+			return unexpectedErrUpdate
+		}
+		if rowsUpdated == 0 {
+			/* Logs directly, and return error to trigger rollback if the batch does not exist in db */
+			return fmt.Errorf("no rows updated when updating sample batch %v", batch.ID)
+		}
+		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
+			err := insertSampleRecords(ctx, records, txRepoSample, batch.TenantCode)
+			if err != nil {
+				return fmt.Errorf("error during sample insertion %v", err)
+			}
+		}
+		return nil
+	})
+}
+
+type sampleStore interface {
+	CreateSample(ctx context.Context, newSample *types.Sample) (*types.Sample, error)
+}
+
+func insertSampleRecords(ctx context.Context, records []*SampleValidationRecord, repo sampleStore, tenantCode string) error {
+	createdSamples := make(map[SampleKey]int)
+
+	for _, record := range records {
+		if !record.Skipped {
+			var parentSampleId *int
+			if record.ParentSampleId != nil {
+				parentSampleId = record.ParentSampleId
+			} else if record.Sample.SubmitterParentSampleId != "" {
+				parentKey := SampleKey{
+					OrganizationCode:  record.Sample.SampleOrganizationCode,
+					SubmitterSampleId: record.Sample.SubmitterParentSampleId.String(),
+				}
+				if parentId, exists := createdSamples[parentKey]; exists {
+					parentSampleId = &parentId
+				}
+			}
+
+			sample := types.Sample{
+				TypeCode:          record.Sample.TypeCode,
+				SubmitterSampleId: record.Sample.SubmitterSampleId.String(),
+				TissueSite:        record.Sample.TissueSite.String(),
+				HistologyCode:     record.Sample.HistologyCode,
+				OrganizationCode:  record.OrganizationCode,
+				TenantCode:        tenantCode,
+				PatientID:         record.PatientId,
+				ParentSampleID:    parentSampleId,
+				FetusID:           record.FetusId,
+			}
+			newSample, err := repo.CreateSample(ctx, &sample)
+			if err != nil {
+				return err
+			}
+
+			sampleKey := SampleKey{
+				OrganizationCode:  record.Sample.SampleOrganizationCode,
+				SubmitterSampleId: record.Sample.SubmitterSampleId.String(),
+			}
+			createdSamples[sampleKey] = newSample.ID
+		}
+	}
+	return nil
+}
+
+func samplesMap(samples []types.SampleBatch) map[SampleKey]*types.SampleBatch {
+	samplesMap := make(map[SampleKey]*types.SampleBatch)
+	for i := range samples {
+		key := SampleKey{
+			OrganizationCode:  samples[i].SampleOrganizationCode,
+			SubmitterSampleId: samples[i].SubmitterSampleId.String(),
+		}
+		samplesMap[key] = &samples[i]
+	}
+	return samplesMap
+}
+
+func getSampleKey(orgCode, sampleId string) SampleKey {
+	return SampleKey{
+		OrganizationCode:  orgCode,
+		SubmitterSampleId: sampleId,
+	}
+}
+
+func reorderSampleRecords(records []*SampleValidationRecord) []*SampleValidationRecord {
+	byKey := make(map[SampleKey][]*SampleValidationRecord)
+	for _, r := range records {
+		key := getSampleKey(r.Sample.SampleOrganizationCode, r.Sample.SubmitterSampleId.String())
+		byKey[key] = append(byKey[key], r)
+	}
+
+	reordered := make([]*SampleValidationRecord, 0, len(records))
+	visited := make(map[*SampleValidationRecord]bool)
+
+	var reorder func(r *SampleValidationRecord)
+	reorder = func(r *SampleValidationRecord) {
+		if visited[r] {
+			return
+		}
+		visited[r] = true
+
+		if parentID := r.Sample.SubmitterParentSampleId.String(); parentID != "" {
+			parentKey := getSampleKey(r.Sample.SampleOrganizationCode, parentID)
+			for _, parent := range byKey[parentKey] {
+				reorder(parent)
+			}
+		}
+		reordered = append(reordered, r)
+	}
+
+	for _, r := range records {
+		reorder(r)
+	}
+
+	return reordered
+}
+
+func (r *SampleValidationRecord) validateSubmitterPatientId() {
+	path := r.getFormattedPath("submitter_patient_id")
+	r.ValidateStringField(r.Sample.SubmitterPatientId.String(), "submitter_patient_id", path, SampleInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getUniqueIds(), true)
+}
+
+func (r *SampleValidationRecord) validateSubmitterSampleId() {
+	path := r.getFormattedPath("submitter_sample_id")
+	r.ValidateStringField(r.Sample.SubmitterSampleId.String(), "submitter_sample_id", path, SampleInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getUniqueIds(), true)
+}
+
+func (r *SampleValidationRecord) validateSubmitterParentSampleId() {
+	path := r.getFormattedPath("submitter_parent_sample_id")
+	r.ValidateStringField(r.Sample.SubmitterParentSampleId.String(), "submitter_parent_sample_id", path, SampleInvalidValueCode, r.GetResourceType(), TextMaxLength, ExternalIdRegexpCompiled, r.getUniqueIds(), false)
+}
+
+func (r *SampleValidationRecord) validateTissueSite() {
+	path := r.getFormattedPath("tissue_site")
+	r.ValidateStringField(r.Sample.TissueSite.String(), "tissue_site", path, SampleInvalidValueCode, r.GetResourceType(), TextMaxLength, TissueSiteRegExpCompiled, r.getUniqueIds(), false)
+}
+
+func (r *SampleValidationRecord) validateTypeCode(ctx context.Context) error {
+	codes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetSampleType)
+	if err != nil {
+		return fmt.Errorf("error retrieving sample type codes: %v", err)
+	}
+	r.ValidateCode(r.GetResourceType(), r.getFormattedPath("type_code"), "type_code", SampleInvalidValueCode, r.Sample.TypeCode, codes, r.getUniqueIds(), true)
+	return nil
+}
+
+func (r *SampleValidationRecord) validateHistologyCode(ctx context.Context) error {
+	codes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetHistologyType)
+	if err != nil {
+		return fmt.Errorf("error retrieving sample histology codes: %v", err)
+	}
+	r.ValidateCode(r.GetResourceType(), r.getFormattedPath("histology_code"), "histology_code", SampleInvalidValueCode, r.Sample.HistologyCode, codes, r.getUniqueIds(), true)
+	return nil
+}
+
+func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, samples []types.SampleBatch, tenantCode string) ([]*SampleValidationRecord, error) {
+	records := make([]*SampleValidationRecord, 0, len(samples))
+	samplesMap := samplesMap(samples)
+	seenSamples := make(map[SampleKey]struct{})
+
+	for index, sample := range samples {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		record := &SampleValidationRecord{
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context:      bv,
+				Cache:        cache,
+				Index:        index,
+				ResourceType: sampleResourceLabel,
+			},
+			Sample: sample,
+		}
+
+		// 1. Validate fields
+		record.validateSubmitterPatientId()
+		record.validateSubmitterSampleId()
+		record.validateSubmitterParentSampleId()
+		record.validateTissueSite()
+
+		if err := record.validateTypeCode(ctx); err != nil {
+			return nil, err
+		}
+		if err := record.validateHistologyCode(ctx); err != nil {
+			return nil, err
+		}
+
+		// 2. Validate duplicates in batch
+		batchval.ValidateUniquenessInBatch(
+			record,
+			SampleKey{
+				OrganizationCode:  sample.SampleOrganizationCode,
+				SubmitterSampleId: sample.SubmitterSampleId.String(),
+			},
+			seenSamples,
+			SampleDuplicateInBatchCode,
+			[]string{sample.SampleOrganizationCode, sample.SubmitterSampleId.String()},
+		)
+
+		// 3. Validate patient
+		patient, patientErr := cache.GetPatientByOrgCodeAndSubmitterPatientId(ctx, sample.PatientOrganizationCode, sample.SubmitterPatientId.String(), tenantCode)
+		if patientErr != nil {
+			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
+		}
+		record.validatePatient(patient)
+
+		// 3b. Validate fetus, if referenced. Resolved against the mother, so the lookup needs the
+		// patient: when that one is missing its own error is the root cause and stands alone.
+		var fetus *types.Fetus
+		if sample.SubmitterFetusId != "" && patient != nil {
+			var fetusErr error
+			fetus, fetusErr = cache.GetFetusByMotherAndSubmitterId(ctx, patient.ID, sample.SubmitterFetusId.String())
+			if fetusErr != nil {
+				return nil, fmt.Errorf("error getting existing fetus: %v", fetusErr)
+			}
+			record.validateFetus(fetus)
+		}
+
+		// 4. Validate organization
+		organization, orgErr := cache.GetOrganizationByCode(ctx, sample.SampleOrganizationCode, tenantCode)
+		if orgErr != nil {
+			return nil, fmt.Errorf("error getting existing sample organization: %v", orgErr)
+		}
+		record.validateOrganization(organization)
+
+		// 5. Validate if sample exists in DB
+		if organization != nil {
+			existingSample, sampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterSampleId.String(), tenantCode)
+			if sampleErr != nil {
+				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
+			}
+			// 6. If exists, check if all fields are identical, and add error messages
+			record.validateExistingSampleInDb(existingSample)
+
+			// 7. Validate parent sample in DB if provided
+			if sample.SubmitterParentSampleId != "" {
+				existingParentSample, parentSampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterParentSampleId.String(), tenantCode)
+				if parentSampleErr != nil {
+					return nil, fmt.Errorf("error getting existing parent sample: %v", parentSampleErr)
+				}
+				record.validateExistingParentSampleInDb(existingParentSample)
+
+				if existingParentSample == nil {
+					// 8. If parent sample does not exist in DB, check if it exists in the current batch
+					_, parentSampleIsInBatch := samplesMap[SampleKey{
+						OrganizationCode:  sample.SampleOrganizationCode,
+						SubmitterSampleId: sample.SubmitterParentSampleId.String(),
+					}]
+					record.validateExistingParentSampleInBatch(parentSampleIsInBatch)
+				} else {
+					// Parent sample exists in DB, set the parent sample ID
+					record.ParentSampleId = &existingParentSample.ID
+				}
+			}
+		}
+		records = append(records, record)
+	}
+
+	reordered := reorderSampleRecords(records)
+	return reordered, nil
+}
+
+func processUpdateSampleBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
+	payload := []byte(batch.Payload)
+	var samplesBatch []types.SampleBatch
+	cache := batchval.NewBatchValidationCache(bv)
+
+	if unexpectedErr := json.Unmarshal(payload, &samplesBatch); unexpectedErr != nil {
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling update sample batch: %v", unexpectedErr), bv.BatchRepo)
+		return nil
+	}
+
+	records, unexpectedErr := validateUpdateSamplesBatch(ctx, bv, cache, samplesBatch, batch.TenantCode)
+	if unexpectedErr != nil {
+		if errors.Is(unexpectedErr, context.Canceled) {
+			return unexpectedErr
+		}
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error update sample batch validation: %v", unexpectedErr), bv.BatchRepo)
+		return nil
+	}
+
+	slog.InfoContext(ctx, "update sample batch processed", slog.String("batch_id", batch.ID), slog.Int("records", len(records)))
+
+	if err := persistBatchAndUpdateSampleRecords(ctx, db, batch, records); err != nil {
+		if errors.Is(err, context.Canceled) {
+			return err
+		}
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing update sample batch records: %v", err), bv.BatchRepo)
+		return nil
+	}
+	return nil
+}
+
+func persistBatchAndUpdateSampleRecords(ctx context.Context, db *gorm.DB, batch *types.Batch, records []*SampleValidationRecord) error {
+	return db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		txRepoSample := postgres.NewSamplesRepository(database.PostgresDB{DB: tx})
+		txRepoBatch := postgres.NewBatchRepository(database.PostgresDB{DB: tx})
+		rowsUpdated, unexpectedErrUpdate := batchval.UpdateBatch(ctx, batch, records, txRepoBatch)
+		if unexpectedErrUpdate != nil {
+			return unexpectedErrUpdate
+		}
+		if rowsUpdated == 0 {
+			return fmt.Errorf("no rows updated when updating update_sample batch %v", batch.ID)
+		}
+		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
+			err := updateSampleRecords(ctx, records, txRepoSample, batch.TenantCode)
+			if err != nil {
+				return fmt.Errorf("error during sample update %v", err)
+			}
+		}
+		return nil
+	})
+}
+
+type sampleUpdater interface {
+	UpdateSample(ctx context.Context, sample *types.Sample) error
+}
+
+func updateSampleRecords(ctx context.Context, records []*SampleValidationRecord, repo sampleUpdater, tenantCode string) error {
+	for _, record := range records {
+		if !record.Skipped {
+			sample := types.Sample{
+				TypeCode:          record.Sample.TypeCode,
+				SubmitterSampleId: record.Sample.SubmitterSampleId.String(),
+				TissueSite:        record.Sample.TissueSite.String(),
+				HistologyCode:     record.Sample.HistologyCode,
+				OrganizationCode:  record.OrganizationCode,
+				TenantCode:        tenantCode,
+				PatientID:         record.PatientId,
+				ParentSampleID:    record.ParentSampleId,
+				FetusID:           record.FetusId,
+			}
+			if err := repo.UpdateSample(ctx, &sample); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// validateUpdateSamplesBatch mirrors validateSamplesBatch, but a referenced parent sample must
+// already exist in the database — an update batch never creates rows, so there is no in-batch
+// parent to reorder against.
+func validateUpdateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationContext, cache *batchval.BatchValidationCache, samples []types.SampleBatch, tenantCode string) ([]*SampleValidationRecord, error) {
+	records := make([]*SampleValidationRecord, 0, len(samples))
+	seenSamples := make(map[SampleKey]struct{})
+
+	for index, sample := range samples {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		record := &SampleValidationRecord{
+			BaseValidationRecord: batchval.BaseValidationRecord{
+				Context:      bv,
+				Cache:        cache,
+				Index:        index,
+				ResourceType: sampleResourceLabel,
+			},
+			Sample: sample,
+		}
+
+		record.validateSubmitterPatientId()
+		record.validateSubmitterSampleId()
+		record.validateSubmitterParentSampleId()
+		record.validateTissueSite()
+
+		if err := record.validateTypeCode(ctx); err != nil {
+			return nil, err
+		}
+		if err := record.validateHistologyCode(ctx); err != nil {
+			return nil, err
+		}
+
+		batchval.ValidateUniquenessInBatch(
+			record,
+			SampleKey{
+				OrganizationCode:  sample.SampleOrganizationCode,
+				SubmitterSampleId: sample.SubmitterSampleId.String(),
+			},
+			seenSamples,
+			SampleDuplicateInBatchCode,
+			[]string{sample.SampleOrganizationCode, sample.SubmitterSampleId.String()},
+		)
+
+		patient, patientErr := cache.GetPatientByOrgCodeAndSubmitterPatientId(ctx, sample.PatientOrganizationCode, sample.SubmitterPatientId.String(), tenantCode)
+		if patientErr != nil {
+			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
+		}
+		record.validatePatient(patient)
+
+		// Resolved against the mother, see the create path above.
+		var fetus *types.Fetus
+		if sample.SubmitterFetusId != "" && patient != nil {
+			var fetusErr error
+			fetus, fetusErr = cache.GetFetusByMotherAndSubmitterId(ctx, patient.ID, sample.SubmitterFetusId.String())
+			if fetusErr != nil {
+				return nil, fmt.Errorf("error getting existing fetus: %v", fetusErr)
+			}
+			record.validateFetus(fetus)
+		}
+
+		organization, orgErr := cache.GetOrganizationByCode(ctx, sample.SampleOrganizationCode, tenantCode)
+		if orgErr != nil {
+			return nil, fmt.Errorf("error getting existing sample organization: %v", orgErr)
+		}
+		record.validateOrganization(organization)
+
+		if organization != nil {
+			existingSample, sampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterSampleId.String(), tenantCode)
+			if sampleErr != nil {
+				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
+			}
+			record.validateExistingSampleForUpdate(existingSample)
+
+			if sample.SubmitterParentSampleId != "" {
+				existingParentSample, parentSampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterParentSampleId.String(), tenantCode)
+				if parentSampleErr != nil {
+					return nil, fmt.Errorf("error getting existing parent sample: %v", parentSampleErr)
+				}
+				if existingParentSample == nil {
+					record.validateExistingParentSampleInBatch(false)
+				} else {
+					record.validateExistingParentSampleInDb(existingParentSample)
+					record.ParentSampleId = &existingParentSample.ID
+				}
+			}
+		}
+		records = append(records, record)
+	}
+	return records, nil
+}

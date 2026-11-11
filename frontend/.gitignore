@@ -1,0 +1,10 @@
+# node
+node_modules/
+.cache/
+dist/
+build/
+
+# Build-time generated translations
+translations/merged/
+translations/.merge-lock-*
+
