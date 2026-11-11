@@ -13,18 +13,40 @@ git diff --shortstat poc/monorepo-03-images-release poc/monorepo-04-contracts --
 Chapter 2 showed that the MCP reads three things it does not own. This chapter is about the first two, the StarRocks
 tables of the ETL and the tenant views of the backend.
 
-**What the MCP knows about other modules' schema.** At runtime the MCP sends SQL to StarRocks. To do it, it keeps in
-its own code three things about tables it does not own:
+**Why the MCP needs to know the schema.** The MCP's users are AI agents (the D.A.V.I.D agents in LibreChat) that
+answer a clinician's questions. An agent gets data in two ways, and both need SQL on tables the MCP does not own:
 
-| In the MCP | What it is | Example |
+- **The Radiant tools** (`second_hit`, `cohort_carriers`, `genotype_phenotype`...): one tool per frequent question.
+  The agent only gives arguments (a case, a gene); the tool builds tested SQL itself, in `radiant_mcp/queries/*.py`.
+  This is the preferred way: the SQL already follows the rules a model gets wrong, such as always filtering on the
+  `part` partition (without it StarRocks scans every partition of the tenant and the query times out).
+- **Raw SQL, as a last resort** (`read_query`), when no tool answers. Here **the model writes the SQL**. It first calls
+  `describe_schema`, which prints the **catalog** (`radiant_mcp/schema_catalog.py`) for one topic: which tables to
+  use, their keys and partitions, how to join them, the useful columns with one line of meaning each, example
+  queries. The raw schema says which columns exist; it does not say which table to use or how to join, which is
+  where a model's SQL goes wrong.
+
+In both ways, filters on text columns need the **exact stored values** (`radiant_mcp/enums.py`). StarRocks compares
+strings case-sensitively, and the spellings are not uniform: Exomiser stores `pathogenic`, ClinVar stores
+`Pathogenic`. A filter `exomiser_acmg_classification = 'Pathogenic'` raises no error: it **matches nothing**, and the
+agent answers "no pathogenic variant in this case". So the tools map what the user says onto the stored spelling, and
+`describe_schema` prints the allowed values next to each column.
+
+So the MCP keeps, in its own code, three copies of what other modules own:
+
+| In the MCP | What it is for | Example |
 |---|---|---|
-| `radiant_mcp/schema_catalog.py` | the catalog shown to the agent (`describe_schema`): tables, columns, one line per column | `germline__snv__occurrence`: `"gq": "genotype quality"`, `"zygosity": "genotype"` |
-| `radiant_mcp/enums.py` | the values of some columns, so the agent writes `zygosity = 'HOM'`, not `'homozygous'` | `zygosity`: HET, HOM, HEM, WT, UNK |
-| `radiant_mcp/queries/*.py` | the SQL the curated tools generate | `hits.py`: `o.filter, o.gq` |
+| `radiant_mcp/queries/*.py` | the SQL of the Radiant tools | `hits.py`: `o.filter, o.gq` |
+| `radiant_mcp/schema_catalog.py` | what `describe_schema` tells the model before it writes SQL | `germline__snv__occurrence`: `"gq": "genotype quality"` |
+| `radiant_mcp/enums.py` | the stored values, for the tools' filters and the model's SQL | `zygosity`: HET, HOM, HEM, WT, UNK |
 
-All three are **copies of knowledge** whose truth is elsewhere: the ETL owns the tables, the backend owns the views.
-If one of them renames `gq`, the copy is wrong: the agent is told about a column that no longer exists, a tool fails
-in production.
+Their truth is elsewhere: the ETL owns the tables, the backend owns the views. When a copy is wrong, there are two
+kinds of failure:
+
+- **a column that no longer exists** (the ETL renamed `gq`): the tool's SQL fails in StarRocks, and the agent tells
+  the clinician it cannot answer. Visible, but in production;
+- **a value that no longer exists** (the ETL now stores `Pathogenic` instead of `pathogenic`): no error at all, an
+  **empty result**, and the agent gives a wrong answer with confidence. The worst kind: nobody notices.
 
 **A contract** is what an owner **publishes and promises** about one table or view: its columns, their type, the
 values allowed, what they mean, who reads it. One YAML file per table, in the ODCS format (Open Data Contract
