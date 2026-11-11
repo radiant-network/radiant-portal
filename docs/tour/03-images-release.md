@@ -126,6 +126,18 @@ scripts/tags.sh radiant-mcp                               # sha-<short>, <sha>-<
 `publish.sh` builds through moon (`moon run <targets>` with `PUSH=1`), so the images' `deps` run first: the tests,
 from the cache when they already passed. It then scans the pushed images with Trivy (step 5 explains the scan).
 
+Expected Trivy lines: `CRITICAL=0 HIGH=0` for most images, except (Trivy database of 2026-11-11):
+
+| Image | Packages | Result | CVE |
+|---|---|---|---|
+| `radiant-portal` | library | `CRITICAL=1` | CVE-2026-126187, `react-server-dom-webpack` 19.2.6, fixed in 19.2.9 |
+| `radiant-api` | library | `HIGH=1` | CVE-2026-107223, `github.com/xuri/excelize/v2`, fixed in 2.11.1 |
+| `radiant-dbt`, `radiant-task-operator` | os | `HIGH=2` | |
+
+The vulnerability database changes every day: your counts can differ. Details per CVE:
+`jq -r '.Results[]?.Vulnerabilities[]? | "\(.VulnerabilityID) \(.PkgName) \(.InstalledVersion) -> \(.FixedVersion)"' .trivy/radiant-portal-library.json`.
+On `main`, these scans **report** (SARIF, like today): they do not block the publish.
+
 ## Step 4: a merge to `main`
 
 **Concept.** On each merge, `publish.sh <before> <after>` builds and pushes the **affected** images, with the three
@@ -179,8 +191,11 @@ script prints `fixable CRITICAL found` and exits 1: the PR is red. The settings 
 (HIGH and CRITICAL, unfixed ignored, OS and library packages apart), per image in the task's `env`
 (`TRIVY_LIBRARY_SEVERITY`, `TRIVY_IGNOREFILE`), read by `scripts/images.sh`.
 
-Trivy already ran at step 3 (the bootstrap scans what it pushes): `radiant-dbt` and `radiant-task-operator` show
-`HIGH=2` on OS packages. HIGH is reported, not blocking; only a fixable CRITICAL fails a PR.
+Note what this PR does **not** catch: the fixable CRITICAL of `radiant-portal` found at step 3. The PR does not touch
+the frontend, so it does not build or scan the UI image, and it stays green. A CVE published after an image was built
+is the job of the **daily scan** (`scripts/trivy-daily.sh`: the tags QA runs, no build), and the fix is a PR that
+bumps the dependency: that PR rebuilds `radiant-portal`, and the gate checks the CRITICAL is gone. HIGH findings
+(`radiant-api`, `radiant-dbt`, `radiant-task-operator`) are reported, never blocking.
 
 ## Step 6: one product release
 
