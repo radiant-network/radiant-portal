@@ -21,7 +21,7 @@ type SomaticCNVOccurrence struct {
 	Symbol     JsonArray[string] `json:"symbol,omitempty"`
 	Filter     string            `json:"filter,omitempty"`
 	BC         *int              `json:"bc,omitempty"`
-	PE         JsonArray[*int]   `json:"pe,omitempty" extensions:"x-nullable-items"`
+	PE         JsonArray[int]    `json:"pe,omitempty"`
 	SM         *float32          `json:"sm,omitempty"`
 	SVType     string            `json:"svtype,omitempty" gorm:"column:svtype"`
 	SVLen      *int              `json:"svlen,omitempty" gorm:"column:svlen"`

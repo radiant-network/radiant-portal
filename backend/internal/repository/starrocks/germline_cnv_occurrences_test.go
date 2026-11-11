@@ -8,7 +8,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -947,10 +946,10 @@ func Test_GermlineCNV_GetOccurrences_SlivarSet_ReturnsInheritanceAndParentCalls(
 		assert.Equal(t, types.JsonArray[int]{0, 0}, denovo.MotherCalls)
 		assert.Equal(t, 2, *denovo.MotherCN)
 		assert.Equal(t, 11, *denovo.MotherBC)
-		assert.Equal(t, types.JsonArray[*int]{utils.IntPtr(0), utils.IntPtr(0)}, denovo.MotherPE)
+		assert.Equal(t, types.JsonArray[int]{0, 0}, denovo.MotherPE)
 		assert.InDelta(t, 1.01, *denovo.MotherSM, 0.001)
 		assert.Empty(t, denovo.MotherName)
-		assert.Equal(t, types.JsonArray[*int]{utils.IntPtr(0), utils.IntPtr(1)}, denovo.FatherPE)
+		assert.Equal(t, types.JsonArray[int]{0, 1}, denovo.FatherPE)
 		assert.Equal(t, 9, *denovo.FatherBC)
 
 		maternal := occurrences[1]
@@ -986,23 +985,6 @@ func Test_GermlineCNV_GetOccurrences_AlignmentSet_InheritanceFieldsEmpty(t *test
 		assert.Nil(t, o.FatherCalls)
 		assert.Nil(t, o.FatherCN)
 		assert.Empty(t, o.FatherName)
-	})
-}
-
-func Test_GermlineCNV_GetOccurrences_PENullElement_KeptAsNull(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
-		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
-		require.NoError(t, err)
-
-		occurrences, err := repo.GetOccurrences(t.Context(), 70, 71, 91022, query)
-
-		require.NoError(t, err)
-		require.Len(t, occurrences, 1)
-		o := occurrences[0]
-		assert.Equal(t, types.JsonArray[*int]{nil, utils.IntPtr(3)}, o.PE)
-		assert.Equal(t, types.JsonArray[*int]{nil, utils.IntPtr(2)}, o.MotherPE)
-		assert.Equal(t, types.JsonArray[*int]{utils.IntPtr(4), nil}, o.FatherPE)
 	})
 }
 

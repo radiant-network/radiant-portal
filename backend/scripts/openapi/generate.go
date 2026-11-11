@@ -21,24 +21,12 @@ func main() {
 	yamlFilePath := "docs/swagger.yaml"
 	jsonFilePath := "docs/swagger.json"
 
-	// Before cleanupFile: swag wraps the YAML lines with the "types." prefixes in, and the YAML
-	// encoder must wrap them the same way to leave the other lines unchanged.
-	for filePath, rewrite := range map[string]func([]byte) ([]byte, error){
-		yamlFilePath:   nullableItemsYAML,
-		jsonFilePath:   nullableItemsComponentsLine,
-		"docs/docs.go": nullableItemsComponentsLine,
-	} {
-		if err := rewriteFile(filePath, rewrite); err != nil {
-			log.Fatalf("Failed to set nullable items: %v", err)
-		}
-		log.Printf("Successfully set nullable items in the file %s.", filePath)
-	}
-
 	// Process the YAML file
 	cleanupFile(yamlFilePath)
 
 	// Process the JSON file
 	cleanupFile(jsonFilePath)
+
 }
 
 func cleanupFile(filePath string) {

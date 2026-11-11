@@ -8,7 +8,6 @@ import (
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/types"
-	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -80,20 +79,6 @@ func Test_SomaticCNV_GetOccurrences_ScopesToTaskId(t *testing.T) {
 			assert.Equal(t, "SCNV4", occurrences[0].Name)
 			assert.Equal(t, 86, occurrences[0].TaskID)
 		}
-	})
-}
-
-func Test_SomaticCNV_GetOccurrences_PENullElement_KeptAsNull(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
-		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		query, err := types.NewOccurrenceListQueryFromSqon(SomaticCnvQueryConfigForTest, allSomaticCnvFields, nil, nil, nil)
-		require.NoError(t, err)
-
-		occurrences, err := repo.GetOccurrences(t.Context(), 71, 74, 86, query)
-
-		require.NoError(t, err)
-		require.Len(t, occurrences, 1)
-		assert.Equal(t, types.JsonArray[*int]{nil, utils.IntPtr(1)}, occurrences[0].PE)
 	})
 }
 
