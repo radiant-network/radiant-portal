@@ -156,10 +156,10 @@ export const data = {
       caddraw: '0.71699',
       dann: '0.97801495',
       fathmm: 'Damaging (-1.74)',
-      loeuf: '0.516',
+      loeuf: '0.65709',
       lrt: null,
       phylop17way: null,
-      pli: '3.17e-39',
+      pli: null,
       polyphen2_hvar: 'Possibly Damaging 0.845',
       revel: '0.731',
       sift: 'Damaging (0.004)',
@@ -208,6 +208,16 @@ export const data = {
       mother: 'S13225',
     },
     sqon: '{"content":[{"content":{"field":"hgvsg","value":["chr5:g.90855813C>G"]},"op":"in"}],"op":"and"}',
+  },
+  // Carries the scores variantGermline has none of.
+  variantPredictionScores: {
+    locus_id: '-7458836471105978368',
+    variant: 'chr6:g.130956280G>C',
+    gene: 'EPB41L2',
+    predictionScores: {
+      lrt: 'Deleterious (0.000006)',
+      pli: '9.52e-1',
+    },
   },
   caseSomatic: {
     case: CASE_SOMATIC_VALUE,
