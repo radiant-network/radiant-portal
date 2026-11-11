@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { type RedirectEnv, redirectToLogoutWith, resetAuthRedirectAttemptsWith } from './auth-redirect';
+import {
+  isEdgeSessionExpiredWith,
+  type RedirectEnv,
+  redirectToLogoutWith,
+  resetAuthRedirectAttemptsWith,
+} from './auth-redirect';
 
 type FakeEnvOptions = { path?: string; nowOverride?: () => number };
 
@@ -86,5 +91,23 @@ describe('resetAuthRedirectAttemptsWith', () => {
     const removeItem = vi.spyOn(env, 'removeItem');
     resetAuthRedirectAttemptsWith(env);
     expect(removeItem).not.toHaveBeenCalled();
+  });
+});
+
+describe('isEdgeSessionExpiredWith', () => {
+  it('detects an opaque redirect on the same-origin probe', async () => {
+    const fetchFn = vi.fn().mockResolvedValue({ type: 'opaqueredirect' });
+    await expect(isEdgeSessionExpiredWith(fetchFn)).resolves.toBe(true);
+    expect(fetchFn).toHaveBeenCalledWith('/health-check', expect.objectContaining({ redirect: 'manual' }));
+  });
+
+  it('returns false when the probe succeeds normally', async () => {
+    const fetchFn = vi.fn().mockResolvedValue({ type: 'basic' });
+    await expect(isEdgeSessionExpiredWith(fetchFn)).resolves.toBe(false);
+  });
+
+  it('returns false when the network is actually down', async () => {
+    const fetchFn = vi.fn().mockRejectedValue(new TypeError('Failed to fetch'));
+    await expect(isEdgeSessionExpiredWith(fetchFn)).resolves.toBe(false);
   });
 });
