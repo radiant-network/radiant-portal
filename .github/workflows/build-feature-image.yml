@@ -45,4 +45,5 @@ jobs:
           context: ./frontend
           file: ./frontend/Dockerfile.radiant
           push: true
+          build-args: BUILD_SHA=${{ github.sha }}
           tags: ${{ env.REGISTRY }}/${{ steps.tag.outputs.namespace }}/${{ env.IMAGE_NAME }}:${{ steps.tag.outputs.value }}

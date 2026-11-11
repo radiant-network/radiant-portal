@@ -145,6 +145,7 @@ jobs:
           CYPRESS_BASE_URL: ${{ needs.ferlease-release.outputs.url }}/
           CYPRESS_USER_USERNAME: ${{ secrets.CYPRESS_USER_USERNAME }}
           CYPRESS_USER_PASSWORD: ${{ secrets.CYPRESS_USER_PASSWORD }}
+          FERLEASE_BUILD_SHA: ${{ github.event.pull_request.head.sha }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         run: |
           SG_ID=$(aws ec2 describe-security-groups \
@@ -169,13 +170,15 @@ jobs:
               --arg password "$CYPRESS_USER_PASSWORD" \
               --arg spec "${SHARDS[$i]}" \
               --arg shard_id "$i" \
+              --arg build_sha "$FERLEASE_BUILD_SHA" \
               '{containerOverrides:[{name:"ferlease-cypress",environment:[
                 {name:"RELEASE",value:$release},
                 {name:"CYPRESS_BASE_URL",value:$base_url},
                 {name:"CYPRESS_USER_USERNAME",value:$username},
                 {name:"CYPRESS_USER_PASSWORD",value:$password},
                 {name:"CYPRESS_SPEC",value:$spec},
-                {name:"SHARD_ID",value:$shard_id}
+                {name:"SHARD_ID",value:$shard_id},
+                {name:"FERLEASE_BUILD_SHA",value:$build_sha}
               ]}]}')
             ARN=$(aws ecs run-task \
               --cluster pipelines \
