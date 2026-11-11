@@ -332,6 +332,12 @@ export interface CNVGeneOverlap {
      * @type {string}
      * @memberof CNVGeneOverlap
      */
+    'refseq_transcript_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CNVGeneOverlap
+     */
     'symbol': string;
     /**
      * 
