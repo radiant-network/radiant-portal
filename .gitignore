@@ -7,3 +7,4 @@ frontend/openapitools.json
 .venv/
 __pycache__/
 clients/python/.gen/
+.trivy/

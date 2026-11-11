@@ -62,3 +62,18 @@ tasks:
     outputs: ['portals/radiant/build']
     deps: ['install', 'api-client-check']
 
+
+  # ---- Docker image
+  docker-radiant:
+    tags: ['docker']
+    env:
+      TRIVY_LIBRARY_SEVERITY: 'CRITICAL'
+    command: '$workspaceRoot/scripts/docker.sh radiant-portal Dockerfile.radiant .'
+    inputs:
+      - 'Dockerfile.radiant'
+      - '@group(sources)'
+      - '@group(configs)'
+    deps: ['test', 'api-client-check']
+    options:
+      runInCI: 'affected'
+      cache: false  # side effect (push): never replay from moon's cache

@@ -25,3 +25,53 @@ tasks:
     command: '.venv/bin/pytest -q tests/unit'
     inputs: ['@group(sources)']
     deps: ['venv']
+
+  # ---- Docker images: each one only copies part of the ETL.
+  docker-dbt:
+    tags: ['docker']
+    env:
+      TRIVY_IGNOREFILE: 'etl/.trivyignore.yaml'
+    command: '$workspaceRoot/scripts/docker.sh radiant-dbt Dockerfile.radiant.dbt .'
+    inputs:
+      - 'Dockerfile.radiant.dbt'
+      - 'radiant/data_qa/**/*'
+      - 'scripts/dbt/**/*'
+    deps: []
+    options:
+      runInCI: 'affected'
+      cache: false  # side effect (push): never replay from moon's cache
+  docker-operator:
+    tags: ['docker']
+    env:
+      TRIVY_IGNOREFILE: 'etl/.trivyignore.yaml'
+    command: '$workspaceRoot/scripts/docker.sh radiant-task-operator Dockerfile.radiant.operator .'
+    inputs:
+      - 'Dockerfile.radiant.operator'
+      - 'requirements.txt'
+      - 'radiant/**/*'
+      - 'scripts/ecs/**/*'
+    deps: ['test-unit']
+    options:
+      runInCI: 'affected'
+      cache: false  # side effect (push): never replay from moon's cache
+  docker-nextflow-launcher:
+    tags: ['docker']
+    env:
+      TRIVY_IGNOREFILE: 'etl/.trivyignore.yaml'
+    command: '$workspaceRoot/scripts/docker.sh nextflow-launcher Dockerfile.nextflow.launcher .'
+    inputs:
+      - 'Dockerfile.nextflow.launcher'
+    deps: []
+    options:
+      runInCI: 'affected'
+      cache: false  # side effect (push): never replay from moon's cache
+  # Local dev image (`make` in the ETL), never published nor deployed: no `docker` tag.
+  docker-airflow:
+    command: '$workspaceRoot/scripts/docker.sh radiant-airflow Dockerfile .'
+    inputs:
+      - 'Dockerfile'
+      - 'requirements-airflow.txt'
+    deps: []
+    options:
+      runInCI: 'affected'
+      cache: false  # side effect (push): never replay from moon's cache

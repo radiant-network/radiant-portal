@@ -27,3 +27,20 @@ tasks:
       - 'project://backend?group=views'
       # The generated API client: regenerated whenever the backend API changes.
       - 'project://python-client?group=sources'
+
+  # ---- Docker image. Context = repo root: the image needs clients/python.
+  docker-mcp:
+    tags: ['docker']
+    command: '$workspaceRoot/scripts/docker.sh radiant-mcp Dockerfile ..'
+    inputs:
+      - 'Dockerfile'
+      - 'Dockerfile.dockerignore'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - 'server.py'
+      - 'radiant_mcp/**/*'
+      - 'project://python-client?group=sources'
+    deps: ['test']
+    options:
+      runInCI: 'affected'
+      cache: false  # side effect (push): never replay from moon's cache
