@@ -13,9 +13,19 @@ previous one. Start it with Claude Code: open this folder and type `/tour`.
 `git diff poc/monorepo-01-moon-portal poc/monorepo-02-mcp-etl` shows what a chapter adds. The chapters are in
 `docs/tour/`.
 
-The code is a copy of `origin/main` of radiant-portal (and later radiant-portal-pipeline and radiant-mcp). The repo
-is local and throwaway: no remote, and the GitHub workflows in `.github/` are never run (the tour runs what they run,
-`moon ci`).
+The code is a copy of `origin/main` of radiant-portal (and later radiant-portal-pipeline and radiant-mcp). The
+branches are pushed to radiant-portal only to be shared: they have no common history with `main`, are never merged,
+and the GitHub workflows in `.github/` are never run (the tour runs what they run, `moon ci`). Never open a PR from
+them.
+
+Get the tour in its own folder (not in your radiant-portal clone: the demos commit and the frontend's husky hooks
+would get in the way):
+
+```bash
+git clone git@github.com:radiant-network/radiant-portal.git radiant-moon-tour
+cd radiant-moon-tour
+git switch poc/monorepo-01-moon-portal
+```
 
 Setup:
 
