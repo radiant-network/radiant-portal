@@ -1,0 +1,321 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.ensembl_gene
+name: ensembl_gene
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per Ensembl gene feature of the Ensembl GRCh38 GFF3 release (e.g. 114). Fully overwritten by
+    the ETL open-data import (group ensembl_gene) from the OpenDataLake table ensembl_gene_v1 or the legacy Radiant
+    Iceberg table ensembl_gene, keeping only genes with a name (symbol). Shared reference table.
+
+    '
+  usage: 'Gene search/autocomplete in the portal matches name, gene_id and alias. The ETL overlaps it with CNVs
+    (chromosome, start <= cnv.end, end >= cnv.start) to fill the CNV occurrence gene symbols; the portal joins it
+    for CNV overlapping genes.
+
+    '
+  limitations: 'Genes without a Name attribute (novel genes with no symbol) are dropped. Several columns are GFF3
+    attributes that are NULL for gene features (phase, ccdsid, constitutive, ensembl_phase, ensembl_end_phase, external_name).
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: ensembl_gene
+  physicalName: ensembl_gene
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: gene_id
+    logicalType: string
+    physicalType: varchar(128)
+    description: Ensembl stable gene id without version (ENSG...), GFF3 gene_id attribute.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/ensembl_gene_insert.sql; upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+    required: true
+    unique: true
+  - name: chromosome
+    logicalType: string
+    physicalType: varchar(10)
+    description: Ensembl sequence name without chr prefix (GFF3 seqid, e.g. 1, X, MT).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake release-notes ensembl_gene/v1.md)
+    required: true
+  - name: start
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Gene start, 1-based inclusive.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake release-notes ensembl_gene/v1.md)
+    required: true
+  - name: end
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Gene end, 1-based inclusive.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake release-notes ensembl_gene/v1.md)
+    required: true
+  - name: version
+    logicalType: integer
+    physicalType: tinyint
+    description: Version of the Ensembl gene id (GFF3 version attribute); gene_id.version gives the versioned id.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: type
+    logicalType: string
+    physicalType: varchar(128)
+    description: GFF3 feature type of the row (gene, ncRNA_gene, pseudogene...).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: strand
+    logicalType: string
+    physicalType: char(1)
+    description: Strand of the gene, + or -.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl
+  - name: phase
+    logicalType: integer
+    physicalType: tinyint
+    description: GFF3 phase column; not defined for gene features, so expected NULL.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: name
+    logicalType: string
+    physicalType: varchar(128)
+    description: Gene symbol (GFF3 Name attribute, e.g. BRCA1). Never NULL here (filtered at import).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/ensembl_gene_insert.sql; portal:internal/types/gene.go
+  - name: alias
+    logicalType: array
+    physicalType: array<varchar(128)>
+    description: GFF3 Alias attribute values of the gene, as an array.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala); portal:internal/repository/starrocks/genes.go
+  - name: biotype
+    logicalType: string
+    physicalType: varchar(128)
+    description: Ensembl gene biotype (e.g. protein_coding, lncRNA, processed_pseudogene).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl; hub:docs/features/RAD-155-cnv-profile.md
+    enum:
+    - value: IG_C_gene
+    - value: IG_D_gene
+    - value: IG_J_gene
+    - value: IG_LV_gene
+    - value: IG_V_gene
+    - value: TR_C_gene
+    - value: TR_J_gene
+    - value: TR_V_gene
+    - value: TR_D_gene
+    - value: IG_pseudogene
+    - value: IG_C_pseudogene
+    - value: IG_J_pseudogene
+    - value: IG_V_pseudogene
+    - value: TR_V_pseudogene
+    - value: TR_J_pseudogene
+    - value: Mt_rRNA
+    - value: Mt_tRNA
+    - value: miRNA
+    - value: misc_RNA
+    - value: rRNA
+    - value: scRNA
+    - value: snRNA
+    - value: snoRNA
+    - value: ribozyme
+    - value: sRNA
+    - value: scaRNA
+    - value: lncRNA
+    - value: Mt_tRNA_pseudogene
+    - value: tRNA_pseudogene
+    - value: snoRNA_pseudogene
+    - value: snRNA_pseudogene
+    - value: scRNA_pseudogene
+    - value: rRNA_pseudogene
+    - value: misc_RNA_pseudogene
+    - value: miRNA_pseudogene
+    - value: TEC
+    - value: nonsense_mediated_decay
+    - value: non_stop_decay
+    - value: retained_intron
+    - value: protein_coding
+    - value: protein_coding_LoF
+    - value: protein_coding_CDS_not_defined
+    - value: processed_transcript
+    - value: non_coding
+    - value: ambiguous_orf
+    - value: sense_intronic
+    - value: sense_overlapping
+    - value: antisense_RNA
+    - value: known_ncrna
+    - value: pseudogene
+    - value: processed_pseudogene
+    - value: polymorphic_pseudogene
+    - value: retrotransposed
+    - value: transcribed_processed_pseudogene
+    - value: transcribed_unprocessed_pseudogene
+    - value: transcribed_unitary_pseudogene
+    - value: translated_processed_pseudogene
+    - value: translated_unprocessed_pseudogene
+    - value: unitary_pseudogene
+    - value: unprocessed_pseudogene
+    - value: artifact
+    - value: lincRNA
+    - value: macro_lncRNA
+    - value: 3prime_overlapping_ncRNA
+    - value: disrupted_domain
+    - value: vault_RNA
+    - value: bidirectional_promoter_lncRNA
+    - value: transcribed_pseudogene
+    - value: ncRNA_pseudogene
+    - value: ncRNA
+    - value: Y_RNA
+    - value: RNase_P_RNA
+    - value: RNase_MRP_RNA
+    - value: telomerase_RNA
+    - value: tRNA
+    - value: ''
+  - name: ccdsid
+    logicalType: string
+    physicalType: varchar(128)
+    description: GFF3 ccdsid attribute (CCDS id); a transcript-level attribute in Ensembl, expected NULL on gene
+      rows.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: constitutive
+    logicalType: string
+    physicalType: varchar(128)
+    description: GFF3 constitutive attribute (exon-level flag in Ensembl), expected NULL on gene rows.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: description
+    logicalType: string
+    physicalType: varchar(500)
+    description: Ensembl gene description (GFF3 description attribute), e.g. "BRCA1 DNA repair associated [Source:HGNC
+      Symbol;Acc:HGNC:1100]".
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl
+  - name: ensembl_end_phase
+    logicalType: string
+    physicalType: varchar(10)
+    description: GFF3 ensembl_end_phase attribute (exon-level in Ensembl), expected NULL on gene rows.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: ensembl_phase
+    logicalType: string
+    physicalType: varchar(10)
+    description: GFF3 ensembl_phase attribute (exon-level in Ensembl), expected NULL on gene rows.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: external_name
+    logicalType: string
+    physicalType: varchar(128)
+    description: 'TODO: GFF3 external_name attribute copied as-is; not established whether Ensembl gene features
+      carry it in the imported release.'
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: logic_name
+    logicalType: string
+    physicalType: varchar(500)
+    description: Ensembl annotation analysis that produced the gene (GFF3 logic_name attribute, e.g. ensembl_havana_gene_homo_sapiens).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl
+  - name: length
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Gene length, end - start + 1.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake release-notes ensembl_gene/v1.md)
+  quality:
+  - name: ensembl_gene__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: ensembl_gene__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except alias, ccdsid, chromosome, constitutive, end, ensembl_end_phase,
+      ensembl_phase, external_name, gene_id, phase, start).
+    query: SELECT (CASE WHEN COUNT(version) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(type) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(strand) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(name) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(biotype) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(description) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(logic_name) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(length) = 0 THEN 1 ELSE 0 END) FROM ensembl_gene
+    mustBe: 0
+  - name: ensembl_gene__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except gene_id, type).
+    query: SELECT (CASE WHEN COUNT(DISTINCT chromosome) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT start)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT end) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      version) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT strand) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT phase) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT name) <= 1 THEN 1 ELSE 0 END) +
+      (CASE WHEN COUNT(DISTINCT biotype) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT ccdsid) <= 1 THEN 1
+      ELSE 0 END) + (CASE WHEN COUNT(DISTINCT constitutive) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      description) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT ensembl_end_phase) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT ensembl_phase) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT external_name)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT logic_name) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      length) <= 1 THEN 1 ELSE 0 END) FROM ensembl_gene
+    mustBe: 0
+  - name: ensembl_gene__validate_start_end_order
+    type: sql
+    description: 'Genomic coordinate sanity for the Ensembl gene reference: - start must not exceed end (1-based
+      inclusive span).'
+    query: SELECT COUNT(*) FROM (select gene_id, chromosome, start, `end` from radiant.ensembl_gene where start
+      > `end`) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/ensembl_gene__validate_start_end_order.sql
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`gene_id`, `chromosome`)
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/services/genes.py
+    - portal/backend/internal/repository/starrocks/genes.go
+    - portal/backend/internal/types/gene.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/ensembl_gene_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/ensembl_gene.yml

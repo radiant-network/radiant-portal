@@ -1,0 +1,128 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.hpo_gene_panel
+name: hpo_gene_panel
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per distinct (gene, HPO phenotype term) association from the HPO genes_to_phenotype.txt file.
+    Fully overwritten by the ETL open-data import (group hpo_gene_panel) from the OpenDataLake table hpo_genes_v1
+    or the legacy Radiant Iceberg table hpo_gene_set. Shared reference table.
+
+    '
+  usage: 'Filter occurrences on predictors with `LEFT SEMI JOIN radiant.snv__consequence_filter_partitioned cf ON
+    cf.locus_id = o.locus_id AND cf.part = o.part AND (<condition>)`. Join on symbol; filter on hpo_term_id (HP:nnnnnnn).
+    The portal exposes panel as the hpo_gene_panel filter/aggregation and hpo_term_id/hpo_term_name in the variant
+    conditions tab; the MCP uses it to find the genes of HPO terms.
+
+    '
+  limitations: 'Associations are deduplicated across diseases: the disease (OMIM/ORPHA id) and frequency of the
+    source are not kept. Rows with a NULL symbol, term name or term id are dropped.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: hpo_gene_panel
+  physicalName: hpo_gene_panel
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: symbol
+    logicalType: string
+    physicalType: varchar(30)
+    description: Gene symbol of the association (source gene_symbol).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/hpo_gene_panel_insert.sql; upstream:hpo (radiant-open-datalake release-notes
+        hpo_genes/v1.md)
+    required: true
+  - name: panel
+    logicalType: string
+    physicalType: varchar(250)
+    description: Display label of the term, "<hpo_term_name>(<hpo_term_id>)", e.g. Seizure(HP:0001250); no space
+      before the parenthesis.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/hpo_gene_panel_insert.sql
+    required: true
+  - name: hpo_term_name
+    logicalType: string
+    physicalType: varchar(200)
+    description: HPO term label (source hpo_name).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/hpo_gene_panel_insert.sql; mcp:schema_catalog.py
+    required: true
+  - name: hpo_term_id
+    logicalType: string
+    physicalType: varchar(200)
+    description: HPO term id, HP:nnnnnnn (source hpo_id).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/hpo_gene_panel_insert.sql; mcp:schema_catalog.py
+    required: true
+  quality:
+  - name: hpo_gene_panel__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: hpo_gene_panel__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except hpo_term_id, panel, symbol).
+    query: SELECT (CASE WHEN COUNT(hpo_term_name) = 0 THEN 1 ELSE 0 END) FROM hpo_gene_panel
+    mustBe: 0
+  - name: hpo_gene_panel__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value.
+    query: SELECT (CASE WHEN COUNT(DISTINCT symbol) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT panel) <=
+      1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT hpo_term_name) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      hpo_term_id) <= 1 THEN 1 ELSE 0 END) FROM hpo_gene_panel
+    mustBe: 0
+  - name: hpo_gene_panel__validate_hpo_term_id_format
+    type: sql
+    description: hpo_term_id must be a well-formed HPO id (HP:NNNNNNN). Catches CSV header rows or malformed values
+      leaking into the panel during ingestion (e.g. the literal 'hpo_id' header row observed with symbol='gene_symbol',
+      panel='hpo_name(hpo_id)').
+    query: SELECT COUNT(*) FROM (select symbol, panel, hpo_term_id from radiant.hpo_gene_panel where hpo_term_id
+      is not null and hpo_term_id not regexp '^HP:[0-9]{7}$') failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/hpo_gene_panel__validate_hpo_term_id_format.sql
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`symbol`, `panel`)
+  - property: mcpKeys
+    value: symbol, panel
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/queries/genes.py
+    - mcp/radiant_mcp/schema_catalog.py
+    - mcp/radiant_mcp/tools/occurrences.py
+    - portal/backend/internal/repository/starrocks/snv_occurrences.go
+    - portal/backend/internal/types/gene_panels.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/hpo_gene_panel_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/hpo_gene_panel.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

@@ -1,0 +1,229 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.sequencing_experiment
+name: sequencing_experiment
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per sequencing experiment (one aliquot of a sample sequenced by a lab), the "seq_id" of every
+    occurrence table. Rows of the portal''s PostgreSQL table public.sequencing_experiment read through the radiant_jdbc
+    catalog and filtered to the tenant (WHERE tenant_code = ''<tenant>''). Written by the portal worker from
+    create_sequencing_experiment / update_sequencing_experiment batches.
+
+    '
+  usage: 'Key id, which is the seq_id of the occurrence tables (germline__snv__occurrence.seq_id, ...). Join
+    sample on sample_id = sample.id; cases through case_has_sequencing_experiment.sequencing_experiment_id; the tasks
+    that used it through task_context.sequencing_experiment_id. Filter by experimental_strategy_code (wgs / wxs) to
+    split by strategy. A member re-sequenced in a case has several rows: the ETL keeps the newest completed one
+    (status_code = ''completed'', ORDER BY created_on DESC, id DESC).
+
+    '
+  limitations: 'run_name, run_alias and capture_kit are optional and written as an empty string when not submitted
+    (test NULL and ''''); run_date is NULL when not submitted. aliquot is unique per sequencing lab by the worker''s
+    check, not by a database constraint. The ETL reads the underlying PostgreSQL table
+    (radiant_jdbc.public.sequencing_experiment) directly, not this view.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: sequencing_experiment
+    physicalName: sequencing_experiment
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Internal sequencing experiment id (identity, primary key); the seq_id of the occurrence tables
+          and of the API ("Seq. ID" in the portal).
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:internal/types/sequencing_experiment.go SequencingExperimentIdField; frontend:translations/common/en.json
+              case_entity.details.sequencing_id_tooltip
+      - name: sample_id
+        logicalType: integer
+        description: Sample that was sequenced.
+        relationships:
+          - type: foreignKey
+            to: sample.id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql sequencing_experiment_sample_id_fkey
+      - name: status_code
+        logicalType: string
+        description: Status of the sequencing experiment, a code of the status lookup shared with cases. The ETL only
+          takes experiments with status_code = 'completed' as candidates for its pipelines.
+        examples:
+          - completed
+          - submitted
+          - in_progress
+          - revoked
+        relationships:
+          - type: foreignKey
+            to: status.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000030_seed_target_case_status_enum.up.sql; etl:radiant/dags/sql/clinical/pending_annotation_select.sql;
+              frontend:translations/common/en.json case_entity.details.status_code_tooltip
+      - name: aliquot
+        logicalType: string
+        description: Aliquot identifier (alphanumeric) of the sequenced sample. It is the sample name in the VCFs;
+          the ETL and the case batch's tasks match sequencing experiments by aliquot.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:cmd/worker/sequencing_experiment_validation.go validateAliquotField; backend:internal/types/case_batch.go
+              CaseTaskBatch.Aliquots; etl:radiant/dags/sql/clinical/pending_annotation_select.sql
+      - name: run_name
+        logicalType: string
+        description: Name of the sequencing run (optional). Shown as "Run" for the proband's sample in the case list.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/sequencing_experiment_batch.go; frontend:translations/common/en.json case_exploration.case.headers.run_names_tooltip
+      - name: run_alias
+        logicalType: string
+        description: Alias of the sequencing run (optional); shown as "Run" in the file list.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/sequencing_experiment_batch.go; frontend:translations/common/en.json file_entity.run_alias
+      - name: run_date
+        logicalType: timestamp
+        description: Date of the sequencing run (RFC 3339, must be in the past); NULL when not submitted.
+        examples:
+          - '2023-10-01T00:00:00Z'
+        customProperties:
+          - property: postgresType
+            value: timestamp with time zone
+          - property: descriptionSource
+            value: backend:internal/types/sequencing_experiment_batch.go; backend:cmd/worker/sequencing_experiment_validation.go
+              validateRunDateField
+      - name: capture_kit
+        logicalType: string
+        description: Name of the capture kit used for the library (optional, free text).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/sequencing_experiment_batch.go; frontend:translations/common/en.json case_entity.details.capture_kit
+      - name: created_on
+        logicalType: timestamp
+        description: When the row was created in the portal database (set on insert). The ETL orders a member's
+          experiments by it to keep the newest.
+        customProperties:
+          - property: postgresType
+            value: timestamp without time zone
+          - property: descriptionSource
+            value: backend:internal/types/sequencing_experiment.go autoCreateTime; etl:radiant/dags/sql/clinical/pending_annotation_select.sql
+      - name: updated_on
+        logicalType: timestamp
+        description: When the row was last updated in the portal database (set on every update). "Last Update" in the
+          portal.
+        customProperties:
+          - property: postgresType
+            value: timestamp without time zone
+          - property: descriptionSource
+            value: backend:internal/types/sequencing_experiment.go autoUpdateTime; frontend:translations/common/en.json
+              case_entity.details.updated_on
+      - name: experimental_strategy_code
+        logicalType: string
+        description: Sequencing strategy, a code of experimental_strategy (wgs, wxs, rnaseq or targeted_dna).
+        examples:
+          - wgs
+          - wxs
+          - rnaseq
+          - targeted_dna
+        relationships:
+          - type: foreignKey
+            to: experimental_strategy.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/sequencing_experiment_batch.go; backend:scripts/init-sql/migrations/000001_init.up.sql
+      - name: sequencing_read_technology_code
+        logicalType: string
+        description: Read technology, a code of sequencing_read_technology (short_read or long_read).
+        examples:
+          - short_read
+          - long_read
+        relationships:
+          - type: foreignKey
+            to: sequencing_read_technology.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/sequencing_experiment_batch.go; backend:scripts/init-sql/migrations/000001_init.up.sql
+      - name: platform_code
+        logicalType: string
+        description: Sequencing platform, a code of the platform lookup.
+        examples:
+          - illumina
+          - pacbio
+          - nanopore
+        relationships:
+          - type: foreignKey
+            to: platform.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql sequencing_experiment_platform_code_fkey
+      - name: tenant_code
+        logicalType: string
+        description: Tenant owning the row; always the view's tenant, since the view filters on it.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000009_init_auth_multi_tenancy.up.sql; backend:internal/repository/starrocks/starrocks_tenant.go
+      - name: sequencing_lab_code
+        logicalType: string
+        description: Code of the organization that sequenced the aliquot; references organization (code, tenant_code).
+        relationships:
+          - type: foreignKey
+            to: organization.code
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000009_init_auth_multi_tenancy.up.sql sequencing_experiment_performer_lab_fkey;
+              backend:internal/utils/joins/joins.go
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/repository/starrocks/documents.go
+          - backend/internal/repository/starrocks/igv.go
+          - backend/internal/repository/starrocks/sequencing_experiment.go
+          - backend/internal/repository/starrocks/transcript_report.go
+          - backend/internal/repository/starrocks/variants.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

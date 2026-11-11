@@ -1,0 +1,138 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.gnomad_genomes_v3
+name: gnomad_genomes_v3
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per variant of the gnomAD population frequency callset, with global allele and homozygote counts.
+    Fully overwritten by the ETL open-data import (group gnomad, mapping key iceberg_gnomad_joint). Despite its
+    name, when the source is on its OpenDataLake contract (gnomad_joint_v1) it holds gnomAD v4.1 JOINT (exomes +
+    genomes) frequencies; only the legacy Radiant Iceberg table gnomad_genomes_v3 gives gnomAD v3 genomes. Shared
+    reference table.
+
+    '
+  usage: 'Join on locus_id. The ETL copies af into the snv variant column gnomad_v3_af during (re)annotation (labelled
+    "gnomAD 4.1.0 Joint" in the portal). Check open_data_release for which source was imported.
+
+    '
+  limitations: 'Table and downstream column names (gnomad_v3_af) still say v3 although the contract source is v4.1
+    joint. In the joint callset AN varies by region (exomes do not cover non-coding positions), so an is not a stable
+    denominator. Per-ancestry, per-sex and filtering allele frequencies are not imported.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: gnomad_genomes_v3
+  physicalName: gnomad_genomes_v3
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: locus_id
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Radiant variant id of the allele, GET_VARIANT_ID encoding when the allele fits it, otherwise the
+      surrogate id from variant_lookup (matched on locus_hash).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/gnomad_insert.sql
+    required: true
+    unique: true
+  - name: af
+    logicalType: number
+    physicalType: double
+    description: Global alternate allele frequency; gnomAD v4.1 joint AF (af_joint) from the contract source, gnomAD
+      v3 genomes AF from the legacy source.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/gnomad_insert.sql; upstream:gnomad (radiant-open-datalake release-notes gnomad_joint/v1.md);
+        frontend:translations/common/en.json gnomad_v3_af_tooltip
+  - name: ac
+    logicalType: integer
+    physicalType: INT(11)
+    description: Global alternate allele count (ac_joint from the v4.1 joint contract source, ac from legacy v3
+      genomes).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/gnomad_insert.sql; upstream:gnomad
+  - name: an
+    logicalType: integer
+    physicalType: INT(11)
+    description: Global number of called alleles (an_joint from the v4.1 joint contract source, an from legacy v3
+      genomes). In the joint callset it varies by region.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/gnomad_insert.sql; etl:design/SJRA-1811-opendatalake-integration.md
+  - name: hom
+    logicalType: integer
+    physicalType: INT(11)
+    description: Number of individuals homozygous for the alternate allele (gnomAD nhomalt; hom_joint from the v4.1
+      joint contract source).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/gnomad_insert.sql; upstream:gnomad (radiant-open-datalake release-notes gnomad_joint/v1.md)
+  quality:
+  - name: gnomad_genomes_v3__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: gnomad_genomes_v3__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except locus_id).
+    query: SELECT (CASE WHEN COUNT(af) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(ac) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(an) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(hom) = 0 THEN 1 ELSE 0 END) FROM gnomad_genomes_v3
+    mustBe: 0
+  - name: gnomad_genomes_v3__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except locus_id).
+    query: SELECT (CASE WHEN COUNT(DISTINCT af) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT ac) <= 1 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT an) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT hom) <=
+      1 THEN 1 ELSE 0 END) FROM gnomad_genomes_v3
+    mustBe: 0
+  - name: gnomad_genomes_v3__should_be_within_range_af
+    type: sql
+    dimension: accuracy
+    description: af stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM gnomad_genomes_v3 WHERE af < 0 OR af > 1
+    mustBe: 0
+  - name: gnomad_genomes_v3__validate_allele_counts
+    type: sql
+    description: 'Allele-count sanity for the gnomAD frequency table: - ac (alt allele count), an (total called
+      alleles) and hom (homozygote count) must be non-negative; - ac cannot exceed an'
+    query: SELECT COUNT(*) FROM (select locus_id, af, ac, an, hom from radiant.gnomad_genomes_v3 where ac < 0 or
+      an < 0 or hom < 0 or ac > an) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/gnomad_genomes_v3__validate_allele_counts.sql
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`locus_id`)
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(`locus_id`) BUCKETS 10
+  - property: consumers
+    value:
+    - portal/backend/internal/types/gnomad.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/gnomad_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/gnomad_genomes_v3.yml

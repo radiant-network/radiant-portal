@@ -1,0 +1,64 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.case_type
+name: case_type
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Type of analysis of a case: germline or somatic. Referenced by cases.case_type_code. Shared by every tenant (the
+    PostgreSQL table has no tenant_code), exposed in each {tenant}_tenant database through radiant_jdbc; the portal also serves
+    it as GET /value_sets/{type}.'
+  usage: Join cases.case_type_code = case_type.code for the label, or filter cases on case_type_code directly. The ETL selects
+    the cases to annotate on this code (germline for SNV/CNV annotation, somatic for somatic annotation and QC).
+  limitations: 'The values are data seeded by the backend migrations (backend/scripts/init-sql/migrations), not a fixed enum:
+    later migrations or a deployment can add codes, so query the view for the current list. Codes are unique case-insensitively
+    (migration 000034) and stored in the case they were entered in.'
+team:
+- username: radiant-portal
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: case_type
+  physicalName: case_type
+  physicalType: view
+  tags:
+  - per-tenant
+  properties:
+  - name: code
+    logicalType: string
+    description: Code of the case type, primary key; the value stored in the referencing columns.
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql; etl:dags/sql/clinical/pending_annotation_select.sql;
+        etl:dags/sql/clinical/pending_somatic_annotation_select.sql
+    examples:
+    - germline
+    - somatic
+  - name: name_en
+    logicalType: string
+    description: English label of the code (Germline, Somatic).
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql
+  customProperties:
+  - property: consumers
+    value:
+    - backend/internal/repository/starrocks/cases.go
+authoritativeDefinitions:
+- type: implementation
+  url: backend:internal/repository/starrocks/starrocks_tenant.go

@@ -1,0 +1,690 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.somatic__snv__occurrence
+name: somatic__snv__occurrence
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per variant carried by the tumor sample of a somatic SNV analysis task (tumor-normal or tumor-only)
+    in the tenant: caller INFO fields plus the tumor and, for tumor-normal, the matched normal FORMAT values. Loaded
+    by the ETL import_part DAG from the Iceberg somatic_snv_occurrence table (VCF parsed by tasks/vcf/snv/somatic),
+    keeping only records where the tumor carries the alt allele with at least 2 alt reads.'
+  usage: 'Every query on a table partitioned by `part` carries `<alias>.part = <part>` as an equality, next to seq_id
+    / task_id. Take `part` and `variant_part` from get_case_context''s occurrence_keys, from the key of the right
+    data type; never compute them. Without it StarRocks scans every partition of the tenant and the query can time
+    out. Join the catalog with `v.locus_id = o.locus_id AND v.part = <variant_part>`. Key: part, task_id, tumor_seq_id,
+    locus_id. Always filter on part (and task_id / tumor_seq_id). Join snv__variant on locus_id (portal), or snv__variant_partitioned
+    on locus_id AND v.part = o.part DIV 10 (MCP). Tumor-only analyses have normal_seq_id and every normal_* column
+    NULL.'
+  limitations: Most info_* columns are germline (GATK) annotations that the somatic callers in use (DRAGEN tumor-only,
+    Mutect2 tumor-normal) do not emit, so they are NULL; quality is NULL (QUAL '.'); tumor_gt_status and normal_gt_status
+    are never populated. tumor_af / normal_af repeat the AD ratio, not the caller's FORMAT/AF. AD-derived counts
+    of 0 are stored as NULL. tumor_zygosity is almost always HET because the callers emit 0/1.
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: somatic__snv__occurrence
+  physicalName: somatic__snv__occurrence
+  physicalType: table
+  tags:
+  - per-tenant
+  properties:
+  - name: part
+    logicalType: integer
+    physicalType: INT
+    description: Occurrence partition of the tumor sequencing, assigned by the ETL so that the sequencings of a
+      patient, case or family with the same experimental strategy share it (WGS parts from 0, WXS parts from 65536).
+      Always filter on it; the matching snv__variant_partitioned partition is part DIV 10.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/starrocks/partition.py; etl:dags/import_part.py; mcp:radiant_mcp/domain/keys.py
+    required: true
+    partitioned: true
+  - name: task_id
+    logicalType: integer
+    physicalType: INT
+    description: 'Somatic analysis task that produced the VCF: one tumor sample, with or without a matched normal.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql
+    required: true
+  - name: tumor_seq_id
+    logicalType: integer
+    physicalType: INT
+    description: Sequencing experiment (seq_id) of the tumor sample; the sequencing the occurrence belongs to.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; mcp:radiant_mcp/schema_catalog.py
+    required: true
+  - name: locus_id
+    logicalType: integer
+    physicalType: BIGINT
+    description: Variant identifier; join to snv__variant on locus_id (or snv__variant_partitioned with part = this
+      part DIV 10). Every occurrence has its variant row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_occurrence_insert_partition_delta.sql; etl:data_qa/sources/somatic_snv_occurrence.yml
+    required: true
+    relationships:
+    - to: snv__variant.locus_id
+    quality:
+    - name: somatic_snv_occurrence__relationships__locus_id__snv_variant
+      type: sql
+      dimension: consistency
+      description: Every locus_id exists in snv__variant.locus_id.
+      query: SELECT COUNT(*) FROM somatic__snv__occurrence a LEFT JOIN snv__variant b ON a.locus_id = b.locus_id
+        WHERE a.locus_id IS NOT NULL AND b.locus_id IS NULL
+      mustBe: 0
+  - name: normal_seq_id
+    logicalType: integer
+    physicalType: INT
+    description: Sequencing experiment of the matched normal sample; NULL for a tumor-only analysis.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; mcp:radiant_mcp/schema_catalog.py
+  - name: quality
+    logicalType: number
+    physicalType: FLOAT
+    description: VCF QUAL truncated to an integer; NULL when QUAL is '.', which is the case for the DRAGEN and Mutect2
+      somatic VCFs seen so far.
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml
+  - name: filter
+    logicalType: string
+    physicalType: VARCHAR(255)
+    description: 'VCF FILTER: ''PASS'' when the record passed (FILTER ''PASS'' or ''.''), otherwise the failed filter
+      names joined by '';''. Only PASS occurrences count in the somatic frequencies.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; upstream:cyvcf2 Variant.FILTER; etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql
+  - name: info_hotspotallele
+    logicalType: integer
+    physicalType: INT
+    description: 'INFO/HotspotAllele of GATK-era callers: index of the hotspot allele, 1 meaning the alternate allele.
+      NULL for DRAGEN and Mutect2 VCFs; use info_hotspot.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py read_hotspot; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml
+  - name: info_hotspot
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: 'Known somatic hotspot: TRUE when DRAGEN''s INFO/hotspot flag is set (''Known somatic site, used
+      to increase confidence in call''), else HotspotAllele = 1 for GATK-era VCFs. NULL, not FALSE, when the caller
+      emits neither key (e.g. a DRAGEN record without the flag).'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py read_hotspot; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        frontend:translations/common/en.json hotspot
+  - name: info_old_record
+    logicalType: string
+    physicalType: VARCHAR(2000)
+    description: 'INFO/OLD_RECORD: the original VCF record (before multi-allelic splitting / normalisation) written
+      by bcftools norm --old-rec-tag; NULL when the record was not changed or the tag is absent.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; bioinfo:snv-post-processing/modules/local/split_multiallelics/main.nf;
+        etl:data_qa/sources/somatic_snv_occurrence.yml
+  - name: info_baseq_rank_sum
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/BaseQRankSum as emitted by the caller: rank-sum test z-score of alt versus ref base qualities.
+      GATK germline-style annotation, NULL for the DRAGEN and Mutect2 somatic VCFs seen so far.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/BaseQRankSum
+  - name: info_excess_het
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/ExcessHet as emitted by the caller: Phred-scaled p-value for an excess of heterozygotes.
+      GATK germline-style annotation, NULL for the DRAGEN and Mutect2 somatic VCFs seen so far.'
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/ExcessHet
+  - name: info_fs
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/FS as emitted by the caller: Phred-scaled Fisher''s exact test p-value for strand bias. GATK
+      germline-style annotation, NULL for the DRAGEN and Mutect2 somatic VCFs seen so far.'
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/FS
+  - name: info_ds
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: 'INFO/DS as emitted by the caller: flag set when any sample was downsampled. GATK germline-style
+      annotation, NULL for the DRAGEN and Mutect2 somatic VCFs seen so far.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/DS
+  - name: info_fraction_informative_reads
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/FractionInformativeReads: fraction of the reads at the site that are informative for the
+      call. Emitted by DRAGEN on every record.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        upstream:DRAGEN/GATK INFO/FractionInformativeReads
+  - name: info_inbreed_coeff
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/InbreedingCoeff as emitted by the caller: inbreeding coefficient from the genotype likelihoods
+      (also read under the InbreedCoeff spelling). GATK germline-style annotation, NULL for the DRAGEN and Mutect2
+      somatic VCFs seen so far.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/InbreedingCoeff
+  - name: info_mleac
+    logicalType: integer
+    physicalType: INT
+    description: 'INFO/MLEAC as emitted by the caller: maximum-likelihood expected allele count. GATK germline-style
+      annotation, NULL for the DRAGEN and Mutect2 somatic VCFs seen so far.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/MLEAC
+  - name: info_mleaf
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/MLEAF as emitted by the caller: maximum-likelihood expected allele frequency. GATK germline-style
+      annotation, NULL for the DRAGEN and Mutect2 somatic VCFs seen so far.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/MLEAF
+  - name: info_mq
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/MQ: root mean square mapping quality of the reads at the site. Emitted by DRAGEN.'
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        upstream:GATK/DRAGEN INFO/MQ
+  - name: info_mq0
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/MQ0 as emitted by the caller: number of reads with mapping quality 0. GATK germline-style
+      annotation, NULL for the DRAGEN and Mutect2 somatic VCFs seen so far.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/MQ0
+  - name: info_m_qrank_sum
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/MQRankSum as emitted by the caller: rank-sum test z-score of alt versus ref read mapping
+      qualities. GATK germline-style annotation, NULL for the DRAGEN and Mutect2 somatic VCFs seen so far.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/MQRankSum
+  - name: info_qd
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/QD as emitted by the caller: variant quality (QUAL) normalised by the depth of non-reference
+      samples. Shown by the portal as ''Quality Depth''. GATK germline-style annotation, NULL for the DRAGEN and
+      Mutect2 somatic VCFs seen so far.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/QD
+  - name: info_r2_5p_bias
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/R2_5P_bias (DRAGEN): score based on mate bias and distance from the 5'' end of the reads.
+      NULL for the current DRAGEN tumor-only and Mutect2 VCFs.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        upstream:DRAGEN INFO/R2_5P_bias
+  - name: info_read_pos_rank_sum
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/ReadPosRankSum as emitted by the caller: rank-sum test z-score of alt versus ref read position
+      bias. GATK germline-style annotation, NULL for the DRAGEN and Mutect2 somatic VCFs seen so far.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/ReadPosRankSum
+  - name: info_sor
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/SOR as emitted by the caller: symmetric odds ratio test for strand bias. GATK germline-style
+      annotation, NULL for the DRAGEN and Mutect2 somatic VCFs seen so far.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/SOR
+  - name: info_vqslod
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/VQSLOD as emitted by the caller: VQSR log odds of the variant being true versus false. GATK
+      germline-style annotation, NULL for the DRAGEN and Mutect2 somatic VCFs seen so far.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/VQSLOD
+  - name: info_culprit
+    logicalType: string
+    physicalType: VARCHAR(255)
+    description: 'INFO/culprit as emitted by the caller: annotation that contributed most to a bad VQSR VQSLOD.
+      GATK germline-style annotation, NULL for the DRAGEN and Mutect2 somatic VCFs seen so far.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/culprit
+  - name: info_dp
+    logicalType: integer
+    physicalType: INT
+    description: 'INFO/DP: combined read depth at the site over all samples of the VCF (tumor and normal).'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        upstream:VCF INFO/DP
+  - name: info_haplotype_score
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/HaplotypeScore as emitted by the caller: consistency of the site with at most two segregating
+      haplotypes (legacy GATK). GATK germline-style annotation, NULL for the DRAGEN and Mutect2 somatic VCFs seen
+      so far.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; upstream:GATK INFO/HaplotypeScore
+  - name: info_germq
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/GERMQ (Mutect2): Phred-scaled quality that the alt allele is not germline. NULL for DRAGEN
+      VCFs.'
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        upstream:GATK Mutect2 INFO/GERMQ
+  - name: info_tlod
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/TLOD (Mutect2): log10 likelihood ratio of the variant being present in the tumor versus absent.
+      NULL for DRAGEN VCFs.'
+    customProperties:
+    - property: unit
+      value: log10
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        upstream:GATK Mutect2 INFO/TLOD
+  - name: info_mapq
+    logicalType: number
+    physicalType: FLOAT
+    description: 'TODO: INFO/MAPQ copied as is; NULL in the DRAGEN tumor-only VCF (SJRA-1751) and no header defining
+      it was found in the bioinfo repos, so the caller and exact meaning (some mapping-quality summary) are unconfirmed.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md
+  - name: info_aq
+    logicalType: number
+    physicalType: FLOAT
+    description: 'INFO/AQ (DRAGEN, --vc-systematic-noise): systematic noise score, the signal DRAGEN uses to raise
+      the systematic_noise filter. NULL for Mutect2 VCFs.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; frontend:translations/common/en.json aq
+  - name: tumor_calls
+    logicalType: array
+    physicalType: ARRAY<INT>
+    description: Tumor genotype (FORMAT/GT) as allele indexes without the phase flag, e.g. [0, 1]; -1 for a missing
+      allele. Replaced by -1s when an alt is called with fewer than 2 alt reads.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py adjust_somatic_calls_and_zygosity; etl:tasks/vcf/vcf_utils.py
+  - name: tumor_dp
+    logicalType: integer
+    physicalType: INT
+    description: Tumor read depth (FORMAT/DP); NULL when the field is absent or 0.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py
+  - name: tumor_has_alt
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: 'TRUE when the tumor genotype contains the alt allele with at least 2 alt reads. Always TRUE in
+      this table: only such rows are loaded.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py adjust_somatic_calls_and_zygosity; etl:dags/sql/radiant/somatic_snv_occurrence_insert_partition_delta.sql
+  - name: tumor_af
+    logicalType: number
+    physicalType: FLOAT
+    description: Tumor alt allele fraction, identical to tumor_ad_ratio (alt / (ref + alt) from FORMAT/AD), not
+      the caller's FORMAT/AF.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py
+  - name: tumor_zygosity
+    logicalType: string
+    physicalType: CHAR(3)
+    description: 'Tumor genotype class: HET, HOM or HEM (single-allele genotype, e.g. haploid region or LOH); WT
+      and UNK are never loaded. Somatic callers emit 0/1, so it is HET almost always.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py adjust_somatic_calls_and_zygosity; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:dags/sql/radiant/somatic_snv_occurrence_insert_partition_delta.sql
+    enum:
+    - value: HET
+    - value: HOM
+    - value: HEM
+    - value: WT
+    - value: UNK
+  - name: tumor_ad_ref
+    logicalType: integer
+    physicalType: INT
+    description: Tumor reads supporting the reference allele (FORMAT/AD); NULL when 0 or missing.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; upstream:cyvcf2 gt_ref_depths
+  - name: tumor_ad_alt
+    logicalType: integer
+    physicalType: INT
+    description: Tumor reads supporting the alternate allele (FORMAT/AD); NULL when 0 or missing. At least 2 in
+      this table.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; upstream:cyvcf2 gt_alt_depths
+  - name: tumor_ad_total
+    logicalType: integer
+    physicalType: INT
+    description: Tumor ref + alt reads from FORMAT/AD (not FORMAT/DP); NULL when 0.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; upstream:cyvcf2 gt_depths
+  - name: tumor_ad_ratio
+    logicalType: number
+    physicalType: FLOAT
+    description: 'Tumor alt allele fraction: ad_alt / (ad_ref + ad_alt) from FORMAT/AD; NULL when 0.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; upstream:cyvcf2 gt_alt_freqs; frontend:translations/common/en.json
+        ad_ratio
+  - name: tumor_phased
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: TRUE when the tumor genotype is phased ('|' in GT, with a PS block).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md
+  - name: tumor_gt_status
+    logicalType: string
+    physicalType: VARCHAR(50)
+    description: 'Never populated (always NULL): reserved for a genotype status that was never defined.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:data_qa/sources/somatic_snv_occurrence.yml; etl:design/SJRA-341-somatic-snv-ingestion.md
+  - name: tumor_sq
+    logicalType: number
+    physicalType: FLOAT
+    description: Tumor somatic quality (DRAGEN FORMAT/SQ, first per-alt value). NULL for Mutect2 VCFs.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; frontend:translations/common/en.json sq
+  - name: normal_calls
+    logicalType: array
+    physicalType: ARRAY<INT>
+    description: Normal genotype (FORMAT/GT) as allele indexes without the phase flag, e.g. [0, 1]; -1 for a missing
+      allele. Replaced by -1s when an alt is called with fewer than 2 alt reads. NULL for a tumor-only analysis.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py adjust_somatic_calls_and_zygosity; etl:tasks/vcf/vcf_utils.py
+  - name: normal_dp
+    logicalType: integer
+    physicalType: INT
+    description: Normal read depth (FORMAT/DP); NULL when the field is absent or 0. NULL for a tumor-only analysis.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py
+  - name: normal_has_alt
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: TRUE when the normal genotype contains the alt allele with at least 2 alt reads (germline or contamination
+      signal); FALSE otherwise. NULL for a tumor-only analysis.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py adjust_somatic_calls_and_zygosity
+  - name: normal_af
+    logicalType: number
+    physicalType: FLOAT
+    description: Normal alt allele fraction, identical to normal_ad_ratio (alt / (ref + alt) from FORMAT/AD), not
+      the caller's FORMAT/AF. NULL for a tumor-only analysis.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py
+  - name: normal_zygosity
+    logicalType: string
+    physicalType: CHAR(3)
+    description: 'Normal genotype class: WT (no alt called), HET, HOM, HEM (single-allele genotype) or UNK (alt
+      called with fewer than 2 alt reads). NULL for a tumor-only analysis.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py adjust_somatic_calls_and_zygosity; etl:data_qa/macros/dictionaries.sql
+        dict_zygosity
+    enum:
+    - value: HET
+    - value: HOM
+    - value: HEM
+    - value: WT
+    - value: UNK
+  - name: normal_ad_ref
+    logicalType: integer
+    physicalType: INT
+    description: Normal reads supporting the reference allele (FORMAT/AD); NULL when 0 or missing. NULL for a tumor-only
+      analysis.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; upstream:cyvcf2 gt_ref_depths
+  - name: normal_ad_alt
+    logicalType: integer
+    physicalType: INT
+    description: Normal reads supporting the alternate allele (FORMAT/AD); NULL when 0 or missing. NULL for a tumor-only
+      analysis.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; upstream:cyvcf2 gt_alt_depths
+  - name: normal_ad_total
+    logicalType: integer
+    physicalType: INT
+    description: Normal ref + alt reads from FORMAT/AD (not FORMAT/DP); NULL when 0. NULL for a tumor-only analysis.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; upstream:cyvcf2 gt_depths
+  - name: normal_ad_ratio
+    logicalType: number
+    physicalType: FLOAT
+    description: 'Normal alt allele fraction: ad_alt / (ad_ref + ad_alt) from FORMAT/AD; NULL when 0. NULL for a
+      tumor-only analysis.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; upstream:cyvcf2 gt_alt_freqs; frontend:translations/common/en.json
+        ad_ratio
+  - name: normal_phased
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: TRUE when the normal genotype is phased ('|' in GT, with a PS block). NULL for a tumor-only analysis.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md
+  - name: normal_gt_status
+    logicalType: string
+    physicalType: VARCHAR(50)
+    description: 'Never populated (always NULL): reserved for a genotype status that was never defined.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:data_qa/sources/somatic_snv_occurrence.yml; etl:design/SJRA-341-somatic-snv-ingestion.md
+  - name: normal_sq
+    logicalType: number
+    physicalType: FLOAT
+    description: Normal somatic quality (DRAGEN FORMAT/SQ, first per-alt value). NULL for Mutect2 VCFs. NULL for
+      a tumor-only analysis.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/somatic/occurrence.py; etl:design/SJRA-1751-somatic-snv-tumor-only-ingestion.md;
+        etl:data_qa/sources/somatic_snv_occurrence.yml; frontend:translations/common/en.json sq
+  quality:
+  - name: somatic_snv_occurrence__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: somatic_snv_occurrence__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except info_aq, info_baseq_rank_sum, info_culprit, info_ds, info_excess_het,
+      info_fraction_informative_reads, info_fs, info_haplotype_score, info_hotspot, info_hotspotallele, info_inbreed_coeff,
+      info_m_qrank_sum, info_mapq, info_mleac, info_mleaf, info_mq, info_mq0, info_old_record, info_qd, info_r2_5p_bias,
+      info_read_pos_rank_sum, info_sor, info_vqslod, locus_id, normal_gt_status, normal_sq, part, quality, task_id,
+      tumor_gt_status, tumor_seq_id, tumor_sq).
+    query: SELECT (CASE WHEN COUNT(normal_seq_id) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(filter) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(info_dp) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_germq) = 0 THEN 1 ELSE 0
+      END) + (CASE WHEN COUNT(info_tlod) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(tumor_calls) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(tumor_dp) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(tumor_has_alt) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(tumor_af) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(tumor_zygosity) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(tumor_ad_ref) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(tumor_ad_alt) = 0 THEN 1
+      ELSE 0 END) + (CASE WHEN COUNT(tumor_ad_total) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(tumor_ad_ratio) =
+      0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(tumor_phased) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(normal_calls)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(normal_dp) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(normal_has_alt)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(normal_af) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(normal_zygosity)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(normal_ad_ref) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(normal_ad_alt)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(normal_ad_total) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(normal_ad_ratio)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(normal_phased) = 0 THEN 1 ELSE 0 END) FROM somatic__snv__occurrence
+    mustBe: 0
+  - name: somatic_snv_occurrence__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except normal_calls, normal_has_alt, normal_seq_id,
+      normal_zygosity, part, task_id, tumor_has_alt, tumor_seq_id, tumor_zygosity).
+    query: SELECT (CASE WHEN COUNT(DISTINCT locus_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT quality)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT filter) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      info_hotspotallele) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_hotspot) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT info_old_record) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_baseq_rank_sum)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_excess_het) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT info_fs) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_ds) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT info_fraction_informative_reads) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      info_inbreed_coeff) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_mleac) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT info_mleaf) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_mq) <= 1
+      THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_mq0) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      info_m_qrank_sum) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_qd) <= 1 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(DISTINCT info_r2_5p_bias) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_read_pos_rank_sum)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_sor) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      info_vqslod) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_culprit) <= 1 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(DISTINCT info_dp) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_haplotype_score) <=
+      1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_germq) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      info_tlod) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_mapq) <= 1 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(DISTINCT info_aq) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT tumor_dp) <= 1 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(DISTINCT tumor_af) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT tumor_ad_ref)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT tumor_ad_alt) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      tumor_ad_total) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT tumor_ad_ratio) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT tumor_phased) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT tumor_gt_status)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT tumor_sq) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      normal_dp) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT normal_af) <= 1 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(DISTINCT normal_ad_ref) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT normal_ad_alt) <= 1
+      THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT normal_ad_total) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      normal_ad_ratio) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT normal_phased) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT normal_gt_status) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT normal_sq)
+      <= 1 THEN 1 ELSE 0 END) FROM somatic__snv__occurrence
+    mustBe: 0
+  - name: somatic_snv_occurrence__should_be_within_range_ad_ratio
+    type: sql
+    dimension: accuracy
+    description: tumor_ad_ratio, normal_ad_ratio stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM somatic__snv__occurrence WHERE tumor_ad_ratio < 0 OR tumor_ad_ratio > 1 OR normal_ad_ratio
+      < 0 OR normal_ad_ratio > 1
+    mustBe: 0
+  - name: somatic_snv_occurrence__should_be_unique__part_task_id_tumor_seq_id_locus_id
+    metric: duplicateValues
+    arguments:
+      properties:
+      - part
+      - task_id
+      - tumor_seq_id
+      - locus_id
+    mustBe: 0
+    dimension: uniqueness
+    description: (part, task_id, tumor_seq_id, locus_id) is unique.
+  - name: somatic_snv_occurrence__validate_no_wt_tumor_zygosity
+    type: sql
+    description: 'Occurrences are inserted only when the tumor sample carries the alternate allele (`tumor_has_alt`,
+      see somatic_snv_occurrence_insert_partition_delta.sql: `WHERE ... AND COALESCE(o.tumor_has_alt, FALSE)`).
+      A WT (0/0) genotype carries no alt, so `tumor_zygosity` should never be ''WT'' in this table — these rows
+      should have been filtered out upstream. (''WT'' is still in the accepted-values dictionary because it is a
+      valid, portal-handled zygosity in general — this asserts the stronger table-specific invariant.)'
+    query: SELECT COUNT(*) FROM (select part, task_id, tumor_seq_id, locus_id, tumor_zygosity from somatic__snv__occurrence
+      where tumor_zygosity = 'WT') failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/somatic_snv_occurrence__validate_no_wt_tumor_zygosity.sql
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`part`, `task_id`, `tumor_seq_id`, `locus_id`)
+  - property: partitionBy
+    value: PARTITION BY (`part`)
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(`locus_id`) BUCKETS 10
+  - property: mcpKeys
+    value: part, task_id, tumor_seq_id, locus_id
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/queries/carriers.py
+    - mcp/radiant_mcp/queries/charts.py
+    - mcp/radiant_mcp/queries/hits.py
+    - mcp/radiant_mcp/schema_catalog.py
+    - portal/backend/internal/repository/starrocks/somatic_snv_occurrences.go
+    - portal/backend/internal/types/somatic_snv_occurrence.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/radiant/init/somatic_snv_occurrence_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/somatic_snv_occurrence.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

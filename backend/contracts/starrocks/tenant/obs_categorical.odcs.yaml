@@ -1,0 +1,207 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.obs_categorical
+name: obs_categorical
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per coded clinical observation of one subject (a patient or a fetus) in one case: a phenotype
+    (HPO term, observed or not), an ancestry or consanguinity value, or a coded value of an abnormal paraclinical exam.
+    Rows of the portal''s PostgreSQL table public.obs_categorical read through the radiant_jdbc catalog and filtered to
+    the tenant (WHERE tenant_code = ''<tenant>''). Written by the portal worker from the observations_categorical of
+    each patient (or fetus) of a case batch; a case update replaces them.
+
+    '
+  usage: 'Always filter on observation_code, then on case_id and/or patient_id. Phenotypes: observation_code =
+    ''phenotype'', code_value is the HPO id (join the shared hpo_term on hpo_term.id = code_value for the name),
+    interpretation_code = ''positive'' for an observed sign, ''negative'' for a sign reported absent. Ancestry and
+    consanguinity: code_value is a code of the ancestry / consanguinity lookup. Exams: observation_code = ''exam'' with
+    exam_code; exams without a coded value are in obs_string. The subject is either patient_id or fetus_id (never
+    both): add fetus_id IS NULL to count patients only, as the MCP does.
+
+    '
+  limitations: 'patient_id is NULL for a fetus''s observations (fetus_id set instead). onset_code and
+    interpretation_code are NULL for ancestry and consanguinity (not required for them); onset_code may be NULL on exam
+    values. note is an empty string when not submitted. The ETL reads the underlying PostgreSQL table directly, not
+    this view.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: obs_categorical
+    physicalName: obs_categorical
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Internal observation id (identity, primary key).
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql observation_coding_pkey
+      - name: case_id
+        logicalType: integer
+        description: Case the observation was reported in.
+        relationships:
+          - type: foreignKey
+            to: cases.id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql observation_coding_case_id_fkey
+      - name: patient_id
+        logicalType: integer
+        description: Patient the observation is about; NULL when the subject is a fetus (exactly one of patient_id
+          and fetus_id is set, by a CHECK constraint).
+        relationships:
+          - type: foreignKey
+            to: patient.id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000021_add_fetus.up.sql obs_categorical_subject_xor
+      - name: observation_code
+        logicalType: string
+        description: Kind of observation, a code of the observation lookup (phenotype, ancestry, consanguinity,
+          exam).
+        examples:
+          - phenotype
+          - ancestry
+          - consanguinity
+          - exam
+        relationships:
+          - type: foreignKey
+            to: observation.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/case_batch.go ObsCode*; backend:internal/repository/starrocks/cases.go
+      - name: coding_system
+        logicalType: string
+        description: Coding system of code_value as submitted in the batch (system, required), e.g. 'HPO' for
+          phenotypes.
+        examples:
+          - HPO
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/case_batch.go ObservationCategoricalBatch.System; backend:cmd/worker/case_validation.go
+              persistObservationCategorical
+      - name: code_value
+        logicalType: string
+        description: The coded value, an HPO id for phenotypes and exam values (e.g. 'HP:0001263'), an ancestry or
+          consanguinity code for those observations (validated against their lookup).
+        examples:
+          - HP:0001263
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/cases.go retrieveCasePatients retrieveCaseValueSetObservations
+              retrieveCaseExams; backend:cmd/worker/case_validation.go observationValueCodes
+      - name: onset_code
+        logicalType: string
+        description: Age of onset of the phenotype, a code of the onset lookup (e.g. congenital, infantile); NULL when
+          not reported or not applicable.
+        examples:
+          - unknown
+          - antenatal
+          - congenital
+          - infantile
+          - childhood
+        relationships:
+          - type: foreignKey
+            to: onset.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql observation_coding_onset_code_fkey; backend:cmd/worker/case_validation.go
+              validateObservationCategoricalItem
+      - name: interpretation_code
+        logicalType: string
+        description: Interpretation, a code of obs_interpretation; 'positive' (observed) or 'negative' (not observed)
+          for phenotypes, 'abnormal' / 'normal' for exams; NULL for ancestry and consanguinity.
+        examples:
+          - positive
+          - negative
+          - abnormal
+        relationships:
+          - type: foreignKey
+            to: obs_interpretation.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/case_batch.go; backend:internal/repository/starrocks/cases.go retrieveCasePatients;
+              mcp:radiant_mcp/domain/rules.py POSITIVE_INTERPRETATION_CODE
+      - name: note
+        logicalType: string
+        description: Optional free-text comment attached to the observation in the batch; empty when not given.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/case_batch.go ObservationCategoricalBatch.Note
+      - name: tenant_code
+        logicalType: string
+        description: Tenant owning the row; always the view's tenant, since the view filters on it.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql; backend:internal/repository/starrocks/starrocks_tenant.go
+      - name: exam_code
+        logicalType: string
+        description: Exam the coded value belongs to, for observation_code = 'exam' (references exam (code,
+          tenant_code)); NULL otherwise.
+        relationships:
+          - type: foreignKey
+            to: exam.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000017_add_exam_and_obs_exam_columns.up.sql obs_categorical_exam_fkey;
+              backend:internal/repository/starrocks/cases.go retrieveCaseExams
+      - name: fetus_id
+        logicalType: integer
+        description: Fetus the observation is about, in a prenatal case; NULL when the subject is a patient.
+        relationships:
+          - type: foreignKey
+            to: fetus.id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000021_add_fetus.up.sql obs_categorical_subject_xor
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/utils/repositories.go
+          - mcp/radiant_mcp/queries/carriers.py
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

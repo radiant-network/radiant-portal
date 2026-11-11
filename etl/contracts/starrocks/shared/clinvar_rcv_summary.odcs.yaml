@@ -1,0 +1,242 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.clinvar_rcv_summary
+name: clinvar_rcv_summary
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per ClinVar RCV record (a variant-condition pair aggregating the submissions for that condition),
+    with the Radiant locus_id of the variant. Built by the import_open_data DAG from raw_clinvar_rcv_summary (OpenDataLake
+    clinvar_rcv_v1, or NDJSON files parsed from the ClinVar RCV XML), joined to clinvar on VariationID. Read by
+    the portal for the ClinVar conditions panel of a variant.
+
+    '
+  usage: 'Several rows per variant. Join on locus_id, or on clinvar_id = clinvar.name / snv__variant.clinvar_name
+    (the portal joins on clinvar_name and keeps submission_count > 0). clinical_significance shares the value set
+    of clinvar.interpretations.
+
+    '
+  limitations: 'RCVs whose VariationID is not in the clinvar table are dropped (inner join). Only clinical_significance
+    is rewritten to the underscore form (RAD-173); submissions[].clinical_significance and the clinical_significance_count
+    keys keep the RCV export''s spelling with spaces. submissions and clinical_significance_count are read by no
+    current consumer.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: clinvar_rcv_summary
+  physicalName: clinvar_rcv_summary
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: locus_id
+    logicalType: integer
+    physicalType: BIGINT(20)
+    description: Radiant variant id, taken from clinvar.locus_id by joining clinvar.name = clinvar_id.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/clinvar_rcv_summary_insert.sql
+    required: true
+  - name: clinvar_id
+    logicalType: string
+    physicalType: VARCHAR(32)
+    description: ClinVar VariationID of the variant (MeasureSet ID of type Variant in the RCV XML), same value as
+      clinvar.name.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/clinvar_rcv_summary_insert.sql; upstream:parse-clinvar-xml/parse_clinvar.py
+        (get_clinvar_id)
+    required: true
+  - name: accession
+    logicalType: string
+    physicalType: VARCHAR(32)
+    description: RCV accession of the record (e.g. RCV000012345), without version.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:parse-clinvar-xml/parse_clinvar.py; portal:internal/types/clinvar_rcv.go
+    required: true
+  - name: clinical_significance
+    logicalType: array
+    physicalType: ARRAY<VARCHAR (64)>
+    description: Aggregate germline classification of the RCV, split on '/' and ';', with spaces and commas rewritten
+      to '_' (e.g. "Likely pathogenic, low penetrance" -> Likely_pathogenic_low_penetrance) to match clinvar.interpretations.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/clinvar_rcv_summary_insert.sql (RAD-173); upstream:parse-clinvar-xml/parse_clinvar.py
+        (get_clinical_significance); etl:data_qa/sources/clinvar_rcv_summary.yml
+    items:
+      name: clinical_significance_item
+      logicalType: string
+      physicalType: VARCHAR (64)
+      enum:
+      - value: Affects
+      - value: association_not_found
+      - value: association
+      - value: Benign
+      - value: confers_sensitivity
+      - value: Conflicting_classifications_of_pathogenicity
+      - value: conflicting_data_from_submitters
+      - value: Conflicting_interpretations_of_pathogenicity
+      - value: drug_response
+      - value: Established_risk_allele
+      - value: Likely_benign
+      - value: likely_pathogenic_low_penetrance
+      - value: Likely_pathogenic
+      - value: Likely_risk_allele
+      - value: no_classification_for_the_single_variant
+      - value: no_classifications_from_unflagged_records
+      - value: not_provided
+      - value: other
+      - value: pathogenic_low_penetrance
+      - value: Pathogenic
+      - value: protective
+      - value: risk_factor
+      - value: Uncertain_risk_allele
+      - value: Uncertain_significance
+      - value: VUS-high
+      - value: VUS-low
+      - value: VUS-mid
+      - value: _low_penetrance
+      - value: low_penetrance
+      - value: Likely_pathogenic_low_penetrance
+      - value: Pathogenic_low_penetrance
+  - name: date_last_evaluated
+    logicalType: date
+    physicalType: DATE
+    description: Date the aggregate classification was last evaluated (DateLastEvaluated of the GermlineClassification).
+      NULL when not given.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:parse-clinvar-xml/parse_clinvar.py
+  - name: submission_count
+    logicalType: integer
+    physicalType: INT(11)
+    description: Number of submissions (SCVs) aggregated in the RCV (SubmissionCount); the portal shows only rows
+      with a count > 0.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:parse-clinvar-xml/parse_clinvar.py; portal:internal/repository/starrocks/clinvar_rcv.go
+  - name: review_status
+    logicalType: string
+    physicalType: VARCHAR(128)
+    description: ClinVar review status of the aggregate classification, as text with spaces (e.g. "criteria provided,
+      multiple submitters, no conflicts").
+    customProperties:
+    - property: descriptionSource
+      value: upstream:parse-clinvar-xml/parse_clinvar.py
+  - name: review_status_stars
+    logicalType: integer
+    physicalType: INT(11)
+    description: ClinVar gold stars derived from review_status, 4 practice guideline, 3 reviewed by expert panel,
+      2 multiple submitters no conflicts, 1 single submitter or conflicting classifications, 0 otherwise.
+    customProperties:
+    - property: unit
+      value: stars 0-4
+    - property: descriptionSource
+      value: upstream:parse-clinvar-xml/parse_clinvar.py (review_status_to_stars); etl:data_qa/sources/clinvar_rcv_summary.yml
+  - name: version
+    logicalType: integer
+    physicalType: INT(11)
+    description: Version number of the RCV accession.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:parse-clinvar-xml/parse_clinvar.py
+  - name: traits
+    logicalType: array
+    physicalType: ARRAY< VARCHAR (512)>
+    description: Preferred names of the conditions (traits) of the RCV.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:parse-clinvar-xml/parse_clinvar.py (get_all_preferred_trait_names)
+  - name: origins
+    logicalType: array
+    physicalType: ARRAY< VARCHAR (64)>
+    description: Distinct, sorted allele origins of the observed samples (ObservedIn/Sample/Origin, e.g. germline,
+      somatic, de novo).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:parse-clinvar-xml/parse_clinvar.py (get_all_origins)
+  - name: submissions
+    logicalType: array
+    physicalType: ARRAY< STRUCT< submitter VARCHAR(512), scv VARCHAR(32), version INT(11), review_status VARCHAR(128),
+      review_status_stars INT(11), clinical_significance VARCHAR(128), date_last_evaluated DATE > >
+    description: 'One struct per submission (SCV): submitter name, scv accession, version, review_status, review_status_stars
+      (same scale as the row), clinical_significance (submitter''s germline classification, raw spelling with spaces),
+      date_last_evaluated.'
+    customProperties:
+    - property: descriptionSource
+      value: upstream:parse-clinvar-xml/parse_clinvar.py (extract_clinvar_submissions); etl:dags/sql/open_data/init/clinvar_rcv_summary_create_table.sql
+  - name: clinical_significance_count
+    logicalType: object
+    physicalType: MAP<VARCHAR(64), INT(11)>
+    description: Number of submissions per clinical significance, counting only submission classifications that
+      appear in the RCV aggregate significance; keys in the raw spelling with spaces (not rewritten like clinical_significance).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:parse-clinvar-xml/parse_clinvar.py; etl:dags/sql/open_data/clinvar_rcv_summary_insert.sql
+  quality:
+  - name: clinvar_rcv_summary__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: clinvar_rcv_summary__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except accession, clinvar_id, locus_id).
+    query: SELECT (CASE WHEN COUNT(clinical_significance) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(date_last_evaluated)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(submission_count) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(review_status)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(review_status_stars) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(version)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(traits) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(origins) = 0 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(submissions) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(clinical_significance_count)
+      = 0 THEN 1 ELSE 0 END) FROM clinvar_rcv_summary
+    mustBe: 0
+  - name: clinvar_rcv_summary__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except clinical_significance_count, submissions).
+    query: SELECT (CASE WHEN COUNT(DISTINCT locus_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT clinvar_id)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT accession) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      date_last_evaluated) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT submission_count) <= 1 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(DISTINCT review_status) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT review_status_stars)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT version) <= 1 THEN 1 ELSE 0 END) FROM clinvar_rcv_summary
+    mustBe: 0
+  - name: clinvar_rcv_summary__should_be_within_range_review_status_stars
+    type: sql
+    dimension: accuracy
+    description: review_status_stars stay within [0, 4] (NULL allowed).
+    query: SELECT COUNT(*) FROM clinvar_rcv_summary WHERE review_status_stars < 0 OR review_status_stars > 4
+    mustBe: 0
+  - name: clinvar_rcv_summary__validate_submission_count
+    type: sql
+    description: submission_count is a count of ClinVar submissions and must be non-negative.
+    query: SELECT COUNT(*) FROM (select locus_id, clinvar_id, submission_count from radiant.clinvar_rcv_summary
+      where submission_count < 0) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/clinvar_rcv_summary__validate_submission_count.sql
+  customProperties:
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(`locus_id`) BUCKETS 10
+  - property: consumers
+    value:
+    - portal/backend/internal/types/clinvar_rcv.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/clinvar_rcv_summary_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/clinvar_rcv_summary.yml

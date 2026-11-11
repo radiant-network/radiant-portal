@@ -1,0 +1,63 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.sequencing_read_technology
+name: sequencing_read_technology
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Read technology of a sequencing experiment: short or long read. Referenced by sequencing_experiment.sequencing_read_technology_code.
+    Shared by every tenant (the PostgreSQL table has no tenant_code), exposed in each {tenant}_tenant database through radiant_jdbc;
+    the portal also serves it as GET /value_sets/{type}.'
+  usage: Join sequencing_experiment.sequencing_read_technology_code = sequencing_read_technology.code for the label. The sequencing
+    batch only accepts short_read and long_read.
+  limitations: 'The values are data seeded by the backend migrations (backend/scripts/init-sql/migrations), not a fixed enum:
+    later migrations or a deployment can add codes, so query the view for the current list. Codes are unique case-insensitively
+    (migration 000034) and stored in the case they were entered in.'
+team:
+- username: radiant-portal
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: sequencing_read_technology
+  physicalName: sequencing_read_technology
+  physicalType: view
+  tags:
+  - per-tenant
+  properties:
+  - name: code
+    logicalType: string
+    description: Code of the sequencing read technology, primary key; the value stored in the referencing columns.
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/types/sequencing_experiment_batch.go
+    examples:
+    - short_read
+    - long_read
+  - name: name_en
+    logicalType: string
+    description: English label of the code (Short Read, Long Read).
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql
+  customProperties:
+  - property: consumers
+    value:
+    - backend/internal/repository/starrocks/sequencing_experiment.go
+authoritativeDefinitions:
+- type: implementation
+  url: backend:internal/repository/starrocks/starrocks_tenant.go

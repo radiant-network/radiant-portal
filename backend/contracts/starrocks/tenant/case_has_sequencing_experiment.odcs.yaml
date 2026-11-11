@@ -1,0 +1,78 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.case_has_sequencing_experiment
+name: case_has_sequencing_experiment
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Links a case to the sequencing experiments of its members (proband, relatives, fetal samples, tumor and
+    normal): one row per (case, sequencing experiment). Rows of the portal''s PostgreSQL junction table
+    public.case_has_sequencing_experiment read through radiant_jdbc. The table has no tenant_code, so the view is not
+    filtered: it holds the links of every tenant. The batch worker writes them from the sequencing_experiments of a case
+    batch (create, and merged in by the PUT and PATCH batches, the ETL''s PATCH /{tenant}/cases/batch included).'
+  usage: 'Unique (case_id, sequencing_experiment_id). Join cases on cases.id = case_id (tenant-filtered, which also
+    scopes the rows to the tenant) and sequencing_experiment on sequencing_experiment.id = sequencing_experiment_id,
+    then sample on sample.id = sequencing_experiment.sample_id. The member''s family row: family.case_id = case_id AND
+    ((sample.fetus_id IS NULL AND family.family_member_id = sample.patient_id) OR (sample.fetus_id IS NOT NULL AND
+    family.fetus_id = sample.fetus_id)), since a fetal sample carries its mother''s patient_id. The proband''s
+    sequencings: sample.patient_id = cases.proband_id AND sample.fetus_id IS NULL. task_context references (case_id,
+    sequencing_experiment_id).'
+  limitations: 'Not filtered on the tenant (junction without tenant_code): join a tenant view before counting. A
+    re-sequenced member can have several sequencing experiments in the same case; the ETL keeps the newest completed
+    one per (case, member).'
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: case_has_sequencing_experiment
+    physicalName: case_has_sequencing_experiment
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: case_id
+        logicalType: integer
+        description: cases.id of the case.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql; backend:cmd/worker/case_validation.go'
+        relationships:
+          - type: foreignKey
+            to: cases.id
+      - name: sequencing_experiment_id
+        logicalType: integer
+        description: sequencing_experiment.id of a sequencing of one of the case's members (the seq_id of the
+          occurrence tables).
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/repository/starrocks/cases.go'
+        relationships:
+          - type: foreignKey
+            to: sequencing_experiment.id
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/repository/starrocks/documents.go
+          - backend/internal/repository/starrocks/igv.go
+          - backend/internal/repository/starrocks/variants.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

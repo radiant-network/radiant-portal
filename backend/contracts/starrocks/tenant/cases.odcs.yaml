@@ -1,0 +1,278 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.cases
+name: cases
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per case of the tenant: an analysis prescribed for a proband (germline, with or without relatives,
+    or somatic), with its project, analysis, prescribing institution, diagnostic lab, priority and status. Rows of the
+    portal''s PostgreSQL table public.cases read through the radiant_jdbc catalog and filtered on tenant_code = the
+    tenant. The portal batch worker writes them from POST /{tenant}/cases/batch (create_case) and the PUT / PATCH
+    batches; users change the status in the portal and the ETL moves the system statuses with PATCH
+    /{tenant}/cases/status.'
+  usage: 'Key id (the case_id of family, family_history, case_has_sequencing_experiment, case_group_case and the
+    observation / interpretation views). Join patient on proband_id = patient.id, project on project_id,
+    analysis_catalog on analysis_catalog_id, organization on ordering_organization_code (or diagnosis_lab_code) =
+    organization.code AND tenant_code = organization.tenant_code, and the lookup views (status, priority, case_type,
+    case_category) on their code for labels. Members are in family (case_id), sequencings in
+    case_has_sequencing_experiment (case_id). Outside the database a case is addressed by (project code,
+    submitter_case_id), as the batch PATCH does. Typical filters: case_type_code, status_code, diagnosis_lab_code,
+    analysis_catalog_id.'
+  limitations: 'public.cases has no json, jsonb or uuid column, so every column is exposed. The optional text columns
+    (primary_condition, condition_code_system, note, diagnosis_hypothesis, ordering_physician, submitter_case_id) can be
+    an empty string as well as NULL: the worker writes the batch value as is. The status dictionary changed over time
+    (migrations 000030, 000031, 000038: unknown / incomplete / revoke retired, the resolution folded into the status,
+    draft restored). The tenant-consistency FKs on project_id and analysis_catalog_id (000037) are NOT VALID: rows
+    written before them may point at another tenant''s project or analysis, which the tenant-filtered views then do
+    not return. Timestamps are without time zone.'
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: cases
+    physicalName: cases
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Case id, primary key (identity). One sequence over all tenants, so a case id is unique across them.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql; etl:dags/sql/clinical/pending_annotation_select.sql'
+      - name: proband_id
+        logicalType: integer
+        description: patient.id of the proband, the index patient of the case. A prenatal case's proband is the mother;
+          her fetuses are in fetus and family.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/utils/joins/joins.go; backend:cmd/worker/case_fetus_validation.go'
+        relationships:
+          - type: foreignKey
+            to: patient.id
+      - name: project_id
+        logicalType: integer
+        description: project.id of the project the case was submitted under (batch project_code, resolved in the tenant).
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/migrations/000037_case_tenant_scoped_fkeys.up.sql;
+              backend:internal/types/case_batch.go'
+        relationships:
+          - type: foreignKey
+            to: project.id
+      - name: status_code
+        logicalType: string
+        description: 'Case status, a status.code. draft, submitted (label Pending) and processing are system statuses
+          (the pipeline only moves submitted -> processing -> in_progress); the others (in_progress, in_review,
+          completed (label Closed), resolved, unresolved, inconclusive, reopened, revoked (label Cancelled)) are set by
+          users with can_edit_case. The ETL ignores draft and revoked cases.'
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/case.go; backend:scripts/init-sql/migrations/000030_seed_target_case_status_enum.up.sql;
+              backend:scripts/init-sql/migrations/000038_restore_draft_case_status.up.sql; etl:tasks/data/radiant_tables.py'
+        relationships:
+          - type: foreignKey
+            to: status.code
+        examples:
+          - submitted
+          - in_progress
+          - completed
+      - name: primary_condition
+        logicalType: string
+        description: Code of the case's primary condition in the system named by condition_code_system (batch
+          primary_condition_value). The portal reads it as a MONDO id and joins mondo.id = primary_condition for the
+          name (UI "Primary Condition").
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:cmd/worker/case_validation.go; backend:internal/utils/joins/joins.go; backend:docs/swagger.yaml
+              primary_condition_id; frontend:translations/common/en.json case_entity.details.primary_condition'
+      - name: note
+        logicalType: string
+        description: Free-text note submitted with the case batch, shown on the case page.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/case_batch.go; backend:internal/repository/starrocks/cases.go'
+      - name: created_on
+        logicalType: timestamp
+        description: When the case row was created (set by the backend on insert), without time zone.
+        customProperties:
+          - property: postgresType
+            value: timestamp without time zone
+          - property: descriptionSource
+            value: 'backend:internal/types/case.go; backend:scripts/init-sql/migrations/000001_init.up.sql'
+      - name: updated_on
+        logicalType: timestamp
+        description: When the case row was last updated (set by the backend on every update), without time zone.
+        customProperties:
+          - property: postgresType
+            value: timestamp without time zone
+          - property: descriptionSource
+            value: 'backend:internal/types/case.go; backend:scripts/init-sql/migrations/000001_init.up.sql'
+      - name: analysis_catalog_id
+        logicalType: integer
+        description: analysis_catalog.id of the prescribed analysis (batch analysis_code, resolved in the tenant; UI
+          "Analysis").
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/repository/postgres/cases.go;
+              frontend:translations/common/en.json case_exploration.case.filters.analysis_catalog_code'
+        relationships:
+          - type: foreignKey
+            to: analysis_catalog.id
+      - name: priority_code
+        logicalType: string
+        description: Priority of the case, a priority.code (routine, urgent, asap, stat); routine when the batch omits
+          it. The case group notification flags the stat cases.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/case.go; backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/types/case_group.go'
+        relationships:
+          - type: foreignKey
+            to: priority.code
+        examples:
+          - routine
+          - stat
+      - name: case_type_code
+        logicalType: string
+        description: Case type, a case_type.code (germline or somatic). The portal shows germline_family for a germline
+          case with more than one member; that value is derived, not stored.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/case_batch.go; backend:docs/swagger.yaml PatientCase.case_type'
+        relationships:
+          - type: foreignKey
+            to: case_type.code
+        examples:
+          - germline
+          - somatic
+      - name: case_category_code
+        logicalType: string
+        description: Case category, a case_category.code (prenatal or postnatal).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/case_batch.go; backend:scripts/init-sql/migrations/000001_init.up.sql'
+        relationships:
+          - type: foreignKey
+            to: case_category.code
+        examples:
+          - postnatal
+          - prenatal
+      - name: condition_code_system
+        logicalType: string
+        description: Code system of primary_condition as submitted (batch primary_condition_code_system), e.g. MONDO.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:cmd/worker/case_validation.go; backend:internal/types/case_batch.go'
+        examples:
+          - MONDO
+      - name: ordering_physician
+        logicalType: string
+        description: Name of the prescribing doctor, free text (UI "Prescriber").
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/repository/starrocks/cases.go; frontend:translations/common/en.json case_entity.details.prescriber_tooltip'
+      - name: submitter_case_id
+        logicalType: string
+        description: The submitter's own case identifier. Optional; unique per (tenant_code, project_id) when not empty.
+          The batch PUT / PATCH (the ETL's included) find a case by (project_code, submitter_case_id).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000003_submitter_case_id_optional.up.sql; backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql;
+              backend:internal/repository/postgres/cases.go; etl:dags/sql/clinical/pending_annotation_select.sql'
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the case; always the tenant of this database (the view filters on it).
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: 'backend:internal/repository/starrocks/starrocks_tenant.go; backend:scripts/init-sql/migrations/000009_init_auth_multi_tenancy.up.sql'
+      - name: ordering_organization_code
+        logicalType: string
+        description: organization.code (same tenant) of the prescribing institution (UI "Prescribing Institution" /
+          "Requested by"). Join on code and tenant_code.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000009_init_auth_multi_tenancy.up.sql; frontend:translations/common/en.json
+              case_exploration.case.headers.ordering_organization_code_tooltip'
+        relationships:
+          - type: foreignKey
+            to: organization.code
+      - name: diagnosis_lab_code
+        logicalType: string
+        description: organization.code (same tenant) of the diagnostic laboratory running the case (UI "Diagnostic
+          Lab"). A can_read_pii grant at this lab unmasks the case's patients, can_edit_case at it allows user status
+          changes, and the case group notifications go to this lab.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000009_init_auth_multi_tenancy.up.sql; backend:internal/repository/starrocks/views/auth_pii_lab_patient.sql;
+              backend:internal/types/case.go; backend:CLAUDE.md /case_groups'
+        relationships:
+          - type: foreignKey
+            to: organization.code
+      - name: diagnosis_hypothesis
+        logicalType: string
+        description: Free-text diagnostic hypothesis of the case (UI "Diagnosis Hypothesis"). Migration 000025 moved it
+          here from the proband's 'condition' text observations, newline-joined when there were several.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000025_add_diagnosis_hypothesis_to_cases.up.sql; frontend:translations/common/en.json
+              case_entity.details.diagnosis_hypothesis'
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/repository/starrocks/documents.go
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/repository/starrocks/transcript_report.go
+          - backend/internal/repository/starrocks/variants.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

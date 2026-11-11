@@ -1,0 +1,226 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_csf_tumor_analysis_latest
+name: v_csf_tumor_analysis_latest
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    Latest tumour-relevant CSF analysis, one row per patient (814 patients): which assay family the most recent
+    analysis was (cytology, AFP, beta-hCG, CEA, cell-free DNA, malignant cell panel, pathology review), its
+    quantitative result, a malignant-cells finding classified from the pathology text, the evidence that the
+    specimen was CSF, and counts over the patient's CSF history. Built from FHIR DiagnosticReports into
+    radiant_data_dev.csf_tumor_analysis_latest, then v_csf_tumor_analysis_latest (adds mrn, research_id,
+    organization, ages); this grant-guarded view drops patient_fhir_id and latest_report_id and gates the
+    timestamps and the free text.
+  usage: >-
+    Read it as the end user (StarRocks with the caller's JWT). Join on (organization_code, patient_id_type,
+    patient_id); v_pcx_30_patient_key maps that key to patient_key. Read result_display, not result_value: the
+    comparator is load-bearing ('<1.0 ng/mL' is undetectable). Read malignant_cells with multi_specimen_report, and
+    filter patient_best_evidence = 'named' for the strictly defensible subset. Non-PHI callers get malignant_cells
+    instead of the narrative.
+  limitations: >-
+    final_diagnosis and result_text quote the patient name and MRN; with PHI access they are shown whole (no
+    redaction). 190 of the 814 patients resolve to SCH, the organization currently granted for tenant cbtn, so this
+    view does release identified values today. 6 patients with a NULL organization_code are always de-identified;
+    13 have no usable research_id. malignant_cells is a deterministic keyword classifier, a screening aid. No
+    reader in this repository today (v_csf_results_latest_by_component carries the per-component results the
+    portal reads). Column masking only, no row filtering; the lab grant is not bounded by organization_code;
+    radiant_patient_id is projected unmasked.
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_csf_tumor_analysis_latest
+    physicalName: v_csf_tumor_analysis_latest
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: organization_name
+        description: Name of the contributing institution, from stg_cbtn_enrollment_final. Shown to every caller.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: organization_code
+        description: Code of the contributing institution, from pcx_30_organization_ref. The vocabulary
+          auth.pii_grant keys on; NULL fails closed to de-identified with the text hidden.
+        examples:
+          - CHOP
+          - SCH
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: patient_id
+        description: "The patient's identifier as this caller may see it: CASE WHEN can_read_phi THEN mrn ELSE
+          research_id END (both from radiant_patient_mrn_list). Join key only: never select or show it."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/csf_tumor_analysis_latest_access_controlled.sql.tmpl
+      - name: patient_id_type
+        description: "'mrn' when can_read_phi, else 'research_id': the namespace of patient_id on this row."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/csf_tumor_analysis_latest_access_controlled.sql.tmpl
+      - name: radiant_patient_id
+        description: Portal patient id (radiant_jdbc.public.patient.id), matched on organization_code and the MRN
+          with leading zeros stripped on both sides; NULL when the patient has no portal record. Not masked.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/csf_tumor_analysis_latest_access_controlled.sql.tmpl
+      - name: patient_best_evidence
+        description: "Strongest evidence anywhere for this patient that an analysis was on CSF: 'named' (a report
+          name states CSF), 'text_confirmed' (the result text states CSF and no competing source) or
+          'same_day_only' (CSF drawn the same day). No specimen-to-report link exists in the source."
+        examples:
+          - named
+          - text_confirmed
+          - same_day_only
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: evidence_tier
+        description: Evidence tier of the returned (most recent) analysis, same vocabulary as
+          patient_best_evidence; can be weaker than it.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: latest_test_family
+        description: Assay family of the most recent analysis.
+        examples:
+          - cytology
+          - tumor_marker_afp
+          - tumor_marker_hcg
+          - tumor_marker_cea
+          - cell_free_dna
+          - malignant_cell_panel
+          - pathology_review
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: latest_test_name
+        description: Local order name of the most recent analysis, kept verbatim.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: latest_analyzed_at
+        description: Timestamp of the most recent analysis, DiagnosticReport.effective_date_time (UTC), a clinical
+          date. NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_latest_analysis_days
+        description: Age in days at the most recent analysis, datediff(latest_analyzed_at, FHIR patient
+          birth_date). Populated on every row.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/combined/v_csf_tumor_analysis_latest.sql; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: malignant_cells
+        description: Finding classified from the pathology narrative of the latest analysis; NULL when it has no
+          narrative (mostly quantitative markers). Shown to every caller as the stand-in for the gated text.
+        examples:
+          - positive
+          - suspicious
+          - negative
+          - non_diagnostic
+          - no_malignancy_statement
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/access_controlled_views/csf_tumor_analysis_latest_access_controlled.sql.tmpl
+      - name: multi_specimen_report
+        description: 1 when the report covered more than one specimen, so malignant_cells may pertain to a non-CSF
+          part and needs confirmation.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: result_display
+        description: Quantitative result composed as comparator + value + unit, e.g. '<1.0 ng/mL'. Read this, not
+          result_value.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: result_value
+        description: Numeric quantitative result without its comparator; units not normalised.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: result_comparator
+        description: Comparator of result_value, typically '<' for an undetectable marker; NULL for an absolute
+          measurement.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: result_unit
+        description: Unit of result_value (ng/mL for AFP, IU/L for beta-hCG); not normalised, 'ng/mL' and 'NG/ML'
+          both occur.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: final_diagnosis
+        description: Pathologist's Final Diagnosis / Impression section, verbatim. Free text containing PHI (patient
+          name, MRN); NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/access_controlled_views/csf_tumor_analysis_latest_access_controlled.sql.tmpl
+      - name: result_text
+        description: All diagnostic narrative sections of the report stitched together, verbatim (up to 10,805
+          characters). Free text containing PHI (patient name, MRN, provider names); NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: result_sections
+        description: Number of narrative sections that carried text for the most recent analysis.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: csf_analyses_total
+        description: Total tumour-relevant CSF analyses recorded for the patient, all evidence tiers.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: first_analyzed_at
+        description: Timestamp of the patient's earliest tumour-relevant CSF analysis. NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_first_analysis_days
+        description: Age in days at the earliest tumour-relevant CSF analysis, datediff(first_analyzed_at, FHIR
+          patient birth_date).
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/combined/v_csf_tumor_analysis_latest.sql
+      - name: distinct_families
+        description: Number of distinct tumour-relevant assay families recorded for the patient (1-7).
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: families_ever
+        description: Comma-separated list of every tumour-relevant CSF assay family recorded for the patient.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: can_read_phi
+        description: "TRUE when the caller may read this row's PHI: an org grant (auth.pii_grant, a can_read_pii
+          role at the row's organization_code) or a lab grant (auth.pii_lab_patient, a can_read_pii role at the
+          diagnosis lab of a portal case of radiant_patient_id). The caller is current_user(), the JWT sub."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/csf_tumor_analysis_latest_access_controlled.sql.tmpl; backend:internal/repository/starrocks/views/auth_pii_lab_patient.sql
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/pcx_tables/access_controlled_views/csf_tumor_analysis_latest_access_controlled.sql.tmpl

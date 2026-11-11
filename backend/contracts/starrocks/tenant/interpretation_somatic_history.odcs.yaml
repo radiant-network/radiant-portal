@@ -1,0 +1,243 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.interpretation_somatic_history
+name: interpretation_somatic_history
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Audit log of interpretation_somatic: one row per INSERT, UPDATE or DELETE of a somatic interpretation,
+    holding the full row as it was after the change (the deleted row for a DELETE). Written by the PostgreSQL trigger
+    trg_interpretation_somatic (tp_history_func), never by the API directly. Rows of public.interpretation_somatic_history,
+    read through the JDBC catalog radiant_jdbc and filtered to the tenant (tenant_code).
+
+    '
+  usage: 'Key history_id. A version history of one interpretation is `WHERE case_id = ... AND sequencing_id = ... AND
+    locus_id = ... AND transcript_id = ... ORDER BY history_timestamp`; the latest row equals the live row unless
+    history_op is DELETE. Value columns have the same meaning, codes and text-typed ids as interpretation_somatic (cast
+    locus_id, sequencing_id and case_id before joining ETL tables).
+
+    '
+  limitations: 'The uuid id of the interpretation and its jsonb metadata are not exposed (the JDBC catalog cannot map
+    them), so history rows link to the live row only through (case_id, sequencing_id, locus_id, transcript_id). The
+    trigger skips the copy on a foreign key violation. The API has no delete route for interpretations, so DELETE rows
+    come only from direct database changes. No FK on this table (audit log).
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: interpretation_somatic_history
+    physicalName: interpretation_somatic_history
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: history_id
+        logicalType: integer
+        description: Primary key of the history row, from the sequence interpretation_somatic_history_seq; increases
+          with each change.
+        customProperties:
+          - property: postgresType
+            value: bigint
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql tp_history_func
+      - name: history_timestamp
+        logicalType: timestamp
+        description: Time of the change (now() in the trigger).
+        customProperties:
+          - property: postgresType
+            value: timestamp with time zone
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql tp_history_func
+      - name: history_deleted_by
+        logicalType: string
+        description: On DELETE only, the session setting history.deleted_by; NULL for INSERT and UPDATE. No backend code
+          sets it, so it is NULL in practice.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql tp_history_func
+      - name: history_op
+        logicalType: string
+        description: Operation that produced the row (trigger TG_OP).
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql tp_history_func
+        examples:
+          - INSERT
+          - UPDATE
+          - DELETE
+      - name: sequencing_id
+        logicalType: string
+        description: Tumour sequencing experiment (sequencing_experiment.id, somatic__snv__occurrence.tumor_seq_id), stored
+          as text.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/somatic_snv_occurrences.go
+      - name: locus_id
+        logicalType: string
+        description: Variant id (snv__variant.locus_id, BIGINT in the ETL), stored as text.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/occurrences.go
+      - name: transcript_id
+        logicalType: string
+        description: Ensembl transcript the interpretation is made on (snv__consequence.transcript_id).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/pcx_patients.go
+      - name: tumoral_type
+        logicalType: string
+        description: Mondo term id of the tumour type (mondo_term.id).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go
+        examples:
+          - MONDO:0000001
+      - name: oncogenicity
+        logicalType: string
+        description: Oncogenicity as a LOINC answer code; LA6668-3 oncogenic, LA26332-9 likely oncogenic, LA26333-7 VUS,
+          LA26334-5 likely benign, LA6675-8 benign.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: frontend:apps/case/src/entity/variants/somatic-occurrence/interpretation/somatic-interpretation-form.tsx
+        examples:
+          - LA6668-3
+          - LA26332-9
+          - LA26333-7
+          - LA26334-5
+          - LA6675-8
+      - name: oncogenicity_classification_criterias
+        logicalType: string
+        description: Oncogenicity criteria, comma-separated (OVS1, OS1-OS3, OM1-OM4, OP1-OP4, SBVS1, SBS1-SBS2, SBP1-SBP2).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/postgres/interpretations.go; frontend:components/base/classifications/oncogenicity.tsx
+        examples:
+          - OS1,OM1
+      - name: clinical_utility
+        logicalType: string
+        description: Clinical utility tier; category_ia Tier IA, category_ib Tier IB, category_iic Tier IIC, category_iid
+          Tier IID, category_iii Tier III.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: frontend:apps/case/src/entity/variants/somatic-occurrence/interpretation/somatic-interpretation-form.tsx
+        examples:
+          - category_ia
+          - category_ib
+          - category_iic
+          - category_iid
+          - category_iii
+      - name: interpretation
+        logicalType: string
+        description: Free-text interpretation, HTML-escaped rich text.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/postgres/interpretations.go mapToInterpretationCommonDAO
+      - name: pubmed
+        logicalType: string
+        description: PubMed ids cited, comma-separated.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/postgres/interpretations.go mapToInterpretationCommonDAO
+      - name: created_by
+        logicalType: string
+        description: Keycloak user id (JWT sub) of the author of the first save.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go fillInterpretationCommonWithContext
+      - name: created_by_name
+        logicalType: string
+        description: Display name (JWT name) of the author of the first save.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go fillInterpretationCommonWithContext
+      - name: created_at
+        logicalType: timestamp
+        description: created_at of the interpretation in this version (see the caveat on interpretation_somatic.created_at).
+        customProperties:
+          - property: postgresType
+            value: timestamp with time zone
+          - property: descriptionSource
+            value: backend:internal/repository/postgres/interpretations.go CreateOrUpdateSomatic
+      - name: updated_by
+        logicalType: string
+        description: Keycloak user id (JWT sub) of the user whose save produced this version.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go fillInterpretationCommonWithContext
+      - name: updated_by_name
+        logicalType: string
+        description: Display name (JWT name) of the user whose save produced this version.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go fillInterpretationCommonWithContext
+      - name: updated_at
+        logicalType: timestamp
+        description: updated_at of the interpretation in this version.
+        customProperties:
+          - property: postgresType
+            value: timestamp with time zone
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql tp_history_func
+      - name: case_id
+        logicalType: string
+        description: Case (cases.id, an integer), stored as text.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/pcx_patients.go
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the row; the view already keeps only the current tenant. No FK on the history table.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

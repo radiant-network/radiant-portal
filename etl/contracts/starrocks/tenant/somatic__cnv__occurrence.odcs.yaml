@@ -1,0 +1,578 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.somatic__cnv__occurrence
+name: somatic__cnv__occurrence
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per CNV segment called by DRAGEN in the tumor sample of a tumor-only analysis task, i.e. one
+    record of the task''s somatic CNV VCF. Loaded per part by the ETL (VCF -> Iceberg somatic_cnv_occurrence ->
+    StarRocks), enriched with cytobands, overlapping genes, somatic SNV count and the best gnomAD-SV match. Read
+    by the portal somatic CNV endpoints and the MCP.
+
+    '
+  usage: 'Every query on a table partitioned by `part` carries `<alias>.part = <part>` as an equality, next to seq_id
+    / task_id. Take `part` and `variant_part` from get_case_context''s occurrence_keys, from the key of the right
+    data type; never compute them. Without it StarRocks scans every partition of the tenant and the query can time
+    out. Per-tenant table, partitioned on part: always filter on part (plus seq_id and task_id). Key is (part, seq_id,
+    task_id, cnv_id). seq_id is the tumor sequencing (there is no normal_seq_id, unlike somatic__snv__occurrence''s
+    tumor_seq_id). Join somatic__cnv__variant_frequency on cnv_id for in-cohort frequencies. Column order differs
+    from germline__cnv__occurrence (cn sits in the ASCN block).
+
+    '
+  limitations: 'Only tumor-only tasks are loaded today; tumor-normal CNV is out of scope and rejected by the loader.
+    Reference segments and records whose ALT cannot be classified are skipped. The ASCN columns (cn, cnf, cnq, mcn,
+    mcnf, mcnq, maf, sd, ascn_as) are absent from DRAGEN 3.10.8 files and omitted on LOH records of 4.2.4, so expect
+    them mostly NULL. nb_snv counts somatic SNVs and is not comparable with the germline column.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: somatic__cnv__occurrence
+  physicalName: somatic__cnv__occurrence
+  physicalType: table
+  tags:
+  - per-tenant
+  properties:
+  - name: part
+    logicalType: integer
+    physicalType: int(11)
+    description: ETL partition of the sequencing experiment. A patient, its case and family stay in one part per
+      sequencing strategy (WGS or WXS); every table of the same part is loaded and rebuilt together.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/starrocks/partition.py; etl:dags/sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql
+    required: true
+    partitioned: true
+  - name: seq_id
+    logicalType: integer
+    physicalType: int(11)
+    description: Tumor sequencing experiment the CNV was called in (staging_sequencing_experiment.seq_id, histology_type
+      tumoral).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/process.py; portal:internal/types/somatic_cnv_occurrence.go
+  - name: task_id
+    logicalType: integer
+    physicalType: int(11)
+    description: Tumor-only variant calling task (tumor_only_variant_calling) that produced the CNV VCF.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/process.py
+    required: true
+  - name: cnv_id
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Identifier of the CNV interval, computed by the GET_CNV_ID UDF (radiant-starrocks-udf) from chromosome,
+      start, length and type. Identical segments in different samples share the same cnv_id; it is the key of somatic__cnv__variant_frequency.
+      The portal API exposes it as a string.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql; etl:dags/sql/radiant/init/cnv_id_udf.sql;
+        hub:docs/features/RAD-120-cnv-cohort-frequency.md
+    required: true
+  - name: aliquot
+    logicalType: string
+    physicalType: varchar(50)
+    description: Sample name of the tumor in the VCF (the single sample of a tumor-only file).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/process.py
+  - name: chromosome
+    logicalType: string
+    physicalType: varchar(20)
+    description: Chromosome of the segment, VCF CHROM without the 'chr' prefix.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:data_qa/sources/somatic_cnv_occurrence.yml
+    enum:
+    - value: '1'
+    - value: '2'
+    - value: '3'
+    - value: '4'
+    - value: '5'
+    - value: '6'
+    - value: '7'
+    - value: '8'
+    - value: '9'
+    - value: '10'
+    - value: '11'
+    - value: '12'
+    - value: '13'
+    - value: '14'
+    - value: '15'
+    - value: '16'
+    - value: '17'
+    - value: '18'
+    - value: '19'
+    - value: '20'
+    - value: '21'
+    - value: '22'
+    - value: X
+    - value: Y
+    - value: M
+  - name: alternate
+    logicalType: string
+    physicalType: varchar(20)
+    description: Normalized symbolic allele derived from type, not the raw ALT - <DUP> for GAIN, <DEL> for LOSS,
+      <LOH> for CNLOH and GAINLOH (DRAGEN writes LOH as <DEL>,<DUP> in VCF 4.2 and <LOH> in 4.4).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py ALTERNATE_BY_TYPE; etl:data_qa/tests/somatic_cnv_occurrence__validate_type_alternate_consistency.sql
+  - name: start
+    logicalType: integer
+    physicalType: int(11)
+    description: VCF POS of the record. For these symbolic-allele records it is the padding base, one before the
+      first CNV base (the DRAGEN name starts at POS+1).
+    customProperties:
+    - property: unit
+      value: bp (1-based)
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:tests/resources/test_somatic_cnv.vcf (live checkout)
+  - name: end
+    logicalType: integer
+    physicalType: int(11)
+    description: End position of the segment, VCF INFO/END.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py
+  - name: type
+    logicalType: string
+    physicalType: varchar(10)
+    description: 'CNV class taken from the DRAGEN ID (DRAGEN:<TYPE>:chr:start-end): GAIN, LOSS, CNLOH (copy-neutral
+      loss of heterozygosity) or GAINLOH (gain with LOH). Falls back to ALT (<DUP> GAIN, <DEL> LOSS) when the ID
+      is unparseable; the ID wins on conflict.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py resolve_cnv_type; mcp:enums.py; portal:internal/types/somatic_cnv_occurrence.go
+    enum:
+    - value: GAIN
+    - value: LOSS
+    - value: CNLOH
+    - value: GAINLOH
+  - name: length
+    logicalType: integer
+    physicalType: int(11)
+    description: Segment length computed as end - start.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py
+  - name: name
+    logicalType: string
+    physicalType: varchar(1048576)
+    description: VCF ID of the record, the DRAGEN segment name (e.g. DRAGEN:GAIN:chr1:124941719-124975661).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py
+  - name: quality
+    logicalType: number
+    physicalType: FLOAT
+    description: VCF QUAL of the CNV call.
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py
+  - name: calls
+    logicalType: array
+    physicalType: array<int(11)>
+    description: Genotype (FORMAT/GT) of the tumor as allele indices, phasing flag removed (e.g. [0,1]; [1,2] on
+      LOH records written with two ALTs; -1 = missing allele).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/vcf_utils.py calls_without_phased; etl:tests/resources/test_somatic_cnv.vcf (live checkout)
+  - name: filter
+    logicalType: string
+    physicalType: varchar(255)
+    description: VCF FILTER, 'PASS' when the record passes (an empty FILTER is stored as PASS), otherwise the DRAGEN
+      filter ids semicolon-joined as written (e.g. cnvQual, cnvLength, binCount, segmentMean, cnvCopyRatio, cnvBinSupportRatio,
+      LoDFail). Frequencies count only filter = 'PASS'.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/somatic_cnv_occurrence_create_table.sql; etl:tests/resources/test_somatic_cnv.vcf
+        (live checkout); etl:dags/sql/radiant/somatic_cnv_variant_frequency_insert.sql
+  - name: bc
+    logicalType: integer
+    physicalType: int(11)
+    description: DRAGEN FORMAT/BC, number of bins in the segment.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:tests/resources/test_somatic_cnv.vcf (live checkout)
+  - name: pe
+    logicalType: array
+    physicalType: array<int(11)>
+    description: DRAGEN FORMAT/PE, two values - number of improperly paired end reads at the start and at the stop
+      breakpoint.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:tests/resources/test_somatic_cnv.vcf (live checkout)
+  - name: sm
+    logicalType: number
+    physicalType: FLOAT
+    description: DRAGEN FORMAT/SM, linear copy ratio of the segment mean (about 1.0 = copy-neutral).
+    customProperties:
+    - property: unit
+      value: ratio
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:tests/resources/test_somatic_cnv.vcf (live checkout)
+  - name: svtype
+    logicalType: string
+    physicalType: varchar(20)
+    description: VCF INFO/SVTYPE, defaulted to 'CNV' when the record has none (VCF 4.4 may drop it); constant CNV
+      in practice.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:data_qa/sources/somatic_cnv_occurrence.yml
+  - name: svlen
+    logicalType: integer
+    physicalType: int(11)
+    description: VCF INFO/SVLEN, difference in length between REF and ALT (negative for a loss). LOH records carry
+      one value per ALT; the first is kept.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py
+  - name: reflen
+    logicalType: integer
+    physicalType: int(11)
+    description: VCF INFO/REFLEN, number of reference positions covered by the record.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:tests/resources/test_somatic_cnv.vcf (live checkout)
+  - name: ciend
+    logicalType: array
+    physicalType: array<int(11)>
+    description: VCF INFO/CIEND, two values - confidence interval around END. Mostly NULL (data QA exempts it).
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:data_qa/sources/somatic_cnv_occurrence.yml
+  - name: cipos
+    logicalType: array
+    physicalType: array<int(11)>
+    description: VCF INFO/CIPOS, two values - confidence interval around POS. Mostly NULL (data QA exempts it).
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:data_qa/sources/somatic_cnv_occurrence.yml
+  - name: phased
+    logicalType: boolean
+    physicalType: boolean
+    description: True when the tumor genotype is phased (GT written with '|'). Constant in practice.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:data_qa/sources/somatic_cnv_occurrence.yml
+  - name: cn
+    logicalType: integer
+    physicalType: int(11)
+    description: DRAGEN FORMAT/CN, estimated total copy number of the segment (ASCN). NULL on DRAGEN 3.10.8 files
+      and on LOH records of 4.2.4.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:tests/resources/test_somatic_cnv.vcf (live checkout);
+        portal:internal/types/somatic_cnv_occurrence.go
+  - name: cnf
+    logicalType: number
+    physicalType: FLOAT
+    description: DRAGEN FORMAT/CNF, floating-point copy number estimate (ASCN). Mostly NULL, see cn.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:tests/resources/test_somatic_cnv.vcf (live checkout)
+  - name: cnq
+    logicalType: number
+    physicalType: FLOAT
+    description: DRAGEN FORMAT/CNQ, quality of the copy number call (ASCN). Mostly NULL, see cn.
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:tests/resources/test_somatic_cnv.vcf (live checkout)
+  - name: mcn
+    logicalType: integer
+    physicalType: int(11)
+    description: DRAGEN FORMAT/MCN, estimated minor haplotype copy number (ASCN); 0 means one haplotype is lost.
+      Mostly NULL, see cn.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:tests/resources/test_somatic_cnv.vcf (live checkout)
+  - name: mcnf
+    logicalType: number
+    physicalType: FLOAT
+    description: DRAGEN FORMAT/MCNF, floating-point minor haplotype copy number estimate (ASCN). Mostly NULL, see
+      cn.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:tests/resources/test_somatic_cnv.vcf (live checkout)
+  - name: mcnq
+    logicalType: number
+    physicalType: FLOAT
+    description: DRAGEN FORMAT/MCNQ, quality of the minor haplotype copy number call (ASCN). Mostly NULL, see cn.
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:tests/resources/test_somatic_cnv.vcf (live checkout)
+  - name: maf
+    logicalType: number
+    physicalType: FLOAT
+    description: DRAGEN FORMAT/MAF, MAP estimate of the minor allele frequency in the segment; MAF = 0 is the direct
+      LOH marker where the record carries it. NULL when DRAGEN omits it.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/somatic_cnv_occurrence_create_table.sql; etl:tests/resources/test_somatic_cnv.vcf
+        (live checkout); etl:data_qa/sources/somatic_cnv_occurrence.yml
+  - name: sd
+    logicalType: number
+    physicalType: FLOAT
+    description: DRAGEN FORMAT/SD, standard deviation of the segment mean. NULL when DRAGEN omits it (e.g. 3.10.8).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/somatic/occurrence.py; etl:tests/resources/test_somatic_cnv.vcf (live checkout)
+  - name: ascn_as
+    logicalType: integer
+    physicalType: int(11)
+    description: DRAGEN FORMAT/AS (renamed because AS is a reserved word), number of allele-specific sites used
+      in the segment. NULL when DRAGEN omits it.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/somatic_cnv_occurrence_create_table.sql; etl:tests/resources/test_somatic_cnv.vcf
+        (live checkout)
+  - name: cytoband
+    logicalType: array
+    physicalType: array<varchar(10)>
+    description: Cytobands overlapping [start, end], from the radiant cytoband reference table; order not guaranteed.
+      NULL when none overlaps.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql
+  - name: symbol
+    logicalType: array
+    physicalType: array<varchar(128)>
+    description: Symbols of the Ensembl genes (ensembl_gene.name) whose span overlaps [start, end]; order not guaranteed.
+      NULL, not empty, when no gene overlaps.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql
+  - name: nb_genes
+    logicalType: integer
+    physicalType: int(11)
+    description: Number of genes in symbol. NULL when no gene overlaps.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql
+  - name: nb_snv
+    logicalType: integer
+    physicalType: int(11)
+    description: Number of distinct somatic SNVs of the same tumor sequencing (somatic__snv__occurrence.tumor_seq_id)
+      in [start, end] that pass the frequency gate (filter = PASS, tumor_ad_alt >= 2). Counts somatic, not germline,
+      SNVs. NULL when there are none.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql; portal:internal/types/somatic_cnv_occurrence.go
+  - name: gnomad_af
+    logicalType: number
+    physicalType: FLOAT
+    description: Allele frequency (AF) of the best matching gnomAD-SV v4.1 site - same chromosome, DUP for GAIN/GAINLOH
+      and DEL for LOSS, at least 80% reciprocal overlap, PASS sites only; the best is the highest AF, then highest
+      SF. Always NULL for CNLOH (copy-neutral, matches nothing) and when no site matches.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql; portal:internal/types/somatic_cnv_occurrence.go;
+        upstream:gnomAD-SV v4.1
+  - name: gnomad_sc
+    logicalType: integer
+    physicalType: int(11)
+    description: Site count of the matched gnomAD-SV site, n_het + n_homalt (individuals carrying the SV). NULL
+      when no match (always for CNLOH).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql; upstream:gnomAD-SV v4.1
+  - name: gnomad_sn
+    logicalType: integer
+    physicalType: int(11)
+    description: Number of individuals with a biallelic genotype at the matched gnomAD-SV site (n_bi_genos), denominator
+      of gnomad_sf. NULL when no match.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql; upstream:gnomAD-SV v4.1
+  - name: gnomad_sf
+    logicalType: number
+    physicalType: FLOAT
+    description: Site frequency of the matched gnomAD-SV site, gnomad_sc / gnomad_sn. NULL when no match (always
+      for CNLOH).
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql; frontend:translations/common/en.json
+        gnomad_sf_tooltip
+  - name: gnomad_sc_hom
+    logicalType: integer
+    physicalType: int(11)
+    description: Number of homozygous-alternate individuals (n_homalt) at the matched gnomAD-SV site. NULL when
+      no match.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql; upstream:gnomAD-SV v4.1
+  - name: gnomad_sc_het
+    logicalType: integer
+    physicalType: int(11)
+    description: Number of heterozygous individuals (n_het) at the matched gnomAD-SV site. NULL when no match.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql; upstream:gnomAD-SV v4.1
+  - name: gnomad_ac
+    logicalType: integer
+    physicalType: int(11)
+    description: Allele count (AC) of the matched gnomAD-SV site. NULL when no match.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_cnv_occurrence_insert_partition_delta.sql (RAD-194)
+  quality:
+  - name: somatic_cnv_occurrence__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: somatic_cnv_occurrence__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except ascn_as, ciend, cipos, cn, cnf, cnq, cnv_id, maf, mcn, mcnf,
+      mcnq, part, sd, task_id).
+    query: SELECT (CASE WHEN COUNT(seq_id) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(aliquot) = 0 THEN 1 ELSE 0
+      END) + (CASE WHEN COUNT(chromosome) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(alternate) = 0 THEN 1 ELSE 0
+      END) + (CASE WHEN COUNT(start) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(end) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(type) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(length) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(name)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(quality) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(calls) = 0 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(filter) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(bc) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(pe) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(sm) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(svtype)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(svlen) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(reflen) = 0 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(phased) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(cytoband) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(symbol) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(nb_genes) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(nb_snv) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gnomad_af) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(gnomad_sc) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gnomad_sn) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(gnomad_sf) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gnomad_sc_hom) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(gnomad_sc_het) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gnomad_ac) = 0 THEN 1 ELSE 0 END) FROM
+      somatic__cnv__occurrence
+    mustBe: 0
+  - name: somatic_cnv_occurrence__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except aliquot, part, phased, seq_id, svtype, task_id).
+    query: SELECT (CASE WHEN COUNT(DISTINCT cnv_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT chromosome)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT alternate) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      start) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT end) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      type) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT length) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      name) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT quality) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      filter) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT bc) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      sm) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT svlen) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      reflen) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT cn) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      cnf) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT cnq) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      mcn) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT mcnf) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      mcnq) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT maf) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      sd) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT ascn_as) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      nb_genes) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT nb_snv) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT gnomad_af) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT gnomad_sc) <= 1 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(DISTINCT gnomad_sn) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT gnomad_sf)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT gnomad_sc_hom) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      gnomad_sc_het) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT gnomad_ac) <= 1 THEN 1 ELSE 0 END) FROM
+      somatic__cnv__occurrence
+    mustBe: 0
+  - name: somatic_cnv_occurrence__should_be_within_range_gnomad_af
+    type: sql
+    dimension: accuracy
+    description: gnomad_af stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM somatic__cnv__occurrence WHERE gnomad_af < 0 OR gnomad_af > 1
+    mustBe: 0
+  - name: somatic_cnv_occurrence__should_be_within_range_gnomad_sf
+    type: sql
+    dimension: accuracy
+    description: gnomad_sf stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM somatic__cnv__occurrence WHERE gnomad_sf < 0 OR gnomad_sf > 1
+    mustBe: 0
+  - name: somatic_cnv_occurrence__should_be_within_range_maf
+    type: sql
+    dimension: accuracy
+    description: maf stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM somatic__cnv__occurrence WHERE maf < 0 OR maf > 1
+    mustBe: 0
+  - name: somatic_cnv_occurrence__should_be_unique__part_seq_id_task_id_cnv_id
+    metric: duplicateValues
+    arguments:
+      properties:
+      - part
+      - seq_id
+      - task_id
+      - cnv_id
+    mustBe: 0
+    dimension: uniqueness
+    description: (part, seq_id, task_id, cnv_id) is unique.
+  - name: somatic_cnv_occurrence__validate_start_end_order
+    type: sql
+    description: 'Genomic coordinate sanity for somatic CNV occurrences: - start must not exceed end (1-based inclusive
+      span).'
+    query: SELECT COUNT(*) FROM (select cnv_id, chromosome, start, `end` from somatic__cnv__occurrence where start
+      > `end`) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/somatic_cnv_occurrence__validate_start_end_order.sql
+  - name: somatic_cnv_occurrence__validate_type_alternate_consistency
+    type: sql
+    description: '`alternate` is derived from the resolved `type`, never copied from the VCF: - GAIN -> <DUP>, LOSS
+      -> <DEL>, CNLOH / GAINLOH -> <LOH>.'
+    query: SELECT COUNT(*) FROM (select cnv_id, chromosome, start, `end`, type, alternate from somatic__cnv__occurrence
+      where (type = 'GAIN' and alternate != '<DUP>') or (type = 'LOSS' and alternate != '<DEL>') or (type in ('CNLOH',
+      'GAINLOH') and alternate != '<LOH>')) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/somatic_cnv_occurrence__validate_type_alternate_consistency.sql
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(part, seq_id, task_id, cnv_id)
+  - property: partitionBy
+    value: PARTITION BY (part)
+  - property: mcpKeys
+    value: part, seq_id, task_id, cnv_id
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/queries/carriers.py
+    - mcp/radiant_mcp/queries/charts.py
+    - mcp/radiant_mcp/queries/hits.py
+    - mcp/radiant_mcp/schema_catalog.py
+    - portal/backend/internal/types/somatic_cnv_occurrence.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/radiant/init/somatic_cnv_occurrence_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/somatic_cnv_occurrence.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

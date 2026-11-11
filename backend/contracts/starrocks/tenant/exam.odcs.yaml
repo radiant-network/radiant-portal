@@ -1,0 +1,86 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.exam
+name: exam
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Per-tenant lookup of paraclinical exams (e.g. EEG, EMG) that a case''s observations can report: one row
+    per (code, tenant_code), the primary key. Rows of the portal''s PostgreSQL table public.exam read through the
+    radiant_jdbc catalog and filtered to the tenant (WHERE tenant_code = ''<tenant>''). Migration 000017 seeds the
+    code ''other'' for the radiant tenant; each tenant maintains its own list.
+
+    '
+  usage: 'Join obs_categorical / obs_string on exam_code = exam.code (and tenant_code, as the backend does) for the
+    exam''s label: those rows have observation_code = ''exam''. name_en / name_fr are the English / French labels.
+
+    '
+  limitations: 'Codes are unique per tenant case-insensitively (lower(code), tenant_code).
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: exam
+    physicalName: exam
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: code
+        logicalType: string
+        description: Exam code, referenced by obs_categorical.exam_code and obs_string.exam_code; validated against
+          this list when a case batch reports an exam observation.
+        examples:
+          - other
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000017_add_exam_and_obs_exam_columns.up.sql; backend:cmd/worker/case_validation.go
+              validateExamCode
+      - name: name_en
+        logicalType: string
+        description: English label of the exam, e.g. 'Other'; shown as the exam name in the case page.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000017_add_exam_and_obs_exam_columns.up.sql; backend:internal/repository/starrocks/cases.go
+              retrieveCaseExams
+      - name: name_fr
+        logicalType: string
+        description: French label of the exam, e.g. 'Autre'.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000017_add_exam_and_obs_exam_columns.up.sql
+      - name: tenant_code
+        logicalType: string
+        description: Tenant owning the exam code; always the view's tenant, since the view filters on it.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000017_add_exam_and_obs_exam_columns.up.sql; backend:internal/repository/starrocks/starrocks_tenant.go
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

@@ -1,0 +1,741 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.snv__consequence
+name: snv__consequence
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per (variant, gene, transcript): every VEP CSQ annotation block of every germline or somatic
+    SNV, on Ensembl transcripts and, for VEP --merged files, RefSeq transcripts too. Shared across tenants (base
+    database). Written by the import_part DAG from the Iceberg snv_consequence table (upsert on the primary key),
+    enriched with dbNSFP predictors, SpliceAI and gnomAD constraint, and rescored in place by reannotate_open_data.
+
+    '
+  usage: 'Filter occurrences on predictors with `LEFT SEMI JOIN radiant.snv__consequence_filter_partitioned cf ON
+    cf.locus_id = o.locus_id AND cf.part = o.part AND (<condition>)`. snv__consequence holds every transcript: add
+    `is_picked = true` for the picked one. Primary key (locus_id, symbol, transcript_id), distributed and colocated
+    on locus_id. Several rows per variant: add is_picked = true for the single annotation shown in the portal (the
+    portal joins it that way), or is_mane_select / is_canonical for a given transcript. To filter variants by predictor
+    or consequence, use snv__consequence_filter(_partitioned) instead.
+
+    '
+  limitations: 'Intergenic blocks are stored with symbol = '''' and transcript_id = '''' (not NULL) and source NULL.
+    Columns added by migrations are NULL (or false) on rows not re-imported since: transcript_version, source, mane_pair_transcript_id
+    (SJRA-1820/1827), cds_start / cds_end (RAD-71); mane_select is empty on rows ingested before SJRA-1822. Predictor
+    scores come from dbNSFP keyed on Ensembl transcript ids, so RefSeq rows get them only through their MANE Select
+    Ensembl twin.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: snv__consequence
+  physicalName: snv__consequence
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: locus_id
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Radiant variant id (same key as snv__variant and the occurrence tables), resolved from the VCF
+      locus hash at import.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_insert.sql
+    required: true
+  - name: symbol
+    logicalType: string
+    physicalType: varchar(30)
+    description: Gene symbol of the annotated feature, from VEP CSQ SYMBOL. Empty string (not NULL) for intergenic
+      blocks.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:dags/sql/radiant/snv_consequence_insert.sql
+    required: true
+  - name: transcript_id
+    logicalType: string
+    physicalType: varchar(100)
+    description: Transcript accession from VEP CSQ Feature with its version suffix stripped (ENST..., or NM_/NR_/XM_...
+      for RefSeq; ENSR... for regulatory features). Empty string for intergenic blocks.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py (strip_transcript_version); etl:dags/sql/radiant/migrations/SJRA-1820_snv_consequences_add_columns.sql
+    required: true
+  - name: transcript_version
+    logicalType: string
+    physicalType: varchar(10)
+    description: Version suffix removed from the Feature accession (e.g. "6" for NM_000546.6), the citable form
+      being transcript_id.transcript_version. Always NULL on Ensembl rows, which VEP emits unversioned.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py (extract_transcript_version); etl:dags/sql/radiant/migrations/SJRA-1820_snv_consequences_add_columns.sql
+  - name: source
+    logicalType: string
+    physicalType: varchar(20)
+    description: 'Transcript catalogue the annotation comes from: ''Ensembl'' or ''RefSeq'', from VEP CSQ SOURCE
+      or else inferred from the transcript/gene id prefix. NULL for intergenic blocks that belong to no catalogue.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py (resolve_source); etl:data_qa/sources/snv_consequence.yml
+    enum:
+    - value: Ensembl
+    - value: RefSeq
+  - name: consequences
+    logicalType: array
+    physicalType: array<varchar(50)>
+    description: VEP Consequence Sequence Ontology terms for this transcript (e.g. missense_variant, splice_region_variant),
+      split on '&'.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:data_qa/macros/dictionaries.sql (dict_consequences)
+    items:
+      name: consequences_item
+      logicalType: string
+      physicalType: varchar(50)
+      enum:
+      - value: 3_prime_UTR_variant
+      - value: 5_prime_UTR_variant
+      - value: coding_sequence_variant
+      - value: downstream_gene_variant
+      - value: feature_elongation
+      - value: feature_truncation
+      - value: frameshift_variant
+      - value: incomplete_terminal_codon_variant
+      - value: inframe_deletion
+      - value: inframe_insertion
+      - value: intergenic_variant
+      - value: intron_variant
+      - value: mature_miRNA_variant
+      - value: missense_variant
+      - value: NMD_transcript_variant
+      - value: non_coding_transcript_exon_variant
+      - value: non_coding_transcript_variant
+      - value: protein_altering_variant
+      - value: regulatory_region_ablation
+      - value: regulatory_region_amplification
+      - value: regulatory_region_variant
+      - value: splice_acceptor_variant
+      - value: splice_donor_5th_base_variant
+      - value: splice_donor_region_variant
+      - value: splice_donor_variant
+      - value: splice_polypyrimidine_tract_variant
+      - value: splice_region_variant
+      - value: start_lost
+      - value: start_retained_variant
+      - value: stop_gained
+      - value: stop_lost
+      - value: stop_retained_variant
+      - value: synonymous_variant
+      - value: TF_binding_site_variant
+      - value: TFBS_ablation
+      - value: TFBS_amplification
+      - value: transcript_ablation
+      - value: transcript_amplification
+      - value: upstream_gene_variant
+  - name: impact_score
+    logicalType: integer
+    physicalType: tinyint(4)
+    description: Numeric rank of vep_impact used for sorting and filtering, HIGH=4, MODERATE=3, LOW=2, MODIFIER=1,
+      0 when VEP gave no impact.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py (IMPACT_SCORE)
+  - name: biotype
+    logicalType: string
+    physicalType: varchar(50)
+    description: VEP BIOTYPE of the transcript (e.g. protein_coding, lncRNA); labelled "Gene Type" in the portal.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; frontend:translations/common/en.json biotype
+    enum:
+    - value: IG_C_gene
+    - value: IG_D_gene
+    - value: IG_J_gene
+    - value: IG_LV_gene
+    - value: IG_V_gene
+    - value: TR_C_gene
+    - value: TR_J_gene
+    - value: TR_V_gene
+    - value: TR_D_gene
+    - value: IG_pseudogene
+    - value: IG_C_pseudogene
+    - value: IG_J_pseudogene
+    - value: IG_V_pseudogene
+    - value: TR_V_pseudogene
+    - value: TR_J_pseudogene
+    - value: Mt_rRNA
+    - value: Mt_tRNA
+    - value: miRNA
+    - value: misc_RNA
+    - value: rRNA
+    - value: scRNA
+    - value: snRNA
+    - value: snoRNA
+    - value: ribozyme
+    - value: sRNA
+    - value: scaRNA
+    - value: lncRNA
+    - value: Mt_tRNA_pseudogene
+    - value: tRNA_pseudogene
+    - value: snoRNA_pseudogene
+    - value: snRNA_pseudogene
+    - value: scRNA_pseudogene
+    - value: rRNA_pseudogene
+    - value: misc_RNA_pseudogene
+    - value: miRNA_pseudogene
+    - value: TEC
+    - value: nonsense_mediated_decay
+    - value: non_stop_decay
+    - value: retained_intron
+    - value: protein_coding
+    - value: protein_coding_LoF
+    - value: protein_coding_CDS_not_defined
+    - value: processed_transcript
+    - value: non_coding
+    - value: ambiguous_orf
+    - value: sense_intronic
+    - value: sense_overlapping
+    - value: antisense_RNA
+    - value: known_ncrna
+    - value: pseudogene
+    - value: processed_pseudogene
+    - value: polymorphic_pseudogene
+    - value: retrotransposed
+    - value: transcribed_processed_pseudogene
+    - value: transcribed_unprocessed_pseudogene
+    - value: transcribed_unitary_pseudogene
+    - value: translated_processed_pseudogene
+    - value: translated_unprocessed_pseudogene
+    - value: unitary_pseudogene
+    - value: unprocessed_pseudogene
+    - value: artifact
+    - value: lincRNA
+    - value: macro_lncRNA
+    - value: 3prime_overlapping_ncRNA
+    - value: disrupted_domain
+    - value: vault_RNA
+    - value: bidirectional_promoter_lncRNA
+    - value: transcribed_pseudogene
+    - value: ncRNA_pseudogene
+    - value: ncRNA
+    - value: Y_RNA
+    - value: RNase_P_RNA
+    - value: RNase_MRP_RNA
+    - value: telomerase_RNA
+    - value: tRNA
+    - value: ''
+  - name: exon_rank
+    logicalType: string
+    physicalType: VARCHAR(10)
+    description: Number of the exon hit by the variant, from VEP CSQ EXON ("rank/total"), stored as text. NULL when
+      the variant is not in an exon.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:dags/sql/radiant/snv_consequence_insert.sql
+  - name: exon_total
+    logicalType: string
+    physicalType: VARCHAR(10)
+    description: Total number of exons of the transcript, from VEP CSQ EXON ("rank/total"), stored as text. NULL
+      when the variant is not in an exon.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py
+  - name: spliceai_ds
+    logicalType: number
+    physicalType: float
+    description: SpliceAI maximum delta score (highest of acceptor gain/loss and donor gain/loss) for this variant
+      and gene, from the SpliceAI precomputed scores. Joined on locus_id + symbol, so it is gene-level and identical
+      for every transcript of the gene. NULL when SpliceAI has no score.
+    customProperties:
+    - property: unit
+      value: probability 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_insert.sql; etl:dags/sql/open_data/spliceai_insert.sql; upstream:spliceai
+        (radiant-open-datalake SpliceAi max_score)
+  - name: spliceai_type
+    logicalType: array
+    physicalType: array<varchar(2)>
+    description: Splice event(s) that reach spliceai_ds, AG (acceptor gain), AL (acceptor loss), DG (donor gain),
+      DL (donor loss); several when tied, NULL when the max score is 0 or absent.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/spliceai_insert.sql; upstream:spliceai (radiant-open-datalake enriched/SpliceAi.scala
+        addMaxScore)
+  - name: is_canonical
+    logicalType: boolean
+    physicalType: boolean
+    description: True when VEP flags this transcript as the canonical one of its gene (CSQ CANONICAL = YES).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py
+  - name: is_picked
+    logicalType: boolean
+    physicalType: boolean
+    description: True for the single annotation VEP selected for the variant (CSQ PICK = 1); this is the row readers
+      use as the variant's main consequence.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; portal:internal/repository/starrocks/variants.go; mcp:schema_catalog.py
+  - name: is_mane_select
+    logicalType: boolean
+    physicalType: boolean
+    description: True when VEP's MANE column is MANE_Select for this transcript.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py
+  - name: is_mane_plus
+    logicalType: boolean
+    physicalType: boolean
+    description: True when VEP's MANE column is MANE_Plus_Clinical (an additional clinically relevant transcript,
+      never on the same transcript as MANE Select).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py
+  - name: mane_select
+    logicalType: string
+    physicalType: varchar(200)
+    description: Raw VEP MANE_SELECT value, the versioned accession of the paired MANE Select transcript in the
+      other catalogue (RefSeq NM_ on an Ensembl row, ENST on a RefSeq row). Empty or NULL when the transcript is
+      not MANE Select; empty on rows ingested before SJRA-1822.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:dags/sql/radiant/migrations/SJRA-1820_snv_consequences_add_columns.sql
+  - name: mane_pair_transcript_id
+    logicalType: string
+    physicalType: varchar(100)
+    description: mane_select with its version stripped, used as the join key to borrow Ensembl-keyed scores for
+      RefSeq rows. NULL on MANE Plus Clinical rows and on rows loaded before SJRA-1827.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:dags/sql/radiant/snv_consequence_insert.sql
+  - name: sift_score
+    logicalType: number
+    physicalType: float
+    description: SIFT score from dbNSFP for this Ensembl transcript (lower = more damaging). NULL when dbNSFP has
+      no value (non-missense, or no matching transcript).
+    customProperties:
+    - property: unit
+      value: 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/dbnsfp_insert.sql (SIFT_score); upstream:dbnsfp
+  - name: sift_pred
+    logicalType: string
+    physicalType: varchar(1)
+    description: 'SIFT prediction from dbNSFP, one letter: D (Damaging) or T (Tolerated).'
+    customProperties:
+    - property: descriptionSource
+      value: etl:data_qa/macros/dictionaries.sql (dict_sift_pred); frontend:translations/common/en.json sift_pred
+    enum:
+    - value: D
+    - value: T
+  - name: polyphen2_hvar_score
+    logicalType: number
+    physicalType: float
+    description: PolyPhen-2 HumVar score from dbNSFP (higher = more damaging).
+    customProperties:
+    - property: unit
+      value: probability 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/dbnsfp_insert.sql (Polyphen2_HVAR_score); upstream:dbnsfp
+  - name: polyphen2_hvar_pred
+    logicalType: string
+    physicalType: varchar(1)
+    description: 'PolyPhen-2 HumVar prediction from dbNSFP, one letter: B (Benign), P (Possibly damaging), D (Damaging).'
+    customProperties:
+    - property: descriptionSource
+      value: etl:data_qa/macros/dictionaries.sql; frontend:translations/common/en.json polyphen2_hvar_pred
+    enum:
+    - value: B
+    - value: D
+    - value: P
+  - name: fathmm_score
+    logicalType: number
+    physicalType: float
+    description: FATHMM score from dbNSFP (more negative = more damaging).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/dbnsfp_insert.sql (FATHMM_score); upstream:dbnsfp
+  - name: fathmm_pred
+    logicalType: string
+    physicalType: varchar(1)
+    description: 'FATHMM prediction from dbNSFP, one letter: D (Damaging) or T (Tolerated).'
+    customProperties:
+    - property: descriptionSource
+      value: etl:data_qa/macros/dictionaries.sql; frontend:translations/common/en.json fathmm_pred
+    enum:
+    - value: D
+    - value: T
+  - name: cadd_score
+    logicalType: number
+    physicalType: float
+    description: CADD raw rank score from dbNSFP (CADD_raw_rankscore, the rank of the CADD raw score among all dbNSFP
+      variants), not the CADD raw score itself despite the "CADD (Raw)" label in the portal.
+    customProperties:
+    - property: unit
+      value: rank 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/dbnsfp_insert.sql; frontend:translations/common/en.json cadd_score; upstream:dbnsfp
+  - name: cadd_phred
+    logicalType: number
+    physicalType: float
+    description: CADD PHRED-scaled score from dbNSFP (higher = more deleterious; 20 = top 1% of possible substitutions).
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/dbnsfp_insert.sql (CADD_phred); upstream:cadd
+  - name: dann_score
+    logicalType: number
+    physicalType: float
+    description: DANN deleteriousness score from dbNSFP (higher = more deleterious).
+    customProperties:
+    - property: unit
+      value: 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/dbnsfp_insert.sql (DANN_score); upstream:dbnsfp
+  - name: revel_score
+    logicalType: number
+    physicalType: float
+    description: REVEL ensemble pathogenicity score for missense variants, from dbNSFP for this Ensembl transcript
+      (higher = more likely pathogenic). NULL when dbNSFP has no value (non-missense, or no matching transcript).
+    customProperties:
+    - property: unit
+      value: 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/dbnsfp_insert.sql (REVEL_score); etl:dags/sql/radiant/snv_consequence_insert.sql;
+        frontend:translations/common/en.json revel_score; upstream:dbnsfp
+  - name: lrt_score
+    logicalType: number
+    physicalType: float
+    description: LRT (Likelihood Ratio Test) score from dbNSFP, the test p-value (lower = more constrained).
+    customProperties:
+    - property: unit
+      value: 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/dbnsfp_insert.sql (LRT_score); upstream:dbnsfp
+  - name: lrt_pred
+    logicalType: string
+    physicalType: varchar(1)
+    description: 'LRT prediction from dbNSFP, one letter: D (Deleterious), N (Neutral), U (Unknown).'
+    customProperties:
+    - property: descriptionSource
+      value: etl:data_qa/macros/dictionaries.sql; frontend:translations/common/en.json lrt_pred
+    enum:
+    - value: D
+    - value: N
+    - value: U
+  - name: gnomad_pli
+    logicalType: number
+    physicalType: float
+    description: gnomAD probability of loss-of-function intolerance of the transcript (v4.1 lof_pLI with the OpenDataLake
+      contract, v2.1.1 pLI before), joined on the Ensembl transcript (or MANE twin for RefSeq rows).
+    customProperties:
+    - property: unit
+      value: probability 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/gnomad_constraint_insert.sql; etl:dags/sql/radiant/snv_consequence_insert.sql
+  - name: gnomad_loeuf
+    logicalType: number
+    physicalType: float
+    description: gnomAD LOEUF, upper bound of the 90% CI of the observed/expected loss-of-function ratio of the
+      transcript (lower = more intolerant); v4.1 lof_oe_ci_upper or v2.1.1 oe_lof_upper.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/gnomad_constraint_insert.sql; upstream:gnomad_constraint
+  - name: phyloP17way_primate
+    logicalType: number
+    physicalType: float
+    description: phyloP conservation score across 17 primate genomes, from dbNSFP (positive = conserved).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/dbnsfp_insert.sql; upstream:dbnsfp
+  - name: phyloP100way_vertebrate
+    logicalType: number
+    physicalType: float
+    description: phyloP conservation score across 100 vertebrate genomes, from dbNSFP (positive = conserved).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/dbnsfp_insert.sql; upstream:dbnsfp
+  - name: scores_from_mane_pair
+    logicalType: boolean
+    physicalType: boolean
+    description: True on RefSeq rows whose dbNSFP and gnomAD constraint scores were looked up under their Ensembl
+      MANE twin (mane_pair_transcript_id) rather than their own id. Always false on Ensembl rows; true even if the
+      twin has no score.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_insert.sql; etl:dags/sql/radiant/migrations/SJRA-1820_snv_consequences_add_columns.sql
+    required: true
+  - name: vep_impact
+    logicalType: string
+    physicalType: VARCHAR(20)
+    description: VEP IMPACT of the consequence, HIGH, MODERATE, LOW or MODIFIER.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:data_qa/macros/dictionaries.sql
+    enum:
+    - value: HIGH
+    - value: MODERATE
+    - value: LOW
+    - value: MODIFIER
+  - name: aa_change
+    logicalType: string
+    physicalType: varchar(2000)
+    description: Protein change, the part of VEP HGVSp after the ':' (e.g. p.Arg123Cys). NULL for non-coding consequences.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py
+  - name: dna_change
+    logicalType: string
+    physicalType: varchar(2000)
+    description: Coding DNA change, the part of VEP HGVSc after the ':' (e.g. c.367C>T). NULL when VEP gives no
+      HGVSc.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py
+  - name: cds_start
+    logicalType: integer
+    physicalType: INT
+    description: CDS position of the first base of the variant, from VEP CDS_position (for an insertion, the base
+      before the insertion point). NULL outside the CDS, when VEP gives '?', or on rows not re-imported since RAD-71.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py (parse_cds_position); etl:dags/sql/radiant/migrations/RAD-71_snv_consequence_add_cds_position.sql
+  - name: cds_end
+    logicalType: integer
+    physicalType: INT
+    description: CDS position of the last base of the variant, from VEP CDS_position (for an insertion, the base
+      after the insertion point). Equals cds_start for an SNV; NULL outside the CDS or when VEP gives '?'.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py (parse_cds_position); etl:dags/sql/radiant/migrations/RAD-71_snv_consequence_add_cds_position.sql
+  quality:
+  - name: snv_consequence__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: snv_consequence__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except cds_end, cds_start, locus_id, mane_pair_transcript_id, symbol,
+      transcript_id, transcript_version).
+    query: SELECT (CASE WHEN COUNT(source) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(consequences) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(impact_score) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(biotype) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(exon_rank) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(exon_total) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(spliceai_ds) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(spliceai_type) = 0 THEN 1
+      ELSE 0 END) + (CASE WHEN COUNT(is_canonical) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(is_picked) = 0 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(is_mane_select) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(is_mane_plus) =
+      0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(mane_select) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(sift_score)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(sift_pred) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(polyphen2_hvar_score)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(polyphen2_hvar_pred) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(fathmm_score)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(fathmm_pred) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(cadd_score)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(cadd_phred) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(dann_score)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(revel_score) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(lrt_score)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(lrt_pred) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gnomad_pli)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gnomad_loeuf) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(phyloP17way_primate)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(phyloP100way_vertebrate) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(scores_from_mane_pair)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(vep_impact) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(aa_change)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(dna_change) = 0 THEN 1 ELSE 0 END) FROM snv__consequence
+    mustBe: 0
+  - name: snv_consequence__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except scores_from_mane_pair, source).
+    query: SELECT (CASE WHEN COUNT(DISTINCT locus_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT symbol)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT transcript_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      transcript_version) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT impact_score) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT biotype) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT exon_rank) <= 1 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT exon_total) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      spliceai_ds) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT is_canonical) <= 1 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(DISTINCT is_picked) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT is_mane_select) <= 1 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT is_mane_plus) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      mane_select) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT mane_pair_transcript_id) <= 1 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(DISTINCT sift_score) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT sift_pred)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT polyphen2_hvar_score) <= 1 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(DISTINCT polyphen2_hvar_pred) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT fathmm_score)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT fathmm_pred) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      cadd_score) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT cadd_phred) <= 1 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(DISTINCT dann_score) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT revel_score) <= 1 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT lrt_score) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT lrt_pred)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT gnomad_pli) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      gnomad_loeuf) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT phyloP17way_primate) <= 1 THEN 1 ELSE 0
+      END) + (CASE WHEN COUNT(DISTINCT phyloP100way_vertebrate) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      vep_impact) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT aa_change) <= 1 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(DISTINCT dna_change) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT cds_start) <= 1 THEN 1
+      ELSE 0 END) + (CASE WHEN COUNT(DISTINCT cds_end) <= 1 THEN 1 ELSE 0 END) FROM snv__consequence
+    mustBe: 0
+  - name: snv_consequence__should_be_unique__locus_id_symbol_transcript_id
+    metric: duplicateValues
+    arguments:
+      properties:
+      - locus_id
+      - symbol
+      - transcript_id
+    mustBe: 0
+    dimension: uniqueness
+    description: (locus_id, symbol, transcript_id) is unique.
+  - name: snv_consequence__validate_cds_position_off_coding_sequence
+    type: sql
+    description: 'RAD-71 — a consequence that never reaches the coding sequence has no CDS position. Only rows whose
+      every term is intronic, UTR, up/downstream or intergenic are checked: VEP leaves `CDS_position` empty on those.
+      A value there means a column was read from the wrong CSQ index, or the positional INSERT shifted a neighbour
+      into `cds_start` / `cds_end`. "Every term is in the list" is written as an intersection-size comparison: StarRocks
+      3.4 fails a lambda (`array_filter(consequences, x -> ...)`) in this WHERE with "missing statistic of col:
+      auto_fill_col".'
+    query: SELECT COUNT(*) FROM (select locus_id, symbol, transcript_id, consequences, cds_start, cds_end from radiant.snv__consequence
+      where (cds_start is not null or cds_end is not null) and array_length(array_intersect(consequences, [ 'intron_variant',
+      '3_prime_UTR_variant', '5_prime_UTR_variant', 'upstream_gene_variant', 'downstream_gene_variant', 'intergenic_variant'
+      ])) = array_length(array_distinct(consequences))) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/snv_consequence__validate_cds_position_off_coding_sequence.sql
+  - name: snv_consequence__validate_cds_position_on_coding_terms
+    type: sql
+    description: 'RAD-71 — a consequence with a coding term has a CDS position. `cds_start` and `cds_end` are copied
+      from VEP''s `CDS_position`. An indel partly outside the CDS keeps one end only (`?-125`), so the rule is that
+      at least one of the two is set. `coding_sequence_variant` is left out: VEP falls back to it, with no `CDS_position`,
+      when it cannot place the variant in the CDS (e.g. a RefSeq exon boundary that differs from the genome). A
+      failure means the CSQ lookup lost `CDS_position`, or the rows were imported before the columns existed and
+      need a re-import.'
+    query: SELECT COUNT(*) FROM (select locus_id, symbol, transcript_id, consequences from radiant.snv__consequence
+      where cds_start is null and cds_end is null and arrays_overlap(consequences, [ 'missense_variant', 'synonymous_variant',
+      'stop_gained', 'stop_lost', 'stop_retained_variant', 'start_lost', 'start_retained_variant', 'frameshift_variant',
+      'inframe_insertion', 'inframe_deletion', 'protein_altering_variant', 'incomplete_terminal_codon_variant' ]))
+      failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/snv_consequence__validate_cds_position_on_coding_terms.sql
+  - name: snv_consequence__validate_cds_start_end_order
+    type: sql
+    description: RAD-71 — `cds_start` must not exceed `cds_end`. VEP writes `CDS_position` lowest position first
+      on both strands, so the split must keep that order. Rows with one end NULL (an indel partly outside the CDS)
+      are not compared.
+    query: SELECT COUNT(*) FROM (select locus_id, symbol, transcript_id, cds_start, cds_end from radiant.snv__consequence
+      where cds_start > cds_end) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/snv_consequence__validate_cds_start_end_order.sql
+  - name: snv_consequence__validate_mane_pair_reciprocity
+    type: sql
+    description: 'SJRA-1830 — when a RefSeq MANE Select row''s `mane_pair_transcript_id` resolves to an Ensembl
+      row at the same locus, that row must itself be MANE Select and point back. SJRA-1827''s score borrow joins
+      on that pointer, so a wrong one silently reads another transcript''s scores. A pointer that resolves to nothing
+      is not checked here: it borrows no scores, and VEP''s merged cache produces some on its own (RAD-175). snv_consequence__validate_mane_pair_resolves
+      bounds it. RefSeq -> Ensembl only: the reverse is red table-wide, since rows from pre-merged loads point at
+      RefSeq transcripts that were never ingested. MANE Plus Clinical is excluded — VEP fills MANE_SELECT only on
+      the Select transcript. The twin is matched on transcript rather than symbol, which is in the primary key but
+      not stable across annotation-cache versions.'
+    query: SELECT COUNT(*) FROM (with ensembl_twin as ( select locus_id, transcript_id, max(cast(is_mane_select
+      as int)) as twin_is_mane_select, max(mane_pair_transcript_id) as twin_pair_transcript_id from radiant.snv__consequence
+      where source = 'Ensembl' and transcript_id <> '' group by locus_id, transcript_id ) select r.locus_id, r.symbol,
+      r.transcript_id, r.mane_pair_transcript_id, t.twin_is_mane_select, t.twin_pair_transcript_id from radiant.snv__consequence
+      r join ensembl_twin t on t.locus_id = r.locus_id and t.transcript_id = r.mane_pair_transcript_id where r.source
+      = 'RefSeq' and r.is_mane_select and nullif(r.mane_pair_transcript_id, '') is not null and (t.twin_is_mane_select
+      = 0 or coalesce(t.twin_pair_transcript_id, '') <> r.transcript_id)) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/snv_consequence__validate_mane_pair_reciprocity.sql
+  - name: snv_consequence__validate_mane_pair_resolves
+    type: sql
+    description: 'RAD-175 — the share of RefSeq MANE Select rows whose `mane_pair_transcript_id` names no Ensembl
+      row at the same locus stays under 1%. Some never resolve, and not through the ETL: in VEP''s merged cache
+      the RefSeq half''s MANE_SELECT follows a newer MANE release than the Ensembl half, so for a few genes it names
+      an ENST the Ensembl half does not have yet (cache 114: 20 transcripts — MUC16, FCGBP, NBPF1, MUC2… — 0.1%
+      of the rows in QA). A share well above that means --mane was lost upstream or the two halves come from different
+      caches. Returns one row, with the figures, when the threshold is crossed.'
+    query: SELECT COUNT(*) FROM (with refseq_mane as ( select r.locus_id, r.mane_pair_transcript_id, e.locus_id
+      as twin_locus_id from radiant.snv__consequence r left join ( select distinct locus_id, transcript_id from
+      radiant.snv__consequence where source = 'Ensembl' and transcript_id <> '' ) e on e.locus_id = r.locus_id and
+      e.transcript_id = r.mane_pair_transcript_id where r.source = 'RefSeq' and r.is_mane_select and nullif(r.mane_pair_transcript_id,
+      '') is not null ) select count(*) as refseq_mane_rows, sum(case when twin_locus_id is null then 1 else 0 end)
+      as unresolved_rows, count(distinct case when twin_locus_id is null then mane_pair_transcript_id end) as unresolved_transcripts
+      from refseq_mane having sum(case when twin_locus_id is null then 1 else 0 end) > 0.01 * count(*)) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/snv_consequence__validate_mane_pair_resolves.sql
+  - name: snv_consequence__validate_source_only_null_when_transcript_less
+    type: sql
+    description: SJRA-1830 — only rule 4 of resolve_source() (radiant/tasks/vcf/snv/consequence.py) leaves `source`
+      empty, and it fires on intergenic rows alone. A null source on a row that has a transcript means rules 1-3
+      all missed — a broken CSQ lookup or an unrecognised namespace.
+    query: SELECT COUNT(*) FROM (select locus_id, symbol, transcript_id, transcript_version from radiant.snv__consequence
+      where source is null and transcript_id <> '') failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/snv_consequence__validate_source_only_null_when_transcript_less.sql
+  - name: snv_consequence__validate_transcript_id_is_version_free
+    type: sql
+    description: 'SJRA-1820 — `transcript_id` must never carry a version suffix, on either catalogue. `snv__consequence`
+      is PRIMARY KEY(locus_id, symbol, transcript_id). VEP emits RefSeq accessions versioned (`NM_000546.6`) and
+      Ensembl ones bare, so storing `Feature` as is would put the annotation cache release inside row identity for
+      one catalogue only: a cohort annotated against a newer RefSeq release arrives as `NM_000546.7`, a different
+      key, and lands beside the old row instead of replacing it. The variant page then lists one transcript twice
+      with no way to tell which is current. Extraction splits the accession (radiant/tasks/vcf/snv/consequence.py),
+      so a hit here means either the split was bypassed or rows predating SJRA-1820 survived the migration. Both
+      fail silently otherwise — the duplicate rows are individually well-formed. The companion assertion, that the
+      version is not simply lost, lives in snv_consequence__validate_transcript_version_matches_source.sql.'
+    query: SELECT COUNT(*) FROM (select locus_id, symbol, transcript_id, source from radiant.snv__consequence where
+      transcript_id like '%.%') failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/snv_consequence__validate_transcript_id_is_version_free.sql
+  - name: snv_consequence__validate_transcript_version_matches_source
+    type: sql
+    description: 'SJRA-1820 — `transcript_version` must be populated on RefSeq rows and empty on Ensembl ones. The
+      asymmetry is VEP''s: it emits no version for Ensembl accessions under any option, and one for every RefSeq
+      accession. Pinning it both ways catches the two failure modes of the split in radiant/tasks/vcf/snv/consequence.py:
+      - a null on a RefSeq row means the version was dropped rather than moved, and the citable form (`transcript_id.transcript_version`)
+      can no longer be reconstructed; - a value on an Ensembl row means something is being invented, most likely
+      by parsing `hgvsc` — which is empty on 30.6% of Ensembl annotations and so cannot fill the column consistently
+      anyway. Intergenic rows carry no transcript and no source, and are excluded rather than counted as either
+      case. That matches resolve_source() rule 4: we record "unknown" rather than guessing. The RefSeq side only
+      applies to accessions (`_REFSEQ_FEATURE_RE`). Mitochondrial genes have no RefSeq transcript accession, so
+      VEP emits the gene symbol (`ATP6`, `TRNL1`) as `Feature`, with no version to keep.'
+    query: SELECT COUNT(*) FROM (select locus_id, symbol, transcript_id, source, transcript_version from radiant.snv__consequence
+      where (source = 'RefSeq' and transcript_id regexp '^[NX][MRP]_' and transcript_version is null) or (source
+      = 'Ensembl' and transcript_version is not null)) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/snv_consequence__validate_transcript_version_matches_source.sql
+  customProperties:
+  - property: dataModel
+    value: PRIMARY KEY(`locus_id`, `symbol`, `transcript_id`)
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(`locus_id`) BUCKETS 10
+  - property: mcpKeys
+    value: locus_id, symbol, transcript_id
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/schema_catalog.py
+    - portal/backend/internal/service/ranger_masking.go
+    - portal/backend/internal/types/consequence.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/radiant/init/snv_consequence_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/snv_consequence.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

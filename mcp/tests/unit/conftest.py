@@ -1,5 +1,5 @@
 """Shared fixtures: a fake Radiant API in place of the HTTP client, and the
-StarRocks schema read from the ETL and portal checkouts (``schema_sources``)."""
+StarRocks schema read from the data contracts of its owners (``contracts``)."""
 
 import asyncio
 import base64
@@ -9,16 +9,15 @@ from contextlib import contextmanager
 from typing import Any
 
 import pytest
-from radiant_python.exceptions import ApiException
-from schema_sources import (  # noqa: F401
-    etl,
-    etl_dictionaries,
+from contracts import (  # noqa: F401
+    etl_contracts,
+    etl_enums,
     etl_tables,
-    portal,
-    portal_fields,
     portal_tenant_objects,
     portal_views,
 )
+from portal_fields import portal, portal_fields  # noqa: F401
+from radiant_python.exceptions import ApiException
 
 from radiant_mcp import portal_api as _api
 from radiant_mcp import workers

@@ -1,0 +1,106 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.mondo_term
+name: mondo_term
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per Mondo Disease Ontology term (id and label), parsed from the mondo-base.obo release. Fully
+    overwritten by the ETL open-data import (group mondo_term) from the OpenDataLake table mondo_v1 or the legacy
+    Radiant Iceberg table mondo_term. Shared dictionary.
+
+    '
+  usage: 'Filter occurrences on predictors with `LEFT SEMI JOIN radiant.snv__consequence_filter_partitioned cf ON
+    cf.locus_id = o.locus_id AND cf.part = o.part AND (<condition>)`. Look up by id (MONDO:nnnnnnn). The portal
+    uses it for condition autocomplete and to label a case''s primary condition (condition_id / condition_name /
+    condition_term, split by primary condition in frequencies).
+
+    '
+  limitations: 'Obsolete terms are imported and not flagged (obo-parser 1.3.1 has no is_obsolete handling). Parents,
+    alt_ids, synonyms and cross-references are not imported.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: mondo_term
+  physicalName: mondo_term
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: id
+    logicalType: string
+    physicalType: varchar(65533)
+    description: Mondo term id, MONDO:nnnnnnn (e.g. MONDO:0000001).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/mondo_term_insert.sql; upstream:mondo (radiant-open-datalake release-notes mondo/v1.md);
+        mcp:schema_catalog.py
+    required: true
+    unique: true
+  - name: name
+    logicalType: string
+    physicalType: varchar(65533)
+    description: Mondo term label (obo name).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/mondo_term_insert.sql; upstream:mondo (radiant-open-datalake release-notes mondo/v1.md)
+    required: true
+  - name: term
+    logicalType: string
+    physicalType: varchar(65533)
+    description: Generated column, concat(id, ' ', name), e.g. "MONDO:0000001 disease"; used for text search/autocomplete.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/init/mondo_term_create_table.sql; portal:internal/types/term.go
+  quality:
+  - name: mondo_term__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: mondo_term__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except id, name).
+    query: SELECT (CASE WHEN COUNT(term) = 0 THEN 1 ELSE 0 END) FROM mondo_term
+    mustBe: 0
+  - name: mondo_term__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except id).
+    query: SELECT (CASE WHEN COUNT(DISTINCT name) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT term) <= 1
+      THEN 1 ELSE 0 END) FROM mondo_term
+    mustBe: 0
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`id`)
+  - property: distributedBy
+    value: DISTRIBUTED BY RANDOM
+  - property: mcpKeys
+    value: id
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/schema_catalog.py
+    - portal/backend/internal/types/term.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/mondo_term_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/mondo_term.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

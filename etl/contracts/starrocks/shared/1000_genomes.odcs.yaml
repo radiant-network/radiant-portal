@@ -1,0 +1,125 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.1000_genomes
+name: 1000_genomes
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per variant of the 1000 Genomes Project phase 3 sites VCF (GRCh38), with its global allele counts.
+    Fully overwritten by the ETL open-data import (radiant-import-open-data, group 1000_genomes) from the OpenDataLake
+    Iceberg table 1000_genomes_v1 (legacy Radiant Iceberg table 1000_genomes when the source is not on its contract).
+    Shared, tenant-independent reference table.
+
+    '
+  usage: 'Join on locus_id (colocated with the variant tables). The ETL copies af into snv variant tg_af during
+    (re)annotation; the portal joins it directly for the thousand_genome_af filter/sort.
+
+    '
+  limitations: 'Covers the whole 1000 Genomes callset, not only variants seen in Radiant. Only global AC/AN/AF are
+    kept: the super-population frequencies and DP of the source are not imported.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: 1000_genomes
+  physicalName: 1000_genomes
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: locus_id
+    logicalType: integer
+    physicalType: BIGINT
+    description: Radiant variant id of the (chromosome, start, reference, alternate) allele, GET_VARIANT_ID encoding
+      when the allele fits it, otherwise the surrogate id from variant_lookup (matched on locus_hash). Same key
+      as snv variant/occurrence tables.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/1000_genomes_insert.sql; etl:dags/sql/open_data/1000_genomes_insert_hashes.sql
+    required: true
+    unique: true
+  - name: af
+    logicalType: number
+    physicalType: DOUBLE
+    description: Alternate allele frequency across all 1000 Genomes phase 3 samples (VCF INFO/AF).
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/1000_genomes_insert.sql; upstream:1000_genomes (radiant-open-datalake release-notes
+        1000_genomes/v1.md)
+  - name: ac
+    logicalType: integer
+    physicalType: INT(11)
+    description: Alternate allele count across all 1000 Genomes phase 3 samples (VCF INFO/AC).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:1000_genomes (radiant-open-datalake release-notes 1000_genomes/v1.md)
+  - name: an
+    logicalType: integer
+    physicalType: INT(11)
+    description: Total number of called alleles at the site in 1000 Genomes phase 3 (VCF INFO/AN), the denominator
+      of af.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:1000_genomes (radiant-open-datalake release-notes 1000_genomes/v1.md)
+  quality:
+  - name: 1000_genomes__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: 1000_genomes__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except locus_id).
+    query: SELECT (CASE WHEN COUNT(af) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(ac) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(an) = 0 THEN 1 ELSE 0 END) FROM 1000_genomes
+    mustBe: 0
+  - name: 1000_genomes__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except locus_id).
+    query: SELECT (CASE WHEN COUNT(DISTINCT af) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT ac) <= 1 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT an) <= 1 THEN 1 ELSE 0 END) FROM 1000_genomes
+    mustBe: 0
+  - name: 1000_genomes__should_be_within_range_af
+    type: sql
+    dimension: accuracy
+    description: af stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM 1000_genomes WHERE af < 0 OR af > 1
+    mustBe: 0
+  - name: 1000_genomes__validate_allele_counts
+    type: sql
+    description: 'Allele-count sanity for the 1000 Genomes frequency table: - ac (alt allele count) and an (total
+      called alleles) must be non-negative; - ac cannot exceed an'
+    query: SELECT COUNT(*) FROM (select locus_id, af, ac, an from radiant.1000_genomes where ac < 0 or an < 0 or
+      ac > an) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/1000_genomes__validate_allele_counts.sql
+  customProperties:
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(locus_id) BUCKETS 10
+  - property: consumers
+    value:
+    - portal/backend/internal/repository/starrocks/snv_occurrences.go
+    - portal/backend/internal/types/thousand_genomes.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/1000_genomes_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/1000_genomes.yml

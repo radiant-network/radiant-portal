@@ -1,0 +1,67 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.priority
+name: priority
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Priority of the request of a case: routine, urgent, asap or stat. Referenced by cases.priority_code. Shared by
+    every tenant (the PostgreSQL table has no tenant_code), exposed in each {tenant}_tenant database through radiant_jdbc;
+    the portal also serves it as GET /value_sets/{type}.'
+  usage: 'Join cases.priority_code = priority.code for the label. Meaning per the portal tooltips: routine (routine service),
+    urgent (to be actioned promptly), asap (as soon as possible), stat (to be actioned immediately, highest possible priority).
+    The ETL defaults a NULL priority_code to routine.'
+  limitations: 'The values are data seeded by the backend migrations (backend/scripts/init-sql/migrations), not a fixed enum:
+    later migrations or a deployment can add codes, so query the view for the current list. Codes are unique case-insensitively
+    (migration 000034) and stored in the case they were entered in. The portal UI shows its own labels (ASAP, STAT) instead
+    of name_en.'
+team:
+- username: radiant-portal
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: priority
+  physicalName: priority
+  physicalType: view
+  tags:
+  - per-tenant
+  properties:
+  - name: code
+    logicalType: string
+    description: Code of the priority, primary key; the value stored in the referencing columns.
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql; frontend:translations/common/en.json priority; etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+    examples:
+    - routine
+    - urgent
+    - asap
+    - stat
+  - name: name_en
+    logicalType: string
+    description: English label of the code (Routine, Urgent, Asap, Stat).
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql
+  customProperties:
+  - property: consumers
+    value:
+    - backend/internal/repository/starrocks/cases.go
+authoritativeDefinitions:
+- type: implementation
+  url: backend:internal/repository/starrocks/starrocks_tenant.go

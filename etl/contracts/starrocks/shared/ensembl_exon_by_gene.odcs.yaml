@@ -1,0 +1,251 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.ensembl_exon_by_gene
+name: ensembl_exon_by_gene
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per (Ensembl gene, exon) of the Ensembl GRCh38 GFF3 release, with the transcripts that contain
+    the exon. Fully overwritten by the ETL open-data import (group ensembl_exon_by_gene) from the OpenDataLake table
+    ensembl_exon_by_gene_v1 or the legacy Radiant Iceberg table ensembl_exon_by_gene, keeping rows with an exon_id.
+    Shared reference table.
+
+    '
+  usage: 'Filter on gene_id. The MCP unnests transcript_ids to find a gene''s transcripts (joined to gnomad_constraint);
+    the portal CNV views count exons per gene from it.
+
+    '
+  limitations: 'From the contract source, phase, alias, description, external_name and logic_name are always NULL
+    (the contract does not carry them). Exon-level columns are taken with any_value over the exon''s transcripts.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: ensembl_exon_by_gene
+  physicalName: ensembl_exon_by_gene
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: gene_id
+    logicalType: string
+    physicalType: varchar(128)
+    description: Ensembl stable gene id without version (ENSG...) of the exon's transcripts.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala); mcp:queries/genes.py
+    required: true
+  - name: exon_id
+    logicalType: string
+    physicalType: varchar(128)
+    description: Ensembl stable exon id without version (ENSE...).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/ensembl_exon_by_gene_insert.sql; upstream:ensembl
+    required: true
+  - name: chromosome
+    logicalType: string
+    physicalType: varchar(10)
+    description: Ensembl sequence name without chr prefix (e.g. 1, X, MT).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake release-notes ensembl_exon_by_gene/v1.md)
+    required: true
+  - name: start
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Exon start, 1-based inclusive.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake release-notes ensembl_exon_by_gene/v1.md)
+    required: true
+  - name: end
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Exon end, 1-based inclusive.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake release-notes ensembl_exon_by_gene/v1.md)
+    required: true
+  - name: transcript_ids
+    logicalType: array
+    physicalType: array<varchar(128)>
+    description: Set of Ensembl transcript ids, without version (ENST...), that contain this exon.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala exonsByGene); mcp:queries/genes.py
+  - name: version
+    logicalType: integer
+    physicalType: tinyint
+    description: Version of the Ensembl exon id (GFF3 version attribute).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: type
+    logicalType: string
+    physicalType: varchar(128)
+    description: GFF3 feature type, exon.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: strand
+    logicalType: string
+    physicalType: char(1)
+    description: Strand of the exon, + or -.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl
+  - name: phase
+    logicalType: integer
+    physicalType: tinyint
+    description: GFF3 phase column; Ensembl exon rows have none, so NULL (always NULL from the contract source).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/ensembl_exon_by_gene_insert.sql; upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: name
+    logicalType: string
+    physicalType: varchar(128)
+    description: GFF3 Name attribute of the exon (Ensembl sets it to the exon id).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: alias
+    logicalType: array
+    physicalType: array<varchar(128)>
+    description: GFF3 Alias attribute; not set on Ensembl exon rows, NULL (always NULL from the contract source).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/ensembl_exon_by_gene_insert.sql; upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: constitutive
+    logicalType: string
+    physicalType: varchar(128)
+    description: Ensembl constitutive flag of the exon, "1" when the exon is in every transcript of the gene, "0"
+      otherwise.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: description
+    logicalType: string
+    physicalType: varchar(500)
+    description: Not set on exon rows; NULL (always NULL from the contract source).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/ensembl_exon_by_gene_insert.sql; upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: ensembl_end_phase
+    logicalType: string
+    physicalType: varchar(10)
+    description: Ensembl end phase of the exon (reading frame at its 3' end, -1 when the exon end is non-coding).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl
+  - name: ensembl_phase
+    logicalType: string
+    physicalType: varchar(10)
+    description: Ensembl phase of the exon (reading frame at its 5' start, -1 when the exon start is non-coding).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:ensembl
+  - name: external_name
+    logicalType: string
+    physicalType: varchar(128)
+    description: Not set on exon rows; NULL (always NULL from the contract source).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/ensembl_exon_by_gene_insert.sql; upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: logic_name
+    logicalType: string
+    physicalType: varchar(500)
+    description: Not set on exon rows; NULL (always NULL from the contract source).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/ensembl_exon_by_gene_insert.sql; upstream:ensembl (radiant-open-datalake EnsemblGff.scala)
+  - name: length
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Exon length, end - start + 1.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: upstream:ensembl (radiant-open-datalake release-notes ensembl_exon_by_gene/v1.md)
+  quality:
+  - name: ensembl_exon_by_gene__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: ensembl_exon_by_gene__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except alias, chromosome, description, end, exon_id, external_name,
+      gene_id, logic_name, phase, start).
+    query: SELECT (CASE WHEN COUNT(transcript_ids) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(version) = 0 THEN 1
+      ELSE 0 END) + (CASE WHEN COUNT(type) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(strand) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(name) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(constitutive) = 0 THEN 1 ELSE 0 END) +
+      (CASE WHEN COUNT(ensembl_end_phase) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(ensembl_phase) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(length) = 0 THEN 1 ELSE 0 END) FROM ensembl_exon_by_gene
+    mustBe: 0
+  - name: ensembl_exon_by_gene__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except type).
+    query: SELECT (CASE WHEN COUNT(DISTINCT gene_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT exon_id)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT chromosome) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      start) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT end) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      version) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT strand) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT phase) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT name) <= 1 THEN 1 ELSE 0 END) +
+      (CASE WHEN COUNT(DISTINCT constitutive) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT description) <=
+      1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT ensembl_end_phase) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      ensembl_phase) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT external_name) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT logic_name) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT length) <= 1 THEN
+      1 ELSE 0 END) FROM ensembl_exon_by_gene
+    mustBe: 0
+  - name: ensembl_exon_by_gene__should_be_unique__gene_id_exon_id
+    metric: duplicateValues
+    arguments:
+      properties:
+      - gene_id
+      - exon_id
+    mustBe: 0
+    dimension: uniqueness
+    description: (gene_id, exon_id) is unique.
+  - name: ensembl_exon_by_gene__validate_start_end_order
+    type: sql
+    description: 'Genomic coordinate sanity for the Ensembl exon reference: - start must not exceed end (1-based
+      inclusive span).'
+    query: SELECT COUNT(*) FROM (select gene_id, exon_id, chromosome, start, `end` from radiant.ensembl_exon_by_gene
+      where start > `end`) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/ensembl_exon_by_gene__validate_start_end_order.sql
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`gene_id`, `exon_id`, `chromosome`)
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/queries/genes.py
+    - portal/backend/internal/repository/starrocks/cnv_occurrences.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/ensembl_exon_by_gene_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/ensembl_exon_by_gene.yml

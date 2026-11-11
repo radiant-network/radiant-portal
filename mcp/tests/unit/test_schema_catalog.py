@@ -1,5 +1,5 @@
-"""``describe_schema`` against the owners of the StarRocks schema: the ETL
-for the tables, the portal for the clinical views (``schema_sources``).
+"""``describe_schema`` against the data contracts of the StarRocks schema: the
+ETL's for the tables, the portal's for the tenant views (``contracts``).
 """
 
 import asyncio
@@ -34,23 +34,31 @@ def test_every_table_has_a_known_owner():
 
 @pytest.mark.parametrize("topic_name, table", _owned_by("portal"), ids=lambda v: getattr(v, "qualified", v))
 def test_clinical_views_and_columns_exist_in_the_portal(portal_views, topic_name, table):
-    assert table.qualified in portal_views, f"{topic_name}: {table.qualified} is not created by the portal"
+    assert table.qualified in portal_views, f"{topic_name}: {table.qualified} has no portal contract"
     missing = sorted(set(table.columns) - portal_views[table.qualified])
-    assert not missing, f"{table.qualified}: columns not in the portal view: {missing}"
+    assert not missing, f"{table.qualified}: columns not in the portal contract: {missing}"
 
 
 @pytest.mark.parametrize("topic_name, table", _owned_by("etl"), ids=lambda v: getattr(v, "qualified", v))
 def test_catalog_tables_and_columns_exist_in_the_etl(etl_tables, topic_name, table):
-    assert table.qualified in etl_tables, f"{topic_name}: {table.qualified} is not created by the ETL"
+    assert table.qualified in etl_tables, f"{topic_name}: {table.qualified} has no ETL contract"
     missing = sorted(set(table.columns) - etl_tables[table.qualified].keys())
-    assert not missing, f"{table.qualified}: columns not in the ETL DDL: {missing}"
+    assert not missing, f"{table.qualified}: columns not in the ETL contract: {missing}"
     assert set(table.enums) <= set(table.columns)
 
 
-@pytest.mark.parametrize("name", sorted(ENUMS))
-def test_enums_match_the_etl_dictionaries(etl_dictionaries, name):
-    assert name in etl_dictionaries, f"no dict_{name} macro in the ETL data QA dictionaries"
-    assert sorted(ENUMS[name]) == sorted(etl_dictionaries[name])
+def _catalog_enums():
+    return sorted({(table.qualified, column, name) for _, table in _owned_by("etl") for column, name in table.enums.items()})
+
+
+@pytest.mark.parametrize("qualified, column, name", _catalog_enums(), ids=lambda v: v)
+def test_catalog_enums_match_the_etl_contracts(etl_enums, qualified, column, name):
+    assert (qualified, column) in etl_enums, f"{qualified}.{column}: no enum in the ETL contract"
+    assert sorted(ENUMS[name]) == sorted(etl_enums[(qualified, column)])
+
+
+def test_every_enum_is_checked_against_a_contract():
+    assert set(ENUMS) <= {name for *_, name in _catalog_enums()}
 
 
 def test_enum_references_are_known():

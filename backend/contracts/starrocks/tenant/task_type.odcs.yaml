@@ -1,0 +1,78 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.task_type
+name: task_type
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: Type of a bioinformatics task (alignment, variant calling, Radiant annotation, QC metrics, clinical report...).
+    Referenced by task.task_type_code. Shared by every tenant (the PostgreSQL table has no tenant_code), exposed in each {tenant}_tenant
+    database through radiant_jdbc; the portal also serves it as GET /value_sets/{type}.
+  usage: Join task.task_type_code = task_type.code for the label, or filter task on task_type_code. The ETL selects its input
+    files and the existing annotation / QC tasks on these codes (e.g. alignment_germline_variant_calling, radiant_germline_annotation,
+    radiant_germline_cnv_annotation, radiant_somatic_annotation, quality_control_metrics).
+  limitations: 'The values are data seeded by the backend migrations (backend/scripts/init-sql/migrations), not a fixed enum:
+    later migrations or a deployment can add codes, so query the view for the current list. Codes are unique case-insensitively
+    (migration 000034) and stored in the case they were entered in. Migration 000044 (RAD-116) deleted the exomiser and exomiser_cnv
+    task types: their outputs moved to the radiant_germline_annotation / radiant_germline_cnv_annotation tasks.'
+team:
+- username: radiant-portal
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: task_type
+  physicalName: task_type
+  physicalType: view
+  tags:
+  - per-tenant
+  properties:
+  - name: code
+    logicalType: string
+    description: Code of the task type, primary key; the value stored in the referencing columns.
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/migrations/000004_add_radiant_somatic_annotation.up.sql;
+        backend:scripts/init-sql/migrations/000020_add_clinical_report_task_and_data_type.up.sql; backend:scripts/init-sql/migrations/000028_qd_qc_metrics_task_and_data_type.up.sql;
+        backend:scripts/init-sql/migrations/000039_add_germline_cnv_annotation_and_exomiser_cnv_task_types.up.sql; backend:scripts/init-sql/migrations/000044_embed_exomiser_in_annotation_tasks.up.sql
+    examples:
+    - alignment
+    - alignment_germline_variant_calling
+    - alignment_somatic_variant_calling
+    - family_variant_calling
+    - somatic_variant_calling
+    - tumor_only_variant_calling
+    - radiant_germline_annotation
+    - radiant_germline_cnv_annotation
+    - radiant_somatic_annotation
+    - rnaseq_analysis
+    - quality_control_metrics
+    - clinical_report
+  - name: name_en
+    logicalType: string
+    description: English label of the code (e.g. radiant_germline_annotation = RADIANT Germline Annotation, family_variant_calling
+      = Family Joint Genotyping).
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql
+  customProperties:
+  - property: consumers
+    value:
+    - backend/internal/repository/starrocks/cases.go
+authoritativeDefinitions:
+- type: implementation
+  url: backend:internal/repository/starrocks/starrocks_tenant.go

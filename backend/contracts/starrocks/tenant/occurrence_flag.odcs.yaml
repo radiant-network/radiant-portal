@@ -1,0 +1,119 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.occurrence_flag
+name: occurrence_flag
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per occurrence (SNV or CNV) a user marked in a case''s variant list, with the mark (flag, pin or
+    star). An occurrence carries at most one mark: setting another one replaces it (upsert on the key), removing it
+    deletes the row. Rows of the portal''s PostgreSQL table public.occurrence_flag, read through the JDBC catalog
+    radiant_jdbc and filtered to the tenant (tenant_code). Written by the /{tenant}/occurrences/flags routes.
+
+    '
+  usage: 'Primary key (case_id, occurrence_id, seq_id, task_id). Join an occurrence table on occurrence_id plus task_id,
+    seq_id and case_id: for SNVs `f.occurrence_id = CAST(o.locus_id AS VARCHAR) AND f.task_id = o.task_id AND f.seq_id
+    = o.seq_id` on germline__snv__occurrence (o.tumor_seq_id on somatic__snv__occurrence); for CNVs `f.occurrence_id
+    = CAST(c.cnv_id AS VARCHAR)` on germline__cnv__occurrence / somatic__cnv__occurrence. Always add `f.case_id = <case>`:
+    a sequencing can belong to several cases. Filter marks with `flag_type IN (...)`.
+
+    '
+  limitations: 'No author or timestamp: who set the mark and when is not recorded. occurrence_id is text and does not
+    say whether it is a locus_id or a cnv_id; the occurrence table you join decides. The backend joins it without an
+    explicit cast (implicit varchar/bigint comparison).
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: occurrence_flag
+    physicalName: occurrence_flag
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: case_id
+        logicalType: integer
+        description: Case in which the occurrence is marked.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000008_add_occurrence_flag.up.sql
+        relationships:
+          - type: foreignKey
+            to: cases.id
+      - name: occurrence_id
+        logicalType: string
+        description: Id of the marked occurrence as text; the locus_id of an SNV occurrence or the cnv_id of a CNV occurrence.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/germline_snv_occurrences.go; backend:internal/repository/starrocks/cnv_occurrences.go
+      - name: seq_id
+        logicalType: integer
+        description: Sequencing experiment of the occurrence (seq_id of germline tables, tumor_seq_id of somatic SNVs).
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000008_add_occurrence_flag.up.sql; backend:internal/repository/starrocks/somatic_snv_occurrences.go
+        relationships:
+          - type: foreignKey
+            to: sequencing_experiment.id
+      - name: task_id
+        logicalType: integer
+        description: Annotation task that produced the occurrence (occurrence task_id).
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000008_add_occurrence_flag.up.sql; backend:internal/repository/starrocks/occurrences.go
+        relationships:
+          - type: foreignKey
+            to: task.id
+      - name: flag_type
+        logicalType: string
+        description: The mark; flag, pin or star (CHECK constraint in the DDL).
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000008_add_occurrence_flag.up.sql; backend:internal/types/occurrence_flag.go;
+              frontend:translations/common/en.json occurrence_flag
+        examples:
+          - flag
+          - pin
+          - star
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the row; the view already keeps only the current tenant.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/starrocks_tenant.go buildViewStatement; backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cnv_occurrences.go
+          - backend/internal/repository/starrocks/germline_snv_occurrences.go
+          - backend/internal/repository/starrocks/occurrences.go
+          - backend/internal/repository/starrocks/somatic_snv_occurrences.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

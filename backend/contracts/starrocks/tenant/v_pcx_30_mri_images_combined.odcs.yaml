@@ -1,0 +1,166 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_pcx_30_mri_images_combined
+name: v_pcx_30_mri_images_combined
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    PCX 3.0 imaging, one row per MRI imaging session in Flywheel of a patient of the release cohort: Flywheel
+    subject, project and session ids, session label, age at session, anatomical site, modality, the Flywheel deep
+    link and an optional clinical report link. Grant-guarded read surface over
+    radiant_data_dev.v_pcx_30_mri_images_combined, which reads imaging_sessions directly (no pcx_30 base table)
+    and keeps only the cohort's subjects and imaging_modality = 'MRI'.
+  usage: >-
+    Read it as the end user (the portal API and the MCP query StarRocks with the caller's JWT). Join on
+    (organization_code, patient_id_type, patient_id); v_pcx_30_patient_key maps that key to patient_key.
+    v_pcx_30_patient_list.has_imaging already says whether a patient has a session. Use age_at_session_days, never
+    session_date.
+  limitations: >-
+    session_name embeds the age in days and the time of day (e.g. '5766d_B_brain_18h40m') and is shown to every
+    caller; only session_date is gated. flywheel_url and clinical_report_url are shown to every caller: they are
+    pointers whose resources need their own authorization. Column masking only, no row filtering; a NULL
+    organization_code fails closed; the lab grant is not bounded by organization_code; radiant_patient_id is
+    projected unmasked.
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_pcx_30_mri_images_combined
+    physicalName: v_pcx_30_mri_images_combined
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: organization_name
+        description: Name of the institution that contributed the patient's data (the pcx_30_organization_override
+          seed wins where it carries the patient). Shown to every caller.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: organization_code
+        description: Code of the contributing institution, pcx_30_organization_ref.code joined on the organization
+          name (the override seed wins). The vocabulary auth.pii_grant keys on; NULL fails closed to de-identified.
+        examples:
+          - CHOP
+          - SCH
+          - UCSF-BCH
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/mri_images_access_controlled.sql.tmpl
+      - name: patient_id
+        description: "The patient's identifier as this caller may see it: CASE WHEN can_read_phi THEN mrn ELSE
+          research_id END. Join key only: never select or show it."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/mri_images_access_controlled.sql.tmpl
+      - name: patient_id_type
+        description: "'mrn' when can_read_phi, else 'research_id': the namespace of patient_id on this row."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/mri_images_access_controlled.sql.tmpl
+      - name: radiant_patient_id
+        description: Portal patient id (radiant_jdbc.public.patient.id), matched on organization_code and the MRN
+          with leading zeros stripped on both sides; NULL when the patient has no portal record. Not masked.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/mri_images_access_controlled.sql.tmpl
+      - name: flywheel_subject_id
+        description: Flywheel internal identifier of the subject.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: flywheel_project_id
+        description: Flywheel internal identifier of the project holding the session.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: flywheel_project_name
+        description: Flywheel project name, generally the diagnosis cohort.
+        examples:
+          - Medullo_v2
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: session_id
+        description: Flywheel internal identifier of the imaging session; unique in the view.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_mri_images_combined.sql
+      - name: session_name
+        description: Flywheel session label. Embeds the age in days and the time of day but no calendar date.
+        examples:
+          - 5766d_B_brain_18h40m
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: session_date
+        description: Date of the session, date_add(dob, age_at_session_days). NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/mri_images_access_controlled.sql.tmpl; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_mri_images_combined.sql
+      - name: age_at_session_days
+        description: Age in days at the imaging session, an integer 0-44945; this domain has no unknown-date
+          sentinel.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_mri_images_combined.sql
+      - name: anatomical_site
+        description: Anatomical region imaged.
+        examples:
+          - brain
+          - spine
+          - brain-spine
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: imaging_modality
+        description: Imaging modality of the session; the view keeps 'MRI' only.
+        examples:
+          - MRI
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_mri_images_combined.sql
+      - name: flywheel_url
+        description: Deep link to the session in Flywheel (chop.flywheel.io hosts every site's images), built from
+          flywheel_project_id and session_id unless pcx_30_imaging_link overrides it for the session.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_mri_images_combined.sql; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: clinical_report_url
+        description: Link to the clinical report of the session, from pcx_30_imaging_link; NULL unless a link was
+          curated. A pointer only.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: can_read_phi
+        description: "TRUE when the caller may read this row's PHI: an org grant (auth.pii_grant, a can_read_pii
+          role at the row's organization_code) or a lab grant (auth.pii_lab_patient, a can_read_pii role at the
+          diagnosis lab of a portal case of radiant_patient_id). The caller is current_user(), the JWT sub."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/mri_images_access_controlled.sql.tmpl; backend:internal/repository/starrocks/views/auth_pii_lab_patient.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/types/pcx_patient_query.go
+          - backend/scripts/seed/views/v_pcx_30_patient_list.sql.tmpl
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/pcx_tables/access_controlled_views/mri_images_access_controlled.sql.tmpl

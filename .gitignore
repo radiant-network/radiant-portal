@@ -8,3 +8,4 @@ frontend/openapitools.json
 __pycache__/
 clients/python/.gen/
 .trivy/
+backend/.gen/

@@ -1,0 +1,82 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.data_type
+name: data_type
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: Type of content of a document (file), e.g. aligned reads, germline SNV, somatic CNV, Exomiser report. Referenced
+    by document.data_type_code; with document.format_code it identifies a file of a task (e.g. data_type_code = 'snv' AND
+    format_code = 'gvcf'). Shared by every tenant (the PostgreSQL table has no tenant_code), exposed in each {tenant}_tenant
+    database through radiant_jdbc; the portal also serves it as GET /value_sets/{type}.
+  usage: Join document.data_type_code = data_type.code for the label. To find a file, filter document on data_type_code and
+    format_code together, as the ETL does (e.g. gcnv + vcf for the germline CNV VCF, alignment + cram / crai for the reads).
+  limitations: 'The values are data seeded by the backend migrations (backend/scripts/init-sql/migrations), not a fixed enum:
+    later migrations or a deployment can add codes, so query the view for the current list. Codes are unique case-insensitively
+    (migration 000034) and stored in the case they were entered in. About 20 codes are seeded; the examples list only the
+    main ones. exomiser_cnv (migration 000044) is the CNV Exomiser report, exomiser the SNV one.'
+team:
+- username: radiant-portal
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: data_type
+  physicalName: data_type
+  physicalType: view
+  tags:
+  - per-tenant
+  properties:
+  - name: code
+    logicalType: string
+    description: 'Code of the data type, primary key; the value stored in the referencing columns. snv / ssnv: germline /
+      somatic SNV; gcnv / scnv: germline / somatic CNV; gsv / ssv: germline / somatic SV; ssup: sequencing data supplement;
+      aggqc: aggregate QC report.'
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/migrations/000020_add_clinical_report_task_and_data_type.up.sql;
+        backend:scripts/init-sql/migrations/000028_qd_qc_metrics_task_and_data_type.up.sql; backend:scripts/init-sql/migrations/000043_add_qlin_data_types_and_xlsx_file_format.up.sql;
+        backend:scripts/init-sql/migrations/000044_embed_exomiser_in_annotation_tasks.up.sql
+    examples:
+    - alignment
+    - snv
+    - ssnv
+    - gcnv
+    - scnv
+    - gsv
+    - ssv
+    - ssup
+    - exomiser
+    - exomiser_cnv
+    - aggqc
+    - clinical_report
+    - igv
+    - qcrun
+  - name: name_en
+    logicalType: string
+    description: English label of the code (e.g. snv = Germline SNV, alignment = Aligned Reads, exomiser_cnv = Exomiser CNV
+      Report).
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql
+  customProperties:
+  - property: consumers
+    value:
+    - backend/internal/repository/starrocks/documents.go
+authoritativeDefinitions:
+- type: implementation
+  url: backend:internal/repository/starrocks/starrocks_tenant.go

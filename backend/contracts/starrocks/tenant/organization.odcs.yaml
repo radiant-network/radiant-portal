@@ -1,0 +1,111 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.organization
+name: organization
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per organization of the tenant: healthcare providers, diagnostic laboratories, sequencing centers,
+    research institutes. Rows of the portal''s PostgreSQL table public.organization read through radiant_jdbc and
+    filtered on tenant_code = the tenant. Managed through the portal admin API (create, update) and seeded per tenant
+    (e.g. backend/scripts/init-sql/qlin/organization.sql).'
+  usage: 'Primary key (code, tenant_code): join on both columns. Referenced by cases.ordering_organization_code
+    (prescribing institution), cases.diagnosis_lab_code (diagnostic lab), patient.organization_code and
+    fetus.organization_code (managing organization), sample.organization_code and
+    sequencing_experiment.sequencing_lab_code. Label of the category: organization_category on category_code. Organization
+    codes are also the scope of the org-level grants (can_read_pii, can_edit_case...).'
+  limitations: 'No integer id (dropped by migration 000009): the code is the key. code and category_code cannot change
+    after creation. notification_emails is NULL when the organization has no list. No json, jsonb or uuid column in
+    public.organization.'
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: organization
+    physicalName: organization
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: code
+        logicalType: string
+        description: Organization code, key with tenant_code; unique in the tenant case-insensitively, stored as entered.
+          Starts with a letter; letters, digits, underscores and dashes, up to 50.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000009_init_auth_multi_tenancy.up.sql; backend:scripts/init-sql/migrations/000034_case_insensitive_code_unique_indexes.up.sql;
+              backend:internal/types/organization.go'
+        examples:
+          - CHUSJ
+          - LDM-CHUSJ
+          - CQGC
+      - name: name
+        logicalType: string
+        description: Display name of the organization.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/organization.go; backend:scripts/init-sql/qlin/organization.sql'
+      - name: category_code
+        logicalType: string
+        description: Category of the organization, an organization_category.code.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/types/organization.go'
+        relationships:
+          - type: foreignKey
+            to: organization_category.code
+        examples:
+          - healthcare_provider
+          - diagnostic_laboratory
+          - sequencing_center
+          - research_institute
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the organization, part of the key; always the tenant of this database (the view filters on
+          it).
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000009_init_auth_multi_tenancy.up.sql'
+      - name: notification_emails
+        logicalType: string
+        description: Comma-separated distribution list of a laboratory for the data-availability (case group)
+          notifications; NULL when there is none.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000040_add_organization_notification_emails.up.sql; backend:internal/types/organization.go;
+              frontend:translations/common/en.json admin.organizations.fields.notification_emails_hint'
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/repository/starrocks/documents.go
+          - backend/internal/repository/starrocks/organizations.go
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/repository/starrocks/sequencing_experiment.go
+          - backend/internal/repository/starrocks/variants.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

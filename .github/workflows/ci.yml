@@ -2,6 +2,8 @@
 name: CI
 on:
   pull_request:
+    # edited: a new title re-runs contracts-breaking (the title declares the product bump)
+    types: [opened, synchronize, reopened, edited]
   push:
     branches: [main]
 
@@ -25,3 +27,8 @@ jobs:
       # Only tasks whose inputs changed between the PR base and HEAD,
       # plus the tasks that depend on them (e.g. swagger.yaml -> frontend:api-client-check).
       - run: moon ci --job ${{ matrix.shard }} --job-total 2
+        env:
+          # contracts-breaking: the bump the contracts need <= the bump the title declares (none on a push)
+          CONTRACTS_BASE: origin/${{ github.base_ref || 'main' }}
+          CONTRACTS_PR_TITLE: ${{ github.event.pull_request.title }}
+          CONTRACTS_PR_BODY: ${{ github.event.pull_request.body }}

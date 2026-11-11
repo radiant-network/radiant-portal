@@ -1,0 +1,131 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_pcx_30_surgery_level_combined
+name: v_pcx_30_surgery_level_combined
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    PCX 3.0 tumor-directed surgeries (resections and biopsies), several rows per patient: one per distinct
+    surgery record of the CBTN treatment table (surgery = 'Yes'), with age at surgery, extent of resection, whether
+    it was part of the initial treatment and, with PHI access, its date and BRIM evidence link. Grant-guarded read
+    surface over radiant_data_dev.v_pcx_30_surgery_level_combined.
+  usage: >-
+    Read it as the end user (the portal API and the MCP query StarRocks with the caller's JWT). Join on
+    (organization_code, patient_id_type, patient_id); v_pcx_30_patient_key maps that key to patient_key. Use
+    age_at_surgery_days, never surgery_date. To count non-frontline surgeries, exclude both unknown forms first:
+    CAST(age_at_surgery_days AS INT) IS NULL and CAST(age_at_surgery_days AS INT) < 0.
+  limitations: >-
+    is_initial_treatment = 'no' means "not known to be initial treatment": it absorbs rows without a usable
+    initial-diagnosis anchor and unknown ages (27% of 'no' on the 2026-10-01 build). age_at_surgery_days carries
+    both unknown conventions (string sentinels and -1 / negative numbers), so surgery_date is dob minus one day on
+    -1 rows. Column masking only, no row filtering; a NULL organization_code fails closed; the lab grant is not
+    bounded by organization_code; radiant_patient_id is projected unmasked. The rendered
+    surgery_level_access_controlled.sql (tenant cbtn) predates brim_url and lacks it.
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_pcx_30_surgery_level_combined
+    physicalName: v_pcx_30_surgery_level_combined
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: organization_name
+        description: Name of the institution that contributed the patient's data (the pcx_30_organization_override
+          seed wins where it carries the patient). Shown to every caller.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: organization_code
+        description: Code of the contributing institution, pcx_30_organization_ref.code joined on the organization
+          name (the override seed wins). The vocabulary auth.pii_grant keys on; NULL fails closed to de-identified.
+        examples:
+          - CHOP
+          - SCH
+          - UCSF-BCH
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/surgery_level_access_controlled.sql.tmpl
+      - name: patient_id
+        description: "The patient's identifier as this caller may see it: CASE WHEN can_read_phi THEN mrn ELSE
+          research_id END. Join key only: never select or show it."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/surgery_level_access_controlled.sql.tmpl
+      - name: patient_id_type
+        description: "'mrn' when can_read_phi, else 'research_id': the namespace of patient_id on this row."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/surgery_level_access_controlled.sql.tmpl
+      - name: radiant_patient_id
+        description: Portal patient id (radiant_jdbc.public.patient.id), matched on organization_code and the MRN
+          with leading zeros stripped on both sides; NULL when the patient has no portal record. Not masked.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/surgery_level_access_controlled.sql.tmpl
+      - name: surgery_date
+        description: Date of the surgery, date_add(dob, age_at_surgery_days). NULL without PHI access; dob minus one
+          day when the age is -1.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/surgery_level_access_controlled.sql.tmpl; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_surgery_days
+        description: Age in days at the surgery (treatment.age_at_surgery, a reviewer-accepted override wins). -1 or
+          another negative number, or a string sentinel such as 'Not Reported', for an unknown date.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_surgery_level_combined.sql; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/pcx_30_surgery_level_deid.sql
+      - name: extent_of_tumor_resection
+        description: Extent of tumor resection performed during the surgery.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: is_initial_treatment
+        description: "'yes' when the surgery age lies between the initial-diagnosis age and the first subsequent
+          disease event age (int_pcx_30_initial_events), i.e. frontline management of the initial tumor; 'no'
+          otherwise, including when it cannot be determined."
+        examples:
+          - 'yes'
+          - 'no'
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_surgery_level_combined.sql; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: brim_url
+        description: BRIM link to the curated evidence of this surgery (pcx_30_surgery_brim_url, matched on MRN and
+          age at surgery). It embeds BRIM's internal patient id, so NULL without PHI access; NULL for a surgery
+          with no BRIM abstraction.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/surgery_level_access_controlled.sql.tmpl; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_surgery_level_combined.sql
+      - name: can_read_phi
+        description: "TRUE when the caller may read this row's PHI: an org grant (auth.pii_grant, a can_read_pii
+          role at the row's organization_code) or a lab grant (auth.pii_lab_patient, a can_read_pii role at the
+          diagnosis lab of a portal case of radiant_patient_id). The caller is current_user(), the JWT sub."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/surgery_level_access_controlled.sql.tmpl; backend:internal/repository/starrocks/views/auth_pii_lab_patient.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/types/pcx_patient_query.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/pcx_tables/access_controlled_views/surgery_level_access_controlled.sql.tmpl

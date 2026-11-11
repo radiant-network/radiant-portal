@@ -1,0 +1,98 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.task_context
+name: task_context
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Junction between a task and the sequencing experiments it ran on: one row per (task, sequencing
+    experiment, case), unique. Rows of the portal''s PostgreSQL table public.task_context read through the
+    radiant_jdbc catalog; the table has no tenant_code, so the view is NOT filtered and holds the rows of every tenant.
+    Written by the portal worker with each task of a case batch: one row per aliquot listed in the task.
+
+    '
+  usage: 'Join task on task_id = task.id (the task view is tenant-filtered, so an inner join scopes the rows to the
+    tenant) and sequencing_experiment on sequencing_experiment_id. case_id is set only for case-level tasks (family
+    and somatic calling, RADIANT annotation, QC, clinical report); per-sequencing tasks such as
+    alignment_germline_variant_calling have case_id NULL and are shared by every case of the experiment. To find a
+    case''s tasks, join on sequencing_experiment_id and keep (task_context.case_id IS NULL OR task_context.case_id =
+    <case_id>), never on case_id alone. The occurrence tables'' (seq_id, task_id) match (sequencing_experiment_id,
+    task_id) here.
+
+    '
+  limitations: 'Not tenant-filtered: query it joined to a tenant-filtered view (task, sequencing_experiment) or by
+    ids taken from one. case_id is NULL for per-sequencing tasks. The ETL reads the underlying PostgreSQL table
+    (radiant_jdbc.public.task_context) directly, not this view.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: task_context
+    physicalName: task_context
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: task_id
+        logicalType: integer
+        description: Task that ran on the sequencing experiment.
+        relationships:
+          - type: foreignKey
+            to: task.id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql task_context_task_id_fkey; backend:cmd/worker/case_validation.go
+              persistTask
+      - name: case_id
+        logicalType: integer
+        description: Case the task belongs to, for case-level task types (CaseRelatedTaskTypes); NULL for
+          per-sequencing tasks such as alignment_germline_variant_calling. With sequencing_experiment_id, references
+          case_has_sequencing_experiment.
+        relationships:
+          - type: foreignKey
+            to: case_has_sequencing_experiment.case_id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:cmd/worker/case_validation.go CaseRelatedTaskTypes; backend:scripts/init-sql/migrations/000001_init.up.sql
+              task_context_case_id_sequencing_experiment_id_fkey; etl:radiant/dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+      - name: sequencing_experiment_id
+        logicalType: integer
+        description: Sequencing experiment the task ran on (the seq_id of the occurrences it produced).
+        relationships:
+          - type: foreignKey
+            to: case_has_sequencing_experiment.sequencing_experiment_id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql task_context_case_id_sequencing_experiment_id_fkey;
+              backend:internal/repository/starrocks/variants.go
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/repository/starrocks/documents.go
+          - backend/internal/repository/starrocks/igv.go
+          - backend/internal/repository/starrocks/variants.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

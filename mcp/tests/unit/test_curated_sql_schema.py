@@ -2,7 +2,7 @@
 
 Each builder is called with sample arguments covering its branches. sqlglot
 parses the SQL and resolves every column against the tables the ETL and the
-portal create (``schema_sources``): an unknown table, an unknown column, or a
+portal publish (``contracts``): an unknown table, an unknown column, or a
 column no table of the FROM clause holds fails here, not at runtime in
 production.
 """

@@ -1,0 +1,133 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.topmed_bravo
+name: topmed_bravo
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per variant of the TOPMed BRAVO allele-frequency VCFs (freeze 8, hg38), with allele and homozygote
+    counts. Fully overwritten by the ETL open-data import (group topmed_bravo) from the OpenDataLake table topmed_bravo_v1
+    (legacy Radiant Iceberg table topmed_bravo when not on its contract). Shared reference table.
+
+    '
+  usage: 'Join on locus_id. The ETL copies af into the snv variant column topmed_af during (re)annotation; the portal
+    joins this table directly for the topmed_af filter/sort.
+
+    '
+  limitations: 'Covers the whole BRAVO callset, not only Radiant variants. Release is chosen by the operator in
+    OpenDataLake (freeze 8 at contract creation; on freeze 10 AN is recomputed as round(AC/AF)).
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: topmed_bravo
+  physicalName: topmed_bravo
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: locus_id
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Radiant variant id of the allele, GET_VARIANT_ID encoding when the allele fits it, otherwise the
+      surrogate id from variant_lookup (matched on locus_hash).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/topmed_bravo_insert.sql
+    required: true
+    unique: true
+  - name: af
+    logicalType: number
+    physicalType: double
+    description: Alternate allele frequency in TOPMed BRAVO (VCF INFO/AF).
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/topmed_bravo_insert.sql; upstream:topmed_bravo (radiant-open-datalake release-notes
+        topmed_bravo/v1.md)
+  - name: ac
+    logicalType: integer
+    physicalType: INT(11)
+    description: Alternate allele count in TOPMed BRAVO (VCF INFO/AC).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:topmed_bravo (radiant-open-datalake release-notes topmed_bravo/v1.md)
+  - name: an
+    logicalType: integer
+    physicalType: INT(11)
+    description: Number of called alleles in TOPMed BRAVO (INFO/AN on freeze 8; round(AC/AF) on freeze 10, which
+      no longer ships AN).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:topmed_bravo (radiant-open-datalake release-notes topmed_bravo/v1.md)
+  - name: hom
+    logicalType: integer
+    physicalType: INT(11)
+    description: Number of individuals homozygous for the alternate allele in TOPMed BRAVO (first element of INFO/HOM;
+      source column homozygotes).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/topmed_bravo_insert.sql; upstream:topmed_bravo (radiant-open-datalake release-notes
+        topmed_bravo/v1.md)
+  quality:
+  - name: topmed_bravo__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: topmed_bravo__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except locus_id).
+    query: SELECT (CASE WHEN COUNT(af) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(ac) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(an) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(hom) = 0 THEN 1 ELSE 0 END) FROM topmed_bravo
+    mustBe: 0
+  - name: topmed_bravo__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except an, locus_id).
+    query: SELECT (CASE WHEN COUNT(DISTINCT af) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT ac) <= 1 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT hom) <= 1 THEN 1 ELSE 0 END) FROM topmed_bravo
+    mustBe: 0
+  - name: topmed_bravo__should_be_within_range_af
+    type: sql
+    dimension: accuracy
+    description: af stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM topmed_bravo WHERE af < 0 OR af > 1
+    mustBe: 0
+  - name: topmed_bravo__validate_allele_counts
+    type: sql
+    description: 'Allele-count sanity for the TOPMed Bravo frequency table: - ac (alt allele count), an (total called
+      alleles) and hom (homozygote count) must be non-negative; - ac cannot exceed an'
+    query: SELECT COUNT(*) FROM (select locus_id, af, ac, an, hom from radiant.topmed_bravo where ac < 0 or an <
+      0 or hom < 0 or ac > an) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/topmed_bravo__validate_allele_counts.sql
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`locus_id`)
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(`locus_id`) BUCKETS 10
+  - property: consumers
+    value:
+    - portal/backend/internal/types/topmed.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/topmed_bravo_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/topmed_bravo.yml

@@ -1,0 +1,71 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.family_relationship
+name: family_relationship
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: Relationship of a family member to the proband of the case (mother, father, sibling, fetus...). Referenced by family.relationship_to_proband_code;
+    the proband itself has code 'proband'. Shared by every tenant (the PostgreSQL table has no tenant_code), exposed in each
+    {tenant}_tenant database through radiant_jdbc; the portal also serves it as GET /value_sets/{type}.
+  usage: Join family.relationship_to_proband_code = family_relationship.code for the label. The case batch accepts mother,
+    father, brother, sister, sibling and proband for patients; fetus (migration 000021) is for the fetuses of the proband.
+    The ETL treats a missing family row of a germline sequencing as the proband.
+  limitations: 'The values are data seeded by the backend migrations (backend/scripts/init-sql/migrations), not a fixed enum:
+    later migrations or a deployment can add codes, so query the view for the current list. Codes are unique case-insensitively
+    (migration 000034) and stored in the case they were entered in. The frontend translates many more relationship codes (child,
+    grandparents, cousins, twins...) that are not seeded here.'
+team:
+- username: radiant-portal
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: family_relationship
+  physicalName: family_relationship
+  physicalType: view
+  tags:
+  - per-tenant
+  properties:
+  - name: code
+    logicalType: string
+    description: Code of the relationship to the proband, primary key; the value stored in the referencing columns.
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/migrations/000021_add_fetus.up.sql;
+        backend:internal/types/case_batch.go; etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+    examples:
+    - proband
+    - mother
+    - father
+    - brother
+    - sister
+    - sibling
+    - fetus
+  - name: name_en
+    logicalType: string
+    description: English label of the code (Mother, Father, Brother, Sister, Proband, Sibling, Fetus).
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/migrations/000021_add_fetus.up.sql
+  customProperties:
+  - property: consumers
+    value:
+    - backend/internal/repository/starrocks/documents.go
+authoritativeDefinitions:
+- type: implementation
+  url: backend:internal/repository/starrocks/starrocks_tenant.go

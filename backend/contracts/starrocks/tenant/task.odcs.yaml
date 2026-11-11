@@ -1,0 +1,138 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.task
+name: task
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per bioinformatics task: one run of a pipeline (alignment and variant calling, family joint
+    genotyping, RADIANT annotation, QC, clinical report...) on one or more sequencing experiments. Rows of the
+    portal''s PostgreSQL table public.task read through the radiant_jdbc catalog and filtered to the tenant (WHERE
+    tenant_code = ''<tenant>''). Written by the portal worker from the tasks of create_case / patch_case batches; the
+    ETL registers its annotation and QC tasks through PATCH /{tenant}/cases/batch.
+
+    '
+  usage: 'Key id, which is the task_id of the occurrence tables. Join task_context on task_context.task_id = task.id
+    for the sequencing experiments (and the case, for case-level tasks) it ran on, and task_has_document on task_id
+    for its input and output files. Filter on task_type_code (e.g. ''radiant_germline_annotation''). A re-run adds a
+    new task next to the old one: take the newest by created_on DESC, id DESC.
+
+    '
+  limitations: 'pipeline_name and genome_build are optional and written as an empty string when not submitted (test
+    NULL and ''''). The legacy task types exomiser and exomiser_cnv were removed by migration 000044: their outputs are
+    now outputs of the annotation tasks. The ETL reads the underlying PostgreSQL table (radiant_jdbc.public.task)
+    directly, not this view.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: task
+    physicalName: task
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Internal task id (identity, primary key); the task_id of the occurrence tables and of the API.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/types/task.go TaskOccurrenceType
+      - name: task_type_code
+        logicalType: string
+        description: Kind of task, a code of task_type. The annotation tasks (radiant_germline_annotation,
+          radiant_germline_cnv_annotation, radiant_somatic_annotation) produce the occurrences; the
+          alignment_*_variant_calling tasks hold the per-sequencing files (CRAM, gVCF, CNV VCF).
+        examples:
+          - alignment_germline_variant_calling
+          - radiant_germline_annotation
+          - radiant_germline_cnv_annotation
+          - radiant_somatic_annotation
+          - quality_control_metrics
+        relationships:
+          - type: foreignKey
+            to: task_type.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/task.go; backend:scripts/init-sql/migrations/000001_init.up.sql; etl:radiant/dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+      - name: created_on
+        logicalType: timestamp
+        description: When the task was registered in the portal database (set on insert), not when the pipeline ran.
+          The ETL takes the newest task of a type by it.
+        customProperties:
+          - property: postgresType
+            value: timestamp without time zone
+          - property: descriptionSource
+            value: backend:internal/types/task.go autoCreateTime; etl:radiant/dags/sql/clinical/pending_annotation_select.sql
+      - name: pipeline_name
+        logicalType: string
+        description: Name of the pipeline that ran the task (optional), e.g. 'Dragen' for alignment tasks or
+          'snv-post-processing' for the ETL's germline annotation task. The ETL matches the CNV caller on its prefix.
+        examples:
+          - Dragen
+          - snv-post-processing
+          - cnv-post-processing
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: etl:radiant/tasks/nextflow/batch.py ANNOTATION_PIPELINE; etl:radiant/tasks/nextflow/cnv/resolve.py
+      - name: pipeline_version
+        logicalType: string
+        description: Version of the pipeline (required); for the ETL's annotation tasks, the pinned pipeline revision
+          (a git commit or tag).
+        examples:
+          - 4.4.4
+          - 0df1ac0
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/case_batch.go CaseTaskBatch; etl:radiant/tasks/nextflow/batch.py ANNOTATION_PIPELINE
+      - name: genome_build
+        logicalType: string
+        description: Reference genome build of the task's outputs (optional). Stored with the spelling 'GRch38'.
+        examples:
+          - GRch38
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: etl:radiant/tasks/nextflow/batch.py GENOME_BUILD; backend:internal/types/case_batch.go CaseTaskBatch
+      - name: tenant_code
+        logicalType: string
+        description: Tenant owning the row; always the view's tenant, since the view filters on it.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql; backend:internal/repository/starrocks/starrocks_tenant.go
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/repository/starrocks/documents.go
+          - backend/internal/repository/starrocks/igv.go
+          - backend/internal/repository/starrocks/transcript_report.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

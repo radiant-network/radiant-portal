@@ -1,0 +1,108 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.panel
+name: panel
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per gene panel of the tenant: the panels the analysis catalog prescribes (analysis_catalog.panel_id)
+    and the panels uploaded through PUT /{tenant}/gene_panels (type_code uploaded). Rows of the portal''s PostgreSQL
+    table public.panel, read through the JDBC catalog radiant_jdbc and filtered to the tenant (tenant_code). An upload
+    replaces the genes of the panels with the same code (any type), creates the new codes as uploaded panels and removes
+    the uploaded panels missing from the file.
+
+    '
+  usage: 'Key id; code is unique per tenant, case-insensitively. A case''s panel is `cases.analysis_catalog_id ->
+    analysis_catalog.panel_id -> panel.id`. The genes of a panel are not in a tenant view (panel_has_genes is not
+    exposed): use gene_panel_mv (panel = panel.name, symbol). The portal''s case list filters on panel.name and leaves
+    out the uploaded panels.
+
+    '
+  limitations: 'No gene list here (see gene_panel_mv). An uploaded panel is named by its code, so name = code for
+    type_code uploaded.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: panel
+    physicalName: panel
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Surrogate key of the panel (identity), target of analysis_catalog.panel_id.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/utils/joins/joins.go
+      - name: code
+        logicalType: string
+        description: Panel code, unique per tenant case-insensitively (lower(code), tenant_code). An uploaded code matches
+          ^[A-Za-z0-9][A-Za-z0-9_-]{0,49}$. The portal exposes it as panel_code.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000034_case_insensitive_code_unique_indexes.up.sql; backend:internal/types/gene_panel_upload.go
+              genePanelCodePattern; backend:internal/types/panel.go PanelCodeField
+        examples:
+          - EPILEP
+      - name: name
+        logicalType: string
+        description: Display name of the panel; the value of gene_panel_mv.panel. Equal to code for an uploaded panel.
+          The portal exposes it as panel_name.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/starrocks_tenant.go BuildGenePanelMVStatement; backend:internal/service/gene_panel_tsv.go;
+              backend:internal/types/panel.go PanelNameField
+      - name: type_code
+        logicalType: string
+        description: Panel type (panel_type.code); seeded values virtual, physical and uploaded (set by the gene panel
+          upload).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql panel_type; backend:scripts/init-sql/migrations/000041_seed_gene_panel_upload.up.sql
+        relationships:
+          - type: foreignKey
+            to: panel_type.code
+        examples:
+          - virtual
+          - physical
+          - uploaded
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the row; the view already keeps only the current tenant.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/starrocks_tenant.go buildViewStatement; backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

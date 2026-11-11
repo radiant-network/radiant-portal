@@ -1,0 +1,67 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.onset
+name: onset
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: Age of onset of a clinical observation (phenotype, condition), as age bands from antenatal to senior. Referenced
+    by obs_categorical.onset_code. Shared by every tenant (the PostgreSQL table has no tenant_code), exposed in each {tenant}_tenant
+    database through radiant_jdbc; the portal also serves it as GET /value_sets/{type}.
+  usage: Join obs_categorical.onset_code = onset.code for the label; name_en carries the age band.
+  limitations: 'The values are data seeded by the backend migrations (backend/scripts/init-sql/migrations), not a fixed enum:
+    later migrations or a deployment can add codes, so query the view for the current list. Codes are unique case-insensitively
+    (migration 000034) and stored in the case they were entered in.'
+team:
+- username: radiant-portal
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: onset
+  physicalName: onset
+  physicalType: view
+  tags:
+  - per-tenant
+  properties:
+  - name: code
+    logicalType: string
+    description: Code of the age of onset, primary key; the value stored in the referencing columns.
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql
+    examples:
+    - unknown
+    - antenatal
+    - congenital
+    - neonatal
+    - infantile
+    - childhood
+    - juvenile
+    - young_adult
+    - middle_age
+    - senior
+  - name: name_en
+    logicalType: string
+    description: English label with the age band, e.g. 'Neonatal (< 28 days)', 'Juvenile (>= 5 years and < 16 years)', 'Senior
+      (>= 60 years)'.
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql
+authoritativeDefinitions:
+- type: implementation
+  url: backend:internal/repository/starrocks/starrocks_tenant.go

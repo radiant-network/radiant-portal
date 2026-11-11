@@ -1,0 +1,427 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.clinvar
+name: clinvar
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per ClinVar variant locus (chromosome, start, reference, alternate) of the ClinVar VCF release,
+    normalised by the OpenDataLake clinvar_v1 contract and copied (INSERT OVERWRITE) into the shared database by
+    the import_open_data DAG, with the Radiant locus_id added. Feeds snv__variant.clinvar_name / clinvar_interpretation
+    and the locus_id of clinvar_rcv_summary.
+
+    '
+  usage: 'Filter occurrences on predictors with `LEFT SEMI JOIN radiant.snv__consequence_filter_partitioned cf ON
+    cf.locus_id = o.locus_id AND cf.part = o.part AND (<condition>)`. Join on locus_id (unique, distributed and
+    colocated on it). name is the ClinVar VariationID, the key to clinvar_rcv_summary.clinvar_id. Array columns
+    use StarRocks array functions (array_contains, arrays_overlap).
+
+    '
+  limitations: 'Multi-valued ClinVar INFO fields are split into flat arrays, which loses their grouping (per-disease
+    groups in clndisdb, SO id / term pairs in mc, review-status phrase in clnrevstat). Some arrays read [''''] rather
+    than NULL when ClinVar has no value (clin_sig_conflict, clndnincl, clndisdbincl). Most columns are read by no
+    pipeline SQL and only name is read by the portal backend; the MCP exposes name, interpretations, conditions
+    and clnrevstat.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: clinvar
+  physicalName: clinvar
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: locus_id
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Radiant variant id (same key as snv__variant), resolved from the locus with GET_VARIANT_ID or through
+      variant_lookup on locus_hash. Unique.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/clinvar_insert.sql; etl:data_qa/sources/clinvar.yml
+    required: true
+    unique: true
+  - name: chromosome
+    logicalType: string
+    physicalType: varchar(1048576)
+    description: Chromosome without 'chr' prefix (1-22, X, Y, M); ClinVar's MT is rewritten to M.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake/spark/doc/release-notes/clinvar/v1.md
+    required: true
+  - name: start
+    logicalType: integer
+    physicalType: bigint(20)
+    description: 1-based position of the first reference base (VCF POS).
+    customProperties:
+    - property: descriptionSource
+      value: etl:data_qa/sources/clinvar.yml; upstream:datalake-lib GenomicImplicits (start + 1)
+    required: true
+  - name: end
+    logicalType: integer
+    physicalType: bigint(20)
+    description: 1-based position one past the last reference base (start + length of reference), e.g. start + 1
+      for an SNV.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:datalake-lib GenomicImplicits (end + 1); upstream:datalake-lib NormalizedClinvar test fixture
+  - name: reference
+    logicalType: string
+    physicalType: varchar(1048576)
+    description: Reference allele (VCF REF).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake Clinvar_v1.scala
+    required: true
+  - name: alternate
+    logicalType: string
+    physicalType: varchar(1048576)
+    description: Alternate allele (VCF ALT); multi-allelic records are split upstream, one allele per row.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake/spark/doc/release-notes/clinvar/v1.md
+  - name: interpretations
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: Distinct union of clin_sig and clin_sig_conflict with empty values removed, underscore form (e.g.
+      Pathogenic, Likely_pathogenic, Uncertain_significance). Copied to snv__variant.clinvar_interpretation and
+      used by portal and MCP ClinVar filters.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake Clinvar_v1.scala (withInterpretations); etl:data_qa/macros/dictionaries.sql
+        (dict_clinvar_interpretation); mcp:domain/rules.py
+    items:
+      name: interpretations_item
+      logicalType: string
+      physicalType: varchar(1048576)
+      enum:
+      - value: Affects
+      - value: association_not_found
+      - value: association
+      - value: Benign
+      - value: confers_sensitivity
+      - value: Conflicting_classifications_of_pathogenicity
+      - value: conflicting_data_from_submitters
+      - value: Conflicting_interpretations_of_pathogenicity
+      - value: drug_response
+      - value: Established_risk_allele
+      - value: Likely_benign
+      - value: likely_pathogenic_low_penetrance
+      - value: Likely_pathogenic
+      - value: Likely_risk_allele
+      - value: no_classification_for_the_single_variant
+      - value: no_classifications_from_unflagged_records
+      - value: not_provided
+      - value: other
+      - value: pathogenic_low_penetrance
+      - value: Pathogenic
+      - value: protective
+      - value: risk_factor
+      - value: Uncertain_risk_allele
+      - value: Uncertain_significance
+      - value: VUS-high
+      - value: VUS-low
+      - value: VUS-mid
+      - value: _low_penetrance
+      - value: low_penetrance
+      - value: Likely_pathogenic_low_penetrance
+      - value: Pathogenic_low_penetrance
+  - name: name
+    logicalType: string
+    physicalType: varchar(1048576)
+    description: ClinVar VariationID (VCF ID column, e.g. "257668"), not a human-readable name. Copied to snv__variant.clinvar_name,
+      exposed by the portal as clinvar_id, and joined to clinvar_rcv_summary.clinvar_id.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:datalake-lib GenomicImplicits (name = names[0]); portal:internal/repository/starrocks/variants.go;
+        etl:dags/sql/open_data/clinvar_rcv_summary_insert.sql
+  - name: clin_sig
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: Aggregate clinical significance from ClinVar INFO CLNSIG, split on '/', '|' and ',' with leading/trailing
+      underscores trimmed (e.g. "Pathogenic/Likely_pathogenic" -> [Pathogenic, Likely_pathogenic]).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake Clinvar_v1.scala (splitEscapedInfo); upstream:clinvar
+  - name: clin_sig_conflict
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: Significances of the conflicting submissions, from ClinVar INFO CLNSIGCONF with the per-significance
+      submitter counts "(n)" removed, split like clin_sig. [''] when the record has no conflict.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake Clinvar_v1.scala; upstream:clinvar
+  - name: af_exac
+    logicalType: number
+    physicalType: double
+    description: Allele frequency in ExAC, as reported by ClinVar INFO AF_EXAC. NULL when absent.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: upstream:clinvar; etl:data_qa/sources/clinvar.yml (af_ range test)
+  - name: clnvcso
+    logicalType: string
+    physicalType: varchar(1048576)
+    description: Sequence Ontology id of the variant type (ClinVar INFO CLNVCSO, e.g. SO:0001483 for SNV).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:clinvar; upstream:datalake-lib NormalizedClinvar fixture
+  - name: geneinfo
+    logicalType: string
+    physicalType: varchar(1048576)
+    description: Gene(s) of the variant as raw ClinVar INFO GENEINFO, "SYMBOL:NCBI_GeneID" pairs separated by '|'
+      (e.g. GFPT1:2673).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:clinvar; upstream:datalake-lib NormalizedClinvar fixture
+  - name: clnsigincl
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: Raw ClinVar INFO CLNSIGINCL, "VariationID:significance" of haplotypes or genotypes that include
+      this variant. NULL when none.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:clinvar; upstream:radiant-open-datalake Clinvar_v1.scala (copied as is)
+  - name: clnvi
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: Identifiers of the variant in other databases (ClinVar INFO CLNVI), "source:id" entries (e.g. Illumina:747283).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:clinvar; upstream:datalake-lib NormalizedClinvar fixture
+  - name: clndisdb
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: Database ids of the conditions (ClinVar INFO CLNDISDB, e.g. MONDO:MONDO:0012518, MedGen:C3552335,
+      OMIM:610542), flattened into one array so the grouping per condition is lost.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake Clinvar_v1.scala; upstream:clinvar
+  - name: clnrevstat
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: ClinVar review status (INFO CLNREVSTAT) split on its commas into tokens, e.g. [criteria_provided,
+      multiple_submitters, no_conflicts]; the status is the concatenation of the tokens.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake Clinvar_v1.scala; upstream:datalake-lib NormalizedClinvar fixture; mcp:schema_catalog.py
+  - name: alleleid
+    logicalType: integer
+    physicalType: int(11)
+    description: ClinVar AlleleID of the variant (INFO ALLELEID).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:clinvar
+  - name: origin
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: Raw ClinVar INFO ORIGIN allele-origin bitmask, as decimal strings (1 germline, 2 somatic, 4 inherited,
+      8 paternal, 16 maternal, 32 de novo, ...); decoded in inheritance.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake Clinvar_v1.scala (inheritance_udf); upstream:clinvar
+  - name: clndnincl
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: Condition names for the haplotypes or genotypes that include this variant (ClinVar INFO CLNDNINCL).
+      [''] when none.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:clinvar; upstream:radiant-open-datalake Clinvar_v1.scala
+  - name: rs
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: dbSNP rs number(s) of the variant without the 'rs' prefix (ClinVar INFO RS, e.g. "112682152").
+    customProperties:
+    - property: descriptionSource
+      value: upstream:clinvar; upstream:datalake-lib NormalizedClinvar fixture
+  - name: dbvarid
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: dbVar accession(s) of the variant (ClinVar INFO DBVARID, nsv/esv ids). NULL when none.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:clinvar
+  - name: af_tgp
+    logicalType: number
+    physicalType: double
+    description: Allele frequency in 1000 Genomes, as reported by ClinVar INFO AF_TGP. NULL when absent.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: upstream:clinvar; etl:data_qa/sources/clinvar.yml
+  - name: clnvc
+    logicalType: string
+    physicalType: varchar(1048576)
+    description: Variant type name (ClinVar INFO CLNVC, e.g. single_nucleotide_variant, Deletion).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:clinvar; upstream:datalake-lib NormalizedClinvar fixture
+  - name: clnhgvs
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: Top-level genomic HGVS expression of the variant (ClinVar INFO CLNHGVS, e.g. NC_000002.12:g.69359261T>A).
+    customProperties:
+    - property: descriptionSource
+      value: upstream:clinvar; upstream:datalake-lib NormalizedClinvar fixture
+  - name: mc
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: Molecular consequences (ClinVar INFO MC) flattened into alternating SO id and term elements, e.g.
+      [SO:0001627, intron_variant, SO:0001589, frameshift_variant].
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake Clinvar_v1.scala; upstream:datalake-lib NormalizedClinvar fixture
+  - name: af_esp
+    logicalType: number
+    physicalType: double
+    description: Allele frequency in the NHLBI GO Exome Sequencing Project, as reported by ClinVar INFO AF_ESP.
+      NULL when absent.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: upstream:clinvar; etl:data_qa/sources/clinvar.yml
+  - name: clndisdbincl
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: Database ids of the conditions of the haplotypes or genotypes that include this variant (ClinVar
+      INFO CLNDISDBINCL). [''] when none.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:clinvar; upstream:radiant-open-datalake Clinvar_v1.scala
+  - name: conditions
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: Condition names asserted for the variant, from ClinVar INFO CLNDN split on '|' with underscores
+      replaced by spaces (e.g. "Congenital myasthenic syndrome 12", "not provided").
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake Clinvar_v1.scala; mcp:schema_catalog.py
+  - name: inheritance
+    logicalType: array
+    physicalType: array<varchar(1048576)>
+    description: Allele origin labels decoded from the ORIGIN bitmask (germline, somatic, inherited, paternal, maternal,
+      de-novo, biparental, uniparental, not-tested, tested-inconclusive, other; 'unknown' when absent or 0). Despite
+      its name it is the allele origin, not a mode of inheritance.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake Clinvar_v1.scala (inheritance_udf)
+  - name: locus
+    logicalType: string
+    physicalType: varchar(1048576)
+    description: Text locus key "chromosome-start-reference-alternate".
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake/spark/doc/release-notes/clinvar/v1.md; etl:data_qa/sources/clinvar.yml
+    required: true
+    unique: true
+  - name: locus_hash
+    logicalType: string
+    physicalType: varchar(1048576)
+    description: SHA-256 of locus as 64-char lowercase hex, the platform variant join key used to resolve locus_id
+      through variant_lookup.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:radiant-open-datalake/spark/doc/release-notes/clinvar/v1.md; etl:dags/sql/open_data/clinvar_insert.sql
+  quality:
+  - name: clinvar__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: clinvar__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except chromosome, locus, locus_id, reference, start).
+    query: SELECT (CASE WHEN COUNT(end) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(alternate) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(interpretations) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(name) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(clin_sig) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(clin_sig_conflict) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(af_exac) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(clnvcso) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(geneinfo) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(clnsigincl) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(clnvi) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(clndisdb) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(clnrevstat) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(alleleid) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(origin) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(clndnincl) = 0 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(rs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(dbvarid) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(af_tgp)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(clnvc) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(clnhgvs) = 0 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(mc) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(af_esp) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(clndisdbincl) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(conditions) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(inheritance) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(locus_hash) = 0 THEN 1 ELSE 0 END)
+      FROM clinvar
+    mustBe: 0
+  - name: clinvar__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except locus, locus_id).
+    query: SELECT (CASE WHEN COUNT(DISTINCT chromosome) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT start)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT end) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      reference) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT alternate) <= 1 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(DISTINCT name) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT af_exac) <= 1 THEN 1 ELSE 0
+      END) + (CASE WHEN COUNT(DISTINCT clnvcso) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT geneinfo) <=
+      1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT alleleid) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      af_tgp) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT clnvc) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      af_esp) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT locus_hash) <= 1 THEN 1 ELSE 0 END) FROM clinvar
+    mustBe: 0
+  - name: clinvar__should_be_within_range_af
+    type: sql
+    dimension: accuracy
+    description: af_exac, af_tgp, af_esp stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM clinvar WHERE af_exac < 0 OR af_exac > 1 OR af_tgp < 0 OR af_tgp > 1 OR af_esp <
+      0 OR af_esp > 1
+    mustBe: 0
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`locus_id`, `chromosome`)
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(`locus_id`) BUCKETS 10
+  - property: mcpKeys
+    value: locus_id
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/api_fields.py
+    - mcp/radiant_mcp/domain/criteria.py
+    - mcp/radiant_mcp/enums.py
+    - mcp/radiant_mcp/queries/carriers.py
+    - mcp/radiant_mcp/schema_catalog.py
+    - mcp/radiant_mcp/settings.py
+    - mcp/radiant_mcp/tools/charts/lollipop.py
+    - mcp/radiant_mcp/tools/charts/survival.py
+    - mcp/radiant_mcp/tools/cohort.py
+    - mcp/radiant_mcp/tools/occurrences.py
+    - mcp/radiant_mcp/tools/variants.py
+    - portal/backend/cmd/api/main.go
+    - portal/backend/docs/docs.go
+    - portal/backend/internal/report/helpers.go
+    - portal/backend/internal/report/labels.go
+    - portal/backend/internal/repository/starrocks/clinvar_rcv.go
+    - portal/backend/internal/repository/starrocks/facets.go
+    - portal/backend/internal/repository/starrocks/variants.go
+    - portal/backend/internal/server/handlers_variants.go
+    - portal/backend/internal/types/germline_snv_occurrence.go
+    - portal/backend/internal/types/somatic_snv_occurrence.go
+    - portal/backend/internal/types/variant.go
+    - portal/backend/internal/utils/igv_public_tracks.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/clinvar_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/clinvar.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

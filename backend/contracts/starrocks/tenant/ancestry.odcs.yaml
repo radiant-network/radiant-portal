@@ -1,0 +1,85 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.ancestry
+name: ancestry
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Ancestry (ethnicity) value set of a patient or fetus. No foreign key points to it: an ancestry is stored as an
+    obs_categorical row with observation_code = ''ancestry'' and code_value = ancestry.code (a subject can have several).
+    The portal case API returns them as the member''s ethnicities. Shared by every tenant (the PostgreSQL table has no tenant_code),
+    exposed in each {tenant}_tenant database through radiant_jdbc; the portal also serves it as GET /value_sets/{type}.'
+  usage: Join obs_categorical o ON o.observation_code = 'ancestry' AND o.code_value = ancestry.code for the label. Use name_fr
+    for French, falling back to name_en when it is NULL.
+  limitations: 'The values are data seeded by the backend migrations (backend/scripts/init-sql/migrations), not a fixed enum:
+    later migrations or a deployment can add codes, so query the view for the current list. Codes are unique case-insensitively
+    (migration 000034) and stored in the case they were entered in. Codes follow Radiant''s own list: upstream mappings fold
+    other vocabularies into it (QLIN AFR and ABOR are sent as BLK and IND), so a code can carry a source meaning that its
+    label does not spell out. name_fr is nullable: a code added without a translation has only name_en.'
+team:
+- username: radiant-portal
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: ancestry
+  physicalName: ancestry
+  physicalType: view
+  tags:
+  - per-tenant
+  properties:
+  - name: code
+    logicalType: string
+    description: Code of the ancestry, primary key; the value stored in the referencing columns. Matched against obs_categorical.code_value
+      when observation_code = 'ancestry'.
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000015_create_ancestry_value_set.up.sql; backend:internal/repository/starrocks/cases.go
+    examples:
+    - BLK
+    - EAS
+    - IND
+    - LAT-AM
+    - MENA
+    - SO-AS
+    - SE-AS
+    - WHT
+    - NH-PI
+    - MIX
+    - OTH
+  - name: name_en
+    logicalType: string
+    description: English label of the code (e.g. BLK = Black, SO-AS = South Asian, MIX = Mixed, OTH = Other).
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000015_create_ancestry_value_set.up.sql
+  - name: name_fr
+    logicalType: string
+    description: French label of the code (added by migration 000024). NULL when the code has no translation; use name_en
+      then.
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000024_add_name_fr_to_ancestry_and_consanguinity.up.sql
+  customProperties:
+  - property: consumers
+    value:
+    - backend/internal/repository/starrocks/cases.go
+authoritativeDefinitions:
+- type: implementation
+  url: backend:internal/repository/starrocks/starrocks_tenant.go

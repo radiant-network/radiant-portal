@@ -1,0 +1,236 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.interpretation_germline
+name: interpretation_germline
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per germline variant interpretation a user saved in the portal: the ACMG classification, criteria,
+    condition, transmission modes, free-text interpretation and PubMed references of one variant (locus_id) on one
+    transcript, for one sequencing of one case. Rows of the portal''s PostgreSQL table public.interpretation_germline,
+    read through the JDBC catalog radiant_jdbc and filtered to the tenant (tenant_code). Written by POST
+    /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} (create or update).
+    Every insert and update is copied to interpretation_germline_history by a trigger.
+
+    '
+  usage: 'Unique key (case_id, sequencing_id, locus_id, transcript_id). The ids are stored as text: join the ETL
+    tables with a cast, e.g. `ig.locus_id = CAST(o.locus_id AS VARCHAR) AND ig.sequencing_id = CAST(o.seq_id AS VARCHAR)`
+    on germline__snv__occurrence (or `CAST(ig.locus_id AS BIGINT) = v.locus_id` on snv__variant), and `CAST(ig.case_id
+    AS INT) = c.id` on cases. Filter on case_id too: the same sequencing and variant can be interpreted in several
+    cases. There is no task_id: to tie an interpretation to one occurrence, go through task_context (task_id,
+    sequencing_experiment_id, case_id). transcript_id joins snv__consequence.transcript_id (with locus_id). classification
+    holds LOINC answer codes, not labels: filter P/LP with `classification IN (''LA6668-3'', ''LA26332-9'')`. condition
+    joins mondo_term.id.
+
+    '
+  limitations: 'The uuid id and the jsonb metadata (analysis_id, patient_id, variant_hash) are not exposed: the JDBC
+    catalog cannot map them. SNV only (no CNV interpretation table). Multi-valued columns (classification_criterias,
+    transmission_modes, pubmed) are comma-separated strings, not arrays. interpretation is HTML-escaped rich text.
+    The allowed values come from the frontend form only; the database has no CHECK on them. condition, classification,
+    criteria and transmission modes are nullable in the DDL although the portal form requires them.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: interpretation_germline
+    physicalName: interpretation_germline
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: sequencing_id
+        logicalType: string
+        description: Sequencing experiment the interpretation is for (sequencing_experiment.id, germline__snv__occurrence.seq_id),
+          stored as text. Cast before joining the integer ids.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go; backend:internal/utils/joins/joins.go GermlineInterpretationWithSNVOccurrence
+        examples:
+          - '1'
+      - name: locus_id
+        logicalType: string
+        description: Variant id (snv__variant.locus_id, a BIGINT in the ETL), stored as text. Join with `CAST(o.locus_id
+          AS VARCHAR)` or `CAST(locus_id AS BIGINT)`.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/occurrences.go; backend:internal/repository/starrocks/pcx_patients.go;
+              mcp:radiant_mcp/queries/hits.py
+      - name: transcript_id
+        logicalType: string
+        description: Ensembl transcript the interpretation is made on; joins snv__consequence.transcript_id together
+          with locus_id. Part of the unique key, so a variant can carry one interpretation per transcript.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql uc_interpretation_germline; backend:internal/repository/starrocks/pcx_patients.go
+      - name: condition
+        logicalType: string
+        description: Condition the variant is interpreted against, a Mondo term id picked in the form (joins mondo_term.id;
+          the API resolves its name).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go GetInterpretationGermline; frontend:apps/case/src/entity/variants/interpretation/mondo-auto-complete-form-field.tsx
+        examples:
+          - MONDO:0000001
+      - name: classification
+        logicalType: string
+        description: ACMG germline classification as a LOINC answer code; LA6668-3 pathogenic, LA26332-9 likely pathogenic,
+          LA26333-7 VUS, LA26334-5 likely benign, LA6675-8 benign.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/classification.go Classifications; frontend:apps/case/src/entity/variants/germline-occurrence/interpretation/germline-interpretation-form.tsx;
+              mcp:radiant_mcp/domain/rules.py INTERPRETATION_PLP
+        examples:
+          - LA6668-3
+          - LA26332-9
+          - LA26333-7
+          - LA26334-5
+          - LA6675-8
+      - name: classification_criterias
+        logicalType: string
+        description: ACMG/AMP criteria the user applied, comma-separated without spaces (form values PVS1, PS1-PS4, PM1-PM6,
+          PP1-PP5, BA1, BS1-BS4, BP1-BP7).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/postgres/interpretations.go mapToInterpretationGermlineDAO; frontend:components/base/classifications/interpretation.tsx
+              classificationCriterias
+        examples:
+          - PVS1,PM2
+          - PS3,PM2,PP3
+      - name: transmission_modes
+        logicalType: string
+        description: Modes of transmission the user selected, comma-separated. Form values autosomal_dominant_de_novo,
+          autosomal_dominant, autosomal_recessive, x_linked_dominant_de_novo, x_linked_recessive_de_novo, x_linked_dominant,
+          x_linked_recessive, uniparental_disomy, non_carrier_proband, unknown_parents_genotype, unknown_father_genotype,
+          unknown_mother_genotype, unknown_proband_genotype.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/postgres/interpretations.go mapToInterpretationGermlineDAO; frontend:components/base/badges/transmission-mode-badge.tsx
+              getTransmissionModeList
+        examples:
+          - autosomal_dominant_de_novo
+          - autosomal_recessive,x_linked_recessive
+      - name: interpretation
+        logicalType: string
+        description: Free-text interpretation from the rich-text editor, HTML-escaped on write (html.EscapeString; the
+          API unescapes it on read).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/postgres/interpretations.go mapToInterpretationCommonDAO; frontend:apps/case/src/entity/variants/interpretation/types.ts
+      - name: pubmed
+        logicalType: string
+        description: PubMed ids (citation_id) cited by the interpretation, comma-separated. The API checks each id against
+          PubMed on write.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/postgres/interpretations.go mapToInterpretationCommonDAO
+      - name: created_by
+        logicalType: string
+        description: Keycloak user id (JWT sub) of the author of the first save; kept on updates.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go fillInterpretationCommonWithContext; backend:internal/repository/postgres/interpretations.go
+              CreateOrUpdateGermline
+      - name: created_by_name
+        logicalType: string
+        description: Display name (JWT name) of the author of the first save; kept on updates.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go fillInterpretationCommonWithContext
+      - name: created_at
+        logicalType: timestamp
+        description: Time of the first save (DB default now()); kept on updates.
+        customProperties:
+          - property: postgresType
+            value: timestamp with time zone
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/repository/postgres/interpretations.go
+              CreateOrUpdateGermline
+      - name: updated_by
+        logicalType: string
+        description: Keycloak user id (JWT sub) of the user who saved last.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go fillInterpretationCommonWithContext
+      - name: updated_by_name
+        logicalType: string
+        description: Display name (JWT name) of the user who saved last.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go fillInterpretationCommonWithContext
+      - name: updated_at
+        logicalType: timestamp
+        description: Time of the last save. The portal exposes it as interpretation_updated_on.
+        customProperties:
+          - property: postgresType
+            value: timestamp with time zone
+          - property: descriptionSource
+            value: backend:internal/types/interpretations.go GermlineInterpretationUpdatedOnField
+      - name: case_id
+        logicalType: string
+        description: Case the interpretation belongs to (cases.id, an integer), stored as text; cast with `CAST(case_id
+          AS INT)`.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/pcx_patients.go; backend:scripts/init-sql/migrations/000001_init.up.sql
+              uc_interpretation_germline
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the row; the view already keeps only the current tenant.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/starrocks_tenant.go buildViewStatement; backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/germline_snv_occurrences.go
+          - backend/internal/repository/starrocks/occurrences.go
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/repository/starrocks/variants.go
+          - mcp/radiant_mcp/queries/hits.py
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

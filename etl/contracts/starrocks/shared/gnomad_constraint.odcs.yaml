@@ -1,0 +1,88 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.gnomad_constraint
+name: gnomad_constraint
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per transcript with its gnomAD loss-of-function constraint scores (pLI, LOEUF). Fully overwritten
+    by the ETL open-data import (group gnomad_constraint) from the OpenDataLake table gnomad_constraint_v1 (gnomAD
+    v4.1.2 constraint_metrics per the ETL insert) or the legacy Radiant Iceberg table gnomad_constraint_v_2_1_1
+    (gnomAD v2.1.1 lof_metrics.by_gene). Shared reference table.
+
+    '
+  usage: 'Filter occurrences on predictors with `LEFT SEMI JOIN radiant.snv__consequence_filter_partitioned cf ON
+    cf.locus_id = o.locus_id AND cf.part = o.part AND (<condition>)`. The ETL joins it on transcript_id = the consequence''s
+    score transcript (the Ensembl transcript, or the MANE Ensembl twin of a RefSeq transcript) to fill pli/loeuf
+    of snv consequences. The MCP joins it to ensembl_exon_by_gene transcripts after stripping any version suffix
+    (split_part(transcript_id, ''.'', 1)).
+
+    '
+  limitations: 'The two sources are different gnomAD releases with different transcript sets; check open_data_release
+    for which one was imported. The local OpenDataLake checkout still documents gnomad_constraint_v1 as v2.1.1 (flat
+    pLI), while the ETL reads lof_pLI / lof_oe_ci_upper from it (v4.1.2): verify the contract version.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: gnomad_constraint
+  physicalName: gnomad_constraint
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: transcript_id
+    logicalType: string
+    physicalType: varchar(100)
+    description: Transcript id the constraint metrics are computed for (gnomAD `transcript` column).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/gnomad_constraint_insert.sql; mcp:queries/genes.py
+    unique: true
+    required: true
+  - name: pli
+    logicalType: number
+    physicalType: float
+    description: Probability of being loss-of-function intolerant (pLI) of the transcript; v4.1.2 lof.pLI (high-confidence
+      pLoF category) from the contract source, v2.1.1 pLI from the legacy one. Close to 1 = intolerant.
+    customProperties:
+    - property: unit
+      value: probability 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/gnomad_constraint_insert.sql; upstream:gnomad_constraint
+  - name: loeuf
+    logicalType: number
+    physicalType: float
+    description: LOEUF, upper bound of the 90% confidence interval of the observed/expected pLoF ratio (v4.1.2 lof.oe_ci.upper,
+      or v2.1.1 oe_lof_upper). Lower = more constrained.
+    customProperties:
+    - property: unit
+      value: ratio
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/gnomad_constraint_insert.sql; upstream:gnomad_constraint
+  customProperties:
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/queries/genes.py
+    - mcp/radiant_mcp/schema_catalog.py
+    - mcp/radiant_mcp/tools/genes.py
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/gnomad_constraint_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/gnomad_constraint.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

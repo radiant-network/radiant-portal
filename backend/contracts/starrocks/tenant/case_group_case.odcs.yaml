@@ -1,0 +1,68 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.case_group_case
+name: case_group_case
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Membership of the case groups: one row per (case group, case). Rows of the portal''s PostgreSQL junction
+    table public.case_group_case read through radiant_jdbc. The table has no tenant_code, so the view is not filtered:
+    it holds the memberships of every tenant. Written by POST /{tenant}/case_groups, which replaces the whole case list
+    of the group.'
+  usage: 'Primary key (case_group_id, case_id). Join case_group on case_group.id = case_group_id (the group name) and
+    cases on cases.id = case_id. Join at least one of these tenant-filtered views to keep only the tenant''s rows. A
+    case can belong to several groups, so de-duplicate cases (DISTINCT) after the join.'
+  limitations: 'Not filtered on the tenant (junction without tenant_code): never count or list it alone. Rows are
+    deleted with their group or their case (ON DELETE CASCADE) and replaced wholesale when a group is overwritten.'
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: case_group_case
+    physicalName: case_group_case
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: case_group_id
+        logicalType: integer
+        description: case_group.id of the group.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000036_add_case_group.up.sql'
+        relationships:
+          - type: foreignKey
+            to: case_group.id
+      - name: case_id
+        logicalType: integer
+        description: cases.id of a member case.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000036_add_case_group.up.sql'
+        relationships:
+          - type: foreignKey
+            to: cases.id
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

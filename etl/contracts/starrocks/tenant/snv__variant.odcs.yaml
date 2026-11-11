@@ -1,0 +1,1187 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.snv__variant
+name: snv__variant
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per SNV/indel locus that has at least one germline or somatic SNV occurrence in the tenant (per-tenant
+    database): picked VEP annotation, open-data annotations (gnomAD, TOPMed, 1000 Genomes, ClinVar, dbSNP, OMIM,
+    COSMIC CMC) and the tenant''s germline and somatic frequencies. Rebuilt in full (INSERT OVERWRITE) by the ETL
+    (import_part after each import, reannotate_open_data) from radiant.snv__staging_variant joined with the tenant''s
+    frequency tables. Read by the portal backend; the MCP reads the per-variant_part copy snv__variant_partitioned
+    instead.'
+  usage: 'Key: locus_id (unique). Join occurrences (germline__snv__occurrence, somatic__snv__occurrence) on locus_id;
+    prefer this table over snv__variant_partitioned for cohort-wide queries since it holds one row per locus. The
+    annotation is that of one picked consequence per variant: the VEP PICK=1 transcript, else the first canonical
+    one. Other transcripts and the in-silico scores (dbNSFP, SpliceAI, gnomAD constraint) are not here but in snv__consequence
+    / snv__consequence_filter_partitioned. Open-data columns are joined on locus_id (exact allele) from the shared
+    radiant database when radiant.snv__staging_variant is built, and refreshed by reannotate_open_data. '
+  limitations: 'Frequency columns (pc, pn, pf, hom, af) are COALESCEd to 0, never NULL; open-data columns are NULL
+    when the allele is absent from the source. gnomad_v3_af is misnamed: it holds gnomAD 4.1 joint AF with the contract
+    open-data tables. clinvar_name holds the ClinVar Variation ID, not a name. germline_af_* / somatic_af_* are
+    diploid approximations. rsnumber keeps a single rs id when dbSNP lists several for the locus (snv__staging_variant
+    is keyed on locus_id). '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: snv__variant
+  physicalName: snv__variant
+  physicalType: table
+  tags:
+  - per-tenant
+  properties:
+  - name: locus_id
+    logicalType: integer
+    physicalType: BIGINT
+    description: 'Variant identifier: the GET_VARIANT_ID UDF encoding of (chromosome, start, reference, alternate),
+      or, for alleles the UDF cannot encode, the id held for the locus_hash in radiant.variant_lookup. Same key
+      as the occurrence, consequence and open-data tables; unique in snv__variant.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_tmp_variant_insert.sql; etl:dags/sql/radiant/init/variant_id_udf.sql; etl:data_qa/sources/snv_variant.yml
+    required: true
+    unique: true
+  - name: germline_pf_wgs
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Patient (carrier) frequency in the tenant: germline_pc_wgs / germline_pn_wgs; 0 when the denominator
+      is 0. Labelled in the portal as the patient frequency across the network (WGS).'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: germline_pf_wxs
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Patient (carrier) frequency in the tenant: germline_pc_wxs / germline_pn_wxs; 0 when the denominator
+      is 0. Labelled in the portal as the patient frequency across the network (WXS (exome)).'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: somatic_pf_tn_wgs
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Patient frequency in the tenant''s TN cohort: somatic_pc_tn_wgs / somatic_pn_tn_wgs; 0 when the
+      denominator is 0.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: somatic_pf_tn_wxs
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Patient frequency in the tenant''s TN cohort: somatic_pc_tn_wxs / somatic_pn_tn_wxs; 0 when the
+      denominator is 0.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: somatic_pf_to_wgs
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Patient frequency in the tenant''s TO cohort: somatic_pc_to_wgs / somatic_pn_to_wgs; 0 when the
+      denominator is 0.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: somatic_pf_to_wxs
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Patient frequency in the tenant''s TO cohort: somatic_pc_to_wxs / somatic_pn_to_wxs; 0 when the
+      denominator is 0.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: gnomad_v3_af
+    logicalType: number
+    physicalType: DOUBLE
+    description: gnomAD allele frequency of this exact allele, from radiant.gnomad_genomes_v3.af joined on locus_id;
+      NULL when the allele is not in gnomAD. Despite the name, with the open-data contract tables it holds the gnomAD
+      4.1 joint (exomes + genomes) af_joint (the portal labels it 'gnomAD 4.1.0 Joint'); legacy loads held gnomAD
+      v3 genomes AF.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_staging_variant_insert.sql; etl:dags/sql/open_data/gnomad_insert.sql; etl:tasks/data/radiant_tables.py;
+        etl:design/SJRA-1811-opendatalake-integration.md; frontend:translations/common/en.json
+  - name: topmed_af
+    logicalType: number
+    physicalType: DOUBLE
+    description: TOPMed (BRAVO) allele frequency of this exact allele, from radiant.topmed_bravo.af joined on locus_id;
+      NULL when absent from TOPMed.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_staging_variant_insert.sql; etl:dags/sql/open_data/topmed_bravo_insert.sql
+  - name: tg_af
+    logicalType: number
+    physicalType: DOUBLE
+    description: 1000 Genomes allele frequency of this exact allele, from radiant.1000_genomes.af joined on locus_id;
+      NULL when absent from 1000 Genomes.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_staging_variant_insert.sql; etl:dags/sql/open_data/1000_genomes_insert.sql
+  - name: germline_pc_wgs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient count: distinct patients of the tenant with a germline WGS sequencing that carry this
+      variant with a qualifying call (FILTER = PASS, GQ >= 20, ad_alt >= 3). 0 when none.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: germline_pn_wgs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient number: distinct patients of the tenant with a germline WGS sequencing, the denominator
+      of germline_pf_wgs. Same value on every row (tenant-wide); 0 when the cohort is empty.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: germline_pc_wgs_affected
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient count: distinct patients of the tenant with a germline WGS sequencing whose sequencing
+      has affected_status ''affected'' that carry this variant with a qualifying call (FILTER = PASS, GQ >= 20,
+      ad_alt >= 3). 0 when none.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: germline_pn_wgs_affected
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient number: distinct patients of the tenant with a germline WGS sequencing whose sequencing
+      has affected_status ''affected'', the denominator of germline_pf_wgs_affected. Same value on every row (tenant-wide);
+      0 when the cohort is empty.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: germline_pf_wgs_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Patient (carrier) frequency in the tenant: germline_pc_wgs_affected / germline_pn_wgs_affected;
+      0 when the denominator is 0. Labelled in the portal as the patient frequency across the network (WGS).'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: germline_pc_wgs_not_affected
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient count: distinct patients of the tenant with a germline WGS sequencing whose sequencing
+      has affected_status ''non_affected'' that carry this variant with a qualifying call (FILTER = PASS, GQ >=
+      20, ad_alt >= 3). 0 when none.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: germline_pn_wgs_not_affected
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient number: distinct patients of the tenant with a germline WGS sequencing whose sequencing
+      has affected_status ''non_affected'', the denominator of germline_pf_wgs_not_affected. Same value on every
+      row (tenant-wide); 0 when the cohort is empty.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: germline_pf_wgs_not_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Patient (carrier) frequency in the tenant: germline_pc_wgs_not_affected / germline_pn_wgs_not_affected;
+      0 when the denominator is 0. Labelled in the portal as the patient frequency across the network (WGS).'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: germline_pc_wxs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient count: distinct patients of the tenant with a germline WXS (exome) sequencing that carry
+      this variant with a qualifying call (FILTER = PASS, GQ >= 20, ad_alt >= 3). 0 when none.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: germline_pn_wxs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient number: distinct patients of the tenant with a germline WXS (exome) sequencing, the denominator
+      of germline_pf_wxs. Same value on every row (tenant-wide); 0 when the cohort is empty.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: germline_pc_wxs_affected
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient count: distinct patients of the tenant with a germline WXS (exome) sequencing whose sequencing
+      has affected_status ''affected'' that carry this variant with a qualifying call (FILTER = PASS, GQ >= 20,
+      ad_alt >= 3). 0 when none.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: germline_pn_wxs_affected
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient number: distinct patients of the tenant with a germline WXS (exome) sequencing whose sequencing
+      has affected_status ''affected'', the denominator of germline_pf_wxs_affected. Same value on every row (tenant-wide);
+      0 when the cohort is empty.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: germline_pf_wxs_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Patient (carrier) frequency in the tenant: germline_pc_wxs_affected / germline_pn_wxs_affected;
+      0 when the denominator is 0. Labelled in the portal as the patient frequency across the network (WXS (exome)).'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: germline_pc_wxs_not_affected
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient count: distinct patients of the tenant with a germline WXS (exome) sequencing whose sequencing
+      has affected_status ''non_affected'' that carry this variant with a qualifying call (FILTER = PASS, GQ >=
+      20, ad_alt >= 3). 0 when none.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: germline_pn_wxs_not_affected
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient number: distinct patients of the tenant with a germline WXS (exome) sequencing whose sequencing
+      has affected_status ''non_affected'', the denominator of germline_pf_wxs_not_affected. Same value on every
+      row (tenant-wide); 0 when the cohort is empty.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: germline_pf_wxs_not_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Patient (carrier) frequency in the tenant: germline_pc_wxs_not_affected / germline_pn_wxs_not_affected;
+      0 when the denominator is 0. Labelled in the portal as the patient frequency across the network (WXS (exome)).'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: somatic_pc_tn_wgs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient count: distinct patients of the tenant with a somatic tumor-normal (task with at least
+      one tumoral and one normal aliquot) WGS analysis whose tumor carries this variant with a qualifying call (FILTER
+      = PASS, tumor_ad_alt >= 2). 0 when none.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: somatic_pn_tn_wgs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient number: distinct patients of the tenant with a somatic tumor-normal (task with at least
+      one tumoral and one normal aliquot) WGS analysis, counted from the tasks (not the occurrences); denominator
+      of somatic_pf_tn_wgs. Same value on every row. A patient analysed both ways counts in both cohorts.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: somatic_pc_tn_wxs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient count: distinct patients of the tenant with a somatic tumor-normal (task with at least
+      one tumoral and one normal aliquot) WXS (exome) analysis whose tumor carries this variant with a qualifying
+      call (FILTER = PASS, tumor_ad_alt >= 2). 0 when none.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: somatic_pn_tn_wxs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient number: distinct patients of the tenant with a somatic tumor-normal (task with at least
+      one tumoral and one normal aliquot) WXS (exome) analysis, counted from the tasks (not the occurrences); denominator
+      of somatic_pf_tn_wxs. Same value on every row. A patient analysed both ways counts in both cohorts.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: somatic_pc_to_wgs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient count: distinct patients of the tenant with a somatic tumor-only (task with exactly one
+      tumoral aliquot and no normal) WGS analysis whose tumor carries this variant with a qualifying call (FILTER
+      = PASS, tumor_ad_alt >= 2). 0 when none.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: somatic_pn_to_wgs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient number: distinct patients of the tenant with a somatic tumor-only (task with exactly one
+      tumoral aliquot and no normal) WGS analysis, counted from the tasks (not the occurrences); denominator of
+      somatic_pf_to_wgs. Same value on every row. A patient analysed both ways counts in both cohorts.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: somatic_pc_to_wxs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient count: distinct patients of the tenant with a somatic tumor-only (task with exactly one
+      tumoral aliquot and no normal) WXS (exome) analysis whose tumor carries this variant with a qualifying call
+      (FILTER = PASS, tumor_ad_alt >= 2). 0 when none.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; frontend:translations/common/en.json
+  - name: somatic_pn_to_wxs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Patient number: distinct patients of the tenant with a somatic tumor-only (task with exactly one
+      tumoral aliquot and no normal) WXS (exome) analysis, counted from the tasks (not the occurrences); denominator
+      of somatic_pf_to_wxs. Same value on every row. A patient analysed both ways counts in both cohorts.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: chromosome
+    logicalType: string
+    physicalType: CHAR(2)
+    description: 'Chromosome without the ''chr'' prefix: 1-22, X, Y or M (mitochondrion).'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/common.py; etl:data_qa/macros/dictionaries.sql dict_chromosome
+    required: true
+    enum:
+    - value: '1'
+    - value: '2'
+    - value: '3'
+    - value: '4'
+    - value: '5'
+    - value: '6'
+    - value: '7'
+    - value: '8'
+    - value: '9'
+    - value: '10'
+    - value: '11'
+    - value: '12'
+    - value: '13'
+    - value: '14'
+    - value: '15'
+    - value: '16'
+    - value: '17'
+    - value: '18'
+    - value: '19'
+    - value: '20'
+    - value: '21'
+    - value: '22'
+    - value: X
+    - value: Y
+    - value: M
+  - name: start
+    logicalType: integer
+    physicalType: BIGINT
+    description: 1-based position of the variant (VCF POS, after normalisation and multi-allelic splitting upstream).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/common.py; etl:data_qa/sources/snv_variant.yml
+    required: true
+  - name: end
+    logicalType: integer
+    physicalType: BIGINT
+    description: '1-based inclusive end of the reference allele (cyvcf2 Variant.end: start + length(reference) -
+      1, or INFO/END when present).'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/common.py; upstream:cyvcf2 Variant.end
+  - name: clinvar_name
+    logicalType: string
+    physicalType: VARCHAR(2000)
+    description: 'ClinVar Variation ID of this allele (radiant.clinvar.name, joined on locus_id), not a human-readable
+      name: the portal links it as https://www.ncbi.nlm.nih.gov/clinvar/variation/<clinvar_name> and joins it to
+      clinvar_rcv.clinvar_id. NULL when the allele is not in ClinVar.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_staging_variant_insert.sql; frontend:apps/variant/src/entity/overview/external-references-card.tsx;
+        portal:internal/repository/starrocks/clinvar_rcv.go
+  - name: variant_class
+    logicalType: string
+    physicalType: VARCHAR(50)
+    description: 'VEP VARIANT_CLASS (Sequence Ontology class) of the picked consequence: SNV, insertion, deletion,
+      indel, substitution or sequence_alteration.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:tasks/vcf/snv/variant.py; etl:data_qa/macros/dictionaries.sql
+        dict_variant_class
+    enum:
+    - value: insertion
+    - value: deletion
+    - value: SNV
+    - value: indel
+    - value: substitution
+    - value: sequence_alteration
+  - name: clinvar_interpretation
+    logicalType: array
+    physicalType: ARRAY<VARCHAR(100)>
+    description: ClinVar clinical significance terms of the allele (radiant.clinvar.interpretations, joined on locus_id),
+      spelled as in ClinVar with underscores, e.g. Pathogenic, Likely_benign, Conflicting_classifications_of_pathogenicity.
+      NULL when not in ClinVar.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_staging_variant_insert.sql; etl:data_qa/macros/dictionaries.sql dict_clinvar_interpretation;
+        upstream:clinvar CLNSIG
+    quality:
+    - name: snv_variant__accepted_values_clinvar_interpretation
+      type: sql
+      dimension: conformity
+      description: Every array element is an accepted, case-sensitive value.
+      query: SELECT COUNT(*) FROM snv__variant x, unnest(x.clinvar_interpretation) AS u(v) WHERE u.v NOT IN ('Affects',
+        'association_not_found', 'association', 'Benign', 'confers_sensitivity', 'Conflicting_classifications_of_pathogenicity',
+        'conflicting_data_from_submitters', 'Conflicting_interpretations_of_pathogenicity', 'drug_response', 'Established_risk_allele',
+        'Likely_benign', 'likely_pathogenic_low_penetrance', 'Likely_pathogenic', 'Likely_risk_allele', 'no_classification_for_the_single_variant',
+        'no_classifications_from_unflagged_records', 'not_provided', 'other', 'pathogenic_low_penetrance', 'Pathogenic',
+        'protective', 'risk_factor', 'Uncertain_risk_allele', 'Uncertain_significance', 'VUS-high', 'VUS-low', 'VUS-mid',
+        '_low_penetrance', 'low_penetrance', 'Likely_pathogenic_low_penetrance', 'Pathogenic_low_penetrance')
+      mustBe: 0
+    items:
+      name: clinvar_interpretation_item
+      logicalType: string
+      physicalType: VARCHAR(100)
+      enum:
+      - value: Affects
+      - value: association_not_found
+      - value: association
+      - value: Benign
+      - value: confers_sensitivity
+      - value: Conflicting_classifications_of_pathogenicity
+      - value: conflicting_data_from_submitters
+      - value: Conflicting_interpretations_of_pathogenicity
+      - value: drug_response
+      - value: Established_risk_allele
+      - value: Likely_benign
+      - value: likely_pathogenic_low_penetrance
+      - value: Likely_pathogenic
+      - value: Likely_risk_allele
+      - value: no_classification_for_the_single_variant
+      - value: no_classifications_from_unflagged_records
+      - value: not_provided
+      - value: other
+      - value: pathogenic_low_penetrance
+      - value: Pathogenic
+      - value: protective
+      - value: risk_factor
+      - value: Uncertain_risk_allele
+      - value: Uncertain_significance
+      - value: VUS-high
+      - value: VUS-low
+      - value: VUS-mid
+      - value: _low_penetrance
+      - value: low_penetrance
+      - value: Likely_pathogenic_low_penetrance
+      - value: Pathogenic_low_penetrance
+  - name: symbol
+    logicalType: string
+    physicalType: VARCHAR(100)
+    description: Gene symbol (VEP SYMBOL) of the picked consequence. HGNC/Ensembl names for an Ensembl pick; NCBI
+      names (LOC..., readthroughs) possible when pick_source = 'RefSeq'. NULL or empty when the pick has no gene
+      (intergenic).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:tasks/vcf/snv/variant.py; etl:data_qa/sources/snv_variant.yml
+    relationships:
+    - to: radiant.ensembl_gene.name
+    quality:
+    - name: snv_variant__relationships__symbol__ensembl_gene_RAD-176
+      type: sql
+      dimension: consistency
+      description: Every symbol exists in radiant.ensembl_gene.name.
+      query: SELECT COUNT(*) FROM snv__variant a LEFT JOIN radiant.ensembl_gene b ON a.symbol = b.name WHERE a.symbol
+        IS NOT NULL AND b.name IS NULL AND (symbol is not null and symbol <> '' and (pick_source is null or pick_source
+        <> 'RefSeq'))
+      mustBe: 0
+  - name: impact_score
+    logicalType: integer
+    physicalType: tinyint
+    description: 'Numeric rank of vep_impact, for sorting: HIGH 4, MODERATE 3, LOW 2, MODIFIER 1 (0 if the impact
+      is missing).'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py IMPACT_SCORE
+  - name: consequences
+    logicalType: array
+    physicalType: ARRAY<VARCHAR(50)>
+    description: VEP Consequence terms (Sequence Ontology, e.g. missense_variant) of the picked transcript only,
+      split on '&'. Other transcripts' consequences are in snv__consequence.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:tasks/vcf/snv/variant.py; etl:data_qa/macros/dictionaries.sql
+        dict_consequences
+    items:
+      name: consequences_item
+      logicalType: string
+      physicalType: VARCHAR(50)
+      enum:
+      - value: 3_prime_UTR_variant
+      - value: 5_prime_UTR_variant
+      - value: coding_sequence_variant
+      - value: downstream_gene_variant
+      - value: feature_elongation
+      - value: feature_truncation
+      - value: frameshift_variant
+      - value: incomplete_terminal_codon_variant
+      - value: inframe_deletion
+      - value: inframe_insertion
+      - value: intergenic_variant
+      - value: intron_variant
+      - value: mature_miRNA_variant
+      - value: missense_variant
+      - value: NMD_transcript_variant
+      - value: non_coding_transcript_exon_variant
+      - value: non_coding_transcript_variant
+      - value: protein_altering_variant
+      - value: regulatory_region_ablation
+      - value: regulatory_region_amplification
+      - value: regulatory_region_variant
+      - value: splice_acceptor_variant
+      - value: splice_donor_5th_base_variant
+      - value: splice_donor_region_variant
+      - value: splice_donor_variant
+      - value: splice_polypyrimidine_tract_variant
+      - value: splice_region_variant
+      - value: start_lost
+      - value: start_retained_variant
+      - value: stop_gained
+      - value: stop_lost
+      - value: stop_retained_variant
+      - value: synonymous_variant
+      - value: TF_binding_site_variant
+      - value: TFBS_ablation
+      - value: TFBS_amplification
+      - value: transcript_ablation
+      - value: transcript_amplification
+      - value: upstream_gene_variant
+  - name: vep_impact
+    logicalType: string
+    physicalType: VARCHAR(20)
+    description: 'VEP IMPACT of the picked consequence: HIGH, MODERATE, LOW or MODIFIER.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:tasks/vcf/snv/variant.py; etl:data_qa/macros/dictionaries.sql
+        dict_vep_impact
+    enum:
+    - value: HIGH
+    - value: MODERATE
+    - value: LOW
+    - value: MODIFIER
+  - name: is_mane_select
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: True when the picked transcript is the MANE Select transcript (VEP MANE = MANE_Select).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:tasks/vcf/snv/variant.py
+  - name: is_mane_plus
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: True when the picked transcript is a MANE Plus Clinical transcript (VEP MANE = MANE_Plus_Clinical);
+      mutually exclusive with is_mane_select.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:tasks/vcf/snv/variant.py
+  - name: is_canonical
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: True when the picked transcript is VEP's canonical transcript for the gene (CANONICAL = YES).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:tasks/vcf/snv/variant.py
+  - name: rsnumber
+    logicalType: string
+    physicalType: VARCHAR(20)
+    description: dbSNP rs identifier of the allele (radiant.dbsnp, joined on locus_id), not the VCF ID column. NULL
+      when the allele is not in dbSNP.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_staging_variant_insert.sql; etl:dags/sql/open_data/dbsnp_insert.sql
+  - name: reference
+    logicalType: string
+    physicalType: VARCHAR(2000)
+    description: Reference allele as in the VCF REF (VCF-style, anchored base included for indels).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/common.py
+    required: true
+  - name: alternate
+    logicalType: string
+    physicalType: VARCHAR(2000)
+    description: Alternate allele (the single ALT of the split record). Spanning-deletion '*' alleles are never
+      loaded.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/common.py; etl:dags/sql/radiant/snv_tmp_variant_insert.sql
+    required: true
+  - name: mane_select
+    logicalType: string
+    physicalType: varchar(200)
+    description: 'Raw VEP MANE_SELECT value of the picked consequence: the versioned MANE Select accession paired
+      with the picked transcript in the other catalogue (e.g. an NM_ accession for an Ensembl pick). Empty or NULL
+      when the pick is not a MANE Select transcript.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:tasks/vcf/snv/variant.py
+  - name: hgvsg
+    logicalType: string
+    physicalType: VARCHAR(2000)
+    description: Genomic HGVS notation of the variant (VEP HGVSg of the picked consequence).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:tasks/vcf/snv/variant.py
+  - name: hgvsc
+    logicalType: string
+    physicalType: varchar(2000)
+    description: Transcript HGVS notation of the picked transcript (VEP HGVSc, 'transcript:c.change'); NULL when
+      the pick is not on a transcript.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:tasks/vcf/snv/variant.py
+  - name: hgvsp
+    logicalType: string
+    physicalType: varchar(2000)
+    description: Protein HGVS notation of the picked transcript (VEP HGVSp, 'protein:p.change'); NULL when the change
+      is not coding.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py; etl:tasks/vcf/snv/variant.py
+  - name: locus
+    logicalType: string
+    physicalType: VARCHAR(2000)
+    description: Pipeline-wide variant key 'chromosome-start-reference-alternate' (no 'chr' prefix, 1-based VCF
+      POS). Unique per locus; its SHA-256 is the locus_hash join key of the ETL.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/common.py locus_and_hash; etl:data_qa/sources/snv_variant.yml
+    required: true
+    unique: true
+  - name: dna_change
+    logicalType: string
+    physicalType: VARCHAR(2000)
+    description: The c. part of hgvsc (text after the last ':'), e.g. c.123A>G; NULL when hgvsc is NULL.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py
+  - name: aa_change
+    logicalType: string
+    physicalType: VARCHAR(2000)
+    description: The p. part of hgvsp (text after the last ':'); NULL when hgvsp is NULL.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py
+  - name: transcript_id
+    logicalType: string
+    physicalType: varchar(100)
+    description: Picked transcript accession without its version (ENST... for Ensembl, NM_/NR_/XM_... for RefSeq);
+      the version is stripped so it matches dbNSFP, gnomAD constraint and COSMIC transcript keys.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py strip_transcript_version
+  - name: pick_source
+    logicalType: string
+    physicalType: varchar(20)
+    description: 'Transcript catalogue of the picked consequence: ''Ensembl'' or ''RefSeq'' (VEP SOURCE, else inferred
+      from the transcript or gene id). NULL for intergenic picks and for rows loaded before the column existed (Ensembl-only
+      loads).'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/consequence.py resolve_source; etl:dags/sql/radiant/migrations/SJRA-1833_snv_variant_add_pick_source.sql;
+        etl:data_qa/sources/snv_variant.yml
+  - name: omim_inheritance_code
+    logicalType: array
+    physicalType: array<varchar(5)>
+    description: Distinct OMIM inheritance codes over all OMIM phenotypes of the picked gene symbol (radiant.omim_gene_panel,
+      joined on symbol), e.g. AD, AR, XLR; a '?' prefix marks a provisional mode. NULL when the gene has no OMIM
+      phenotype.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_staging_variant_insert.sql; etl:data_qa/macros/dictionaries.sql dict_omim_inheritance;
+        frontend:translations/common/en.json
+  - name: cmc_mutation_url
+    logicalType: string
+    physicalType: VARCHAR(255)
+    description: URL of the mutation page in COSMIC. Taken from the COSMIC Mutation Census row of the locus (the
+      transcript with the most mutated samples), else from the HGVS row matching the picked transcript_id and dna_change;
+      NULL when in neither.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_staging_variant_insert.sql; etl:dags/sql/open_data/cosmic_mutation_set_insert.sql;
+        hub:docs/features/RAD-15-cosmic-cmc-snv.md
+  - name: cmc_sample_mutated
+    logicalType: integer
+    physicalType: INT
+    description: Number of COSMIC samples carrying this mutation (COSMIC CMC). Taken from the COSMIC Mutation Census
+      row of the locus (the transcript with the most mutated samples), else from the HGVS row matching the picked
+      transcript_id and dna_change; NULL when in neither.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_staging_variant_insert.sql; etl:dags/sql/open_data/cosmic_mutation_set_insert.sql;
+        hub:docs/features/RAD-15-cosmic-cmc-snv.md; frontend:translations/common/en.json
+  - name: cmc_sample_ratio
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'COSMIC CMC sample_mutated / sample_tested: fraction of tested COSMIC samples carrying this mutation.
+      Taken from the COSMIC Mutation Census row of the locus (the transcript with the most mutated samples), else
+      from the HGVS row matching the picked transcript_id and dna_change; NULL when in neither.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_staging_variant_insert.sql; etl:dags/sql/open_data/cosmic_mutation_set_insert.sql;
+        hub:docs/features/RAD-15-cosmic-cmc-snv.md
+  - name: cmc_tier
+    logicalType: string
+    physicalType: VARCHAR(8)
+    description: 'COSMIC CMC mutation significance tier, as published: ''1'' high, ''2'' medium, ''3'' low, ''Other''
+      no predicted significance. Taken from the COSMIC Mutation Census row of the locus (the transcript with the
+      most mutated samples), else from the HGVS row matching the picked transcript_id and dna_change; NULL when
+      in neither.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_staging_variant_insert.sql; etl:dags/sql/open_data/cosmic_mutation_set_insert.sql;
+        hub:docs/features/RAD-15-cosmic-cmc-snv.md; etl:data_qa/macros/dictionaries.sql dict_cosmic_tier; frontend:translations/common/en.json
+    enum:
+    - value: '1'
+    - value: '2'
+    - value: '3'
+    - value: Other
+  - name: germline_hom_wgs
+    logicalType: integer
+    physicalType: INT(11)
+    description: Distinct patients counted in germline_pc_wgs whose qualifying call is HOM or HEM (same quality
+      gate and cohort; a patient HOM in one sample and HET in another counts once).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: germline_af_wgs
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Approximate allele frequency in the tenant: (germline_pc_wgs + germline_hom_wgs) / (2 * germline_pn_wgs).
+      Assumes diploid genotypes (HEM counted as two alleles, so approximate on chrX/chrY); 0 when the denominator
+      is 0.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: germline_hom_wgs_affected
+    logicalType: integer
+    physicalType: INT(11)
+    description: Distinct patients counted in germline_pc_wgs_affected whose qualifying call is HOM or HEM (same
+      quality gate and cohort; a patient HOM in one sample and HET in another counts once).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: germline_af_wgs_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Approximate allele frequency in the tenant: (germline_pc_wgs_affected + germline_hom_wgs_affected)
+      / (2 * germline_pn_wgs_affected). Assumes diploid genotypes (HEM counted as two alleles, so approximate on
+      chrX/chrY); 0 when the denominator is 0.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: germline_hom_wgs_not_affected
+    logicalType: integer
+    physicalType: INT(11)
+    description: Distinct patients counted in germline_pc_wgs_not_affected whose qualifying call is HOM or HEM (same
+      quality gate and cohort; a patient HOM in one sample and HET in another counts once).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: germline_af_wgs_not_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Approximate allele frequency in the tenant: (germline_pc_wgs_not_affected + germline_hom_wgs_not_affected)
+      / (2 * germline_pn_wgs_not_affected). Assumes diploid genotypes (HEM counted as two alleles, so approximate
+      on chrX/chrY); 0 when the denominator is 0.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: germline_hom_wxs
+    logicalType: integer
+    physicalType: INT(11)
+    description: Distinct patients counted in germline_pc_wxs whose qualifying call is HOM or HEM (same quality
+      gate and cohort; a patient HOM in one sample and HET in another counts once).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: germline_af_wxs
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Approximate allele frequency in the tenant: (germline_pc_wxs + germline_hom_wxs) / (2 * germline_pn_wxs).
+      Assumes diploid genotypes (HEM counted as two alleles, so approximate on chrX/chrY); 0 when the denominator
+      is 0.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: germline_hom_wxs_affected
+    logicalType: integer
+    physicalType: INT(11)
+    description: Distinct patients counted in germline_pc_wxs_affected whose qualifying call is HOM or HEM (same
+      quality gate and cohort; a patient HOM in one sample and HET in another counts once).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: germline_af_wxs_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Approximate allele frequency in the tenant: (germline_pc_wxs_affected + germline_hom_wxs_affected)
+      / (2 * germline_pn_wxs_affected). Assumes diploid genotypes (HEM counted as two alleles, so approximate on
+      chrX/chrY); 0 when the denominator is 0.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: germline_hom_wxs_not_affected
+    logicalType: integer
+    physicalType: INT(11)
+    description: Distinct patients counted in germline_pc_wxs_not_affected whose qualifying call is HOM or HEM (same
+      quality gate and cohort; a patient HOM in one sample and HET in another counts once).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: germline_af_wxs_not_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Approximate allele frequency in the tenant: (germline_pc_wxs_not_affected + germline_hom_wxs_not_affected)
+      / (2 * germline_pn_wxs_not_affected). Assumes diploid genotypes (HEM counted as two alleles, so approximate
+      on chrX/chrY); 0 when the denominator is 0.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: somatic_hom_tn_wgs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Distinct patients counted in somatic_pc_tn_wgs whose tumor call (tumor_zygosity) is HOM or HEM.
+      Near 0 in practice: somatic callers emit 0/1 genotypes.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml;
+        etl:data_qa/sources/snv_variant.yml
+  - name: somatic_af_tn_wgs
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Approximate allele frequency: (somatic_pc_tn_wgs + somatic_hom_tn_wgs) / (2 * somatic_pn_tn_wgs),
+      0 when the denominator is 0. Assumes diploid genotypes and ignores tumor purity, copy number and loss of heterozygosity:
+      not biologically meaningful.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: somatic_hom_tn_wxs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Distinct patients counted in somatic_pc_tn_wxs whose tumor call (tumor_zygosity) is HOM or HEM.
+      Near 0 in practice: somatic callers emit 0/1 genotypes.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml;
+        etl:data_qa/sources/snv_variant.yml
+  - name: somatic_af_tn_wxs
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Approximate allele frequency: (somatic_pc_tn_wxs + somatic_hom_tn_wxs) / (2 * somatic_pn_tn_wxs),
+      0 when the denominator is 0. Assumes diploid genotypes and ignores tumor purity, copy number and loss of heterozygosity:
+      not biologically meaningful.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: somatic_hom_to_wgs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Distinct patients counted in somatic_pc_to_wgs whose tumor call (tumor_zygosity) is HOM or HEM.
+      Near 0 in practice: somatic callers emit 0/1 genotypes.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml;
+        etl:data_qa/sources/snv_variant.yml
+  - name: somatic_af_to_wgs
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Approximate allele frequency: (somatic_pc_to_wgs + somatic_hom_to_wgs) / (2 * somatic_pn_to_wgs),
+      0 when the denominator is 0. Assumes diploid genotypes and ignores tumor purity, copy number and loss of heterozygosity:
+      not biologically meaningful.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  - name: somatic_hom_to_wxs
+    logicalType: integer
+    physicalType: INT(11)
+    description: 'Distinct patients counted in somatic_pc_to_wxs whose tumor call (tumor_zygosity) is HOM or HEM.
+      Near 0 in practice: somatic callers emit 0/1 genotypes.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml;
+        etl:data_qa/sources/snv_variant.yml
+  - name: somatic_af_to_wxs
+    logicalType: number
+    physicalType: DOUBLE
+    description: 'Approximate allele frequency: (somatic_pc_to_wxs + somatic_hom_to_wxs) / (2 * somatic_pn_to_wxs),
+      0 when the denominator is 0. Assumes diploid genotypes and ignores tumor purity, copy number and loss of heterozygosity:
+      not biologically meaningful.'
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/somatic_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/somatic_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql; hub:docs/features/RAD-22-snv-hom-af.md; portal:docs/swagger.yaml
+  quality:
+  - name: snv_variant__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: snv_variant__should_not_contain_only_null_RAD-177
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except alternate, chromosome, locus, locus_id, reference, start).
+    query: SELECT (CASE WHEN COUNT(germline_pf_wgs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pf_wxs) =
+      0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_pf_tn_wgs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_pf_tn_wxs)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_pf_to_wgs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_pf_to_wxs)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gnomad_v3_af) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(topmed_af)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(tg_af) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pc_wgs)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pn_wgs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pc_wgs_affected)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pn_wgs_affected) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pf_wgs_affected)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pc_wgs_not_affected) = 0 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(germline_pn_wgs_not_affected) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pf_wgs_not_affected)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pc_wxs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pn_wxs)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pc_wxs_affected) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pn_wxs_affected)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pf_wxs_affected) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pc_wxs_not_affected)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_pn_wxs_not_affected) = 0 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(germline_pf_wxs_not_affected) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_pc_tn_wgs) = 0 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(somatic_pn_tn_wgs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_pc_tn_wxs)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_pn_tn_wxs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_pc_to_wgs)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_pn_to_wgs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_pc_to_wxs)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_pn_to_wxs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(end)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(clinvar_name) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(variant_class)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(clinvar_interpretation) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(symbol)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(impact_score) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(consequences)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(vep_impact) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(is_mane_select)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(is_mane_plus) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(is_canonical)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(rsnumber) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(mane_select)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(hgvsg) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(hgvsc) = 0 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(hgvsp) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(dna_change) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(aa_change) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(transcript_id) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(pick_source) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(omim_inheritance_code) =
+      0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(cmc_mutation_url) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(cmc_sample_mutated)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(cmc_sample_ratio) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(cmc_tier)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_hom_wgs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_af_wgs)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_hom_wgs_affected) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_af_wgs_affected)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_hom_wgs_not_affected) = 0 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(germline_af_wgs_not_affected) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_hom_wxs) = 0 THEN 1
+      ELSE 0 END) + (CASE WHEN COUNT(germline_af_wxs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_hom_wxs_affected)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_af_wxs_affected) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_hom_wxs_not_affected)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(germline_af_wxs_not_affected) = 0 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(somatic_hom_tn_wgs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_af_tn_wgs) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(somatic_hom_tn_wxs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_af_tn_wxs) = 0 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(somatic_hom_to_wgs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_af_to_wgs)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_hom_to_wxs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(somatic_af_to_wxs)
+      = 0 THEN 1 ELSE 0 END) FROM snv__variant
+    mustBe: 0
+  - name: snv_variant__should_not_contain_same_value_RAD-177
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except germline_af_wxs, germline_af_wxs_affected,
+      germline_af_wxs_not_affected, germline_hom_wxs, germline_hom_wxs_affected, germline_hom_wxs_not_affected,
+      germline_pc_wxs, germline_pc_wxs_affected, germline_pc_wxs_not_affected, germline_pf_wxs, germline_pf_wxs_affected,
+      germline_pf_wxs_not_affected, germline_pn_wgs, germline_pn_wgs_affected, germline_pn_wgs_not_affected, germline_pn_wxs,
+      germline_pn_wxs_affected, germline_pn_wxs_not_affected, locus, locus_id, pick_source, somatic_af_tn_wxs, somatic_af_to_wgs,
+      somatic_af_to_wxs, somatic_hom_tn_wgs, somatic_hom_tn_wxs, somatic_hom_to_wgs, somatic_hom_to_wxs, somatic_pc_tn_wxs,
+      somatic_pc_to_wgs, somatic_pc_to_wxs, somatic_pf_tn_wxs, somatic_pf_to_wgs, somatic_pf_to_wxs, somatic_pn_tn_wgs,
+      somatic_pn_tn_wxs, somatic_pn_to_wgs, somatic_pn_to_wxs).
+    query: SELECT (CASE WHEN COUNT(DISTINCT germline_pf_wgs) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      somatic_pf_tn_wgs) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT gnomad_v3_af) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT topmed_af) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT tg_af) <= 1 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT germline_pc_wgs) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      germline_pc_wgs_affected) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT germline_pf_wgs_affected) <=
+      1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT germline_pc_wgs_not_affected) <= 1 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(DISTINCT germline_pf_wgs_not_affected) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT somatic_pc_tn_wgs)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT chromosome) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      start) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT end) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      clinvar_name) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT variant_class) <= 1 THEN 1 ELSE 0 END) +
+      (CASE WHEN COUNT(DISTINCT symbol) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT impact_score) <= 1 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT vep_impact) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      is_mane_select) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT is_mane_plus) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT is_canonical) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT rsnumber) <=
+      1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT reference) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      alternate) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT mane_select) <= 1 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(DISTINCT hgvsg) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT hgvsc) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT hgvsp) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT dna_change) <= 1 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT aa_change) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT transcript_id)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT cmc_mutation_url) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT cmc_sample_mutated) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT cmc_sample_ratio) <=
+      1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT cmc_tier) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      germline_hom_wgs) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT germline_af_wgs) <= 1 THEN 1 ELSE 0
+      END) + (CASE WHEN COUNT(DISTINCT germline_hom_wgs_affected) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      germline_af_wgs_affected) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT germline_hom_wgs_not_affected)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT germline_af_wgs_not_affected) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT somatic_af_tn_wgs) <= 1 THEN 1 ELSE 0 END) FROM snv__variant
+    mustBe: 0
+  - name: snv_variant__should_be_within_range_pf
+    type: sql
+    dimension: accuracy
+    description: germline_pf_wgs, germline_pf_wxs, somatic_pf_tn_wgs, somatic_pf_tn_wxs, somatic_pf_to_wgs, somatic_pf_to_wxs,
+      germline_pf_wgs_affected, germline_pf_wgs_not_affected, germline_pf_wxs_affected, germline_pf_wxs_not_affected
+      stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM snv__variant WHERE germline_pf_wgs < 0 OR germline_pf_wgs > 1 OR germline_pf_wxs
+      < 0 OR germline_pf_wxs > 1 OR somatic_pf_tn_wgs < 0 OR somatic_pf_tn_wgs > 1 OR somatic_pf_tn_wxs < 0 OR somatic_pf_tn_wxs
+      > 1 OR somatic_pf_to_wgs < 0 OR somatic_pf_to_wgs > 1 OR somatic_pf_to_wxs < 0 OR somatic_pf_to_wxs > 1 OR
+      germline_pf_wgs_affected < 0 OR germline_pf_wgs_affected > 1 OR germline_pf_wgs_not_affected < 0 OR germline_pf_wgs_not_affected
+      > 1 OR germline_pf_wxs_affected < 0 OR germline_pf_wxs_affected > 1 OR germline_pf_wxs_not_affected < 0 OR
+      germline_pf_wxs_not_affected > 1
+    mustBe: 0
+  - name: snv_variant__should_be_within_range_cmc_sample_ratio
+    type: sql
+    dimension: accuracy
+    description: cmc_sample_ratio stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM snv__variant WHERE cmc_sample_ratio < 0 OR cmc_sample_ratio > 1
+    mustBe: 0
+  - name: snv_variant__should_be_within_range_af
+    type: sql
+    dimension: accuracy
+    description: germline_af_wgs, germline_af_wgs_affected, germline_af_wgs_not_affected, germline_af_wxs, germline_af_wxs_affected,
+      germline_af_wxs_not_affected, somatic_af_tn_wgs, somatic_af_tn_wxs, somatic_af_to_wgs, somatic_af_to_wxs stay
+      within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM snv__variant WHERE germline_af_wgs < 0 OR germline_af_wgs > 1 OR germline_af_wgs_affected
+      < 0 OR germline_af_wgs_affected > 1 OR germline_af_wgs_not_affected < 0 OR germline_af_wgs_not_affected >
+      1 OR germline_af_wxs < 0 OR germline_af_wxs > 1 OR germline_af_wxs_affected < 0 OR germline_af_wxs_affected
+      > 1 OR germline_af_wxs_not_affected < 0 OR germline_af_wxs_not_affected > 1 OR somatic_af_tn_wgs < 0 OR somatic_af_tn_wgs
+      > 1 OR somatic_af_tn_wxs < 0 OR somatic_af_tn_wxs > 1 OR somatic_af_to_wgs < 0 OR somatic_af_to_wgs > 1 OR
+      somatic_af_to_wxs < 0 OR somatic_af_to_wxs > 1
+    mustBe: 0
+  - name: snv_variant__validate_hom_lte_pc
+    type: sql
+    description: '`hom` counts the carriers called HOM or HEM among the `pc` carriers, with the same filters and
+      cohorts, so it can never exceed `pc`. A row here means the hom and pc counts drifted apart (filter or cohort
+      mismatch in the *_snv_staging_variant_freq_insert.sql queries) or a column swap in the positional snv_variant_insert.sql.'
+    query: SELECT COUNT(*) FROM (select locus_id, germline_pc_wgs, germline_hom_wgs, germline_pc_wxs, germline_hom_wxs,
+      somatic_pc_tn_wgs, somatic_hom_tn_wgs, somatic_pc_to_wgs, somatic_hom_to_wgs from snv__variant where germline_hom_wgs
+      > germline_pc_wgs or germline_hom_wgs_affected > germline_pc_wgs_affected or germline_hom_wgs_not_affected
+      > germline_pc_wgs_not_affected or germline_hom_wxs > germline_pc_wxs or germline_hom_wxs_affected > germline_pc_wxs_affected
+      or germline_hom_wxs_not_affected > germline_pc_wxs_not_affected or somatic_hom_tn_wgs > somatic_pc_tn_wgs
+      or somatic_hom_tn_wxs > somatic_pc_tn_wxs or somatic_hom_to_wgs > somatic_pc_to_wgs or somatic_hom_to_wxs
+      > somatic_pc_to_wxs) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/snv_variant__validate_hom_lte_pc.sql
+  - name: snv_variant__validate_no_star_alternate
+    type: sql
+    description: '`*` in `alternate` is the spanning-deletion placeholder (VCF artifact), expected to be filtered
+      out upstream — this table should contain none.'
+    query: SELECT COUNT(*) FROM (select locus_id, chromosome, start, reference, alternate from snv__variant where
+      alternate = '*') failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/snv_variant__validate_no_star_alternate.sql
+  customProperties:
+  - property: dataModel
+    value: PRIMARY KEY(locus_id)
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(locus_id) BUCKETS 10
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/queries/carriers.py
+    - mcp/radiant_mcp/queries/charts.py
+    - mcp/radiant_mcp/schema_catalog.py
+    - portal/backend/internal/repository/starrocks/germline_snv_occurrences.go
+    - portal/backend/internal/repository/starrocks/somatic_snv_occurrences.go
+    - portal/backend/internal/service/ranger_masking.go
+    - portal/backend/internal/types/variant.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/radiant/init/snv_variant_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/snv_variant.yml

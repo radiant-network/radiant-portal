@@ -1,0 +1,173 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.omim_gene_panel
+name: omim_gene_panel
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per (gene symbol, OMIM phenotype) from the OMIM genemap2.txt gene map. Fully overwritten by
+    the ETL open-data import (group omim_gene_panel) from the OpenDataLake table omim_v1 (release label typed in
+    by the operator) or the legacy Radiant Iceberg table omim_gene_set. Shared reference table.
+
+    '
+  usage: 'Filter occurrences on predictors with `LEFT SEMI JOIN radiant.snv__consequence_filter_partitioned cf ON
+    cf.locus_id = o.locus_id AND cf.part = o.part AND (<condition>)`. Join on symbol. The ETL aggregates inheritance_code
+    per symbol into the snv variant omim_inheritance_code; the portal exposes panel (omim_gene_panel filter) and
+    inheritance_code (omim_inheritance), and links omim_phenotype_id to omim.org in the variant conditions tab.
+
+    '
+  limitations: 'A gene row is exploded on every symbol of its genemap2 "Gene Symbols" list, so a gene appears under
+    its alias symbols too. Gene map entries without a phenotype are dropped.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: omim_gene_panel
+  physicalName: omim_gene_panel
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: symbol
+    logicalType: string
+    physicalType: varchar(30)
+    description: One of the gene symbols listed by OMIM for the gene map entry (genemap2 Gene Symbols split on ",
+      "; aliases included).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/omim_gene_panel_insert.sql; upstream:omim (radiant-open-datalake release-notes
+        omim/v1.md)
+    required: true
+  - name: panel
+    logicalType: string
+    physicalType: varchar(200)
+    description: OMIM phenotype name, parsed from the genemap2 Phenotypes entry with the MIM number, mapping key
+      and inheritance removed and curly braces stripped.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/omim_gene_panel_insert.sql; upstream:omim (radiant-open-datalake OmimPhenotype.scala)
+    required: true
+  - name: inheritance_code
+    logicalType: array
+    physicalType: array<varchar(5)>
+    description: Short codes of the phenotype's inheritance modes (AD, AR, XL, XLD, XLR, YL, PD, PR, Mi, Mu, DD,
+      DR, IC, ICB, SMo, Smu, ?AD...); NULL when OMIM gives no inheritance.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:omim (radiant-open-datalake OmimPhenotype.scala); frontend:variant.omim.<code> translations
+    items:
+      name: inheritance_code_item
+      logicalType: string
+      physicalType: varchar(5)
+      enum:
+      - value: ?AD
+      - value: ?AR
+      - value: ?DD
+      - value: ?DR
+      - value: ?IC
+      - value: ?Mi
+      - value: ?Mu
+      - value: ?SMo
+      - value: ?Smu
+      - value: ?XL
+      - value: ?XLD
+      - value: ?XLR
+      - value: ?YL
+      - value: AD
+      - value: AR
+      - value: DD
+      - value: DR
+      - value: IC
+      - value: ICB
+      - value: Mi
+      - value: Mu
+      - value: NA
+      - value: NRP
+      - value: NRT
+      - value: PD
+      - value: PR
+      - value: SMo
+      - value: Smu
+      - value: XL
+      - value: XLD
+      - value: XLR
+      - value: YL
+  - name: inheritance
+    logicalType: array
+    physicalType: array<varchar(50)>
+    description: Inheritance modes of the phenotype as written by OMIM (e.g. Autosomal recessive), same order as
+      inheritance_code.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:omim (radiant-open-datalake OmimPhenotype.scala)
+  - name: omim_gene_id
+    logicalType: integer
+    physicalType: int
+    description: MIM number of the gene (genemap2 "MIM Number").
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/omim_gene_panel_insert.sql; upstream:omim
+  - name: omim_phenotype_id
+    logicalType: integer
+    physicalType: int
+    description: MIM number of the phenotype; NULL when the phenotype entry has none.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/omim_gene_panel_insert.sql; upstream:omim (radiant-open-datalake OmimPhenotype.scala);
+        portal:internal/repository/starrocks/gene_panels.go
+  quality:
+  - name: omim_gene_panel__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: omim_gene_panel__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except panel, symbol).
+    query: SELECT (CASE WHEN COUNT(inheritance_code) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(inheritance) = 0
+      THEN 1 ELSE 0 END) + (CASE WHEN COUNT(omim_gene_id) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(omim_phenotype_id)
+      = 0 THEN 1 ELSE 0 END) FROM omim_gene_panel
+    mustBe: 0
+  - name: omim_gene_panel__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value.
+    query: SELECT (CASE WHEN COUNT(DISTINCT symbol) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT panel) <=
+      1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT omim_gene_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      omim_phenotype_id) <= 1 THEN 1 ELSE 0 END) FROM omim_gene_panel
+    mustBe: 0
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`symbol`, `panel`)
+  - property: mcpKeys
+    value: symbol, panel
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/queries/genes.py
+    - mcp/radiant_mcp/schema_catalog.py
+    - mcp/radiant_mcp/tools/occurrences.py
+    - portal/backend/internal/repository/starrocks/cnv_occurrences.go
+    - portal/backend/internal/repository/starrocks/snv_occurrences.go
+    - portal/backend/internal/types/omim_gene_panel.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/omim_gene_panel_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/omim_gene_panel.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

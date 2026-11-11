@@ -1,0 +1,92 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_pcx_30_patient_key
+name: v_pcx_30_patient_key
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    The key mapping of the PCX views, one row per PCX patient: the patient_key of the portal patient page (and of
+    the MCP patient and chart tools) beside the identifier the caller sees for that patient. Radiant's own view,
+    built on the secured v_pcx_30_demographics_combined; the source join (radiant_data_dev demographics) only maps
+    that identifier back to the MRN the key is stored under in radiant_data_dev.pcx_30_patient_key. It adds no PHI
+    rule of its own.
+  usage: >-
+    Join any PCX level view to it on (organization_code, patient_id_type, patient_id) to get patient_key, and select
+    patient_key rather than patient_id. The portal resolves a patient_key to that triple here (patientIdentifier),
+    then reads each view with it; radiant_patient_id maps portal patients (cases, family) to their patient page.
+    patient_key is the same for every caller, so a link can be shared.
+  limitations: >-
+    patient_id is an MRN for a PHI caller: never select or show it. A patient without a key row, or whose
+    demographics row does not map back, is absent. Not guaranteed unique per patient: the demographics view (and
+    the source join) carry one row per cohort diagnosis, so a patient in both cohorts can repeat; use DISTINCT.
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_pcx_30_patient_key
+    physicalName: v_pcx_30_patient_key
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: organization_code
+        description: Code of the contributing institution, from v_pcx_30_demographics_combined. Part of the join key.
+        examples:
+          - CHOP
+          - SCH
+          - UCSF-BCH
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_patient_key.sql.tmpl; mcp:radiant_mcp/schema_catalog.py
+      - name: patient_id_type
+        description: "'mrn' or 'research_id', from v_pcx_30_demographics_combined: the namespace of patient_id for
+          this caller. Part of the join key."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_patient_key.sql.tmpl; mcp:radiant_mcp/schema_catalog.py
+      - name: patient_id
+        description: The patient's identifier as this caller may see it (MRN with PHI access, research id without),
+          from v_pcx_30_demographics_combined. Join key only, never select or show it.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_patient_key.sql.tmpl; mcp:radiant_mcp/schema_catalog.py
+      - name: radiant_patient_id
+        description: Portal patient id (radiant_jdbc.public.patient.id), from v_pcx_30_demographics_combined, not
+          masked; NULL when the patient has no portal record. Lets the case page link its members to their patient
+          page.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_patient_key.sql.tmpl; backend:internal/repository/starrocks/pcx_patients.go
+      - name: patient_key
+        description: Random key (uuid4, 36 characters) of the patient's portal page, one per (organization_code,
+          MRN) in radiant_data_dev.pcx_30_patient_key, never changed once assigned and never derived from an
+          identifier.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/sql/pcx_30_patient_key.sql; backend:scripts/seed/views/v_pcx_30_patient_key.sql.tmpl
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/types/pcx_patient_query.go
+          - backend/scripts/seed/views/v_pcx_30_patient_list.sql.tmpl
+          - mcp/radiant_mcp/schema_catalog.py
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/seed/views/v_pcx_30_patient_key.sql.tmpl

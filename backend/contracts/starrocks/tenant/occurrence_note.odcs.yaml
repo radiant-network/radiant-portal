@@ -1,0 +1,147 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.occurrence_note
+name: occurrence_note
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per note a user wrote on an occurrence (SNV or CNV) of a case; an occurrence can have several notes.
+    Rows of the portal''s PostgreSQL table public.occurrence_note, read through the JDBC catalog radiant_jdbc and filtered
+    to the tenant (tenant_code). Written by the /{tenant}/notes routes: create, edit content, delete (soft delete,
+    deleted = true).
+
+    '
+  usage: 'Always filter `deleted = false`, as every backend reader does. Join an occurrence table on occurrence_id plus
+    task_id, seq_id and case_id: for SNVs `n.occurrence_id = CAST(o.locus_id AS VARCHAR) AND n.task_id = o.task_id AND
+    n.seq_id = o.seq_id` on germline__snv__occurrence (o.tumor_seq_id on somatic__snv__occurrence); for CNVs `n.occurrence_id
+    = CAST(c.cnv_id AS VARCHAR)`. Always add `n.case_id = <case>`. Use `SELECT DISTINCT occurrence_id, case_id, seq_id,
+    task_id` to test for "has a note" without fanning out. Order a thread by created_at.
+
+    '
+  limitations: 'The uuid id and the author''s uuid user_id are not exposed (the JDBC catalog cannot map them): only
+    user_name identifies the author. Deleted notes stay in the table with deleted = true. content is sanitized HTML,
+    at most 1000 characters on input.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: occurrence_note
+    physicalName: occurrence_note
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: case_id
+        logicalType: integer
+        description: Case in which the note was written.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000006_add_occurrence_note.up.sql
+        relationships:
+          - type: foreignKey
+            to: cases.id
+      - name: seq_id
+        logicalType: integer
+        description: Sequencing experiment of the occurrence (seq_id of germline tables, tumor_seq_id of somatic SNVs).
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000006_add_occurrence_note.up.sql; backend:internal/repository/starrocks/somatic_snv_occurrences.go
+        relationships:
+          - type: foreignKey
+            to: sequencing_experiment.id
+      - name: task_id
+        logicalType: integer
+        description: Annotation task that produced the occurrence (occurrence task_id).
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000006_add_occurrence_note.up.sql; backend:internal/repository/starrocks/occurrences.go
+        relationships:
+          - type: foreignKey
+            to: task.id
+      - name: occurrence_id
+        logicalType: string
+        description: Id of the occurrence as text; the locus_id of an SNV occurrence or the cnv_id of a CNV occurrence.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/germline_snv_occurrences.go; backend:internal/repository/starrocks/cnv_occurrences.go
+      - name: user_name
+        logicalType: string
+        description: Full name of the author, taken from the JWT at creation.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:internal/server/handlers_occurrence_notes.go PostOccurrenceNoteHandler
+      - name: content
+        logicalType: string
+        description: Note text, HTML sanitized by the API (htmlPolicy); at most 1000 characters on input.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_occurrence_notes.go sanitizeNoteContent; backend:internal/types/occurrence_note.go
+              CreateOccurrenceNoteInput
+      - name: created_at
+        logicalType: timestamp
+        description: Creation time of the note.
+        customProperties:
+          - property: postgresType
+            value: timestamp with time zone
+          - property: descriptionSource
+            value: backend:internal/types/occurrence_note.go; backend:scripts/init-sql/migrations/000006_add_occurrence_note.up.sql
+      - name: updated_at
+        logicalType: timestamp
+        description: Time of the last change of the row (GORM autoUpdateTime), an edit of the content or the soft delete.
+        customProperties:
+          - property: postgresType
+            value: timestamp with time zone
+          - property: descriptionSource
+            value: backend:internal/types/occurrence_note.go; backend:internal/repository/postgres/occurrence_notes.go
+      - name: deleted
+        logicalType: boolean
+        description: True once the note is deleted (soft delete); readers keep deleted = false.
+        customProperties:
+          - property: postgresType
+            value: boolean
+          - property: descriptionSource
+            value: backend:internal/repository/postgres/occurrence_notes.go Delete
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the row; the view already keeps only the current tenant.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/starrocks_tenant.go buildViewStatement; backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cnv_occurrences.go
+          - backend/internal/repository/starrocks/germline_snv_occurrences.go
+          - backend/internal/repository/starrocks/occurrences.go
+          - backend/internal/repository/starrocks/somatic_snv_occurrences.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

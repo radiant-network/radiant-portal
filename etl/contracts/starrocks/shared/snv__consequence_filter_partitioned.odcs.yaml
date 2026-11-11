@@ -1,0 +1,380 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.snv__consequence_filter_partitioned
+name: snv__consequence_filter_partitioned
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'Copy of snv__consequence_filter partitioned by import part: for each part, the filter rows of the loci
+    that have a germline or somatic SNV occurrence in that part (any tenant). Rewritten one part at a time (dynamic
+    overwrite) by import_part and reannotate_open_data. Read by the portal to filter occurrences on consequence,
+    gene and predictors.'
+  usage: 'Filter occurrences on predictors with `LEFT SEMI JOIN radiant.snv__consequence_filter_partitioned cf ON
+    cf.locus_id = o.locus_id AND cf.part = o.part AND (<condition>)`. Use it to FILTER variants (LEFT SEMI JOIN
+    / EXISTS on locus_id), never as a 1:1 join: a variant has one row per gene x consequence term (more when transcripts
+    of the gene differ in grouped scores), so joins inflate counts. Always join on both locus_id and part (cf.part
+    = o.part) to prune partitions, as the portal does (LEFT SEMI JOIN ... ON cf.locus_id = o.locus_id AND cf.part
+    = o.part).'
+  limitations: 'No transcript id: rows are grouped by (locus_id, symbol, consequence, biotype, impact_score, vep_impact,
+    sift_score, polyphen2_hvar_score, fathmm_score, revel_score, spliceai_ds, gnomad_pli) and the other scores are
+    ANY_VALUE over the collapsed transcripts, so they may come from different transcripts. RefSeq rows are kept
+    only where no Ensembl row exists for the same (locus_id, symbol, consequence). is_deleterious only means ''has
+    a score''. A locus is duplicated in every part where it occurs; do not aggregate across parts.'
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: snv__consequence_filter_partitioned
+  physicalName: snv__consequence_filter_partitioned
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: part
+    logicalType: integer
+    physicalType: INT
+    description: 'Import partition number (same value as the occurrence tables'' part: WGS parts count up from 0,
+      WXS parts start at 65536). The row is present in a part when its locus has a germline or somatic SNV occurrence
+      in that part in any tenant.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert_part.sql; etl:dags/sql/radiant/migrations/SJRA-1850-snv_consequence_filter_partitioned_widen_part.sql
+    required: true
+    partitioned: true
+  - name: locus_id
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Radiant variant id (same key as snv__variant and the occurrence tables). Several rows per variant.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql
+  - name: is_deleterious
+    logicalType: boolean
+    physicalType: boolean
+    description: 'True when at least one in-silico score is present on the row (sift_score, fathmm_score, polyphen2_hvar_score,
+      cadd_score, dann_score, lrt_score, revel_score, phyloP17way_primate, phyloP100way_vertebrate or spliceai_ds
+      is not NULL). Not a deleteriousness prediction despite its name: filter on the scores or *_pred columns for
+      that.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; mcp:schema_catalog.py
+    required: true
+  - name: impact_score
+    logicalType: integer
+    physicalType: tinyint(4)
+    description: Numeric rank of vep_impact used for sorting and filtering, HIGH=4, MODERATE=3, LOW=2, MODIFIER=1,
+      0 when VEP gave no impact.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:tasks/vcf/snv/consequence.py (IMPACT_SCORE)
+  - name: symbol
+    logicalType: string
+    physicalType: varchar(30)
+    description: Gene symbol of the consequence, from VEP CSQ SYMBOL. Empty string for intergenic rows. A variant
+      belongs to every gene it has a row for (readers exclude upstream/downstream/intergenic consequences for gene
+      membership).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; mcp:domain/rules.py (NEARBY_CONSEQUENCES)
+  - name: consequence
+    logicalType: string
+    physicalType: varchar(50)
+    description: One VEP Sequence Ontology consequence term (snv__consequence.consequences unnested, one row per
+      term).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:data_qa/macros/dictionaries.sql (dict_consequences)
+  - name: biotype
+    logicalType: string
+    physicalType: varchar(50)
+    description: VEP BIOTYPE of the transcript (e.g. protein_coding, lncRNA); labelled "Gene Type" in the portal.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:tasks/vcf/snv/consequence.py; frontend:translations/common/en.json
+        biotype
+  - name: spliceai_ds
+    logicalType: number
+    physicalType: float
+    description: SpliceAI maximum delta score (highest of acceptor gain/loss and donor gain/loss) for this variant
+      and gene, from the SpliceAI precomputed scores. Joined on locus_id + symbol, so it is gene-level and identical
+      for every transcript of the gene. NULL when SpliceAI has no score.
+    customProperties:
+    - property: unit
+      value: probability 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:dags/sql/radiant/snv_consequence_insert.sql;
+        etl:dags/sql/open_data/spliceai_insert.sql; upstream:spliceai (radiant-open-datalake SpliceAi max_score)
+  - name: sift_score
+    logicalType: number
+    physicalType: float
+    description: SIFT score from dbNSFP for this Ensembl transcript (lower = more damaging). NULL when dbNSFP has
+      no value (non-missense, or no matching transcript).
+    customProperties:
+    - property: unit
+      value: 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:dags/sql/open_data/dbnsfp_insert.sql (SIFT_score);
+        upstream:dbnsfp
+  - name: sift_pred
+    logicalType: string
+    physicalType: varchar(1)
+    description: 'SIFT prediction from dbNSFP, one letter: D (Damaging) or T (Tolerated). Taken with ANY_VALUE among
+      the transcripts collapsed into this row.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:data_qa/macros/dictionaries.sql (dict_sift_pred);
+        frontend:translations/common/en.json sift_pred
+  - name: polyphen2_hvar_score
+    logicalType: number
+    physicalType: float
+    description: PolyPhen-2 HumVar score from dbNSFP (higher = more damaging).
+    customProperties:
+    - property: unit
+      value: probability 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:dags/sql/open_data/dbnsfp_insert.sql (Polyphen2_HVAR_score);
+        upstream:dbnsfp
+  - name: polyphen2_hvar_pred
+    logicalType: string
+    physicalType: varchar(1)
+    description: 'PolyPhen-2 HumVar prediction from dbNSFP, one letter: B (Benign), P (Possibly damaging), D (Damaging).
+      Taken with ANY_VALUE among the transcripts collapsed into this row.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:data_qa/macros/dictionaries.sql; frontend:translations/common/en.json
+        polyphen2_hvar_pred
+  - name: fathmm_score
+    logicalType: number
+    physicalType: float
+    description: FATHMM score from dbNSFP (more negative = more damaging).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:dags/sql/open_data/dbnsfp_insert.sql (FATHMM_score);
+        upstream:dbnsfp
+  - name: fathmm_pred
+    logicalType: string
+    physicalType: varchar(1)
+    description: 'FATHMM prediction from dbNSFP, one letter: D (Damaging) or T (Tolerated). Taken with ANY_VALUE
+      among the transcripts collapsed into this row.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:data_qa/macros/dictionaries.sql; frontend:translations/common/en.json
+        fathmm_pred
+  - name: cadd_score
+    logicalType: number
+    physicalType: float
+    description: CADD raw rank score from dbNSFP (CADD_raw_rankscore, the rank of the CADD raw score among all dbNSFP
+      variants), not the CADD raw score itself despite the "CADD (Raw)" label in the portal. Taken with ANY_VALUE
+      among the transcripts collapsed into this row.
+    customProperties:
+    - property: unit
+      value: rank 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:dags/sql/open_data/dbnsfp_insert.sql; frontend:translations/common/en.json
+        cadd_score; upstream:dbnsfp
+  - name: cadd_phred
+    logicalType: number
+    physicalType: float
+    description: CADD PHRED-scaled score from dbNSFP (higher = more deleterious; 20 = top 1% of possible substitutions).
+      Taken with ANY_VALUE among the transcripts collapsed into this row.
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:dags/sql/open_data/dbnsfp_insert.sql (CADD_phred);
+        upstream:cadd
+  - name: dann_score
+    logicalType: number
+    physicalType: float
+    description: DANN deleteriousness score from dbNSFP (higher = more deleterious). Taken with ANY_VALUE among
+      the transcripts collapsed into this row.
+    customProperties:
+    - property: unit
+      value: 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:dags/sql/open_data/dbnsfp_insert.sql (DANN_score);
+        upstream:dbnsfp
+  - name: revel_score
+    logicalType: number
+    physicalType: float
+    description: REVEL ensemble pathogenicity score for missense variants, from dbNSFP (higher = more likely pathogenic).
+    customProperties:
+    - property: unit
+      value: 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/dbnsfp_insert.sql (REVEL_score); frontend:translations/common/en.json revel_score;
+        upstream:dbnsfp
+  - name: lrt_score
+    logicalType: number
+    physicalType: float
+    description: LRT (Likelihood Ratio Test) score from dbNSFP, the test p-value (lower = more constrained). Taken
+      with ANY_VALUE among the transcripts collapsed into this row.
+    customProperties:
+    - property: unit
+      value: 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:dags/sql/open_data/dbnsfp_insert.sql (LRT_score);
+        upstream:dbnsfp
+  - name: lrt_pred
+    logicalType: string
+    physicalType: varchar(1)
+    description: 'LRT prediction from dbNSFP, one letter: D (Deleterious), N (Neutral), U (Unknown). Taken with
+      ANY_VALUE among the transcripts collapsed into this row.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:data_qa/macros/dictionaries.sql; frontend:translations/common/en.json
+        lrt_pred
+  - name: gnomad_pli
+    logicalType: number
+    physicalType: float
+    description: gnomAD probability of loss-of-function intolerance of the transcript (v4.1 lof_pLI with the OpenDataLake
+      contract, v2.1.1 pLI before), joined on the Ensembl transcript (or MANE twin for RefSeq rows).
+    customProperties:
+    - property: unit
+      value: probability 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:dags/sql/open_data/gnomad_constraint_insert.sql;
+        etl:dags/sql/radiant/snv_consequence_insert.sql
+  - name: gnomad_loeuf
+    logicalType: number
+    physicalType: float
+    description: gnomAD LOEUF, upper bound of the 90% CI of the observed/expected loss-of-function ratio of the
+      transcript (lower = more intolerant); v4.1 lof_oe_ci_upper or v2.1.1 oe_lof_upper. Taken with ANY_VALUE among
+      the transcripts collapsed into this row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:dags/sql/open_data/gnomad_constraint_insert.sql;
+        upstream:gnomad_constraint
+  - name: phyloP17way_primate
+    logicalType: number
+    physicalType: float
+    description: phyloP conservation score across 17 primate genomes, from dbNSFP (positive = conserved). Taken
+      with ANY_VALUE among the transcripts collapsed into this row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:dags/sql/open_data/dbnsfp_insert.sql; upstream:dbnsfp
+  - name: phyloP100way_vertebrate
+    logicalType: number
+    physicalType: float
+    description: phyloP conservation score across 100 vertebrate genomes, from dbNSFP (positive = conserved). Taken
+      with ANY_VALUE among the transcripts collapsed into this row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:dags/sql/open_data/dbnsfp_insert.sql; upstream:dbnsfp
+  - name: vep_impact
+    logicalType: string
+    physicalType: VARCHAR(20)
+    description: VEP IMPACT of the consequence, HIGH, MODERATE, LOW or MODIFIER.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/snv_consequence_filter_insert.sql; etl:tasks/vcf/snv/consequence.py; etl:data_qa/macros/dictionaries.sql
+    enum:
+    - value: HIGH
+    - value: MODERATE
+    - value: LOW
+    - value: MODIFIER
+  quality:
+  - name: snv_consequence_filter_partitioned__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: snv_consequence_filter_partitioned__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL.
+    query: SELECT (CASE WHEN COUNT(part) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(locus_id) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(is_deleterious) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(impact_score) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(symbol) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(consequence) = 0 THEN 1 ELSE 0
+      END) + (CASE WHEN COUNT(biotype) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(spliceai_ds) = 0 THEN 1 ELSE 0
+      END) + (CASE WHEN COUNT(sift_score) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(sift_pred) = 0 THEN 1 ELSE 0
+      END) + (CASE WHEN COUNT(polyphen2_hvar_score) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(polyphen2_hvar_pred)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(fathmm_score) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(fathmm_pred)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(cadd_score) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(cadd_phred)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(dann_score) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(revel_score)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(lrt_score) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(lrt_pred) =
+      0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gnomad_pli) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gnomad_loeuf)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(phyloP17way_primate) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(phyloP100way_vertebrate)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(vep_impact) = 0 THEN 1 ELSE 0 END) FROM snv__consequence_filter_partitioned
+    mustBe: 0
+  - name: snv_consequence_filter_partitioned__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except part).
+    query: SELECT (CASE WHEN COUNT(DISTINCT locus_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT is_deleterious)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT impact_score) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      symbol) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT consequence) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT biotype) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT spliceai_ds) <= 1 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(DISTINCT sift_score) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT sift_pred)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT polyphen2_hvar_score) <= 1 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(DISTINCT polyphen2_hvar_pred) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT fathmm_score)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT fathmm_pred) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      cadd_score) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT cadd_phred) <= 1 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(DISTINCT dann_score) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT revel_score) <= 1 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT lrt_score) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT lrt_pred)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT gnomad_pli) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      gnomad_loeuf) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT phyloP17way_primate) <= 1 THEN 1 ELSE 0
+      END) + (CASE WHEN COUNT(DISTINCT phyloP100way_vertebrate) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      vep_impact) <= 1 THEN 1 ELSE 0 END) FROM snv__consequence_filter_partitioned
+    mustBe: 0
+  - name: snv_consequence_filter_partitioned__validate_completeness_vs_snv_consequence
+    type: sql
+    description: 'Completeness (locus grain) — the reciprocal of snv_consequence_filter_partitioned__validate_subset_of_snv_consequence.
+      `_filter_partitioned` derives from `snv__consequence` (UNNEST + GROUP BY) then semi-joins `germline__snv__occurrence`
+      on (locus_id, part). So a locus present in `snv__consequence` AND having a germline occurrence for a given
+      `part` MUST appear in `_filter_partitioned` for that `part`. A missing one signals a dropped locus — a failed
+      / partial partition overwrite or a broken semi-join. Locus grain on purpose: it targets the partition / semi-join
+      logic without replaying the UNNEST + GROUP BY of the derivation.'
+    query: SELECT COUNT(*) FROM (select o.part, o.locus_id from germline__snv__occurrence o join radiant.snv__consequence
+      c on c.locus_id = o.locus_id and array_length(c.consequences) > 0 left join radiant.snv__consequence_filter_partitioned
+      fp on fp.locus_id = o.locus_id and fp.part = o.part where fp.locus_id is null group by o.part, o.locus_id)
+      failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/snv_consequence_filter_partitioned__validate_completeness_vs_snv_consequence.sql
+  - name: snv_consequence_filter_partitioned__validate_subset_of_snv_consequence
+    type: sql
+    description: '`snv__consequence_filter_partitioned` is derived from `snv__consequence` via UNNEST(consequences)
+      + GROUP BY (locus_id, symbol, …), then filtered by a semi-join to occurrences. Every row must therefore trace
+      back to a base `snv__consequence` row with the same (locus_id, symbol) whose `consequences` array contains
+      the unnested scalar `consequence`. A row that doesn''t is an orphan — a derivation bug or a stale partition
+      overwrite. Matched on categorical columns only (no fragile float equality).'
+    query: SELECT COUNT(*) FROM (select fp.part, fp.locus_id, fp.symbol, fp.consequence from radiant.snv__consequence_filter_partitioned
+      fp left join radiant.snv__consequence c on c.locus_id = fp.locus_id and c.symbol = fp.symbol and array_contains(c.consequences,
+      fp.consequence) where c.locus_id is null) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/snv_consequence_filter_partitioned__validate_subset_of_snv_consequence.sql
+  customProperties:
+  - property: partitionBy
+    value: PARTITION BY (`part`)
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(`locus_id`) BUCKETS 10
+  - property: mcpKeys
+    value: part, locus_id
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/domain/keys.py
+    - mcp/radiant_mcp/schema_catalog.py
+    - portal/backend/internal/types/consequence.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/radiant/init/snv_consequence_filter_partitioned_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/snv_consequence_filter_partitioned.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

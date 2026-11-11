@@ -1,0 +1,276 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.germline__cnv__variant_frequency
+name: germline__cnv__variant_frequency
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per distinct germline CNV interval (cnv_id) of the tenant, with the number and fraction of patients
+    carrying a matching CNV, split by sequencing strategy (WGS, WXS) and affected status. Fully recomputed per tenant
+    by the ETL after each import (RAD-120); read by the portal germline CNV occurrence endpoints (germline_p*_ fields)
+    and the MCP.
+
+    '
+  usage: 'Every query on a table partitioned by `part` carries `<alias>.part = <part>` as an equality, next to seq_id
+    / task_id. Take `part` and `variant_part` from get_case_context''s occurrence_keys, from the key of the right
+    data type; never compute them. Without it StarRocks scans every partition of the tenant and the query can time
+    out. Per-tenant table, key cnv_id. LEFT JOIN on germline__cnv__occurrence.cnv_id. The portal exposes the columns
+    with a germline_ prefix (pf_wgs -> germline_pf_wgs).
+
+    '
+  limitations: 'Matching is per interval, not per cluster, and not transitive: two overlapping intervals can show
+    slightly different frequencies. Adjacent fragments of one event are not merged. Patients whose affected_status
+    is neither affected nor non_affected count only in the all-patients columns. Only filter = PASS counts as a
+    carrier; no other quality gate.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: germline__cnv__variant_frequency
+  physicalName: germline__cnv__variant_frequency
+  physicalType: table
+  tags:
+  - per-tenant
+  properties:
+  - name: cnv_id
+    logicalType: integer
+    physicalType: BIGINT
+    description: CNV interval (GET_CNV_ID of chromosome, start, length, type), one row per distinct cnv_id of germline__cnv__occurrence
+      in the tenant. Join key to germline__cnv__occurrence.cnv_id.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+    required: true
+    unique: true
+  - name: pc_wgs
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct all patients with a WGS germline sequencing that carry at least one PASS CNV
+      matching this interval (same chromosome, same class with GAIN and GAINLOH pooled, overlap >= 80% of each length).
+      0 when none.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pn_wgs
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct all patients with a WGS germline sequencing that have at least one CNV occurrence
+      in the tenant, whatever its filter. Same value on every row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pf_wgs
+    logicalType: number
+    physicalType: DOUBLE
+    description: pc_wgs / pn_wgs, carrier frequency of the interval among all patients (WGS). NULL when pn_wgs is
+      0.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pc_wgs_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct affected patients (affected_status = 'affected') with a WGS germline sequencing
+      that carry at least one PASS CNV matching this interval (same chromosome, same class with GAIN and GAINLOH
+      pooled, overlap >= 80% of each length). 0 when none.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pn_wgs_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct affected patients (affected_status = 'affected') with a WGS germline sequencing
+      that have at least one CNV occurrence in the tenant, whatever its filter. Same value on every row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pf_wgs_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: pc_wgs_affected / pn_wgs_affected, carrier frequency of the interval among affected patients (affected_status
+      = 'affected') (WGS). NULL when pn_wgs_affected is 0.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pc_wgs_not_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct non-affected patients (affected_status = 'non_affected') with a WGS germline
+      sequencing that carry at least one PASS CNV matching this interval (same chromosome, same class with GAIN
+      and GAINLOH pooled, overlap >= 80% of each length). 0 when none.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pn_wgs_not_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct non-affected patients (affected_status = 'non_affected') with a WGS germline
+      sequencing that have at least one CNV occurrence in the tenant, whatever its filter. Same value on every row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pf_wgs_not_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: pc_wgs_not_affected / pn_wgs_not_affected, carrier frequency of the interval among non-affected
+      patients (affected_status = 'non_affected') (WGS). NULL when pn_wgs_not_affected is 0.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pc_wxs
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct all patients with a WXS (exome) germline sequencing that carry at least one
+      PASS CNV matching this interval (same chromosome, same class with GAIN and GAINLOH pooled, overlap >= 80%
+      of each length). 0 when none.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pn_wxs
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct all patients with a WXS (exome) germline sequencing that have at least one CNV
+      occurrence in the tenant, whatever its filter. Same value on every row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pf_wxs
+    logicalType: number
+    physicalType: DOUBLE
+    description: pc_wxs / pn_wxs, carrier frequency of the interval among all patients (WXS (exome)). NULL when
+      pn_wxs is 0.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pc_wxs_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct affected patients (affected_status = 'affected') with a WXS (exome) germline
+      sequencing that carry at least one PASS CNV matching this interval (same chromosome, same class with GAIN
+      and GAINLOH pooled, overlap >= 80% of each length). 0 when none.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pn_wxs_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct affected patients (affected_status = 'affected') with a WXS (exome) germline
+      sequencing that have at least one CNV occurrence in the tenant, whatever its filter. Same value on every row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pf_wxs_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: pc_wxs_affected / pn_wxs_affected, carrier frequency of the interval among affected patients (affected_status
+      = 'affected') (WXS (exome)). NULL when pn_wxs_affected is 0.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pc_wxs_not_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct non-affected patients (affected_status = 'non_affected') with a WXS (exome)
+      germline sequencing that carry at least one PASS CNV matching this interval (same chromosome, same class with
+      GAIN and GAINLOH pooled, overlap >= 80% of each length). 0 when none.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pn_wxs_not_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct non-affected patients (affected_status = 'non_affected') with a WXS (exome)
+      germline sequencing that have at least one CNV occurrence in the tenant, whatever its filter. Same value on
+      every row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  - name: pf_wxs_not_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: pc_wxs_not_affected / pn_wxs_not_affected, carrier frequency of the interval among non-affected
+      patients (affected_status = 'non_affected') (WXS (exome)). NULL when pn_wxs_not_affected is 0.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+  quality:
+  - name: germline_cnv_variant_frequency__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: germline_cnv_variant_frequency__should_be_within_range_pf
+    type: sql
+    dimension: accuracy
+    description: pf_wgs, pf_wgs_affected, pf_wgs_not_affected, pf_wxs, pf_wxs_affected, pf_wxs_not_affected stay
+      within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM germline__cnv__variant_frequency WHERE pf_wgs < 0 OR pf_wgs > 1 OR pf_wgs_affected
+      < 0 OR pf_wgs_affected > 1 OR pf_wgs_not_affected < 0 OR pf_wgs_not_affected > 1 OR pf_wxs < 0 OR pf_wxs >
+      1 OR pf_wxs_affected < 0 OR pf_wxs_affected > 1 OR pf_wxs_not_affected < 0 OR pf_wxs_not_affected > 1
+    mustBe: 0
+  - name: germline_cnv_variant_frequency__validate_occurrence_coverage
+    type: sql
+    description: Every interval of the occurrences gets a frequency row, also when none of its CNVs passes the filter.
+      With the uniqueness of `cnv_id` on the frequency table, each occurrence joins to exactly one row. A row here
+      means the frequency table is older than the occurrences (the recompute after the occurrence insert failed
+      or was skipped) or the insert dropped intervals.
+    query: SELECT COUNT(*) FROM (select distinct o.cnv_id from germline__cnv__occurrence o left join germline__cnv__variant_frequency
+      f on f.cnv_id = o.cnv_id where f.cnv_id is null) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/germline_cnv_variant_frequency__validate_occurrence_coverage.sql
+  - name: germline_cnv_variant_frequency__validate_pc_lte_pn
+    type: sql
+    description: '`pc` counts the patients carrying a matching CNV, `pn` the patients with any CNV occurrence of
+      the same cohort, so `pc` can never exceed `pn`. A row here means a cohort mismatch between the counts and
+      the denominators in germline_cnv_variant_frequency_insert.sql.'
+    query: SELECT COUNT(*) FROM (select cnv_id, pc_wgs, pn_wgs, pc_wxs, pn_wxs from germline__cnv__variant_frequency
+      where pc_wgs > pn_wgs or pc_wgs_affected > pn_wgs_affected or pc_wgs_not_affected > pn_wgs_not_affected or
+      pc_wxs > pn_wxs or pc_wxs_affected > pn_wxs_affected or pc_wxs_not_affected > pn_wxs_not_affected) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/germline_cnv_variant_frequency__validate_pc_lte_pn.sql
+  customProperties:
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(`cnv_id`) BUCKETS 10
+  - property: mcpKeys
+    value: cnv_id
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/schema_catalog.py
+    - portal/backend/internal/types/germline_cnv_occurrence.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/radiant/init/germline_cnv_variant_frequency_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/germline_cnv_variant_frequency.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

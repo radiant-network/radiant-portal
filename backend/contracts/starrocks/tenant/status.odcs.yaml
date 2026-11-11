@@ -1,0 +1,80 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.status
+name: status
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Workflow status shared by cases and sequencing experiments. Referenced by cases.status_code and sequencing_experiment.status_code.
+    For a case: draft (started, not submitted), submitted (label ''Pending'': variant data pending), processing, in_progress,
+    in_review, completed (label ''Closed'') and its closure sub-statuses resolved / unresolved / inconclusive, reopened, revoked
+    (label ''Cancelled''). Shared by every tenant (the PostgreSQL table has no tenant_code), exposed in each {tenant}_tenant
+    database through radiant_jdbc; the portal also serves it as GET /value_sets/{type}.'
+  usage: Join cases.status_code (or sequencing_experiment.status_code) = status.code for the label; filter on the code, not
+    on name_en (labels were renamed by migration 000030). The ETL annotates only sequencing experiments with status_code =
+    'completed'.
+  limitations: 'The values are data seeded by the backend migrations (backend/scripts/init-sql/migrations), not a fixed enum:
+    later migrations or a deployment can add codes, so query the view for the current list. Codes are unique case-insensitively
+    (migration 000034) and stored in the case they were entered in. Migration 000030 retired unknown, incomplete and revoke
+    (remapped to submitted / revoked) and 000038 restored draft; resolution_status was folded into resolved / unresolved /
+    inconclusive by 000031. The labels are worded for cases.'
+team:
+- username: radiant-portal
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: status
+  physicalName: status
+  physicalType: view
+  tags:
+  - per-tenant
+  properties:
+  - name: code
+    logicalType: string
+    description: Code of the status, primary key; the value stored in the referencing columns.
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/migrations/000030_seed_target_case_status_enum.up.sql;
+        backend:scripts/init-sql/migrations/000031_retire_case_resolution_status.up.sql; backend:scripts/init-sql/migrations/000038_restore_draft_case_status.up.sql;
+        etl:dags/sql/clinical/pending_annotation_select.sql
+    examples:
+    - draft
+    - submitted
+    - processing
+    - in_progress
+    - in_review
+    - completed
+    - resolved
+    - unresolved
+    - inconclusive
+    - reopened
+    - revoked
+  - name: name_en
+    logicalType: string
+    description: English label of the code (e.g. submitted = Pending, completed = Closed, revoked = Cancelled).
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000030_seed_target_case_status_enum.up.sql; frontend:translations/common/en.json
+        status
+  customProperties:
+  - property: consumers
+    value:
+    - backend/internal/repository/starrocks/cases.go
+authoritativeDefinitions:
+- type: implementation
+  url: backend:internal/repository/starrocks/starrocks_tenant.go

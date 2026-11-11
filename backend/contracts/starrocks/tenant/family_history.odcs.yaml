@@ -1,0 +1,104 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.family_history
+name: family_history
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per condition reported in the family of a case member: which relative has it and the condition, as
+    free text (UI "Family History" on the case page). Rows of the portal''s PostgreSQL table public.family_history read
+    through radiant_jdbc and filtered on tenant_code = the tenant. The batch worker writes them from
+    patients[].family_history of the case batch.'
+  usage: 'Join cases on cases.id = case_id and patient on patient.id = patient_id (the member the history was reported
+    for). The portal reads them per case, ordered by family_member_code then condition.'
+  limitations: 'family_member_code and condition are free text: family_member_code is not a family_relationship code
+    (letters, dashes and spaces) and condition is not coded. The update batch replaces a case''s family history. No
+    json, jsonb or uuid column in public.family_history.'
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: family_history
+    physicalName: family_history
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Row id, primary key (identity).
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql'
+      - name: case_id
+        logicalType: integer
+        description: cases.id of the case the history was submitted with.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql; backend:cmd/worker/case_validation.go'
+        relationships:
+          - type: foreignKey
+            to: cases.id
+      - name: patient_id
+        logicalType: integer
+        description: patient.id of the case member the history was reported for.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql; backend:cmd/worker/case_validation.go; backend:docs/swagger.yaml
+              CaseFamilyHistory'
+        relationships:
+          - type: foreignKey
+            to: patient.id
+      - name: family_member_code
+        logicalType: string
+        description: Relative of the member who has the condition, free text (letters, dashes and spaces), e.g. mother,
+          uncle.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:cmd/worker/case_validation.go FamilyMemberCodeRegExp; backend:internal/types/case_batch.go'
+        examples:
+          - mother
+          - uncle
+      - name: condition
+        logicalType: string
+        description: The condition reported for that relative, free text.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/case_batch.go; backend:docs/swagger.yaml CaseFamilyHistory'
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the row; always the tenant of this database (the view filters on it).
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql'
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

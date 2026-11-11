@@ -1,0 +1,175 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.document
+name: document
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per file registered in the portal (CRAM, VCF, gVCF, reports, QC metrics...), described by its
+    data category, data type and format and located by its storage URL. Rows of the portal''s PostgreSQL table
+    public.document read through the radiant_jdbc catalog and filtered to the tenant (WHERE tenant_code =
+    ''<tenant>''). Written by the portal worker from the output documents of the tasks of a case batch (the ETL
+    registers its pipeline outputs through PATCH /{tenant}/cases/batch).
+
+    '
+  usage: 'Key id. Link a file to its task with task_has_document (document_id = document.id, type = ''output'') and
+    to the sequencing experiments through task_context. Select files on data_type_code and format_code, never on the
+    file name: e.g. germline annotated VCF = data_type_code ''snv'' AND format_code ''vcf'', gVCF = ''snv'' / ''gvcf'',
+    CNV VCF = ''gcnv'' or ''scnv'' / ''vcf'', alignment = ''alignment'' / ''cram''. The portal file list hides index
+    files (crai, tbi) and the QC metrics JSON (data_type_code ''aggqc'' AND format_code ''json'').
+
+    '
+  limitations: 'url is a storage URL (s3://...), not a download link: the API presigns it. hash is optional (empty
+    or NULL). One URL can be registered more than once when a batch resubmits it with different metadata. The ETL
+    reads the underlying PostgreSQL table (radiant_jdbc.public.document) directly, not this view.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: document
+    physicalName: document
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Internal document id (identity, primary key); exposed by the API as document_id.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:internal/types/document.go DocumentIdField
+      - name: name
+        logicalType: string
+        description: File name, e.g. 'FI0037662.S13230.cram' ("File Name" in the portal).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/case_batch.go OutputDocumentBatch; frontend:translations/common/en.json file_entity.name
+      - name: data_category_code
+        logicalType: string
+        description: Broad category of the data, a code of data_category (clinical or genomic).
+        examples:
+          - genomic
+          - clinical
+        relationships:
+          - type: foreignKey
+            to: data_category.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql document_data_category_fkey
+      - name: data_type_code
+        logicalType: string
+        description: Kind of data in the file, a code of data_type (e.g. alignment, snv for germline SNV, ssnv for
+          somatic SNV, gcnv / scnv for germline / somatic CNV, exomiser, aggqc). "Type" in the portal.
+        examples:
+          - alignment
+          - snv
+          - ssnv
+          - gcnv
+          - scnv
+          - exomiser
+          - exomiser_cnv
+          - aggqc
+        relationships:
+          - type: foreignKey
+            to: data_type.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/migrations/000028_qd_qc_metrics_task_and_data_type.up.sql;
+              backend:scripts/init-sql/migrations/000044_embed_exomiser_in_annotation_tasks.up.sql; frontend:translations/common/en.json
+              file_entity.data_type_code
+      - name: format_code
+        logicalType: string
+        description: File format, a code of file_format (e.g. cram, crai, vcf, gvcf, tbi, tsv, json, pdf). "Format"
+          in the portal.
+        examples:
+          - cram
+          - crai
+          - vcf
+          - gvcf
+          - tbi
+          - tsv
+          - json
+        relationships:
+          - type: foreignKey
+            to: file_format.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql document_format_fkey; backend:internal/types/document.go
+              FileFormatCode; frontend:translations/common/en.json file_entity.format_code
+      - name: size
+        logicalType: integer
+        description: File size in bytes (required by the batch); the portal renders it with JEDEC units.
+        customProperties:
+          - property: postgresType
+            value: bigint
+          - property: unit
+            value: bytes
+          - property: descriptionSource
+            value: backend:internal/types/case_batch.go OutputDocumentBatch; frontend:components/base/information/document-size.tsx
+      - name: url
+        logicalType: string
+        description: Storage URL of the file (an S3 URI, s3://bucket/key). The API presigns it for download; the ETL
+          reads VCFs, gVCFs and Exomiser reports from it.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_documents.go GetDocumentsDownloadUrlHandler; etl:radiant/dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+      - name: hash
+        logicalType: string
+        description: Checksum of the file as submitted in the batch (optional; empty or NULL when not given).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/case_batch.go OutputDocumentBatch; frontend:translations/common/en.json file_entity.hash
+      - name: created_on
+        logicalType: timestamp
+        description: When the document was registered in the portal database (default now()), not the file's own
+          creation date.
+        customProperties:
+          - property: postgresType
+            value: timestamp without time zone
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/types/document.go autoCreateTime
+      - name: tenant_code
+        logicalType: string
+        description: Tenant owning the row; always the view's tenant, since the view filters on it.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql; backend:internal/repository/starrocks/starrocks_tenant.go
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/documents.go
+          - backend/internal/repository/starrocks/igv.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

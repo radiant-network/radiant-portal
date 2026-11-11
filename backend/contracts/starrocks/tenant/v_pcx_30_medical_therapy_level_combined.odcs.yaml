@@ -1,0 +1,170 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_pcx_30_medical_therapy_level_combined
+name: v_pcx_30_medical_therapy_level_combined
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    PCX 3.0 systemic therapy, several rows per patient: one per distinct chemotherapy regimen of the CBTN treatment
+    table (chemotherapy = 'Yes'), with the protocol (name and arm), regimen type, agents, start and stop ages, and
+    whether it was part of the initial treatment. Grant-guarded read surface over
+    radiant_data_dev.v_pcx_30_medical_therapy_level_combined. The MCP uses it to build patient groups by protocol
+    for survival curves.
+  usage: >-
+    Read it as the end user (the portal API and the MCP query StarRocks with the caller's JWT). Join to
+    v_pcx_30_patient_key on (organization_code, patient_id_type, patient_id) to get patient_key; count patients
+    with COUNT(DISTINCT k.patient_key), since there are several regimens per patient. Match a trial on
+    protocol_name (e.g. = 'ACNS0334') and list its arms with a GROUP BY before choosing one: values are free text.
+    v_pcx_30_patient_list.chemotherapy_agents already holds a patient's distinct agents as an array.
+  limitations: >-
+    is_initial_treatment = 'no' means "not known to be frontline": ~30% of 'no' rows on the 2026-10-01 build are a
+    sentinel start age or a missing initial-diagnosis anchor. The ages are text and can hold 'Not Reported', 'Not
+    Available' or 'Not Applicable'. protocol_name_and_arm and its two parts, and chemotherapy_agents, come from the
+    *_unmasked_internal_use source columns and are shown to every caller. protocol_name_and_arm is not overridden
+    by reviewers while protocol_name can be. Column masking only, no row filtering; a NULL organization_code fails
+    closed; the lab grant is not bounded by organization_code; radiant_patient_id is projected unmasked.
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_pcx_30_medical_therapy_level_combined
+    physicalName: v_pcx_30_medical_therapy_level_combined
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: organization_name
+        description: Name of the institution that contributed the patient's data (the pcx_30_organization_override
+          seed wins where it carries the patient). Shown to every caller.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: organization_code
+        description: Code of the contributing institution, pcx_30_organization_ref.code joined on the organization
+          name (the override seed wins). The vocabulary auth.pii_grant keys on; NULL fails closed to de-identified.
+        examples:
+          - CHOP
+          - SCH
+          - UCSF-BCH
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/medical_therapy_access_controlled.sql.tmpl
+      - name: patient_id
+        description: "The patient's identifier as this caller may see it: CASE WHEN can_read_phi THEN mrn ELSE
+          research_id END. Join key only: never select or show it."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/medical_therapy_access_controlled.sql.tmpl; mcp:radiant_mcp/schema_catalog.py
+      - name: patient_id_type
+        description: "'mrn' when can_read_phi, else 'research_id': the namespace of patient_id on this row."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/medical_therapy_access_controlled.sql.tmpl
+      - name: radiant_patient_id
+        description: Portal patient id (radiant_jdbc.public.patient.id), matched on organization_code and the MRN
+          with leading zeros stripped on both sides; NULL when the patient has no portal record. Not masked.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/medical_therapy_access_controlled.sql.tmpl
+      - name: protocol_name_and_arm
+        description: Treatment protocol the patient is enrolled on or treated per, with its arm when recorded
+          (treatment.protocol_name_unmasked_internal_use, double quotes removed). Sentinels such as 'Not
+          Applicable', 'Not Reported' or 'Other' occur.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_medical_therapy_level_combined.sql; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: protocol_name
+        description: The protocol alone, protocol_name_and_arm before its first colon, trimmed; the whole value when
+          there is no colon (so a sentinel appears unchanged). All rows of one trial share it, with or without an
+          arm, so group on this column.
+        examples:
+          - ACNS0334
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_medical_therapy_level_combined.sql; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; mcp:radiant_mcp/schema_catalog.py
+      - name: protocol_arm
+        description: Arm, stratum or regimen within the protocol, protocol_name_and_arm after its first colon
+          (further colons kept). 'Not Applicable' when there is no colon, which covers both a protocol without arm
+          and an unrecorded protocol; read protocol_name first.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_medical_therapy_level_combined.sql; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: chemotherapy_type
+        description: Whether the regimen followed a treatment protocol (with or without enrollment) or other
+          standard of care.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: regimen_start_date
+        description: Start date of the regimen, date_add(dob, age_at_regimen_start_days). NULL without PHI access or
+          when the age is a sentinel.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/medical_therapy_access_controlled.sql.tmpl; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_medical_therapy_level_combined.sql
+      - name: age_at_regimen_start_days
+        description: Age in days at the start of the regimen (treatment.age_at_chemo_start; a reviewer-accepted
+          override wins). Text that can be 'Not Reported', 'Not Available' or 'Not Applicable'.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_medical_therapy_level_combined.sql
+      - name: regimen_stop_date
+        description: Stop date of the regimen, date_add(dob, age_at_regimen_stop_days). NULL without PHI access or
+          when the age is a sentinel.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/medical_therapy_access_controlled.sql.tmpl; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_medical_therapy_level_combined.sql
+      - name: age_at_regimen_stop_days
+        description: Age in days at the end of the regimen (treatment.age_at_chemo_stop). Same sentinels as the
+          start age.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_medical_therapy_level_combined.sql
+      - name: chemotherapy_agents
+        description: Agents of the regimen as one comma-separated text (treatment.chemotherapy_agents_unmasked_internal_use;
+          literal double quotes kept).
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_medical_therapy_level_combined.sql; backend:scripts/seed/views/v_pcx_30_patient_list.sql.tmpl
+      - name: is_initial_treatment
+        description: "'yes' when the regimen started between the initial-diagnosis age and the first subsequent
+          disease event age (int_pcx_30_initial_events), i.e. frontline therapy of the initial tumor; 'no'
+          otherwise, including when it cannot be determined."
+        examples:
+          - 'yes'
+          - 'no'
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_medical_therapy_level_combined.sql; mcp:radiant_mcp/schema_catalog.py
+      - name: can_read_phi
+        description: "TRUE when the caller may read this row's PHI: an org grant (auth.pii_grant, a can_read_pii
+          role at the row's organization_code) or a lab grant (auth.pii_lab_patient, a can_read_pii role at the
+          diagnosis lab of a portal case of radiant_patient_id). The caller is current_user(), the JWT sub."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/medical_therapy_access_controlled.sql.tmpl; backend:internal/repository/starrocks/views/auth_pii_lab_patient.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/types/pcx_patient_query.go
+          - backend/scripts/seed/views/v_pcx_30_patient_list.sql.tmpl
+          - mcp/radiant_mcp/schema_catalog.py
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/pcx_tables/access_controlled_views/medical_therapy_access_controlled.sql.tmpl

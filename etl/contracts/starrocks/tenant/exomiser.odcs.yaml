@@ -1,0 +1,236 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.exomiser
+name: exomiser
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per contributing variant x gene x mode of inheritance reported by Exomiser for the proband of
+    one germline annotation task, loaded from the pipeline''s <family>.exomiser.variants.tsv (only rows with CONTRIBUTING_VARIANT
+    = 1). Loaded by import_part through staging_exomiser and keyed to the variant catalog; its variant_rank = 1
+    row feeds the exomiser_* columns of germline__snv__occurrence. Read by the portal (variant page Exomiser classification
+    counts) and the MCP.
+
+    '
+  usage: 'Every query on a table partitioned by `part` carries `<alias>.part = <part>` as an equality, next to seq_id
+    / task_id. Take `part` and `variant_part` from get_case_context''s occurrence_keys, from the key of the right
+    data type; never compute them. Without it StarRocks scans every partition of the tenant and the query can time
+    out. Join the catalog with `v.locus_id = o.locus_id AND v.part = <variant_part>`. Per-tenant table, partitioned
+    on part: filter on part, seq_id and task_id. Key (part, seq_id, task_id, locus_id, id). A locus can have several
+    rows per sequencing (one per gene / MOI): filter variant_rank = 1 for the single best row per variant, as the
+    occurrence table and the portal do. Join snv__variant or germline__snv__occurrence on locus_id (plus seq_id,
+    task_id for the occurrence).
+
+    '
+  limitations: 'Exomiser runs on the proband only, so parents and siblings have no rows. Variants Exomiser did not
+    flag as contributing are absent (no row, not a low score). Rows whose locus is not in the run''s variant table
+    are dropped. Rows imported before RAD-116 were re-keyed to their annotation task; sequencings with several annotation
+    tasks were re-imported.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: exomiser
+  physicalName: exomiser
+  physicalType: table
+  tags:
+  - per-tenant
+  properties:
+  - name: part
+    logicalType: integer
+    physicalType: INT
+    description: ETL partition of the sequencing experiment. A patient, its case and family stay in one part per
+      sequencing strategy (WGS or WXS); every table of the same part is loaded and rebuilt together.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/starrocks/partition.py; etl:dags/sql/radiant/staging_exomiser_load.sql
+    required: true
+    partitioned: true
+  - name: seq_id
+    logicalType: integer
+    physicalType: INT
+    description: Sequencing experiment of the proband the Exomiser file belongs to.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/staging_exomiser_load.sql; etl:dags/sql/radiant/migrations/RAD-116_exomiser_task_id.sql
+    required: true
+  - name: task_id
+    logicalType: integer
+    physicalType: INT
+    description: Germline annotation task (radiant_germline_annotation) that produced the Exomiser file (RAD-116);
+      one sequencing can have several tasks, e.g. a duo then a trio analysis.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-116_exomiser_task_id.sql; portal:internal/repository/starrocks/exomiser.go
+    required: true
+  - name: locus_id
+    logicalType: integer
+    physicalType: BIGINT
+    description: Variant id (snv__variant.locus_id), resolved from the SHA-256 of 'chromosome-start-reference-alternate'
+      built from the TSV CONTIG, START, REF and ALT columns.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_exomiser_create_table.sql; etl:dags/sql/radiant/exomiser_insert_partition_delta.sql
+    required: true
+  - name: id
+    logicalType: string
+    physicalType: VARCHAR(2000)
+    description: Exomiser variant identifier, the TSV ID column (in Exomiser output, the variant coordinates suffixed
+      with the mode of inheritance, e.g. 1-12345-A-G_AD); not a Radiant key.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/staging_exomiser_load.sql; upstream:exomiser variants.tsv
+    required: true
+  - name: locus_hash
+    logicalType: string
+    physicalType: VARCHAR(256)
+    description: SHA-256 hex of 'chromosome-start-reference-alternate' from the Exomiser TSV coordinates, the key
+      used to resolve locus_id.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_exomiser_create_table.sql
+  - name: moi
+    logicalType: string
+    physicalType: VARCHAR(10)
+    description: Mode of inheritance Exomiser evaluated the gene and variant under, TSV MOI column as written by
+      Exomiser (e.g. AD, AR, XD, XR, MT).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/staging_exomiser_load.sql; upstream:exomiser variants.tsv
+  - name: variant_score
+    logicalType: number
+    physicalType: FLOAT
+    description: Exomiser variant score (TSV EXOMISER_VARIANT_SCORE), the variant's own pathogenicity/frequency-based
+      score; higher is more deleterious.
+    customProperties:
+    - property: unit
+      value: score 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/staging_exomiser_load.sql; etl:data_qa/sources/exomiser.yml; upstream:exomiser
+        variants.tsv
+  - name: gene_combined_score
+    logicalType: number
+    physicalType: FLOAT
+    description: Exomiser gene combined score (TSV EXOMISER_GENE_COMBINED_SCORE) of the gene under this MOI, combining
+      the variant and the phenotype (HPO) scores; the score the portal shows as "Exomiser Score".
+    customProperties:
+    - property: unit
+      value: score 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/staging_exomiser_load.sql; frontend:translations/common/en.json exomiser_gene_combined_score_tooltip;
+        upstream:exomiser variants.tsv
+  - name: variant_rank
+    logicalType: integer
+    physicalType: TINYINT
+    description: Rank of this row among the rows of the same variant (locus) for the same seq_id and task_id, by
+      gene_combined_score descending (1 = best), computed by the ETL with ROW_NUMBER; ties are broken arbitrarily.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/exomiser_insert_partition_delta.sql
+  - name: rank
+    logicalType: integer
+    physicalType: INT
+    description: Exomiser rank of the gene / MOI result in the whole analysis (TSV RANK column, 1 = top candidate).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/staging_exomiser_load.sql; upstream:exomiser variants.tsv
+  - name: symbol
+    logicalType: string
+    physicalType: VARCHAR(200)
+    description: Gene symbol of the Exomiser result (TSV GENE_SYMBOL).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/staging_exomiser_load.sql
+  - name: acmg_classification
+    logicalType: string
+    physicalType: VARCHAR(300)
+    description: ACMG classification computed by Exomiser (TSV EXOMISER_ACMG_CLASSIFICATION), lower-cased by the
+      load, e.g. pathogenic, likely_pathogenic, uncertain_significance, likely_benign, benign.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/staging_exomiser_load.sql; etl:data_qa/macros/dictionaries.sql
+    enum:
+    - value: pathogenic
+    - value: likely_pathogenic
+    - value: uncertain_significance
+    - value: likely_benign
+    - value: benign
+  - name: acmg_evidence
+    logicalType: array
+    physicalType: array< VARCHAR (10)>
+    description: ACMG criteria codes Exomiser applied (TSV EXOMISER_ACMG_EVIDENCE split on ','), e.g. PVS1, PM2;
+      NULL when the TSV field is empty.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/staging_exomiser_load.sql
+  quality:
+  - name: exomiser__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: exomiser__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except id, locus_id, part, seq_id, task_id).
+    query: SELECT (CASE WHEN COUNT(locus_hash) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(moi) = 0 THEN 1 ELSE 0
+      END) + (CASE WHEN COUNT(variant_score) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gene_combined_score) = 0
+      THEN 1 ELSE 0 END) + (CASE WHEN COUNT(variant_rank) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(rank) = 0 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(symbol) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(acmg_classification) =
+      0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(acmg_evidence) = 0 THEN 1 ELSE 0 END) FROM exomiser
+    mustBe: 0
+  - name: exomiser__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except part).
+    query: SELECT (CASE WHEN COUNT(DISTINCT seq_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT task_id)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT locus_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT locus_hash) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      moi) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT variant_score) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT gene_combined_score) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT variant_rank) <= 1
+      THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT rank) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT symbol)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT acmg_classification) <= 1 THEN 1 ELSE 0 END) FROM exomiser
+    mustBe: 0
+  - name: exomiser__should_be_within_range_score
+    type: sql
+    dimension: accuracy
+    description: variant_score, gene_combined_score stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM exomiser WHERE variant_score < 0 OR variant_score > 1 OR gene_combined_score < 0
+      OR gene_combined_score > 1
+    mustBe: 0
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`, `id`)
+  - property: partitionBy
+    value: PARTITION BY (`part`)
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(`locus_id`) BUCKETS 10
+  - property: mcpKeys
+    value: part, seq_id, task_id, locus_id
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/domain/keys.py
+    - mcp/radiant_mcp/schema_catalog.py
+    - portal/backend/internal/repository/starrocks/exomiser.go
+    - portal/backend/internal/types/exomiser.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/radiant/init/exomiser_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/exomiser.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

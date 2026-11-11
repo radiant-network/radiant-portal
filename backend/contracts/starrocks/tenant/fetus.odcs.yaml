@@ -1,0 +1,144 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.fetus
+name: fetus
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per fetus, the clinical subject of a prenatal case, modeled as tissue of its mother (the case''s
+    proband) with no administrative identity of its own. Rows of the portal''s PostgreSQL table public.fetus read through
+    radiant_jdbc and filtered on tenant_code = the tenant. The batch worker writes them from fetuses[] of the case batch
+    (created, or updated in place when submitter_fetus_id already exists), with a family row (relationship fetus) each.'
+  usage: 'Key id: family.fetus_id and sample.fetus_id point at it. A fetal sample is drawn from the mother, so
+    sample.patient_id is the mother and sample.fetus_id names whose genome was sequenced. Join the mother on patient.id
+    = mother_id. Natural key (organization_code, tenant_code, submitter_fetus_id), unique. Combine with patient fields
+    with COALESCE (sex_code, life_status_code), as the portal does for case members.'
+  limitations: 'fetus.id and patient.id are independent sequences and can collide: never mix them in one key without a
+    tag. last_menstrual_period and estimated_due_date are optional (NULL). No PHI mask applies to this view (the Ranger
+    masks target patient). tenant_code and organization_code are text here, varchar elsewhere. No json, jsonb or uuid
+    column in public.fetus.'
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: fetus
+    physicalName: fetus
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Fetus id, primary key (identity); never appears in an API payload. Independent of patient.id.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000021_add_fetus.up.sql; backend:internal/types/fetus.go; backend:internal/repository/starrocks/cases.go'
+      - name: submitter_fetus_id
+        logicalType: string
+        description: The submitter's identifier of the fetus, its identity across batches; unique per (organization_code,
+          tenant_code).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000021_add_fetus.up.sql; backend:scripts/init-sql/migrations/000022_widen_tenant_unique_constraints.up.sql;
+              backend:internal/types/case_batch.go'
+      - name: mother_id
+        logicalType: integer
+        description: patient.id of the mother, the proband of the prenatal case.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000021_add_fetus.up.sql; backend:cmd/worker/case_fetus_validation.go'
+        relationships:
+          - type: foreignKey
+            to: patient.id
+      - name: organization_code
+        logicalType: string
+        description: organization.code (same tenant), inherited from the mother's organization_code at creation.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/fetus.go; backend:scripts/init-sql/migrations/000021_add_fetus.up.sql'
+        relationships:
+          - type: foreignKey
+            to: organization.code
+      - name: life_status_code
+        logicalType: string
+        description: Life status of the fetus, a life_status.code (alive, deceased, unknown).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/case_batch.go; backend:scripts/init-sql/migrations/000021_add_fetus.up.sql'
+        relationships:
+          - type: foreignKey
+            to: life_status.code
+        examples:
+          - alive
+          - deceased
+          - unknown
+      - name: sex_code
+        logicalType: string
+        description: Sex of the fetus, a sex.code (male, female, unknown).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/case_batch.go; backend:scripts/init-sql/migrations/000021_add_fetus.up.sql'
+        relationships:
+          - type: foreignKey
+            to: sex.code
+        examples:
+          - female
+          - male
+          - unknown
+      - name: last_menstrual_period
+        logicalType: date
+        description: Last menstrual period date of the pregnancy (UI "Last Menstrual Period"), optional.
+        customProperties:
+          - property: postgresType
+            value: date
+          - property: descriptionSource
+            value: 'backend:internal/types/case_batch.go; frontend:translations/common/en.json case_entity.patient_information.last_menstrual_period'
+      - name: estimated_due_date
+        logicalType: date
+        description: Estimated due date of the pregnancy (UI "Estimated Due Date"), optional.
+        customProperties:
+          - property: postgresType
+            value: date
+          - property: descriptionSource
+            value: 'backend:internal/types/case_batch.go; frontend:translations/common/en.json case_entity.patient_information.estimated_due_date'
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the row; always the tenant of this database (the view filters on it).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000021_add_fetus.up.sql'
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/repository/starrocks/igv.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

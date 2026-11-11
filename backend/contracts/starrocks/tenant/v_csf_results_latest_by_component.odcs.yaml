@@ -1,0 +1,450 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_csf_results_latest_by_component
+name: v_csf_results_latest_by_component
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    Latest CSF results by component, one row per patient (1,054 patients: 814 with a tumour-relevant component, 240
+    with routine chemistry or cell counts only). Eleven components each resolved to their own most recent result:
+    protein, glucose, nucleated (white) and red cell counts, cytology (with a malignant-cells finding), AFP,
+    beta-hCG, CEA, cell-free DNA, malignant cell panel and pathology review, plus the first and last CSF result
+    of the patient's history. Built from FHIR results into radiant_data_dev.csf_results_latest_by_component, then
+    v_csf_results_latest_by_component (adds mrn, research_id, organization, the ages); this grant-guarded view
+    drops patient_fhir_id and gates the 13 timestamps and the free text.
+  usage: >-
+    Read it as the end user (the portal API and the MCP query StarRocks with the caller's JWT). Join on
+    (organization_code, patient_id_type, patient_id); v_pcx_30_patient_key maps that key to patient_key. Read
+    <component>_display, not <component>_value: the comparator is load-bearing. Compare two components' ages before
+    treating them as one lumbar puncture. Filter patient_best_evidence = 'named' for the strictly defensible subset.
+  limitations: >-
+    A row is not one lumbar puncture: each component is its own latest, and components of one patient can be
+    years apart. The cytology and pathology review text quote the patient name and MRN; with PHI access they are
+    shown whole (no redaction). A share of the patients resolve to SCH, the organization currently granted for
+    tenant cbtn, so this view does release identified values today. Ages are exact to the day. Column masking
+    only, no row filtering; a NULL organization_code fails closed; the lab grant is not bounded by
+    organization_code; radiant_patient_id is projected unmasked.
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_csf_results_latest_by_component
+    physicalName: v_csf_results_latest_by_component
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: organization_name
+        description: Name of the contributing institution, from stg_cbtn_enrollment_final. Shown to every caller.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: organization_code
+        description: Code of the contributing institution, from pcx_30_organization_ref. The vocabulary
+          auth.pii_grant keys on; NULL fails closed to de-identified with dates and text hidden.
+        examples:
+          - CHOP
+          - SCH
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: patient_id
+        description: "The patient's identifier as this caller may see it: CASE WHEN can_read_phi THEN mrn ELSE
+          research_id END (both from radiant_patient_mrn_list). Join key only: never select or show it."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/csf_results_latest_by_component_access_controlled.sql.tmpl
+      - name: patient_id_type
+        description: "'mrn' when can_read_phi, else 'research_id': the namespace of patient_id on this row."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/csf_results_latest_by_component_access_controlled.sql.tmpl
+      - name: radiant_patient_id
+        description: Portal patient id (radiant_jdbc.public.patient.id), matched on organization_code and the MRN
+          with leading zeros stripped on both sides; NULL when the patient has no portal record. Not masked.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/csf_results_latest_by_component_access_controlled.sql.tmpl
+      - name: patient_best_evidence
+        description: "Strongest evidence anywhere for this patient that a tumour-relevant analysis was on CSF:
+          'named', 'text_confirmed' or 'same_day_only'. NULL for the 240 routine-only patients."
+        examples:
+          - named
+          - text_confirmed
+          - same_day_only
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: protein_display
+        description: Most recent CSF total protein as comparator + value + unit, e.g. '<10 mg/dL'. Read this rather
+          than protein_value.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: protein_value
+        description: Numeric CSF total protein without its comparator.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: protein_comparator
+        description: Comparator of protein_value ('<' or '>' outside the reportable range); NULL for an absolute
+          measurement.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: protein_unit
+        description: Unit of protein_value, uniformly mg/dL.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: protein_observed_at
+        description: Timestamp of the most recent CSF total protein, DiagnosticReport.effective_date_time (UTC).
+          NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_protein_days
+        description: Age in days at the most recent CSF total protein, datediff(protein_observed_at, FHIR patient
+          birth_date). NULL exactly when the test was not done.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/combined/v_csf_results_latest_by_component.sql; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: protein_source_code_text
+        description: Local result name of the CSF total protein, kept verbatim (audits which code was matched).
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: glucose_display
+        description: Most recent CSF glucose as comparator + value + unit. Read this rather than glucose_value.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: glucose_value
+        description: Numeric CSF glucose without its comparator.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: glucose_comparator
+        description: Comparator of glucose_value ('<' or '>'); NULL for an absolute measurement.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: glucose_unit
+        description: Unit of glucose_value, uniformly mg/dL.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: glucose_observed_at
+        description: Timestamp of the most recent CSF glucose (UTC), a clinical date. NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_glucose_days
+        description: Age in days at the most recent CSF glucose; NULL exactly when the test was not done.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/combined/v_csf_results_latest_by_component.sql
+      - name: glucose_source_code_text
+        description: Local result name of the CSF glucose, kept verbatim.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: wbc_display
+        description: Most recent CSF nucleated (white) cell count as value + unit.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: wbc_value
+        description: Numeric CSF nucleated (white) cell count. Differential denominators (cells counted) are
+          excluded.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: wbc_unit
+        description: Unit of wbc_value; six spellings occur, all numerically equivalent, so values compare directly.
+        examples:
+          - /uL
+          - /mm3
+          - CUMM
+          - x10E6/L
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/access_controlled_views/csf_results_latest_by_component_access_controlled.sql.tmpl
+      - name: wbc_observed_at
+        description: Timestamp of the most recent CSF nucleated cell count (UTC). NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_wbc_days
+        description: Age in days at the most recent CSF nucleated cell count; NULL exactly when absent.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/combined/v_csf_results_latest_by_component.sql
+      - name: wbc_source_code_text
+        description: Local result name of the CSF nucleated cell count, kept verbatim.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: rbc_display
+        description: Most recent CSF red cell count as value + unit.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: rbc_value
+        description: Numeric CSF red cell count. Differential denominators are excluded.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: rbc_unit
+        description: Unit of rbc_value; six numerically equivalent spellings occur.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: rbc_observed_at
+        description: Timestamp of the most recent CSF red cell count (UTC). NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_rbc_days
+        description: Age in days at the most recent CSF red cell count; NULL exactly when absent.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/combined/v_csf_results_latest_by_component.sql
+      - name: rbc_source_code_text
+        description: Local result name of the CSF red cell count, kept verbatim.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: cytology_evidence_tier
+        description: "How this cytology result was attributed to CSF: 'named', 'text_confirmed' or 'same_day_only'
+          (weakest)."
+        examples:
+          - named
+          - text_confirmed
+          - same_day_only
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: cytology_test_name
+        description: Local order name of the most recent CSF cytology, kept verbatim.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: malignant_cells
+        description: Finding classified from the cytology narrative by a keyword classifier with negation passes;
+          NULL when no narrative exists. Shown to every caller as the stand-in for the gated text; confirm against
+          cytology_final_diagnosis case by case.
+        examples:
+          - positive
+          - suspicious
+          - negative
+          - non_diagnostic
+          - no_malignancy_statement
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: multi_specimen_report
+        description: 1 when the cytology report covered more than one specimen, so malignant_cells may pertain to a
+          non-CSF part.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: cytology_final_diagnosis
+        description: Pathologist's Final Diagnosis / Impression of the most recent CSF cytology, verbatim. Free text
+          containing PHI (patient name, MRN); NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: cytology_result_text
+        description: All narrative sections of the most recent CSF cytology report, verbatim (up to 10,805
+          characters). Free text containing PHI; NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: cytology_observed_at
+        description: Timestamp of the most recent CSF cytology (UTC). NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_cytology_days
+        description: Age in days at the most recent CSF cytology; NULL exactly when no cytology exists.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: afp_display
+        description: Most recent CSF alpha-fetoprotein as comparator + value + unit, e.g. '<1.0 ng/mL'; '<' (the
+          majority) means undetectable.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: afp_value
+        description: Numeric CSF AFP without its comparator; read afp_display instead.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: afp_comparator
+        description: Comparator of afp_value, '<' for an undetectable marker; NULL for a genuine measurement.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: afp_unit
+        description: Unit of afp_value, not normalised ('ng/mL' and 'NG/ML' both occur).
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: afp_observed_at
+        description: Timestamp of the most recent CSF AFP (UTC). NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_afp_days
+        description: Age in days at the most recent CSF AFP; NULL exactly when never measured.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: hcg_display
+        description: Most recent CSF beta-hCG as comparator + value + unit; '<' (the majority) means undetectable.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: hcg_value
+        description: Numeric CSF beta-hCG without its comparator; read hcg_display instead.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: hcg_comparator
+        description: Comparator of hcg_value, '<' for an undetectable marker; NULL for a genuine measurement.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: hcg_unit
+        description: Unit of hcg_value, not normalised.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: hcg_observed_at
+        description: Timestamp of the most recent CSF beta-hCG (UTC). NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_hcg_days
+        description: Age in days at the most recent CSF beta-hCG; NULL exactly when never measured.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: cea_display
+        description: Most recent CSF carcinoembryonic antigen as comparator + value + unit; very rare in this cohort.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: cea_observed_at
+        description: Timestamp of the most recent CSF CEA (UTC). NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_cea_days
+        description: Age in days at the most recent CSF CEA.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: cell_free_dna_observed_at
+        description: Timestamp of the most recent CSF cell-free DNA order (UTC); a send-out assay with no result
+          here, the date shows it was done. NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_cell_free_dna_days
+        description: Age in days at the most recent CSF cell-free DNA order.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: malignant_cell_panel_observed_at
+        description: Timestamp of the most recent CSF acute-leukaemia panel, a flow-cytometry assay for malignant
+          cells (UTC). NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_malignant_cell_panel_days
+        description: Age in days at the most recent CSF acute-leukaemia panel.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: pathology_review_text
+        description: Narrative of the most recent pathologist or MD review of the CSF differential, verbatim. Free
+          text containing PHI; NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: pathology_review_observed_at
+        description: Timestamp of the most recent pathologist review of the CSF differential (UTC). NULL without
+          PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_pathology_review_days
+        description: Age in days at the most recent pathologist review of the CSF differential.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: components_present
+        description: How many of the eleven CSF components resolved for the patient (1-11).
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: csf_reports_total
+        description: Total distinct CSF reports contributing to this row across all components.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: first_csf_result_at
+        description: Timestamp of the patient's earliest CSF result of any component (UTC). NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_first_csf_result_days
+        description: Age in days at the earliest CSF result of any component; with age_at_last_csf_result_days, the
+          span of CSF surveillance.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: last_csf_result_at
+        description: Timestamp of the patient's latest CSF result of any component (UTC). NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_last_csf_result_days
+        description: Age in days at the latest CSF result of any component.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: can_read_phi
+        description: "TRUE when the caller may read this row's PHI: an org grant (auth.pii_grant, a can_read_pii
+          role at the row's organization_code) or a lab grant (auth.pii_lab_patient, a can_read_pii role at the
+          diagnosis lab of a portal case of radiant_patient_id). The caller is current_user(), the JWT sub."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/csf_results_latest_by_component_access_controlled.sql.tmpl; backend:internal/repository/starrocks/views/auth_pii_lab_patient.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/types/pcx_patient_query.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/pcx_tables/access_controlled_views/csf_results_latest_by_component_access_controlled.sql.tmpl

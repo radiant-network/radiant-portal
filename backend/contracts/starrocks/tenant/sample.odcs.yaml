@@ -1,0 +1,177 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.sample
+name: sample
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per biological sample of a patient, as submitted by an organization (natural key organization_code
+    + submitter_sample_id). Rows of the portal''s PostgreSQL table public.sample read through the radiant_jdbc catalog
+    and filtered to the tenant (WHERE tenant_code = ''<tenant>''). Written by the portal worker from create_sample /
+    update_sample batches. A sample is sequenced by one or more sequencing_experiment rows.
+
+    '
+  usage: 'Key id. Join sequencing_experiment.sample_id = sample.id to reach the sequencing (seq_id), then
+    case_has_sequencing_experiment and family for the case and the family role. A fetal sample carries the mother''s
+    patient_id and the fetus in fetus_id: to match a sample to its family row, compare family.family_member_id =
+    sample.patient_id only when fetus_id IS NULL, and family.fetus_id = sample.fetus_id otherwise (as the backend
+    does). Filter tumor samples of somatic cases with histology_code = ''tumoral''.
+
+    '
+  limitations: 'Optional text fields (tissue_site) are written by the API as an empty string when not submitted, so
+    test both NULL and ''''. organization_code is scoped by tenant_code in PostgreSQL (compound foreign key on
+    organization). The ETL reads the underlying PostgreSQL table (radiant_jdbc.public.sample) directly, not this view.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: sample
+    physicalName: sample
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Internal sample id (identity, primary key). Exposed by the API as sample_id.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/types/sample.go SampleIdField
+      - name: type_code
+        logicalType: string
+        description: Kind of material of the sample, a code of the sample_type lookup (e.g. blood, dna, saliva).
+        examples:
+          - blood
+          - dna
+          - saliva
+          - buccal_swab
+        relationships:
+          - type: foreignKey
+            to: sample_type.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql sample_type_fkey; frontend:translations/common/en.json
+              case_entity.details.sample_type_code
+      - name: parent_sample_id
+        logicalType: integer
+        description: Sample this one was derived from (submitted as submitter_parent_sample_id); NULL when none. The
+          worker requires the parent to belong to the same patient.
+        relationships:
+          - type: foreignKey
+            to: sample.id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql sample_parent_sample_id_fkey; backend:internal/types/sample_batch.go;
+              backend:cmd/worker/sample_validation.go validateExistingParentSampleInDb
+      - name: tissue_site
+        logicalType: string
+        description: Free-text anatomical site the sample was taken from (letters, spaces and hyphens only). Optional,
+          empty or NULL when not submitted.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:cmd/worker/sample_validation.go TissueSiteRegExp; frontend:translations/common/en.json case_entity.details.tissue_site
+      - name: histology_code
+        logicalType: string
+        description: Histology of the sample, a code of histology_type (tumoral or normal; required by the batch). The
+          backend picks a somatic case's proband sample with histology_code = 'tumoral'.
+        examples:
+          - tumoral
+          - normal
+        relationships:
+          - type: foreignKey
+            to: histology_type.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/sample_batch.go; backend:internal/utils/joins/joins.go probandSequencings; frontend:translations/common/en.json
+              case_entity.details.histology_code
+      - name: submitter_sample_id
+        logicalType: string
+        description: Sample identifier given by the submitting organization; unique with organization_code within the
+          tenant (the worker's lookup key). Shown as "Sample" in the portal.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/postgres/samples.go; frontend:translations/common/en.json file_entity.submitter_sample_id
+      - name: patient_id
+        logicalType: integer
+        description: Patient the sample was drawn from. For a fetal sample it is the mother; the fetus whose genome
+          was sequenced is in fetus_id.
+        relationships:
+          - type: foreignKey
+            to: patient.id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000021_add_fetus.up.sql; backend:internal/utils/joins/joins.go SampleToFamilyJoinCondition
+      - name: tenant_code
+        logicalType: string
+        description: Tenant owning the row; always the view's tenant, since the view filters on it.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000009_init_auth_multi_tenancy.up.sql; backend:internal/repository/starrocks/starrocks_tenant.go
+      - name: organization_code
+        logicalType: string
+        description: Code of the organization that submitted the sample (sample_organization_code in the batch);
+          references organization (code, tenant_code).
+        relationships:
+          - type: foreignKey
+            to: organization.code
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000009_init_auth_multi_tenancy.up.sql sample_submitter_organization_fkey;
+              backend:internal/types/sample_batch.go
+      - name: fetus_id
+        logicalType: integer
+        description: Fetus whose genome the sample carries, for a prenatal sample drawn from the mother; NULL otherwise.
+          Not exclusive with patient_id, which stays the mother.
+        relationships:
+          - type: foreignKey
+            to: fetus.id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000021_add_fetus.up.sql; backend:internal/types/sample_batch.go
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/repository/starrocks/documents.go
+          - backend/internal/repository/starrocks/igv.go
+          - backend/internal/repository/starrocks/sequencing_experiment.go
+          - backend/internal/repository/starrocks/transcript_report.go
+          - backend/internal/repository/starrocks/variants.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

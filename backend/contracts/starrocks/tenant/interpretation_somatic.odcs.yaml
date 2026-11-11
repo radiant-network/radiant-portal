@@ -1,0 +1,233 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.interpretation_somatic
+name: interpretation_somatic
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per somatic variant interpretation a user saved in the portal: tumour type, oncogenicity and its
+    criteria, clinical utility tier, free-text interpretation and PubMed references of one variant (locus_id) on one
+    transcript, for one tumour sequencing of one case. Rows of the portal''s PostgreSQL table public.interpretation_somatic,
+    read through the JDBC catalog radiant_jdbc and filtered to the tenant (tenant_code). Written by POST
+    /{tenant}/interpretations/v2/somatic/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} (create or update).
+    Every insert and update is copied to interpretation_somatic_history by a trigger.
+
+    '
+  usage: 'Unique key (case_id, sequencing_id, locus_id, transcript_id). The ids are stored as text: join
+    somatic__snv__occurrence with `i.locus_id = CAST(o.locus_id AS VARCHAR) AND i.sequencing_id = CAST(o.tumor_seq_id
+    AS VARCHAR)`, snv__variant with `CAST(i.locus_id AS BIGINT) = v.locus_id`, cases with `CAST(i.case_id AS INT) =
+    c.id`. Filter on case_id too: the same sequencing and variant can be interpreted in several cases. There is no
+    task_id. transcript_id joins snv__consequence.transcript_id (with locus_id). oncogenicity holds LOINC answer codes,
+    not labels. tumoral_type joins mondo_term.id.
+
+    '
+  limitations: 'The uuid id and the jsonb metadata (analysis_id, patient_id, variant_hash) are not exposed: the JDBC
+    catalog cannot map them. SNV only (no CNV interpretation table). Multi-valued columns (oncogenicity_classification_criterias,
+    pubmed) are comma-separated strings, not arrays. interpretation is HTML-escaped rich text. The allowed values come
+    from the frontend form only; the database has no CHECK on them. oncogenicity and its criteria are optional in the
+    form, so they can be NULL or empty.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: interpretation_somatic
+    physicalName: interpretation_somatic
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: sequencing_id
+        logicalType: string
+        description: Tumour sequencing experiment the interpretation is for (sequencing_experiment.id, somatic__snv__occurrence.tumor_seq_id),
+          stored as text. Cast before joining the integer ids.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/somatic_snv_occurrences.go; backend:internal/server/handlers_interpretations.go
+        examples:
+          - '1'
+      - name: locus_id
+        logicalType: string
+        description: Variant id (snv__variant.locus_id, a BIGINT in the ETL), stored as text. Join with `CAST(o.locus_id
+          AS VARCHAR)` or `CAST(locus_id AS BIGINT)`.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/occurrences.go; backend:internal/repository/starrocks/pcx_patients.go
+      - name: transcript_id
+        logicalType: string
+        description: Ensembl transcript the interpretation is made on; joins snv__consequence.transcript_id together
+          with locus_id. Part of the unique key.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql uc_interpretation_somatic; backend:internal/repository/starrocks/pcx_patients.go
+      - name: tumoral_type
+        logicalType: string
+        description: Tumour type, a Mondo term id picked in the form (joins mondo_term.id; the API resolves its name as
+          tumoral_name).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go; frontend:apps/case/src/entity/variants/somatic-occurrence/interpretation/somatic-interpretation-form.tsx
+        examples:
+          - MONDO:0000001
+      - name: oncogenicity
+        logicalType: string
+        description: Oncogenicity as a LOINC answer code; LA6668-3 oncogenic, LA26332-9 likely oncogenic, LA26333-7 VUS,
+          LA26334-5 likely benign, LA6675-8 benign. Optional in the form.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: frontend:apps/case/src/entity/variants/somatic-occurrence/interpretation/somatic-interpretation-form.tsx;
+              frontend:translations/common/en.json variant.interpretation_form.somatic.oncogenicity_options
+        examples:
+          - LA6668-3
+          - LA26332-9
+          - LA26333-7
+          - LA26334-5
+          - LA6675-8
+      - name: oncogenicity_classification_criterias
+        logicalType: string
+        description: Oncogenicity criteria the user applied, comma-separated without spaces (form values
+          OVS1, OS1-OS3, OM1-OM4, OP1-OP4, SBVS1, SBS1-SBS2, SBP1-SBP2).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/postgres/interpretations.go mapToInterpretationSomaticDAO; frontend:components/base/classifications/oncogenicity.tsx
+              oncogenicityClassificationCriterias
+        examples:
+          - OS1,OM1
+          - SBVS1
+      - name: clinical_utility
+        logicalType: string
+        description: Clinical utility tier; category_ia Tier IA, category_ib Tier IB, category_iic Tier IIC, category_iid
+          Tier IID, category_iii Tier III.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: frontend:apps/case/src/entity/variants/somatic-occurrence/interpretation/somatic-interpretation-form.tsx;
+              frontend:translations/common/en.json variant.interpretation_form.somatic.clinical_utility_options
+        examples:
+          - category_ia
+          - category_ib
+          - category_iic
+          - category_iid
+          - category_iii
+      - name: interpretation
+        logicalType: string
+        description: Free-text interpretation from the rich-text editor, HTML-escaped on write (html.EscapeString; the
+          API unescapes it on read).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/postgres/interpretations.go mapToInterpretationCommonDAO
+      - name: pubmed
+        logicalType: string
+        description: PubMed ids (citation_id) cited by the interpretation, comma-separated. The API checks each id against
+          PubMed on write.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/postgres/interpretations.go mapToInterpretationCommonDAO
+      - name: created_by
+        logicalType: string
+        description: Keycloak user id (JWT sub) of the author of the first save; kept on updates.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go fillInterpretationCommonWithContext; backend:internal/repository/postgres/interpretations.go
+              CreateOrUpdateSomatic
+      - name: created_by_name
+        logicalType: string
+        description: Display name (JWT name) of the author of the first save; kept on updates.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go fillInterpretationCommonWithContext
+      - name: created_at
+        logicalType: timestamp
+        description: Time of the first save (DB default now()). Unlike the germline table, an update does not restore
+          the stored value (see CreateOrUpdateSomatic), so treat it with care.
+        customProperties:
+          - property: postgresType
+            value: timestamp with time zone
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/repository/postgres/interpretations.go
+              CreateOrUpdateSomatic
+      - name: updated_by
+        logicalType: string
+        description: Keycloak user id (JWT sub) of the user who saved last.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go fillInterpretationCommonWithContext
+      - name: updated_by_name
+        logicalType: string
+        description: Display name (JWT name) of the user who saved last.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/server/handlers_interpretations.go fillInterpretationCommonWithContext
+      - name: updated_at
+        logicalType: timestamp
+        description: Time of the last save.
+        customProperties:
+          - property: postgresType
+            value: timestamp with time zone
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/pcx_patients.go
+      - name: case_id
+        logicalType: string
+        description: Case the interpretation belongs to (cases.id, an integer), stored as text; cast with `CAST(case_id
+          AS INT)`.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/pcx_patients.go; backend:scripts/init-sql/migrations/000001_init.up.sql
+              uc_interpretation_somatic
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the row; the view already keeps only the current tenant.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/starrocks_tenant.go buildViewStatement; backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/occurrences.go
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/repository/starrocks/somatic_snv_occurrences.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

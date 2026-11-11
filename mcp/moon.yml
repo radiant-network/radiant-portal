@@ -13,20 +13,19 @@ tasks:
     command: 'uv run --frozen --only-group dev ruff check .'
     inputs: ['@group(sources)']
   test:
-    # In the monorepo the sibling checkouts of the CI become plain paths.
+    # The schema tests read the data contracts of the ETL and the backend, not their DDL / Go / SQL.
     command: 'uv run --frozen pytest -q tests/unit'
     env:
-      RADIANT_ETL_DIR: '$workspaceRoot/etl'
-      RADIANT_REQUIRE_ETL: '1'
-      RADIANT_PORTAL_DIR: '$workspaceRoot'
-      RADIANT_REQUIRE_PORTAL: '1'
+      RADIANT_ROOT: '$workspaceRoot'
     inputs:
       - '@group(sources)'
-      # Only the files the schema tests read, not the whole ETL or backend.
-      - 'project://etl?group=schema'
-      - 'project://backend?group=views'
+      - 'project://etl?group=contracts'
+      - 'project://backend?group=contracts'
+      - 'project://backend?group=api-fields'
       # The generated API client: regenerated whenever the backend API changes.
       - 'project://python-client?group=sources'
+    # Test against contracts their owners have checked.
+    deps: ['etl:contracts-check', 'backend:contracts-check']
 
   # ---- Docker image. Context = repo root: the image needs clients/python.
   docker-mcp:

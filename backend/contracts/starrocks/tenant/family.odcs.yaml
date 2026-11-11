@@ -1,0 +1,137 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.family
+name: family
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per member of a case: the proband, the relatives, and the fetuses of a prenatal case, with the
+    member''s relationship to the proband and affected status. Rows of the portal''s PostgreSQL table public.family read
+    through radiant_jdbc and filtered on tenant_code = the tenant. The batch worker writes one row per patient of the case
+    batch (proband included) and one per fetus (relationship fetus).'
+  usage: 'Join cases on cases.id = case_id, then the member: patient on patient.id = family_member_id, or fetus on
+    fetus.id = fetus_id (exactly one of them is set). From a sample to its member: family.case_id = <case> AND
+    ((sample.fetus_id IS NULL AND family_member_id = sample.patient_id) OR (sample.fetus_id IS NOT NULL AND fetus_id =
+    sample.fetus_id)), since a fetal sample carries its mother''s patient_id. Labels: family_relationship and
+    affected_status on their code. Typical filters: case_id, relationship_to_proband_code = ''proband''.'
+  limitations: 'family_member_id is NULL on fetus rows and fetus_id on patient rows (CHECK family_member_subject_xor).
+    patient.id and fetus.id are independent sequences: count distinct members on a tagged key (patient vs fetus), not
+    on the raw ids. Only cases.proband_id is guaranteed: a case whose family rows were never written has no proband row
+    here. No json, jsonb or uuid column in public.family.'
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: family
+    physicalName: family
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Family row id, primary key (identity).
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql'
+      - name: case_id
+        logicalType: integer
+        description: cases.id of the case the member belongs to.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql'
+        relationships:
+          - type: foreignKey
+            to: cases.id
+      - name: family_member_id
+        logicalType: integer
+        description: patient.id of the member; NULL when the member is a fetus (then fetus_id is set).
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/migrations/000021_add_fetus.up.sql'
+        relationships:
+          - type: foreignKey
+            to: patient.id
+      - name: relationship_to_proband_code
+        logicalType: string
+        description: Relationship of the member to the proband, a family_relationship.code; proband for the proband
+          itself, fetus for a fetus of the proband.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/case_batch.go; backend:cmd/worker/case_fetus_validation.go; backend:scripts/init-sql/migrations/000021_add_fetus.up.sql'
+        relationships:
+          - type: foreignKey
+            to: family_relationship.code
+        examples:
+          - proband
+          - mother
+          - father
+          - sibling
+          - fetus
+      - name: affected_status_code
+        logicalType: string
+        description: Whether the member is affected by the case's condition, an affected_status.code (affected,
+          non_affected, unknown).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/case_batch.go; backend:scripts/init-sql/migrations/000001_init.up.sql'
+        relationships:
+          - type: foreignKey
+            to: affected_status.code
+        examples:
+          - affected
+          - non_affected
+          - unknown
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the row; always the tenant of this database (the view filters on it).
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql'
+      - name: fetus_id
+        logicalType: integer
+        description: fetus.id of the member when it is a fetus of the proband; NULL for patient members.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000021_add_fetus.up.sql; backend:cmd/worker/case_fetus_validation.go'
+        relationships:
+          - type: foreignKey
+            to: fetus.id
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/repository/starrocks/documents.go
+          - backend/internal/repository/starrocks/igv.go
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/repository/starrocks/variants.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

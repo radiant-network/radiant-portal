@@ -1,0 +1,89 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.task_has_document
+name: task_has_document
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Junction between a task and its files: one row per (task, document, type), the primary key, where type
+    says whether the document is an input or an output of the task. Rows of the portal''s PostgreSQL table
+    public.task_has_document read through the radiant_jdbc catalog; the table has no tenant_code, so the view is NOT
+    filtered and holds the rows of every tenant. Written by the portal worker with each task of a case batch.
+
+    '
+  usage: 'Join document on document_id = document.id and task on task_id = task.id (both tenant-filtered, so inner
+    joins scope the rows to the tenant). Keep type = ''output'' to list the files a task produced (the file list, the
+    IGV tracks and the ETL''s VCF lookup all do); a document can be the output of one task and the input of another
+    (e.g. an alignment task''s gVCF is an input of the germline annotation task). Reach the sequencing experiments
+    through task_context on task_id.
+
+    '
+  limitations: 'Not tenant-filtered: query it joined to a tenant-filtered view (task, document). The ETL reads the
+    underlying PostgreSQL table (radiant_jdbc.public.task_has_document) directly, not this view.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: task_has_document
+    physicalName: task_has_document
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: task_id
+        logicalType: integer
+        description: Task that read or produced the document.
+        relationships:
+          - type: foreignKey
+            to: task.id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql task_has_documents_task_id_fkey
+      - name: document_id
+        logicalType: integer
+        description: Document (file) read or produced by the task.
+        relationships:
+          - type: foreignKey
+            to: document.id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql task_has_documents_document_id_fkey
+      - name: type
+        logicalType: string
+        description: Role of the document for the task, 'input' or 'output' (the only values the worker writes; not a
+          lookup code).
+        examples:
+          - input
+          - output
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:cmd/worker/case_validation.go persistTask; backend:scripts/init-sql/migrations/000044_embed_exomiser_in_annotation_tasks.up.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/documents.go
+          - backend/internal/repository/starrocks/igv.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

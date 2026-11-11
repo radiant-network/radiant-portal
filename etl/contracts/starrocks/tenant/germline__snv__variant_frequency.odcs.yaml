@@ -1,0 +1,310 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.germline__snv__variant_frequency
+name: germline__snv__variant_frequency
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per germline SNV/indel locus of the tenant, with the number and fraction of patients carrying
+    it, split by sequencing strategy (WGS, WXS) and affected status, plus homozygous counts. Built by the ETL by
+    summing the per-part staging table germline__snv__staging_variant_frequency_part across parts; feeds the germline_*
+    frequency columns of snv__variant / snv__variant_partitioned.
+
+    '
+  usage: 'Per-tenant table, key locus_id. Prefer the germline_* columns of snv__variant_partitioned when already
+    joining it (same values).
+
+    '
+  limitations: 'A locus whose calls all fail the quality gate keeps a row with pc = 0 (RAD-57). hom_* were added
+    by RAD-22 and stay 0 on existing rows until the frequencies are recomputed (recompute_frequencies). Patients
+    whose affected_status is neither affected nor non_affected count only in the all-patients columns.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: germline__snv__variant_frequency
+  physicalName: germline__snv__variant_frequency
+  physicalType: table
+  tags:
+  - per-tenant
+  properties:
+  - name: locus_id
+    logicalType: integer
+    physicalType: BIGINT
+    description: Variant id (same locus_id as snv__variant and germline__snv__occurrence); one row per locus with
+      at least one germline occurrence in the tenant.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql
+    required: true
+  - name: pc_wgs
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct all patients with a WGS germline sequencing carrying the variant with a qualifying
+      call (filter = PASS, GQ >= 20, ad_alt >= 3). 0 when the locus has only non-qualifying calls.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        frontend:translations/common/en.json freq_g_tooltip
+  - name: pn_wgs
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct all patients with a WGS germline sequencing in the tenant (counted per part
+      on sequencings that have SNV occurrences, then summed over parts). Same value on every row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:tasks/starrocks/partition.py
+  - name: pf_wgs
+    logicalType: number
+    physicalType: DOUBLE
+    description: pc_wgs / pn_wgs, carrier frequency of the variant among all patients (WGS). NULL when pn_wgs is
+      0. Copied to snv__variant as germline_pf_wgs.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: pc_wgs_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct affected patients (affected_status = 'affected') with a WGS germline sequencing
+      carrying the variant with a qualifying call (filter = PASS, GQ >= 20, ad_alt >= 3). 0 when the locus has only
+      non-qualifying calls.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        frontend:translations/common/en.json freq_g_tooltip
+  - name: pn_wgs_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct affected patients (affected_status = 'affected') with a WGS germline sequencing
+      in the tenant (counted per part on sequencings that have SNV occurrences, then summed over parts). Same value
+      on every row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:tasks/starrocks/partition.py
+  - name: pf_wgs_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: pc_wgs_affected / pn_wgs_affected, carrier frequency of the variant among affected patients (affected_status
+      = 'affected') (WGS). NULL when pn_wgs_affected is 0. Copied to snv__variant as germline_pf_wgs_affected.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: pc_wgs_not_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct non-affected patients (affected_status = 'non_affected') with a WGS germline
+      sequencing carrying the variant with a qualifying call (filter = PASS, GQ >= 20, ad_alt >= 3). 0 when the
+      locus has only non-qualifying calls.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        frontend:translations/common/en.json freq_g_tooltip
+  - name: pn_wgs_not_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct non-affected patients (affected_status = 'non_affected') with a WGS germline
+      sequencing in the tenant (counted per part on sequencings that have SNV occurrences, then summed over parts).
+      Same value on every row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:tasks/starrocks/partition.py
+  - name: pf_wgs_not_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: pc_wgs_not_affected / pn_wgs_not_affected, carrier frequency of the variant among non-affected
+      patients (affected_status = 'non_affected') (WGS). NULL when pn_wgs_not_affected is 0. Copied to snv__variant
+      as germline_pf_wgs_not_affected.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: pc_wxs
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct all patients with a WXS (exome) germline sequencing carrying the variant with
+      a qualifying call (filter = PASS, GQ >= 20, ad_alt >= 3). 0 when the locus has only non-qualifying calls.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        frontend:translations/common/en.json freq_g_tooltip
+  - name: pn_wxs
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct all patients with a WXS (exome) germline sequencing in the tenant (counted per
+      part on sequencings that have SNV occurrences, then summed over parts). Same value on every row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:tasks/starrocks/partition.py
+  - name: pf_wxs
+    logicalType: number
+    physicalType: DOUBLE
+    description: pc_wxs / pn_wxs, carrier frequency of the variant among all patients (WXS (exome)). NULL when pn_wxs
+      is 0. Copied to snv__variant as germline_pf_wxs.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: pc_wxs_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct affected patients (affected_status = 'affected') with a WXS (exome) germline
+      sequencing carrying the variant with a qualifying call (filter = PASS, GQ >= 20, ad_alt >= 3). 0 when the
+      locus has only non-qualifying calls.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        frontend:translations/common/en.json freq_g_tooltip
+  - name: pn_wxs_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct affected patients (affected_status = 'affected') with a WXS (exome) germline
+      sequencing in the tenant (counted per part on sequencings that have SNV occurrences, then summed over parts).
+      Same value on every row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:tasks/starrocks/partition.py
+  - name: pf_wxs_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: pc_wxs_affected / pn_wxs_affected, carrier frequency of the variant among affected patients (affected_status
+      = 'affected') (WXS (exome)). NULL when pn_wxs_affected is 0. Copied to snv__variant as germline_pf_wxs_affected.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: pc_wxs_not_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct non-affected patients (affected_status = 'non_affected') with a WXS (exome)
+      germline sequencing carrying the variant with a qualifying call (filter = PASS, GQ >= 20, ad_alt >= 3). 0
+      when the locus has only non-qualifying calls.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        frontend:translations/common/en.json freq_g_tooltip
+  - name: pn_wxs_not_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct non-affected patients (affected_status = 'non_affected') with a WXS (exome)
+      germline sequencing in the tenant (counted per part on sequencings that have SNV occurrences, then summed
+      over parts). Same value on every row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:tasks/starrocks/partition.py
+  - name: pf_wxs_not_affected
+    logicalType: number
+    physicalType: DOUBLE
+    description: pc_wxs_not_affected / pn_wxs_not_affected, carrier frequency of the variant among non-affected
+      patients (affected_status = 'non_affected') (WXS (exome)). NULL when pn_wxs_not_affected is 0. Copied to snv__variant
+      as germline_pf_wxs_not_affected.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        etl:dags/sql/radiant/snv_variant_insert.sql
+  - name: hom_wgs
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct all patients (WGS) carrying the variant homozygous or hemizygous (zygosity HOM
+      or HEM) with a qualifying call (filter = PASS, GQ >= 20, ad_alt >= 3); subset of pc_wgs. Used for the approximate
+      allele frequency (pc + hom) / (2 * pn) in snv__variant.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        hub:docs/features/RAD-22-snv-hom-af.md
+  - name: hom_wgs_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct affected patients (affected_status = 'affected') (WGS) carrying the variant
+      homozygous or hemizygous (zygosity HOM or HEM) with a qualifying call (filter = PASS, GQ >= 20, ad_alt >=
+      3); subset of pc_wgs_affected. Used for the approximate allele frequency (pc + hom) / (2 * pn) in snv__variant.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        hub:docs/features/RAD-22-snv-hom-af.md
+  - name: hom_wgs_not_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct non-affected patients (affected_status = 'non_affected') (WGS) carrying the
+      variant homozygous or hemizygous (zygosity HOM or HEM) with a qualifying call (filter = PASS, GQ >= 20, ad_alt
+      >= 3); subset of pc_wgs_not_affected. Used for the approximate allele frequency (pc + hom) / (2 * pn) in snv__variant.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        hub:docs/features/RAD-22-snv-hom-af.md
+  - name: hom_wxs
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct all patients (WXS (exome)) carrying the variant homozygous or hemizygous (zygosity
+      HOM or HEM) with a qualifying call (filter = PASS, GQ >= 20, ad_alt >= 3); subset of pc_wxs. Used for the
+      approximate allele frequency (pc + hom) / (2 * pn) in snv__variant.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        hub:docs/features/RAD-22-snv-hom-af.md
+  - name: hom_wxs_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct affected patients (affected_status = 'affected') (WXS (exome)) carrying the
+      variant homozygous or hemizygous (zygosity HOM or HEM) with a qualifying call (filter = PASS, GQ >= 20, ad_alt
+      >= 3); subset of pc_wxs_affected. Used for the approximate allele frequency (pc + hom) / (2 * pn) in snv__variant.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        hub:docs/features/RAD-22-snv-hom-af.md
+  - name: hom_wxs_not_affected
+    logicalType: integer
+    physicalType: BIGINT
+    description: Number of distinct non-affected patients (affected_status = 'non_affected') (WXS (exome)) carrying
+      the variant homozygous or hemizygous (zygosity HOM or HEM) with a qualifying call (filter = PASS, GQ >= 20,
+      ad_alt >= 3); subset of pc_wxs_not_affected. Used for the approximate allele frequency (pc + hom) / (2 * pn)
+      in snv__variant.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_staging_variant_freq_insert.sql; etl:dags/sql/radiant/germline_snv_variant_frequency_insert.sql;
+        hub:docs/features/RAD-22-snv-hom-af.md
+  customProperties:
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(`locus_id`) BUCKETS 10
+  - property: mcpKeys
+    value: locus_id
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/schema_catalog.py
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/radiant/init/germline_snv_variant_frequency_create_table.sql
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

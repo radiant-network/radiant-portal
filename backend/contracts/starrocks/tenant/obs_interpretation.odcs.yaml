@@ -1,0 +1,70 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.obs_interpretation
+name: obs_interpretation
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Lookup of observation interpretations: positive / negative for phenotypes (observed / not observed),
+    normal / abnormal for exams. One row per code. Rows of the portal''s PostgreSQL table public.obs_interpretation, an
+    instance-wide value set shared by every tenant (no tenant_code, so the view is not filtered), read through the
+    radiant_jdbc catalog. Seeded by migrations 000001 and 000017.
+
+    '
+  usage: 'Join obs_categorical.interpretation_code or obs_string.interpretation_code = obs_interpretation.code for
+    the label. For phenotypes, interpretation_code = ''positive'' means observed and anything else is listed as
+    non-observed by the portal.
+
+    '
+  limitations: 'Codes are unique case-insensitively. No reader of this view was found: the API reads the PostgreSQL
+    table for its value sets and readers filter on the code directly.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: obs_interpretation
+    physicalName: obs_interpretation
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: code
+        logicalType: string
+        description: Interpretation code (primary key), referenced by obs_categorical.interpretation_code and
+          obs_string.interpretation_code.
+        examples:
+          - positive
+          - negative
+          - normal
+          - abnormal
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/migrations/000017_add_exam_and_obs_exam_columns.up.sql;
+              backend:internal/repository/starrocks/cases.go retrieveCasePatients
+      - name: name_en
+        logicalType: string
+        description: English label of the interpretation, e.g. 'Positive', 'Abnormal'.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/migrations/000017_add_exam_and_obs_exam_columns.up.sql
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

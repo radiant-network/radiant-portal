@@ -1,0 +1,62 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.affected_status
+name: affected_status
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Affected status of a family member for the condition of the case: affected, non_affected or unknown. Referenced
+    by family.affected_status_code. Shared by every tenant (the PostgreSQL table has no tenant_code), exposed in each {tenant}_tenant
+    database through radiant_jdbc; the portal also serves it as GET /value_sets/{type}.'
+  usage: Join family.affected_status_code = affected_status.code for the label. Filter on the code (e.g. 'affected'), not
+    on name_en. The case batch only accepts affected, non_affected and unknown.
+  limitations: 'The values are data seeded by the backend migrations (backend/scripts/init-sql/migrations), not a fixed enum:
+    later migrations or a deployment can add codes, so query the view for the current list. Codes are unique case-insensitively
+    (migration 000034) and stored in the case they were entered in. The portal UI shows its own labels for these codes (e.g.
+    ''Unaffected'' for non_affected) instead of name_en. The ETL treats a missing family row as ''affected'' for germline
+    sequencings and ''unknown'' for somatic QC.'
+team:
+- username: radiant-portal
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: affected_status
+  physicalName: affected_status
+  physicalType: view
+  tags:
+  - per-tenant
+  properties:
+  - name: code
+    logicalType: string
+    description: Code of the affected status, primary key; the value stored in the referencing columns.
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/types/case_batch.go; etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+    examples:
+    - affected
+    - non_affected
+    - unknown
+  - name: name_en
+    logicalType: string
+    description: English label of the code as seeded (Affected, Non Affected, Unknown).
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql; frontend:translations/common/en.json
+authoritativeDefinitions:
+- type: implementation
+  url: backend:internal/repository/starrocks/starrocks_tenant.go

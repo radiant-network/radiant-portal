@@ -1,0 +1,106 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_pcx_30_hin_exchange
+name: v_pcx_30_hin_exchange
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    Health information network (HIN) exchanges of each PCX patient (TEFCA and Carequality): one row per
+    organization, document class and document type retrieved, plus one row with no document for an organization
+    linked to the patient that returned none. Radiant's own view: a FULL OUTER JOIN of
+    radiant_data_dev.hin_org_patient (organizations linked to a patient) and hin_document_metadata (documents
+    counted per organization, type and class), both keyed on research_id, put under the identifier the caller sees
+    through the secured v_pcx_30_demographics_combined. It adds no PHI rule of its own.
+  usage: >-
+    Read it as the end user (StarRocks with the caller's JWT). Filter on (organization_code, patient_id_type,
+    patient_id) from v_pcx_30_patient_key. Group by hin_org_name for the organizations; sum document_count per
+    organization or class, skipping the NULL rows. The portal's external records tab reads it that way.
+  limitations: >-
+    No column is masked and there is no can_read_phi column: organization names and document counts are shown to
+    every caller. Only patients with HIN data have rows. network is NULL for documents from an organization the
+    patient is not linked to. patient_id is an MRN for a PHI caller: never select or show it.
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_pcx_30_hin_exchange
+    physicalName: v_pcx_30_hin_exchange
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: organization_code
+        description: Code of the patient's contributing institution (v_pcx_30_demographics_combined), not of the HIN
+          organization. Part of the join key.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_hin_exchange.sql.tmpl
+      - name: patient_id_type
+        description: "'mrn' or 'research_id' (v_pcx_30_demographics_combined): the namespace of patient_id for this
+          caller."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_hin_exchange.sql.tmpl
+      - name: patient_id
+        description: The patient's identifier as this caller may see it (MRN with PHI access, research id
+          without). Join key only, never select or show it.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_hin_exchange.sql.tmpl
+      - name: hin_org_name
+        description: Name of the HIN organization the patient is linked to or documents came from,
+          coalesce(hin_org_patient.hin_org_name, hin_document_metadata.hin_org_name).
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_hin_exchange.sql.tmpl
+      - name: network
+        description: Network the patient is linked through, lower(hin_org_patient.hin_short_code). NULL when the
+          documents came from an organization the patient is not linked to.
+        examples:
+          - tefca
+          - carequality
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_hin_exchange.sql.tmpl; backend:scripts/seed/README.md
+      - name: document_class_name
+        description: Class of the documents retrieved (hin_document_metadata); NULL on the row of a linked
+          organization without documents.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_hin_exchange.sql.tmpl
+      - name: document_type_name
+        description: Type of the documents retrieved (hin_document_metadata); NULL on the row of a linked
+          organization without documents.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_hin_exchange.sql.tmpl
+      - name: document_count
+        description: Number of documents of this class and type retrieved from the organization
+          (hin_document_metadata.count); NULL when the organization returned none.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_hin_exchange.sql.tmpl; backend:internal/repository/starrocks/pcx_patients.go
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/types/pcx_patient_query.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/seed/views/v_pcx_30_hin_exchange.sql.tmpl

@@ -1,0 +1,69 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.gene_panel_mv
+name: gene_panel_mv
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per distinct (panel name, gene symbol) pair of the tenant''s gene panels, every panel type included
+    (analysis catalog and uploaded panels). Materialized view built by the portal over radiant_jdbc.public.panel joined
+    to panel_has_genes (WHERE tenant_code = the tenant), REFRESH DEFERRED MANUAL: the portal refreshes it (FORCE, sync)
+    when it provisions the tenant (EnsureGenePanelMV, cmd/refresh-tenants) and after each gene panel upload.
+
+    '
+  usage: 'Join on the gene symbol: `tgp.symbol = cf.symbol` on snv__consequence_filter for SNVs, `array_contains(c.symbol,
+    tgp.symbol)` on CNV occurrences. Filter a panel by its name (`panel IN (...)`); the portal exposes it as the
+    tenant_gene_panel field. The tenant panels of a gene: `SELECT DISTINCT panel FROM gene_panel_mv WHERE symbol = ''SCN1A''`.
+
+    '
+  limitations: 'Keyed by symbol only: the Ensembl ids of panel_has_genes are dropped (DISTINCT, since two ids can share
+    a symbol). panel is the panel name, not its code nor its id; panel.name has no unique constraint, so a join on it can match several panels. StarRocks does
+    not see changes in PostgreSQL by itself, so a panel change made outside the upload stays invisible until the next
+    refresh.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: gene_panel_mv
+    physicalName: gene_panel_mv
+    physicalType: materialized_view
+    tags:
+      - per-tenant
+    properties:
+      - name: panel
+        description: Name of the panel (panel.name).
+        customProperties:
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/starrocks_tenant.go BuildGenePanelMVStatement
+      - name: symbol
+        description: Gene symbol of a gene of the panel (panel_has_genes.symbol); distribution key of the MV.
+        customProperties:
+          - property: descriptionSource
+            value: backend:internal/repository/starrocks/starrocks_tenant.go BuildGenePanelMVStatement
+        examples:
+          - SCN1A
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cnv_occurrences.go
+          - backend/internal/repository/starrocks/snv_occurrences.go
+          - backend/internal/types/gene_panels.go
+          - mcp/radiant_mcp/queries/genes.py
+          - mcp/radiant_mcp/tools/genes.py
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

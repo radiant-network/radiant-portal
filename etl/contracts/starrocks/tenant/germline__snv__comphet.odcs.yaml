@@ -1,0 +1,162 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.germline__snv__comphet
+name: germline__snv__comphet
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per compound-heterozygous pair (variant, partner variant, gene) of one progeny sample in one
+    germline annotation task, read from the slivar INFO tag slivar_comphet of the task''s germline VCF (RAD-39).
+    Slivar tags both variants of a pair, so every pair is stored once in each direction. Written by the ETL (VCF
+    -> Iceberg germline_snv_comphet -> StarRocks) during import_part, before the occurrences, which summarize it
+    in has_comphet / comphet_genes. Read by the portal occurrence list ("Compound Het of") and the MCP.
+
+    '
+  usage: 'Every query on a table partitioned by `part` carries `<alias>.part = <part>` as an equality, next to seq_id
+    / task_id. Take `part` and `variant_part` from get_case_context''s occurrence_keys, from the key of the right
+    data type; never compute them. Without it StarRocks scans every partition of the tenant and the query can time
+    out. Join the catalog with `v.locus_id = o.locus_id AND v.part = <variant_part>`. Per-tenant table, partitioned
+    on part: filter on part, seq_id and task_id for one sequencing. Key columns (part, seq_id, task_id, locus_id)
+    are not unique: one variant can have several partners and genes. Join germline__snv__occurrence on (part, seq_id,
+    task_id, locus_id) or snv__variant on locus_id / partner_locus_id. To list the variants a given occurrence pairs
+    with, filter locus_id = X and read partner_locus_id (the reverse direction is also present).
+
+    '
+  limitations: 'Only progenies of a family get rows (proband and siblings, never the parents), and only when slivar
+    paired two heterozygous variants in the same gene; a tenant with no family or affected proband has no rows.
+    Per the pipeline docs, a pair in a non-trio family is unproven (cis/trans unknown) and should be treated as
+    a candidate, but nothing in the table says so. A pair is dropped when either locus is missing from the run''s
+    variant table. Pairs are recomputed by the bioinformatics pipeline; the ETL only parses them.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: germline__snv__comphet
+  physicalName: germline__snv__comphet
+  physicalType: table
+  tags:
+  - per-tenant
+  properties:
+  - name: part
+    logicalType: integer
+    physicalType: INT
+    description: ETL partition of the sequencing experiment. A patient, its case and family stay in one part per
+      sequencing strategy (WGS or WXS); every table of the same part is loaded and rebuilt together.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/starrocks/partition.py; etl:dags/sql/radiant/germline_snv_comphet_insert_partition_delta.sql
+    required: true
+    partitioned: true
+  - name: seq_id
+    logicalType: integer
+    physicalType: INT
+    description: Sequencing experiment of the progeny sample that carries the pair, matched from the sample name
+      (aliquot) listed in the slivar_comphet entry.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/comphet.py
+    required: true
+  - name: task_id
+    logicalType: integer
+    physicalType: INT
+    description: Germline annotation task (radiant_germline_annotation) whose VCF the pair was read from; a re-imported
+      task replaces all its pairs.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/comphet.py; etl:tasks/vcf/snv/germline/process.py
+    required: true
+  - name: locus_id
+    logicalType: integer
+    physicalType: BIGINT
+    description: Variant id (snv__variant.locus_id) of the VCF record carrying the slivar_comphet tag, resolved
+      from its locus hash (chromosome without 'chr', 1-based POS, REF, ALT).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_comphet_insert_partition_delta.sql; etl:tasks/vcf/snv/common.py
+    required: true
+  - name: partner_locus_id
+    logicalType: integer
+    physicalType: BIGINT
+    description: Variant id (snv__variant.locus_id) of the other variant of the pair, from the chrom/pos/ref/alt
+      fields of the slivar_comphet entry. The same pair also exists with locus_id and partner_locus_id swapped.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/comphet.py; etl:dags/sql/radiant/germline_snv_comphet_insert_partition_delta.sql;
+        portal:internal/repository/starrocks/snv_occurrences.go
+    required: true
+  - name: symbol
+    logicalType: string
+    physicalType: VARCHAR(200)
+    description: Gene symbol in which slivar paired the two variants (gene field of the slivar_comphet entry). A
+      pair linked in several genes gives one row per gene; duplicate pair ids for the same gene are collapsed.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/comphet.py; bioinfo:snv-post-processing/docs/output.md
+    required: true
+  quality:
+  - name: germline_snv_comphet__should_be_unique__part_seq_id_task_id_locus_id_partner_locus_id_symbol
+    metric: duplicateValues
+    arguments:
+      properties:
+      - part
+      - seq_id
+      - task_id
+      - locus_id
+      - partner_locus_id
+      - symbol
+    mustBe: 0
+    dimension: uniqueness
+    description: (part, seq_id, task_id, locus_id, partner_locus_id, symbol) is unique.
+  - name: germline_snv_comphet__validate_variants_in_occurrences
+    type: sql
+    description: 'Both variants of a compound-het pair must be occurrences of the same sample and task. The pairs
+      and the occurrences are loaded from the same VCF and both hashes resolve through `snv__tmp_variant`, so a
+      pair whose variant or partner has no occurrence signals a locus key mismatch (e.g. a slivar partner position
+      not hashed like the VCF record) or a pair table out of sync with the occurrences (one partition swap failed).
+      Task 2 of RAD-39 counts these pairs on the occurrence: a missing partner would be counted but could not be
+      listed.'
+    query: SELECT COUNT(*) FROM (select c.part, c.seq_id, c.task_id, c.locus_id, c.partner_locus_id from germline__snv__comphet
+      c left join germline__snv__occurrence o on o.part = c.part and o.seq_id = c.seq_id and o.task_id = c.task_id
+      and o.locus_id = c.locus_id left join germline__snv__occurrence p on p.part = c.part and p.seq_id = c.seq_id
+      and p.task_id = c.task_id and p.locus_id = c.partner_locus_id where o.locus_id is null or p.locus_id is null)
+      failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/germline_snv_comphet__validate_variants_in_occurrences.sql
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`)
+  - property: partitionBy
+    value: PARTITION BY (`part`)
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(`locus_id`) BUCKETS 10
+  - property: mcpKeys
+    value: part, seq_id, task_id, locus_id
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/queries/hits.py
+    - mcp/radiant_mcp/schema_catalog.py
+    - portal/backend/internal/types/germline_snv_occurrence.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/radiant/init/germline_snv_comphet_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/germline_snv_comphet.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

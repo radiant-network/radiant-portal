@@ -1,0 +1,223 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_cbc_latest_results
+name: v_cbc_latest_results
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    Latest complete blood count panel, one row per patient: WBC, hemoglobin, platelets and ANC of the patient's
+    most recent CBC draw (one panel, one timestamp, since 2026-10-14), with each analyte's unit, LOINC and local
+    code text. Built from the FHIR DiagnosticReport / Observation tables (final and amended results of reports
+    named CBC or blood count) into radiant_data_dev.cbc_latest_results, then v_cbc_latest_results (adds mrn,
+    research_id, organization and the age); this grant-guarded view drops the FHIR ids and org_short_code.
+  usage: >-
+    Read it as the end user (the portal API and the MCP query StarRocks with the caller's JWT). Join on
+    (organization_code, patient_id_type, patient_id); v_pcx_30_patient_key maps that key to patient_key. Read each
+    value with its unit: values are not unit-normalized. Use age_at_panel_days, never panel_observed_at.
+  limitations: >-
+    Not unit-normalized: ANC appears as both '/uL' and 'x10E9/L', which differ by 1000x. anc_value is NULL when
+    the latest panel had no differential (no fill-forward from an earlier draw, ~401 patients). A patient with a
+    NULL organization_code (16 of 2,421) is always de-identified; some patients have no usable research_id and
+    surface with a NULL or blank patient_id without PHI access. Column masking only, no row filtering; the lab
+    grant is not bounded by organization_code; radiant_patient_id is projected unmasked. Ages are exact to the
+    day. The base view in scripts/pcx_tables/radiant-prod/combined_views and the CBC rows of
+    view_data_dictionary_access_policy.csv still describe the older per-analyte shape.
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_cbc_latest_results
+    physicalName: v_cbc_latest_results
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: organization_name
+        description: Name of the contributing institution, from stg_cbtn_enrollment_final by MRN (the
+          pcx_30_organization_override seed wins). Shown to every caller.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/combined/v_cbc_latest_results.sql
+      - name: organization_code
+        description: Code of the contributing institution, pcx_30_organization_ref.code joined on the organization
+          name (the override seed wins). The vocabulary auth.pii_grant keys on, not org_short_code; NULL fails
+          closed to de-identified.
+        examples:
+          - CHOP
+          - SCH
+          - UCSF-BCH
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/cbc_latest_results_access_controlled.sql.tmpl; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/combined/v_cbc_latest_results.sql
+      - name: patient_id
+        description: "The patient's identifier as this caller may see it: CASE WHEN can_read_phi THEN mrn ELSE
+          research_id END (both from radiant_patient_mrn_list). Join key only: never select or show it."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/cbc_latest_results_access_controlled.sql.tmpl
+      - name: patient_id_type
+        description: "'mrn' when can_read_phi, else 'research_id': the namespace of patient_id on this row."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/cbc_latest_results_access_controlled.sql.tmpl
+      - name: radiant_patient_id
+        description: Portal patient id (radiant_jdbc.public.patient.id), matched on organization_code and the MRN
+          with leading zeros stripped on both sides; NULL when the patient has no portal record. Not masked.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/cbc_latest_results_access_controlled.sql.tmpl
+      - name: panel_observed_at
+        description: Timestamp of the latest panel (Observation effective_date_time, else effective_period_start,
+          else issued), UTC wall clock with the 'Z' stripped. NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql; backend:scripts/pcx_tables/access_controlled_views/cbc_latest_results_access_controlled.sql.tmpl
+      - name: age_at_panel_days
+        description: Age in days at the panel, datediff(panel_observed_at, FHIR patient birth_date). Applies to
+          every value of the row.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/combined/v_cbc_latest_results.sql
+      - name: date_semantic
+        description: "'clinical' when the panel timestamp is an effective date, 'administrative' when it fell back
+          to Observation.issued (a release-time proxy)."
+        examples:
+          - clinical
+          - administrative
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: wbc_value
+        description: White blood cell count of the panel (Observation value_quantity_value), not unit-normalized.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: wbc_unit
+        description: Unit of wbc_value as recorded by the source system.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: wbc_loinc
+        description: LOINC code of the WBC observation; NULL when the source gave none and the analyte was matched
+          on its local code_text.
+        examples:
+          - 6690-2
+          - 26464-8
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: wbc_source_code_text
+        description: Local result name of the WBC observation (Observation.code_text), kept verbatim for provenance.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: hemoglobin_value
+        description: Hemoglobin of the panel, not unit-normalized.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: hemoglobin_unit
+        description: Unit of hemoglobin_value as recorded by the source system.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: hemoglobin_loinc
+        description: LOINC code of the hemoglobin observation; NULL when matched on code_text.
+        examples:
+          - 718-7
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: hemoglobin_source_code_text
+        description: Local result name of the hemoglobin observation, kept verbatim for provenance.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: platelets_value
+        description: Platelet count of the panel, not unit-normalized.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: platelets_unit
+        description: Unit of platelets_value as recorded by the source system.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: platelets_loinc
+        description: LOINC code of the platelet observation; NULL when matched on code_text.
+        examples:
+          - 777-3
+          - 26515-7
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: platelets_source_code_text
+        description: Local result name of the platelet observation, kept verbatim for provenance.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: anc_value
+        description: Absolute neutrophil count of the panel, not unit-normalized. NULL when the latest panel had no
+          differential, not "never measured".
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/access_controlled/ac_v_cbc_latest_results.sql
+      - name: anc_unit
+        description: Unit of anc_value; both '/uL' and 'x10E9/L' occur (1000x apart).
+        examples:
+          - /uL
+          - x10E9/L
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: anc_loinc
+        description: LOINC code of the ANC observation (absolute count, not percentage); NULL when matched on
+          code_text (~18.5% of ANC rows carry no LOINC).
+        examples:
+          - 751-8
+          - 753-4
+          - 26499-4
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: anc_source_code_text
+        description: Local result name of the ANC observation, kept verbatim for provenance.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: analytes_found
+        description: How many of the four analytes this panel carried (1-4), count(*) of its picked observations.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/cbc_latest_results.sql
+      - name: can_read_phi
+        description: "TRUE when the caller may read this row's PHI: an org grant (auth.pii_grant, a can_read_pii
+          role at the row's organization_code) or a lab grant (auth.pii_lab_patient, a can_read_pii role at the
+          diagnosis lab of a portal case of radiant_patient_id). The caller is current_user(), the JWT sub."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/cbc_latest_results_access_controlled.sql.tmpl; backend:internal/repository/starrocks/views/auth_pii_lab_patient.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/types/pcx_patient_query.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/pcx_tables/access_controlled_views/cbc_latest_results_access_controlled.sql.tmpl

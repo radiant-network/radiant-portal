@@ -1,0 +1,82 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_pcx_30_tumor_board_deck
+name: v_pcx_30_tumor_board_deck
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    The tumor board presentation deck of each PCX patient (a file in S3), one row per row of
+    radiant_data_dev.tumor_board_deck (research_id, deck_url). Radiant's own view, built like
+    v_pcx_30_tumor_board_session: under the identifier the caller sees through the secured
+    v_pcx_30_demographics_combined, the source join only mapping it back to the research id.
+  usage: >-
+    Read it as the end user (StarRocks with the caller's JWT). Filter on (organization_code, patient_id_type,
+    patient_id) from v_pcx_30_patient_key. The portal takes the first non-NULL deck_url to say whether a deck
+    exists and to presign a download.
+  limitations: >-
+    deck_url is PHI: NULL without PHI access, so a non-PHI caller cannot tell a missing deck from a hidden one.
+    Loaded by hand in QA and PRD (one patient so far). patient_id is an MRN for a PHI caller: never select or show
+    it.
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_pcx_30_tumor_board_deck
+    physicalName: v_pcx_30_tumor_board_deck
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: organization_code
+        description: Code of the contributing institution (v_pcx_30_demographics_combined). Part of the join key.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_tumor_board_deck.sql.tmpl
+      - name: patient_id_type
+        description: "'mrn' or 'research_id' (v_pcx_30_demographics_combined): the namespace of patient_id for this
+          caller."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_tumor_board_deck.sql.tmpl
+      - name: patient_id
+        description: The patient's identifier as this caller may see it (MRN with PHI access, research id
+          without). Join key only, never select or show it.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_tumor_board_deck.sql.tmpl
+      - name: deck_url
+        description: S3 URL of the patient's tumor board presentation deck (tumor_board_deck.deck_url). PHI, NULL
+          without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_tumor_board_deck.sql.tmpl
+      - name: can_read_phi
+        description: can_read_phi of the patient's v_pcx_30_demographics_combined row (org grant or lab grant of
+          the caller); gates deck_url.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/seed/views/v_pcx_30_tumor_board_deck.sql.tmpl
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/types/pcx_patient_query.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/seed/views/v_pcx_30_tumor_board_deck.sql.tmpl

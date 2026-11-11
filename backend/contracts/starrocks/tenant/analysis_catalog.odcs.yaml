@@ -1,0 +1,108 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.analysis_catalog
+name: analysis_catalog
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per analysis the tenant offers, the analysis prescribed by a case (UI "Analysis"), optionally tied to
+    a gene panel. Rows of the portal''s PostgreSQL table public.analysis_catalog read through radiant_jdbc and filtered
+    on tenant_code = the tenant. Seeded per tenant by SQL (e.g. backend/scripts/init-sql/qlin/analysis_catalog.sql) and
+    managed by users with can_manage_analysis_catalog.'
+  usage: 'Key id: join cases on cases.analysis_catalog_id = analysis_catalog.id. code is unique in the tenant
+    (case-insensitively) and is the analysis_code of the case batches. The analysis''s gene panel: panel on panel.id =
+    panel_id (the portal shows its code and name on the case). The portal filters and aggregates the case list on code.'
+  limitations: 'panel_id and description are nullable (the qlin seeds set neither). The FK making a case''s analysis
+    belong to the case''s tenant is NOT VALID (migration 000037): an older case may reference an analysis this view does
+    not return. No json, jsonb or uuid column in public.analysis_catalog.'
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: analysis_catalog
+    physicalName: analysis_catalog
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Analysis id, primary key (identity); the cases.analysis_catalog_id.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql'
+      - name: code
+        logicalType: string
+        description: Analysis code, unique in the tenant case-insensitively and stored as entered; the analysis_code of
+          the case batches.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql; backend:scripts/init-sql/migrations/000034_case_insensitive_code_unique_indexes.up.sql;
+              backend:internal/types/case_batch.go'
+        examples:
+          - MYOC
+          - HYPM
+          - RGDI
+      - name: name
+        logicalType: string
+        description: Display name of the analysis, in the tenant's language (e.g. French for qlin).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/qlin/analysis_catalog.sql'
+        examples:
+          - Myopathies congénitales
+      - name: panel_id
+        logicalType: integer
+        description: panel.id of the analysis's gene panel; NULL when the analysis has none.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/utils/joins/joins.go AnalysisCatalogWithPanel'
+        relationships:
+          - type: foreignKey
+            to: panel.id
+      - name: description
+        logicalType: string
+        description: Optional free-text description of the analysis.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql'
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the analysis; always the tenant of this database (the view filters on it).
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql'
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/repository/starrocks/variants.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

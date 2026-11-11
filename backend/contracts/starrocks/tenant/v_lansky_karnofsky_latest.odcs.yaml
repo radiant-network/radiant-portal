@@ -1,0 +1,159 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_lansky_karnofsky_latest
+name: v_lansky_karnofsky_latest
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    Latest performance status, one row per patient: the most recent Lansky (pediatric) or Karnofsky (adult) score,
+    whichever scale was recorded last, with its source text, code, flowsheet line and age. Built from FHIR
+    observations coded EPIC#1501 / MEDCIN#124024 (the score is parsed from the leading number of the component's
+    free-text answer) into radiant_data_dev.lansky_karnofsky_latest, then v_lansky_karnofsky_latest (adds mrn,
+    research_id, organization, age); this grant-guarded view drops patient_fhir_id, subject_reference,
+    observation_id and org_short_code.
+  usage: >-
+    Read it as the end user (the portal API and the MCP query StarRocks with the caller's JWT). Join on
+    (organization_code, patient_id_type, patient_id); v_pcx_30_patient_key maps that key to patient_key. Read score
+    with scale: the two scales are not interchangeable. The portal keeps rows with a score only.
+  limitations: >-
+    The only date is Observation.issued, so age_at_score_days is age at result release, not at assessment
+    (date_semantic 'administrative'); 104 of 1,627 rows have neither date nor age ('undated'). A patient who
+    switched scale appears under the later scale only. The cohort is effectively CHOP-only (no SCH patient), so a
+    caller granted SCH only sees every row de-identified. 14 patients with a NULL organization_code are always
+    de-identified; 47 have no usable research_id and get a NULL or blank patient_id without PHI access. Column
+    masking only, no row filtering; the lab grant is not bounded by organization_code; radiant_patient_id is
+    projected unmasked.
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_lansky_karnofsky_latest
+    physicalName: v_lansky_karnofsky_latest
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: organization_name
+        description: Name of the contributing institution, from stg_cbtn_enrollment_final. Shown to every caller.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: organization_code
+        description: Code of the contributing institution, from pcx_30_organization_ref. The vocabulary
+          auth.pii_grant keys on; NULL (14 of 1,627 patients) fails closed to de-identified.
+        examples:
+          - CHOP
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/access_controlled_views/lansky_karnofsky_latest_access_controlled.sql.tmpl
+      - name: patient_id
+        description: "The patient's identifier as this caller may see it: CASE WHEN can_read_phi THEN mrn ELSE
+          research_id END (both from radiant_patient_mrn_list). Join key only: never select or show it."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/lansky_karnofsky_latest_access_controlled.sql.tmpl
+      - name: patient_id_type
+        description: "'mrn' when can_read_phi, else 'research_id': the namespace of patient_id on this row."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/lansky_karnofsky_latest_access_controlled.sql.tmpl
+      - name: radiant_patient_id
+        description: Portal patient id (radiant_jdbc.public.patient.id), matched on organization_code and the MRN
+          with leading zeros stripped on both sides; NULL when the patient has no portal record. Not masked.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/lansky_karnofsky_latest_access_controlled.sql.tmpl
+      - name: scale
+        description: Instrument of the score.
+        examples:
+          - lansky
+          - karnofsky
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: score
+        description: Performance-status score, 10-100 in steps of ten, higher is better function. Parsed from the
+          leading number of score_text.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/lansky_karnofsky_latest.sql
+      - name: scored_at
+        description: Timestamp of the score, Observation.issued in UTC (the 'Z' stripped), a result-release time.
+          NULL without PHI access and for undated rows.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/lansky_karnofsky_latest.sql
+      - name: age_at_score_days
+        description: Age in days at the score, datediff(scored_at, FHIR patient birth_date). NULL for the undated
+          rows.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/cbtn_clinical/combined/v_lansky_karnofsky_latest.sql
+      - name: score_text
+        description: Source free-text answer the score was parsed from, kept verbatim.
+        examples:
+          - 90 - Minor restrictions in strenuous activity
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: scale_code
+        description: Coded instrument as recorded by the source system.
+        examples:
+          - EPIC#1501
+          - MEDCIN#124024
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: source_code_text
+        description: Local observation name as recorded by the contributing system, kept verbatim.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: component_line
+        description: Flowsheet line label the score was read from; the lowest line wins when one observation scores
+          several.
+        examples:
+          - Line 1
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: date_semantic
+        description: "How the row's date was obtained: 'administrative' (Observation.issued) or 'undated' (no date
+          upstream). Never 'clinical' here."
+        examples:
+          - administrative
+          - undated
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: can_read_phi
+        description: "TRUE when the caller may read this row's PHI: an org grant (auth.pii_grant, a can_read_pii
+          role at the row's organization_code) or a lab grant (auth.pii_lab_patient, a can_read_pii role at the
+          diagnosis lab of a portal case of radiant_patient_id). The caller is current_user(), the JWT sub."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/lansky_karnofsky_latest_access_controlled.sql.tmpl; backend:internal/repository/starrocks/views/auth_pii_lab_patient.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/types/pcx_patient_query.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/pcx_tables/access_controlled_views/lansky_karnofsky_latest_access_controlled.sql.tmpl

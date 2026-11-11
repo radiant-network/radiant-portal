@@ -1,0 +1,81 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.file_format
+name: file_format
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: File format of a document (CRAM, VCF, TSV, PDF...). Referenced by document.format_code. Shared by every tenant
+    (the PostgreSQL table has no tenant_code), exposed in each {tenant}_tenant database through radiant_jdbc; the portal also
+    serves it as GET /value_sets/{type}.
+  usage: 'Join document.format_code = file_format.code for the label. Filter document on format_code with data_type_code to
+    find a file (e.g. vcf + gcnv). crai and tbi are index files: the portal hides them from its document lists and filters.'
+  limitations: 'The values are data seeded by the backend migrations (backend/scripts/init-sql/migrations), not a fixed enum:
+    later migrations or a deployment can add codes, so query the view for the current list. Codes are unique case-insensitively
+    (migration 000034) and stored in the case they were entered in.'
+team:
+- username: radiant-portal
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: file_format
+  physicalName: file_format
+  physicalType: view
+  tags:
+  - per-tenant
+  properties:
+  - name: code
+    logicalType: string
+    description: Code of the file format, primary key; the value stored in the referencing columns. Lower-case file extension.
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/migrations/000029_add_zip_file_format.up.sql;
+        backend:scripts/init-sql/migrations/000043_add_qlin_data_types_and_xlsx_file_format.up.sql; backend:scripts/init-sql/migrations/000045_add_maf_file_format.up.sql;
+        backend:internal/repository/starrocks/documents.go
+    examples:
+    - cram
+    - crai
+    - vcf
+    - tbi
+    - gvcf
+    - tgz
+    - json
+    - html
+    - tsv
+    - bw
+    - bed
+    - png
+    - csv
+    - pdf
+    - txt
+    - zip
+    - xlsx
+    - maf
+  - name: name_en
+    logicalType: string
+    description: English label of the code (e.g. CRAM File, CRAI Index File, gVCF File).
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql
+  customProperties:
+  - property: consumers
+    value:
+    - backend/internal/repository/starrocks/documents.go
+authoritativeDefinitions:
+- type: implementation
+  url: backend:internal/repository/starrocks/starrocks_tenant.go

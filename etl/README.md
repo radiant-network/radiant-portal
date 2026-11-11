@@ -118,6 +118,10 @@ The `mwaa/` directory contains files and documentation specific to deploying the
 
 ## Release
 
+> **Monorepo POC:** the ETL is no longer released alone. One product release for every module: root
+> `release-please-config.json` and `.github/workflows/publish.yml` (tour chapter 3). The text below describes the
+> separate repo.
+
 The ETL is released from its conventional commits by [release-please](https://github.com/googleapis/release-please)
 (`.github/workflows/release.yml`). On each push to `main`, it opens or updates one release PR,
 `chore(main): release <version>`: the version is computed from the commit types since the last `vX.Y.Z` tag, and the

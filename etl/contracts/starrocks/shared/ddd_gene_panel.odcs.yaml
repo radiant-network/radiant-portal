@@ -1,0 +1,71 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.ddd_gene_panel
+name: ddd_gene_panel
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per gene-disease entry of the Gene2Phenotype DDG2P (Deciphering Developmental Disorders) panel.
+    Fully overwritten by the ETL open-data import (group ddd_gene_panel) from the OpenDataLake table ddd_v1 (G2P
+    release YYYY_MM_DD) or the legacy Radiant Iceberg table ddd_gene_set. Shared reference table.
+
+    '
+  usage: 'Join on symbol. The portal exposes panel as the ddd_gene_panel filter/aggregation; the MCP lists the panels
+    of a gene.
+
+    '
+  limitations: 'Entries without a disease name are dropped. Confidence category, allelic requirement and variant
+    consequence of the DDG2P entry are not imported. The same (symbol, panel) can appear more than once.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: ddd_gene_panel
+  physicalName: ddd_gene_panel
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: symbol
+    logicalType: string
+    physicalType: varchar(30)
+    description: Gene symbol of the DDG2P entry (DDG2P "gene symbol").
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/ddd_gene_panel_insert.sql; upstream:ddd (radiant-open-datalake release-notes
+        ddd/v1.md)
+    required: true
+  - name: panel
+    logicalType: string
+    physicalType: varchar(250)
+    description: Disease name of the DDG2P entry (DDG2P "disease name", source column disease_name).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/ddd_gene_panel_insert.sql; upstream:ddd (radiant-open-datalake release-notes
+        ddd/v1.md)
+    required: true
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`symbol`, `panel`)
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/queries/genes.py
+    - portal/backend/internal/types/gene_panels.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/ddd_gene_panel_create_table.sql

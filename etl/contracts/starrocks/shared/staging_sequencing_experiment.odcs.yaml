@@ -1,0 +1,268 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.staging_sequencing_experiment
+name: staging_sequencing_experiment
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'Internal ETL staging table: one row per (case, sequencing experiment, task) whose output file the ETL
+    imports, i.e. the clinical rows of the portal database snapshotted with the StarRocks partition (part) their
+    occurrences are written to. The import DAG upserts rows from the staging_sequencing_experiment_delta view (portal
+    clinical tables, new or changed since the last snapshot), assigns part, then sets ingested_at once import_part
+    has loaded the partition.
+
+    '
+  usage: 'Primary key (case_id, seq_id, task_id). Map an occurrence''s (seq_id, task_id) to its case/patient and
+    part, then prune tenant occurrence tables with part. Exclude deleted rows, and rows with ingested_at at the
+    epoch (1970-01-01 00:00:00: not imported yet). A re-analysis adds a new task_id next to the old one; keep the
+    latest task per (case_id, seq_id) when counting.
+
+    '
+  limitations: "Internal staging table the team wants to stop exposing, but read directly by: the portal backend\
+    \ (utils.GetSequencingPart: part of a seq_id for SNV/CNV occurrence queries; cases.go: has_variants of cases\
+    \ and case sequencings via ingested_at/task_type/histology_type; transcript_report.go: part of a report; variants.go:\
+    \ frequency split by project/condition/analysis) and the MCP (services/cases.py lookup_parts via queries/sequencing.py\
+    \ parts_query, TEMPORARY until the Radiant API returns part per task; latest_tasks/genotyped_patients for cohort\
+    \ carriers; queries/hits.py germline_keys_query). The portal tests ingested_at IS NOT NULL, but the ETL inserts\
+    \ rows with ingested_at at the epoch, not NULL, so a row not imported yet already counts there. GetSequencingPart\
+    \ filters on seq_id only (any case/task). patient_id is stored as a string of the numeric clinical patient id.\n\
+    \ Internal staging table read directly by the portal and the MCP; contracted until they stop reading it."
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: staging_sequencing_experiment
+  physicalName: staging_sequencing_experiment
+  physicalType: table
+  tags:
+  - shared
+  - internal-exposed
+  - to-be-removed
+  properties:
+  - name: case_id
+    logicalType: integer
+    physicalType: INT
+    description: Portal case id (clinical cases.id) the sequencing experiment belongs to. A parent's sequencing
+      carries the proband's case_id.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql; mcp:domain/rules.py
+        PROBAND
+    required: true
+  - name: seq_id
+    logicalType: integer
+    physicalType: INT
+    description: Portal sequencing experiment id (clinical sequencing_experiment.id); seq_id of the occurrence tables.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+    required: true
+  - name: task_id
+    logicalType: integer
+    physicalType: INT
+    description: Portal task id (clinical task.id) whose output file is imported; task_id of the occurrence tables.
+      A per-experiment task shared by several cases has one row per case.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+    required: true
+  - name: task_type
+    logicalType: string
+    physicalType: VARCHAR(100)
+    description: 'Portal task type code: radiant_germline_annotation (germline SNV VCF + Exomiser), radiant_somatic_annotation
+      (somatic SNV VCF), alignment_germline_variant_calling (germline CNV VCF), tumor_only_variant_calling (somatic
+      CNV VCF).'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql; mcp:domain/rules.py
+        TASK_TYPES
+    required: true
+  - name: part
+    logicalType: integer
+    physicalType: INT
+    description: 'StarRocks partition of the tenant occurrence tables the experiment''s occurrences go to. Assigned
+      by the ETL: a patient, sequencing, case and family keep one part per experimental strategy; WGS parts start
+      at 0 and hold up to 100 experiments, WXS parts start at 65536 (0x10000) and hold up to 1000.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/starrocks/partition.py SequencingExperimentPartitionAssigner; etl:dags/sql/radiant/init/staging_sequencing_experiment_delta_create_table.sql
+    required: true
+  - name: analysis_type
+    logicalType: string
+    physicalType: VARCHAR(50)
+    description: Case type of the case (clinical cases.case_type_code), germline or somatic.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql; portal:scripts/init-sql/migrations/000001_init.up.sql
+        case_type
+  - name: aliquot
+    logicalType: string
+    physicalType: VARCHAR(255)
+    description: Aliquot identifier of the sequencing experiment; the sample name in the VCF the ETL matches the
+      experiment against.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql; etl:tasks/vcf/pedigree.py
+  - name: patient_id
+    logicalType: string
+    physicalType: VARCHAR(255)
+    description: Portal patient id (clinical patient.id) of the sequenced sample, stored as text.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+  - name: experimental_strategy
+    logicalType: string
+    physicalType: VARCHAR(50)
+    description: Sequencing strategy code of the experiment, lowercase (wgs or wxs; the portal also defines rnaseq
+      and targeted_dna, which part assignment does not support).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/starrocks/partition.py; portal:scripts/init-sql/migrations/000001_init.up.sql experimental_strategy
+  - name: tenant_code
+    logicalType: string
+    physicalType: VARCHAR(50)
+    description: Tenant of the sequencing experiment (clinical sequencing_experiment.tenant_code).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+  - name: request_priority
+    logicalType: string
+    physicalType: VARCHAR(20)
+    description: Highest priority among the experiment's cases (stat > asap > urgent > routine), default routine;
+      the ETL imports the parts holding the most urgent experiments first.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql; etl:tasks/starrocks/partition.py
+        SequencingExperimentPriorityAssigner
+  - name: vcf_filepath
+    logicalType: string
+    physicalType: VARCHAR(1024)
+    description: URL of the annotated SNV VCF (data type snv or ssnv) output by the radiant_germline_annotation
+      / radiant_somatic_annotation task; NULL for CNV-only rows.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+  - name: cnv_vcf_filepath
+    logicalType: string
+    physicalType: VARCHAR(1024)
+    description: URL of the CNV VCF (gcnv from alignment_germline_variant_calling, scnv from tumor_only_variant_calling);
+      NULL otherwise.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+  - name: exomiser_filepath
+    logicalType: string
+    physicalType: VARCHAR(1024)
+    description: URL of the Exomiser variants.tsv output by radiant_germline_annotation; set on the proband's row
+      only (NULL for other family members and other tasks).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+  - name: sex
+    logicalType: string
+    physicalType: VARCHAR(50)
+    description: Sex code of the patient (clinical patient.sex_code), male, female or unknown.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql; portal:scripts/init-sql/migrations/000001_init.up.sql
+        sex
+  - name: family_id
+    logicalType: integer
+    physicalType: INT
+    description: Id of the patient's clinical family row for this case (clinical family.id); NULL when the patient
+      has no family row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+  - name: family_role
+    logicalType: string
+    physicalType: VARCHAR(50)
+    description: Relationship of the patient to the proband (clinical family.relationship_to_proband_code, e.g.
+      proband, mother, father, sibling); proband when no family row, and always proband for somatic cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql; mcp:domain/rules.py
+        PROBAND
+  - name: affected_status
+    logicalType: string
+    physicalType: VARCHAR(50)
+    description: Affected status of the patient in the case (clinical family.affected_status_code, affected, non_affected
+      or unknown); affected when no family row, and always affected for somatic cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql; portal:scripts/init-sql/migrations/000001_init.up.sql
+        affected_status
+  - name: histology_type
+    logicalType: string
+    physicalType: VARCHAR(100)
+    description: Histology of the sequenced sample (clinical sample.histology_code), tumoral or normal; a somatic
+      SNV task with a normal sample is tumor-normal.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql; mcp:domain/rules.py
+        NORMAL_HISTOLOGY
+  - name: created_at
+    logicalType: date
+    physicalType: DATETIME
+    description: Creation time of the sequencing experiment in the portal (sequencing_experiment.created_on).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql
+  - name: updated_at
+    logicalType: date
+    physicalType: DATETIME
+    description: Last update time in the portal, UTC; the case's updated_on for a task tied to a case, otherwise
+      the experiment's updated_on. A row is re-imported while updated_at >= ingested_at.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/init/staging_external_sequencing_experiment_create_table.sql; etl:dags/sql/radiant/sequencing_experiment_update.sql;
+        etl:dags/sql/radiant/sequencing_experiment_partition_select.sql
+  - name: ingested_at
+    logicalType: date
+    physicalType: DATETIME
+    description: UTC time import_part last loaded the row's partition; 1970-01-01 00:00:00 when inserted and not
+      imported yet (imported means > epoch).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/sequencing_experiment_update.sql; etl:tasks/starrocks/partition.py DT_EPOCH; etl:dags/sql/clinical/case_status_select.sql;
+        mcp:domain/rules.py NOT_INGESTED
+  - name: deleted
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: True when the task no longer exists in the portal clinical task table; such rows are picked up
+      by the import to purge their occurrences and then deleted.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/sequencing_experiment_update_deleted.sql; etl:dags/sql/radiant/sequencing_experiment_delete.sql;
+        etl:dags/sql/radiant/import_pending_case_select.sql
+    required: true
+  customProperties:
+  - property: dataModel
+    value: PRIMARY KEY (case_id, seq_id, task_id)
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/domain/rules.py
+    - mcp/radiant_mcp/queries/carriers.py
+    - mcp/radiant_mcp/queries/hits.py
+    - mcp/radiant_mcp/queries/sequencing.py
+    - mcp/radiant_mcp/services/cases.py
+    - mcp/radiant_mcp/settings.py
+    - mcp/radiant_mcp/tools/cohort.py
+    - portal/backend/internal/service/ranger_masking.go
+    - portal/backend/internal/types/sequencing.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/radiant/init/staging_sequencing_experiment_create_table.sql

@@ -1,0 +1,219 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_pcx_30_treatment_summary_combined
+name: v_pcx_30_treatment_summary_combined
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    PCX 3.0 initial-treatment summary, one row per patient: ages at initial diagnosis and at the first subsequent
+    disease event, ages at the first radiation, chemotherapy and methotrexate ever and at the first ones that were
+    part of the initial treatment, three had_initial_* flags and the radiation-vs-chemotherapy order label.
+    Grant-guarded read surface over radiant_data_dev.v_pcx_30_treatment_summary_combined, which aggregates the
+    event, radiation and medical therapy combined views; the flags read their is_initial_treatment column.
+  usage: >-
+    Read it as the end user (the portal API and the MCP query StarRocks with the caller's JWT). Join on
+    (organization_code, patient_id_type, patient_id); v_pcx_30_patient_key maps that key to patient_key.
+    initial_treatment_order is reproducible from the age_at_initial_* columns. v_pcx_30_patient_list takes its
+    age_at_initial_dx_days (when >= 0). Use the ages, never the *_date columns.
+  limitations: >-
+    'no' and the no_initial_* labels mean "not known to be initial": they absorb patients treated only outside the
+    frontline window and the patients without an initial-diagnosis anchor (23 patients). age_at_initial_dx_days and
+    age_at_first_event_days pass -1 through for an unknown date. Column masking only, no row filtering; a NULL
+    organization_code fails closed; the lab grant is not bounded by organization_code; radiant_patient_id is
+    projected unmasked.
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_pcx_30_treatment_summary_combined
+    physicalName: v_pcx_30_treatment_summary_combined
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: patient_id
+        description: "The patient's identifier as this caller may see it: CASE WHEN can_read_phi THEN mrn ELSE
+          research_id END. Join key only: never select or show it."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/treatment_summary_access_controlled.sql.tmpl
+      - name: patient_id_type
+        description: "'mrn' when can_read_phi, else 'research_id': the namespace of patient_id on this row."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/treatment_summary_access_controlled.sql.tmpl
+      - name: radiant_patient_id
+        description: Portal patient id (radiant_jdbc.public.patient.id), matched on organization_code and the MRN
+          with leading zeros stripped on both sides; NULL when the patient has no portal record. Not masked.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/treatment_summary_access_controlled.sql.tmpl
+      - name: organization_name
+        description: Name of the institution that contributed the patient's data, as in v_pcx_30_event_level_combined.
+          Shown to every caller.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: organization_code
+        description: Code of the contributing institution, as in v_pcx_30_event_level_combined. The vocabulary
+          auth.pii_grant keys on; NULL fails closed to de-identified.
+        examples:
+          - CHOP
+          - SCH
+          - UCSF-BCH
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/treatment_summary_access_controlled.sql.tmpl
+      - name: initial_dx_date
+        description: Date of the initial CNS diagnosis, the earliest event_date of an 'Initial%' event. NULL
+          without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: age_at_initial_dx_days
+        description: Age in days at the initial CNS diagnosis, min(age_at_event_days) over the 'Initial%' events.
+          -1 means an unknown date.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: first_event_date
+        description: Date of the first subsequent disease event (any event_type but 'Initial CNS Tumor',
+          'Unavailable' and 'Not Reported'). NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: age_at_first_event_days
+        description: Age in days at the first event of type progression, recurrence, second malignancy or deceased
+          (min over those events). -1 means an unknown date.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: first_radiation_ever_date
+        description: Start date of the patient's first radiation course ever. NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_first_radiation_ever_days
+        description: Age in days at the start of the first radiation course ever, initial treatment or not
+          (min of the cast start ages).
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: initial_radiation_date
+        description: Start date of the first radiation course that was part of the initial treatment. NULL without
+          PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_initial_radiation_days
+        description: Age in days at the start of the first radiation course with is_initial_treatment = 'yes'; NULL
+          when none.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: first_chemo_ever_date
+        description: Start date of the patient's first chemotherapy regimen ever, any agent. NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_first_chemo_ever_days
+        description: Age in days at the start of the first chemotherapy regimen ever, any agent, initial treatment
+          or not.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: initial_chemo_date
+        description: Start date of the first chemotherapy regimen that was part of the initial treatment. NULL
+          without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_initial_chemo_days
+        description: Age in days at the start of the first regimen with is_initial_treatment = 'yes'; NULL when
+          none.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: first_methotrexate_ever_date
+        description: Start date of the first regimen ever whose agents contain methotrexate. NULL without PHI
+          access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: age_at_first_methotrexate_ever_days
+        description: Age in days at the start of the first regimen ever whose chemotherapy_agents contain
+          'methotrexate' (case-insensitive), initial treatment or not.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: had_initial_radiation
+        description: "'yes' when at least one radiation course has is_initial_treatment = 'yes', else 'no' (which
+          also covers 'cannot tell')."
+        examples:
+          - 'yes'
+          - 'no'
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: had_initial_chemo
+        description: "'yes' when at least one chemotherapy regimen, any agent, has is_initial_treatment = 'yes',
+          else 'no' (which also covers 'cannot tell')."
+        examples:
+          - 'yes'
+          - 'no'
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: had_initial_methotrexate
+        description: "'yes' when at least one methotrexate regimen has is_initial_treatment = 'yes', else 'no'."
+        examples:
+          - 'yes'
+          - 'no'
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: initial_treatment_order
+        description: Order of the initial radiation and chemotherapy, compared on age_at_initial_radiation_days and
+          age_at_initial_chemo_days; no_initial_radiation_or_chemo when neither was initial treatment.
+        examples:
+          - radiation_before_chemotherapy
+          - chemo_before_radiation
+          - radiation_and_chemo_same_day
+          - chemo_only_no_initial_radiation
+          - radiation_only_no_initial_chemo
+          - no_initial_radiation_or_chemo
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: can_read_phi
+        description: "TRUE when the caller may read this row's PHI: an org grant (auth.pii_grant, a can_read_pii
+          role at the row's organization_code) or a lab grant (auth.pii_lab_patient, a can_read_pii role at the
+          diagnosis lab of a portal case of radiant_patient_id). The caller is current_user(), the JWT sub."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/treatment_summary_access_controlled.sql.tmpl; backend:internal/repository/starrocks/views/auth_pii_lab_patient.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/types/pcx_patient_query.go
+          - backend/scripts/seed/views/v_pcx_30_patient_list.sql.tmpl
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/pcx_tables/access_controlled_views/treatment_summary_access_controlled.sql.tmpl

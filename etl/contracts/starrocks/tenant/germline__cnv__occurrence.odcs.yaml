@@ -1,0 +1,644 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.germline__cnv__occurrence
+name: germline__cnv__occurrence
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per CNV segment called by DRAGEN in one germline sequencing (seq_id) of one analysis task, i.e.
+    one record of the task''s germline CNV VCF for that sample. Loaded per part by the ETL (VCF -> Iceberg germline_cnv_occurrence
+    -> StarRocks), enriched with cytobands, overlapping genes, SNV count and the best gnomAD-SV match; rebuilt in
+    place on re-annotation. Read by the portal CNV occurrence endpoints and the MCP.
+
+    '
+  usage: 'Every query on a table partitioned by `part` carries `<alias>.part = <part>` as an equality, next to seq_id
+    / task_id. Take `part` and `variant_part` from get_case_context''s occurrence_keys, from the key of the right
+    data type; never compute them. Without it StarRocks scans every partition of the tenant and the query can time
+    out. Per-tenant table, partitioned on part: always filter on part (plus seq_id and task_id) for one case. Key
+    is (part, seq_id, task_id, cnv_id). Join germline__cnv__variant_frequency on cnv_id for in-cohort frequencies.
+    symbol and cytoband are arrays: filter with array_contains(symbol, ''GENE'').
+
+    '
+  limitations: 'Reference records (no ALT) are skipped. svlen, cipos and ciend are NULL in practice on the DRAGEN
+    germline files (data QA exempts them). symbol, nb_genes and nb_snv are NULL (not 0 / empty) when nothing overlaps
+    the segment. gnomad_* are NULL when no gnomAD-SV site matches.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: germline__cnv__occurrence
+  physicalName: germline__cnv__occurrence
+  physicalType: table
+  tags:
+  - per-tenant
+  properties:
+  - name: part
+    logicalType: integer
+    physicalType: int(11)
+    description: ETL partition of the sequencing experiment. A patient, its case and family stay in one part per
+      sequencing strategy (WGS or WXS); every table of the same part is loaded and rebuilt together.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/starrocks/partition.py; etl:dags/sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql
+    required: true
+    partitioned: true
+  - name: seq_id
+    logicalType: integer
+    physicalType: int(11)
+    description: Sequencing experiment the CNV was called in (staging_sequencing_experiment.seq_id).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/process.py; mcp:schema_catalog.py
+  - name: task_id
+    logicalType: integer
+    physicalType: int(11)
+    description: Analysis task (alignment_germline_variant_calling) that produced the CNV VCF.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/process.py
+    required: true
+  - name: cnv_id
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Identifier of the CNV interval, computed by the GET_CNV_ID UDF (radiant-starrocks-udf) from chromosome,
+      start, length and type. Identical segments in different samples share the same cnv_id; it is the key of germline__cnv__variant_frequency.
+      The portal API exposes it as a string.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql; etl:dags/sql/radiant/init/cnv_id_udf.sql;
+        portal:internal/types/germline_cnv_occurrence.go; hub:docs/features/RAD-120-cnv-cohort-frequency.md
+    required: true
+  - name: aliquot
+    logicalType: string
+    physicalType: varchar(50)
+    description: Sample name of the sequencing in the VCF (the VCF sample column read for this row).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/process.py
+  - name: chromosome
+    logicalType: string
+    physicalType: varchar(20)
+    description: Chromosome of the segment, VCF CHROM without the 'chr' prefix (1-22, X, Y, M...).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; etl:data_qa/sources/germline_cnv_occurrence.yml
+    enum:
+    - value: '1'
+    - value: '2'
+    - value: '3'
+    - value: '4'
+    - value: '5'
+    - value: '6'
+    - value: '7'
+    - value: '8'
+    - value: '9'
+    - value: '10'
+    - value: '11'
+    - value: '12'
+    - value: '13'
+    - value: '14'
+    - value: '15'
+    - value: '16'
+    - value: '17'
+    - value: '18'
+    - value: '19'
+    - value: '20'
+    - value: '21'
+    - value: '22'
+    - value: X
+    - value: Y
+    - value: M
+  - name: alternate
+    logicalType: string
+    physicalType: varchar(20)
+    description: First ALT allele of the VCF record as written by DRAGEN, normally the symbolic allele <DEL> or
+      <DUP>.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: start
+    logicalType: integer
+    physicalType: int(11)
+    description: VCF POS of the record. For these symbolic-allele records it is the padding base, one before the
+      first CNV base (the DRAGEN name starts at POS+1).
+    customProperties:
+    - property: unit
+      value: bp (1-based)
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: end
+    logicalType: integer
+    physicalType: int(11)
+    description: End position of the segment, VCF INFO/END.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: type
+    logicalType: string
+    physicalType: varchar(10)
+    description: CNV class derived from ALT - GAIN for <DUP>, LOSS for <DEL>, UNKNOWN for any other ALT. CNLOH/GAINLOH
+      exist only in the somatic table.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; mcp:enums.py
+    enum:
+    - value: GAIN
+    - value: LOSS
+    - value: CNLOH
+    - value: GAINLOH
+  - name: length
+    logicalType: integer
+    physicalType: int(11)
+    description: Segment length computed as end - start.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; frontend:translations/common/en.json length_tooltip
+  - name: name
+    logicalType: string
+    physicalType: varchar(1048576)
+    description: VCF ID of the record, the DRAGEN segment name (e.g. DRAGEN:LOSS:chr1:1000-2000). Used by the portal
+      as the occurrence id within a sequencing.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; portal:internal/types/germline_cnv_occurrence.go
+  - name: quality
+    logicalType: number
+    physicalType: FLOAT
+    description: VCF QUAL of the CNV call, truncated to an integer by the germline loader.
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; frontend:translations/common/en.json quality_tooltip
+  - name: calls
+    logicalType: array
+    physicalType: array<int(11)>
+    description: Genotype (FORMAT/GT) of the sample as allele indices, phasing flag removed (e.g. [0,1], [1,1],
+      [1] on haploid regions; -1 = missing allele).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/vcf_utils.py calls_without_phased; frontend:translations/common/en.json calls_tooltip
+  - name: filter
+    logicalType: string
+    physicalType: varchar(255)
+    description: VCF FILTER, 'PASS' when the record passes (an empty FILTER is stored as PASS), otherwise the DRAGEN
+      filter ids semicolon-joined (e.g. cnvQual, cnvLength, binCount, cnvCopyRatio, cnvBinSupportRatio). Frequencies
+      count only filter = 'PASS'.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; etl:tests/resources/integration/test_cnv.vcf (live checkout)
+        header; etl:dags/sql/radiant/germline_cnv_variant_frequency_insert.sql
+  - name: bc
+    logicalType: integer
+    physicalType: int(11)
+    description: DRAGEN FORMAT/BC, number of bins in the segment.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; etl:tests/resources/integration/test_cnv.vcf (live checkout)
+        header; frontend:translations/common/en.json bc_tooltip
+  - name: cn
+    logicalType: integer
+    physicalType: int(11)
+    description: DRAGEN FORMAT/CN, estimated copy number of the segment (2 = diploid reference on autosomes).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; etl:tests/resources/integration/test_cnv.vcf (live checkout)
+        header; frontend:translations/common/en.json cn_tooltip
+  - name: pe
+    logicalType: array
+    physicalType: array<int(11)>
+    description: DRAGEN FORMAT/PE, two values - number of improperly paired end reads at the start and at the stop
+      breakpoint.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; etl:tests/resources/integration/test_cnv.vcf (live checkout)
+        header; frontend:translations/common/en.json pe_tooltip
+  - name: sm
+    logicalType: number
+    physicalType: FLOAT
+    description: DRAGEN FORMAT/SM, linear copy ratio of the segment mean (about 1.0 = copy-neutral, below = loss,
+      above = gain).
+    customProperties:
+    - property: unit
+      value: ratio
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; etl:tests/resources/integration/test_cnv.vcf (live checkout)
+        header; frontend:translations/common/en.json sm_tooltip
+  - name: svtype
+    logicalType: string
+    physicalType: varchar(20)
+    description: VCF INFO/SVTYPE, the structural variant type DRAGEN writes; constant (CNV) in practice, NULL when
+      the record has none.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; etl:data_qa/sources/germline_cnv_occurrence.yml
+  - name: svlen
+    logicalType: integer
+    physicalType: int(11)
+    description: VCF INFO/SVLEN, difference in length between REF and ALT (negative for a deletion). Not declared
+      by the DRAGEN germline files seen so far, hence NULL in practice; use length.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; etl:data_qa/sources/germline_cnv_occurrence.yml
+  - name: reflen
+    logicalType: integer
+    physicalType: int(11)
+    description: VCF INFO/REFLEN, number of reference positions covered by the record.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; etl:tests/resources/integration/test_cnv.vcf (live checkout)
+        header
+  - name: ciend
+    logicalType: array
+    physicalType: array<int(11)>
+    description: VCF INFO/CIEND, two values - confidence interval around END. NULL in practice on the DRAGEN germline
+      files.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; etl:data_qa/sources/germline_cnv_occurrence.yml
+  - name: cipos
+    logicalType: array
+    physicalType: array<int(11)>
+    description: VCF INFO/CIPOS, two values - confidence interval around POS. NULL in practice on the DRAGEN germline
+      files.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; etl:data_qa/sources/germline_cnv_occurrence.yml
+  - name: phased
+    logicalType: boolean
+    physicalType: boolean
+    description: True when the sample genotype is phased (GT written with '|'). Constant in practice.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/cnv/germline/occurrence.py; etl:data_qa/sources/germline_cnv_occurrence.yml
+  - name: cytoband
+    logicalType: array
+    physicalType: array<varchar(10)>
+    description: Cytobands (e.g. p36.33) overlapping [start, end], from the radiant cytoband reference table; order
+      not guaranteed. NULL when none overlaps.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql
+  - name: symbol
+    logicalType: array
+    physicalType: array<varchar(128)>
+    description: Symbols of the Ensembl genes (ensembl_gene.name) whose span overlaps [start, end]; order not guaranteed.
+      NULL, not empty, when no gene overlaps.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql; mcp:schema_catalog.py
+  - name: nb_genes
+    logicalType: integer
+    physicalType: int(11)
+    description: Number of genes in symbol. NULL when no gene overlaps.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql; frontend:translations/common/en.json
+        nb_genes_tooltip
+  - name: nb_snv
+    logicalType: integer
+    physicalType: int(11)
+    description: Number of distinct germline SNVs of the same sequencing whose position falls in [start, end] and
+      that pass the frequency quality gate (filter = PASS, GQ >= 20, ad_alt >= 3). NULL when there are none.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql (RAD-57, RAD-61)
+  - name: gnomad_af
+    logicalType: number
+    physicalType: FLOAT
+    description: Allele frequency (AF) of the best matching gnomAD-SV v4.1 site - same chromosome, DUP for GAIN
+      / DEL for LOSS, at least 80% reciprocal overlap, PASS sites only; the best is the highest AF, then highest
+      SF. NULL when no site matches.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql; frontend:translations/common/en.json
+        gnomad_sv_af_tooltip; upstream:gnomAD-SV v4.1
+  - name: gnomad_sc
+    logicalType: integer
+    physicalType: int(11)
+    description: Site count of the matched gnomAD-SV site, n_het + n_homalt (individuals carrying the SV). NULL
+      when no match.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql; upstream:gnomAD-SV v4.1
+  - name: gnomad_sn
+    logicalType: integer
+    physicalType: int(11)
+    description: Number of individuals with a biallelic genotype at the matched gnomAD-SV site (n_bi_genos), denominator
+      of gnomad_sf. NULL when no match.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql; upstream:gnomAD-SV v4.1
+  - name: gnomad_sf
+    logicalType: number
+    physicalType: FLOAT
+    description: Site frequency of the matched gnomAD-SV site, gnomad_sc / gnomad_sn (fraction of individuals carrying
+      it). NULL when no match.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql; frontend:translations/common/en.json
+        gnomad_sf_tooltip
+  - name: gnomad_sc_hom
+    logicalType: integer
+    physicalType: int(11)
+    description: Number of homozygous-alternate individuals (n_homalt) at the matched gnomAD-SV site. NULL when
+      no match.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql; upstream:gnomAD-SV v4.1
+  - name: gnomad_sc_het
+    logicalType: integer
+    physicalType: int(11)
+    description: Number of heterozygous individuals (n_het) at the matched gnomAD-SV site. NULL when no match.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql; upstream:gnomAD-SV v4.1
+  - name: gnomad_ac
+    logicalType: integer
+    physicalType: int(11)
+    description: Allele count (AC) of the matched gnomAD-SV site. NULL when no match.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_cnv_occurrence_insert_partition_delta.sql (RAD-194); frontend:translations/common/en.json
+        gnomad_sv_ac_tooltip
+  - name: parental_origin
+    logicalType: string
+    physicalType: varchar(25)
+    description: 'Parent the CNV comes from for the proband, from its slivar po_* tag (germline SNV values: DENOVO,
+      MOTHER, FATHER...). Filled on the proband rows of a radiant_germline_cnv_annotation task only (slivar CNV
+      set); NULL on alignment-task rows, for parents and solo cases.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+    enum:
+    - value: DENOVO
+    - value: MOTHER
+    - value: FATHER
+    - value: BOTH
+    - value: AMBIGUOUS
+    - value: POSSIBLE_DENOVO
+    - value: POSSIBLE_MOTHER
+    - value: POSSIBLE_FATHER
+    - value: UNKNOWN
+  - name: transmission_mode
+    logicalType: string
+    physicalType: varchar(50)
+    description: CNV mode tag of the slivar record that lists the proband, under its own name. Filled on the proband
+      rows of a radiant_germline_cnv_annotation task only (slivar CNV set); NULL on alignment-task rows, for parents
+      and solo cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+    enum:
+    - value: denovo
+    - value: denovo_suspect
+    - value: possible_denovo
+    - value: x_linked_denovo
+    - value: inherited_maternal
+    - value: inherited_paternal
+    - value: possible_inherited_maternal
+    - value: possible_inherited_paternal
+    - value: recessive
+    - value: recessive_lowconf
+    - value: x_linked_recessive
+    - value: inheritance_unresolved
+    - value: mendelian_inconsistent
+    - value: unknown_cn
+  - name: mother_calls
+    logicalType: array
+    physicalType: array<int(11)>
+    description: The mother's genotype on the same slivar record, as calls. Filled on the proband rows of a radiant_germline_cnv_annotation
+      task only (slivar CNV set); NULL on alignment-task rows, for parents and solo cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: mother_cn
+    logicalType: integer
+    physicalType: int(11)
+    description: The mother's DRAGEN FORMAT/CN on the same slivar record, as cn. Filled on the proband rows of a
+      radiant_germline_cnv_annotation task only (slivar CNV set); NULL on alignment-task rows, for parents and solo
+      cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: mother_bc
+    logicalType: integer
+    physicalType: int(11)
+    description: The mother's DRAGEN FORMAT/BC on the same slivar record, as bc. Filled on the proband rows of a
+      radiant_germline_cnv_annotation task only (slivar CNV set); NULL on alignment-task rows, for parents and solo
+      cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: mother_pe
+    logicalType: array
+    physicalType: array<int(11)>
+    description: The mother's DRAGEN FORMAT/PE on the same slivar record, as pe. Filled on the proband rows of a
+      radiant_germline_cnv_annotation task only (slivar CNV set); NULL on alignment-task rows, for parents and solo
+      cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: mother_sm
+    logicalType: number
+    physicalType: FLOAT
+    description: The mother's DRAGEN FORMAT/SM on the same slivar record, as sm. Filled on the proband rows of a
+      radiant_germline_cnv_annotation task only (slivar CNV set); NULL on alignment-task rows, for parents and solo
+      cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: mother_name
+    logicalType: string
+    physicalType: varchar(1048576)
+    description: The mother's own DRAGEN call ID (FORMAT/OID), equal to name on her alignment-task row; NULL for
+      a slivar VCF made before FORMAT/OID. Filled on the proband rows of a radiant_germline_cnv_annotation task
+      only (slivar CNV set); NULL on alignment-task rows, for parents and solo cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: father_calls
+    logicalType: array
+    physicalType: array<int(11)>
+    description: The father's genotype on the same slivar record, as calls. Filled on the proband rows of a radiant_germline_cnv_annotation
+      task only (slivar CNV set); NULL on alignment-task rows, for parents and solo cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: father_cn
+    logicalType: integer
+    physicalType: int(11)
+    description: The father's DRAGEN FORMAT/CN on the same slivar record, as cn. Filled on the proband rows of a
+      radiant_germline_cnv_annotation task only (slivar CNV set); NULL on alignment-task rows, for parents and solo
+      cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: father_bc
+    logicalType: integer
+    physicalType: int(11)
+    description: The father's DRAGEN FORMAT/BC on the same slivar record, as bc. Filled on the proband rows of a
+      radiant_germline_cnv_annotation task only (slivar CNV set); NULL on alignment-task rows, for parents and solo
+      cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: father_pe
+    logicalType: array
+    physicalType: array<int(11)>
+    description: The father's DRAGEN FORMAT/PE on the same slivar record, as pe. Filled on the proband rows of a
+      radiant_germline_cnv_annotation task only (slivar CNV set); NULL on alignment-task rows, for parents and solo
+      cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: father_sm
+    logicalType: number
+    physicalType: FLOAT
+    description: The father's DRAGEN FORMAT/SM on the same slivar record, as sm. Filled on the proband rows of a
+      radiant_germline_cnv_annotation task only (slivar CNV set); NULL on alignment-task rows, for parents and solo
+      cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+  - name: father_name
+    logicalType: string
+    physicalType: varchar(1048576)
+    description: The father's own DRAGEN call ID (FORMAT/OID), equal to name on his alignment-task row; NULL for
+      a slivar VCF made before FORMAT/OID. Filled on the proband rows of a radiant_germline_cnv_annotation task
+      only (slivar CNV set); NULL on alignment-task rows, for parents and solo cases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/migrations/RAD-206_germline_cnv_occurrence_add_inheritance.sql; etl:tasks/vcf/cnv/germline/occurrence.py
+  quality:
+  - name: germline_cnv_occurrence__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: germline_cnv_occurrence__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except ciend, cipos, cnv_id, part, svlen, task_id).
+    query: SELECT (CASE WHEN COUNT(seq_id) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(aliquot) = 0 THEN 1 ELSE 0
+      END) + (CASE WHEN COUNT(chromosome) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(alternate) = 0 THEN 1 ELSE 0
+      END) + (CASE WHEN COUNT(start) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(end) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(type) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(length) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(name)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(quality) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(calls) = 0 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(filter) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(bc) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(cn) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(pe) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(sm)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(svtype) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(reflen) = 0 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(phased) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(cytoband) = 0 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(symbol) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(nb_genes) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(nb_snv) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gnomad_af) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(gnomad_sc) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gnomad_sn) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(gnomad_sf) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gnomad_sc_hom) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(gnomad_sc_het) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gnomad_ac) = 0 THEN 1 ELSE 0 END) FROM
+      germline__cnv__occurrence
+    mustBe: 0
+  - name: germline_cnv_occurrence__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except part, phased, svtype).
+    query: SELECT (CASE WHEN COUNT(DISTINCT seq_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT task_id)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT cnv_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      aliquot) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT chromosome) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT alternate) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT start) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT end) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT type) <= 1 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(DISTINCT length) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT name) <= 1
+      THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT quality) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      filter) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT bc) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      cn) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT sm) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      svlen) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT reflen) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      nb_genes) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT nb_snv) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT gnomad_af) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT gnomad_sc) <= 1 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(DISTINCT gnomad_sn) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT gnomad_sf)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT gnomad_sc_hom) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      gnomad_sc_het) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT gnomad_ac) <= 1 THEN 1 ELSE 0 END) FROM
+      germline__cnv__occurrence
+    mustBe: 0
+  - name: germline_cnv_occurrence__should_be_within_range_gnomad_af
+    type: sql
+    dimension: accuracy
+    description: gnomad_af stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM germline__cnv__occurrence WHERE gnomad_af < 0 OR gnomad_af > 1
+    mustBe: 0
+  - name: germline_cnv_occurrence__should_be_within_range_gnomad_sf
+    type: sql
+    dimension: accuracy
+    description: gnomad_sf stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM germline__cnv__occurrence WHERE gnomad_sf < 0 OR gnomad_sf > 1
+    mustBe: 0
+  - name: germline_cnv_occurrence__should_be_unique__part_seq_id_task_id_cnv_id
+    metric: duplicateValues
+    arguments:
+      properties:
+      - part
+      - seq_id
+      - task_id
+      - cnv_id
+    mustBe: 0
+    dimension: uniqueness
+    description: (part, seq_id, task_id, cnv_id) is unique.
+  - name: germline_cnv_occurrence__validate_start_end_order
+    type: sql
+    description: 'Genomic coordinate sanity for germline CNV occurrences: - start must not exceed end (1-based inclusive
+      span).'
+    query: SELECT COUNT(*) FROM (select cnv_id, chromosome, start, `end` from germline__cnv__occurrence where start
+      > `end`) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/germline_cnv_occurrence__validate_start_end_order.sql
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(part, seq_id, task_id, cnv_id)
+  - property: partitionBy
+    value: PARTITION BY (part)
+  - property: mcpKeys
+    value: part, seq_id, task_id, cnv_id
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/queries/carriers.py
+    - mcp/radiant_mcp/queries/charts.py
+    - mcp/radiant_mcp/queries/hits.py
+    - mcp/radiant_mcp/schema_catalog.py
+    - portal/backend/internal/repository/starrocks/cnv_occurrences.go
+    - portal/backend/internal/types/germline_cnv_occurrence.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/radiant/init/germline_cnv_occurrence_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/germline_cnv_occurrence.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

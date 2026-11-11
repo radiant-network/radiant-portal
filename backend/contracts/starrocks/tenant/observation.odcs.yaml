@@ -1,0 +1,74 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.observation
+name: observation
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Lookup of the kinds of clinical observation a case can carry (phenotype, note, ancestry, consanguinity,
+    exam...): one row per code. Rows of the portal''s PostgreSQL table public.observation, an instance-wide value set
+    shared by every tenant (no tenant_code, so the view is not filtered), read through the radiant_jdbc catalog.
+    Seeded by migrations 000001 and 000017.
+
+    '
+  usage: 'Join obs_categorical.observation_code or obs_string.observation_code = observation.code for the label.
+    Readers usually filter the observation tables on a known code directly: ''phenotype'' (HPO terms, in
+    obs_categorical), ''note'' (free text, in obs_string), ''ancestry'' and ''consanguinity'' (value-set codes, in
+    obs_categorical), ''exam'' (both tables).
+
+    '
+  limitations: 'Codes are unique case-insensitively. ''condition'' is still listed, but migration 000025 moved the
+    condition observations to cases.diagnosis_hypothesis. No reader of this view was found: the API reads the
+    PostgreSQL table for its value sets.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: observation
+    physicalName: observation
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: code
+        logicalType: string
+        description: Observation code (primary key), referenced by obs_categorical.observation_code and
+          obs_string.observation_code.
+        examples:
+          - phenotype
+          - note
+          - ancestry
+          - consanguinity
+          - exam
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/migrations/000017_add_exam_and_obs_exam_columns.up.sql;
+              backend:internal/types/case_batch.go ObsCode*
+      - name: name_en
+        logicalType: string
+        description: English label of the observation kind, e.g. 'Clinical sign' for phenotype, 'Clinical Note' for
+          note.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

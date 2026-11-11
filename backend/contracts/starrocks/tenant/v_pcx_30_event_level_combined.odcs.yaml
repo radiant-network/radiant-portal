@@ -1,0 +1,176 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_pcx_30_event_level_combined
+name: v_pcx_30_event_level_combined
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    PCX 3.0 disease events, several rows per patient: the initial CNS tumor diagnosis and the later events
+    (progression, recurrence, second malignancy, death), with age at event, metastasis, tumor location and the
+    diagnosis at the time of the event. Grant-guarded read surface over
+    radiant_data_dev.v_pcx_30_event_level_combined, built from the CBTN diagnosis table (research_study_name =
+    'CBTN'). For the ATRT / medulloblastoma cohort the 'Initial CNS Tumor' rows are aggregated to one row per
+    patient and diagnosis (specimens merged); other events give one row per diagnosis record. A NOS/NEC or
+    'Medulloblastoma, non-WNT/non-SHH' diagnosis is upgraded to a more specific OpenPedCan molecular subtype of the
+    same biospecimen when one exists.
+  usage: >-
+    Read it as the end user (the portal API and the MCP query StarRocks with the caller's JWT). Join on
+    (organization_code, patient_id_type, patient_id); v_pcx_30_patient_key maps that key to patient_key. The
+    initial diagnosis is the 'Initial CNS Tumor' event with the smallest known age (sort -1 last), as
+    v_pcx_30_patient_list does; it already exposes cns_integrated_diagnosis and its source. Use
+    age_at_event_days, never event_date.
+  limitations: >-
+    age_at_event_days is -1 for an unknown date, so event_date is dob minus one day on those rows (not corrected).
+    Column masking only, no row filtering; a NULL organization_code fails closed; the lab grant is not bounded by
+    organization_code; radiant_patient_id is projected unmasked. Reviewer-accepted overrides
+    (pcx_30_field_provenance) apply to some columns.
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_pcx_30_event_level_combined
+    physicalName: v_pcx_30_event_level_combined
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: organization_name
+        description: Name of the institution that contributed the patient's data (the pcx_30_organization_override
+          seed wins where it carries the patient). Shown to every caller.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: organization_code
+        description: Code of the contributing institution, pcx_30_organization_ref.code joined on the organization
+          name (the override seed wins). The vocabulary auth.pii_grant keys on; NULL fails closed to de-identified.
+        examples:
+          - CHOP
+          - SCH
+          - UCSF-BCH
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/event_level_access_controlled.sql.tmpl
+      - name: patient_id
+        description: "The patient's identifier as this caller may see it: CASE WHEN can_read_phi THEN mrn ELSE
+          research_id END. Join key only: never select or show it."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/event_level_access_controlled.sql.tmpl
+      - name: patient_id_type
+        description: "'mrn' when can_read_phi, else 'research_id': the namespace of patient_id on this row."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/event_level_access_controlled.sql.tmpl
+      - name: radiant_patient_id
+        description: Portal patient id (radiant_jdbc.public.patient.id), matched on organization_code and the MRN
+          with leading zeros stripped on both sides; NULL when the patient has no portal record. Not masked.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/event_level_access_controlled.sql.tmpl
+      - name: event_type
+        description: Type of diagnosis-related event, determined via surgery, imaging or clinical observation.
+          'Initial CNS Tumor' is the initial diagnosis; the treatment summary counts every type but 'Initial CNS
+          Tumor', 'Unavailable' and 'Not Reported' as a subsequent event.
+        examples:
+          - Initial CNS Tumor
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_treatment_summary_combined.sql
+      - name: event_date
+        description: Date of the event, date_add(dob, age_at_event_days). NULL without PHI access; dob minus one day
+          when age_at_event_days is -1.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/event_level_access_controlled.sql.tmpl; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: age_at_event_days
+        description: Age in days at the event, cast to INT (the minimum over the merged specimens of an aggregated
+          initial event). -1 means an unknown date.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_event_level_combined.sql
+      - name: metastasis
+        description: Whether metastatic disease was present at the event. On an aggregated initial event 'Yes' when
+          any merged record says so, else 'No'.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_event_level_combined.sql
+      - name: metastasis_location
+        description: Site(s) of the metastasis, semicolon-delimited when more than one. 'Not Applicable' on an
+          aggregated initial event without metastasis.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_event_level_combined.sql
+      - name: metastasis_location_other
+        description: Free-text site given when metastasis_location is 'Other'; semicolon-delimited, 'Not
+          Applicable' otherwise on an aggregated initial event.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_event_level_combined.sql
+      - name: cns_diagnosis_category
+        description: Broad diagnosis category at the time of the event.
+        examples:
+          - Medulloblastoma
+          - Atypical teratoid/rhabdoid tumor
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_event_level_combined.sql
+      - name: cns_integrated_diagnosis
+        description: WHO integrated (histologic plus molecular) diagnosis at the event. A CBTN '%NOS or NEC%' value
+          is replaced by an allowlisted OpenPedCan subtype of the event's biospecimen, and 'Medulloblastoma,
+          non-WNT/non-SHH' by 'Medulloblastoma, Group 3' or 'Group 4' only.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_event_level_combined.sql
+      - name: cns_integrated_diagnosis_source
+        description: "Which source supplied cns_integrated_diagnosis: 'CBTN' as recorded, or 'OpenPedCan' when the
+          CBTN value was upgraded from openpedcan_histologies_annotated. Provenance only; not masked."
+        examples:
+          - CBTN
+          - OpenPedCan
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/event_level_access_controlled.sql.tmpl; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_event_level_combined.sql
+      - name: tumor_locations
+        description: Anatomical site(s) of the tumor, semicolon-delimited; on an aggregated initial event the
+          distinct trimmed sites of the merged records, sorted.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_event_level_combined.sql
+      - name: tumor_location_other
+        description: Free-text site given when the coded tumor_locations does not cover it; 'Not Applicable'
+          otherwise.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_event_level_combined.sql
+      - name: can_read_phi
+        description: "TRUE when the caller may read this row's PHI: an org grant (auth.pii_grant, a can_read_pii
+          role at the row's organization_code) or a lab grant (auth.pii_lab_patient, a can_read_pii role at the
+          diagnosis lab of a portal case of radiant_patient_id). The caller is current_user(), the JWT sub."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/event_level_access_controlled.sql.tmpl; backend:internal/repository/starrocks/views/auth_pii_lab_patient.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/types/pcx_patient_query.go
+          - backend/scripts/seed/views/v_pcx_30_patient_list.sql.tmpl
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/pcx_tables/access_controlled_views/event_level_access_controlled.sql.tmpl

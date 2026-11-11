@@ -1,0 +1,72 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.cosmic_gene_panel
+name: cosmic_gene_panel
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per (gene, germline tumour type) of the COSMIC Cancer Gene Census. Rebuilt (INSERT OVERWRITE)
+    by radiant-import-cosmic-gene-set from the StarRocks table cosmic_gene_set, itself broker-loaded from the census
+    TSV (Cosmic_CancerGeneCensus_GRCh38.tsv.gz) when import_open_data gets cosmic_gene_set_filepath. Shared reference
+    table.
+
+    '
+  usage: 'Join on symbol. The portal exposes panel as the cosmic_gene_panel filter/aggregation; the MCP lists the
+    panels of a gene.
+
+    '
+  limitations: 'Only genes with at least one germline tumour type are present: census genes with somatic-only tumour
+    types are absent. Not an Iceberg source, so not tracked by open_data_release.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: cosmic_gene_panel
+  physicalName: cosmic_gene_panel
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: symbol
+    logicalType: string
+    physicalType: varchar(30)
+    description: HGNC gene symbol from the census GENE_SYMBOL column.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/cosmic_gene_set_load.sql; etl:dags/sql/open_data/cosmic_gene_panel_insert.sql
+    required: true
+  - name: panel
+    logicalType: string
+    physicalType: varchar(250)
+    description: One germline tumour type of the gene, one element of the census TUMOUR_TYPES_GERMLINE list (split
+      on commas, trimmed), as written by COSMIC.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/cosmic_gene_panel_insert.sql; etl:dags/sql/open_data/cosmic_gene_set_load.sql;
+        frontend:translations cosmic_gene_panel_tooltip
+    required: true
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`symbol`, `panel`)
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/queries/genes.py
+    - portal/backend/internal/types/gene_panels.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/cosmic_gene_panel_create_table.sql

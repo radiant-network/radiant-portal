@@ -1,0 +1,178 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.patient
+name: patient
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per patient of the tenant (proband or relative; a fetus is not a patient, see fetus). Rows of the
+    portal''s PostgreSQL table public.patient read through radiant_jdbc and filtered on tenant_code = the tenant, by the
+    template views/patient.sql.tmpl, which adds the can_read_pii column computed for the connected user. The batch
+    worker writes them from POST /{tenant}/patients/batch.'
+  usage: 'Key id (cases.proband_id, family.family_member_id, family_history.patient_id, fetus.mother_id,
+    sample.patient_id). Natural key (organization_code, tenant_code, submitter_patient_id), unique. Join the managing
+    organization on organization.code = organization_code AND organization.tenant_code = tenant_code, and sex /
+    life_status on their code. Reach a case''s members through family (case_id). Prefer id and codes in results; select
+    the identifying columns only when the user needs them.'
+  limitations: 'PHI masking (Ranger, tenant members only, admins excepted): when can_read_pii is false,
+    submitter_patient_id, first_name, last_name and jhn read ''***'' and date_of_birth is truncated to January 1st of
+    its year. Masking applies only to queries run as the user (portal reads through mysql-proxy, the MCP with the
+    caller''s JWT). can_read_pii runs two EXISTS lookups per row, so wide scans of this view are slower than of the other
+    views. first_name, last_name, jhn and date_of_birth are nullable. No json, jsonb or uuid column in public.patient.'
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: patient
+    physicalName: patient
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Portal patient id, primary key (identity). Independent of fetus.id, which can hold the same numbers.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql; backend:internal/repository/starrocks/cases.go'
+      - name: sex_code
+        logicalType: string
+        description: Sex of the patient, a sex.code (male, female, unknown).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/patient_batch.go; backend:scripts/init-sql/migrations/000001_init.up.sql'
+        relationships:
+          - type: foreignKey
+            to: sex.code
+        examples:
+          - female
+          - male
+          - unknown
+      - name: date_of_birth
+        logicalType: date
+        description: Date of birth. Required by the patient batch but nullable in the table. PHI, truncated to January
+          1st of the year when can_read_pii is false.
+        customProperties:
+          - property: postgresType
+            value: date
+          - property: descriptionSource
+            value: 'backend:internal/types/patient_batch.go; backend:internal/service/ranger_masking.go'
+      - name: life_status_code
+        logicalType: string
+        description: Life status, a life_status.code (alive, deceased, unknown).
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/patient_batch.go; backend:scripts/init-sql/migrations/000001_init.up.sql'
+        relationships:
+          - type: foreignKey
+            to: life_status.code
+        examples:
+          - alive
+          - deceased
+          - unknown
+      - name: submitter_patient_id
+        logicalType: string
+        description: The submitter's identifier of the patient at its organization (UI "MRN"), of the type in
+          submitter_patient_id_type; unique per (organization_code, tenant_code). PHI, '***' when can_read_pii is false.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000022_widen_tenant_unique_constraints.up.sql; backend:internal/types/patient.go
+              PatientMrnField; frontend:translations/common/en.json patient_exploration.columns.mrn; backend:internal/service/ranger_masking.go'
+      - name: submitter_patient_id_type
+        logicalType: string
+        description: Type of submitter_patient_id as submitted by the patient batch (free text, e.g. mrn). Not masked.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/patient_batch.go; backend:internal/repository/starrocks/cases.go SearchById'
+        examples:
+          - mrn
+      - name: first_name
+        logicalType: string
+        description: First name, optional. PHI, '***' when can_read_pii is false.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/patient_batch.go; backend:internal/service/ranger_masking.go'
+      - name: last_name
+        logicalType: string
+        description: Last name, optional. PHI, '***' when can_read_pii is false.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/patient_batch.go; backend:internal/service/ranger_masking.go'
+      - name: jhn
+        logicalType: string
+        description: Jurisdiction Health Number (UI "JHN"), optional (newborns have none yet); unique per tenant when not
+          empty. PHI, '***' when can_read_pii is false.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000010_patient_unique_constraints.up.sql; backend:scripts/init-sql/migrations/000022_widen_tenant_unique_constraints.up.sql;
+              backend:internal/service/ranger_masking.go'
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the patient; always the tenant of this database (the view filters on it).
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: 'backend:internal/repository/starrocks/views/patient.sql.tmpl'
+      - name: organization_code
+        logicalType: string
+        description: organization.code (same tenant) of the patient's managing organization (batch
+          patient_organization_code). A can_read_pii grant at it unmasks the patient; a fetus inherits it from its mother.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000009_init_auth_multi_tenancy.up.sql; backend:internal/repository/starrocks/views/patient.sql.tmpl;
+              backend:internal/types/fetus.go'
+        relationships:
+          - type: foreignKey
+            to: organization.code
+      - name: can_read_pii
+        description: 'Computed by the view for the connected user (current_user(), the JWT sub): true when the user holds
+          can_read_pii at the patient''s organization (auth.pii_grant, ''*'' grants expanded to every organization) or at
+          the diagnosis lab of a case the patient is in, as proband or family member (auth.pii_lab_patient). The Ranger
+          masks of the PHI columns branch on it.'
+        customProperties:
+          - property: descriptionSource
+            value: 'backend:internal/repository/starrocks/views/patient.sql.tmpl; backend:internal/repository/starrocks/views/auth_pii_grant.sql;
+              backend:internal/repository/starrocks/views/auth_pii_lab_patient.sql; backend:CLAUDE.md can_read_pii'
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/repository/starrocks/documents.go
+          - backend/internal/repository/starrocks/igv.go
+          - backend/internal/repository/starrocks/transcript_report.go
+          - backend/internal/repository/starrocks/variants.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

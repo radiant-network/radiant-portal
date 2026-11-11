@@ -1,0 +1,156 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.obs_string
+name: obs_string
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per free-text clinical observation of one subject (a patient or a fetus) in one case: a clinical
+    note, or a paraclinical exam with nothing to code (normal, abnormal without a value, or the free-text exam
+    ''other''). Rows of the portal''s PostgreSQL table public.obs_string read through the radiant_jdbc catalog and
+    filtered to the tenant (WHERE tenant_code = ''<tenant>''). Written by the portal worker from the observations_text
+    of each patient (or fetus) of a case batch; a case update replaces them.
+
+    '
+  usage: 'Always filter on observation_code, then on case_id. Clinical notes: observation_code = ''note'', ordered by
+    id. Exams: observation_code = ''exam'', join exam on exam_code (and tenant_code) for the label; coded exam values
+    are in obs_categorical. The subject is either patient_id or fetus_id (never both).
+
+    '
+  limitations: 'patient_id is NULL for a fetus''s observations (fetus_id set instead). Rows with observation_code =
+    ''condition'' were moved to cases.diagnosis_hypothesis by migration 000025; only rows whose case got no value were
+    left. value is free text: never parse it for coded data. The ETL reads the underlying PostgreSQL table directly,
+    not this view.
+
+    '
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: obs_string
+    physicalName: obs_string
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Internal observation id (identity, primary key); the portal orders a case's notes by it.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql obs_string_pkey; backend:internal/repository/starrocks/cases.go
+              retrieveCaseNotes
+      - name: case_id
+        logicalType: integer
+        description: Case the observation was reported in.
+        relationships:
+          - type: foreignKey
+            to: cases.id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000001_init.up.sql obs_string_case_id_fkey
+      - name: patient_id
+        logicalType: integer
+        description: Patient the observation is about; NULL when the subject is a fetus (exactly one of patient_id
+          and fetus_id is set, by a CHECK constraint).
+        relationships:
+          - type: foreignKey
+            to: patient.id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000021_add_fetus.up.sql obs_string_subject_xor
+      - name: observation_code
+        logicalType: string
+        description: Kind of observation, a code of the observation lookup ('note' or 'exam' in practice).
+        examples:
+          - note
+          - exam
+        relationships:
+          - type: foreignKey
+            to: observation.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/case_batch.go ObsCode*; backend:internal/repository/starrocks/cases.go retrieveCaseNotes
+              retrieveCaseExams
+      - name: value
+        logicalType: string
+        description: The free text of the observation (the note itself, or the exam result text, e.g. 'normal').
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:internal/types/case_batch.go ObservationTextBatch; backend:internal/repository/starrocks/cases.go
+      - name: tenant_code
+        logicalType: string
+        description: Tenant owning the row; always the view's tenant, since the view filters on it.
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql; backend:internal/repository/starrocks/starrocks_tenant.go
+      - name: exam_code
+        logicalType: string
+        description: Exam reported, for observation_code = 'exam' (references exam (code, tenant_code)); NULL
+          otherwise.
+        relationships:
+          - type: foreignKey
+            to: exam.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000017_add_exam_and_obs_exam_columns.up.sql obs_string_exam_fkey
+      - name: interpretation_code
+        logicalType: string
+        description: Interpretation of the exam, a code of obs_interpretation ('normal' or 'abnormal'); NULL for notes
+          and for the free-text exam 'other'.
+        examples:
+          - normal
+          - abnormal
+        relationships:
+          - type: foreignKey
+            to: obs_interpretation.code
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000017_add_exam_and_obs_exam_columns.up.sql; backend:internal/repository/starrocks/cases.go
+              retrieveCaseExams
+      - name: fetus_id
+        logicalType: integer
+        description: Fetus the observation is about, in a prenatal case; NULL when the subject is a patient.
+        relationships:
+          - type: foreignKey
+            to: fetus.id
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: backend:scripts/init-sql/migrations/000021_add_fetus.up.sql obs_string_subject_xor
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

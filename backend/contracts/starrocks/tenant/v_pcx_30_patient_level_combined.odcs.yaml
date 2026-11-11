@@ -1,0 +1,118 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_pcx_30_patient_level_combined
+name: v_pcx_30_patient_level_combined
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    PCX 3.0 vital status, one row per patient: the most recent known vital status and the age (and, with PHI
+    access, the date) it was recorded at. Grant-guarded read surface over
+    radiant_data_dev.v_pcx_30_patient_level_combined, which ranks the candidate vital-status records of four source
+    streams (int_pcx_30_vital_status_events): deceased outranks alive, then the largest day count wins. Reviewer
+    overrides accepted in pcx_30_field_provenance apply to the age and status.
+  usage: >-
+    Read it as the end user (the portal API and the MCP query StarRocks with the caller's JWT): every row is
+    already resolved for that caller. Join on (organization_code, patient_id_type, patient_id);
+    v_pcx_30_patient_key maps that key to patient_key. v_pcx_30_patient_list already carries vital_status and
+    age_at_vital_status_days, plus survival_days. Use age_at_vital_status_days, never vital_status_date.
+  limitations: >-
+    Column masking only, no row filtering: a caller with no grant sees every row, de-identified. A NULL
+    organization_code fails closed. The lab grant is not bounded by organization_code. radiant_patient_id is
+    projected unmasked. The template's CAVEAT that the other views implement the org grant only is stale: every
+    pcx_30 view now has both arms (access_controlled_view macro).
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_pcx_30_patient_level_combined
+    physicalName: v_pcx_30_patient_level_combined
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: organization_name
+        description: Name of the institution that contributed the patient's data (the pcx_30_organization_override
+          seed wins where it carries the patient). Shown to every caller.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_patient_level_combined.sql
+      - name: organization_code
+        description: Code of the contributing institution, pcx_30_organization_ref.code joined on the organization
+          name (the override seed wins). The vocabulary auth.pii_grant keys on; NULL fails closed to de-identified.
+        examples:
+          - CHOP
+          - SCH
+          - UCSF-BCH
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/patient_level_access_controlled.sql.tmpl; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: patient_id
+        description: "The patient's identifier as this caller may see it: CASE WHEN can_read_phi THEN mrn ELSE
+          research_id END. Join key only: never select or show it."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/patient_level_access_controlled.sql.tmpl
+      - name: patient_id_type
+        description: "'mrn' when can_read_phi, else 'research_id': the namespace of patient_id on this row."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/patient_level_access_controlled.sql.tmpl
+      - name: radiant_patient_id
+        description: Portal patient id (radiant_jdbc.public.patient.id), matched on organization_code and the MRN
+          with leading zeros stripped on both sides; NULL when the patient has no portal record. Not masked.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/patient_level_access_controlled.sql.tmpl
+      - name: vital_status_date
+        description: Date of the most recent known vital status, date_add(dob, age_at_vital_status_days). NULL
+          without PHI access, and NULL (not dob minus one day) when the age is unknown.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/patient_level_access_controlled.sql.tmpl; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_patient_level_combined.sql
+      - name: age_at_vital_status_days
+        description: Age in days at the most recent known vital status. NULL, never -1, when the date is unknown
+          (an undated deceased record still wins over alive).
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/_pcx_30__models.yml
+      - name: vital_status
+        description: "Most recent known vital status: deceased outranks alive, the largest day count breaks ties
+          within a tier. 'deceased', 'alive', or a raw lowercased clinical_status passed through by one stream."
+        examples:
+          - alive
+          - deceased
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/_pcx_30__models.yml
+      - name: can_read_phi
+        description: "TRUE when the caller may read this row's PHI: an org grant (auth.pii_grant, a can_read_pii
+          role at the row's organization_code) or a lab grant (auth.pii_lab_patient, a can_read_pii role at the
+          diagnosis lab of a portal case of radiant_patient_id). The caller is current_user(), the JWT sub."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/patient_level_access_controlled.sql.tmpl; backend:internal/repository/starrocks/views/auth_pii_lab_patient.sql
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/types/pcx_patient_query.go
+          - backend/scripts/seed/views/v_pcx_30_patient_list.sql.tmpl
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/pcx_tables/access_controlled_views/patient_level_access_controlled.sql.tmpl

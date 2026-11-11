@@ -1,0 +1,172 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.v_pcx_30_demographics_combined
+name: v_pcx_30_demographics_combined
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: >-
+    PCX 3.0 demographics, one row per patient of the release cohort and cohort diagnosis (a patient carrying both
+    cohort diagnoses appears twice): names, birth date and year, race, ethnicity, gender, postal code and the two
+    cohort labels. Grant-guarded read surface over radiant_data_dev.v_pcx_30_demographics_combined, which holds
+    the identified and de-identified value of each field side by side (CBTN enrollment stg_cbtn_enrollment_final,
+    the FHIR patient resolved through the site MRN, CBTN participants). Each identified / de-identified pair is
+    collapsed into one column chosen by can_read_phi, so a row never shows both. Base of every Radiant PCX view
+    (v_pcx_30_patient_key, v_pcx_30_patient_list, v_pcx_30_hin_exchange, tumor board and processing report views).
+  usage: >-
+    Read it as the end user (the portal API and the MCP query StarRocks with the caller's JWT): every row is
+    already resolved for that caller. Join the other PCX views on (organization_code, patient_id_type,
+    patient_id), the key every PCX view shares for a given caller; v_pcx_30_patient_key maps it to patient_key.
+    Select codes, birth_year and cohorts; never names, patient_id (an MRN for PHI callers) or birth_date unless
+    the caller is meant to see them. Count patients with COUNT(DISTINCT ...) on the key, not COUNT(*).
+  limitations: >-
+    Column masking only, no row filtering: a caller with no grant sees every row of every institution,
+    de-identified. A NULL organization_code fails closed (de-identified even for a fully granted caller). The lab
+    grant is not bounded by organization_code: a lab-granted caller reads PHI for that lab's patients at any
+    enrolling institution. radiant_patient_id is projected unmasked and resolves to the portal patient (name,
+    birth date, MRN); access to the portal catalog is the compensating control. Not unique per patient (the cohort
+    join duplicates a patient with both cohort diagnoses).
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: v_pcx_30_demographics_combined
+    physicalName: v_pcx_30_demographics_combined
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: organization_name
+        description: Name of the institution that contributed the patient's data (enrollment organization_name,
+          replaced by the pcx_30_organization_override seed where it carries the patient). Shown to every caller.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_demographics_combined.sql
+      - name: organization_code
+        description: Code of the contributing institution, pcx_30_organization_ref.code joined on the organization
+          name (the override seed wins). The vocabulary auth.pii_grant keys on; NULL when the name does not
+          resolve, and the row then always comes out de-identified.
+        examples:
+          - CHOP
+          - SCH
+          - UCSF-BCH
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/demographics_access_controlled.sql.tmpl; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: patient_id
+        description: "The patient's identifier as this caller may see it: CASE WHEN can_read_phi THEN mrn ELSE
+          research_id END. Namespaces mix across rows when the caller holds grants on some organizations only;
+          patient_id_type tells which. Join key only: never select or show it."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/demographics_access_controlled.sql.tmpl; mcp:radiant_mcp/schema_catalog.py
+      - name: patient_id_type
+        description: "'mrn' when can_read_phi, else 'research_id': the namespace of patient_id on this row."
+        examples:
+          - mrn
+          - research_id
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/demographics_access_controlled.sql.tmpl
+      - name: radiant_patient_id
+        description: Portal patient id (radiant_jdbc.public.patient.id of the same tenant), matched on
+          organization_code and the MRN with leading zeros stripped on both sides (the portal zero-pads, PCX does
+          not). NULL when the patient has no portal record. Deliberately not masked (decision of 2026-09-30).
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/demographics_access_controlled.sql.tmpl; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: given_name
+        description: First name. With PHI access the real one (FHIR patient, else enrollment first_name); without,
+          the placeholder concat(research_id, '_given_name').
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/demographics_access_controlled.sql.tmpl; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_demographics_combined.sql
+      - name: family_name
+        description: Last name. With PHI access the real one (FHIR patient, else enrollment last_name); without,
+          the placeholder concat(research_id, '_family_name').
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/demographics_access_controlled.sql.tmpl; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_demographics_combined.sql
+      - name: birth_date
+        description: Full date of birth (FHIR birth_date, else enrollment dob). NULL without PHI access.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/demographics_access_controlled.sql.tmpl; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_demographics_combined.sql
+      - name: birth_year
+        description: Year of birth (enrollment dob_year). Shown to every caller.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_demographics_combined.sql
+      - name: race
+        description: Race as reported by the institution (FHIR patient, else CBTN participants).
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_demographics_combined.sql
+      - name: ethnicity
+        description: Ethnicity as reported by the institution (FHIR patient, else CBTN participants).
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_demographics_combined.sql
+      - name: gender
+        description: Administrative sex, lowercased (FHIR gender, else CBTN participants legal_sex).
+          v_pcx_30_patient_list turns it into the API code (spaces to underscores).
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_demographics_combined.sql; backend:scripts/seed/views/v_pcx_30_patient_list.sql.tmpl
+      - name: address_postal_code
+        description: Residential ZIP code. With PHI access the real one ('XXXXX' when missing); without, ZIP3 +
+          'XX', fully masked to 'XXXXX' when missing or in one of the 17 HIPAA low-population ZIP3 prefixes.
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/demographics_access_controlled.sql.tmpl; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_demographics_combined.sql
+      - name: diagnosis_type_cohort
+        description: Diagnosis cohort of this row (cns_diagnosis_category of the release cohort definition); a
+          patient in both cohorts has one row per cohort.
+        examples:
+          - Medulloblastoma
+          - Atypical teratoid/rhabdoid tumor
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_demographics_combined.sql; backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/_pcx_30__models.yml
+      - name: data_type_cohort
+        description: "'radiant' when the patient's FHIR identifier resolved (a RADIANT patient), else
+          'cbtn-non-radiant' (CBTN patient not in RADIANT)."
+        examples:
+          - radiant
+          - cbtn-non-radiant
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/starrocks-dbt/starrocks_radiant/models/pcx_30/combined/v_pcx_30_demographics_combined.sql; backend:scripts/pcx_tables/view_data_dictionary_access_policy.csv
+      - name: can_read_phi
+        description: "TRUE when the caller may read this row's PHI: an org grant (auth.pii_grant, a can_read_pii
+          role at the row's organization_code) or a lab grant (auth.pii_lab_patient, a can_read_pii role at the
+          diagnosis lab of a portal case of radiant_patient_id). The caller is current_user(), the JWT sub."
+        customProperties:
+          - property: descriptionSource
+            value: backend:scripts/pcx_tables/access_controlled_views/demographics_access_controlled.sql.tmpl; backend:internal/repository/starrocks/views/auth_pii_grant.sql; backend:internal/repository/starrocks/views/auth_pii_lab_patient.sql; backend:internal/repository/starrocks/starrocks_user.go
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/pcx_patients.go
+          - backend/internal/types/pcx_patient_query.go
+          - backend/scripts/seed/views/v_pcx_30_patient_key.sql.tmpl
+          - backend/scripts/seed/views/v_pcx_30_patient_list.sql.tmpl
+          - backend/scripts/seed/views/v_pcx_30_hin_exchange.sql.tmpl
+          - backend/scripts/seed/views/v_pcx_30_tumor_board_session.sql.tmpl
+          - backend/scripts/seed/views/v_pcx_30_tumor_board_deck.sql.tmpl
+          - backend/scripts/seed/views/v_pcx_30_processing_report.sql.tmpl
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:scripts/pcx_tables/access_controlled_views/demographics_access_controlled.sql.tmpl

@@ -1,0 +1,170 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.cytoband
+name: cytoband
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per chromosome band (cytoband) of the GRCh38 ideogram, with its coordinates and Giemsa stain.
+    Loaded by the ETL open-data import (task load_cytoband, truncate then StarRocks broker load) only when the run
+    is given a cytoband_filepath TSV; not an OpenDataLake/Iceberg source. Shared reference table.
+
+    '
+  usage: 'The ETL overlaps it with CNV occurrences (same chromosome, c.start <= cnv.end AND c.end >= cnv.start)
+    to fill the cytoband array of germline/somatic CNV occurrences. The CNV profile feature reads it for the ideogram
+    track.
+
+    '
+  limitations: 'The table is truncated then reloaded from the file on each load. Coordinates are taken as-is from
+    the supplied file; with the UCSC cytoBand layout the start is 0-based. A refresh is not tracked by open_data_release
+    and does not trigger a CNV re-annotation.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: cytoband
+  physicalName: cytoband
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: chromosome
+    logicalType: string
+    physicalType: CHAR(2)
+    description: Chromosome without the chr prefix (1-22, X, Y, M); rows of other contigs in the file are dropped
+      at load.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/cytoband_load.sql
+    required: true
+    enum:
+    - value: '1'
+    - value: '2'
+    - value: '3'
+    - value: '4'
+    - value: '5'
+    - value: '6'
+    - value: '7'
+    - value: '8'
+    - value: '9'
+    - value: '10'
+    - value: '11'
+    - value: '12'
+    - value: '13'
+    - value: '14'
+    - value: '15'
+    - value: '16'
+    - value: '17'
+    - value: '18'
+    - value: '19'
+    - value: '20'
+    - value: '21'
+    - value: '22'
+    - value: X
+    - value: Y
+    - value: M
+  - name: cytoband
+    logicalType: string
+    physicalType: VARCHAR(20)
+    description: Band name as in the file's 4th column, without the chromosome (e.g. p36.33).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/cytoband_load.sql; upstream:ucsc_cytoband
+    required: true
+  - name: start
+    logicalType: integer
+    physicalType: BIGINT
+    description: Start position of the band, from the file's 2nd column (0-based in the UCSC cytoBand layout).
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/cytoband_load.sql; upstream:ucsc_cytoband
+    required: true
+  - name: end
+    logicalType: integer
+    physicalType: BIGINT
+    description: End position of the band, from the file's 3rd column.
+    customProperties:
+    - property: unit
+      value: bp
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/cytoband_load.sql; upstream:ucsc_cytoband
+    required: true
+  - name: gie_stain
+    logicalType: string
+    physicalType: VARCHAR(20)
+    description: Giemsa stain of the band from the file's 5th column (UCSC values gneg, gpos25/50/75/100, acen for
+      centromeres, gvar, stalk).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/cytoband_load.sql; upstream:ucsc_cytoband
+  quality:
+  - name: cytoband__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: cytoband__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except chromosome, cytoband, end, start).
+    query: SELECT (CASE WHEN COUNT(gie_stain) = 0 THEN 1 ELSE 0 END) FROM cytoband
+    mustBe: 0
+  - name: cytoband__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value.
+    query: SELECT (CASE WHEN COUNT(DISTINCT chromosome) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT cytoband)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT start) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      end) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT gie_stain) <= 1 THEN 1 ELSE 0 END) FROM cytoband
+    mustBe: 0
+  - name: cytoband__should_be_unique__chromosome_cytoband
+    metric: duplicateValues
+    arguments:
+      properties:
+      - chromosome
+      - cytoband
+    mustBe: 0
+    dimension: uniqueness
+    description: (chromosome, cytoband) is unique.
+  - name: cytoband__validate_start_end_order
+    type: sql
+    description: 'Genomic coordinate sanity for the cytoband reference: - start must not exceed end (band span).'
+    query: SELECT COUNT(*) FROM (select chromosome, cytoband, start, `end` from radiant.cytoband where start > `end`)
+      failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/cytoband__validate_start_end_order.sql
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`chromosome`, `cytoband`)
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/schema_catalog.py
+    - mcp/radiant_mcp/tools/occurrences.py
+    - portal/backend/docs/docs.go
+    - portal/backend/internal/repository/starrocks/cnv_occurrences.go
+    - portal/backend/internal/types/cnv_gene_overlap.go
+    - portal/backend/internal/types/germline_cnv_occurrence.go
+    - portal/backend/internal/types/somatic_cnv_occurrence.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/cytoband_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/cytoband.yml

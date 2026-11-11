@@ -1,0 +1,124 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.shared.orphanet_gene_panel
+name: orphanet_gene_panel
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per gene-disorder association of Orphadata product6, with the disorder''s inheritance from product9_ages.
+    Fully overwritten by the ETL open-data import (group orphanet_gene_panel) from the OpenDataLake table orphanet_v1
+    or the legacy Radiant Iceberg table orphanet_gene_set. Shared reference table.
+
+    '
+  usage: 'Filter occurrences on predictors with `LEFT SEMI JOIN radiant.snv__consequence_filter_partitioned cf ON
+    cf.locus_id = o.locus_id AND cf.part = o.part AND (<condition>)`. Join on symbol. The portal exposes panel (orphanet_gene_panel
+    filter) and inheritance_code in the variant conditions tab; the MCP lists a gene''s disorders.
+
+    '
+  limitations: 'disorder_id is the internal id attribute of the product6 Disorder element, not the ORPHAcode, yet
+    the portal builds orpha.net/en/disease/detail/{disorder_id} links from it. product6 is exploded per gene locus,
+    so a (symbol, panel) can repeat. In the inheritance mapping, ''X-linked recessive'' maps to XL (the XLR branch
+    is unreachable).
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: radiant
+schema:
+- name: orphanet_gene_panel
+  physicalName: orphanet_gene_panel
+  physicalType: table
+  tags:
+  - shared
+  properties:
+  - name: symbol
+    logicalType: string
+    physicalType: varchar(30)
+    description: Gene symbol of the association (product6 gene symbol, source gene_symbol).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/orphanet_gene_panel_insert.sql; upstream:orphanet (radiant-open-datalake release-notes
+        orphanet/v1.md)
+    required: true
+  - name: panel
+    logicalType: string
+    physicalType: varchar(250)
+    description: Orphanet disorder name (product6 Disorder/Name).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/orphanet_gene_panel_insert.sql; upstream:orphanet
+    required: true
+  - name: disorder_id
+    logicalType: integer
+    physicalType: bigint
+    description: Internal Orphanet id of the disorder (product6 Disorder id attribute), not the ORPHAcode.
+    customProperties:
+    - property: descriptionSource
+      value: upstream:orphanet (radiant-open-datalake normalized/orphanet/Orphanet_v1.scala); portal:internal/repository/starrocks/gene_panels.go;
+        frontend:apps/variant/src/entity/evidence/table-settings.tsx
+  - name: type_of_inheritance
+    logicalType: array
+    physicalType: array<varchar(200)>
+    description: Inheritance modes of the disorder as named by Orphanet product9_ages (e.g. Autosomal recessive);
+      NULL when the disorder has no product9 entry.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/orphanet_gene_panel_insert.sql; upstream:orphanet (radiant-open-datalake release-notes
+        orphanet/v1.md)
+  - name: inheritance_code
+    logicalType: array
+    physicalType: array<varchar(3)>
+    description: 'Short codes mapped from type_of_inheritance by the ETL: AR, AD, XL (X-linked recessive), XLD,
+      Mi, Mu, OG, SD, YL; unmapped values (e.g. Unknown, Not applicable) are dropped.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/open_data/orphanet_gene_panel_insert.sql
+  quality:
+  - name: orphanet_gene_panel__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: orphanet_gene_panel__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except panel, symbol).
+    query: SELECT (CASE WHEN COUNT(disorder_id) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(type_of_inheritance) =
+      0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(inheritance_code) = 0 THEN 1 ELSE 0 END) FROM orphanet_gene_panel
+    mustBe: 0
+  - name: orphanet_gene_panel__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value.
+    query: SELECT (CASE WHEN COUNT(DISTINCT symbol) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT panel) <=
+      1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT disorder_id) <= 1 THEN 1 ELSE 0 END) FROM orphanet_gene_panel
+    mustBe: 0
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`symbol`, `panel`)
+  - property: mcpKeys
+    value: symbol, panel
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/queries/genes.py
+    - mcp/radiant_mcp/schema_catalog.py
+    - portal/backend/internal/types/gene_panels.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/open_data/init/orphanet_gene_panel_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/orphanet_gene_panel.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

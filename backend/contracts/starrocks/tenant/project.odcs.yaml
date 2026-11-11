@@ -1,0 +1,94 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.project
+name: project
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per project of the tenant, the program a case is submitted under (UI "Project"). Rows of the
+    portal''s PostgreSQL table public.project read through radiant_jdbc and filtered on tenant_code = the tenant. Seeded
+    per tenant by SQL (e.g. backend/scripts/init-sql/qlin/project.sql for qlin).'
+  usage: 'Key id: join cases on cases.project_id = project.id. code is unique in the tenant (case-insensitively) and is
+    what batches carry: a case is identified across batches by (project code, submitter_case_id). The portal filters
+    and sorts the case list on code and name.'
+  limitations: 'description is optional (NULL; the qlin seeds leave it unset). The FK making a case''s project belong to
+    the case''s tenant is NOT VALID (migration 000037): an older case may reference a project this view does not
+    return. No json, jsonb or uuid column in public.project.'
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: project
+    physicalName: project
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Project id, primary key (identity); the cases.project_id.
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql'
+      - name: code
+        logicalType: string
+        description: Project code, unique in the tenant case-insensitively and stored as entered; the project_code of the
+          case batches.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000014_project_tenant_unique_constraint.up.sql; backend:scripts/init-sql/migrations/000034_case_insensitive_code_unique_indexes.up.sql;
+              backend:internal/types/case_batch.go'
+        examples:
+          - QLIN
+          - PRAGMatIQ
+          - Care4Rare-Expand
+      - name: name
+        logicalType: string
+        description: Display name of the project.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/project.go; backend:scripts/init-sql/qlin/project.sql'
+      - name: description
+        logicalType: string
+        description: Optional free-text description of the project.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000001_init.up.sql'
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the project; always the tenant of this database (the view filters on it).
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000013_tenant_scope_clinical_tables.up.sql'
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/repository/starrocks/documents.go
+          - backend/internal/repository/starrocks/variants.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go

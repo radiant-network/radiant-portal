@@ -4,10 +4,13 @@ stack: 'data'
 
 fileGroups:
   sources: ['radiant/**/*', 'tests/**/*', 'pyproject.toml', 'pytest.ini', '.ruff.toml', 'requirements*.txt']
-  # StarRocks schema the ETL publishes: read by the backend and the MCP.
+  # What the ETL publishes to the backend and the MCP: one contract per StarRocks table they read.
+  contracts: ['contracts/starrocks/**/*']
+  # What the contracts are checked against.
   schema:
-    - 'radiant/dags/sql/**/*'
-    - 'radiant/data_qa/macros/**/*'
+    - 'radiant/dags/sql/*/init/*'
+    - 'radiant/data_qa/sources/*'
+    - 'radiant/data_qa/macros/dictionaries.sql'
     - 'radiant/tasks/data/radiant_tables.py'
 
 tasks:
@@ -25,6 +28,16 @@ tasks:
     command: '.venv/bin/pytest -q tests/unit'
     inputs: ['@group(sources)']
     deps: ['venv']
+
+  # ---- Data contracts (contracts/): the DDL and the data QA must match them, and a change must not break readers.
+  contracts-check:
+    command: 'uv run -q --no-project --with pyyaml==6.0.2 python contracts/check.py'
+    inputs: ['@group(contracts)', '@group(schema)', 'contracts/check.py']
+  contracts-breaking:
+    command: 'uv run -q --no-project --with pyyaml==6.0.2 python $workspaceRoot/scripts/contracts-breaking.py contracts'
+    inputs: ['@group(contracts)', '/scripts/contracts-breaking.py']
+    options:
+      cache: false  # compares with $CONTRACTS_BASE (default main), not an input
 
   # ---- Docker images: each one only copies part of the ETL.
   docker-dbt:

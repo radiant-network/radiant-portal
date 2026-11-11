@@ -1,0 +1,935 @@
+# Owned by the ETL: the source of truth for this table. Change it in the same PR as the DDL (moon run etl:contracts-check).
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.germline__snv__occurrence
+name: germline__snv__occurrence
+version: 0.1.0
+status: draft
+domain: genomics
+dataProduct: radiant-starrocks
+description:
+  purpose: 'One row per SNV/indel carried by one sample (seq_id) in one germline annotation task, i.e. one record
+    of the task''s joint-called, multi-allelic-split family VCF where the sample has at least one ALT call. For
+    progenies of a family it also carries the parents'' genotypes, parental origin and transmission mode; for the
+    proband the best Exomiser result and the compound-het summary. Written by the ETL import_part (VCF -> Iceberg
+    germline_snv_occurrence -> StarRocks). Main table of the portal germline variant list and of the MCP.
+
+    '
+  usage: 'Every query on a table partitioned by `part` carries `<alias>.part = <part>` as an equality, next to seq_id
+    / task_id. Take `part` and `variant_part` from get_case_context''s occurrence_keys, from the key of the right
+    data type; never compute them. Without it StarRocks scans every partition of the tenant and the query can time
+    out. Join the catalog with `v.locus_id = o.locus_id AND v.part = <variant_part>`. Per-tenant table, partitioned
+    on part: always filter on part plus seq_id and task_id (from get_case_context occurrence keys). Key (part, seq_id,
+    task_id, locus_id), unique. Join snv__variant_partitioned on locus_id and part = variant_part (or snv__variant
+    on locus_id) for annotations. A trio needs no join to the parents'' rows: father_* / mother_* are already on
+    the progeny''s row. Compound-het partners are in germline__snv__comphet.
+
+    '
+  limitations: 'Only carriers are stored (no WT rows; calls downgraded to UNK are dropped too). Parental and inheritance
+    columns are NULL for parents, solo cases and non-progeny members. Several measures store NULL instead of 0 (dp,
+    gq, ad_ref, ad_alt, ad_total, ad_ratio). Columns added by RAD-88 (comphet) and RAD-94 (slivar sources) are NULL
+    on occurrences imported before them until the case is re-imported. Several info_* fields are never filled by
+    the current pipeline (BaseQRankSum, HaplotypeScore, DS, R2_5P_bias absent from its VCF header; InbreedingCoeff
+    needs 10+ samples); info_vqslod / info_culprit exist for VQSR (WGS) only.
+
+    '
+team:
+- username: radiant-etl
+  role: producer
+- username: radiant-portal
+  role: consumer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: germline__snv__occurrence
+  physicalName: germline__snv__occurrence
+  physicalType: table
+  tags:
+  - per-tenant
+  properties:
+  - name: part
+    logicalType: integer
+    physicalType: INT
+    description: ETL partition of the sequencing experiment. A patient, its case and family stay in one part per
+      sequencing strategy (WGS or WXS); every table of the same part is loaded and rebuilt together.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/starrocks/partition.py; etl:dags/sql/radiant/germline_snv_occurrence_insert_partition_delta.sql
+    required: true
+    partitioned: true
+  - name: seq_id
+    logicalType: integer
+    physicalType: INT
+    description: Sequencing experiment of the sample (one VCF sample column, matched by aliquot through the task's
+      pedigree).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; mcp:schema_catalog.py
+    required: true
+  - name: task_id
+    logicalType: integer
+    physicalType: INT
+    description: Germline annotation task (radiant_germline_annotation) whose family VCF the occurrence comes from;
+      a sequencing can appear in several tasks (e.g. a duo then a trio analysis).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/process.py; etl:dags/sql/radiant/migrations/RAD-116_exomiser_task_id.sql
+    required: true
+  - name: locus_id
+    logicalType: integer
+    physicalType: bigint(20)
+    description: Variant id (snv__variant.locus_id), from GET_VARIANT_ID on chromosome/start/ref/alt or the variant
+      lookup, joined on the locus hash of the record (chromosome without 'chr', 1-based POS, REF, first ALT).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_occurrence_insert_partition_delta.sql; etl:dags/sql/radiant/snv_tmp_variant_insert.sql;
+        etl:tasks/vcf/snv/common.py
+    required: true
+    relationships:
+    - to: snv__variant.locus_id
+    quality:
+    - name: germline_snv_occurrence__relationships__locus_id__snv_variant
+      type: sql
+      dimension: consistency
+      description: Every locus_id exists in snv__variant.locus_id.
+      query: SELECT COUNT(*) FROM germline__snv__occurrence a LEFT JOIN snv__variant b ON a.locus_id = b.locus_id
+        WHERE a.locus_id IS NOT NULL AND b.locus_id IS NULL
+      mustBe: 0
+  - name: ad_ratio
+    logicalType: number
+    physicalType: FLOAT
+    description: Fraction of reads supporting ALT, ad_alt / (ad_ref + ad_alt) from FORMAT/AD (cyvcf2 gt_alt_freqs).
+      NULL when 0 or unknown.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; frontend:translations/common/en.json ad_ratio_tooltip
+  - name: gq
+    logicalType: integer
+    physicalType: INT
+    description: Genotype quality of the sample, FORMAT/GQ. A GQ of 0 or a missing GQ is stored as NULL. The portal
+      frequencies count only occurrences with GQ >= 20.
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; frontend:translations/common/en.json genotype_quality_tooltip
+  - name: dp
+    logicalType: integer
+    physicalType: INT
+    description: Read depth of the sample, FORMAT/DP (may differ from ad_total, which sums AD). NULL when 0 or absent.
+    customProperties:
+    - property: unit
+      value: reads
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: ad_total
+    logicalType: integer
+    physicalType: INT
+    description: Total allelic depth ad_ref + ad_alt from FORMAT/AD (cyvcf2 gt_depths). NULL when 0 or AD is missing.
+    customProperties:
+    - property: unit
+      value: reads
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; frontend:translations/common/en.json facets ad_total
+  - name: ad_ref
+    logicalType: integer
+    physicalType: INT
+    description: Reads supporting the reference allele, first value of FORMAT/AD. NULL when 0 or missing.
+    customProperties:
+    - property: unit
+      value: reads
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: ad_alt
+    logicalType: integer
+    physicalType: INT
+    description: Reads supporting the alternate allele, second value of FORMAT/AD (records are bi-allelic after
+      the pipeline split). NULL when 0 or missing.
+    customProperties:
+    - property: unit
+      value: reads
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; bioinfo:snv-post-processing/modules/local/split_multiallelics/meta.yml
+  - name: zygosity
+    logicalType: string
+    physicalType: CHAR(3)
+    description: 'Genotype of the sample from FORMAT/GT: HET (0/1), HOM (1/1) or HEM (a single haploid ALT call).
+      Only carriers are loaded, so WT and UNK do not occur (a HET/HOM call with fewer than 3 ALT reads is downgraded
+      to UNK and dropped).'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; etl:data_qa/tests/germline_snv_occurrence__validate_no_wt_zygosity.sql;
+        frontend:translations/common/en.json zygosity
+    enum:
+    - value: HET
+      description: One reference and one alternate allele (0/1).
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/GENO_0000135
+        description: GENO:0000135 (exact match)
+    - value: HOM
+      description: Two alternate alleles (1/1).
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/GENO_0000136
+        description: GENO:0000136 (exact match)
+    - value: HEM
+      description: A single haploid alternate call.
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/GENO_0000134
+        description: GENO:0000134 (exact match)
+    - value: WT
+      description: Two reference alleles (0/0). Never stored for the sample itself (only carriers are loaded); possible
+        for a parent.
+    - value: UNK
+      description: No call, or too few supporting reads.
+  - name: calls
+    logicalType: array
+    physicalType: ARRAY<INT>
+    description: Allele indexes of the sample's GT, without the phase flag (e.g. [0,1], [1,1], [1] for a haploid
+      call; -1 = missing allele).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; frontend:translations/common/en.json headers calls
+  - name: quality
+    logicalType: number
+    physicalType: FLOAT
+    description: Site QUAL of the VCF record, truncated to an integer by the ETL. Same value for every sample of
+      the record.
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: filter
+    logicalType: string
+    physicalType: VARCHAR(255)
+    description: VCF FILTER of the record, 'PASS' when the record passed (or had no filter); otherwise the failed
+      filter names (VQSR tranche on WGS, hard-filter names on WES). Same for every sample of the record.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; bioinfo:snv-post-processing/docs/usage.md; mcp:schema_catalog.py
+  - name: info_baseq_rank_sum
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/BaseQRankSum, GATK rank-sum test of ALT vs REF base qualities. Absent from the current pipeline's
+      VCF header, so NULL in practice.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; etl:data_qa/sources/germline_snv_occurrence.yml; upstream:gatk
+  - name: info_excess_het
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/ExcessHet, GATK Phred-scaled p-value for excess heterozygosity across the joint-called samples.
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; upstream:gatk
+  - name: info_fs
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/FS, GATK Fisher strand bias (Phred-scaled p-value); higher means more strand bias.
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; upstream:gatk
+  - name: info_ds
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: INFO/DS flag, true when reads were downsampled at the site (GATK). Absent from the current pipeline's
+      VCF header, so NULL in practice.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; etl:data_qa/sources/germline_snv_occurrence.yml; upstream:gatk
+  - name: info_fraction_informative_reads
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/FractionInformativeReads, fraction of the site's reads that are informative for the genotype
+      likelihoods (GATK/DRAGEN joint genotyping).
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; upstream:gatk
+  - name: info_inbreed_coeff
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/InbreedingCoeff (or InbreedCoeff), GATK inbreeding coefficient across samples. GATK needs
+      10+ samples, so NULL on family VCFs.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; etl:tasks/vcf/vcf_utils.py; etl:data_qa/sources/germline_snv_occurrence.yml
+  - name: info_mleac
+    logicalType: integer
+    physicalType: INT
+    description: INFO/MLEAC, GATK maximum-likelihood expected allele count of ALT across the joint-called samples.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; upstream:gatk
+  - name: info_mleaf
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/MLEAF, GATK maximum-likelihood expected ALT allele frequency across the joint-called samples.
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; upstream:gatk
+  - name: info_mq
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/MQ, root mean square mapping quality of the reads at the site.
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; upstream:gatk
+  - name: info_m_qrank_sum
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/MQRankSum, GATK rank-sum test of ALT vs REF read mapping qualities.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; upstream:gatk
+  - name: info_qd
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/QD, variant confidence (QUAL) normalized by the depth of non-reference samples (GATK quality
+      by depth).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; mcp:schema_catalog.py; frontend:translations/common/en.json
+        info_qd
+  - name: info_r2_5p_bias
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/R2_5P_bias, DRAGEN read-2 5-prime bias score. Absent from the current pipeline's VCF header,
+      so NULL in practice.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; etl:data_qa/sources/germline_snv_occurrence.yml
+  - name: info_read_pos_rank_sum
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/ReadPosRankSum, GATK rank-sum test of the position of the ALT allele within reads vs REF.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; upstream:gatk
+  - name: info_sor
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/SOR, GATK symmetric odds ratio strand bias test; higher means more strand bias.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; upstream:gatk
+  - name: info_vqslod
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/VQSLOD, GATK VQSR log-odds of being a true variant; set on WGS (VQSR) only, NULL on WES (hard
+      filters).
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; bioinfo:snv-post-processing/docs/usage.md; upstream:gatk
+  - name: info_culprit
+    logicalType: string
+    physicalType: VARCHAR(255)
+    description: INFO/culprit, the annotation that contributed most to a poor VQSR score; WGS (VQSR) only.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; bioinfo:snv-post-processing/docs/usage.md; upstream:gatk
+  - name: info_dp
+    logicalType: integer
+    physicalType: INT
+    description: INFO/DP, site-level read depth summed over all samples of the record (not the sample's depth, see
+      dp).
+    customProperties:
+    - property: unit
+      value: reads
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; upstream:gatk
+  - name: info_haplotype_score
+    logicalType: number
+    physicalType: FLOAT
+    description: INFO/HaplotypeScore, legacy GATK consistency score of the site with at most two haplotypes. Absent
+      from the current pipeline's VCF header, so NULL in practice.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; etl:data_qa/sources/germline_snv_occurrence.yml
+  - name: phased
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: True when the sample's GT is phased ('|' separator), from cyvcf2 gt_phases.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+    required: true
+  - name: parental_origin
+    logicalType: string
+    physicalType: VARCHAR(25)
+    description: 'Parent the ALT allele comes from, for a progeny of a family: DENOVO, MOTHER, FATHER, BOTH, AMBIGUOUS,
+      POSSIBLE_DENOVO, POSSIBLE_MOTHER, POSSIBLE_FATHER or UNKNOWN. From the slivar po_* tags or the ETL genotype
+      lookup (see parental_origin_source). NULL for parents and solo cases, and with slivar when no po_* tag lists
+      the sample (non-trio families).'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; etl:tasks/vcf/snv/germline/inheritance.py; bioinfo:snv-post-processing/docs/usage.md;
+        hub:docs/features/RAD-93-slivar-inheritance.md
+  - name: father_dp
+    logicalType: integer
+    physicalType: INT
+    description: Father's FORMAT/DP at this locus, copied on the progeny's row (NULL when 0, when the father is
+      not sequenced, or on non-progeny rows).
+    customProperties:
+    - property: unit
+      value: reads
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: father_gq
+    logicalType: integer
+    physicalType: INT
+    description: Father's FORMAT/GQ at this locus, copied on the progeny's row (NULL when 0 or no father).
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: father_ad_ref
+    logicalType: integer
+    physicalType: INT
+    description: Father's REF read count (FORMAT/AD), copied on the progeny's row (NULL when 0 or no father).
+    customProperties:
+    - property: unit
+      value: reads
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: father_ad_alt
+    logicalType: integer
+    physicalType: INT
+    description: Father's ALT read count (FORMAT/AD), copied on the progeny's row (NULL when 0 or no father).
+    customProperties:
+    - property: unit
+      value: reads
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: father_ad_total
+    logicalType: integer
+    physicalType: INT
+    description: Father's ad_ref + ad_alt, copied on the progeny's row (NULL when 0 or no father).
+    customProperties:
+    - property: unit
+      value: reads
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: father_ad_ratio
+    logicalType: number
+    physicalType: FLOAT
+    description: Father's ALT read fraction ad_alt / ad_total, copied on the progeny's row (NULL when 0 or no father).
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: father_calls
+    logicalType: array
+    physicalType: ARRAY<INT>
+    description: Father's GT allele indexes at this locus (e.g. [0,0], [0,1], [-1,-1] when downgraded to UNK), copied
+      on the progeny's row; NULL when the father is not in the task.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: father_zygosity
+    logicalType: string
+    physicalType: CHAR(3)
+    description: 'Father''s genotype at this locus on the progeny''s row: WT, HET, HOM, HEM or UNK (UNK when no
+      call or too few supporting reads). NULL when the father is not in the task.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; etl:data_qa/macros/dictionaries.sql; mcp:schema_catalog.py
+    enum:
+    - value: HET
+      description: One reference and one alternate allele (0/1).
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/GENO_0000135
+        description: GENO:0000135 (exact match)
+    - value: HOM
+      description: Two alternate alleles (1/1).
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/GENO_0000136
+        description: GENO:0000136 (exact match)
+    - value: HEM
+      description: A single haploid alternate call.
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/GENO_0000134
+        description: GENO:0000134 (exact match)
+    - value: WT
+      description: Two reference alleles (0/0). Never stored for the sample itself (only carriers are loaded); possible
+        for a parent.
+    - value: UNK
+      description: No call, or too few supporting reads.
+  - name: mother_dp
+    logicalType: integer
+    physicalType: INT
+    description: Mother's FORMAT/DP at this locus, copied on the progeny's row (NULL when 0, when the mother is
+      not sequenced, or on non-progeny rows).
+    customProperties:
+    - property: unit
+      value: reads
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: mother_gq
+    logicalType: integer
+    physicalType: INT
+    description: Mother's FORMAT/GQ at this locus, copied on the progeny's row (NULL when 0 or no mother).
+    customProperties:
+    - property: unit
+      value: Phred
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: mother_ad_ref
+    logicalType: integer
+    physicalType: INT
+    description: Mother's REF read count (FORMAT/AD), copied on the progeny's row (NULL when 0 or no mother).
+    customProperties:
+    - property: unit
+      value: reads
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: mother_ad_alt
+    logicalType: integer
+    physicalType: INT
+    description: Mother's ALT read count (FORMAT/AD), copied on the progeny's row (NULL when 0 or no mother).
+    customProperties:
+    - property: unit
+      value: reads
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: mother_ad_total
+    logicalType: integer
+    physicalType: INT
+    description: Mother's ad_ref + ad_alt, copied on the progeny's row (NULL when 0 or no mother).
+    customProperties:
+    - property: unit
+      value: reads
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: mother_ad_ratio
+    logicalType: number
+    physicalType: FLOAT
+    description: Mother's ALT read fraction ad_alt / ad_total, copied on the progeny's row (NULL when 0 or no mother).
+    customProperties:
+    - property: unit
+      value: ratio 0-1
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: mother_calls
+    logicalType: array
+    physicalType: ARRAY<INT>
+    description: Mother's GT allele indexes at this locus (e.g. [0,0], [0,1], [-1,-1] when downgraded to UNK), copied
+      on the progeny's row; NULL when the mother is not in the task.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py
+  - name: mother_zygosity
+    logicalType: string
+    physicalType: CHAR(3)
+    description: 'Mother''s genotype at this locus on the progeny''s row: WT, HET, HOM, HEM or UNK (UNK when no
+      call or too few supporting reads). NULL when the mother is not in the task.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; etl:data_qa/macros/dictionaries.sql; mcp:schema_catalog.py
+    enum:
+    - value: HET
+      description: One reference and one alternate allele (0/1).
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/GENO_0000135
+        description: GENO:0000135 (exact match)
+    - value: HOM
+      description: Two alternate alleles (1/1).
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/GENO_0000136
+        description: GENO:0000136 (exact match)
+    - value: HEM
+      description: A single haploid alternate call.
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/GENO_0000134
+        description: GENO:0000134 (exact match)
+    - value: WT
+      description: Two reference alleles (0/0). Never stored for the sample itself (only carriers are loaded); possible
+        for a parent.
+    - value: UNK
+      description: No call, or too few supporting reads.
+  - name: transmission_mode
+    logicalType: string
+    physicalType: VARCHAR(50)
+    description: 'Mode of transmission compatible with the family genotypes, for a progeny: autosomal_dominant(_de_novo),
+      autosomal_recessive, x_linked_dominant(_de_novo), x_linked_recessive(_de_novo), uniparental_disomy (slivar
+      only), or why none applies (non_carrier_proband, unknown_parents/father/mother/proband_genotype). From the
+      slivar mode tags or the ETL lookup on genotypes and affected status (see transmission_mode_source); NULL when
+      no rule matches, and for parents and solo cases.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; etl:tasks/vcf/snv/germline/inheritance.py; etl:data_qa/macros/dictionaries.sql;
+        frontend:translations/common/en.json transmission_mode
+    enum:
+    - value: autosomal_dominant_de_novo
+      description: Dominant pattern, allele absent from both parents.
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/HP_0000006
+        description: HP:0000006 (broad match)
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/GENO_0000880
+        description: GENO:0000880 (related match)
+    - value: autosomal_dominant
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/HP_0000006
+        description: HP:0000006 (exact match)
+    - value: autosomal_recessive
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/HP_0000007
+        description: HP:0000007 (exact match)
+    - value: x_linked_dominant_de_novo
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/HP_0001423
+        description: HP:0001423 (broad match)
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/GENO_0000880
+        description: GENO:0000880 (related match)
+    - value: x_linked_recessive_de_novo
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/HP_0001419
+        description: HP:0001419 (broad match)
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/GENO_0000880
+        description: GENO:0000880 (related match)
+    - value: x_linked_dominant
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/HP_0001423
+        description: HP:0001423 (exact match)
+    - value: x_linked_recessive
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/HP_0001419
+        description: HP:0001419 (exact match)
+    - value: non_carrier_proband
+      description: 'Not a mode: the proband does not carry the allele.'
+    - value: unknown_parents_genotype
+      description: 'Not a mode: both parents'' genotypes are unknown.'
+    - value: unknown_father_genotype
+      description: 'Not a mode: the father''s genotype is unknown.'
+    - value: unknown_mother_genotype
+      description: 'Not a mode: the mother''s genotype is unknown.'
+    - value: unknown_proband_genotype
+      description: 'Not a mode: the proband''s genotype is unknown.'
+    - value: uniparental_disomy
+      description: Both copies from one parent (RAD-93, slivar).
+      authoritativeDefinitions:
+      - type: ontology
+        url: http://purl.obolibrary.org/obo/SO_0001744
+        description: SO:0001744 (exact match)
+  - name: info_old_record
+    logicalType: string
+    physicalType: VARCHAR(4000)
+    description: INFO/OLD_RECORD written by bcftools norm --old-rec-tag in the pipeline, the original VCF record
+      before multi-allelic split or left-normalization; NULL when the record was not modified.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/occurrence.py; bioinfo:snv-post-processing/modules/local/split_multiallelics/main.nf
+  - name: exomiser_moi
+    logicalType: string
+    physicalType: VARCHAR(10)
+    description: Mode of inheritance (e.g. AD, AR, XD, XR, MT) of the best Exomiser row for this variant (exomiser.variant_rank
+      = 1, same seq_id and task_id). NULL when Exomiser did not report the variant as contributing, and for non-probands.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_occurrence_insert_partition_delta.sql; etl:dags/sql/radiant/exomiser_insert_partition_delta.sql
+  - name: exomiser_acmg_classification
+    logicalType: string
+    physicalType: VARCHAR(300)
+    description: Exomiser ACMG classification of the best Exomiser row (variant_rank = 1), lower-case (pathogenic,
+      likely_pathogenic, uncertain_significance, likely_benign, benign). NULL when no Exomiser row.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_occurrence_insert_partition_delta.sql; etl:dags/sql/radiant/staging_exomiser_load.sql;
+        etl:data_qa/macros/dictionaries.sql
+    enum:
+    - value: pathogenic
+    - value: likely_pathogenic
+    - value: uncertain_significance
+    - value: likely_benign
+    - value: benign
+  - name: exomiser_acmg_evidence
+    logicalType: array
+    physicalType: ARRAY<VARCHAR (10)>
+    description: ACMG criteria codes (e.g. PVS1, PM2) Exomiser applied on the best Exomiser row (variant_rank =
+      1). NULL when no Exomiser row or no evidence.
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_occurrence_insert_partition_delta.sql; etl:dags/sql/radiant/staging_exomiser_load.sql
+  - name: exomiser_variant_score
+    logicalType: number
+    physicalType: FLOAT
+    description: Exomiser variant score of the best Exomiser row (variant_rank = 1). NULL when no Exomiser row.
+    customProperties:
+    - property: unit
+      value: score 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_occurrence_insert_partition_delta.sql; etl:data_qa/sources/exomiser.yml
+  - name: exomiser_gene_combined_score
+    logicalType: number
+    physicalType: FLOAT
+    description: Exomiser gene combined score (variant + phenotype) of the best Exomiser row, i.e. the highest score
+      among the variant's Exomiser rows; shown in the portal as "Exomiser Score". NULL when no Exomiser row.
+    customProperties:
+    - property: unit
+      value: score 0-1
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_occurrence_insert_partition_delta.sql; etl:dags/sql/radiant/exomiser_insert_partition_delta.sql;
+        frontend:translations/common/en.json exomiser_gene_combined_score_tooltip
+  - name: has_comphet
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: True when the occurrence has at least one compound-het partner in germline__snv__comphet (slivar),
+      false otherwise; NULL means not computed (imported before RAD-88).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_occurrence_insert_partition_delta.sql; etl:dags/sql/radiant/migrations/RAD-88_germline_snv_occurrence_add_comphet.sql;
+        portal:internal/types/germline_snv_occurrence.go
+  - name: comphet_genes
+    logicalType: array
+    physicalType: ARRAY<STRUCT<symbol VARCHAR(200), nb INT>>
+    description: One element per gene in which the variant has compound-het partners, {symbol, nb} with nb the number
+      of partner variants in that gene, ordered by symbol; NULL when there is none (or before RAD-88).
+    customProperties:
+    - property: descriptionSource
+      value: etl:dags/sql/radiant/germline_snv_occurrence_insert_partition_delta.sql; portal:internal/types/germline_snv_occurrence.go;
+        frontend:translations/common/en.json comphet_genes_cell
+  - name: other_transmission_modes
+    logicalType: array
+    physicalType: ARRAY<VARCHAR(50)>
+    description: Other slivar modes listing the sample, besides the one kept in transmission_mode (priority de novo
+      > recessive > dominant > uniparental_disomy); empty array when only one. NULL when the mode came from the
+      ETL, for non-progenies, or before RAD-94.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/inheritance.py; etl:tasks/vcf/snv/germline/occurrence.py; hub:docs/features/RAD-93-slivar-inheritance.md
+    items:
+      name: other_transmission_modes_item
+      logicalType: string
+      physicalType: VARCHAR(50)
+      enum:
+      - value: autosomal_dominant_de_novo
+      - value: autosomal_dominant
+      - value: autosomal_recessive
+      - value: x_linked_dominant_de_novo
+      - value: x_linked_recessive_de_novo
+      - value: x_linked_dominant
+      - value: x_linked_recessive
+      - value: non_carrier_proband
+      - value: unknown_parents_genotype
+      - value: unknown_father_genotype
+      - value: unknown_mother_genotype
+      - value: unknown_proband_genotype
+      - value: uniparental_disomy
+  - name: transmission_mode_candidate
+    logicalType: boolean
+    physicalType: BOOLEAN
+    description: True when slivar lists the sample in INFO/candidate, i.e. the mode (recessive or X-recessive) cannot
+      be proven by the family structure (non-trio); false otherwise. Set only when transmission_mode_source = 'slivar',
+      NULL otherwise.
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/inheritance.py; bioinfo:snv-post-processing/docs/output.md; etl:data_qa/sources/germline_snv_occurrence.yml
+    quality:
+    - name: germline_snv_occurrence__should_not_contain_null__transmission_mode_candidate
+      type: custom
+      engine: dbt
+      implementation: 'not_null: {"config": {"where": "transmission_mode_source = ''slivar''"}}'
+  - name: parental_origin_source
+    logicalType: string
+    physicalType: VARCHAR(10)
+    description: 'Method that set parental_origin: ''slivar'' when the VCF header declares a po_* tag, else ''etl''.
+      Set for progenies of a family only; NULL otherwise or before RAD-94.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/inheritance.py; etl:tasks/vcf/snv/germline/occurrence.py; etl:dags/sql/radiant/migrations/RAD-94_germline_snv_occurrence_add_inheritance.sql
+    enum:
+    - value: slivar
+      description: From slivar tags declared in the VCF header.
+    - value: etl
+      description: From the ETL's own genotype lookup.
+  - name: transmission_mode_source
+    logicalType: string
+    physicalType: VARCHAR(10)
+    description: 'Method that set transmission_mode: ''slivar'' when the VCF header declares the BIOINFO-242 mode
+      tags, else ''etl''. Set for progenies of a family only; NULL otherwise or before RAD-94.'
+    customProperties:
+    - property: descriptionSource
+      value: etl:tasks/vcf/snv/germline/inheritance.py; etl:tasks/vcf/snv/germline/occurrence.py; etl:dags/sql/radiant/migrations/RAD-94_germline_snv_occurrence_add_inheritance.sql
+    enum:
+    - value: slivar
+      description: From slivar tags declared in the VCF header.
+    - value: etl
+      description: From the ETL's own genotype lookup.
+  quality:
+  - name: germline_snv_occurrence__should_not_be_empty
+    metric: rowCount
+    mustBeGreaterThan: 0
+    dimension: completeness
+  - name: germline_snv_occurrence__should_not_contain_only_null
+    type: sql
+    dimension: completeness
+    description: No column is entirely NULL (except comphet_genes, has_comphet, info_baseq_rank_sum, info_ds, info_haplotype_score,
+      info_inbreed_coeff, info_r2_5p_bias, locus_id, other_transmission_modes, parental_origin_source, part, phased,
+      seq_id, task_id, transmission_mode_candidate, transmission_mode_source).
+    query: SELECT (CASE WHEN COUNT(ad_ratio) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(gq) = 0 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(dp) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(ad_total) = 0 THEN 1 ELSE 0 END) + (CASE
+      WHEN COUNT(ad_ref) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(ad_alt) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(zygosity)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(calls) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(quality) = 0 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(filter) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_excess_het) = 0 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(info_fs) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_fraction_informative_reads)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_mleac) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_mleaf)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_mq) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_m_qrank_sum)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_qd) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_read_pos_rank_sum)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_sor) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_vqslod)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_culprit) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_dp)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(parental_origin) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(father_dp)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(father_gq) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(father_ad_ref)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(father_ad_alt) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(father_ad_total)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(father_ad_ratio) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(father_calls)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(father_zygosity) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(mother_dp)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(mother_gq) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(mother_ad_ref)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(mother_ad_alt) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(mother_ad_total)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(mother_ad_ratio) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(mother_calls)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(mother_zygosity) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(transmission_mode)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(info_old_record) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(exomiser_moi)
+      = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(exomiser_acmg_classification) = 0 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(exomiser_acmg_evidence) = 0 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(exomiser_variant_score) = 0 THEN 1
+      ELSE 0 END) + (CASE WHEN COUNT(exomiser_gene_combined_score) = 0 THEN 1 ELSE 0 END) FROM germline__snv__occurrence
+    mustBe: 0
+  - name: germline_snv_occurrence__should_not_contain_same_value
+    type: sql
+    dimension: accuracy
+    description: No scalar column holds a single constant value (except comphet_genes, parental_origin_source, part,
+      transmission_mode_candidate, transmission_mode_source).
+    query: SELECT (CASE WHEN COUNT(DISTINCT seq_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT task_id)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT locus_id) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      ad_ratio) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT gq) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      dp) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT ad_total) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      ad_ref) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT ad_alt) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      zygosity) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT quality) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT filter) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_baseq_rank_sum) <= 1 THEN
+      1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_excess_het) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      info_fs) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_ds) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT info_fraction_informative_reads) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_inbreed_coeff)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_mleac) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      info_mleaf) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_mq) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT info_m_qrank_sum) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_qd) <= 1 THEN 1
+      ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_r2_5p_bias) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      info_read_pos_rank_sum) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_sor) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT info_vqslod) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_culprit)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT info_dp) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      info_haplotype_score) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT phased) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT parental_origin) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT father_dp)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT father_gq) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      father_ad_ref) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT father_ad_alt) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT father_ad_total) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT father_ad_ratio)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT father_zygosity) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT mother_dp) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT mother_gq) <= 1 THEN 1 ELSE
+      0 END) + (CASE WHEN COUNT(DISTINCT mother_ad_ref) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT mother_ad_alt)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT mother_ad_total) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN
+      COUNT(DISTINCT mother_ad_ratio) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT mother_zygosity) <= 1
+      THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT transmission_mode) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      info_old_record) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT exomiser_moi) <= 1 THEN 1 ELSE 0 END)
+      + (CASE WHEN COUNT(DISTINCT exomiser_acmg_classification) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT
+      exomiser_variant_score) <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT exomiser_gene_combined_score)
+      <= 1 THEN 1 ELSE 0 END) + (CASE WHEN COUNT(DISTINCT has_comphet) <= 1 THEN 1 ELSE 0 END) FROM germline__snv__occurrence
+    mustBe: 0
+  - name: germline_snv_occurrence__should_be_within_range_ad_ratio
+    type: sql
+    dimension: accuracy
+    description: ad_ratio, father_ad_ratio, mother_ad_ratio stay within [0, 1] (NULL allowed).
+    query: SELECT COUNT(*) FROM germline__snv__occurrence WHERE ad_ratio < 0 OR ad_ratio > 1 OR father_ad_ratio
+      < 0 OR father_ad_ratio > 1 OR mother_ad_ratio < 0 OR mother_ad_ratio > 1
+    mustBe: 0
+  - name: germline_snv_occurrence__should_be_unique__part_seq_id_task_id_locus_id
+    metric: duplicateValues
+    arguments:
+      properties:
+      - part
+      - seq_id
+      - task_id
+      - locus_id
+    mustBe: 0
+    dimension: uniqueness
+    description: (part, seq_id, task_id, locus_id) is unique.
+  - name: germline_snv_occurrence__validate_exclusive_with_somatic
+    type: sql
+    description: 'A given (locus_id, sequencing) call must not be reported as BOTH a germline occurrence and a somatic
+      TUMOR occurrence: a tumor sequencing analyzed as germline (or vice-versa) is contradictory.'
+    query: SELECT COUNT(*) FROM (select g.locus_id, g.seq_id from germline__snv__occurrence g join somatic__snv__occurrence
+      s on s.locus_id = g.locus_id and s.tumor_seq_id = g.seq_id) failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/germline_snv_occurrence__validate_exclusive_with_somatic.sql
+  - name: germline_snv_occurrence__validate_no_wt_zygosity
+    type: sql
+    description: 'Occurrences are inserted only when the sample carries the alternate allele (`has_alt = 1 in calls`,
+      see germline_snv_occurrence_insert_partition_delta.sql: `WHERE ... AND has_alt`). A WT (0/0) genotype carries
+      no alt, so `zygosity` should never be ''WT'' in this table — these rows should have been filtered out upstream.
+      (''WT'' is still in the accepted-values dictionary because it is a valid, portal-handled zygosity in general
+      — this asserts the stronger table-specific invariant.)'
+    query: SELECT COUNT(*) FROM (select part, seq_id, task_id, locus_id, zygosity from germline__snv__occurrence
+      where zygosity = 'WT') failing
+    mustBe: 0
+    authoritativeDefinitions:
+    - type: implementation
+      url: radiant-portal-pipeline:radiant/data_qa/tests/germline_snv_occurrence__validate_no_wt_zygosity.sql
+  customProperties:
+  - property: dataModel
+    value: DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`)
+  - property: partitionBy
+    value: PARTITION BY (`part`)
+  - property: distributedBy
+    value: DISTRIBUTED BY HASH(`locus_id`) BUCKETS 10
+  - property: mcpKeys
+    value: part, seq_id, task_id, locus_id
+  - property: consumers
+    value:
+    - mcp/radiant_mcp/queries/carriers.py
+    - mcp/radiant_mcp/queries/charts.py
+    - mcp/radiant_mcp/queries/hits.py
+    - mcp/radiant_mcp/schema_catalog.py
+    - mcp/radiant_mcp/tools/query.py
+    - portal/backend/internal/repository/starrocks/germline_snv_occurrences.go
+    - portal/backend/internal/types/germline_snv_occurrence.go
+authoritativeDefinitions:
+- type: ddl
+  url: radiant-portal-pipeline:radiant/dags/sql/radiant/init/germline_snv_occurrence_create_table.sql
+- type: dataQuality
+  url: radiant-portal-pipeline:radiant/data_qa/sources/germline_snv_occurrence.yml
+- type: mcpCatalog
+  url: radiant-mcp:radiant_mcp/schema_catalog.py

@@ -1,0 +1,65 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.life_status
+name: life_status
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'Vital status of a patient or fetus: alive, deceased or unknown. Referenced by patient.life_status_code and fetus.life_status_code.
+    Shared by every tenant (the PostgreSQL table has no tenant_code), exposed in each {tenant}_tenant database through radiant_jdbc;
+    the portal also serves it as GET /value_sets/{type}.'
+  usage: Join patient.life_status_code (or fetus.life_status_code) = life_status.code for the label. The patient and case
+    batches only accept alive, deceased and unknown.
+  limitations: 'The values are data seeded by the backend migrations (backend/scripts/init-sql/migrations), not a fixed enum:
+    later migrations or a deployment can add codes, so query the view for the current list. Codes are unique case-insensitively
+    (migration 000034) and stored in the case they were entered in.'
+team:
+- username: radiant-portal
+  role: producer
+- username: radiant-mcp
+  role: consumer
+servers:
+- server: starrocks
+  type: mysql
+  host: starrocks
+  port: 9030
+  database: '{tenant}_tenant'
+schema:
+- name: life_status
+  physicalName: life_status
+  physicalType: view
+  tags:
+  - per-tenant
+  properties:
+  - name: code
+    logicalType: string
+    description: Code of the life status, primary key; the value stored in the referencing columns.
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql; backend:scripts/init-sql/migrations/000021_add_fetus.up.sql;
+        backend:internal/types/patient_batch.go
+    examples:
+    - alive
+    - deceased
+    - unknown
+  - name: name_en
+    logicalType: string
+    description: English label of the code (Alive, Deceased, Unknown).
+    customProperties:
+    - property: postgresType
+      value: text
+    - property: descriptionSource
+      value: backend:scripts/init-sql/migrations/000001_init.up.sql
+  customProperties:
+  - property: consumers
+    value:
+    - backend/internal/repository/starrocks/cases.go
+authoritativeDefinitions:
+- type: implementation
+  url: backend:internal/repository/starrocks/starrocks_tenant.go

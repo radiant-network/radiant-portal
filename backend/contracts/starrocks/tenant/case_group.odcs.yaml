@@ -1,0 +1,96 @@
+# Owned by the backend: the source of truth for this view, hand-edited (moon run backend:contracts-check).
+# Scaffolded by `go run ./cmd/contracts`: add the descriptions, remove the columns no reader should use.
+apiVersion: v3.2.0
+kind: DataContract
+id: radiant.starrocks.tenant.case_group
+name: case_group
+version: 0.1.0
+status: draft
+domain: clinical
+dataProduct: radiant-portal-tenant
+description:
+  purpose: 'One row per case group of the tenant: a named set of cases, the unit the pipeline notifies diagnostic
+    laboratories about (one group per post-processing run). Rows of the portal''s PostgreSQL table public.case_group
+    read through radiant_jdbc and filtered on tenant_code = the tenant. The ETL creates or overwrites a group with
+    POST /{tenant}/case_groups (name + case ids), then emails each diagnosis lab of the group with POST
+    /{tenant}/case_groups/{name}/notify. The members are in case_group_case.'
+  usage: 'Business key (tenant_code, name), unique; id only keys the membership rows. Members: join case_group_case on
+    case_group_case.case_group_id = case_group.id, then cases on cases.id = case_group_case.case_id. The portal case list
+    filters on the group name (POST /cases/search field case_group) and goes DISTINCT, since a case can belong to
+    several groups (re-analysis runs).'
+  limitations: 'No json, jsonb or uuid column in public.case_group. Overwriting a group by name replaces its members but
+    keeps its id, created_on and created_by. created_on is a timestamp with time zone, unlike the other clinical
+    timestamps.'
+team:
+  - username: radiant-portal
+    role: producer
+  - username: radiant-mcp
+    role: consumer
+servers:
+  - server: starrocks
+    type: mysql
+    host: starrocks
+    port: 9030
+    database: '{tenant}_tenant'
+schema:
+  - name: case_group
+    physicalName: case_group
+    physicalType: view
+    tags:
+      - per-tenant
+    properties:
+      - name: id
+        logicalType: integer
+        description: Group id, primary key (identity); only keys the membership rows (case_group_case.case_group_id).
+        customProperties:
+          - property: postgresType
+            value: integer
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000036_add_case_group.up.sql'
+      - name: tenant_code
+        logicalType: string
+        description: Tenant of the group; always the tenant of this database (the view filters on it).
+        customProperties:
+          - property: postgresType
+            value: character varying
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000036_add_case_group.up.sql; backend:internal/repository/starrocks/starrocks_tenant.go'
+      - name: name
+        logicalType: string
+        description: 'Group name, unique in the tenant: 1-100 ASCII letters, digits, underscores, dots or dashes, starting
+          with a letter or digit (it becomes a manifest file name). The ETL names its groups results-<run tag> (scheduled
+          runs) or manual-<run tag>.'
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/types/case_group.go; etl:tasks/nextflow/notify.py; etl:dags/case_scheduler.py; etl:dags/notify_cases.py;
+              etl:tasks/nextflow/paths.py'
+        examples:
+          - results-scheduled-2026-09-03T00-00-00-00-00
+      - name: created_on
+        logicalType: timestamp
+        description: When the group was first created (kept when the group is overwritten), with time zone.
+        customProperties:
+          - property: postgresType
+            value: timestamp with time zone
+          - property: descriptionSource
+            value: 'backend:scripts/init-sql/migrations/000036_add_case_group.up.sql; backend:internal/repository/postgres/case_groups.go'
+      - name: created_by
+        logicalType: string
+        description: User id (JWT sub) of the caller that first created the group (kept when the group is overwritten);
+          for pipeline groups, the identity of the ETL's portal token.
+        customProperties:
+          - property: postgresType
+            value: text
+          - property: descriptionSource
+            value: 'backend:internal/server/handlers_case_groups.go; backend:internal/utils/auth.go; backend:internal/repository/postgres/case_groups.go;
+              etl:tasks/nextflow/portal.py'
+    customProperties:
+      - property: consumers
+        value:
+          - backend/internal/repository/starrocks/cases.go
+          - backend/internal/utils/joins/joins.go
+authoritativeDefinitions:
+  - type: implementation
+    url: backend:internal/repository/starrocks/starrocks_tenant.go
