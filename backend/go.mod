@@ -27,7 +27,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.44.0
 	github.com/vbauerster/mpb/v8 v8.16.1
 	github.com/wneessen/go-mail v0.8.1
-	github.com/xuri/excelize/v2 v2.11.1-0.20261029001137-c5fd73bde8f6
+	github.com/xuri/excelize/v2 v2.11.1
 	golang.org/x/sync v0.24.0
 	golang.org/x/sys v0.49.0
 	golang.org/x/term v0.47.0
