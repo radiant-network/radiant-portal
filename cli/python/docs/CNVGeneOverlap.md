@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **overlap_type** | **str** |  | 
 **overlapping_cnv_percent** | **float** |  | 
 **overlapping_gene_percent** | **float** |  | 
+**refseq_transcript_id** | **str** |  | [optional] 
 **symbol** | **str** |  | 
 **tenant_gene_panels** | **List[str]** |  | 
 

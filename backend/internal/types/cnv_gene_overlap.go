@@ -9,6 +9,7 @@ type CNVGeneOverlap struct {
 	NbOverlapBases         int               `json:"nb_overlap_bases" validate:"required"`
 	Cytoband               JsonArray[string] `json:"cytoband" validate:"required"`
 	NbExons                int               `json:"nb_exons" validate:"required"`
+	RefseqTranscriptId     *string           `json:"refseq_transcript_id,omitempty"`
 	OverlappingGenePercent float32           `json:"overlapping_gene_percent" validate:"required"`
 	OverlappingCNVPercent  float32           `json:"overlapping_cnv_percent" validate:"required"`
 	OverlapType            string            `json:"overlap_type" enum:"full_gene,full_cnv,partial" validate:"required"`
