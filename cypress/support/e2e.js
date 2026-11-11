@@ -12,9 +12,25 @@ Cypress.Commands.add('setToken', () => {
   });
 });
 
+// The cached token is checked once per spec: it has to outlive the spec, or its last API calls get a 401.
+const TOKEN_MIN_REMAINING_SECONDS = 180;
+
+const expiresSoon = token => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+    return payload.exp - Date.now() / 1000 < TOKEN_MIN_REMAINING_SECONDS;
+  } catch {
+    return true;
+  }
+};
+
 Cypress.Commands.add('isValidToken', token => {
   const apiUrl = Cypress.expose('api_base_url');
   const tenant = Cypress.expose('api_tenant');
+
+  if (!token || expiresSoon(token)) {
+    return cy.wrap(false);
+  }
 
   return cy
     .request({
