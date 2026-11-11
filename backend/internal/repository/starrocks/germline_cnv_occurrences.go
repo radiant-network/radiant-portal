@@ -40,24 +40,31 @@ func (r *GermlineCNVOccurrencesRepository) GetGenesOverlap(ctx context.Context, 
 	return cnvGenesOverlap(ctx, r.db.WithContext(ctx), types.GermlineCNVOccurrenceTable, seqId, taskId, cnvId)
 }
 
-// TaskIDsWithOccurrences returns the ids among taskIds that have at least one germline CNV row for
-// the sequencing.
-func (r *GermlineCNVOccurrencesRepository) TaskIDsWithOccurrences(ctx context.Context, seqId int, taskIds []int) ([]int, error) {
-	if len(taskIds) == 0 {
-		return nil, nil
-	}
+// ListTasks returns the tasks of the case and sequencing that have germline CNV rows for the
+// sequencing, newest first. The rows decide, not the task type: the CNV annotation task is attached
+// to every family member's sequencing but has rows under the proband's only, and the proband's
+// alignment task has rows only if the ETL loaded it before the family's slivar VCF.
+func (r *GermlineCNVOccurrencesRepository) ListTasks(ctx context.Context, caseId int, seqId int) ([]types.TaskOccurrenceType, error) {
 	db := r.db.WithContext(ctx)
 	part, err := utils.GetSequencingPart(seqId, db)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching part of seq %d: %w", seqId, err)
 	}
-	var ids []int
-	err = db.Table(types.GermlineCNVOccurrenceTable.TenantQualifiedName(ctx)).
-		Where("part = ? AND seq_id = ? AND task_id IN ?", part, seqId, taskIds).
-		Distinct("task_id").
-		Pluck("task_id", &ids).Error
+	withRows := db.Table(types.GermlineCNVOccurrenceTable.TenantQualifiedName(ctx)).
+		Select("DISTINCT task_id").
+		Where("part = ? AND seq_id = ?", part, seqId)
+
+	var tasks []types.TaskOccurrenceType
+	err = db.Table(fmt.Sprintf("%s tctx", types.TaskContextTable.TenantQualifiedName(ctx))).
+		Select("t.id, t.task_type_code, tt.name_en AS task_type_name, t.pipeline_name, t.pipeline_version, t.genome_build, t.created_on").
+		Joins(fmt.Sprintf("JOIN %s t ON t.id = tctx.task_id", types.TaskTable.TenantQualifiedName(ctx))).
+		Joins(fmt.Sprintf("JOIN %s tt ON tt.code = t.task_type_code", types.TaskTypeTable.TenantQualifiedName(ctx))).
+		Where("tctx.sequencing_experiment_id = ? AND (tctx.case_id = ? OR tctx.case_id IS NULL)", seqId, caseId).
+		Where("t.id IN (?)", withRows).
+		Order("t.created_on DESC, t.id DESC").
+		Find(&tasks).Error
 	if err != nil {
-		return nil, fmt.Errorf("error fetching germline CNV task ids of seq %d: %w", seqId, err)
+		return nil, fmt.Errorf("error listing germline CNV tasks of case %d / seq %d: %w", caseId, seqId, err)
 	}
-	return ids, nil
+	return tasks, nil
 }

@@ -1128,57 +1128,68 @@ func Test_GermlineCNV_GetOccurrences_SortByMotherCN(t *testing.T) {
 	})
 }
 
-func Test_GermlineCNV_TaskIDsWithOccurrences_ReturnsTasksWithRowsForTheSequencing(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+func germlineCNVTaskIDs(tasks []types.TaskOccurrenceType) []int {
+	var ids []int
+	for _, task := range tasks {
+		ids = append(ids, task.ID)
+	}
+	return ids
+}
+
+func Test_GermlineCNV_ListTasks_ProbandSequencing_ReturnsCNVAnnotationTask(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 
-		ids, err := repo.TaskIDsWithOccurrences(t.Context(), 70, []int{71, 86, 91020, 999})
+		tasks, err := repo.ListTasks(t.Context(), 70, 70)
 
 		require.NoError(t, err)
-		assert.ElementsMatch(t, []int{86, 91020}, ids)
+		require.Len(t, tasks, 1)
+		assert.Equal(t, 86, tasks[0].ID)
+		assert.Equal(t, types.RadiantGermlineCNVAnnotationTask, tasks[0].TaskTypeCode)
+		assert.NotEmpty(t, tasks[0].TaskTypeName)
 	})
 }
 
-func Test_GermlineCNV_TaskIDsWithOccurrences_ParentSequencing_ExcludesCNVAnnotationTask(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+func Test_GermlineCNV_ListTasks_ParentSequencing_ReturnsAlignmentTaskOnly(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 
-		ids, err := repo.TaskIDsWithOccurrences(t.Context(), 71, []int{86, 72, 91022})
+		tasks, err := repo.ListTasks(t.Context(), 70, 71)
 
 		require.NoError(t, err)
-		assert.ElementsMatch(t, []int{72, 91022}, ids)
+		assert.Equal(t, []int{72}, germlineCNVTaskIDs(tasks))
 	})
 }
 
-func Test_GermlineCNV_TaskIDsWithOccurrences_IgnoresRowsOfOtherSequencing(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+func Test_GermlineCNV_ListTasks_CaseAgnosticTask_Listed(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 
-		ids, err := repo.TaskIDsWithOccurrences(t.Context(), 1, []int{1, 86})
+		tasks, err := repo.ListTasks(t.Context(), 1, 1)
 
 		require.NoError(t, err)
-		assert.Equal(t, []int{1}, ids)
+		assert.Equal(t, []int{1}, germlineCNVTaskIDs(tasks))
 	})
 }
 
-func Test_GermlineCNV_TaskIDsWithOccurrences_SequencingWithNoRows_ReturnsEmpty(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+func Test_GermlineCNV_ListTasks_SequencingWithNoRows_ReturnsEmpty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 
-		ids, err := repo.TaskIDsWithOccurrences(t.Context(), 70, []int{71})
+		tasks, err := repo.ListTasks(t.Context(), 70, 72)
 
 		require.NoError(t, err)
-		assert.Empty(t, ids)
+		assert.Empty(t, tasks)
 	})
 }
 
-func Test_GermlineCNV_TaskIDsWithOccurrences_NoTaskIds_SkipsQuery(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+func Test_GermlineCNV_ListTasks_TaskOfOtherCase_NotListed(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 
-		ids, err := repo.TaskIDsWithOccurrences(t.Context(), 1, nil)
+		tasks, err := repo.ListTasks(t.Context(), 999, 70)
 
 		require.NoError(t, err)
-		assert.Empty(t, ids)
+		assert.Empty(t, tasks)
 	})
 }

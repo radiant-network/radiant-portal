@@ -11598,7 +11598,7 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the alignment and germline CNV annotation tasks that have CNV occurrences for the sequencing.
+         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the tasks that have CNV occurrences for the sequencing.
          * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -12150,7 +12150,7 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the alignment and germline CNV annotation tasks that have CNV occurrences for the sequencing.
+         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the tasks that have CNV occurrences for the sequencing.
          * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -12356,7 +12356,7 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.caseEntityDocumentsSearch(tenant, caseId, listBodyWithCriteria, options).then((request) => request(axios, basePath));
         },
         /**
-         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the alignment and germline CNV annotation tasks that have CNV occurrences for the sequencing.
+         * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the tasks that have CNV occurrences for the sequencing.
          * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -12540,7 +12540,7 @@ export class CasesApi extends BaseAPI {
     }
 
     /**
-     * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the alignment and germline CNV annotation tasks that have CNV occurrences for the sequencing.
+     * Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the tasks that have CNV occurrences for the sequencing.
      * @summary List tasks producing occurrences of a given type for a (case, sequencing) pair
      * @param {string} tenant Tenant code
      * @param {number} caseId Case ID

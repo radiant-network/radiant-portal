@@ -3,6 +3,7 @@ package starrocks
 import (
 	"context"
 	"fmt"
+	"maps"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 )
@@ -116,16 +117,15 @@ func NewFacetsRepository() *FacetsRepository {
 		},
 	}
 
-	// Germline CNV values that differ from the shared dictionary: the cnv-post-processing tags share the
-	// field name transmission_mode with the germline SNV modes, but none of the values, except x_linked_recessive.
-	germlineCNVDictionary := map[string]Facet{
-		"transmission_mode": {
-			Name: "transmission_mode",
-			Values: []string{
-				"denovo", "denovo_suspect", "possible_denovo", "x_linked_denovo", "x_linked_recessive",
-				"inherited_maternal", "inherited_paternal", "possible_inherited_maternal", "possible_inherited_paternal",
-				"recessive", "recessive_lowconf", "inheritance_unresolved", "mendelian_inconsistent", "unknown_cn",
-			},
+	// The cnv-post-processing tags share the field name transmission_mode with the germline SNV
+	// modes, but none of the values, except x_linked_recessive.
+	germlineCNVDictionary := maps.Clone(dictionary)
+	germlineCNVDictionary["transmission_mode"] = Facet{
+		Name: "transmission_mode",
+		Values: []string{
+			"denovo", "denovo_suspect", "possible_denovo", "x_linked_denovo", "x_linked_recessive",
+			"inherited_maternal", "inherited_paternal", "possible_inherited_maternal", "possible_inherited_paternal",
+			"recessive", "recessive_lowconf", "inheritance_unresolved", "mendelian_inconsistent", "unknown_cn",
 		},
 	}
 
@@ -139,32 +139,22 @@ func (r *FacetsRepository) GetFacets(ctx context.Context, facetNames []string) (
 	return lookupFacets(facetNames, r.facetsDictionary)
 }
 
-// GetGermlineCNVFacets reads the germline CNV dictionary first, then the shared one.
 func (r *FacetsRepository) GetGermlineCNVFacets(ctx context.Context, facetNames []string) ([]Facet, error) {
-	return lookupFacets(facetNames, r.germlineCNVFacetsDictionary, r.facetsDictionary)
+	return lookupFacets(facetNames, r.germlineCNVFacetsDictionary)
 }
 
-func lookupFacets(facetNames []string, dictionaries ...map[string]Facet) ([]Facet, error) {
+func lookupFacets(facetNames []string, dictionary map[string]Facet) ([]Facet, error) {
 	if len(facetNames) == 0 {
 		return nil, fmt.Errorf("no facet names provided")
 	}
 
 	var facets []Facet
 	for _, name := range facetNames {
-		facet, found := findFacet(name, dictionaries)
-		if !found {
+		facet, exists := dictionary[name]
+		if !exists {
 			return nil, fmt.Errorf("facet \"%s\" not found", name)
 		}
 		facets = append(facets, facet)
 	}
 	return facets, nil
-}
-
-func findFacet(name string, dictionaries []map[string]Facet) (Facet, bool) {
-	for _, dictionary := range dictionaries {
-		if facet, exists := dictionary[name]; exists {
-			return facet, true
-		}
-	}
-	return Facet{}, false
 }

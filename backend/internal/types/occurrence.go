@@ -50,34 +50,17 @@ const (
 type TaskSelector struct {
 	TaskTypeCode  string
 	SomaticCohort SomaticCohort
-	// ExtraTaskTypeCode is a second task type listed with TaskTypeCode, or "" for none.
-	ExtraTaskTypeCode string
-	// RequiresGermlineCNVRows keeps only the tasks that have germline CNV rows for the sequencing
-	// (see CaseOccurrenceTasksHandler for why the task list alone cannot tell).
-	RequiresGermlineCNVRows bool
-}
-
-// TaskTypeCodes returns the task types the selector lists.
-func (s TaskSelector) TaskTypeCodes() []string {
-	if s.ExtraTaskTypeCode == "" {
-		return []string{s.TaskTypeCode}
-	}
-	return []string{s.TaskTypeCode, s.ExtraTaskTypeCode}
 }
 
 // TaskSelector returns the criteria selecting the tasks that produce occurrences of this type.
-// Returns a zero selector and an error when the occurrence type is not recognized.
+// Returns a zero selector and an error when the occurrence type is not recognized, or is
+// germline_cnv: its tasks are the ones with CNV rows for the sequencing, not a task type.
 func (o OccurrenceType) TaskSelector() (TaskSelector, error) {
 	switch o {
 	case OccurrenceTypeGermlineSNV:
 		return TaskSelector{TaskTypeCode: RadiantGermlineAnnotationTask, SomaticCohort: SomaticCohortNone}, nil
 	case OccurrenceTypeGermlineCNV:
-		return TaskSelector{
-			TaskTypeCode:            AlignmentGermlineVariantCallingTaskTypeCode,
-			SomaticCohort:           SomaticCohortNone,
-			ExtraTaskTypeCode:       RadiantGermlineCNVAnnotationTask,
-			RequiresGermlineCNVRows: true,
-		}, nil
+		return TaskSelector{}, fmt.Errorf("occurrence type %q has no task selector", string(o))
 	case OccurrenceTypeSomaticSNV, OccurrenceTypeSomaticSNVTumorNormal:
 		return TaskSelector{TaskTypeCode: RadiantSomaticAnnotationTask, SomaticCohort: SomaticCohortTumorNormal}, nil
 	case OccurrenceTypeSomaticSNVTumorOnly:

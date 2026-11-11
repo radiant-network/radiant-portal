@@ -5996,8 +5996,7 @@ paths:
       description: Return tasks attached to the given case and sequencing experiment
         whose task type produces occurrences of the requested occurrence type. Sorted
         by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv
-        returns the alignment and germline CNV annotation tasks that have CNV occurrences
-        for the sequencing.
+        returns the tasks that have CNV occurrences for the sequencing.
       operationId: caseTasksWithOccurrences
       parameters:
       - description: Tenant code

@@ -172,7 +172,7 @@ func (r *TaskRepository) ListTasksByCaseAndSequencing(ctx context.Context, caseI
 	tx = joinTaskWithTaskType(tx)
 	tx = tx.Scopes(WithTenantOn(ctx, types.TaskTable.Alias)) // task_context has no tenant_code; scope the joined task
 	tx = tx.Select("id, task_type_code, name_en AS task_type_name, pipeline_name, pipeline_version, genome_build, created_on")
-	tx = tx.Where("sequencing_experiment_id = ? AND (case_id = ? OR case_id IS NULL) AND task_type_code IN ?", seqId, caseId, selector.TaskTypeCodes())
+	tx = tx.Where("sequencing_experiment_id = ? AND (case_id = ? OR case_id IS NULL) AND task_type_code = ?", seqId, caseId, selector.TaskTypeCode)
 
 	if selector.SomaticCohort != types.SomaticCohortNone {
 		predicate, err := somaticCohortPredicate(selector.SomaticCohort)
