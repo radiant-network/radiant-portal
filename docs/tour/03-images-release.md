@@ -92,7 +92,7 @@ What to look at:
 no other.
 
 ```bash
-D() { moon query affected | jq -c '[.tasks | keys[] | select(startswith("docker"))]'; }
+D() { moon query affected | jq -c '[.tasks | keys[] | select(test(":docker-"))]'; }
 
 echo "# tour"  >> mcp/server.py;                                             D; git checkout -- mcp
 echo "// tour" >> backend/internal/mysqlproxy/proxy.go;                      D; git checkout -- backend
