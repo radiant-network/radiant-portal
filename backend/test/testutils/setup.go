@@ -188,9 +188,12 @@ func startPostgresContainer() (testcontainers.Container, error) {
 		NetworkAliases: map[string][]string{
 			networkName: aliases,
 		},
+		// The entrypoint logs "ready to accept connections" twice: once for its temporary init server,
+		// then for the real one. "init process complete" comes before the real server is up, so a
+		// connection made then fails with "the database system is starting up" (57P03).
 		WaitingFor: wait.ForAll(
 			wait.ForListeningPort("5432/tcp"),
-			wait.ForLog("PostgreSQL init process complete").WithPollInterval(1*time.Second),
+			wait.ForLog("database system is ready to accept connections").WithOccurrence(2).WithPollInterval(1*time.Second),
 		),
 	}
 
