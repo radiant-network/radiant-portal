@@ -123,6 +123,12 @@ contracts.
 with its logical type, whether it is required, its allowed values (`enum`) and what it means. The `customProperties`
 record where a description comes from. The owner edits it like code, in the same PR as the table.
 
+**These first contracts were written with the help of AI and need a review.** An agent drafted the descriptions,
+enums and readers from the code (the DDL, the data QA, the Go view builders, the MCP and the frontend), and recorded
+its sources in `descriptionSource`. The checks guarantee the structure (columns, types, required, enum values match
+the code); they cannot tell whether a description is right. Each owner should review its contracts before relying on
+them: the ETL team its 31 tables, the portal team its 70 views.
+
 ```bash
 C=etl/contracts/starrocks/tenant/germline__snv__occurrence.odcs.yaml
 head -12 $C                                       # owner, id, status, purpose
