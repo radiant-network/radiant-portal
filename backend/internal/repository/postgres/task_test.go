@@ -247,21 +247,6 @@ func Test_ListTasksByCaseAndSequencing_GermlineSNV_ReturnsGermlineAnnotationTask
 	})
 }
 
-func Test_ListTasksByCaseAndSequencing_GermlineCNV_ReturnsGermlineAlignmentTaskAttachedToSequencing(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
-
-		selector, _ := types.OccurrenceTypeGermlineCNV.TaskSelector()
-		result, err := repo.ListTasksByCaseAndSequencing(t.Context(), 1, 1, selector)
-
-		// Task 1 has task_context.case_id = NULL — included via the OR-NULL branch.
-		assert.NoError(t, err)
-		assert.Len(t, result, 1)
-		assert.Equal(t, 1, result[0].ID)
-		assert.Equal(t, types.AlignmentGermlineVariantCallingTaskTypeCode, result[0].TaskTypeCode)
-	})
-}
-
 func Test_ListTasksByCaseAndSequencing_SomaticSNV_ReturnsSomaticAnnotationTask(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})

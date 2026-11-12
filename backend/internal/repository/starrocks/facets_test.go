@@ -67,3 +67,47 @@ func Test_GetFacet_FacetNotFound(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, facets)
 }
+
+func Test_GetFacets_TransmissionMode_ExcludesGermlineCNVModes(t *testing.T) {
+	repo := NewFacetsRepository()
+	facets, err := repo.GetFacets(t.Context(), []string{"transmission_mode"})
+	assert.NoError(t, err)
+	assert.Len(t, facets, 1)
+	assert.Len(t, facets[0].Values, 13)
+	assert.NotContains(t, facets[0].Values, "denovo")
+	assert.NotContains(t, facets[0].Values, "unknown_cn")
+}
+
+func Test_GetGermlineCNVFacets_TransmissionMode_ReturnsCNVModesOnly(t *testing.T) {
+	repo := NewFacetsRepository()
+	facets, err := repo.GetGermlineCNVFacets(t.Context(), []string{"transmission_mode"})
+	assert.NoError(t, err)
+	assert.Len(t, facets, 1)
+	assert.ElementsMatch(t, []string{
+		"denovo", "denovo_suspect", "possible_denovo", "x_linked_denovo", "x_linked_recessive",
+		"inherited_maternal", "inherited_paternal", "possible_inherited_maternal", "possible_inherited_paternal",
+		"recessive", "recessive_lowconf", "inheritance_unresolved", "mendelian_inconsistent", "unknown_cn",
+	}, facets[0].Values)
+}
+
+func Test_GetGermlineCNVFacets_SharedFacet_FallsBackToSharedDictionary(t *testing.T) {
+	repo := NewFacetsRepository()
+	facets, err := repo.GetGermlineCNVFacets(t.Context(), []string{"type"})
+	assert.NoError(t, err)
+	assert.Len(t, facets, 1)
+	assert.Equal(t, []string{"GAIN", "LOSS", "GAINLOH", "CNLOH"}, facets[0].Values)
+}
+
+func Test_GetGermlineCNVFacets_UnknownFacet_ReturnsError(t *testing.T) {
+	repo := NewFacetsRepository()
+	facets, err := repo.GetGermlineCNVFacets(t.Context(), []string{"not_a_facet"})
+	assert.Error(t, err)
+	assert.Nil(t, facets)
+}
+
+func Test_GetGermlineCNVFacets_NoNames_ReturnsError(t *testing.T) {
+	repo := NewFacetsRepository()
+	facets, err := repo.GetGermlineCNVFacets(t.Context(), nil)
+	assert.Error(t, err)
+	assert.Nil(t, facets)
+}

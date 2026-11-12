@@ -34,6 +34,20 @@ type GermlineCNVOccurrence struct {
 	GnomadSF                 *float32           `json:"gnomad_sf,omitempty" gorm:"column:gnomad_sf"`
 	GnomadAF                 *float32           `json:"gnomad_af,omitempty" gorm:"column:gnomad_af"`
 	GnomadAC                 *int               `json:"gnomad_ac,omitempty" gorm:"column:gnomad_ac"`
+	TransmissionMode         string             `json:"transmission_mode,omitempty"`
+	ParentalOrigin           string             `json:"parental_origin,omitempty"`
+	MotherCalls              JsonArray[int]     `json:"mother_calls,omitempty"`
+	MotherCN                 *int               `json:"mother_cn,omitempty" gorm:"column:mother_cn"`
+	MotherBC                 *int               `json:"mother_bc,omitempty" gorm:"column:mother_bc"`
+	MotherPE                 JsonArray[int]     `json:"mother_pe,omitempty" gorm:"column:mother_pe"`
+	MotherSM                 *float32           `json:"mother_sm,omitempty" gorm:"column:mother_sm"`
+	MotherName               string             `json:"mother_name,omitempty"`
+	FatherCalls              JsonArray[int]     `json:"father_calls,omitempty"`
+	FatherCN                 *int               `json:"father_cn,omitempty" gorm:"column:father_cn"`
+	FatherBC                 *int               `json:"father_bc,omitempty" gorm:"column:father_bc"`
+	FatherPE                 JsonArray[int]     `json:"father_pe,omitempty" gorm:"column:father_pe"`
+	FatherSM                 *float32           `json:"father_sm,omitempty" gorm:"column:father_sm"`
+	FatherName               string             `json:"father_name,omitempty"`
 	GermlinePcWgs            *int               `json:"germline_pc_wgs,omitempty"`
 	GermlinePnWgs            *int               `json:"germline_pn_wgs,omitempty"`
 	GermlinePfWgs            *float64           `json:"germline_pf_wgs,omitempty"`
@@ -329,6 +343,124 @@ var GermlineCNVSymbolField = Field{
 	Table:         GermlineCNVOccurrenceTable,
 }
 
+var GermlineCNVTransmissionModeField = Field{
+	Name:            "transmission_mode",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVParentalOriginField = Field{
+	Name:            "parental_origin",
+	CanBeSelected:   true,
+	CanBeFiltered:   true,
+	CanBeAggregated: true,
+	Table:           GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVMotherCallsField = Field{
+	Name:          "mother_calls",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	IsArray:       true,
+	Type:          IntegerType,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVMotherCNField = Field{
+	Name:          "mother_cn",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVMotherBCField = Field{
+	Name:          "mother_bc",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVMotherPEField = Field{
+	Name:          "mother_pe",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	IsArray:       true,
+	Type:          IntegerType,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVMotherSMField = Field{
+	Name:          "mother_sm",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVMotherNameField = Field{
+	Name:          "mother_name",
+	CanBeSelected: true,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVFatherCallsField = Field{
+	Name:          "father_calls",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	IsArray:       true,
+	Type:          IntegerType,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVFatherCNField = Field{
+	Name:          "father_cn",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVFatherBCField = Field{
+	Name:          "father_bc",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          IntegerType,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVFatherPEField = Field{
+	Name:          "father_pe",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	IsArray:       true,
+	Type:          IntegerType,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVFatherSMField = Field{
+	Name:          "father_sm",
+	CanBeSelected: true,
+	CanBeFiltered: true,
+	CanBeSorted:   true,
+	Type:          DecimalType,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
+var GermlineCNVFatherNameField = Field{
+	Name:          "father_name",
+	CanBeSelected: true,
+	Table:         GermlineCNVOccurrenceTable,
+}
+
 var GermlineCNVVariantFrequencyTable = Table{
 	Name:      "germline__cnv__variant_frequency",
 	Alias:     "cnvf",
@@ -547,6 +679,20 @@ var GermlineCNVOccurrencesFields = []Field{
 	GermlineCNVGnomadAC,
 	GermlineCNVCytobandField,
 	GermlineCNVSymbolField,
+	GermlineCNVTransmissionModeField,
+	GermlineCNVParentalOriginField,
+	GermlineCNVMotherCallsField,
+	GermlineCNVMotherCNField,
+	GermlineCNVMotherBCField,
+	GermlineCNVMotherPEField,
+	GermlineCNVMotherSMField,
+	GermlineCNVMotherNameField,
+	GermlineCNVFatherCallsField,
+	GermlineCNVFatherCNField,
+	GermlineCNVFatherBCField,
+	GermlineCNVFatherPEField,
+	GermlineCNVFatherSMField,
+	GermlineCNVFatherNameField,
 	OmimGenePanelField,
 	HpoGenePanelField,
 	DddGenePanelField,

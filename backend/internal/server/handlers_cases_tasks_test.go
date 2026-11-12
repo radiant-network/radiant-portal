@@ -89,7 +89,7 @@ func (e *emptyTaskRepo) ListTasksByCaseAndSequencing(context.Context, int, int, 
 func caseOccurrenceTasksRequest(caseId string, seqId string, dataType string) *httptest.ResponseRecorder {
 	repo := &MockRepository{}
 	router := gin.Default()
-	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", CaseOccurrenceTasksHandler(repo))
+	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", CaseOccurrenceTasksHandler(repo, &stubGermlineCNVTasks{}))
 
 	url := fmt.Sprintf("/radiant/cases/%s/%s/tasks_with_occurrences", caseId, seqId)
 	if dataType != "" {
@@ -113,12 +113,63 @@ func Test_CaseOccurrenceTasksHandler_GermlineSNV_DispatchesGermlineAnnotationTas
 	assert.JSONEq(t, expected, w.Body.String())
 }
 
-func Test_CaseOccurrenceTasksHandler_GermlineCNV_DispatchesGermlineAlignmentTaskType(t *testing.T) {
-	w := caseOccurrenceTasksRequest("1", "1", "germline_cnv")
+type stubGermlineCNVTasks struct {
+	tasks     []types.TaskOccurrenceType
+	err       error
+	called    bool
+	gotCaseId int
+	gotSeqId  int
+}
 
-	expected := `[{"id":91,"task_type_code":"alignment_germline_variant_calling","task_type_name":"Genome Alignment and Germline Variant Calling","pipeline_name":"Dragen","pipeline_version":"4.4.4","genome_build":"GRch38","created_on":"2024-01-01T00:00:00Z"}]`
+func (s *stubGermlineCNVTasks) ListTasks(_ context.Context, caseId int, seqId int) ([]types.TaskOccurrenceType, error) {
+	s.called, s.gotCaseId, s.gotSeqId = true, caseId, seqId
+	return s.tasks, s.err
+}
+
+func germlineCNVTasksRequest(cnvTasks *stubGermlineCNVTasks, dataType string) *httptest.ResponseRecorder {
+	router := gin.Default()
+	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", CaseOccurrenceTasksHandler(&MockRepository{}, cnvTasks))
+	req, _ := http.NewRequest("GET", "/radiant/cases/70/71/tasks_with_occurrences?data_type="+dataType, nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_CaseOccurrenceTasksHandler_GermlineCNV_ReturnsTasksWithCNVRows(t *testing.T) {
+	cnvTasks := &stubGermlineCNVTasks{tasks: []types.TaskOccurrenceType{{
+		ID: 86, TaskTypeCode: types.RadiantGermlineCNVAnnotationTask, TaskTypeName: "RADIANT Germline CNV Annotation",
+		PipelineVersion: "1.0.0", CreatedOn: mockTaskFixedTime,
+	}}}
+
+	w := germlineCNVTasksRequest(cnvTasks, "germline_cnv")
+
+	expected := `[{"id":86,"task_type_code":"radiant_germline_cnv_annotation","task_type_name":"RADIANT Germline CNV Annotation","pipeline_version":"1.0.0","created_on":"2024-01-01T00:00:00Z"}]`
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
+	assert.Equal(t, 70, cnvTasks.gotCaseId)
+	assert.Equal(t, 71, cnvTasks.gotSeqId)
+}
+
+func Test_CaseOccurrenceTasksHandler_GermlineCNV_NoTask_RendersAsEmptyJSONArray(t *testing.T) {
+	w := germlineCNVTasksRequest(&stubGermlineCNVTasks{}, "germline_cnv")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "[]", w.Body.String())
+}
+
+func Test_CaseOccurrenceTasksHandler_GermlineCNV_RepositoryError_Returns500(t *testing.T) {
+	w := germlineCNVTasksRequest(&stubGermlineCNVTasks{err: fmt.Errorf("starrocks down")}, "germline_cnv")
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func Test_CaseOccurrenceTasksHandler_GermlineSNV_DoesNotReadCNVTasks(t *testing.T) {
+	cnvTasks := &stubGermlineCNVTasks{}
+
+	w := germlineCNVTasksRequest(cnvTasks, "germline_snv")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.False(t, cnvTasks.called)
 }
 
 func Test_CaseOccurrenceTasksHandler_SomaticSNV_DispatchesSomaticAnnotationTaskType(t *testing.T) {
@@ -148,7 +199,7 @@ func Test_CaseOccurrenceTasksHandler_SomaticSNVTumorOnly_DispatchesTumorOnlyCoho
 
 func Test_CaseOccurrenceTasksHandler_NilRepoResult_RendersAsEmptyJSONArray(t *testing.T) {
 	router := gin.Default()
-	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", CaseOccurrenceTasksHandler(&emptyTaskRepo{}))
+	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", CaseOccurrenceTasksHandler(&emptyTaskRepo{}, &stubGermlineCNVTasks{}))
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/1/1/tasks_with_occurrences?data_type=germline_snv", nil)
 	w := httptest.NewRecorder()

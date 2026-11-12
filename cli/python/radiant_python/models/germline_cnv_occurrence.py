@@ -37,6 +37,12 @@ class GermlineCNVOccurrence(BaseModel):
     cnv_id: StrictStr
     cytoband: Optional[List[StrictStr]] = None
     end: StrictInt
+    father_bc: Optional[StrictInt] = None
+    father_calls: Optional[List[StrictInt]] = None
+    father_cn: Optional[StrictInt] = None
+    father_name: Optional[StrictStr] = None
+    father_pe: Optional[List[StrictInt]] = None
+    father_sm: Optional[Union[StrictFloat, StrictInt]] = None
     filter: Optional[StrictStr] = None
     flag_type: Optional[OccurrenceFlagType] = None
     germline_pc_wgs: Optional[StrictInt] = None
@@ -64,9 +70,16 @@ class GermlineCNVOccurrence(BaseModel):
     gnomad_sn: Optional[StrictInt] = None
     has_note: StrictBool
     length: StrictInt
+    mother_bc: Optional[StrictInt] = None
+    mother_calls: Optional[List[StrictInt]] = None
+    mother_cn: Optional[StrictInt] = None
+    mother_name: Optional[StrictStr] = None
+    mother_pe: Optional[List[StrictInt]] = None
+    mother_sm: Optional[Union[StrictFloat, StrictInt]] = None
     name: StrictStr
     nb_genes: Optional[StrictInt] = None
     nb_snv: Optional[StrictInt] = None
+    parental_origin: Optional[StrictStr] = None
     pe: Optional[List[StrictInt]] = None
     quality: Optional[Union[StrictFloat, StrictInt]] = None
     reflen: Optional[StrictInt] = None
@@ -77,8 +90,9 @@ class GermlineCNVOccurrence(BaseModel):
     svtype: Optional[StrictStr] = None
     symbol: Optional[List[StrictStr]] = None
     task_id: StrictInt
+    transmission_mode: Optional[StrictStr] = None
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["aliquot", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnv_id", "cytoband", "end", "filter", "flag_type", "germline_pc_wgs", "germline_pc_wgs_affected", "germline_pc_wgs_not_affected", "germline_pc_wxs", "germline_pc_wxs_affected", "germline_pc_wxs_not_affected", "germline_pf_wgs", "germline_pf_wgs_affected", "germline_pf_wgs_not_affected", "germline_pf_wxs", "germline_pf_wxs_affected", "germline_pf_wxs_not_affected", "germline_pn_wgs", "germline_pn_wgs_affected", "germline_pn_wgs_not_affected", "germline_pn_wxs", "germline_pn_wxs_affected", "germline_pn_wxs_not_affected", "gnomad_ac", "gnomad_af", "gnomad_sc", "gnomad_sf", "gnomad_sn", "has_note", "length", "name", "nb_genes", "nb_snv", "pe", "quality", "reflen", "seq_id", "sm", "start", "svlen", "svtype", "symbol", "task_id", "type"]
+    __properties: ClassVar[List[str]] = ["aliquot", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnv_id", "cytoband", "end", "father_bc", "father_calls", "father_cn", "father_name", "father_pe", "father_sm", "filter", "flag_type", "germline_pc_wgs", "germline_pc_wgs_affected", "germline_pc_wgs_not_affected", "germline_pc_wxs", "germline_pc_wxs_affected", "germline_pc_wxs_not_affected", "germline_pf_wgs", "germline_pf_wgs_affected", "germline_pf_wgs_not_affected", "germline_pf_wxs", "germline_pf_wxs_affected", "germline_pf_wxs_not_affected", "germline_pn_wgs", "germline_pn_wgs_affected", "germline_pn_wgs_not_affected", "germline_pn_wxs", "germline_pn_wxs_affected", "germline_pn_wxs_not_affected", "gnomad_ac", "gnomad_af", "gnomad_sc", "gnomad_sf", "gnomad_sn", "has_note", "length", "mother_bc", "mother_calls", "mother_cn", "mother_name", "mother_pe", "mother_sm", "name", "nb_genes", "nb_snv", "parental_origin", "pe", "quality", "reflen", "seq_id", "sm", "start", "svlen", "svtype", "symbol", "task_id", "transmission_mode", "type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -141,6 +155,12 @@ class GermlineCNVOccurrence(BaseModel):
             "cnv_id": obj.get("cnv_id"),
             "cytoband": obj.get("cytoband"),
             "end": obj.get("end"),
+            "father_bc": obj.get("father_bc"),
+            "father_calls": obj.get("father_calls"),
+            "father_cn": obj.get("father_cn"),
+            "father_name": obj.get("father_name"),
+            "father_pe": obj.get("father_pe"),
+            "father_sm": obj.get("father_sm"),
             "filter": obj.get("filter"),
             "flag_type": obj.get("flag_type"),
             "germline_pc_wgs": obj.get("germline_pc_wgs"),
@@ -168,9 +188,16 @@ class GermlineCNVOccurrence(BaseModel):
             "gnomad_sn": obj.get("gnomad_sn"),
             "has_note": obj.get("has_note"),
             "length": obj.get("length"),
+            "mother_bc": obj.get("mother_bc"),
+            "mother_calls": obj.get("mother_calls"),
+            "mother_cn": obj.get("mother_cn"),
+            "mother_name": obj.get("mother_name"),
+            "mother_pe": obj.get("mother_pe"),
+            "mother_sm": obj.get("mother_sm"),
             "name": obj.get("name"),
             "nb_genes": obj.get("nb_genes"),
             "nb_snv": obj.get("nb_snv"),
+            "parental_origin": obj.get("parental_origin"),
             "pe": obj.get("pe"),
             "quality": obj.get("quality"),
             "reflen": obj.get("reflen"),
@@ -181,6 +208,7 @@ class GermlineCNVOccurrence(BaseModel):
             "svtype": obj.get("svtype"),
             "symbol": obj.get("symbol"),
             "task_id": obj.get("task_id"),
+            "transmission_mode": obj.get("transmission_mode"),
             "type": obj.get("type")
         })
         return _obj

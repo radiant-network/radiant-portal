@@ -44,6 +44,10 @@ type caseTasksReader interface {
 	ListTasksByCaseAndSequencing(ctx context.Context, caseId int, seqId int, selector types.TaskSelector) ([]types.TaskOccurrenceType, error)
 }
 
+type germlineCNVTasksReader interface {
+	ListTasks(ctx context.Context, caseId int, seqId int) ([]types.TaskOccurrenceType, error)
+}
+
 type casePatcher interface {
 	PatchCase(ctx context.Context, caseId int, c *types.Case) (bool, error)
 }
@@ -403,9 +407,11 @@ func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc 
 // need to pass the occurrence type. That resolution is more than a lookup for the somatic
 // types: somatic_snv_tn and somatic_snv_to share one task_type_code and are told apart by
 // the tumor/normal makeup of the task, which no client can compute.
+//
+// germline_cnv lists the tasks that have CNV rows for the sequencing.
 // @Summary List tasks producing occurrences of a given type for a (case, sequencing) pair
 // @Id caseTasksWithOccurrences
-// @Description Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches.
+// @Description Return tasks attached to the given case and sequencing experiment whose task type produces occurrences of the requested occurrence type. Sorted by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv returns the tasks that have CNV occurrences for the sequencing.
 // @Tags cases
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
@@ -421,7 +427,7 @@ func CaseEntityDocumentsSearchHandler(repo caseDocumentsReader) gin.HandlerFunc 
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/cases/{case_id}/{seq_id}/tasks_with_occurrences [get]
-func CaseOccurrenceTasksHandler(repo caseTasksReader) gin.HandlerFunc {
+func CaseOccurrenceTasksHandler(repo caseTasksReader, cnvTasks germlineCNVTasksReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		caseId, err := strconv.Atoi(c.Param("case_id"))
 		if err != nil {
@@ -433,13 +439,18 @@ func CaseOccurrenceTasksHandler(repo caseTasksReader) gin.HandlerFunc {
 			HandleNotFoundError(c, "seq_id")
 			return
 		}
-		selector, err := types.OccurrenceType(c.Query("data_type")).TaskSelector()
-		if err != nil {
-			HandleValidationError(c, err)
-			return
+		var tasks []types.TaskOccurrenceType
+		occurrenceType := types.OccurrenceType(c.Query("data_type"))
+		if occurrenceType == types.OccurrenceTypeGermlineCNV {
+			tasks, err = cnvTasks.ListTasks(c.Request.Context(), caseId, seqId)
+		} else {
+			selector, selectorErr := occurrenceType.TaskSelector()
+			if selectorErr != nil {
+				HandleValidationError(c, selectorErr)
+				return
+			}
+			tasks, err = repo.ListTasksByCaseAndSequencing(c.Request.Context(), caseId, seqId, selector)
 		}
-
-		tasks, err := repo.ListTasksByCaseAndSequencing(c.Request.Context(), caseId, seqId, selector)
 		if err != nil {
 			HandleError(c, err)
 			return
