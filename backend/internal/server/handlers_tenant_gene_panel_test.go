@@ -25,7 +25,7 @@ func postTenantGenePanel(router *gin.Engine, path string, body string) *httptest
 func Test_OccurrencesGermlineSNVListHandler_Accepts_TenantGenePanel(t *testing.T) {
 	repo := &occurrenceFiltersRecorder{}
 	router := gin.Default()
-	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineSNVListHandler(repo))
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", OccurrencesGermlineSNVListHandler(repo, emptyInterpretationListCounts{}))
 
 	w := postTenantGenePanel(router, "/radiant/occurrences/germline/snv/1/1/1/list", tenantGenePanelFilterBody)
 
@@ -70,7 +70,7 @@ func Test_OccurrencesGermlineSNVStatisticsHandler_Accepts_TenantGenePanel_Filter
 
 func Test_OccurrencesSomaticSNVListHandler_Accepts_TenantGenePanel(t *testing.T) {
 	router := gin.Default()
-	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(&MockSomaticSNVOccurrencesRepository{}))
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(&MockSomaticSNVOccurrencesRepository{}, emptyInterpretationListCounts{}))
 
 	w := postTenantGenePanel(router, "/radiant/occurrences/somatic/snv/1/1/1/list", tenantGenePanelFilterBody)
 

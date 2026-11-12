@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -98,6 +99,34 @@ func (m *MockRepository) RetrieveSomaticInterpretationClassificationCounts(ctx c
 		"Oncogenic":        2,
 		"Likely Oncogenic": 1,
 	}, nil
+}
+
+func (m *MockRepository) ListGermlineInterpretationClassificationCounts(ctx context.Context, locusIds []string) (map[string]types.JsonMap[string, int], error) {
+	return map[string]types.JsonMap[string, int]{"1000": {"pathogenic": 2, "benign": 1}}, nil
+}
+
+func (m *MockRepository) ListSomaticInterpretationClassificationCounts(ctx context.Context, locusIds []string) (map[string]types.JsonMap[string, int], error) {
+	return map[string]types.JsonMap[string, int]{"1000": {"oncogenic": 2, "likely_oncogenic": 1}}, nil
+}
+
+type emptyInterpretationListCounts struct{}
+
+func (emptyInterpretationListCounts) ListGermlineInterpretationClassificationCounts(context.Context, []string) (map[string]types.JsonMap[string, int], error) {
+	return nil, nil
+}
+
+func (emptyInterpretationListCounts) ListSomaticInterpretationClassificationCounts(context.Context, []string) (map[string]types.JsonMap[string, int], error) {
+	return nil, nil
+}
+
+type failingInterpretationListCounts struct{}
+
+func (failingInterpretationListCounts) ListGermlineInterpretationClassificationCounts(context.Context, []string) (map[string]types.JsonMap[string, int], error) {
+	return nil, errors.New("postgres unavailable")
+}
+
+func (failingInterpretationListCounts) ListSomaticInterpretationClassificationCounts(context.Context, []string) (map[string]types.JsonMap[string, int], error) {
+	return nil, errors.New("postgres unavailable")
 }
 
 func assertGetInterpretationGermline(t *testing.T, caseId string, sequencingId string, locusId string, transcriptId string, status int, expected string) {

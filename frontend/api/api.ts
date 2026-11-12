@@ -4608,6 +4608,12 @@ export interface GermlineSNVOccurrence {
     'hgvsg': string;
     /**
      * 
+     * @type {{ [key: string]: number; }}
+     * @memberof GermlineSNVOccurrence
+     */
+    'interpretation_classification_counts'?: { [key: string]: number; };
+    /**
+     * 
      * @type {boolean}
      * @memberof GermlineSNVOccurrence
      */
@@ -8927,6 +8933,12 @@ export interface SomaticSNVOccurrence {
      * @memberof SomaticSNVOccurrence
      */
     'hotspot': boolean;
+    /**
+     * 
+     * @type {{ [key: string]: number; }}
+     * @memberof SomaticSNVOccurrence
+     */
+    'interpretation_classification_counts'?: { [key: string]: number; };
     /**
      * 
      * @type {boolean}

@@ -82,6 +82,7 @@ class GermlineSNVOccurrence(BaseModel):
     has_interpretation: StrictBool
     has_note: StrictBool
     hgvsg: StrictStr
+    interpretation_classification_counts: Optional[Dict[str, StrictInt]] = None
     is_canonical: Optional[StrictBool] = None
     is_mane_plus: Optional[StrictBool] = None
     is_mane_select: Optional[StrictBool] = None
@@ -119,7 +120,7 @@ class GermlineSNVOccurrence(BaseModel):
     variant_class: StrictStr
     vep_impact: Optional[VepImpact] = None
     zygosity: StrictStr
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "cmc_mutation_url", "cmc_sample_mutated", "cmc_sample_ratio", "cmc_tier", "comphet_genes", "end", "exomiser_acmg_classification", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_variant_score", "filter", "flag_type", "genotype_quality", "germline_af_wgs", "germline_af_wgs_affected", "germline_af_wgs_not_affected", "germline_af_wxs", "germline_af_wxs_affected", "germline_af_wxs_not_affected", "germline_hom_wgs", "germline_hom_wgs_affected", "germline_hom_wgs_not_affected", "germline_hom_wxs", "germline_hom_wxs_affected", "germline_hom_wxs_not_affected", "germline_pc_wgs", "germline_pc_wgs_affected", "germline_pc_wgs_not_affected", "germline_pc_wxs", "germline_pc_wxs_affected", "germline_pc_wxs_not_affected", "germline_pf_wgs", "germline_pf_wgs_affected", "germline_pf_wgs_not_affected", "germline_pf_wxs", "germline_pf_wxs_affected", "germline_pf_wxs_not_affected", "germline_pn_wgs", "germline_pn_wgs_affected", "germline_pn_wgs_not_affected", "germline_pn_wxs", "germline_pn_wxs_affected", "germline_pn_wxs_not_affected", "gnomad_v3_af", "has_comphet", "has_interpretation", "has_note", "hgvsg", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "max_impact_score", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "somatic_af_tn_wgs", "somatic_af_tn_wxs", "somatic_af_to_wgs", "somatic_af_to_wxs", "somatic_hom_tn_wgs", "somatic_hom_tn_wxs", "somatic_hom_to_wgs", "somatic_hom_to_wxs", "somatic_pc_tn_wgs", "somatic_pc_tn_wxs", "somatic_pc_to_wgs", "somatic_pc_to_wxs", "somatic_pf_tn_wgs", "somatic_pf_tn_wxs", "somatic_pf_to_wgs", "somatic_pf_to_wxs", "somatic_pn_tn_wgs", "somatic_pn_tn_wxs", "somatic_pn_to_wgs", "somatic_pn_to_wxs", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact", "zygosity"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "chromosome", "clinvar", "cmc_mutation_url", "cmc_sample_mutated", "cmc_sample_ratio", "cmc_tier", "comphet_genes", "end", "exomiser_acmg_classification", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_variant_score", "filter", "flag_type", "genotype_quality", "germline_af_wgs", "germline_af_wgs_affected", "germline_af_wgs_not_affected", "germline_af_wxs", "germline_af_wxs_affected", "germline_af_wxs_not_affected", "germline_hom_wgs", "germline_hom_wgs_affected", "germline_hom_wgs_not_affected", "germline_hom_wxs", "germline_hom_wxs_affected", "germline_hom_wxs_not_affected", "germline_pc_wgs", "germline_pc_wgs_affected", "germline_pc_wgs_not_affected", "germline_pc_wxs", "germline_pc_wxs_affected", "germline_pc_wxs_not_affected", "germline_pf_wgs", "germline_pf_wgs_affected", "germline_pf_wgs_not_affected", "germline_pf_wxs", "germline_pf_wxs_affected", "germline_pf_wxs_not_affected", "germline_pn_wgs", "germline_pn_wgs_affected", "germline_pn_wgs_not_affected", "germline_pn_wxs", "germline_pn_wxs_affected", "germline_pn_wxs_not_affected", "gnomad_v3_af", "has_comphet", "has_interpretation", "has_note", "hgvsg", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus", "locus_id", "max_impact_score", "omim_inheritance_code", "picked_consequences", "rsnumber", "seq_id", "somatic_af_tn_wgs", "somatic_af_tn_wxs", "somatic_af_to_wgs", "somatic_af_to_wxs", "somatic_hom_tn_wgs", "somatic_hom_tn_wxs", "somatic_hom_to_wgs", "somatic_hom_to_wxs", "somatic_pc_tn_wgs", "somatic_pc_tn_wxs", "somatic_pc_to_wgs", "somatic_pc_to_wxs", "somatic_pf_tn_wgs", "somatic_pf_tn_wxs", "somatic_pf_to_wgs", "somatic_pf_to_wxs", "somatic_pn_tn_wgs", "somatic_pn_tn_wxs", "somatic_pn_to_wgs", "somatic_pn_to_wxs", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact", "zygosity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -232,6 +233,7 @@ class GermlineSNVOccurrence(BaseModel):
             "has_interpretation": obj.get("has_interpretation"),
             "has_note": obj.get("has_note"),
             "hgvsg": obj.get("hgvsg"),
+            "interpretation_classification_counts": obj.get("interpretation_classification_counts"),
             "is_canonical": obj.get("is_canonical"),
             "is_mane_plus": obj.get("is_mane_plus"),
             "is_mane_select": obj.get("is_mane_select"),
