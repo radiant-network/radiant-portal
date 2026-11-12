@@ -23,7 +23,7 @@
   "dependencies": {
     "@react-router/node": "^8.4.0",
     "@react-router/serve": "^8.4.0",
-    "@vitejs/plugin-rsc": "^0.5.27",
+    "@vitejs/plugin-rsc": "^0.5.39",
     "axios": "^1.20.0",
     "isbot": "^5.1.40",
     "jwt-decode": "4.0.0",

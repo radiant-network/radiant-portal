@@ -223,6 +223,7 @@ func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 func cnvGenesOverlapSQL(ctx context.Context) string {
 	ensemblGene := types.EnsemblGeneTable.TenantQualifiedName(ctx)
 	ensemblExon := types.Table{Name: "ensembl_exon_by_gene"}.TenantQualifiedName(ctx)
+	referenceTranscript := types.Table{Name: "gene_reference_transcript"}.TenantQualifiedName(ctx)
 	cytoband := types.Table{Name: "cytoband"}.TenantQualifiedName(ctx)
 	tenantGenePanels := types.TenantGenePanelTable.TenantQualifiedName(ctx)
 	return fmt.Sprintf(`WITH gene_overlap AS (
@@ -232,8 +233,11 @@ func cnvGenesOverlapSQL(ctx context.Context) string {
     	    g.length AS gene_length,
     	    GREATEST(0, LEAST(g.end, @cnv_end) - GREATEST(g.start, @cnv_start)) AS nb_overlap_bases,
     	    g.start AS gene_start,
-    	    g.end AS gene_end
+    	    g.end AS gene_end,
+    	    rt.ensembl_transcript_id AS reference_transcript_id,
+    	    rt.refseq_transcript_id
     	FROM %s g
+    	LEFT JOIN %s rt ON rt.ensembl_gene_id = g.gene_id
     	WHERE g.chromosome = @cnv_chromosome
     	  AND g.end >= @cnv_start
     	  AND g.start <= @cnv_end
@@ -245,6 +249,7 @@ func cnvGenesOverlapSQL(ctx context.Context) string {
          FROM gene_overlap go
                   JOIN %s e
                        ON go.gene_id = e.gene_id
+                           AND array_contains(e.transcript_ids, go.reference_transcript_id)
                            AND e.end >= @cnv_start
                            AND e.start <= @cnv_end
          GROUP BY go.gene_id
@@ -275,6 +280,7 @@ func cnvGenesOverlapSQL(ctx context.Context) string {
     	go.gene_length,
     	go.nb_overlap_bases,
     	COALESCE(eo.nb_exons, 0) AS nb_exons,
+    	go.refseq_transcript_id,
     	ROUND(100.0 * go.nb_overlap_bases  / go.gene_length, 2) AS overlapping_gene_percent,
     	ROUND(100.0 * go.nb_overlap_bases  / @cnv_length, 2) AS overlapping_cnv_percent,
     	CASE
@@ -288,5 +294,5 @@ func cnvGenesOverlapSQL(ctx context.Context) string {
     	     LEFT JOIN gene_overlap_cytoband gc ON go.gene_id=gc.gene_id
     	     LEFT JOIN gene_tenant_panels gtp ON go.symbol = gtp.symbol
 		ORDER BY overlapping_gene_percent DESC, overlapping_cnv_percent DESC;`,
-		ensemblGene, ensemblExon, cytoband, tenantGenePanels)
+		ensemblGene, referenceTranscript, ensemblExon, cytoband, tenantGenePanels)
 }

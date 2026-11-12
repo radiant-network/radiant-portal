@@ -99,6 +99,7 @@ func (m *MockCNVRepository) CountOccurrences(context.Context, int, int, int, typ
 }
 
 func (m *MockCNVRepository) GetGenesOverlap(ctx context.Context, caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error) {
+	refseq := "NM_000001.1"
 	return []types.CNVGeneOverlap{
 		{
 			Symbol:                 "GENE1",
@@ -107,6 +108,7 @@ func (m *MockCNVRepository) GetGenesOverlap(ctx context.Context, caseId int, seq
 			NbOverlapBases:         10,
 			Cytoband:               []string{"p1.1", "p1.2"},
 			NbExons:                1,
+			RefseqTranscriptId:     &refseq,
 			OverlappingGenePercent: 10,
 			OverlappingCNVPercent:  5,
 			OverlapType:            "partial",
@@ -316,6 +318,7 @@ func Test_CNVOccurrencesGenesOverlapHandler(t *testing.T) {
 			"nb_overlap_bases": 10,
 			"cytoband": ["p1.1", "p1.2"],
 			"nb_exons": 1,
+			"refseq_transcript_id": "NM_000001.1",
 			"overlapping_gene_percent": 10,
 			"overlapping_cnv_percent": 5,
 			"overlap_type": "partial",

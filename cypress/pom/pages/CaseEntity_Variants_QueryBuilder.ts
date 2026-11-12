@@ -226,6 +226,19 @@ const generateQueryBuilderFunctions = (
       cy.get(CommonSelectors.querySelectCheckbox).should(shouldShow ? 'be.visible' : 'not.be.visible');
     },
     /**
+     * Checks whether the Combine button is displayed.
+     * @param shouldExist Whether the button should exist.
+     */
+    shouldShowCombine(shouldExist: boolean) {
+      cy.get(CommonSelectors.combineQueriesButton).should(shouldExist ? 'exist' : 'not.exist');
+    },
+    /**
+     * Checks that no query is selected for combination.
+     */
+    shouldHaveNoSelectedQuery() {
+      cy.get(`${CommonSelectors.querySelectCheckbox}[data-state="checked"]`).should('not.exist');
+    },
+    /**
      * Checks the number of pills in the active query.
      * @param count The expected pill count.
      */

@@ -161,6 +161,14 @@ func Test_CNVGenesOverlapSQL_Reads_Only_The_Bound_Tenant_Gene_Panel_MV(t *testin
 	assert.Equal(t, 1, strings.Count(sql, "gene_panel_mv"), "the MV must be read once, through the tenant database")
 }
 
+func Test_CNVGenesOverlapSQL_BoundTenant_Reads_The_Shared_Reference_Transcript(t *testing.T) {
+	t.Parallel()
+	sql := cnvGenesOverlapSQL(types.ContextWithTenant(context.Background(), "tenant1"))
+
+	assert.Contains(t, sql, "radiant.gene_reference_transcript rt")
+	assert.NotContains(t, sql, "tenant1_tenant.gene_reference_transcript")
+}
+
 func Test_CaseWithProbandSample_BoundTenant_QualifiesSubqueryTables(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		ctx := types.ContextWithTenant(env.Ctx, "tenant1")

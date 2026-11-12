@@ -142,6 +142,8 @@ components:
           type: number
         overlapping_gene_percent:
           type: number
+        refseq_transcript_id:
+          type: string
         symbol:
           type: string
         tenant_gene_panels:

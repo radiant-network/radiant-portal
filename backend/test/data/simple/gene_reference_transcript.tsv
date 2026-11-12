@@ -1,0 +1,4 @@
+ensembl_gene_id	ensembl_transcript_id	ensembl_transcript_version	is_mane_select	refseq_transcript_id
+ENSG00000000003	ENST00000373020	9	true	NM_003270.4
+ENSG00000000005	ENST00000373031	5	true	NM_022144.3
+ENSG00000000419	ENST00000371588	10	false	NULL

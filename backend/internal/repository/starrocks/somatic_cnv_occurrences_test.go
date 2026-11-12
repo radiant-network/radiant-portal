@@ -469,9 +469,20 @@ func Test_SomaticCNV_GetGenesOverlap(t *testing.T) {
 				assert.EqualValues(t, 40, fullGeneOverlap.OverlappingCNVPercent)
 				assert.EqualValues(t, 100, fullGeneOverlap.OverlappingGenePercent)
 				assert.EqualValues(t, "full_gene", fullGeneOverlap.OverlapType)
-				assert.EqualValues(t, 1, fullGeneOverlap.NbExons)
+				assert.EqualValues(t, 1, fullGeneOverlap.NbExons, "the exon of its other transcript is not counted")
+				assert.EqualValues(t, "NM_003270.4", *fullGeneOverlap.RefseqTranscriptId)
 				assert.EqualValues(t, "ENSG00000000003", fullGeneOverlap.GeneId)
 				assert.EqualValues(t, types.JsonArray[string]{"p1.1"}, fullGeneOverlap.Cytoband)
+
+				partialGeneOverlap := overlaps[1]
+				assert.Equal(t, "DPM1", partialGeneOverlap.Symbol)
+				assert.EqualValues(t, 1, partialGeneOverlap.NbExons, "counted on the canonical transcript without MANE Select")
+				assert.Nil(t, partialGeneOverlap.RefseqTranscriptId)
+
+				fullCnvOverlap := overlaps[2]
+				assert.Equal(t, "TNMD", fullCnvOverlap.Symbol)
+				assert.EqualValues(t, 2, fullCnvOverlap.NbExons, "the exon of its other transcript is not counted")
+				assert.EqualValues(t, "NM_022144.3", *fullCnvOverlap.RefseqTranscriptId)
 			}
 		}
 	})

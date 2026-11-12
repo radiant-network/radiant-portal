@@ -1,6 +1,11 @@
-import axios, { HttpStatusCode } from 'axios';
+import axios, { AxiosError, HttpStatusCode } from 'axios';
 
-import { redirectToLogout, resetAuthRedirectAttempts } from './auth-redirect';
+import {
+  isEdgeSessionExpired,
+  redirectToLogout,
+  reloadForEdgeReauth,
+  resetAuthRedirectAttempts,
+} from './auth-redirect';
 
 export const axiosClient = axios.create({
   baseURL: '/api',
@@ -18,6 +23,11 @@ axiosClient.interceptors.response.use(
   },
   async error => {
     const originalRequest = error.config;
+
+    if (!error.response && error.code === AxiosError.ERR_NETWORK && (await isEdgeSessionExpired())) {
+      if (reloadForEdgeReauth()) return new Promise(() => {});
+      return Promise.reject(error);
+    }
 
     if (refreshTokenPromise) {
       try {
