@@ -2734,6 +2734,8 @@
         "cnv": "CNV",
         "cnv_to": "CNV (TO)",
         "latest": "Récente",
+        "no_cnv_tooltip": "Aucun CNV pour cet échantillon",
+        "no_snv_tooltip": "Aucun SNV pour cet échantillon",
         "sample_submitter_id": "ID soumissionnaire :",
         "sample_id": "ID échantillon",
         "select_task_label": "Pipeline produisant des lectures alignées et des variants identifiés.",

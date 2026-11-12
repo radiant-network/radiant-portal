@@ -302,7 +302,7 @@ func Test_CaseEntityHandler_PrenatalCaseWithExams(t *testing.T) {
 		"panel_code":"EPILEP",
 		"panel_name":"Epilepsy",
 		"sequencing_experiments":[
-			{"seq_id":77, "patient_id":65, "fetus_id":4, "relationship_to_proband":"fetus", "sample_id":129, "sample_submitter_id":"S-PRENAT-74", "sample_type_code":"dna", "affected_status_code":"unknown", "histology_code":"normal", "experimental_strategy_code":"wxs", "status_code":"completed", "updated_on":"2026-04-03T13:08:00Z", "has_variants":false}
+			{"seq_id":77, "patient_id":65, "fetus_id":4, "relationship_to_proband":"fetus", "sample_id":129, "sample_submitter_id":"S-PRENAT-74", "sample_type_code":"dna", "affected_status_code":"unknown", "histology_code":"normal", "experimental_strategy_code":"wxs", "status_code":"completed", "updated_on":"2026-04-03T13:08:00Z", "has_variants":false, "has_snv":false, "has_cnv":false}
 		],
 		"members":[
 			{
@@ -374,9 +374,9 @@ func Test_CaseEntityHandler_PrenatalCaseWithExams(t *testing.T) {
 func Test_CaseEntityHandler(t *testing.T) {
 	expected := `{
 		"sequencing_experiments":[
-			{"affected_status_code":"affected", "experimental_strategy_code":"wgs", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true}, 
-			{"affected_status_code":"affected", "experimental_strategy_code":"wgs", "patient_id":1, "relationship_to_proband":"mother", "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true},
-			{"affected_status_code":"non_affected", "experimental_strategy_code":"wgs", "patient_id":2, "relationship_to_proband":"father", "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": false}
+			{"affected_status_code":"affected", "experimental_strategy_code":"wgs", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true, "has_snv": true, "has_cnv": false},
+			{"affected_status_code":"affected", "experimental_strategy_code":"wgs", "patient_id":1, "relationship_to_proband":"mother", "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": true, "has_snv": true, "has_cnv": false},
+			{"affected_status_code":"non_affected", "experimental_strategy_code":"wgs", "patient_id":2, "relationship_to_proband":"father", "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"completed", "updated_on":"2021-09-12T13:08:00Z", "histology_code": "normal", "has_variants": false, "has_snv": false, "has_cnv": false}
 		],
 		"analysis_catalog_code":"WGA",
 		"analysis_catalog_name":"Whole Genome Analysis",

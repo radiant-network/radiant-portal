@@ -803,6 +803,10 @@ components:
           type: string
         fetus_id:
           type: integer
+        has_cnv:
+          type: boolean
+        has_snv:
+          type: boolean
         has_variants:
           type: boolean
         histology_code:
@@ -826,6 +830,8 @@ components:
       required:
       - affected_status_code
       - experimental_strategy_code
+      - has_cnv
+      - has_snv
       - has_variants
       - patient_id
       - relationship_to_proband

@@ -563,6 +563,8 @@ func Test_RetrieveCaseSequencingExperiments_Germline(t *testing.T) {
 		assert.Equal(t, "dna", (*sequencingExperiments)[0].SampleTypeCode)
 		assert.Equal(t, "normal", (*sequencingExperiments)[0].HistologyCode)
 		assert.True(t, (*sequencingExperiments)[0].HasVariants)
+		assert.True(t, (*sequencingExperiments)[0].HasSnv)
+		assert.False(t, (*sequencingExperiments)[0].HasCnv)
 
 		// Affected then non_affected
 		assert.Equal(t, "mother", (*sequencingExperiments)[1].RelationshipToProband)
@@ -574,6 +576,8 @@ func Test_RetrieveCaseSequencingExperiments_Germline(t *testing.T) {
 		assert.Equal(t, "dna", (*sequencingExperiments)[1].SampleTypeCode)
 		assert.Equal(t, "normal", (*sequencingExperiments)[1].HistologyCode)
 		assert.True(t, (*sequencingExperiments)[1].HasVariants)
+		assert.True(t, (*sequencingExperiments)[1].HasSnv)
+		assert.False(t, (*sequencingExperiments)[1].HasCnv)
 
 		assert.Equal(t, "father", (*sequencingExperiments)[2].RelationshipToProband)
 		assert.Equal(t, 3, (*sequencingExperiments)[2].SeqID)
@@ -584,6 +588,31 @@ func Test_RetrieveCaseSequencingExperiments_Germline(t *testing.T) {
 		assert.Equal(t, "dna", (*sequencingExperiments)[2].SampleTypeCode)
 		assert.Equal(t, "normal", (*sequencingExperiments)[2].HistologyCode)
 		assert.False(t, (*sequencingExperiments)[2].HasVariants)
+		assert.False(t, (*sequencingExperiments)[2].HasSnv)
+		assert.False(t, (*sequencingExperiments)[2].HasCnv)
+	})
+}
+
+// Case 70 seq 70 has only a radiant_germline_cnv_annotation task staged (no SNV annotation) —
+// has_variants must still be true so the frontend shows the Variants tab, driven by has_cnv.
+func Test_RetrieveCaseSequencingExperiments_CNVOnly(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(t.Context(), 70)
+		assert.NoError(t, err)
+		require.Len(t, *sequencingExperiments, 3)
+
+		var cnvOnlySeq *CaseSequencingExperiment
+		for i := range *sequencingExperiments {
+			if (*sequencingExperiments)[i].SeqID == 70 {
+				cnvOnlySeq = &(*sequencingExperiments)[i]
+				break
+			}
+		}
+		require.NotNil(t, cnvOnlySeq, "seq 70 must be present on case 70")
+		assert.True(t, cnvOnlySeq.HasVariants)
+		assert.True(t, cnvOnlySeq.HasCnv)
+		assert.False(t, cnvOnlySeq.HasSnv)
 	})
 }
 
@@ -602,6 +631,8 @@ func Test_RetrieveCaseSequencingExperiments_Somatic(t *testing.T) {
 		assert.Equal(t, "dna", (*sequencingExperiments)[0].SampleTypeCode)
 		assert.Equal(t, "tumoral", (*sequencingExperiments)[0].HistologyCode)
 		assert.True(t, (*sequencingExperiments)[0].HasVariants)
+		assert.True(t, (*sequencingExperiments)[0].HasSnv)
+		assert.False(t, (*sequencingExperiments)[0].HasCnv)
 
 		assert.Equal(t, "proband", (*sequencingExperiments)[1].RelationshipToProband)
 		assert.Equal(t, 73, (*sequencingExperiments)[1].SeqID)
@@ -611,6 +642,8 @@ func Test_RetrieveCaseSequencingExperiments_Somatic(t *testing.T) {
 		assert.Equal(t, "dna", (*sequencingExperiments)[1].SampleTypeCode)
 		assert.Equal(t, "normal", (*sequencingExperiments)[1].HistologyCode)
 		assert.False(t, (*sequencingExperiments)[1].HasVariants)
+		assert.False(t, (*sequencingExperiments)[1].HasSnv)
+		assert.False(t, (*sequencingExperiments)[1].HasCnv)
 	})
 }
 
