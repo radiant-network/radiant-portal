@@ -187,6 +187,20 @@ omim_symbols = {o[0] for o in genomics.OMIM}
 REAL_COLS = {"is_mane_select": ("mane", lambda x: x == "1"), "is_canonical": ("canonical", lambda x: x == "1")}
 
 
+def variant_parts():
+    """snv__variant_partitioned as the ETL fills it: the variants of each slice of 10 occurrence parts, under part DIV 10."""
+    return f"""INSERT OVERWRITE {TENANT_DB}.snv__variant_partitioned
+SELECT p.part, v.*
+FROM {TENANT_DB}.snv__variant v
+JOIN (
+    SELECT DISTINCT locus_id, part DIV 10 AS part FROM (
+        SELECT locus_id, part FROM {TENANT_DB}.germline__snv__occurrence
+        UNION ALL
+        SELECT locus_id, part FROM {TENANT_DB}.somatic__snv__occurrence
+    ) o
+) p ON p.locus_id = v.locus_id;"""
+
+
 def variant_row(v, pc, pn, sc, sn):
     hgvsg = f"chr{v.chrom}:g.{v.pos}{v.ref}>{v.alt}"
     row = [v.locus_id, v.chrom, v.pos, v.pos, v.ref, v.alt, v.locus, hgvsg, f"{v.transcript}:{v.hgvsc}" if v.hgvsc else None,
@@ -433,6 +447,7 @@ FROM (
 ) f
 WHERE snv__variant.locus_id = f.locus_id;""")
     S.append(f"DELETE FROM {TENANT_DB}.snv__variant WHERE germline_pc_wgs = 0 AND somatic_pc_tn_wgs = 0;")
+    S.append(variant_parts())
     S += source_tables(pcx_tables, swap=True) + source_tables(hin_tables(args.deid), swap=True) + patient_keys(patients)
 
     os.makedirs(args.out, exist_ok=True)
@@ -605,6 +620,7 @@ REFERENCE = [] if QA else [
     insert(f"{SHARED_DB}.hpo_term", ["id", "name", "term"], [[i, n, f"{i} {n}"] for i, n in genomics.HPO + genomics.PRENATAL_HPO])]
 S += REFERENCE
 S += occurrence_rows(sr)
+S.append(variant_parts())
 
 # PCX source tables, MRI and labs, the data dictionary, the URL keys and the HIN exchanges.
 S += source_tables(pcx_tables)

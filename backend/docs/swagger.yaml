@@ -5395,6 +5395,65 @@ components:
       - locus
       - picked_consequences
       type: object
+    VariantSearchBody:
+      description: 'Body of a search by variant identifier: a locus, an HGVSg, an
+        rsID or a ClinVar variation ID'
+      properties:
+        input:
+          type: string
+      required:
+      - input
+      type: object
+    VariantSearchField:
+      type: string
+      x-enum-varnames:
+      - VariantSearchFieldLocus
+      - VariantSearchFieldHgvsg
+      - VariantSearchFieldRsnumber
+      - VariantSearchFieldClinvarId
+    VariantSearchHit:
+      description: A variant of the run matching the searched identifier
+      properties:
+        aa_change:
+          type: string
+        clinvar_id:
+          type: string
+        hgvsg:
+          type: string
+        locus:
+          type: string
+        rsnumber:
+          type: string
+        symbol:
+          type: string
+      required:
+      - hgvsg
+      - locus
+      type: object
+    VariantSearchResult:
+      description: Result of a search by variant identifier in a run
+      properties:
+        matched_field:
+          $ref: '#/components/schemas/VariantSearchField'
+        normalized_input:
+          type: string
+        status:
+          $ref: '#/components/schemas/VariantSearchStatus'
+        variants:
+          items:
+            $ref: '#/components/schemas/VariantSearchHit'
+          type: array
+          uniqueItems: false
+      required:
+      - status
+      - variants
+      type: object
+    VariantSearchStatus:
+      type: string
+      x-enum-varnames:
+      - VariantSearchFound
+      - VariantSearchNotFoundInRun
+      - VariantSearchUnrecognizedFormat
     VariantUninterpretedCase:
       properties:
         ad_alt:
@@ -9222,6 +9281,92 @@ paths:
         a case
       tags:
       - occurrences
+  /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/search:
+    post:
+      description: |-
+        Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the germline SNVs of a run.
+        Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
+      operationId: searchGermlineSNVOccurrences
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VariantSearchBody'
+        description: Search Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantSearchResult'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Search a variant in the germline SNVs of a run
+      tags:
+      - occurrences
   /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics:
     post:
       description: Return statistics about a field for a given sequence ID
@@ -10237,6 +10382,92 @@ paths:
       - bearerauth: []
       summary: Download the transcript report (xlsx) of somatic SNV occurrences of
         a case
+      tags:
+      - occurrences
+  /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/search:
+    post:
+      description: |-
+        Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing.
+        Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
+      operationId: searchSomaticSNVOccurrences
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Tumor sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VariantSearchBody'
+        description: Search Body
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VariantSearchResult'
+          description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Search a variant in the somatic SNVs of a run
       tags:
       - occurrences
   /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics:

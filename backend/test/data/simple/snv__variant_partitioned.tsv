@@ -1,0 +1,5 @@
+part	locus_id	chromosome	start	locus	hgvsg	rsnumber	clinvar_name	symbol	aa_change
+0	1000	1	1111	locus1	hgvsg1	rs111111111	11111	BRAF	p.Arg19His
+0	2000	2	2222	locus2	hgvsg2	rs222222222	NULL	symbol1	p.Arg19His
+0	3000	3	3333	locus3	hgvsg2	rs222222222	NULL	symbol1	p.Arg19His
+1	2000	2	2222	locus2	hgvsg2-other-part	rs222222222	NULL	symbol1	p.Arg19His

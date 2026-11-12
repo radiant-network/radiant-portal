@@ -9,14 +9,19 @@ import (
 	"gorm.io/gorm"
 )
 
+func snvSeqIdColumn(snvTable types.Table) string {
+	if snvTable == types.SomaticSNVOccurrenceTable {
+		return "tumor_seq_id"
+	}
+	return "seq_id"
+}
+
 func AddImplicitSNVOccurrencesFilters(snvTable types.Table, seqId int, taskId int, db *gorm.DB, part int) *gorm.DB {
 	alias := snvTable.Alias
 	tx := db.Table(fmt.Sprintf("%s %s", snvTable.TenantQualifiedName(utils.CtxOf(db)), alias))
 	switch snvTable {
-	case types.GermlineSNVOccurrenceTable:
-		tx = tx.Where(fmt.Sprintf("%s.seq_id = ? AND %s.task_id = ? AND %s.part=?", alias, alias, alias), seqId, taskId, part)
-	case types.SomaticSNVOccurrenceTable:
-		tx = tx.Where(fmt.Sprintf("%s.tumor_seq_id = ? AND %s.task_id = ? AND %s.part=?", alias, alias, alias), seqId, taskId, part)
+	case types.GermlineSNVOccurrenceTable, types.SomaticSNVOccurrenceTable:
+		tx = tx.Where(fmt.Sprintf("%s.%s = ? AND %s.task_id = ? AND %s.part=?", alias, snvSeqIdColumn(snvTable), alias, alias), seqId, taskId, part)
 	}
 	return tx
 }

@@ -157,6 +157,8 @@ Class | Method | HTTP request | Description
 *OccurrencesApi* | [**list_somatic_cnv_genes_overlap**](docs/OccurrencesApi.md#list_somatic_cnv_genes_overlap) | **GET** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap | List genes overlapping a somatic CNV with a given ID
 *OccurrencesApi* | [**list_somatic_cnv_occurrences**](docs/OccurrencesApi.md#list_somatic_cnv_occurrences) | **POST** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/list | List somatic CNV occurrences
 *OccurrencesApi* | [**list_somatic_snv_occurrences**](docs/OccurrencesApi.md#list_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list | List somatic SNV occurrences
+*OccurrencesApi* | [**search_germline_snv_occurrences**](docs/OccurrencesApi.md#search_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/search | Search a variant in the germline SNVs of a run
+*OccurrencesApi* | [**search_somatic_snv_occurrences**](docs/OccurrencesApi.md#search_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/search | Search a variant in the somatic SNVs of a run
 *OccurrencesApi* | [**statistics_germline_cnv_occurrences**](docs/OccurrencesApi.md#statistics_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline CNV occurrences
 *OccurrencesApi* | [**statistics_germline_snv_occurrences**](docs/OccurrencesApi.md#statistics_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline SNV occurrences
 *OccurrencesApi* | [**statistics_somatic_cnv_occurrences**](docs/OccurrencesApi.md#statistics_somatic_cnv_occurrences) | **POST** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of somatic CNV occurrences
@@ -397,6 +399,9 @@ Class | Method | HTTP request | Description
  - [VariantInterpretedCase](docs/VariantInterpretedCase.md)
  - [VariantInterpretedCasesSearchResponse](docs/VariantInterpretedCasesSearchResponse.md)
  - [VariantOverview](docs/VariantOverview.md)
+ - [VariantSearchBody](docs/VariantSearchBody.md)
+ - [VariantSearchHit](docs/VariantSearchHit.md)
+ - [VariantSearchResult](docs/VariantSearchResult.md)
  - [VariantUninterpretedCase](docs/VariantUninterpretedCase.md)
  - [VariantUninterpretedCasesSearchResponse](docs/VariantUninterpretedCasesSearchResponse.md)
  - [VepImpact](docs/VepImpact.md)
