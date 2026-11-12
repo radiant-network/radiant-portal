@@ -102,4 +102,28 @@ describe('Case Entity - Variants - Germline - SNV - Query builder - Two queries'
     CaseEntity_Variants_QueryBuilder.snv.validations.shouldBeEmptyQuery();
     CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowClearAll(false /*shouldExist*/);
   });
+
+  it('Hide Combine after deleting a selected query', () => {
+    setupTest();
+    CaseEntity_Variants_QueryBuilder.snv.actions.selectQuery(0);
+    CaseEntity_Variants_QueryBuilder.snv.actions.selectQuery(1);
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowCombine(true /*shouldExist*/);
+
+    CaseEntity_Variants_QueryBuilder.snv.actions.deleteQuery(1, true /*confirm*/);
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowCombine(false /*shouldExist*/);
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowLabelsSwitch(true /*shouldExist*/);
+  });
+
+  it('Do not restore the selection after adding a query back', () => {
+    setupTest();
+    CaseEntity_Variants_QueryBuilder.snv.actions.selectQuery(0);
+    CaseEntity_Variants_QueryBuilder.snv.actions.selectQuery(1);
+    CaseEntity_Variants_QueryBuilder.snv.actions.deleteQuery(1, true /*confirm*/);
+
+    CaseEntity_Variants_QueryBuilder.snv.actions.clickNewQuery();
+    CaseEntity_Variants_QueryBuilder.snv.actions.addSecondPill();
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowQuerySelectCheckboxes(true /*shouldShow*/);
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldHaveNoSelectedQuery();
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowCombine(false /*shouldExist*/);
+  });
 });

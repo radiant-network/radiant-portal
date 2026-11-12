@@ -7,7 +7,7 @@ import type { Count, CountBodyWithSqon, SortBody, Sqon, SqonContent, SqonOpEnum 
 import type { TableProps } from '@/components/base/data-table/data-table';
 import type { AggregationConfig, IFilterRangeConfig } from '@/components/cores/applications-config';
 
-import { createEmptyQuery, hasEmptyQuery, isEqualToField } from '../libs/sqon';
+import { createEmptyQuery, hasEmptyQuery, isEqualToField, isSqonEmpty } from '../libs/sqon';
 import {
   BooleanOperators,
   type ISqonGroupFacet,
@@ -230,7 +230,19 @@ export type ActionType =
   | LoadQueriesAction
   | any;
 
+function pruneSelectedQueries(context: IQBContext): IQBContext {
+  const combinableIds = context.sqons.filter(sqon => !isSqonEmpty(sqon)).map(sqon => sqon.id);
+  const selectedQueries =
+    combinableIds.length < 2 ? [] : context.cache.selectedQueries.filter(id => combinableIds.includes(id));
+  if (selectedQueries.length === context.cache.selectedQueries.length) return context;
+  return { ...context, cache: { ...context.cache, selectedQueries } };
+}
+
 export function qBReducer(context: IQBContext, action: ActionType) {
+  return pruneSelectedQueries(reduceQB(context, action));
+}
+
+function reduceQB(context: IQBContext, action: ActionType) {
   switch (action.type) {
     /**
      * Add new query
