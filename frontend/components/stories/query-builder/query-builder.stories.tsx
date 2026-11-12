@@ -369,6 +369,7 @@ export const FacetFavourites: Story = {
         http.post(mockCountApi, httpMockCountApiResponse),
         http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
         http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get('*/users/saved_filters', () => HttpResponse.json([])),
         http.get(userPreferenceApi, ({ params }: any) => {
           if (params.key === `facet-favourites-${ApplicationId.germline_cnv_occurrence}`) {
             return HttpResponse.json({ key: params.key, content: { favourites: ['age', 'lastName'] } });
@@ -401,6 +402,7 @@ export const FacetFavouritesSaveError: Story = {
         http.post(mockCountApi, httpMockCountApiResponse),
         http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
         http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get('*/users/saved_filters', () => HttpResponse.json([])),
         http.get(userPreferenceApi, () => new HttpResponse(null, { status: 404 })),
         http.post(userPreferenceApi, () => new HttpResponse(null, { status: 500 })),
       ],
@@ -431,6 +433,7 @@ export const FacetFavouritesLoading: Story = {
         http.post(mockCountApi, httpMockCountApiResponse),
         http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
         http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get('*/users/saved_filters', () => HttpResponse.json([])),
         http.get(userPreferenceApi, async ({ params }: any) => {
           if (params.key === `facet-favourites-${ApplicationId.germline_cnv_occurrence}`) {
             await delay('infinite');
