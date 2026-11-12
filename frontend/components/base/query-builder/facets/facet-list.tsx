@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 
 import Empty from '@/components/base/empties/empty';
-import FacetFavouritesEmptyImage from '@/components/base/icons/facet-favourites-empty-image';
+import FacetFavoritesEmptyImage from '@/components/base/icons/facet-favorites-empty-image';
 import { FacetContainer } from '@/components/base/query-builder/facets/facet-container';
 import {
-  FAVOURITES_GROUP_KEY,
-  useFacetFavourites,
-} from '@/components/base/query-builder/facets/hooks/use-facet-favourites';
+  FAVORITES_GROUP_KEY,
+  useFacetFavorites,
+} from '@/components/base/query-builder/facets/hooks/use-facet-favorites';
 import { SearchFacet } from '@/components/base/query-builder/facets/search-facet';
 import { Accordion } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
@@ -25,9 +25,9 @@ interface FacetListProps {
   defaultExpanded?: boolean;
 }
 
-const FAVOURITABLE_TYPES: string[] = [FilterTypes.MULTIPLE, FilterTypes.NUMERICAL, FilterTypes.BOOLEAN];
+const FAVORITABLE_TYPES: string[] = [FilterTypes.MULTIPLE, FilterTypes.NUMERICAL, FilterTypes.BOOLEAN];
 const UNSTARRED_REMOVAL_DELAY_MS = 500;
-// Slide-out then collapse: keep in sync with duration-200 and delay-200 on the favourite row
+// Slide-out then collapse: keep in sync with duration-200 and delay-200 on the favorite row
 const UNSTARRED_EXIT_DURATION_MS = 400;
 
 /**
@@ -74,46 +74,46 @@ function useDelayedRemoval(keys: string[], onRemove: (key: string) => void) {
 }
 
 /**
- * Favourites listed during one visit of the Favourites panel: newly starred facets join,
+ * Favorites listed during one visit of the Favorites panel: newly starred facets join,
  * unstarred ones linger briefly before sliding out, so a stray click is easy to undo.
  */
-function useFavouritesVisit(groupKey: string | null | undefined, isFavouritesGroup: boolean, savedKeys: string[]) {
-  const [visitFavouriteKeys, setVisitFavouriteKeys] = useState<string[]>(savedKeys);
+function useFavoritesVisit(groupKey: string | null | undefined, isFavoritesGroup: boolean, savedKeys: string[]) {
+  const [visitFavoriteKeys, setVisitFavoriteKeys] = useState<string[]>(savedKeys);
   const [visitGroupKey, setVisitGroupKey] = useState(groupKey);
   if (visitGroupKey !== groupKey) {
     setVisitGroupKey(groupKey);
-    setVisitFavouriteKeys(savedKeys);
-  } else if (savedKeys.some(key => !visitFavouriteKeys.includes(key))) {
-    setVisitFavouriteKeys([...new Set([...visitFavouriteKeys, ...savedKeys])]);
+    setVisitFavoriteKeys(savedKeys);
+  } else if (savedKeys.some(key => !visitFavoriteKeys.includes(key))) {
+    setVisitFavoriteKeys([...new Set([...visitFavoriteKeys, ...savedKeys])]);
   }
 
-  const unstarredKeys = isFavouritesGroup ? visitFavouriteKeys.filter(key => !savedKeys.includes(key)) : [];
-  const leavingFavouriteKeys = useDelayedRemoval(unstarredKeys, key =>
-    setVisitFavouriteKeys(prev => prev.filter(k => k !== key)),
+  const unstarredKeys = isFavoritesGroup ? visitFavoriteKeys.filter(key => !savedKeys.includes(key)) : [];
+  const leavingFavoriteKeys = useDelayedRemoval(unstarredKeys, key =>
+    setVisitFavoriteKeys(prev => prev.filter(k => k !== key)),
   );
 
-  return { visitFavouriteKeys, leavingFavouriteKeys };
+  return { visitFavoriteKeys, leavingFavoriteKeys };
 }
 
 export function FacetList({ groupKey, aggregations, defaultExpanded = false }: FacetListProps) {
   const { t } = useI18n();
-  const favourites = useFacetFavourites();
-  const isFavouritesGroup = groupKey === FAVOURITES_GROUP_KEY;
+  const favorites = useFacetFavorites();
+  const isFavoritesGroup = groupKey === FAVORITES_GROUP_KEY;
   const everyField = Object.values(aggregations).flatMap(group => group.items);
 
-  const { visitFavouriteKeys, leavingFavouriteKeys } = useFavouritesVisit(
+  const { visitFavoriteKeys, leavingFavoriteKeys } = useFavoritesVisit(
     groupKey,
-    isFavouritesGroup,
-    favourites?.favourites ?? [],
+    isFavoritesGroup,
+    favorites?.favorites ?? [],
   );
 
   // If groupKey is provided, use that group's aggregations, otherwise get all aggregations from all groups
   let allFields = groupKey ? aggregations[groupKey]?.items || [] : everyField;
-  if (isFavouritesGroup) {
-    const favouriteKeys = new Set(visitFavouriteKeys);
+  if (isFavoritesGroup) {
+    const favoriteKeys = new Set(visitFavoriteKeys);
     const seen = new Set<string>();
     allFields = everyField.filter((field: Aggregation) => {
-      if (!favouriteKeys.has(field.key) || seen.has(field.key) || !FAVOURITABLE_TYPES.includes(field.type)) {
+      if (!favoriteKeys.has(field.key) || seen.has(field.key) || !FAVORITABLE_TYPES.includes(field.type)) {
         return false;
       }
       seen.add(field.key);
@@ -141,9 +141,9 @@ export function FacetList({ groupKey, aggregations, defaultExpanded = false }: F
     setPrevGroupKey(groupKey);
   }, [groupKey, prevGroupKey]);
 
-  if (isFavouritesGroup && favourites?.isLoading) {
+  if (isFavoritesGroup && favorites?.isLoading) {
     return (
-      <div data-cy="facet-favourites-loading" aria-busy="true" className="flex flex-col gap-1">
+      <div data-cy="facet-favorites-loading" aria-busy="true" className="flex flex-col gap-1">
         {['first', 'second', 'third'].map(row => (
           <Skeleton key={row} className="h-8 w-full bg-card" />
         ))}
@@ -151,26 +151,26 @@ export function FacetList({ groupKey, aggregations, defaultExpanded = false }: F
     );
   }
 
-  if (isFavouritesGroup && fields.length === 0) {
+  if (isFavoritesGroup && fields.length === 0) {
     return (
       <Empty
-        data-cy="facet-favourites-empty"
+        data-cy="facet-favorites-empty"
         size="mini"
         showIcon={false}
-        contentTop={<FacetFavouritesEmptyImage />}
+        contentTop={<FacetFavoritesEmptyImage />}
         classNames={{
           title: 'text-sm text-sidebar-foreground opacity-70',
           description: 'text-sidebar-foreground opacity-70',
         }}
-        title={t('query_filters.favourites.empty.title')}
-        description={t('query_filters.favourites.empty.description')}
+        title={t('query_filters.favorites.empty.title')}
+        description={t('query_filters.favorites.empty.description')}
         className="whitespace-normal"
       />
     );
   }
 
   return (
-    <div data-facet-favourites-panel={isFavouritesGroup || undefined}>
+    <div data-facet-favorites-panel={isFavoritesGroup || undefined}>
       {(searchByFilters.length > 0 || uploadListFilters.length > 0) && (
         <div className="flex flex-col gap-3 mb-3">
           {searchByFilters.map((search, index) => (
@@ -207,11 +207,11 @@ export function FacetList({ groupKey, aggregations, defaultExpanded = false }: F
         onValueChange={value => setExpandedFacets(value)}
       >
         {fields.map((field, index) =>
-          isFavouritesGroup ? (
+          isFavoritesGroup ? (
             <div
               key={field.key}
-              data-cy={`facet-favourite-row-${field.key}`}
-              data-leaving={leavingFavouriteKeys.includes(field.key) || undefined}
+              data-cy={`facet-favorite-row-${field.key}`}
+              data-leaving={leavingFavoriteKeys.includes(field.key) || undefined}
               className="group/row grid grid-rows-[1fr] transition-all delay-200 duration-200 ease-out motion-reduce:transition-none data-leaving:-mb-1 data-leaving:grid-rows-[0fr]"
             >
               <div className="min-h-0 group-data-leaving/row:overflow-hidden">

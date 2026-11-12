@@ -6,7 +6,7 @@ import type { SavedFilter, SavedFilterType } from '@/api/index';
 import { SidebarGroups } from '@/components/base/query-builder//facets/sidebar-groups';
 import { FacetList } from '@/components/base/query-builder/facets/facet-list';
 import { FacetConfigContext } from '@/components/base/query-builder/facets/hooks/use-facet-config';
-import { FacetFavouritesProvider } from '@/components/base/query-builder/facets/hooks/use-facet-favourites';
+import { FacetFavoritesProvider } from '@/components/base/query-builder/facets/hooks/use-facet-favorites';
 import { getAggregationsFetcher } from '@/components/base/query-builder/hooks/use-aggregation-builder';
 import { type IQBContext, type IQBFetcher, QBProvider } from '@/components/base/query-builder/hooks/use-query-builder';
 import { useQueryBuilderGetPreferenceEffect } from '@/components/base/query-builder/hooks/use-query-builder-preference';
@@ -87,7 +87,7 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, swrId, child
         userPrefSqons={qbPreference?.sqons}
       >
         <FacetConfigContext value={{ appId, ...facetFetchers }}>
-          <FacetFavouritesProvider appId={appId}>
+          <FacetFavoritesProvider appId={appId}>
             <SavedFiltersProvider
               savedFilters={savedFilterFetcher.data || []}
               selectedSavedFilter={savedFilterPreference.selectedSavedFilter || undefined}
@@ -134,7 +134,7 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, swrId, child
                 </div>
               </div>
             </SavedFiltersProvider>
-          </FacetFavouritesProvider>
+          </FacetFavoritesProvider>
         </FacetConfigContext>
       </SavedFilterInitializer>
     </QBProvider>

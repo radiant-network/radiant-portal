@@ -361,7 +361,7 @@ export const Default: Story = {
   render: args => <QueryBuilderStory args={args} title="Default" />,
 };
 
-export const FacetFavourites: Story = {
+export const FacetFavorites: Story = {
   parameters: {
     msw: {
       handlers: [
@@ -371,8 +371,8 @@ export const FacetFavourites: Story = {
         http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
         http.get('*/users/saved_filters', () => HttpResponse.json([])),
         http.get(userPreferenceApi, ({ params }: any) => {
-          if (params.key === `facet-favourites-${ApplicationId.germline_cnv_occurrence}`) {
-            return HttpResponse.json({ key: params.key, content: { favourites: ['age', 'lastName'] } });
+          if (params.key === `facet-favorites-${ApplicationId.germline_cnv_occurrence}`) {
+            return HttpResponse.json({ key: params.key, content: { favorites: ['age', 'lastName'] } });
           }
           return new HttpResponse(null, { status: 404 });
         }),
@@ -388,13 +388,13 @@ export const FacetFavourites: Story = {
   render: args => (
     <QueryBuilderStory
       args={args}
-      title="Facet favourites"
-      description="Hover a facet header and click the star. Favourites are listed under the star at the top of the rail, in sidebar order."
+      title="Facet favorites"
+      description="Hover a facet header and click the star. Favorites are listed under the star at the top of the rail, in sidebar order."
     />
   ),
 };
 
-export const FacetFavouritesSaveError: Story = {
+export const FacetFavoritesSaveError: Story = {
   parameters: {
     msw: {
       handlers: [
@@ -418,14 +418,14 @@ export const FacetFavouritesSaveError: Story = {
       <Toaster position="top-right" />
       <QueryBuilderStory
         args={args}
-        title="Facet favourites – save error"
+        title="Facet favorites – save error"
         description="Saving always fails: the star reverts and an error toast is shown."
       />
     </>
   ),
 };
 
-export const FacetFavouritesLoading: Story = {
+export const FacetFavoritesLoading: Story = {
   parameters: {
     msw: {
       handlers: [
@@ -435,7 +435,7 @@ export const FacetFavouritesLoading: Story = {
         http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
         http.get('*/users/saved_filters', () => HttpResponse.json([])),
         http.get(userPreferenceApi, async ({ params }: any) => {
-          if (params.key === `facet-favourites-${ApplicationId.germline_cnv_occurrence}`) {
+          if (params.key === `facet-favorites-${ApplicationId.germline_cnv_occurrence}`) {
             await delay('infinite');
           }
           return new HttpResponse(null, { status: 404 });
@@ -451,8 +451,8 @@ export const FacetFavouritesLoading: Story = {
   render: args => (
     <QueryBuilderStory
       args={args}
-      title="Facet favourites – loading"
-      description="Favourites never finish loading: the panel shows a skeleton instead of the empty state."
+      title="Facet favorites – loading"
+      description="Favorites never finish loading: the panel shows a skeleton instead of the empty state."
     />
   ),
 };

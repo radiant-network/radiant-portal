@@ -8,9 +8,9 @@ import OccurrenceIcon from '@/components/base/icons/occurrence-icon';
 import PathogenicityIcon from '@/components/base/icons/pathogenicity-icon';
 import VariantIcon from '@/components/base/icons/variant-icon';
 import {
-  FAVOURITES_GROUP_KEY,
-  useFacetFavourites,
-} from '@/components/base/query-builder/facets/hooks/use-facet-favourites';
+  FAVORITES_GROUP_KEY,
+  useFacetFavorites,
+} from '@/components/base/query-builder/facets/hooks/use-facet-favorites';
 import { Button } from '@/components/base/shadcn/button';
 import {
   Sidebar,
@@ -66,7 +66,7 @@ export function SidebarGroups({
 }: SidebarGroupsProps) {
   const { t } = useI18n();
   const { open, setOpen } = useSidebar();
-  const favourites = useFacetFavourites();
+  const favorites = useFacetFavorites();
   const [internalSelectedItemId, setInternalSelectedItemId] = useState<string | null>(null);
 
   // Use external state if provided, otherwise use internal state
@@ -111,18 +111,18 @@ export function SidebarGroups({
               {open ? t('query_filters.sidebar_panel.collapse') : t('query_filters.sidebar_panel.expand')}
             </TooltipContent>
           </Tooltip>
-          {favourites && (
+          {favorites && (
             <>
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    data-cy="sidebar-group-favourites"
-                    className={buttonVariants({ selected: selectedItemId === FAVOURITES_GROUP_KEY })}
-                    onClick={() => handleItemClick(FAVOURITES_GROUP_KEY)}
-                    tooltip={t('query_filters.sidebar_panel.filters.favourites')}
+                    data-cy="sidebar-group-favorites"
+                    className={buttonVariants({ selected: selectedItemId === FAVORITES_GROUP_KEY })}
+                    onClick={() => handleItemClick(FAVORITES_GROUP_KEY)}
+                    tooltip={t('query_filters.sidebar_panel.filters.favorites')}
                   >
                     <Star />
-                    <span>{t('query_filters.sidebar_panel.filters.favourites')}</span>
+                    <span>{t('query_filters.sidebar_panel.filters.favorites')}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>

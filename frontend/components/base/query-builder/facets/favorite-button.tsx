@@ -1,30 +1,30 @@
 import { useState } from 'react';
 import { Star, StarOff } from 'lucide-react';
 
-import { useFacetFavourites } from '@/components/base/query-builder/facets/hooks/use-facet-favourites';
+import { useFacetFavorites } from '@/components/base/query-builder/facets/hooks/use-facet-favorites';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
 
-type FavouriteButtonProps = {
+type FavoriteButtonProps = {
   facetKey: string;
   label: string;
 };
 
 /**
  * Star toggle shown in a facet header. Hidden until the header (group/facet-header) is hovered,
- * unless the facet is already a favourite, the button has keyboard focus, or it sits in the Favourites panel.
+ * unless the facet is already a favorite, the button has keyboard focus, or it sits in the Favorites panel.
  */
-export function FavouriteButton({ facetKey, label }: FavouriteButtonProps) {
+export function FavoriteButton({ facetKey, label }: FavoriteButtonProps) {
   const { t } = useI18n();
-  const favourites = useFacetFavourites();
+  const favorites = useFacetFavorites();
   // Holds the resting look after a click, so the hover preview doesn't show the opposite action under the pointer
   const [isSettling, setIsSettling] = useState(false);
 
-  if (!favourites) return null;
+  if (!favorites) return null;
 
-  const isFavourite = favourites.isFavourite(facetKey);
+  const isFavorite = favorites.isFavorite(facetKey);
   const showHover = !isSettling;
 
   return (
@@ -34,35 +34,35 @@ export function FavouriteButton({ facetKey, label }: FavouriteButtonProps) {
           variant="ghost"
           size="2xs"
           iconOnly
-          aria-pressed={isFavourite}
+          aria-pressed={isFavorite}
           aria-label={
-            isFavourite
-              ? t('a11y.facet_favourite.remove', { facet: label })
-              : t('a11y.facet_favourite.add', { facet: label })
+            isFavorite
+              ? t('a11y.facet_favorite.remove', { facet: label })
+              : t('a11y.facet_favorite.add', { facet: label })
           }
-          data-cy={`facet-favourite-${facetKey}`}
+          data-cy={`facet-favorite-${facetKey}`}
           onClick={() => {
             setIsSettling(true);
-            favourites.toggleFavourite(facetKey);
+            favorites.toggleFavorite(facetKey);
           }}
           onPointerLeave={() => setIsSettling(false)}
           onBlur={() => setIsSettling(false)}
           className={cn(
-            'group/favourite text-foreground hover:bg-transparent hover:text-foreground [&_svg]:size-3',
-            !isFavourite &&
-              'opacity-0 group-hover/facet-header:opacity-100 focus-visible:opacity-100 in-data-facet-favourites-panel:opacity-100',
+            'group/favorite text-foreground hover:bg-transparent hover:text-foreground [&_svg]:size-3',
+            !isFavorite &&
+              'opacity-0 group-hover/facet-header:opacity-100 focus-visible:opacity-100 in-data-facet-favorites-panel:opacity-100',
           )}
         >
-          {isFavourite ? (
+          {isFavorite ? (
             <>
               <Star
                 className={cn(
                   'fill-current opacity-80',
-                  showHover && 'group-hover/favourite:hidden group-focus-visible/favourite:hidden',
+                  showHover && 'group-hover/favorite:hidden group-focus-visible/favorite:hidden',
                 )}
               />
               <StarOff
-                className={cn('hidden', showHover && 'group-hover/favourite:block group-focus-visible/favourite:block')}
+                className={cn('hidden', showHover && 'group-hover/favorite:block group-focus-visible/favorite:block')}
               />
             </>
           ) : (
@@ -70,14 +70,14 @@ export function FavouriteButton({ facetKey, label }: FavouriteButtonProps) {
               className={cn(
                 'opacity-50',
                 showHover &&
-                  'group-hover/favourite:fill-current group-hover/favourite:text-accent-foreground group-focus-visible/favourite:fill-current group-focus-visible/favourite:text-accent-foreground',
+                  'group-hover/favorite:fill-current group-hover/favorite:text-accent-foreground group-focus-visible/favorite:fill-current group-focus-visible/favorite:text-accent-foreground',
               )}
             />
           )}
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        {isFavourite ? t('query_filters.favourites.tooltip.remove') : t('query_filters.favourites.tooltip.add')}
+        {isFavorite ? t('query_filters.favorites.tooltip.remove') : t('query_filters.favorites.tooltip.add')}
       </TooltipContent>
     </Tooltip>
   );

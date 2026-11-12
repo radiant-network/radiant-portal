@@ -37,8 +37,8 @@ function Row({ y, filterId, opacity, barOpacity, starred = false }: RowProps) {
   );
 }
 
-function FacetFavouritesEmptyImage() {
-  const filterId = `facet-favourites-empty-shadow-${useId().replace(/[^a-zA-Z0-9-]/g, '')}`;
+function FacetFavoritesEmptyImage() {
+  const filterId = `facet-favorites-empty-shadow-${useId().replace(/[^a-zA-Z0-9-]/g, '')}`;
 
   return (
     <svg width="232" height="115" viewBox="0 0 232 115" fill="none" aria-hidden="true">
@@ -54,4 +54,4 @@ function FacetFavouritesEmptyImage() {
   );
 }
 
-export default FacetFavouritesEmptyImage;
+export default FacetFavoritesEmptyImage;

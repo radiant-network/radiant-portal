@@ -163,7 +163,7 @@
       "results_count_one": "{{count}} résultat affiché",
       "results_count_other": "{{count}} résultats affichés"
     },
-    "facet_favourite": {
+    "facet_favorite": {
       "add": "Ajouter {{facet}} aux favoris",
       "remove": "Retirer {{facet}} des favoris"
     }
@@ -2063,10 +2063,10 @@
         "occurrence": "Occurrence",
         "organization": "Mon Organisation",
         "metric_qc": "Metric QC",
-        "favourites": "Favoris"
+        "favorites": "Favoris"
       }
     },
-    "favourites": {
+    "favorites": {
       "tooltip": {
         "add": "Ajouter aux favoris",
         "remove": "Retirer des favoris"

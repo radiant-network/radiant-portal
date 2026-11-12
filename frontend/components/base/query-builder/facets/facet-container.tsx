@@ -1,7 +1,7 @@
 import React, { useId } from 'react';
 
 import { BooleanFacet } from '@/components/base/query-builder/facets/boolean-facet';
-import { FavouriteButton } from '@/components/base/query-builder/facets/favourite-button';
+import { FavoriteButton } from '@/components/base/query-builder/facets/favorite-button';
 import { MultiSelectFacet } from '@/components/base/query-builder/facets/multiselect-facet';
 import { NumericalFacet } from '@/components/base/query-builder/facets/numerical-facet';
 import {
@@ -75,7 +75,7 @@ export function AccordionContainer({ field, isOpen, children }: AccordionContain
             </span>
           )}
           <CardAction className="sm:self-center">
-            <FavouriteButton facetKey={field.key} label={label} />
+            <FavoriteButton facetKey={field.key} label={label} />
           </CardAction>
         </CardHeader>
         <AccordionContent className="pb-0" forceMount={history.includes(field.key) ? true : undefined}>
