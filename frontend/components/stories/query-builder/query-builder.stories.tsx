@@ -1,9 +1,10 @@
 /* eslint-disable no-use-before-define */
 import { MemoryRouter, Route, Routes } from 'react-router';
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Decorator, Meta, StoryObj } from '@storybook/react-vite';
 import axios from 'axios';
 import { delay, http, HttpResponse } from 'msw';
 import { mocked } from 'storybook/test';
+import { SWRConfig } from 'swr';
 
 import { SavedFilterType } from '@/api/index';
 import type { TableColumnDef } from '@/components/base/data-table/data-table';
@@ -361,7 +362,15 @@ export const Default: Story = {
   render: args => <QueryBuilderStory args={args} title="Default" />,
 };
 
+// Favorites are cached per app; a fresh cache stops one story's favorites leaking into the next
+const withFreshSwrCache: Decorator = Story => (
+  <SWRConfig value={{ provider: () => new Map() }}>
+    <Story />
+  </SWRConfig>
+);
+
 export const FacetFavorites: Story = {
+  decorators: [withFreshSwrCache],
   parameters: {
     msw: {
       handlers: [
@@ -395,6 +404,7 @@ export const FacetFavorites: Story = {
 };
 
 export const FacetFavoritesSaveError: Story = {
+  decorators: [withFreshSwrCache],
   parameters: {
     msw: {
       handlers: [
@@ -426,6 +436,7 @@ export const FacetFavoritesSaveError: Story = {
 };
 
 export const FacetFavoritesLoading: Story = {
+  decorators: [withFreshSwrCache],
   parameters: {
     msw: {
       handlers: [
