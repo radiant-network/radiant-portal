@@ -342,6 +342,11 @@ export const data = {
     overlapping_cnv_percent: '75.17',
     overlap_type: 'partial',
   },
+  // Its overlapping genes differ in # Exons, those of cnvGermline tie.
+  cnvDistinctExons: {
+    cnv_variant: 'GAIN:chr16:22545169-22698638',
+    sqon: '{"content":[{"content":{"field":"name","value":["DRAGEN:GAIN:chr16:22545169-22698638"]},"op":"in"}],"op":"and"}',
+  },
   genePanel: {
     my_network: 'TUPED_V3',
   },
