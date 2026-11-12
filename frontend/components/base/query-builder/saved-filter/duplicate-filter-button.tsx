@@ -122,7 +122,7 @@ function DuplicateFilterButton() {
           <Button
             iconOnly
             variant="ghost"
-            size="sm"
+            size="xs"
             disabled={!selectedSavedFilter}
             aria-label={t('a11y.saved_filter.duplicate')}
             aria-describedby={!selectedSavedFilter ? reasonId : undefined}

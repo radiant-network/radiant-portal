@@ -122,13 +122,13 @@ function QueriesBarCard({ appId, swrId }: QueriesBarCardProps) {
   }, []);
 
   return (
-    <Card id="query-builder-card" className="py-0">
+    <Card id="query-builder-card" className="py-0 rounded-lg">
       <Accordion type="multiple" defaultValue={['query-builder']}>
         <AccordionItem value="query-builder" className="border-none group/qb-item">
           {/* The trigger stretches over the whole header; the filter actions sit above it with z-10 */}
           <div
             data-cy="query-builder-header"
-            className="relative flex border-b px-6 group-data-[state=closed]/qb-item:rounded-sm group-data-[state=closed]/qb-item:border-none"
+            className="relative flex border-b px-4 group-data-[state=closed]/qb-item:rounded-sm group-data-[state=closed]/qb-item:border-none"
           >
             <QueryBuilderSavedFilters
               renderTitle={title => (
@@ -138,7 +138,7 @@ function QueriesBarCard({ appId, swrId }: QueriesBarCardProps) {
               )}
             />
           </div>
-          <AccordionContent className="py-4 px-6 space-y-4">
+          <AccordionContent className="py-4 px-4 space-y-4">
             <div className="flex flex-col gap-3 max-h-[30vh] overflow-y-auto">
               {sqons.map((sqon, index) => (
                 <QueryBar key={sqon.id} index={index} sqon={sqon} swrId={swrId} />
@@ -153,7 +153,7 @@ function QueriesBarCard({ appId, swrId }: QueriesBarCardProps) {
                     {/* Combine Queries */}
                     <ActionButton
                       dataCy="combine-queries-button"
-                      size="xs"
+                      size="2xs"
                       actions={[
                         {
                           id: 'combine_and',
@@ -176,7 +176,7 @@ function QueriesBarCard({ appId, swrId }: QueriesBarCardProps) {
                     {/* Add New Query */}
                     <Button
                       data-cy="new-query-button"
-                      size="xs"
+                      size="2xs"
                       disabled={hasEmptyQuery(sqons)}
                       onClick={handleNewQueryClick}
                     >
@@ -186,7 +186,7 @@ function QueriesBarCard({ appId, swrId }: QueriesBarCardProps) {
 
                     {/* Toggle labelsEnabled Settings */}
                     {sqons.some(sqon => !isSqonEmpty(sqon)) && (
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2 font-medium">
                         <Switch
                           data-cy="labels-switch"
                           size="sm"
@@ -206,7 +206,7 @@ function QueriesBarCard({ appId, swrId }: QueriesBarCardProps) {
                   <Button
                     data-cy="clear-all-button"
                     variant="ghost"
-                    size="sm"
+                    size="2xs"
                     className="no-underline enabled:hover:no-underline"
                     onClick={handleClearOnClick}
                   >

@@ -44,7 +44,7 @@ function CombinerOperator({ sqon }: CombineOperatorProps) {
           <Button
             data-cy="query-combiner-operator"
             variant="link"
-            className="text-current text-sm p-0 h-auto font-normal"
+            className="text-current text-xs p-0 h-auto font-normal"
             onClick={handleOnClick}
           >
             {t(`common.query_pill.operator.${sqon.op}`)}
