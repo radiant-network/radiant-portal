@@ -48,9 +48,9 @@ function BetaFeatures() {
         <div key={key} className="mb-4">
           <div className="flex items-center space-x-2">
             <div>
-              <Link className="block" to={definition.link}>
-                <Button>{definition.label}</Button>
-              </Link>
+              <Button asChild>
+                <Link to={definition.link}>{definition.label}</Link>
+              </Button>
               {definition.description && <p className="text-sm text-gray-500">{definition.description}</p>}
             </div>
           </div>

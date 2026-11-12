@@ -143,7 +143,11 @@ function AssignmentPicker({
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={t('a11y.assignment_picker.open')}
+          aria-label={
+            assignees.length > 0
+              ? t('a11y.assignment_picker.open_assigned', { names: assignees.map(user => user.name).join(', ') })
+              : t('a11y.assignment_picker.open')
+          }
           className="rounded-full focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         >
           <AssigneesAvatar

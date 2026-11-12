@@ -16,16 +16,27 @@ Every response is already filtered by the caller's PHI access: the API reads the
 
 ## Endpoints
 
-Five read-only routes (plus a tentative sixth for the tumor board report), all gated by `can_search_case`, sit next to the existing `/patients/batch` ingestion routes.
+The read-only routes below are all gated by `can_search_case`, sit next to the existing `/patients/batch` ingestion routes.
 
 | Method and path | Request | Response | Operation id |
 | --- | --- | --- | --- |
 | `POST /{tenant}/patients/search` | `ListBodyWithCriteria` | `PatientsSearchResponse` = `{ list: PatientListItem[], count }` | `searchPatients` |
 | `GET /{tenant}/patients/autocomplete?prefix=&limit=` | query prefix (min. 1 character), limit (default 10) | `AutocompleteResult[]` = `[{ type, value }]`, the type shared with the case list | `autocompletePatients` |
 | `GET /{tenant}/patients/filters` | none | `PatientFilters` | `patientsFilters` |
-| `GET /{tenant}/patients/statistics` | none | `PatientStatistics` | `patientsStatistics` |
-| `GET /{tenant}/patients/{patient_key}` | path `patient_key` | `PatientEntity` | `patientEntity` |
-| `GET /{tenant}/patients/{patient_key}/tumor-board/{report_id}/download` (tentative) | path `patient_key`, `report_id` | `{ url, expires_at }`: presigned S3 URL, only after the entity check passes | `patientTumorBoardReportDownload` |
+| ~~`GET /{tenant}/patients/statistics`~~ | none | ~~`PatientStatistics`~~ | ~~`patientsStatistics`~~ (cancelled 2026-11-09) |
+| `GET /{tenant}/patients/{patient_key}` | path `patient_key` | `PatientEntity`: header, sidebar and overview | `patientEntity` |
+| `GET /{tenant}/patients/{patient_key}/processing_report/download_url` | path `patient_key` | `PreSignedURL` of the patient's CHARM processing report (a self-contained HTML page, PHI like the tumor board files; the entity's `has_processing_report` tells whether the caller can open one); 404 without a report or PHI access; gated by `can_read_pii` at the patient's organization (403 otherwise) | `patientProcessingReportDownloadUrl` |
+| `GET /{tenant}/patients/{patient_key}/treatments` | path `patient_key` | `PatientTreatments`: treatments and timeline tabs | `patientTreatments` |
+| `GET /{tenant}/patients/{patient_key}/laboratory` | path `patient_key` | `PatientLaboratory` | `patientLaboratory` |
+| `GET /{tenant}/patients/{patient_key}/imaging` | path `patient_key` | `PatientImaging` | `patientImaging` |
+| `GET /{tenant}/patients/{patient_key}/genomics` | path `patient_key` | `PatientGenomics` | `patientGenomics` |
+| `GET /{tenant}/patients/{patient_key}/external_records` | path `patient_key` | `PatientExternalRecords`: sidebar External Records card, the organizations linked through TEFCA or Carequality and the documents retrieved from them | `patientExternalRecords` |
+| `GET /{tenant}/patients/{patient_key}/trial_eligibilities` | path `patient_key` | `PatientTrialEligibilities`: Clinical Trials tab, the eligibility verdicts BRIM extracted from the patient's notes, each named by its BRIM `variable_name` (PNOC035 so far); `reasoning` and `brim_url` are PHI | `patientTrialEligibilities` |
+| `GET /{tenant}/patients/{patient_key}/tumor_board` | path `patient_key` | `PatientTumorBoard`: Tumor Board tab, the sessions (most recent first; `date` and the report are PHI, `recommendations` split on semicolons) and `has_deck` | `patientTumorBoard` |
+| `GET /{tenant}/patients/{patient_key}/tumor_board/deck/download_url` | path `patient_key` | `PreSignedURL` `{ url, expires_at }` of the patient's presentation deck; 404 without a deck or PHI access; gated by `can_read_pii` at the patient's organization (403 otherwise) | `patientTumorBoardDeckDownloadUrl` |
+| `GET /{tenant}/patients/{patient_key}/tumor_board/sessions/{session_id}/download_url` | path `patient_key`, `session_id` | `PreSignedURL` of a session's report; 404 without a report or PHI access; gated by `can_read_pii` at the patient's organization (403 otherwise) | `patientTumorBoardReportDownloadUrl` |
+
+**One endpoint per tab.** Every secured view re-runs its grant lookups on each read (~200 ms for one patient), and the list view joins eight of them (~1.2 s even for one row). So no patient page endpoint reads the list view: each resolves `patient_key` through `v_pcx_30_patient_key`, then reads its views concurrently. The entity endpoint serves the header, sidebar and overview from demographics, vital status, events and treatment summary, the diagnosis picked from the events as the list view does; each other tab has its own endpoint, fetched the first time the tab is opened.
 
 **Search body.** The existing `ListBodyWithCriteria`: `search_criteria` (`field`, `value[]`, `operator`, default `in`), `limit`, `page_index`, `sort` (`field`, `order` asc/desc). Default sort: `can_read_phi` desc, then `organization_code` asc, then `patient_id` asc (patients the user can identify first, then by site, then by identifier; stable for pagination). Default limit 10.
 
@@ -63,7 +74,7 @@ There is no free-text search, as in the case list: the box only suggests, and a 
 
 **Filters.** Values only (`FiltersValue`: key, label), like the case filters, with no per-value counts, among the patients the caller can see. `age_at_initial_dx_group` always returns every group, in age order, even when no patient falls in it. Yes/no filters have the keys `true` and `false` (labels `Yes` and `No`) and become a boolean criterion: `{"field": "got_radiation_ever", "value": [true]}`. Protocol and molecular subtype have no data source yet.
 
-**Statistics.** Computed on the whole cohort the user can see, not on the current filters, as in the prototype. `by_protocol` groups on `protocol_name` (not name and arm), for the "Patients per treatment protocol" chart.
+**Statistics.** Cancelled 2026-11-09, the endpoint was removed. Was: computed on the whole cohort the user can see, not on the current filters, as in the prototype. `by_protocol` groups on `protocol_name` (not name and arm), for the "Patients per treatment protocol" chart.
 
 **Entity.** About 9 queries on the secured views filtered by `organization_code`, `patient_id_type`, `patient_id`, plus the portal cases when `radiant_patient_id` is set (as proband or family member). Returns 404 for a malformed key or one that matches no row of the list view.
 
@@ -147,7 +158,13 @@ interface PatientDayDate { day: number | null; date: string | null }
 interface PatientKeyDate extends PatientDayDate { source: KeyDateSource }
 interface PatientKeyDates { initial_diagnosis: PatientKeyDate; latest_encounter: PatientKeyDate } // hard-coded sources: clinical, registry
 
-interface PatientEntity extends PatientListItem {
+interface PatientEntity extends PatientIdentity {
+  birth_year: number | null;
+  gender: Gender;
+  diagnosis_type_cohort: string | null;
+  cns_integrated_diagnosis: string | null;        // from the initial event, as in the list
+  cns_integrated_diagnosis_source: string | null;
+  vital_status: VitalStatus;
   birth_date: string | null;
   race: string | null;
   ethnicity: string | null;
@@ -157,11 +174,25 @@ interface PatientEntity extends PatientListItem {
   initial_diagnosis_evidence_url: string | null; // BRIM link, format TBD
   vital_status_at: PatientDayDate;
   events: PatientEvent[];
+  treatment_summary: PatientTreatmentSummary | null;
+}
+
+interface PatientTreatments {
   surgeries: PatientSurgery[];
   radiations: PatientRadiation[];
   therapies: PatientTherapy[];
-  imaging: PatientImagingSession[];
-  treatment_summary: PatientTreatmentSummary | null;
+  trial_enrollments: PatientTrialEnrollment[];  // Clinical trials tab, most recent start first
+}
+
+interface PatientLaboratory {
+  cbc: PatientCbc | null;                       // null when the patient has no CBC
+  performance_status: PatientPerformanceScore[];
+  csf: PatientCsf | null;                       // null when the patient has no CSF result
+}
+
+interface PatientImaging { sessions: PatientImagingSession[] }
+
+interface PatientGenomics {
   cases: PatientCase[];
   interpretations: PatientInterpretation[];
 }
@@ -210,12 +241,58 @@ interface PatientTherapy {
   is_initial_treatment: boolean | null; // source Yes / No; null when Not Reported
 }
 
+// The therapies whose chemotherapy_type is "Treatment follows a protocol and subject is enrolled on a protocol",
+// merged by protocol_name_and_arm (one therapy per phase). Following a protocol without enrollment is left out.
+interface PatientTrialEnrollment {
+  start: PatientDayDate;          // earliest start of its therapies
+  stop: PatientDayDate;           // latest stop of its therapies
+  protocol_name: string;          // as in the source, Other / Not Reported included
+  protocol_arm: string | null;    // null when Not Applicable
+  chemotherapy_agents: string[];  // of all its therapies, without duplicates
+  is_initial_treatment: boolean;  // true when any of its therapies is
+}
+
 interface PatientImagingSession extends PatientDayDate {
   session_id: string;
   session_name: string;
   anatomical_site: string | null;
   imaging_modality: string | null;
   flywheel_url: string | null;
+}
+
+// Laboratory. Raw from the views: units are not normalized (ANC comes in /uL and x10E9/L, 1000x apart).
+// The CBC is the most recent panel: every analyte comes from it, so the day and date are the panel's.
+interface PatientLabResult { value: number | null; unit: string | null }
+interface PatientCbc extends PatientDayDate { wbc: PatientLabResult; hemoglobin: PatientLabResult; platelets: PatientLabResult; anc: PatientLabResult }
+
+// The view holds the latest score of either scale (one row per patient today); a list so one score per scale fits later.
+// The date is when the result was released (observation.issued): the source has no assessment date.
+interface PatientPerformanceScore extends PatientDayDate {
+  scale: 'lansky' | 'karnofsky';
+  score: number;                   // 10 to 100, steps of 10
+  score_text: string | null;       // as recorded
+}
+
+// Read display: it carries the comparator ('<10 mg/dL'), and '<1.0' means undetectable, not 1.0.
+interface PatientCsfResult extends PatientDayDate {
+  display: string | null;
+  value: number | null;
+  comparator: string | null;       // protein and glucose only
+  unit: string | null;
+}
+interface PatientCsfCytology extends PatientDayDate {
+  test_name: string | null;
+  malignant_cells: 'positive' | 'suspicious' | 'negative' | 'non_diagnostic' | 'no_malignancy_statement' | null;
+  evidence_tier: 'named' | 'text_confirmed' | 'same_day_only' | null; // how the report was attributed to CSF
+  multi_specimen_report: boolean | null; // the finding may pertain to a non-CSF specimen
+}
+interface PatientCsf {
+  protein: PatientCsfResult;
+  glucose: PatientCsfResult;
+  wbc: PatientCsfResult;           // nucleated cells
+  rbc: PatientCsfResult;
+  cytology: PatientCsfCytology;
+  cell_free_dna: PatientDayDate;   // when the test was done; the source has no value
 }
 
 // "ever" = first occurrence at any time; "initial" = part of the initial treatment.
@@ -265,7 +342,7 @@ interface PatientInterpretation {
 }
 ```
 
-Not in the contract yet, to be added without breaking anything: the tumor board reports (their view is not ready; B8 adds the list and the download endpoint), and the Laboratory (CBC), predisposition and clinical-trial models, once the other team's views are described. Until then those tabs have no API data.
+Not in the contract yet, to be added without breaking anything: the tumor board reports (their view is not ready; B8 adds the list and the download endpoint), and the predisposition and clinical-trial models, once the other team's views are described. Until then those tabs have no API data. Laboratory reads `v_cbc_latest_results`, `v_lansky_karnofsky_latest` and `v_csf_results_latest_by_component`; CSF opening pressure has no source, and the cytology free text (`cytology_final_diagnosis`, `cytology_result_text`) is left out: it quotes the patient's name and MRN.
 
 ## Frontend alignment
 

@@ -350,7 +350,7 @@ def build(patients, pcx_data, id_base=0, loci=None):
                                                                 transmission))
             v.germline_seqs.add(n_seq)
             if exo:
-                sr["exomiser"].append([PART, n_seq, v.locus_id, f"{v.locus}-{n_seq}", hashlib.md5(v.locus.encode()).hexdigest(), "AD",
+                sr["exomiser"].append([PART, n_seq, g_task, v.locus_id, f"{v.locus}-{n_seq}", hashlib.md5(v.locus.encode()).hexdigest(), "AD",
                                        round(rng.uniform(0.85, 0.99) if pathogenic else rng.uniform(0.3, 0.7), 3),
                                        round(rng.uniform(0.8, 0.98) if pathogenic else rng.uniform(0.2, 0.6), 3),
                                        1, 1 if pathogenic else rng.randrange(2, 20), v.symbol,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 import useSWR from 'swr';
 
@@ -21,6 +21,7 @@ import {
   useConfig,
 } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
+import useIsMobile from '@/components/hooks/use-is-mobile';
 import { cn } from '@/components/lib/utils';
 import { savedFiltersApi } from '@/utils/api';
 
@@ -33,6 +34,7 @@ type QueryBuilderLayoutProps = {
   children: React.ReactElement;
   defaultSidebarOpen?: boolean;
   fetcher: IQBFetcher;
+  swrId?: string;
 };
 
 export async function fetchSavedFilters(savedFilterType: SavedFilterType) {
@@ -43,10 +45,11 @@ export async function fetchSavedFilters(savedFilterType: SavedFilterType) {
 /**
  * Query-Builder (facets + query-bar)
  */
-function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: QueryBuilderLayoutProps) {
+function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, swrId, children }: QueryBuilderLayoutProps) {
   const { t } = useI18n();
   const [open, setOpen] = useState(defaultSidebarOpen);
   const config = useConfig();
+  const isMobile = useIsMobile();
   const aggregations: AggregationConfig = (config[appId] as AppsConfig).aggregations;
   const visibleAggregations = getVisibleAggregations(aggregations);
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<string | null>(null);
@@ -57,6 +60,12 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: 
 
   useQueryBuilderGetPreferenceEffect({ appId, setPreference: setQbPreference });
   useSavedFilterGetPreferenceEffect({ savedFilterType, setPreference: setSavedFilterPreference });
+
+  useEffect(() => {
+    if (!isMobile) return;
+    setOpen(false);
+    setSelectedSidebarItem(null);
+  }, [isMobile]);
 
   // Fetch saved filters
   const savedFilterFetcher = useSWR<SavedFilter[]>(
@@ -118,7 +127,7 @@ function QueryBuilder({ appId, defaultSidebarOpen = false, fetcher, children }: 
                   </aside>
                   <main className="flex-1 shrink px-3 pb-3 overflow-auto">
                     <div className="py-3 space-y-2">
-                      <QueriesBarCard appId={appId} />
+                      <QueriesBarCard appId={appId} swrId={swrId} />
                     </div>
                     {children}
                   </main>

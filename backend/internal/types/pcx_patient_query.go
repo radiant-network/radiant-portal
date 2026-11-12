@@ -9,6 +9,9 @@ var PcxPatientListTable = Table{
 	PerTenant: true,
 }
 
+// PcxPatientKeyTable maps a patient_key to the identifier the caller sees, without the joins of the list view.
+var PcxPatientKeyTable = Table{Name: "v_pcx_30_patient_key", Alias: "pk", PerTenant: true}
+
 const PcxPatientListDefaultLimit = 10
 
 var PcxPatientKeyField = Field{Name: "patient_key", CanBeSelected: true, Table: PcxPatientListTable}
@@ -76,3 +79,18 @@ var PcxRadiationLevelTable = Table{Name: "v_pcx_30_radiation_level_combined", Al
 var PcxMedicalTherapyTable = Table{Name: "v_pcx_30_medical_therapy_level_combined", Alias: "mt", PerTenant: true}
 var PcxMriImagesTable = Table{Name: "v_pcx_30_mri_images_combined", Alias: "mri", PerTenant: true}
 var PcxTreatmentSummaryTable = Table{Name: "v_pcx_30_treatment_summary_combined", Alias: "ts", PerTenant: true}
+var PcxCbcTable = Table{Name: "v_cbc_latest_results", Alias: "cbc", PerTenant: true}
+var PcxPerformanceStatusTable = Table{Name: "v_lansky_karnofsky_latest", Alias: "lk", PerTenant: true}
+var PcxCsfTable = Table{Name: "v_csf_results_latest_by_component", Alias: "csf", PerTenant: true}
+
+// Radiant's own view over the health information network exchanges (scripts/seed/views).
+var PcxHinExchangeTable = Table{Name: "v_pcx_30_hin_exchange", Alias: "hin", PerTenant: true}
+
+var PcxPnoc035EligibilityTable = Table{Name: "v_pcx_30_pnoc035_eligibility_combined", Alias: "pnoc035", PerTenant: true}
+
+// Radiant's own views over the tumor board tables (scripts/seed/views).
+var PcxTumorBoardSessionTable = Table{Name: "v_pcx_30_tumor_board_session", Alias: "tbs", PerTenant: true}
+var PcxTumorBoardDeckTable = Table{Name: "v_pcx_30_tumor_board_deck", Alias: "tbd", PerTenant: true}
+
+// Radiant's own view over the CHARM processing report of each patient (scripts/seed/views).
+var PcxProcessingReportTable = Table{Name: "v_pcx_30_processing_report", Alias: "pr", PerTenant: true}

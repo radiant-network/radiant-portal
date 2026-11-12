@@ -1,35 +1,41 @@
 import { useMemo } from 'react';
 
-import type { PatientEntity } from '@/api/api';
-import DisplayTable from '@/components/base/data-table/display-table';
+import DataTable, { DEFAULT_PAGE_SIZE } from '@/components/base/data-table/data-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { useI18n } from '@/components/hooks/i18n';
 
-import { getImagingColumns } from './imaging-table-settings';
+import { usePatientImaging } from '../hooks/use-patient-entity';
 
-type ImagingTabProps = {
-  patient?: PatientEntity;
-  isLoading: boolean;
-};
+import { defaultImagingSettings, getImagingColumns } from './imaging-table-settings';
 
-function ImagingTab({ patient, isLoading }: ImagingTabProps) {
+function ImagingTab() {
   const { t } = useI18n();
+  const { data: imaging, isLoading } = usePatientImaging();
 
   const columns = useMemo(() => getImagingColumns(t), [t]);
-  const rows = patient?.imaging ?? [];
+  const rows = imaging?.sessions ?? [];
 
   return (
     <Card>
-      <CardHeader className="border-b [.border-b]:pb-2">
+      <CardHeader bordered>
         {isLoading ? (
           <Skeleton className="h-5 w-32" />
         ) : (
           <CardTitle>{t('patient_entity.imaging.title_count', { count: rows.length })}</CardTitle>
         )}
       </CardHeader>
-      <CardContent className="flex flex-col gap-2">
-        <DisplayTable data={rows} columns={columns} loading={isLoading} fullHeight />
+      <CardContent>
+        <DataTable
+          id="patient-imaging-sessions"
+          columns={columns}
+          data={rows}
+          defaultColumnSettings={defaultImagingSettings}
+          pagination={{ type: 'locale', state: { pageIndex: 0, pageSize: DEFAULT_PAGE_SIZE } }}
+          total={rows.length}
+          loadingStates={{ total: isLoading, list: isLoading }}
+          tableIndexResultPosition="bottom"
+        />
       </CardContent>
     </Card>
   );

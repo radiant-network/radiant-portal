@@ -13,11 +13,11 @@ func Test_OccurrenceType_TaskSelector_GermlineSNV_ResolvesGermlineAnnotationWith
 	assert.Equal(t, TaskSelector{TaskTypeCode: RadiantGermlineAnnotationTask, SomaticCohort: SomaticCohortNone}, selector)
 }
 
-func Test_OccurrenceType_TaskSelector_GermlineCNV_ResolvesGermlineAlignmentWithNoCohort(t *testing.T) {
+func Test_OccurrenceType_TaskSelector_GermlineCNV_ReturnsError(t *testing.T) {
 	selector, err := OccurrenceTypeGermlineCNV.TaskSelector()
 
-	assert.NoError(t, err)
-	assert.Equal(t, TaskSelector{TaskTypeCode: AlignmentGermlineVariantCallingTaskTypeCode, SomaticCohort: SomaticCohortNone}, selector)
+	assert.Error(t, err)
+	assert.Equal(t, TaskSelector{}, selector)
 }
 
 // somatic_snv is the deprecated spelling of somatic_snv_tn: it must narrow to tumor-normal,
@@ -68,8 +68,12 @@ func Test_OccurrenceType_TaskSelector_Empty_ReturnsError(t *testing.T) {
 	assert.Equal(t, TaskSelector{}, selector)
 }
 
+// germline_cnv lists its tasks by their CNV rows, not by a selector.
 func Test_OccurrenceType_AllOccurrenceTypes_EveryValueResolves(t *testing.T) {
 	for _, occurrenceType := range AllOccurrenceTypes {
+		if occurrenceType == OccurrenceTypeGermlineCNV {
+			continue
+		}
 		selector, err := occurrenceType.TaskSelector()
 
 		assert.NoErrorf(t, err, "TaskSelector(%q) returned an error; want a selector", occurrenceType)

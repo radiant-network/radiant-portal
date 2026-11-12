@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useId, useState } from 'react';
 import { SaveIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -19,6 +19,7 @@ import { SavedFiltersActionType, useSavedFiltersContext, useSavedFiltersDispatch
  */
 function SaveFilterButton() {
   const { t } = useI18n();
+  const reasonId = useId();
   const dispatch = useSavedFiltersDispatch();
   const { sqons } = useQBContext();
   const { savedFilterType, selectedSavedFilter } = useSavedFiltersContext();
@@ -111,11 +112,17 @@ function SaveFilterButton() {
             size="sm"
             disabled={!hasFilters || (isPristine && !!selectedSavedFilter)}
             aria-label={t('a11y.saved_filter.save')}
+            aria-describedby={!hasFilters ? reasonId : undefined}
             onClick={handleSave}
             className={isPristine ? '' : 'text-yellow-500'}
           >
             <SaveIcon />
           </Button>
+          {!hasFilters && (
+            <span id={reasonId} hidden>
+              {t('common.saved_filter.save_tooltip.when_empty')}
+            </span>
+          )}
         </span>
       </TooltipTrigger>
       <TooltipContent>{getTooltipContent()}</TooltipContent>

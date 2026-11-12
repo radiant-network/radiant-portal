@@ -179,6 +179,7 @@ type CaseResult struct {
 	ProbandID                 int                     `json:"proband_id,omitempty"`
 	SubmitterProbandId        string                  `json:"submitter_proband_id,omitempty"`
 	ProbandSubmitterSampleIds JsonArray[string]       `json:"proband_submitter_sample_ids" validate:"required"`
+	RunNames                  JsonArray[string]       `json:"run_names,omitempty"`
 	PriorityCode              string                  `json:"priority_code,omitempty"`
 	StatusCode                CaseStatus              `json:"status_code" validate:"required" enums:"draft,submitted,processing,in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
 	CaseTypeCode              string                  `json:"-"`
@@ -272,6 +273,7 @@ type CasePatientClinicalInformation struct {
 	AffectedStatusCode    string                       `json:"affected_status_code" validate:"required"`
 	PatientID             *int                         `json:"patient_id,omitempty"`
 	FetusID               *int                         `json:"fetus_id,omitempty"`
+	PatientKey            *string                      `json:"patient_key,omitempty" gorm:"-" format:"uuid"` // Key of the PCX patient page, absent when the patient view is off or the caller cannot see the patient there
 	FirstName             string                       `json:"first_name,omitempty"`
 	LastName              string                       `json:"last_name,omitempty"`
 	DateOfBirth           *time.Time                   `json:"date_of_birth,omitempty"`
@@ -332,6 +334,11 @@ var CaseProbandSampleTable = Table{
 	Alias: "proband_sample",
 }
 
+var CaseRunTable = Table{
+	Name:  "case_run",
+	Alias: "case_run",
+}
+
 func (Case) TableName() string {
 	return CaseTable.Name
 }
@@ -363,6 +370,7 @@ var CasesFields = []Field{
 	CaseOrderingOrganizationNameField,
 	CaseOrderingOrganizationCodeField,
 	CaseProbandSubmitterSampleIdsField,
+	CaseRunNamesField,
 	CaseDiagnosisLabCodeField,
 	CaseDiagnosisLabNameField,
 	PatientOrganizationCodeField,
@@ -540,6 +548,14 @@ var CaseProbandSubmitterSampleIdsField = Field{
 	CanBeFiltered: true,
 	IsArray:       true,
 	Table:         CaseProbandSampleTable,
+}
+
+var CaseRunNamesField = Field{
+	Name:          "run_names",
+	Alias:         "run_names",
+	CanBeSelected: true,
+	IsArray:       true,
+	Table:         CaseRunTable,
 }
 
 var CaseSequencingExperimentIdField = Field{

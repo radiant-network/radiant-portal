@@ -166,8 +166,17 @@ Class | Method | HTTP request | Description
 *OrganizationsApi* | [**update_organization**](docs/OrganizationsApi.md#update_organization) | **PUT** /{tenant}/organizations/{code} | Update an organization
 *PatientsApi* | [**autocomplete_patients**](docs/PatientsApi.md#autocomplete_patients) | **GET** /{tenant}/patients/autocomplete | Get AutocompleteResult list of PCX patients matching prefix
 *PatientsApi* | [**patient_entity**](docs/PatientsApi.md#patient_entity) | **GET** /{tenant}/patients/{patient_key} | Get PatientEntity patient entity
+*PatientsApi* | [**patient_external_records**](docs/PatientsApi.md#patient_external_records) | **GET** /{tenant}/patients/{patient_key}/external_records | Get PatientExternalRecords of a patient
+*PatientsApi* | [**patient_genomics**](docs/PatientsApi.md#patient_genomics) | **GET** /{tenant}/patients/{patient_key}/genomics | Get PatientGenomics of a patient
+*PatientsApi* | [**patient_imaging**](docs/PatientsApi.md#patient_imaging) | **GET** /{tenant}/patients/{patient_key}/imaging | Get PatientImaging of a patient
+*PatientsApi* | [**patient_laboratory**](docs/PatientsApi.md#patient_laboratory) | **GET** /{tenant}/patients/{patient_key}/laboratory | Get PatientLaboratory of a patient
+*PatientsApi* | [**patient_processing_report_download_url**](docs/PatientsApi.md#patient_processing_report_download_url) | **GET** /{tenant}/patients/{patient_key}/processing_report/download_url | Get a presigned URL to open the processing report of a patient
+*PatientsApi* | [**patient_treatments**](docs/PatientsApi.md#patient_treatments) | **GET** /{tenant}/patients/{patient_key}/treatments | Get PatientTreatments of a patient
+*PatientsApi* | [**patient_trial_eligibilities**](docs/PatientsApi.md#patient_trial_eligibilities) | **GET** /{tenant}/patients/{patient_key}/trial_eligibilities | Get PatientTrialEligibilities of a patient
+*PatientsApi* | [**patient_tumor_board**](docs/PatientsApi.md#patient_tumor_board) | **GET** /{tenant}/patients/{patient_key}/tumor_board | Get PatientTumorBoard of a patient
+*PatientsApi* | [**patient_tumor_board_deck_download_url**](docs/PatientsApi.md#patient_tumor_board_deck_download_url) | **GET** /{tenant}/patients/{patient_key}/tumor_board/deck/download_url | Get a presigned URL to download the tumor board deck of a patient
+*PatientsApi* | [**patient_tumor_board_report_download_url**](docs/PatientsApi.md#patient_tumor_board_report_download_url) | **GET** /{tenant}/patients/{patient_key}/tumor_board/sessions/{session_id}/download_url | Get a presigned URL to download the report of a tumor board session
 *PatientsApi* | [**patients_filters**](docs/PatientsApi.md#patients_filters) | **GET** /{tenant}/patients/filters | Get PatientFilters patient list filters
-*PatientsApi* | [**patients_statistics**](docs/PatientsApi.md#patients_statistics) | **GET** /{tenant}/patients/statistics | Get PatientStatistics cohort analytics
 *PatientsApi* | [**post_patient_batch**](docs/PatientsApi.md#post_patient_batch) | **POST** /{tenant}/patients/batch | Create a new patient batch
 *PatientsApi* | [**put_patient_batch**](docs/PatientsApi.md#put_patient_batch) | **PUT** /{tenant}/patients/batch | Update existing patients (batch)
 *PatientsApi* | [**search_patients**](docs/PatientsApi.md#search_patients) | **POST** /{tenant}/patients/search | Search PCX patients
@@ -308,23 +317,39 @@ Class | Method | HTTP request | Description
  - [PatchCaseBatchBody](docs/PatchCaseBatchBody.md)
  - [PatientBatch](docs/PatientBatch.md)
  - [PatientCase](docs/PatientCase.md)
+ - [PatientCbc](docs/PatientCbc.md)
+ - [PatientCsf](docs/PatientCsf.md)
+ - [PatientCsfCytology](docs/PatientCsfCytology.md)
+ - [PatientCsfResult](docs/PatientCsfResult.md)
  - [PatientDayDate](docs/PatientDayDate.md)
+ - [PatientDocumentClass](docs/PatientDocumentClass.md)
+ - [PatientDocumentType](docs/PatientDocumentType.md)
  - [PatientDose](docs/PatientDose.md)
  - [PatientEntity](docs/PatientEntity.md)
  - [PatientEvent](docs/PatientEvent.md)
+ - [PatientExchangeOrganization](docs/PatientExchangeOrganization.md)
+ - [PatientExternalRecords](docs/PatientExternalRecords.md)
  - [PatientFilters](docs/PatientFilters.md)
+ - [PatientGenomics](docs/PatientGenomics.md)
+ - [PatientImaging](docs/PatientImaging.md)
  - [PatientImagingSession](docs/PatientImagingSession.md)
  - [PatientInterpretation](docs/PatientInterpretation.md)
  - [PatientKeyDate](docs/PatientKeyDate.md)
  - [PatientKeyDates](docs/PatientKeyDates.md)
+ - [PatientLabResult](docs/PatientLabResult.md)
+ - [PatientLaboratory](docs/PatientLaboratory.md)
  - [PatientListItem](docs/PatientListItem.md)
- - [PatientOrganizationVitalCount](docs/PatientOrganizationVitalCount.md)
+ - [PatientPerformanceScore](docs/PatientPerformanceScore.md)
  - [PatientRadiation](docs/PatientRadiation.md)
- - [PatientStatistics](docs/PatientStatistics.md)
  - [PatientSurgery](docs/PatientSurgery.md)
- - [PatientSurvival](docs/PatientSurvival.md)
  - [PatientTherapy](docs/PatientTherapy.md)
  - [PatientTreatmentSummary](docs/PatientTreatmentSummary.md)
+ - [PatientTreatments](docs/PatientTreatments.md)
+ - [PatientTrialEligibilities](docs/PatientTrialEligibilities.md)
+ - [PatientTrialEligibility](docs/PatientTrialEligibility.md)
+ - [PatientTrialEnrollment](docs/PatientTrialEnrollment.md)
+ - [PatientTumorBoard](docs/PatientTumorBoard.md)
+ - [PatientTumorBoardSession](docs/PatientTumorBoardSession.md)
  - [PatientsSearchResponse](docs/PatientsSearchResponse.md)
  - [PubmedCitation](docs/PubmedCitation.md)
  - [PubmedCitationDetails](docs/PubmedCitationDetails.md)

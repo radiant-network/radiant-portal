@@ -161,7 +161,7 @@ const generateQueryBuilderFunctions = (
      * Toggles the collapse/expand state of the query panel.
      */
     toggleCollapse() {
-      cy.get(CommonSelectors.querybuilderHeader).clickAndWait({ force: true });
+      cy.get(CommonSelectors.querybuilderToggle).clickAndWait({ force: true });
     },
     /**
      * Toggles the field labels switch.
@@ -170,15 +170,16 @@ const generateQueryBuilderFunctions = (
       cy.get(CommonSelectors.labelsSwitch).clickAndWait({ force: true });
     },
     /**
-     * Turns the field labels switch on if it is off.
+     * Turns the field labels switch on if it is displayed and off (it is hidden while no query has pills).
      */
     forceCheckToggleLabels() {
-      cy.get(CommonSelectors.labelsSwitch).then($switch => {
-        if ($switch.attr('data-state') !== 'checked') {
+      cy.get(CommonSelectors.querybuilderHeader).should('exist');
+      cy.get('body').then($body => {
+        const $switch = $body.find(CommonSelectors.labelsSwitch);
+        if ($switch.length && $switch.attr('data-state') !== 'checked') {
           cy.wrap($switch).clickAndWait({ force: true });
         }
       });
-      cy.get(CommonSelectors.labelsSwitch).should('have.attr', 'data-state', 'checked');
     },
     /**
      * Toggles the intra-query combiner operator (and ↔ or) of the active query.
@@ -208,7 +209,34 @@ const generateQueryBuilderFunctions = (
      * @param collapsed Whether the panel should be collapsed.
      */
     shouldBeCollapsed(collapsed: boolean) {
-      cy.get(CommonSelectors.querybuilderHeader).should('have.attr', 'data-state', collapsed ? 'closed' : 'open');
+      cy.get(CommonSelectors.querybuilderToggle).should('have.attr', 'data-state', collapsed ? 'closed' : 'open');
+    },
+    /**
+     * Checks whether the field labels switch is displayed.
+     * @param shouldExist Whether the switch should exist.
+     */
+    shouldShowLabelsSwitch(shouldExist: boolean) {
+      cy.get(CommonSelectors.labelsSwitch).should(shouldExist ? 'exist' : 'not.exist');
+    },
+    /**
+     * Checks whether the query selection checkboxes are visible (they stay in the DOM but are hidden).
+     * @param shouldShow Whether the checkboxes should be visible.
+     */
+    shouldShowQuerySelectCheckboxes(shouldShow: boolean) {
+      cy.get(CommonSelectors.querySelectCheckbox).should(shouldShow ? 'be.visible' : 'not.be.visible');
+    },
+    /**
+     * Checks whether the Combine button is displayed.
+     * @param shouldExist Whether the button should exist.
+     */
+    shouldShowCombine(shouldExist: boolean) {
+      cy.get(CommonSelectors.combineQueriesButton).should(shouldExist ? 'exist' : 'not.exist');
+    },
+    /**
+     * Checks that no query is selected for combination.
+     */
+    shouldHaveNoSelectedQuery() {
+      cy.get(`${CommonSelectors.querySelectCheckbox}[data-state="checked"]`).should('not.exist');
     },
     /**
      * Checks the number of pills in the active query.

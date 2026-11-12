@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -98,6 +99,7 @@ func (m *MockCNVRepository) CountOccurrences(context.Context, int, int, int, typ
 }
 
 func (m *MockCNVRepository) GetGenesOverlap(ctx context.Context, caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error) {
+	refseq := "NM_000001.1"
 	return []types.CNVGeneOverlap{
 		{
 			Symbol:                 "GENE1",
@@ -106,6 +108,7 @@ func (m *MockCNVRepository) GetGenesOverlap(ctx context.Context, caseId int, seq
 			NbOverlapBases:         10,
 			Cytoband:               []string{"p1.1", "p1.2"},
 			NbExons:                1,
+			RefseqTranscriptId:     &refseq,
 			OverlappingGenePercent: 10,
 			OverlappingCNVPercent:  5,
 			OverlapType:            "partial",
@@ -244,6 +247,35 @@ func Test_CNVOccurrencesAggregateHandler_withDictionary(t *testing.T) {
 	assert.JSONEq(t, expected, w.Body.String())
 }
 
+func (m *MockFacetsRepository) GetGermlineCNVFacets(ctx context.Context, facetNames []string) ([]types.Facet, error) {
+	return m.GetFacets(ctx, facetNames)
+}
+
+// cnvOnlyFacetsRepo fails the shared lookup, so a handler that reads it instead of the CNV one fails.
+type cnvOnlyFacetsRepo struct{}
+
+func (cnvOnlyFacetsRepo) GetFacets(context.Context, []string) ([]types.Facet, error) {
+	return nil, fmt.Errorf("shared dictionary must not be read")
+}
+
+func (cnvOnlyFacetsRepo) GetGermlineCNVFacets(_ context.Context, facetNames []string) ([]types.Facet, error) {
+	return []types.Facet{{Name: facetNames[0], Values: []string{"GAIN", "LOSS", "denovo"}}}, nil
+}
+
+func Test_CNVOccurrencesAggregateHandler_withDictionary_ReadsGermlineCNVDictionary(t *testing.T) {
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/aggregate", OccurrencesGermlineCNVAggregateHandler(&MockCNVRepository{}, cnvOnlyFacetsRepo{}))
+
+	body := `{"field": "type", "size": 10}`
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/cnv/1/1/1/aggregate?with_dictionary=true", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	expected := `[{"key": "GAIN", "count": 2}, {"key": "LOSS", "count": 1}, {"key": "denovo", "count": 0}]`
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
 func Test_CNVOccurrencesStatisticsHandler(t *testing.T) {
 	repo := &MockCNVRepository{}
 	router := gin.Default()
@@ -286,6 +318,7 @@ func Test_CNVOccurrencesGenesOverlapHandler(t *testing.T) {
 			"nb_overlap_bases": 10,
 			"cytoband": ["p1.1", "p1.2"],
 			"nb_exons": 1,
+			"refseq_transcript_id": "NM_000001.1",
 			"overlapping_gene_percent": 10,
 			"overlapping_cnv_percent": 5,
 			"overlap_type": "partial",

@@ -14,12 +14,15 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Query builder - Empty qu
 
   it('Build a first pill', () => {
     setupTest();
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowLabelsSwitch(false /*shouldExist*/);
     CaseEntity_Variants_QueryBuilder.somatic.actions.buildFirstPill();
 
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHaveChromosomePill();
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHaveActivePillCount(1);
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHaveQueryCount();
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowClearAll(false /*shouldExist*/);
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowLabelsSwitch(true /*shouldExist*/);
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowQuerySelectCheckboxes(false /*shouldShow*/);
   });
 
   it('Collapse and expand the query panel', () => {

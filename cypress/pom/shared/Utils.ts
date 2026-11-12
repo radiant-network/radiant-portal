@@ -7,6 +7,8 @@ import { CommonTexts } from './Texts';
  */
 export const oneMinute = 60 * 1000;
 
+const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
  * Builds a RegExp that matches either the English or French text from CommonTexts.
  * Special RegExp characters are automatically escaped.
@@ -14,7 +16,6 @@ export const oneMinute = 60 * 1000;
  * @returns A RegExp matching either EN or FR text exactly.
  */
 export const buildBilingualRegExp = (commonTextsId: string): RegExp => {
-  const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const keyOfCommonTextsId = commonTextsId as keyof typeof CommonTexts.en;
 
   const enValue = CommonTexts.en[keyOfCommonTextsId];
@@ -26,6 +27,14 @@ export const buildBilingualRegExp = (commonTextsId: string): RegExp => {
 
   return new RegExp(`^(${escapeRegExp(enValue)}|${escapeRegExp(frValue)})$`);
 };
+
+/**
+ * Builds a RegExp that matches the text exactly (e.g., 'Cypress_F1' does not match 'Cypress_F1 COPY').
+ * Special RegExp characters are automatically escaped.
+ * @param text The text to match.
+ * @returns A RegExp matching the text exactly.
+ */
+export const buildExactRegExp = (text: string): RegExp => new RegExp(`^${escapeRegExp(text)}$`);
 
 /**
  * Resolves a facet configuration from its section name and facet id.
@@ -142,11 +151,42 @@ export const getColumnPosition = (tableHead: string, columns: any, columnID: str
     } else if (columnName == '') {
       position = columns.find((col: { id: string }) => col.id === columnID)?.position;
     } else {
-      position = Array.from($cells).findIndex($cell => $cell.textContent?.match(stringToRegExp(columnName, true)));
+      position = Array.from($cells).findIndex($cell => getVisibleText($cell).match(stringToRegExp(columnName, true)));
     }
 
     return position;
   });
+};
+
+/**
+ * Returns the text content of an element without its screen-reader-only copies (`.sr-only`), such as a tooltip exposed to screen readers.
+ * @param el The element.
+ * @returns The text content shown on screen.
+ */
+export const getVisibleText = (el: Element): string => {
+  if (el.closest('.sr-only')) {
+    return '';
+  }
+  const clone = el.cloneNode(true) as Element;
+  clone.querySelectorAll('.sr-only').forEach(srOnly => srOnly.remove());
+  return clone.textContent || '';
+};
+
+/**
+ * Checks if one of the elements, or one of their descendants, shows the given text.
+ * Same match as `contains(stringToRegExp(text, exact))`, ignoring the `.sr-only` text.
+ * @param $elements The elements to search in.
+ * @param text The text to find.
+ * @param exact If true, the whole text of the element must match (default: false).
+ * @returns True if the text is found.
+ */
+export const hasVisibleText = ($elements: JQuery<HTMLElement>, text: string, exact: boolean = false): boolean => {
+  const regExp = stringToRegExp(text, exact);
+  return $elements
+    .find('*')
+    .addBack()
+    .toArray()
+    .some(el => regExp.test(getVisibleText(el).replace(/\s+/g, ' ')));
 };
 
 /**
@@ -328,7 +368,7 @@ export const getUrlLink = (columnID: string, data: any): string | undefined => {
     case 'gene':
       return data.gene ? `https://www.omim.org/search?index=entry&start=1&limit=10&sort=score+desc%2C+prefix_sort+desc&search=${data.gene}` : undefined;
     case 'gnomad':
-      return data.locus ? `https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3` : undefined;
+      return data.locus ? `https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r4` : undefined;
     case 'link':
       if (data.omim_id) return `https://omim.org/entry/${data.omim_id}`;
       if (data.orphanet_id) return `https://www.orpha.net/en/disease/detail/${data.orphanet_id}`;

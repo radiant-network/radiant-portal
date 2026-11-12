@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Trans } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -115,6 +115,8 @@ type UserFormSheetProps = {
 
 function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps) {
   const { t } = useI18n();
+  const selfDeleteReasonId = useId();
+  const selfAdminReasonId = useId();
   const { tenant, tenants, refreshPermissions } = useTenant();
   const localPath = useLocalPath();
   const { sub } = useLoginContext();
@@ -242,9 +244,18 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
     <Tooltip>
       <TooltipTrigger asChild>
         <span className="inline-flex">
-          <Button type="button" variant="destructive" disabled className="pointer-events-none">
+          <Button
+            type="button"
+            variant="destructive"
+            disabled
+            className="pointer-events-none"
+            aria-describedby={selfDeleteReasonId}
+          >
             {t('admin.users.delete.action')}
           </Button>
+          <span id={selfDeleteReasonId} hidden>
+            {t('admin.users.errors.self_delete')}
+          </span>
         </span>
       </TooltipTrigger>
       <TooltipContent>{t('admin.users.errors.self_delete')}</TooltipContent>
@@ -259,6 +270,7 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
     <CheckboxGroupField
       box
       className={isEdit ? 'w-auto' : undefined}
+      aria-describedby={isAdminGrantLocked ? selfAdminReasonId : undefined}
       data={[{ id: ADMIN_ROLE_CODE, label: t('admin.users.roles.admin_access'), disabled: isAdminGrantLocked }]}
       value={roles.filter(code => code === ADMIN_ROLE_CODE)}
       onValueChange={values => {
@@ -272,10 +284,15 @@ function UserFormSheet({ open, onOpenChange, user, onSaved }: UserFormSheetProps
   );
 
   const adminGrant = isAdminGrantLocked ? (
-    <Tooltip>
-      <TooltipTrigger asChild>{adminBox}</TooltipTrigger>
-      <TooltipContent>{t('admin.users.roles.errors.self_admin')}</TooltipContent>
-    </Tooltip>
+    <>
+      <Tooltip>
+        <TooltipTrigger asChild>{adminBox}</TooltipTrigger>
+        <TooltipContent>{t('admin.users.roles.errors.self_admin')}</TooltipContent>
+      </Tooltip>
+      <span id={selfAdminReasonId} hidden>
+        {t('admin.users.roles.errors.self_admin')}
+      </span>
+    </>
   ) : (
     <HoverCard>
       <HoverCardTrigger asChild>{adminBox}</HoverCardTrigger>

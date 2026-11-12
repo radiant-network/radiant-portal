@@ -11,7 +11,10 @@ function AminoAcidChange({ value, description, className }: AminoAcidChangeProps
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div className={cn('font-mono truncate w-fit max-w-full', className)}>{value}</div>
+        <div className={cn('font-mono truncate w-fit max-w-full', className)}>
+          {value}
+          {description && <span className="sr-only">{description}</span>}
+        </div>
       </TooltipTrigger>
       <TooltipContent>
         {description && <div>{description}</div>}

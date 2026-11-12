@@ -75,9 +75,9 @@ export default function App() {
       <Error404
         message={t('variant_entity.not_found')}
         extra={
-          <Link to={localPath('/')}>
-            <Button>{t('variant_entity.not_found.button')}</Button>
-          </Link>
+          <Button asChild>
+            <Link to={localPath('/')}>{t('variant_entity.not_found.button')}</Link>
+          </Button>
         }
       />
     );

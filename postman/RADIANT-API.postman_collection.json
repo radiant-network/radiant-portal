@@ -4699,6 +4699,312 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Treatments",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/treatments",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "treatments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Laboratory",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/laboratory",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "laboratory"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Imaging",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/imaging",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "imaging"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Genomics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/genomics",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "genomics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "External records",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/external_records",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "external_records"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Processing report download URL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/processing_report/download_url",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "processing_report",
+                "download_url"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Trial eligibilities",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/trial_eligibilities",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "trial_eligibilities"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tumor board",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/tumor_board",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "tumor_board"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tumor board deck download URL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/tumor_board/deck/download_url",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "tumor_board",
+                "deck",
+                "download_url"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Tumor board session report download URL",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/patients/{{patient_key}}/tumor_board/sessions/1/download_url",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "patients",
+                "{{patient_key}}",
+                "tumor_board",
+                "sessions",
+                "1",
+                "download_url"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     }

@@ -70,6 +70,29 @@ func Test_pcxEventType_MissingIsAnError(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func Test_pcxPerformanceScale_EveryKnownValue(t *testing.T) {
+	for source, code := range map[string]string{"Lansky": "lansky", "Karnofsky": "karnofsky", " KARNOFSKY ": "karnofsky"} {
+		got, err := pcxPerformanceScale(ptr(source))
+		require.NoError(t, err, source)
+		assert.Equal(t, code, got, source)
+	}
+}
+
+func Test_pcxPerformanceScale_UnknownIsAnError(t *testing.T) {
+	_, err := pcxPerformanceScale(ptr("ECOG"))
+	assert.ErrorContains(t, err, `unknown performance status scale "ECOG"`)
+}
+
+func Test_pcxPerformanceScale_EmptyIsAnError(t *testing.T) {
+	_, err := pcxPerformanceScale(ptr(""))
+	assert.ErrorContains(t, err, `unknown performance status scale ""`)
+}
+
+func Test_pcxPerformanceScale_MissingIsAnError(t *testing.T) {
+	_, err := pcxPerformanceScale(nil)
+	assert.Error(t, err)
+}
+
 func dose(value, unit string) types.PatientDose {
 	return types.PatientDose{Value: &value, Unit: &unit}
 }
@@ -121,4 +144,76 @@ func Test_pcxKeyDates_NoKnownDay(t *testing.T) {
 	assert.Nil(t, keyDates.LatestEncounter.Day)
 	assert.Equal(t, "clinical", keyDates.InitialDiagnosis.Source)
 	assert.Equal(t, "registry", keyDates.LatestEncounter.Source)
+}
+
+func enrolledTherapy(nameAndArm, name, arm string, start, stop *int, agents ...string) types.PatientTherapy {
+	return types.PatientTherapy{
+		Start: types.PatientDayDate{Day: start}, Stop: types.PatientDayDate{Day: stop},
+		ProtocolNameAndArm: ptr(nameAndArm), ProtocolName: ptr(name), ProtocolArm: ptr(arm),
+		ChemotherapyType:   ptr("Treatment follows a protocol and subject is enrolled on a protocol"),
+		ChemotherapyAgents: agents,
+	}
+}
+
+func Test_pcxTrialEnrollments_KeepsOnlyEnrolledTherapies(t *testing.T) {
+	followed := enrolledTherapy("ACNS0333: Arm I", "ACNS0333", "Arm I", ptr(100), ptr(200))
+	followed.ChemotherapyType = ptr("Treatment follows a protocol but subject is not enrolled")
+	standard := enrolledTherapy("Not Applicable", "Not Applicable", "Not Applicable", ptr(100), ptr(200))
+	standard.ChemotherapyType = ptr("Treatment follows other standard of care not associated with a current or past protocol")
+	missing := enrolledTherapy("ACNS0333: Arm I", "ACNS0333", "Arm I", ptr(100), ptr(200))
+	missing.ChemotherapyType = nil
+
+	assert.Equal(t, []types.PatientTrialEnrollment{}, pcxTrialEnrollments([]types.PatientTherapy{followed, standard, missing}))
+}
+
+func Test_pcxTrialEnrollments_KeepsEachEnrollmentOnOneProtocolApart(t *testing.T) {
+	first := enrolledTherapy("Other", "Other", "Not Applicable", ptr(1267), ptr(1295), "carboplatin", "vincristine")
+	first.IsInitialTreatment = ptr(true)
+	enrollments := pcxTrialEnrollments([]types.PatientTherapy{
+		first,
+		enrolledTherapy("Other", "Other", "Not Applicable", ptr(1435), ptr(1554), "vincristine", "methotrexate"),
+	})
+
+	assert.Equal(t, []types.PatientTrialEnrollment{
+		{
+			Start: types.PatientDayDate{Day: ptr(1435)}, Stop: types.PatientDayDate{Day: ptr(1554)},
+			ProtocolName: "Other", ChemotherapyAgents: []string{"vincristine", "methotrexate"},
+		},
+		{
+			Start: types.PatientDayDate{Day: ptr(1267)}, Stop: types.PatientDayDate{Day: ptr(1295)},
+			ProtocolName: "Other", ChemotherapyAgents: []string{"carboplatin", "vincristine"}, IsInitialTreatment: true,
+		},
+	}, enrollments)
+}
+
+func Test_pcxTrialEnrollments_KeepsTwoArmsOfOneProtocolApart(t *testing.T) {
+	enrollments := pcxTrialEnrollments([]types.PatientTherapy{
+		enrolledTherapy("ACNS0333: Arm I", "ACNS0333", "Arm I", ptr(100), ptr(200)),
+		enrolledTherapy("ACNS0333: Arm II", "ACNS0333", "Arm II", ptr(100), ptr(200)),
+	})
+
+	require.Len(t, enrollments, 2)
+	assert.Equal(t, ptr("Arm I"), enrollments[0].ProtocolArm)
+	assert.Equal(t, ptr("Arm II"), enrollments[1].ProtocolArm)
+}
+
+func Test_pcxTrialEnrollments_NotApplicableArmIsNull(t *testing.T) {
+	enrollments := pcxTrialEnrollments([]types.PatientTherapy{enrolledTherapy("SJMB12", "SJMB12", "Not Applicable", ptr(100), ptr(200))})
+
+	require.Len(t, enrollments, 1)
+	assert.Nil(t, enrollments[0].ProtocolArm)
+}
+
+func Test_pcxTrialEnrollments_MostRecentFirstUndatedLast(t *testing.T) {
+	enrollments := pcxTrialEnrollments([]types.PatientTherapy{
+		enrolledTherapy("A", "A", "Not Applicable", ptr(100), nil),
+		enrolledTherapy("B", "B", "Not Applicable", nil, nil),
+		enrolledTherapy("C", "C", "Not Applicable", ptr(900), nil),
+	})
+
+	names := make([]string, len(enrollments))
+	for i, e := range enrollments {
+		names[i] = e.ProtocolName
+	}
+	assert.Equal(t, []string{"C", "A", "B"}, names)
 }

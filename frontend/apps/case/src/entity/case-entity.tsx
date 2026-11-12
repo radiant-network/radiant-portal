@@ -107,9 +107,9 @@ export default function App() {
       <Error404
         message={t('case_entity.not_found')}
         extra={
-          <Link to={localPath('/')}>
-            <Button>{t('case_entity.not_found.button')}</Button>
-          </Link>
+          <Button asChild>
+            <Link to={localPath('/')}>{t('case_entity.not_found.button')}</Link>
+          </Button>
         }
       />
     );
@@ -140,6 +140,7 @@ export default function App() {
                   <TabsListItem disabled value={CaseEntityTabs.Variants}>
                     <AudioWaveform />
                     {t('case_entity.variants.title')}
+                    <span className="sr-only">{t('case_entity.details.no_variants')}</span>
                   </TabsListItem>
                 </TooltipTrigger>
                 <TooltipContent>{t('case_entity.details.no_variants')}</TooltipContent>

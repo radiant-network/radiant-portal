@@ -120,7 +120,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               <ConditionalField condition={!!data?.gnomad_v3_af}>
                 <a
                   data-cy="gnomad"
-                  href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r3`}
+                  href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r4`}
                   target="_blank"
                   rel="noreferrer"
                   className="hover:underline"

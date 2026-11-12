@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 
 import type { IGVTracks } from '@/api/api';
@@ -8,7 +8,11 @@ import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { igvApi } from '@/utils/api';
 
-import IgvContainer from './igv-container';
+import { buildCaseTracks } from './case-tracks';
+import IGV from './igv';
+import IGVTracksMenu from './igv-tracks-menu';
+import { buildPublicTracks, type PublicTrackId } from './public-tracks';
+import type { IGVContext } from './types';
 
 type IGVDialogProps = {
   open: boolean;
@@ -17,14 +21,27 @@ type IGVDialogProps = {
   seqId: number;
   locus: string;
   start: number;
+  end?: number;
   chromosome: string;
+  context: IGVContext;
   renderTrigger?: (handleOpen: () => void) => ReactNode;
 };
 
 const fetchIGVForCaseId = async ({ caseId }: { caseId: number }, tenant: string) =>
   igvApi.getIGV(tenant, caseId.toString()).then(response => response.data);
 
-const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, renderTrigger }: IGVDialogProps) => {
+const IGVDialog = ({
+  caseId,
+  seqId,
+  locus,
+  start,
+  end,
+  chromosome,
+  context,
+  open,
+  setOpen,
+  renderTrigger,
+}: IGVDialogProps) => {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const fetchIGV = useSWR<IGVTracks>(
@@ -40,27 +57,73 @@ const IGVDialog = ({ caseId, seqId, locus, start, chromosome, open, setOpen, ren
     },
   );
 
+  // Back to the defaults at each opening.
+  const [shownPublicTrackIds, setShownPublicTrackIds] = useState<PublicTrackId[]>();
+
+  const caseTracks = useMemo(() => buildCaseTracks(fetchIGV.data), [fetchIGV.data]);
+  const publicTrackOptions = useMemo(
+    () => buildPublicTracks(context, fetchIGV.data?.public_tracks, id => t(`variant.igv.public_tracks.${id}`)),
+    [context, fetchIGV.data, t],
+  );
+  const shownIds = useMemo(
+    () =>
+      shownPublicTrackIds ??
+      publicTrackOptions.filter(({ shownByDefault }) => shownByDefault).map(({ track }) => track.id),
+    [shownPublicTrackIds, publicTrackOptions],
+  );
+  const publicTracks = useMemo(
+    () => publicTrackOptions.map(({ track }) => track).filter(track => shownIds.includes(track.id)),
+    [publicTrackOptions, shownIds],
+  );
+
   useEffect(() => {
     if (open) {
+      setShownPublicTrackIds(undefined);
       fetchIGV.mutate();
     }
   }, [open]);
 
+  const handlePublicTrackShownChange = (id: PublicTrackId, shown: boolean) =>
+    setShownPublicTrackIds(shown ? [...shownIds, id] : shownIds.filter(shownId => shownId !== id));
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {renderTrigger?.(() => setOpen(true))}
-      <DialogContent size="full" variant="stickyHeader">
-        {fetchIGV.isLoading ? (
+      <DialogContent
+        size="full"
+        variant="stickyHeader"
+        // The toasts of IGV sit outside the dialog: closing one must not close it.
+        onInteractOutside={event => {
+          if ((event.target as Element | null)?.closest('[data-sonner-toaster]')) event.preventDefault();
+        }}
+      >
+        {/* The cached response of an earlier opening may hold expired URLs: IGV waits for the refetch. */}
+        {fetchIGV.isValidating ? (
           <DialogBody className="flex items-center justify-center">
             <Spinner size={32} />
           </DialogBody>
         ) : (
           <div>
             <DialogHeader>
-              <DialogTitle>{t('variant.igv.title')}</DialogTitle>
+              <div className="flex items-center gap-4">
+                <DialogTitle>{t('variant.igv.title')}</DialogTitle>
+                {publicTrackOptions.length > 0 && (
+                  <IGVTracksMenu
+                    tracks={publicTrackOptions.map(({ track }) => track)}
+                    shownTrackIds={shownIds}
+                    onShownChange={handlePublicTrackShownChange}
+                  />
+                )}
+              </div>
             </DialogHeader>
             <DialogBody className="relative max-h-[85vh] overflow-y-auto">
-              <IgvContainer tracks={fetchIGV.data?.alignment || []} locus={formatLocus(start, chromosome, 100)} />
+              <IGV
+                tracks={caseTracks}
+                context={context}
+                publicTracks={publicTracks}
+                onPublicTrackRemoved={id => handlePublicTrackShownChange(id, false)}
+                locus={formatLocus(start, chromosome, 100, end)}
+              />
             </DialogBody>
           </div>
         )}

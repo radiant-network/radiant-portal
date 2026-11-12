@@ -114,7 +114,7 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Saved filters - Query bu
     CaseEntity_Variants_SavedFilters.somatic.actions.deleteFilter('Cypress_F1');
     CaseEntity_Variants_SavedFilters.somatic.actions.createFilter('Cypress_F1');
     CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
-    CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('discard', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.somatic.validations.shouldShowIcon('discard', false /*shouldExist*/);
 
     CaseEntity_Variants_SavedFilters.somatic.actions.modifyFilter();
     CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('save', false /*isDisable*/, true /*isDirty*/);
@@ -122,7 +122,7 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Saved filters - Query bu
 
     CaseEntity_Variants_SavedFilters.somatic.actions.updateFilter();
     CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
-    CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('discard', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.somatic.validations.shouldShowIcon('discard', false /*shouldExist*/);
   });
 
   it('Modify and discard', () => {
@@ -136,6 +136,6 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Saved filters - Query bu
 
     CaseEntity_Variants_SavedFilters.somatic.actions.clickDiscardButton();
     CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
-    CaseEntity_Variants_SavedFilters.somatic.validations.shouldIconHaveExpectedStates('discard', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.somatic.validations.shouldShowIcon('discard', false /*shouldExist*/);
   });
 });

@@ -1,0 +1,27 @@
+/*
+   {{.TenantCode}}_tenant.v_pcx_30_tumor_board_session  (VIEW, the tumor board sessions of each PCX patient, one row per session)
+
+   Built like v_pcx_30_hin_exchange: on the secured demographics view, so each row comes under the identifier the caller
+   sees; the source join only maps that identifier back to the research id. The session date and the report's S3 URL are
+   PHI, NULL without PHI access. recommendations are separated by semicolons.
+ */
+CREATE OR REPLACE VIEW {{.TenantCode}}_tenant.v_pcx_30_tumor_board_session AS
+SELECT d.organization_code,
+       d.patient_id_type,
+       d.patient_id,
+       t.session_id,
+       CASE WHEN d.can_read_phi THEN t.tumor_board_date END AS tumor_board_date,
+       t.age_at_tumor_board_days,
+       t.reason,
+       t.diagnosis,
+       t.consensus,
+       t.recommendations,
+       t.status,
+       CASE WHEN d.can_read_phi THEN t.report_url END AS report_url,
+       d.can_read_phi
+FROM {{.TenantCode}}_tenant.v_pcx_30_demographics_combined d
+JOIN radiant_data_dev.v_pcx_30_demographics_combined src
+  ON src.organization_code = d.organization_code
+ AND d.patient_id = CASE d.patient_id_type WHEN 'mrn' THEN src.mrn ELSE src.research_id END
+JOIN radiant_data_dev.tumor_board_session t
+  ON t.research_id = src.research_id

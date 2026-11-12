@@ -181,7 +181,7 @@ function ClinicalCard({ data, ...props }: ClinicalCardProps) {
 
   return (
     <Card data-cy="clinical-card" {...props}>
-      <CardHeader className="border-b [.border-b]:pb-4">
+      <CardHeader bordered className="pb-4">
         <CardTitle size="xl">{t('case_entity.details.clinical_overview')}</CardTitle>
         <CardAction>
           {hasVariants ? (

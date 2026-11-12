@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { data } from 'pom/shared/Data';
 import { CommonSelectors } from '../shared/Selectors';
-import { getPriorityColor, getStatusColor, getUrlLink, stringToRegExp } from '../shared/Utils';
+import { getPriorityColor, getStatusColor, getUrlLink, hasVisibleText } from '../shared/Utils';
 import { getColumnName, getColumnPosition } from '../shared/Utils';
 
 const selectors = {
@@ -120,6 +120,28 @@ const tableColumns = [
     tooltip: 'Requested by',
   },
   {
+    id: 'sample',
+    name: 'Sample',
+    apiField: 'proband_submitter_sample_ids',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 10,
+    tooltip: `Proband's sample ID (tumor sample for somatic cases)`,
+  },
+  {
+    id: 'run',
+    name: 'Run',
+    apiField: 'run_names',
+    isVisibleByDefault: false,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 11,
+    tooltip: `Run ID for the proband's sample`,
+  },
+  {
     id: 'project',
     name: 'Project',
     apiField: 'project_code',
@@ -127,7 +149,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 10,
+    position: 12,
     tooltip: null,
   },
   {
@@ -138,7 +160,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 11,
+    position: 13,
     tooltip: 'Date of case creation (yyyy-mm-dd)',
   },
   {
@@ -149,7 +171,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 12,
+    position: 14,
     tooltip: 'Date of last case modification (yyyy-mm-dd)',
   },
   {
@@ -160,7 +182,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 13,
+    position: 15,
     tooltip: 'Prescribing doctor',
   },
   {
@@ -171,7 +193,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 14,
+    position: 16,
     tooltip: 'Molecular diagnostic laboratory',
   },
   {
@@ -182,7 +204,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 15,
+    position: 17,
     tooltip: 'Organization managing the patient’s file',
   },
   {
@@ -193,7 +215,7 @@ const tableColumns = [
     pinByDefault: 'right',
     isSortable: false,
     isPinnable: true,
-    position: 16,
+    position: 18,
     tooltip: null,
   },
 ];
@@ -337,7 +359,7 @@ export const CasesTable = {
      * @param columnID The ID of the column to check.
      */
     shouldDisplayColumn(columnID: string) {
-      cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('exist');
+      cy.get(CommonSelectors.tableHead()).should($head => expect(hasVisibleText($head, getColumnName(tableColumns, columnID))).to.be.true);
     },
     /**
      * Validates the value of the first row for a given column.
@@ -376,7 +398,7 @@ export const CasesTable = {
         if (column.name.startsWith('[')) {
           cy.get(CommonSelectors.tableHead()).find(column.name).should(expectedExist);
         } else {
-          cy.get(CommonSelectors.tableHead()).contains(stringToRegExp(column.name, true /*exact*/)).should(expectedExist);
+          cy.get(CommonSelectors.tableHead()).should($head => expect(hasVisibleText($head, column.name, true)).to.eq(expectedExist === 'exist'));
         }
       });
     },
@@ -404,7 +426,7 @@ export const CasesTable = {
      * @param columnID The ID of the column to check.
      */
     shouldNotDisplayColumn(columnID: string) {
-      cy.get(CommonSelectors.tableHead()).contains(getColumnName(tableColumns, columnID)).should('not.exist');
+      cy.get(CommonSelectors.tableHead()).should($head => expect(hasVisibleText($head, getColumnName(tableColumns, columnID))).to.be.false);
     },
     /**
      * Validates that a specific column is pinned to the left side.
@@ -517,7 +539,9 @@ export const CasesTable = {
         if (column.name.startsWith('[')) {
           cy.get(CommonSelectors.tableHeadCell()).eq(column.position).find(column.name).should('exist');
         } else {
-          cy.get(CommonSelectors.tableHeadCell()).eq(column.position).contains(stringToRegExp(column.name, true /*exact*/)).should('exist');
+          cy.get(CommonSelectors.tableHeadCell())
+            .eq(column.position)
+            .should($cell => expect(hasVisibleText($cell, column.name, true)).to.be.true);
         }
       });
     },
@@ -537,7 +561,7 @@ export const CasesTable = {
               break;
             case 'status':
               cy.validateTableFirstRowContent(dataCase[columnID], position);
-              cy.validateTableFirstRowClass(CommonSelectors.tag(getStatusColor(dataCase[columnID])), position);
+              cy.validateTableFirstRowClass(CommonSelectors.tagButton(getStatusColor(dataCase[columnID])), position);
               break;
             case 'type':
               cy.validateTableFirstRowClass(dataCase[columnID], position);

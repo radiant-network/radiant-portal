@@ -95,10 +95,12 @@ export function usePreferredTenant() {
   const {
     data: tenants,
     isLoading: tenantsLoading,
+    isValidating: tenantsValidating,
     mutate: refreshPermissions,
   } = useSWR('auth-me-tenants', fetchTenants, {
     revalidateOnFocus: false,
-    shouldRetryOnError: false,
+    errorRetryCount: 2,
+    errorRetryInterval: 100,
   });
 
   // Returns 404 when the user never picked a tenant before -> treated as "no preference".
@@ -117,7 +119,10 @@ export function usePreferredTenant() {
     return tenants[0].code;
   }, [tenants, preference]);
 
-  return { tenant, tenants: tenants ?? [], isLoading: tenantsLoading || preferenceLoading, refreshPermissions };
+  // Keep the spinner up while SWR is still retrying tenants, so a transient 401 doesn't flash Error403.
+  const isLoading = tenantsLoading || preferenceLoading || (tenantsValidating && !tenants);
+
+  return { tenant, tenants: tenants ?? [], isLoading, refreshPermissions };
 }
 
 export function TenantProvider({ children }: { children: ReactNode }) {
@@ -133,8 +138,8 @@ export function TenantProvider({ children }: { children: ReactNode }) {
       key: TENANT_PREFERENCE_KEY,
       content: { tenant: code },
     });
-    // Hard navigation: entity ids do not carry across tenants, so land on the case list.
-    window.location.assign(`/${code}/case`);
+    // Hard navigation: entity ids do not carry across tenants, so land on the portal homepage.
+    window.location.assign(`/${code}`);
   };
 
   if (isLoading) {

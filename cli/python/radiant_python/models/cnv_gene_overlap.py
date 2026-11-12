@@ -18,7 +18,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Union
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -34,9 +34,10 @@ class CNVGeneOverlap(BaseModel):
     overlap_type: StrictStr
     overlapping_cnv_percent: Union[StrictFloat, StrictInt]
     overlapping_gene_percent: Union[StrictFloat, StrictInt]
+    refseq_transcript_id: Optional[StrictStr] = None
     symbol: StrictStr
     tenant_gene_panels: List[StrictStr]
-    __properties: ClassVar[List[str]] = ["cytoband", "gene_id", "gene_length", "nb_exons", "nb_overlap_bases", "overlap_type", "overlapping_cnv_percent", "overlapping_gene_percent", "symbol", "tenant_gene_panels"]
+    __properties: ClassVar[List[str]] = ["cytoband", "gene_id", "gene_length", "nb_exons", "nb_overlap_bases", "overlap_type", "overlapping_cnv_percent", "overlapping_gene_percent", "refseq_transcript_id", "symbol", "tenant_gene_panels"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -97,6 +98,7 @@ class CNVGeneOverlap(BaseModel):
             "overlap_type": obj.get("overlap_type"),
             "overlapping_cnv_percent": obj.get("overlapping_cnv_percent"),
             "overlapping_gene_percent": obj.get("overlapping_gene_percent"),
+            "refseq_transcript_id": obj.get("refseq_transcript_id"),
             "symbol": obj.get("symbol"),
             "tenant_gene_panels": obj.get("tenant_gene_panels")
         })

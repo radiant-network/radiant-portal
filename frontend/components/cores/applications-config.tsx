@@ -111,6 +111,7 @@ export interface PortalConfig {
   study?: AppsListConfig;
   portal: {
     name: string;
+    default_language: 'en' | 'fr';
     navigation: {
       dashboard?: boolean;
       variant?: boolean;

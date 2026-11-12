@@ -3,8 +3,12 @@
 import { initReactI18next } from 'react-i18next';
 import i18next, { type i18n } from 'i18next';
 
+declare const __PROJECT__: { portal: { default_language: 'en' | 'fr' } };
+
 // Get the current theme from environment variable
 const getCurrentTheme = () => process.env.THEME || 'radiant';
+
+const getDefaultLanguage = () => __PROJECT__.portal.default_language;
 
 // Simple language detection for consistent server/client behavior
 export const detectLanguageFromRequest = (request: Request): string => {
@@ -44,7 +48,7 @@ export const detectLanguageFromRequest = (request: Request): string => {
     }
   }
 
-  return 'en';
+  return getDefaultLanguage();
 };
 
 // Load pre-merged translations (same as client-side now)
@@ -70,14 +74,14 @@ export const loadTranslations = async (lang: string) => {
 };
 
 // Create a simple server-side i18n instance
-export const createServerI18n = async (lng: string = 'en'): Promise<i18n> => {
+export const createServerI18n = async (lng: string = getDefaultLanguage()): Promise<i18n> => {
   const translations = await loadTranslations(lng);
 
   const serverI18n = i18next.createInstance();
 
   await serverI18n.use(initReactI18next).init({
     lng,
-    fallbackLng: 'en',
+    fallbackLng: getDefaultLanguage(),
     debug: false,
     ns: ['common'],
     defaultNS: 'common',

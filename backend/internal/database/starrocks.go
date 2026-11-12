@@ -132,7 +132,9 @@ func NewStarrocksUserPool(sub, jwt, defaultDB string) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	pool.SetMaxOpenConns(2)
+	// The patient page reads up to four secured views of one patient concurrently.
+	pool.SetMaxOpenConns(4)
+	pool.SetMaxIdleConns(4)
 	pool.SetConnMaxLifetime(5 * time.Minute)
 	return pool, nil
 }

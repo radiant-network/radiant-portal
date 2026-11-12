@@ -20,31 +20,21 @@ import json
 from datetime import date
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
-from radiant_python.models.patient_case import PatientCase
 from radiant_python.models.patient_day_date import PatientDayDate
 from radiant_python.models.patient_event import PatientEvent
-from radiant_python.models.patient_imaging_session import PatientImagingSession
-from radiant_python.models.patient_interpretation import PatientInterpretation
 from radiant_python.models.patient_key_dates import PatientKeyDates
-from radiant_python.models.patient_radiation import PatientRadiation
-from radiant_python.models.patient_surgery import PatientSurgery
-from radiant_python.models.patient_therapy import PatientTherapy
 from radiant_python.models.patient_treatment_summary import PatientTreatmentSummary
 from typing import Optional, Set
 from typing_extensions import Self
 
 class PatientEntity(BaseModel):
     """
-    Data of the patient page
+    Header, sidebar and overview of the patient page; each other tab has its own endpoint
     """ # noqa: E501
-    age_at_initial_dx_days: Optional[StrictInt] = None
-    age_at_vital_status_days: Optional[StrictInt] = None
     birth_date: Optional[date] = None
     birth_year: Optional[StrictInt] = None
     can_read_phi: StrictBool
-    case_count: StrictInt = Field(description="Portal cases, 0 outside the portal")
-    cases: List[PatientCase]
-    cns_integrated_diagnosis: Optional[StrictStr] = Field(default=None, description="From the initial event")
+    cns_integrated_diagnosis: Optional[StrictStr] = Field(default=None, description="From the initial event, as in the list")
     cns_integrated_diagnosis_source: Optional[StrictStr] = Field(default=None, description="Dataset of the diagnosis, e.g. CBTN or OpenPedCan")
     data_type_cohort: Optional[StrictStr] = None
     diagnosis_type_cohort: Optional[StrictStr] = None
@@ -53,10 +43,9 @@ class PatientEntity(BaseModel):
     family_name: StrictStr = Field(description="Placeholder when can_read_phi is false")
     gender: StrictStr
     given_name: StrictStr = Field(description="Placeholder when can_read_phi is false")
-    has_imaging: StrictBool
-    imaging: List[PatientImagingSession]
+    has_processing_report: StrictBool = Field(description="A CHARM processing report can be opened; false without PHI access")
     initial_diagnosis_evidence_url: Optional[StrictStr] = Field(default=None, description="BRIM link, format to be defined")
-    interpretations: List[PatientInterpretation] = Field(description="Germline and somatic, of the patient's cases")
+    initial_tumor_resections: List[StrictStr] = Field(description="Extent of tumor resection of each initial treatment surgery")
     key_dates: PatientKeyDates
     organization_code: StrictStr
     organization_name: StrictStr
@@ -66,14 +55,10 @@ class PatientEntity(BaseModel):
     postal_code: Optional[StrictStr] = Field(default=None, description="Full with PHI access, 3 digits + XX otherwise")
     race: Optional[StrictStr] = None
     radiant_patient_id: Optional[StrictInt] = Field(default=None, description="Portal patient id, null outside the portal")
-    radiations: List[PatientRadiation]
-    surgeries: List[PatientSurgery]
-    survival_days: Optional[StrictInt] = Field(default=None, description="Vital status day minus initial diagnosis day")
-    therapies: List[PatientTherapy]
     treatment_summary: Optional[PatientTreatmentSummary] = None
     vital_status: StrictStr
     vital_status_at: PatientDayDate
-    __properties: ClassVar[List[str]] = ["age_at_initial_dx_days", "age_at_vital_status_days", "birth_date", "birth_year", "can_read_phi", "case_count", "cases", "cns_integrated_diagnosis", "cns_integrated_diagnosis_source", "data_type_cohort", "diagnosis_type_cohort", "ethnicity", "events", "family_name", "gender", "given_name", "has_imaging", "imaging", "initial_diagnosis_evidence_url", "interpretations", "key_dates", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "postal_code", "race", "radiant_patient_id", "radiations", "surgeries", "survival_days", "therapies", "treatment_summary", "vital_status", "vital_status_at"]
+    __properties: ClassVar[List[str]] = ["birth_date", "birth_year", "can_read_phi", "cns_integrated_diagnosis", "cns_integrated_diagnosis_source", "data_type_cohort", "diagnosis_type_cohort", "ethnicity", "events", "family_name", "gender", "given_name", "has_processing_report", "initial_diagnosis_evidence_url", "initial_tumor_resections", "key_dates", "organization_code", "organization_name", "patient_id", "patient_id_type", "patient_key", "postal_code", "race", "radiant_patient_id", "treatment_summary", "vital_status", "vital_status_at"]
 
     @field_validator('gender')
     def gender_validate_enum(cls, value):
@@ -135,13 +120,6 @@ class PatientEntity(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of each item in cases (list)
-        _items = []
-        if self.cases:
-            for _item_cases in self.cases:
-                if _item_cases:
-                    _items.append(_item_cases.to_dict())
-            _dict['cases'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in events (list)
         _items = []
         if self.events:
@@ -149,44 +127,9 @@ class PatientEntity(BaseModel):
                 if _item_events:
                     _items.append(_item_events.to_dict())
             _dict['events'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in imaging (list)
-        _items = []
-        if self.imaging:
-            for _item_imaging in self.imaging:
-                if _item_imaging:
-                    _items.append(_item_imaging.to_dict())
-            _dict['imaging'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in interpretations (list)
-        _items = []
-        if self.interpretations:
-            for _item_interpretations in self.interpretations:
-                if _item_interpretations:
-                    _items.append(_item_interpretations.to_dict())
-            _dict['interpretations'] = _items
         # override the default output from pydantic by calling `to_dict()` of key_dates
         if self.key_dates:
             _dict['key_dates'] = self.key_dates.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of each item in radiations (list)
-        _items = []
-        if self.radiations:
-            for _item_radiations in self.radiations:
-                if _item_radiations:
-                    _items.append(_item_radiations.to_dict())
-            _dict['radiations'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in surgeries (list)
-        _items = []
-        if self.surgeries:
-            for _item_surgeries in self.surgeries:
-                if _item_surgeries:
-                    _items.append(_item_surgeries.to_dict())
-            _dict['surgeries'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in therapies (list)
-        _items = []
-        if self.therapies:
-            for _item_therapies in self.therapies:
-                if _item_therapies:
-                    _items.append(_item_therapies.to_dict())
-            _dict['therapies'] = _items
         # override the default output from pydantic by calling `to_dict()` of treatment_summary
         if self.treatment_summary:
             _dict['treatment_summary'] = self.treatment_summary.to_dict()
@@ -205,13 +148,9 @@ class PatientEntity(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "age_at_initial_dx_days": obj.get("age_at_initial_dx_days"),
-            "age_at_vital_status_days": obj.get("age_at_vital_status_days"),
             "birth_date": obj.get("birth_date"),
             "birth_year": obj.get("birth_year"),
             "can_read_phi": obj.get("can_read_phi"),
-            "case_count": obj.get("case_count"),
-            "cases": [PatientCase.from_dict(_item) for _item in obj["cases"]] if obj.get("cases") is not None else None,
             "cns_integrated_diagnosis": obj.get("cns_integrated_diagnosis"),
             "cns_integrated_diagnosis_source": obj.get("cns_integrated_diagnosis_source"),
             "data_type_cohort": obj.get("data_type_cohort"),
@@ -221,10 +160,9 @@ class PatientEntity(BaseModel):
             "family_name": obj.get("family_name"),
             "gender": obj.get("gender"),
             "given_name": obj.get("given_name"),
-            "has_imaging": obj.get("has_imaging"),
-            "imaging": [PatientImagingSession.from_dict(_item) for _item in obj["imaging"]] if obj.get("imaging") is not None else None,
+            "has_processing_report": obj.get("has_processing_report"),
             "initial_diagnosis_evidence_url": obj.get("initial_diagnosis_evidence_url"),
-            "interpretations": [PatientInterpretation.from_dict(_item) for _item in obj["interpretations"]] if obj.get("interpretations") is not None else None,
+            "initial_tumor_resections": obj.get("initial_tumor_resections"),
             "key_dates": PatientKeyDates.from_dict(obj["key_dates"]) if obj.get("key_dates") is not None else None,
             "organization_code": obj.get("organization_code"),
             "organization_name": obj.get("organization_name"),
@@ -234,10 +172,6 @@ class PatientEntity(BaseModel):
             "postal_code": obj.get("postal_code"),
             "race": obj.get("race"),
             "radiant_patient_id": obj.get("radiant_patient_id"),
-            "radiations": [PatientRadiation.from_dict(_item) for _item in obj["radiations"]] if obj.get("radiations") is not None else None,
-            "surgeries": [PatientSurgery.from_dict(_item) for _item in obj["surgeries"]] if obj.get("surgeries") is not None else None,
-            "survival_days": obj.get("survival_days"),
-            "therapies": [PatientTherapy.from_dict(_item) for _item in obj["therapies"]] if obj.get("therapies") is not None else None,
             "treatment_summary": PatientTreatmentSummary.from_dict(obj["treatment_summary"]) if obj.get("treatment_summary") is not None else None,
             "vital_status": obj.get("vital_status"),
             "vital_status_at": PatientDayDate.from_dict(obj["vital_status_at"]) if obj.get("vital_status_at") is not None else None

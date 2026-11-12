@@ -3,6 +3,7 @@ package starrocks
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"slices"
 	"strings"
 
@@ -23,12 +24,19 @@ type CasePatientClinicalInformation = types.CasePatientClinicalInformation
 type CaseTask = types.CaseTask
 
 type CasesRepository struct {
-	db     *gorm.DB
-	joiner joins.Joiner
+	db             *gorm.DB
+	joiner         joins.Joiner
+	pcxPatientKeys bool
 }
 
 func NewCasesRepository(db database.StarrocksDB) *CasesRepository {
 	return &CasesRepository{db: db.DB, joiner: joins.Starrocks()}
+}
+
+// WithPcxPatientKeys makes the case entity carry each member's patient_key, read from the PCX views.
+func (r *CasesRepository) WithPcxPatientKeys(enabled bool) *CasesRepository {
+	r.pcxPatientKeys = enabled
+	return r
 }
 
 // GetCaseType returns the case_type_code (e.g., "germline" or "somatic") for a
@@ -74,6 +82,11 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) stg ON stg.case_id=%s.id", types.CaseTable.Alias), txStg)
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) members_count ON members_count.case_id = %s.id", types.CaseTable.Alias), txMembersCount)
+	// Selected only, never filtered or sorted on: joined after the count so it does not pay it, and only when
+	// the Run column asks for it in additional_fields.
+	if userQuery.HasFieldFromTables(types.CaseRunTable) {
+		tx = r.joiner.CaseWithRuns(tx)
+	}
 	tx = tx.Select(columns)
 	utils.AddPaginationAndSort(tx, userQuery)
 
@@ -393,7 +406,15 @@ func (r *CasesRepository) retrieveCasePatients(ctx context.Context, caseId int) 
 		return subjectKey(&f.PatientID, nil)
 	})
 
+	patientKeys := r.retrievePcxPatientKeys(ctx, members)
+
 	for i, m := range members {
+		if m.PatientID != nil {
+			if patientKey, ok := patientKeys[*m.PatientID]; ok {
+				members[i].PatientKey = &patientKey
+			}
+		}
+
 		key := subjectKey(m.PatientID, m.FetusID)
 
 		members[i].Exams = make(types.JsonArray[types.CaseExam], 0)
@@ -425,6 +446,28 @@ func (r *CasesRepository) retrieveCasePatients(ctx context.Context, caseId int) 
 	}
 
 	return &members, nil
+}
+
+// retrievePcxPatientKeys never fails the case: most tenants have no PCX views, and the key only adds a link.
+func (r *CasesRepository) retrievePcxPatientKeys(ctx context.Context, members []CasePatientClinicalInformation) map[int]string {
+	if !r.pcxPatientKeys {
+		return nil
+	}
+	var patientIDs []int
+	for _, m := range members {
+		if m.PatientID != nil {
+			patientIDs = append(patientIDs, *m.PatientID)
+		}
+	}
+	if len(patientIDs) == 0 {
+		return nil
+	}
+	keys, err := pcxPatientKeysByRadiantPatientID(ctx, r.db.WithContext(ctx), patientIDs)
+	if err != nil {
+		slog.WarnContext(ctx, "skipping case members patient_key", slog.Any("error", err))
+		return nil
+	}
+	return keys
 }
 
 func (r *CasesRepository) retrieveCaseValueSetObservations(ctx context.Context, caseId int) (*[]types.ValueSetObsCategorical, error) {

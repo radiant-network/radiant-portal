@@ -1,0 +1,17 @@
+/*
+   {{.TenantCode}}_tenant.v_pcx_30_processing_report  (VIEW, the CHARM processing report of each PCX patient)
+
+   Built like v_pcx_30_tumor_board_deck. The report's S3 URL is PHI, NULL without PHI access.
+ */
+CREATE OR REPLACE VIEW {{.TenantCode}}_tenant.v_pcx_30_processing_report AS
+SELECT d.organization_code,
+       d.patient_id_type,
+       d.patient_id,
+       CASE WHEN d.can_read_phi THEN r.report_url END AS report_url,
+       d.can_read_phi
+FROM {{.TenantCode}}_tenant.v_pcx_30_demographics_combined d
+JOIN radiant_data_dev.v_pcx_30_demographics_combined src
+  ON src.organization_code = d.organization_code
+ AND d.patient_id = CASE d.patient_id_type WHEN 'mrn' THEN src.mrn ELSE src.research_id END
+JOIN radiant_data_dev.processing_report r
+  ON r.research_id = src.research_id

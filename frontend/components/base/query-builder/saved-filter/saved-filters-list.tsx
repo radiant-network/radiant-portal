@@ -1,10 +1,17 @@
-import { useState } from 'react';
-import { FolderIcon } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Check, ChevronDown, FolderIcon } from 'lucide-react';
 
-import { Button } from '@/components/base/shadcn/button';
-import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger } from '@/components/base/shadcn/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/base/shadcn/dropdown-menu';
+import { selectTriggerVariants } from '@/components/base/shadcn/select';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/components/lib/utils';
 
 import { QBActionType, useQBDispatch } from '../hooks/use-query-builder';
 
@@ -16,8 +23,8 @@ function SavedFiltersList() {
   const { savedFilters, selectedSavedFilter } = useSavedFiltersContext();
   const dispatchSavedFilter = useSavedFiltersDispatch();
   const dispatchQB = useQBDispatch();
-  const [open, setOpen] = useState(false);
   const [openManageDialog, setOpenManageDialog] = useState(false);
+  const isOpeningManageDialog = useRef(false);
 
   const handleValueChange = (savedFilterId: string) => {
     const selectedFilter = savedFilters.find(filter => filter.id === savedFilterId);
@@ -33,41 +40,62 @@ function SavedFiltersList() {
   };
 
   const handleManageAction = function () {
-    setOpen(false);
+    isOpeningManageDialog.current = true;
     setOpenManageDialog(true);
   };
 
   return (
     <>
-      <Select
-        value={selectedSavedFilter?.id || ''}
-        onValueChange={handleValueChange}
-        open={open}
-        onOpenChange={setOpen}
-        disabled={savedFilters.length === 0}
-      >
+      <DropdownMenu>
         <Tooltip open={savedFilters.length > 0 ? false : undefined}>
           <TooltipTrigger asChild>
-            <SelectTrigger className="w-[135px] h-7" data-cy="my-filters-button">
-              <div className="flex items-center gap-2">
-                <FolderIcon size={14} /> {t('common.saved_filter.my_filters')}
-              </div>
-            </SelectTrigger>
+            <DropdownMenuTrigger asChild disabled={savedFilters.length === 0}>
+              <button
+                type="button"
+                className={selectTriggerVariants().base({ className: 'w-[135px] h-7' })}
+                data-cy="my-filters-button"
+              >
+                <div className="flex items-center gap-2">
+                  <FolderIcon size={14} /> {t('common.saved_filter.my_filters')}
+                </div>
+                <ChevronDown className="h-4 w-4 shrink-0" />
+              </button>
+            </DropdownMenuTrigger>
           </TooltipTrigger>
           <TooltipContent>{t('common.saved_filter.no_saved_filters')}</TooltipContent>
         </Tooltip>
-        <SelectContent data-cy="saved-filter-content">
-          {savedFilters.map(filter => (
-            <SelectItem key={filter.id} value={filter.id}>
-              {filter.name}
-            </SelectItem>
-          ))}
-          <SelectSeparator />
-          <Button size="sm" variant="ghost" className="w-full pl-2 justify-start" onClick={handleManageAction}>
+        <DropdownMenuContent
+          align="start"
+          data-cy="saved-filter-content"
+          onCloseAutoFocus={event => {
+            // Let the manage dialog keep the focus instead of the trigger
+            if (isOpeningManageDialog.current) {
+              event.preventDefault();
+              isOpeningManageDialog.current = false;
+            }
+          }}
+        >
+          {savedFilters.map(filter => {
+            const isSelected = filter.id === selectedSavedFilter?.id;
+            return (
+              <DropdownMenuItem
+                key={filter.id}
+                role="menuitemradio"
+                aria-checked={isSelected}
+                className={cn({ 'bg-accent': isSelected })}
+                onSelect={() => handleValueChange(filter.id)}
+              >
+                {filter.name}
+                {isSelected && <Check className="ml-auto" />}
+              </DropdownMenuItem>
+            );
+          })}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem className="font-medium" onSelect={handleManageAction}>
             {t('common.saved_filter.manage_filters')}
-          </Button>
-        </SelectContent>
-      </Select>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
       <ManageFiltersDialog open={openManageDialog} onOpenChange={setOpenManageDialog} />
     </>
   );

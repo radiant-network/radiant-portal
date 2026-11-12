@@ -373,6 +373,7 @@ CREATE TABLE IF NOT EXISTS {tenant}.`exomiser`
 (
     part                 INT,
     seq_id               INT,
+    task_id              INT NOT NULL,
     locus_id             BIGINT,
     id                   VARCHAR(2000),
     locus_hash           VARCHAR(256),
@@ -386,7 +387,7 @@ CREATE TABLE IF NOT EXISTS {tenant}.`exomiser`
     acmg_evidence array< VARCHAR (10)>
 )
 ENGINE = OLAP
-DUPLICATE KEY(`part`, `seq_id`, `locus_id`,  `id`)
+DUPLICATE KEY(`part`, `seq_id`, `task_id`, `locus_id`, `id`)
 PARTITION BY (`part`)
 DISTRIBUTED BY HASH(`locus_id`)
 BUCKETS 10;
@@ -426,7 +427,22 @@ CREATE TABLE IF NOT EXISTS {tenant}.`germline__cnv__occurrence` (
      gnomad_sn int(11) NULL,
      gnomad_sf FLOAT NULL,
      gnomad_sc_hom int(11) NULL,
-     gnomad_sc_het int(11) NULL
+     gnomad_sc_het int(11) NULL,
+     gnomad_ac int(11) NULL,
+     parental_origin varchar(25) NULL,
+     transmission_mode varchar(50) NULL,
+     mother_calls array<int(11)> NULL,
+     mother_cn int(11) NULL,
+     mother_bc int(11) NULL,
+     mother_pe array<int(11)> NULL,
+     mother_sm FLOAT NULL,
+     mother_name varchar(1048576) NULL,
+     father_calls array<int(11)> NULL,
+     father_cn int(11) NULL,
+     father_bc int(11) NULL,
+     father_pe array<int(11)> NULL,
+     father_sm FLOAT NULL,
+     father_name varchar(1048576) NULL
 ) ENGINE=OLAP
 DUPLICATE KEY(part, seq_id, task_id, cnv_id)
 PARTITION BY (part);
@@ -476,10 +492,51 @@ CREATE TABLE IF NOT EXISTS {tenant}.`somatic__cnv__occurrence` (
      gnomad_sn int(11) NULL,
      gnomad_sf FLOAT NULL,
      gnomad_sc_hom int(11) NULL,
-     gnomad_sc_het int(11) NULL
+     gnomad_sc_het int(11) NULL,
+     gnomad_ac int(11) NULL
 ) ENGINE=OLAP
 DUPLICATE KEY(part, seq_id, task_id, cnv_id)
 PARTITION BY (part);
+
+CREATE TABLE IF NOT EXISTS {tenant}.`germline__cnv__variant_frequency`
+(
+    `cnv_id` BIGINT NOT NULL,
+    `pc_wgs` BIGINT,
+    `pn_wgs` BIGINT,
+    `pf_wgs` DOUBLE,
+    `pc_wgs_affected` BIGINT,
+    `pn_wgs_affected` BIGINT,
+    `pf_wgs_affected` DOUBLE,
+    `pc_wgs_not_affected` BIGINT,
+    `pn_wgs_not_affected` BIGINT,
+    `pf_wgs_not_affected` DOUBLE,
+    `pc_wxs` BIGINT,
+    `pn_wxs` BIGINT,
+    `pf_wxs` DOUBLE,
+    `pc_wxs_affected` BIGINT,
+    `pn_wxs_affected` BIGINT,
+    `pf_wxs_affected` DOUBLE,
+    `pc_wxs_not_affected` BIGINT,
+    `pn_wxs_not_affected` BIGINT,
+    `pf_wxs_not_affected` DOUBLE
+)
+ENGINE = OLAP
+DISTRIBUTED BY HASH(`cnv_id`)
+BUCKETS 10;
+
+CREATE TABLE IF NOT EXISTS {tenant}.`somatic__cnv__variant_frequency`
+(
+    `cnv_id` BIGINT NOT NULL,
+    `pc_to_wgs` BIGINT,
+    `pn_to_wgs` BIGINT,
+    `pf_to_wgs` DOUBLE,
+    `pc_to_wxs` BIGINT,
+    `pn_to_wxs` BIGINT,
+    `pf_to_wxs` DOUBLE
+)
+ENGINE = OLAP
+DISTRIBUTED BY HASH(`cnv_id`)
+BUCKETS 10;
 
 CREATE TABLE IF NOT EXISTS {tenant}.`somatic__snv__occurrence`
 (
@@ -590,6 +647,15 @@ CREATE TABLE IF NOT EXISTS {shared}.`ensembl_exon_by_gene` (
                                         `length` bigint(20) NULL COMMENT ""
 ) ENGINE=OLAP
 DUPLICATE KEY(`gene_id`, `exon_id`, `chromosome`);
+
+CREATE TABLE IF NOT EXISTS {shared}.`gene_reference_transcript` (
+                                             `ensembl_gene_id` varchar(128) NULL COMMENT "",
+                                             `ensembl_transcript_id` varchar(128) NULL COMMENT "",
+                                             `ensembl_transcript_version` int NULL COMMENT "",
+                                             `is_mane_select` boolean NULL COMMENT "",
+                                             `refseq_transcript_id` varchar(128) NULL COMMENT ""
+) ENGINE=OLAP
+DUPLICATE KEY(`ensembl_gene_id`);
 
 CREATE TABLE IF NOT EXISTS {shared}.`cytoband` (
                             `chromosome` char(2) NOT NULL COMMENT "",

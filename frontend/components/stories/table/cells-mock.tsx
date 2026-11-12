@@ -5,7 +5,9 @@ import type { CaseEntity, CaseStatus, Term, VepImpact } from '@/api/api';
 import { CaseEntityContext } from '@/apps/case/src/entity/case-entity-context';
 import GermlineInterpretationDialog from '@/apps/case/src/entity/variants/germline-occurrence/interpretation/germline-interpretation-dialog';
 import ClingenCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/clingen-cell';
+import CNVIGVCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/cnv-igv-cell';
 import CNVNameCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/cnv-name-cell';
+import ComphetGenesCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/comphet-genes-cell';
 import OverlapTypeGeneCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/overlap-type-gene-cell';
 import OverlappingGeneLinkCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/overlapping-gene-link-cell';
 import InterpretationCell from '@/apps/case/src/entity/variants/interpretation/interpretation-cell';
@@ -48,6 +50,7 @@ import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
 import StatusCell from '@/components/base/data-table/cells/status-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
+import TextListCell from '@/components/base/data-table/cells/text-list-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import ZygosityCell from '@/components/base/data-table/cells/zygosity-cell';
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
@@ -139,6 +142,7 @@ export type BaseCellMockData = {
   boolean_value?: boolean;
   number_value?: number;
   number_list_value?: number[];
+  text_list_value?: string[];
   clinvar?: string[];
   rsnumber?: string;
   symbol?: string;
@@ -208,6 +212,8 @@ const baseCellColumnHelper = createAppColumnHelper<BaseCellMockData>();
  *   - PhenotypeConditionLinkCell
  *   - TextTooltipCell
  *   - NumberCell
+ *   - NumberListCell
+ *   - TextListCell
  *   - DateCell
  *   - BooleanCell
  */
@@ -298,6 +304,11 @@ export const firstSetCellColumns = [
     header: 'NumberListCell',
     minSize: 250,
   }),
+  baseCellColumnHelper.accessor(row => row.text_list_value, {
+    id: 'text_list_value',
+    cell: info => <TextListCell values={info.getValue()} />,
+    header: 'TextListCell',
+  }),
   baseCellColumnHelper.accessor(row => row.date, {
     id: 'date',
     cell: info => <DateCell date={info.getValue()} />,
@@ -323,6 +334,7 @@ export const firstSetCellData = [
     text: 'no tooltips',
     tooltips: undefined,
     number_list_value: [10, 20, 30],
+    text_list_value: ['RUN-2026', '1617'],
     boolean_value: true,
   },
   {
@@ -338,6 +350,7 @@ export const firstSetCellData = [
     tooltips: undefined,
     number_value: 100,
     number_list_value: [5.5, 12.75, 8.25, 15.0],
+    text_list_value: ['1679'],
   },
   {
     link: 'AnchorLinkCell 3',
@@ -351,6 +364,7 @@ export const firstSetCellData = [
     tooltips: 'This is a tooltips',
     number_value: 1,
     number_list_value: [100.123, 200.456],
+    text_list_value: ['RUN-RELAPSE', '1704', '1617'],
     boolean_value: true,
   },
   {
@@ -366,6 +380,7 @@ export const firstSetCellData = [
     tooltips: 'This is a tooltips',
     number_value: 0.1,
     number_list_value: [1, 2, 3, 4, 5],
+    text_list_value: [],
   },
   {
     link: 'AnchorLinkCell 5',
@@ -421,6 +436,7 @@ export const firstSetCellData = [
     tooltips: undefined,
     number_value: undefined,
     number_list_value: undefined,
+    text_list_value: undefined,
   },
 ];
 
@@ -914,6 +930,7 @@ export const thirdSetCellData = [
  *   - CaseActionsMenuCell (Case-Exploration)
  *   - CNVNameCell (Variant-Entity/CNV)
  *   - ClingenCell (Variant-Entity/CNV)
+ *   - CNVIGVCell (Variant-Entity/CNV)
  */
 const STORYBOOK_TENANT = 'radiant';
 const STORYBOOK_DIAGNOSIS_LAB = 'CHUSJ';
@@ -1046,6 +1063,18 @@ export const applicationFirstSetCellColumns = [
     enableSorting: false,
   }),
   baseCellColumnHelper.accessor(row => row, {
+    id: 'comphet_genes',
+    cell: info => {
+      const row = info.row.original as any;
+      return <ComphetGenesCell genes={row.comphet_genes} locusId={row.locus_id} />;
+    },
+    header: 'ComphetGenesCell (Variant-Tab/SNV)',
+    size: 150,
+    enablePinning: false,
+    enableResizing: false,
+    enableSorting: false,
+  }),
+  baseCellColumnHelper.accessor(row => row, {
     id: 'cnv_name',
     cell: info => <CNVNameCell occurrence={info.getValue() as any} />,
     header: 'CNVNameCell(Variant-Tab/CNV)',
@@ -1080,6 +1109,24 @@ export const applicationFirstSetCellColumns = [
       </OverlappingGeneLinkCell>
     ),
     header: 'Clingen (Variant-Tab/CNV)',
+    size: 150,
+    enablePinning: false,
+    enableResizing: false,
+    enableSorting: false,
+  }),
+  baseCellColumnHelper.accessor(row => row, {
+    id: 'cnv_igv',
+    cell: info => <CNVIGVCell occurrence={info.getValue() as any} hasIGVFiles />,
+    header: 'CNVIGVCell (Variant-Tab/CNV)',
+    size: 150,
+    enablePinning: false,
+    enableResizing: false,
+    enableSorting: false,
+  }),
+  baseCellColumnHelper.accessor(row => row, {
+    id: 'cnv_igv_no_files',
+    cell: info => <CNVIGVCell occurrence={info.getValue() as any} hasIGVFiles={false} />,
+    header: 'CNVIGVCell (no IGV files)',
     size: 150,
     enablePinning: false,
     enableResizing: false,
@@ -1181,6 +1228,11 @@ export const applicationCellData = [
     task_id: 1,
     transcript_id: 'NM_000000.1',
     has_interpretation: true,
+    comphet_genes: [
+      { symbol: 'TTN', nb: 1 },
+      { symbol: 'BRCA2', nb: 3 },
+      { symbol: 'ABCA4', nb: 1 },
+    ],
   },
   {
     locus_id: '-7485572602358923261',
@@ -1210,6 +1262,7 @@ export const applicationCellData = [
     task_id: 2,
     transcript_id: 'NM_000000.1',
     has_interpretation: false,
+    comphet_genes: [{ symbol: 'CFTR', nb: 2 }],
   },
   {
     locus_id: '-7485572602358923261',

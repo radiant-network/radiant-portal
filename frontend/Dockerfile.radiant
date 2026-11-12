@@ -25,9 +25,13 @@ COPY --from=workspace-dependencies-env /workspace/ /workspace/
 RUN ls -lha
 RUN npm i
 RUN npm run build:radiant
+ARG BUILD_SHA
+# Served at /version.txt: a Ferlease Cypress run waits until it names the commit under test.
+RUN if [ -n "$BUILD_SHA" ]; then echo "$BUILD_SHA" > build/client/version.txt; fi
 
 # Stage 4: Final production image
 FROM node:26.12.1-alpine AS production
 COPY --from=build-env /workspace /workspace
 WORKDIR /workspace/portals/radiant
+USER node
 CMD ["npm", "run", "start:docker"]

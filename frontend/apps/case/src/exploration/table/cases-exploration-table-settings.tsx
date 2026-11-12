@@ -9,6 +9,7 @@ import CaseLinkCell from '@/components/base/data-table/cells/case-link-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
 import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
+import TextListCell from '@/components/base/data-table/cells/text-list-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
@@ -176,6 +177,32 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>, onCaseChange
       ),
       size: 48,
       minSize: 40,
+    }),
+    // Sample
+    columnHelper.accessor(row => row.proband_submitter_sample_ids, {
+      id: 'proband_submitter_sample_ids',
+      cell: info => <TextListCell values={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('case_exploration.case.headers.proband_submitter_sample_ids_tooltip')}>
+          {t('case_exploration.case.headers.proband_submitter_sample_ids')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // Run
+    columnHelper.accessor(row => row.run_names, {
+      id: 'run_names',
+      cell: info => <TextListCell values={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('case_exploration.case.headers.run_names_tooltip')}>
+          {t('case_exploration.case.headers.run_names')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
     }),
     // Project
     columnHelper.accessor(row => row.project_code, {
@@ -351,6 +378,17 @@ const defaultSettings = createColumnSettings([
     id: 'ordering_organization_code',
     visible: true,
     label: 'case_exploration.case.headers.ordering_organization_code',
+  },
+  {
+    id: 'proband_submitter_sample_ids',
+    visible: true,
+    label: 'case_exploration.case.headers.proband_submitter_sample_ids',
+  },
+  {
+    id: 'run_names',
+    visible: false,
+    label: 'case_exploration.case.headers.run_names',
+    additionalFields: ['run_names'],
   },
   {
     id: 'project_code',

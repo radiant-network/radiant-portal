@@ -79,6 +79,22 @@ func OrgFromDocumentParam(repo caseOrgLookup) OrgResolver {
 	}
 }
 
+type patientOrgLookup interface {
+	OrgsForPatientKey(ctx context.Context, patientKey string) ([]string, error)
+}
+
+// OrgFromPatientKeyParam resolves the organization of the PCX patient the route names by its
+// :patient_key, for the patient file downloads (PHI, checked at the patient's own organization).
+func OrgFromPatientKeyParam(repo patientOrgLookup) OrgResolver {
+	return func(c *gin.Context) ([]string, error) {
+		key := c.Param("patient_key")
+		if _, err := uuid.Parse(key); err != nil {
+			return nil, nil
+		}
+		return repo.OrgsForPatientKey(c.Request.Context(), key)
+	}
+}
+
 func orgsForCaseID(c *gin.Context, repo caseOrgLookup, rawCaseID string) ([]string, error) {
 	caseID, err := strconv.Atoi(rawCaseID)
 	if err != nil {

@@ -1,6 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Trans } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import type { InterpretationGermline, InterpretationPubmed } from '@/api/api';
@@ -10,7 +9,6 @@ import {
   getClassificationCriteriaColor,
 } from '@/components/base/classifications/interpretation';
 import MultipleSelector from '@/components/base/data-entry/multi-selector/multi-selector';
-import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Badge } from '@/components/base/shadcn/badge';
 import { FormControl, FormField, FormItem, FormLabel } from '@/components/base/shadcn/form';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -18,6 +16,7 @@ import { useI18n } from '@/components/hooks/i18n';
 import { ToggleGroup, ToggleGroupItem } from 'components/base/shadcn/toggle-group';
 
 import InterpretationFormGeneric from '../../interpretation/interpretation-form-generic';
+import { GermlineClassificationInfoCard } from '../../interpretation/interpretation-info-cards';
 import MondoAutoCompleteFormField from '../../interpretation/mondo-auto-complete-form-field';
 import {
   germlineInterpretationFormSchema,
@@ -75,26 +74,7 @@ const GermlineInterpretationForm = forwardRef<InterpretationFormRef, Interpretat
             name="classification"
             render={({ field }) => (
               <FormItem>
-                <FormLabel
-                  infoCardContent={
-                    <div className="leading-6">
-                      <Trans
-                        i18nKey="variant.interpretation_form.germline.classification_popover.full_text"
-                        components={{
-                          guides: (
-                            // eslint-disable-next-line jsx-a11y/anchor-has-content -- text injected by <Trans>
-                            <AnchorLink
-                              className="inline-flex no-underline hover:underline"
-                              href="https://pubmed.ncbi.nlm.nih.gov/25741868/"
-                              target="_blank"
-                              size="sm"
-                            />
-                          ),
-                        }}
-                      />
-                    </div>
-                  }
-                >
+                <FormLabel infoCardContent={<GermlineClassificationInfoCard />}>
                   {t('variant.interpretation_form.germline.classification')}
                 </FormLabel>
                 <FormControl>

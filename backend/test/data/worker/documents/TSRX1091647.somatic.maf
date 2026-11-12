@@ -1,0 +1,6 @@
+#version 2.4
+Hugo_Symbol	Entrez_Gene_Id	Center	NCBI_Build	Chromosome	Start_Position	End_Position	Strand	Variant_Classification	Variant_Type	Reference_Allele	Tumor_Seq_Allele1	Tumor_Seq_Allele2	dbSNP_RS	Tumor_Sample_Barcode	Matched_Norm_Sample_Barcode	HGVSc	HGVSp_Short	Transcript_ID	t_depth	t_ref_count	t_alt_count	n_depth	n_ref_count	n_alt_count
+TP53	7157	CQGC	GRCh38	chr17	7675088	7675088	+	Missense_Mutation	SNP	C	C	T	rs28934578	TSRX1091647	NSRX1091646	c.524G>A	p.R175H	ENST00000269305	112	61	51	98	98	0
+KRAS	3845	CQGC	GRCh38	chr12	25245350	25245350	+	Missense_Mutation	SNP	C	C	A	rs121913529	TSRX1091647	NSRX1091646	c.35G>T	p.G12V	ENST00000256078	98	70	28	87	87	0
+PIK3CA	5290	CQGC	GRCh38	chr3	179234297	179234297	+	Missense_Mutation	SNP	A	A	G	rs121913279	TSRX1091647	NSRX1091646	c.3140A>G	p.H1047R	ENST00000263967	143	101	42	120	120	0
+PTEN	5728	CQGC	GRCh38	chr10	87957915	87957916	+	Frame_Shift_Del	DEL	AT	AT	-		TSRX1091647	NSRX1091646	c.389_390del	p.R130Lfs*4	ENST00000371953	87	60	27	76	76	0

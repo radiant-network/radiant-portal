@@ -11,7 +11,7 @@ import {
   useQBDispatch,
   useQBSettings,
 } from '@/components/base/query-builder/hooks/use-query-builder';
-import { hasEmptyQuery } from '@/components/base/query-builder/libs/sqon';
+import { hasEmptyQuery, isSqonEmpty } from '@/components/base/query-builder/libs/sqon';
 import QueryBar from '@/components/base/query-builder/query-bar';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
@@ -26,6 +26,7 @@ import { BooleanOperators } from './type';
 
 type QueriesBarCardProps = {
   appId: ApplicationId;
+  swrId?: string;
 };
 
 /**
@@ -43,7 +44,7 @@ type QueriesBarCardProps = {
  * |  [New Query] (*) Label                                                  |
  * └─────────────────────────────────────────────────────────────────────────┘
  */
-function QueriesBarCard({ appId }: QueriesBarCardProps) {
+function QueriesBarCard({ appId, swrId }: QueriesBarCardProps) {
   const { t } = useI18n();
   const settings = useQBSettings();
   const cache = useQBCache();
@@ -123,18 +124,24 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
   return (
     <Card id="query-builder-card" className="py-0">
       <Accordion type="multiple" defaultValue={['query-builder']}>
-        <AccordionItem value="query-builder" className="border-none">
-          <AccordionTrigger
+        <AccordionItem value="query-builder" className="border-none group/qb-item">
+          {/* The trigger stretches over the whole header; the filter actions sit above it with z-10 */}
+          <div
             data-cy="query-builder-header"
-            className="border-b py-0 px-6 data-[state=closed]:rounded-sm data-[state=closed]:border-none"
-            asChild
+            className="relative flex border-b px-6 group-data-[state=closed]/qb-item:rounded-sm group-data-[state=closed]/qb-item:border-none"
           >
-            <QueryBuilderSavedFilters />
-          </AccordionTrigger>
+            <QueryBuilderSavedFilters
+              renderTitle={title => (
+                <AccordionTrigger className="w-auto min-w-0 py-0 after:absolute after:inset-0">
+                  {title}
+                </AccordionTrigger>
+              )}
+            />
+          </div>
           <AccordionContent className="py-4 px-6 space-y-4">
-            <div className="flex flex-col gap-2 max-h-[30vh] overflow-y-auto">
+            <div className="flex flex-col gap-3 max-h-[30vh] overflow-y-auto">
               {sqons.map((sqon, index) => (
-                <QueryBar key={sqon.id} index={index} sqon={sqon} />
+                <QueryBar key={sqon.id} index={index} sqon={sqon} swrId={swrId} />
               ))}
             </div>
 
@@ -178,15 +185,17 @@ function QueriesBarCard({ appId }: QueriesBarCardProps) {
                     </Button>
 
                     {/* Toggle labelsEnabled Settings */}
-                    <div className="flex items-center gap-1.5">
-                      <Switch
-                        data-cy="labels-switch"
-                        size="sm"
-                        checked={settings.labelsEnabled}
-                        onCheckedChange={handleLabelsCheckedChange}
-                      />
-                      {t('common.toolbar.labels')}
-                    </div>
+                    {sqons.some(sqon => !isSqonEmpty(sqon)) && (
+                      <div className="flex items-center gap-1.5">
+                        <Switch
+                          data-cy="labels-switch"
+                          size="sm"
+                          checked={settings.labelsEnabled}
+                          onCheckedChange={handleLabelsCheckedChange}
+                        />
+                        {t('common.toolbar.labels')}
+                      </div>
+                    )}
                   </>
                 )}
               </div>

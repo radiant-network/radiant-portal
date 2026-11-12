@@ -3,7 +3,11 @@ import type { TFunction } from 'i18next';
 
 import BadgeCell from '@/components/base/data-table/cells/badge-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
-import { createAppColumnHelper, type TableColumnDef } from '@/components/base/data-table/data-table';
+import {
+  createAppColumnHelper,
+  createColumnSettings,
+  type TableColumnDef,
+} from '@/components/base/data-table/data-table';
 import { Badge } from '@/components/base/shadcn/badge';
 
 import { DOSE_KEYS, type TreatmentRow } from './treatment-rows';
@@ -18,14 +22,14 @@ function getTreatmentsColumns(t: TFunction<string, undefined>) {
         return day == null ? <EmptyCell /> : t('patient_entity.treatments.day_value', { day });
       },
       header: t('patient_entity.treatments.columns.day'),
-      size: 112,
+      size: 64,
     }),
     columnHelper.accessor('type', {
       cell: info => (
         <BadgeCell variant="secondary">{t(`patient_entity.treatments.types.${info.getValue()}`)}</BadgeCell>
       ),
       header: t('patient_entity.treatments.columns.type'),
-      size: 160,
+      size: 96,
     }),
     columnHelper.accessor('description', {
       cell: info => {
@@ -43,6 +47,7 @@ function getTreatmentsColumns(t: TFunction<string, undefined>) {
         );
       },
       header: t('patient_entity.treatments.columns.description'),
+      size: 200,
     }),
     columnHelper.accessor('doses', {
       cell: info => {
@@ -65,4 +70,11 @@ function getTreatmentsColumns(t: TFunction<string, undefined>) {
   ] as TableColumnDef<TreatmentRow, any>[];
 }
 
-export { getTreatmentsColumns };
+const defaultTreatmentsSettings = createColumnSettings([
+  { id: 'day', visible: true, label: 'patient_entity.treatments.columns.day' },
+  { id: 'type', visible: true, label: 'patient_entity.treatments.columns.type' },
+  { id: 'description', visible: true, label: 'patient_entity.treatments.columns.description' },
+  { id: 'doses', visible: true, label: 'patient_entity.treatments.columns.dose' },
+]);
+
+export { defaultTreatmentsSettings, getTreatmentsColumns };

@@ -17,6 +17,10 @@ type germlineCNVOccurrencesReader interface {
 	GetGenesOverlap(ctx context.Context, caseId int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error)
 }
 
+type germlineCNVFacetsReader interface {
+	GetGermlineCNVFacets(ctx context.Context, facetNames []string) ([]types.Facet, error)
+}
+
 // OccurrencesGermlineCNVListHandler handles list of germline CNV occurrences
 // @Summary List germline CNV occurrences
 // @Id listGermlineCNVOccurrences
@@ -175,7 +179,7 @@ func OccurrencesGermlineCNVCountHandler(repo germlineCNVOccurrencesReader) gin.H
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/aggregate [post]
-func OccurrencesGermlineCNVAggregateHandler(repo germlineCNVOccurrencesReader, facetsRepo facetsReader) gin.HandlerFunc {
+func OccurrencesGermlineCNVAggregateHandler(repo germlineCNVOccurrencesReader, facetsRepo germlineCNVFacetsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body       types.AggregationBodyWithSqon
@@ -222,7 +226,7 @@ func OccurrencesGermlineCNVAggregateHandler(repo germlineCNVOccurrencesReader, f
 		}
 
 		if queryParam.WithDictionary {
-			facets, err := facetsRepo.GetFacets(c.Request.Context(), []string{body.Field})
+			facets, err := facetsRepo.GetGermlineCNVFacets(c.Request.Context(), []string{body.Field})
 			if err != nil {
 				HandleError(c, err)
 				return

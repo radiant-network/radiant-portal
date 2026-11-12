@@ -1,6 +1,7 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
 import { CommonTexts } from 'pom/shared/Texts';
+import { buildExactRegExp } from 'pom/shared/Utils';
 import { CaseEntity_Variants_Facets } from './CaseEntity_Variants_Facets';
 
 const generateSavedFiltersFunctions = (facetsActions: typeof CaseEntity_Variants_Facets.snv.actions, numericalFacet: { section: string; field: string }) => {
@@ -75,23 +76,26 @@ const generateSavedFiltersFunctions = (facetsActions: typeof CaseEntity_Variants
      * @param name The filter name.
      */
     deleteFilter(name: string) {
+      const exactName = buildExactRegExp(name);
       actions.openMyFiltersDropdown();
-      cy.get(CommonSelectors.savedListDropdown)
-        .invoke('text')
-        .then(invokeText => {
-          if (invokeText.includes(name)) {
-            cy.get(CommonSelectors.savedListDropdown).contains(name).clickAndWait({ force: true });
-            validations.shouldDisplayFilterName(name);
-            actions.clickDeleteButton();
+      cy.get(CommonSelectors.savedListDropdown).then($dropdown => {
+        const filterExists = $dropdown
+          .find(CommonSelectors.savedListItem)
+          .toArray()
+          .some(item => item.textContent?.trim() === name);
+        if (filterExists) {
+          cy.get(CommonSelectors.savedListDropdown).contains(exactName).clickAndWait({ force: true });
+          validations.shouldDisplayFilterName(exactName);
+          actions.clickDeleteButton();
 
-            cy.intercept('**/saved_filters{,/**}').as('deleteSavedFilters');
-            cy.get(CommonSelectors.deleteFilterConfirmButton).click({ force: true });
-            cy.wait('@deleteSavedFilters');
+          cy.intercept('**/saved_filters{,/**}').as('deleteSavedFilters');
+          cy.get(CommonSelectors.deleteFilterConfirmButton).click({ force: true });
+          cy.wait('@deleteSavedFilters');
 
-            actions.openMyFiltersDropdown();
-            cy.get(CommonSelectors.savedListDropdown).contains(name).should('not.exist');
-          }
-        });
+          actions.openMyFiltersDropdown();
+          cy.get(CommonSelectors.savedListDropdown).contains(exactName).should('not.exist');
+        }
+      });
     },
     /**
      * Edits the filter name from the query builder.
@@ -125,8 +129,12 @@ const generateSavedFiltersFunctions = (facetsActions: typeof CaseEntity_Variants
      * Opens the My Filters dropdown.
      */
     openMyFiltersDropdown() {
-      cy.get(CommonSelectors.logo).clickAndWait({ force: true }); // Close the dropdown if open
-      cy.get(CommonSelectors.myFiltersButton).clickAndWait({ force: true });
+      cy.get(CommonSelectors.myFiltersButton).then($button => {
+        if ($button.attr('aria-expanded') !== 'true') {
+          cy.wrap($button).clickAndWait({ force: true });
+        }
+      });
+      cy.get(CommonSelectors.myFiltersButton).should('have.attr', 'aria-expanded', 'true');
     },
     /**
      * Selects a filter in the dropdown.
@@ -186,6 +194,15 @@ const generateSavedFiltersFunctions = (facetsActions: typeof CaseEntity_Variants
       const shouldBeDirty = isDirty ? 'have.class' : 'not.have.class';
       cy.get(`${CommonSelectors.querybuilderHeader} button:has(${iconSelector})`).should(shouldBeDisabled);
       cy.get(`${CommonSelectors.querybuilderHeader} button:has(${iconSelector})`).should(shouldBeDirty, CommonSelectors.dirtyClass);
+    },
+    /**
+     * Checks whether the icon is displayed in the query builder header.
+     * @param name The icon name (e.g.: discard)
+     * @param shouldExist Whether the icon should exist.
+     */
+    shouldShowIcon(name: string, shouldExist: boolean) {
+      const iconSelector = CommonSelectors[`${name}Icon` as keyof typeof CommonSelectors];
+      cy.get(`${CommonSelectors.querybuilderHeader} ${iconSelector}`).should(shouldExist ? 'exist' : 'not.exist');
     },
   };
 

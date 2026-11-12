@@ -114,7 +114,7 @@ describe('Case Entity - Variants - Germline - CNV - Saved filters - Query builde
     CaseEntity_Variants_SavedFilters.cnv.actions.deleteFilter('Cypress_F1');
     CaseEntity_Variants_SavedFilters.cnv.actions.createFilter('Cypress_F1');
     CaseEntity_Variants_SavedFilters.cnv.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
-    CaseEntity_Variants_SavedFilters.cnv.validations.shouldIconHaveExpectedStates('discard', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.cnv.validations.shouldShowIcon('discard', false /*shouldExist*/);
 
     CaseEntity_Variants_SavedFilters.cnv.actions.modifyFilter();
     CaseEntity_Variants_SavedFilters.cnv.validations.shouldIconHaveExpectedStates('save', false /*isDisable*/, true /*isDirty*/);
@@ -122,7 +122,7 @@ describe('Case Entity - Variants - Germline - CNV - Saved filters - Query builde
 
     CaseEntity_Variants_SavedFilters.cnv.actions.updateFilter();
     CaseEntity_Variants_SavedFilters.cnv.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
-    CaseEntity_Variants_SavedFilters.cnv.validations.shouldIconHaveExpectedStates('discard', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.cnv.validations.shouldShowIcon('discard', false /*shouldExist*/);
   });
 
   it('Modify and discard', () => {
@@ -136,6 +136,6 @@ describe('Case Entity - Variants - Germline - CNV - Saved filters - Query builde
 
     CaseEntity_Variants_SavedFilters.cnv.actions.clickDiscardButton();
     CaseEntity_Variants_SavedFilters.cnv.validations.shouldIconHaveExpectedStates('save', true /*isDisable*/, false /*isDirty*/);
-    CaseEntity_Variants_SavedFilters.cnv.validations.shouldIconHaveExpectedStates('discard', true /*isDisable*/, false /*isDirty*/);
+    CaseEntity_Variants_SavedFilters.cnv.validations.shouldShowIcon('discard', false /*shouldExist*/);
   });
 });

@@ -10,6 +10,7 @@ import csv, datetime as dt, hashlib, os, re
 TODAY = dt.date(2026, 10, 1)
 FIRST_DIGITAL_MRI = dt.date(2010, 1, 1)
 FLYWHEEL = "https://flywheel.example.org"
+CLINICAL_REPORTS = "https://reports.example.org"
 
 FIRST_F = ["Olivia", "Emma", "Sophia", "Isabella", "Harper", "Amelia", "Evelyn", "Abigail", "Ella", "Scarlett", "Grace", "Lily", "Aria",
            "Zoe", "Nora", "Maya", "Leah", "Hannah", "Chloe", "Layla", "Riley", "Stella", "Hazel", "Violet"]
@@ -139,22 +140,42 @@ def read_organization_ref(pcx_dir):
     return rows + [o for o in PENDING_ORGS if o["name"] not in names]
 
 
-def build(deid_dir, organizations, pins=None):
+def read_deid(deid_dir, name, extra_dir=None, extra_rids=None):
+    """A deid CSV, plus the rows of extra_dir's file of the same name for the research ids of extra_rids."""
+    rows = read_csv(os.path.join(deid_dir, f"pcx_30_{name}_deid.csv"))
+    extra = os.path.join(extra_dir, f"pcx_30_{name}_deid.csv") if extra_dir else None
+    if extra and os.path.exists(extra):
+        if read_csv_header(extra) != read_csv_header(os.path.join(deid_dir, f"pcx_30_{name}_deid.csv")):
+            raise SystemExit(f"{extra}: its columns differ from the deid CSV")
+        rows += [r for r in read_csv(extra) if extra_rids is None or r["research_id"] in extra_rids]
+    return rows
+
+
+def build(deid_dir, organizations, pins=None, extra_dir=None):
     """Read the deid CSVs, give every patient a fake identity. Returns (patients by rid, {table: (cols, rows)}).
     pins: (mrn, birth date) by research id, the identities an environment already holds; the MRN of a patient seen before
-    never changes, and a new patient never gets the MRN of another one, even one the CSVs dropped."""
+    never changes, and a new patient never gets the MRN of another one, even one the CSVs dropped.
+    extra_dir: deid CSVs of patients to add; a research id the deid CSVs already hold keeps its own rows only."""
     codes = {r["name"]: r["code"] for r in organizations}
     demo = read_csv(os.path.join(deid_dir, "pcx_30_demographics_deid.csv"))
+    extra_rids = None
+    if extra_dir:
+        extra_demo = read_csv(os.path.join(extra_dir, "pcx_30_demographics_deid.csv"))
+        extra_rids = {r["research_id"] for r in extra_demo} - {r["research_id"] for r in demo}
+        demo += [r for r in extra_demo if r["research_id"] in extra_rids]
     patients = {}
     for r in demo:
         if r["organization_name"] not in codes:
             raise SystemExit(f"{r['research_id']}: organization {r['organization_name']!r} is not in the organization reference")
         patients[r["research_id"]] = Patient(r, codes[r["organization_name"]])
-    data = {name: read_csv(os.path.join(deid_dir, f"pcx_30_{name}_deid.csv")) for name in TABLES}
+    data = {name: read_deid(deid_dir, name, extra_dir, extra_rids) for name in TABLES}
     for rows in data.values():
         for r in rows:
             p = patients[r["research_id"]]
             p.ages += [a for c, v in r.items() if c.startswith("age_at") and (a := age(v)) is not None]
+    sessions = read_extra(extra_dir, "tumor_board_session", patients)
+    for r in sessions:
+        patients[r["research_id"]].ages.append(age(r["age_at_tumor_board_days"]))
     pins = pins or {}
     used = {mrn for mrn, _ in pins.values()}
     for rid in sorted(patients):
@@ -188,7 +209,93 @@ def build(deid_dir, organizations, pins=None):
                     row.append(r[c])
             rows.append(row)
         tables[table] = (cols, rows)
+    add_surgery_brim(tables["v_pcx_30_surgery_level_combined"], data["surgery_level"])
+    tables["v_pcx_30_pnoc035_eligibility_combined"] = (ELIGIBILITY_COLS, eligibility(deid_dir, patients, codes))
+    tables["tumor_board_session"] = (TUMOR_BOARD_SESSION_COLS, [
+        [r["research_id"], int(r["session_id"]), patients[r["research_id"]].date(r["age_at_tumor_board_days"])[:10],
+         int(r["age_at_tumor_board_days"]), r["reason"], r["diagnosis"], r["consensus"], r["recommendations"], r["status"], r["report_url"]]
+        for r in sessions])
+    tables["tumor_board_deck"] = (TUMOR_BOARD_DECK_COLS, [[r["research_id"], r["deck_url"]]
+                                                          for r in read_extra(extra_dir, "tumor_board_deck", patients)])
+    tables["processing_report"] = (PROCESSING_REPORT_COLS, [[r["research_id"], r["report_url"]]
+                                                            for r in read_extra(extra_dir, "processing_report", patients)])
     return patients, data, tables
+
+
+# Radiant's own tables (scripts/seed/views), keyed on research_id like the HIN ones. Loaded by hand in QA and PRD
+# (one patient so far); locally from the extra patients' CSVs. processing_report holds the patient's CHARM processing
+# report.
+TUMOR_BOARD_SESSION_COLS = [("research_id", "VARCHAR(256)"), ("session_id", "INT"), ("tumor_board_date", "DATE"),
+                            ("age_at_tumor_board_days", "INT"), ("reason", S), ("diagnosis", S), ("consensus", S),
+                            ("recommendations", S), ("status", "VARCHAR(128)"), ("report_url", "VARCHAR(1024)")]
+TUMOR_BOARD_DECK_COLS = [("research_id", "VARCHAR(256)"), ("deck_url", "VARCHAR(1024)")]
+PROCESSING_REPORT_COLS = [("research_id", "VARCHAR(256)"), ("report_url", "VARCHAR(1024)")]
+
+
+def read_extra(extra_dir, name, patients):
+    """The <name>_deid.csv rows of extra_dir, nothing without it. Tumor board recommendations are separated by semicolons."""
+    path = os.path.join(extra_dir, f"{name}_deid.csv") if extra_dir else None
+    if not path or not os.path.exists(path):
+        return []
+    rows = read_csv(path)
+    for r in rows:
+        if r["research_id"] not in patients:
+            raise SystemExit(f"{path}: {r['research_id']} is not a PCX patient")
+    return rows
+
+
+ELIGIBILITY_COLS = IDENT + [("variable_name", "VARCHAR(256)"), ("generated_value", S), ("eligibility_value", S), ("reasoning", S), ("confidence", "VARCHAR(64)"),
+                            ("review_status", "VARCHAR(128)"), ("brim_scope", "VARCHAR(128)"), ("brim_url", "VARCHAR(512)"),
+                            ("note_id", "VARCHAR(256)"), ("source_file", "VARCHAR(256)"), ("brim_loaded_at", "DATETIME")]
+BRIM = "https://brim.example.org"
+
+
+def eligibility(deid_dir, patients, codes):
+    """The PNOC035 verdicts, with fake PHI in reasoning, brim_url and source_file. In PRD a verdict can belong to a patient outside the
+    cohort (resolved through enrollment): such a patient gets an MRN of its own and no portal patient. No CSV, no rows."""
+    path = os.path.join(deid_dir, "pcx_30_pnoc035_eligibility_deid.csv")
+    if not os.path.exists(path):
+        return []
+    used = {p.mrn for p in patients.values()}
+    rows = []
+    for r in read_csv(path):
+        rid, p = r["research_id"], patients.get(r["research_id"])
+        if p:
+            org_name, org, mrn = p.org_name, p.org, p.mrn
+        else:
+            org_name = r["organization_name"]
+            if org_name not in codes:
+                raise SystemExit(f"{rid}: organization {org_name!r} is not in the organization reference")
+            org, mrn, retry = codes[org_name], None, 0
+            while mrn is None or mrn in used:
+                mrn = str(10_000_000 + h("mrn", rid, "outside", retry) % 90_000_000)
+                retry += 1
+            used.add(mrn)
+        note = dt.date(2025, 1, 1) + dt.timedelta(days=h("note", rid) % 365)
+        reasoning = (f"Per the neuro-oncology note of {note.isoformat()} for MRN {mrn}, the patient does not meet the PNOC035 "
+                     f"inclusion criteria: {r['eligibility_value']}.")
+        # BRIM names its exports after the patient's MRN, so source_file is PHI too.
+        source_file = f"{r['brim_loaded_at'][:10]}-Radiant-BRIM-Development-patient-{mrn}.csv"
+        rows.append([org_name, org, mrn, rid, r["variable_name"], r["generated_value"], r["eligibility_value"], reasoning,
+                     r["confidence"], r["review_status"], r["brim_scope"],
+                     f"{BRIM}/overview/project/54/visualize_variable/?var_ids=3610&patient_id={h('brim', rid) % 1_000_000}",
+                     f"note-{h('note_id', rid) % 100_000_000}", source_file, r["brim_loaded_at"]])
+    return rows
+
+
+# The surgeries with a BRIM evidence link, by (research id, age at surgery): the deid CSV does not carry it.
+SURGERY_BRIM = {("C7617267", "1182")}
+
+
+def add_surgery_brim(table, rows):
+    cols, out = table
+    if any(c == "brim_url" for c, _ in cols):
+        return
+    cols.append(("brim_url", "VARCHAR(512)"))
+    for row, r in zip(out, rows):
+        rid = r["research_id"]
+        row.append(f"{BRIM}/overview/project/54/visualize_variable/?var_ids=3608&patient_id={h('brim', rid) % 1_000_000}"
+                   if (rid, r["age_at_surgery_days"]) in SURGERY_BRIM else None)
 
 
 def read_csv_header(path):
@@ -218,7 +325,8 @@ def timeline(p, data):
 
 def mri(p, t):
     """Pre-op, post-op, end of radiation, before each relapse, then surveillance: every 3 months for 2 years,
-    6 months up to 5 years, yearly after. Flywheel only holds digital studies (2010 onward)."""
+    6 months up to 5 years, yearly after. Flywheel only holds digital studies (2010 onward). One session in three gets a
+    clinical report link, NULL elsewhere as in PRD where only curated sessions have one."""
     dx, end = t["dx"], t["end"]
     ages = {dx - 1, dx + 2} | {b + 30 for a, b in t["radiations"] if b is not None}
     ages |= {a - 2 for et, a in t["events"] if et in ("Recurrence", "Progressive", "Second Malignancy")}
@@ -240,7 +348,8 @@ def mri(p, t):
         minutes = h("time", sid) % 600 + 7 * 60
         name = f"{a}d_{'B_brain' if site == 'brain' else 'S_spine'}_{minutes // 60:02d}h{minutes % 60:02d}m"
         rows.append([p.org_name, p.org, p.mrn, p.rid, subject, project, f"PCX30_{p.org}", sid, name, p.date(a), str(a), site, "MRI",
-                     f"{FLYWHEEL}/#/projects/{project}/sessions/{sid}"])
+                     f"{FLYWHEEL}/#/projects/{project}/sessions/{sid}",
+                     f"{CLINICAL_REPORTS}/imaging/{sid}.pdf" if h("report", sid) % 3 == 0 else None])
     return rows
 
 
@@ -252,15 +361,10 @@ def oid(*key):
 MRI_COLS = IDENT + [("flywheel_subject_id", "VARCHAR(128)"), ("flywheel_project_id", "VARCHAR(128)"), ("flywheel_project_name", "VARCHAR(128)"),
                     ("session_id", "VARCHAR(128)"), ("session_name", "VARCHAR(128)"), ("session_date", "DATETIME"),
                     ("age_at_session_days", "VARCHAR(128)"), ("anatomical_site", "VARCHAR(128)"), ("imaging_modality", "VARCHAR(128)"),
-                    ("flywheel_url", S)]
+                    ("flywheel_url", S), ("clinical_report_url", "VARCHAR(1024)")]
 
 
 LAB_IDENT = [("organization_name", S), ("organization_code", "VARCHAR(64)"), ("mrn", L), ("research_id", L)]
-
-
-def analyte(name, extra=()):
-    return [(f"{name}_value", DEC), (f"{name}_unit", L), (f"{name}_observed_at", "DATETIME"), (f"age_at_{name}_days", "INT"), *extra,
-            (f"{name}_source_code_text", L)]
 
 
 def csf_analyte(name, comparator=True):
@@ -269,8 +373,9 @@ def csf_analyte(name, comparator=True):
 
 
 LAB_TABLES = {
-    "v_cbc_latest_results": LAB_IDENT + [c for a in ["wbc", "hemoglobin", "platelets", "anc"] for c in analyte(a, [(f"{a}_loinc", L)])]
-    + [("analytes_found", "BIGINT"), ("administrative_dates", "BIGINT")],
+    "v_cbc_latest_results": LAB_IDENT + [("panel_observed_at", "DATETIME"), ("age_at_panel_days", "INT"), ("date_semantic", L)]
+    + [(f"{a}_{c}", DEC if c == "value" else L) for a in ["wbc", "hemoglobin", "platelets", "anc"] for c in ["value", "unit", "loinc", "source_code_text"]]
+    + [("analytes_found", "BIGINT")],
     "v_csf_results_latest_by_component": LAB_IDENT + [("patient_best_evidence", L)]
     + [c for a in ["protein", "glucose", "wbc", "rbc"] for c in csf_analyte(a, a in ("protein", "glucose")) + [(f"{a}_source_code_text", L)]]
     + [("cytology_evidence_tier", L), ("cytology_test_name", L), ("malignant_cells", L), ("multi_specimen_report", "TINYINT"),
@@ -321,15 +426,15 @@ def labs(p, t):
                   "anc": round(rng.uniform(0.2, 1.5) if low else rng.uniform(1.8, 6.5), 2)}
         meta_cbc = {"wbc": ("10*3/uL", "6690-2", "WBC"), "hemoglobin": ("g/dL", "718-7", "HGB"),
                     "platelets": ("10*3/uL", "777-3", "PLT"), "anc": ("10*3/uL", "751-8", "ANC (automated)")}
-        row, found = [], 0
+        row, found = [p.date(day), day, "clinical"], 0
         for k in ["wbc", "hemoglobin", "platelets", "anc"]:
             if k == "anc" and rng.random() < 0.1:
-                row += [None] * 6
+                row += [None] * 4
                 continue
             unit, loinc, text = meta_cbc[k]
-            row += [values[k], unit, p.date(day), day, loinc, text]
+            row += [values[k], unit, loinc, text]
             found += 1
-        out["v_cbc_latest_results"].append(ident + row + [found, 0])
+        out["v_cbc_latest_results"].append(ident + row + [found])
 
     atrt = "teratoid" in t["cohort"].lower()
     if (atrt or "medulloblastoma" in t["cohort"].lower()) and rng.random() < 0.8:

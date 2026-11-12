@@ -438,6 +438,9 @@ export const PredictionCard = ({
             <TooltipTrigger asChild>
               <span className="inline-flex gap-1 items-center">
                 {t('preview_sheet.variant_details.sections.frequencies.cosmic')}
+                <span className="sr-only">
+                  {t('preview_sheet.variant_details.sections.frequencies.cosmic_tooltip')}
+                </span>
               </span>
             </TooltipTrigger>
             <TooltipContent>{t('preview_sheet.variant_details.sections.frequencies.cosmic_tooltip')}</TooltipContent>
@@ -477,6 +480,7 @@ export const PredictionCard = ({
               <span className="inline-flex gap-1 items-center">
                 {t('preview_sheet.variant_details.sections.frequencies.affected')}
                 <ShapeDiamondIcon className="size-[13px] text-red-500" />
+                <span className="sr-only">{t('occurrence_expand.frequencies.affected_tooltip')}</span>
               </span>
             </TooltipTrigger>
             <TooltipContent>{t('occurrence_expand.frequencies.affected_tooltip')}</TooltipContent>
@@ -501,6 +505,7 @@ export const PredictionCard = ({
               <span className="inline-flex gap-1 items-center">
                 {t('occurrence_expand.frequencies.non_affected')}
                 <Diamond className="size-[13px] text-green-500" />
+                <span className="sr-only">{t('occurrence_expand.frequencies.non_affected_tooltip')}</span>
               </span>
             </TooltipTrigger>
             <TooltipContent>{t('occurrence_expand.frequencies.non_affected_tooltip')}</TooltipContent>
@@ -523,7 +528,7 @@ export const PredictionCard = ({
         {gnomad_v3_af ? (
           <AnchorLink
             size="sm"
-            href={`https://gnomad.broadinstitute.org/variant/${locus}?dataset=gnomad_r3`}
+            href={`https://gnomad.broadinstitute.org/variant/${locus}?dataset=gnomad_r4`}
             target="_blank"
             mono
           >

@@ -351,28 +351,100 @@ func getPcxPatient(t *testing.T, env *testutils.Env, key string) *types.PatientE
 	return patient
 }
 
+func getPcxPatientTreatments(t *testing.T, env *testutils.Env, key string) *types.PatientTreatments {
+	t.Helper()
+	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+	treatments, err := repo.GetPatientTreatments(t.Context(), key)
+	require.NoError(t, err)
+	return treatments
+}
+
+func getPcxPatientLaboratory(t *testing.T, env *testutils.Env, key string) *types.PatientLaboratory {
+	t.Helper()
+	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+	laboratory, err := repo.GetPatientLaboratory(t.Context(), key)
+	require.NoError(t, err)
+	return laboratory
+}
+
+func getPcxPatientImaging(t *testing.T, env *testutils.Env, key string) *types.PatientImaging {
+	t.Helper()
+	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+	imaging, err := repo.GetPatientImaging(t.Context(), key)
+	require.NoError(t, err)
+	return imaging
+}
+
+func getPcxPatientExternalRecords(t *testing.T, env *testutils.Env, key string) *types.PatientExternalRecords {
+	t.Helper()
+	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+	records, err := repo.GetPatientExternalRecords(t.Context(), key)
+	require.NoError(t, err)
+	return records
+}
+
+func getPcxPatientTrialEligibilities(t *testing.T, env *testutils.Env, key string) *types.PatientTrialEligibilities {
+	t.Helper()
+	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+	eligibilities, err := repo.GetPatientTrialEligibilities(t.Context(), key)
+	require.NoError(t, err)
+	return eligibilities
+}
+
+func getPcxPatientTumorBoard(t *testing.T, env *testutils.Env, key string) *types.PatientTumorBoard {
+	t.Helper()
+	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+	board, err := repo.GetPatientTumorBoard(t.Context(), key)
+	require.NoError(t, err)
+	return board
+}
+
+func getPcxPatientGenomics(t *testing.T, env *testutils.Env, key string) *types.PatientGenomics {
+	t.Helper()
+	repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+	genomics, err := repo.GetPatientGenomics(t.Context(), key)
+	require.NoError(t, err)
+	return genomics
+}
+
+func assertJSON(t *testing.T, expected string, actual any) {
+	t.Helper()
+	actualJSON, err := json.Marshal(actual)
+	require.NoError(t, err)
+	assert.JSONEq(t, expected, string(actualJSON))
+}
+
 func Test_GetPcxPatient_UnknownKeyIsNil(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
 		assert.Nil(t, getPcxPatient(t, env, "00000000-0000-4000-8000-000000000999"))
 		assert.Nil(t, getPcxPatient(t, env, "not-a-key"))
 	})
 }
 
+func Test_GetPcxPatientTabs_UnknownKeyIsNil(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		key := "00000000-0000-4000-8000-000000000999"
+		assert.Nil(t, getPcxPatientTreatments(t, env, key))
+		assert.Nil(t, getPcxPatientLaboratory(t, env, key))
+		assert.Nil(t, getPcxPatientImaging(t, env, key))
+		assert.Nil(t, getPcxPatientGenomics(t, env, key))
+		assert.Nil(t, getPcxPatientExternalRecords(t, env, key))
+		assert.Nil(t, getPcxPatientTrialEligibilities(t, env, key))
+		assert.Nil(t, getPcxPatientTumorBoard(t, env, key))
+	})
+}
+
 func Test_GetPcxPatient_EveryPartOfAPatientWithPhiAccess(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
 		patient := getPcxPatient(t, env, pcxPatientKey("1"))
 
 		require.NotNil(t, patient)
-		patient.Cases, patient.Interpretations = nil, nil // asserted in Test_GetPcxPatient_Cases* and *Interpretations*
-		actual, err := json.Marshal(patient)
-		require.NoError(t, err)
-		assert.JSONEq(t, `{
+		assertJSON(t, `{
 			"patient_key": "00000000-0000-4000-8000-000000000001", "patient_id": "MRN-0002", "patient_id_type": "mrn",
 			"can_read_phi": true, "radiant_patient_id": 3, "organization_code": "CHOP",
 			"organization_name": "Children's Hospital of Philadelphia", "given_name": "Ada", "family_name": "Lovelace",
 			"birth_year": 2015, "gender": "female", "cns_integrated_diagnosis": "ATRT", "cns_integrated_diagnosis_source": "CBTN",
-			"vital_status": "alive", "age_at_vital_status_days": 4000, "age_at_initial_dx_days": 1000, "survival_days": 3000,
-			"has_imaging": true, "case_count": 2,
+			"vital_status": "alive",
 			"birth_date": "2015-03-04", "race": "White", "ethnicity": "Not Hispanic or Latino", "postal_code": "19104",
 			"diagnosis_type_cohort": "Atypical teratoid/rhabdoid tumor", "data_type_cohort": "radiant",
 			"key_dates": {
@@ -392,9 +464,30 @@ func Test_GetPcxPatient_EveryPartOfAPatientWithPhiAccess(t *testing.T) {
 				 "cns_integrated_diagnosis": null, "cns_integrated_diagnosis_source": "CBTN", "tumor_locations": [],
 				 "tumor_location_other": "Not Applicable", "metastasis": "Not Reported", "metastasis_locations": [], "metastasis_location_other": "Not Applicable"}
 			],
+			"initial_tumor_resections": ["Gross/Near total resection"],
+			"has_processing_report": false,
+			"treatment_summary": {
+				"initial_dx": {"day": 1000, "date": "2017-11-29"}, "first_event": {"day": 1000, "date": "2017-11-29"},
+				"first_radiation_ever": {"day": 1047, "date": "2018-01-15"}, "initial_radiation": {"day": 1047, "date": "2018-01-15"},
+				"first_chemo_ever": {"day": 1021, "date": "2017-12-20"}, "initial_chemo": {"day": 1021, "date": "2017-12-20"},
+				"first_methotrexate_ever": {"day": null, "date": null},
+				"had_initial_radiation": true, "had_initial_chemo": true, "had_initial_methotrexate": false,
+				"initial_treatment_order": "chemo_before_radiation"
+			}
+		}`, patient)
+	})
+}
+
+func Test_GetPcxPatientTreatments_EveryTreatmentOfAPatientWithPhiAccess(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		treatments := getPcxPatientTreatments(t, env, pcxPatientKey("1"))
+
+		require.NotNil(t, treatments)
+		assertJSON(t, `{
 			"surgeries": [
-				{"day": 1002, "date": "2017-12-01", "extent_of_tumor_resection": "Gross/Near total resection", "is_initial_treatment": true},
-				{"day": null, "date": null, "extent_of_tumor_resection": "Partial resection", "is_initial_treatment": false}
+				{"day": 1002, "date": "2017-12-01", "extent_of_tumor_resection": "Gross/Near total resection", "is_initial_treatment": true,
+				 "evidence_url": "https://brim.example/evidence/1"},
+				{"day": null, "date": null, "extent_of_tumor_resection": "Partial resection", "is_initial_treatment": false, "evidence_url": null}
 			],
 			"radiations": [
 				{"start": {"day": 1047, "date": "2018-01-15"}, "stop": {"day": 1092, "date": "2018-03-01"},
@@ -412,28 +505,299 @@ func Test_GetPcxPatient_EveryPartOfAPatientWithPhiAccess(t *testing.T) {
 				 "chemotherapy_type": "Treatment follows a protocol and subject is enrolled on a protocol",
 				 "chemotherapy_agents": ["carboplatin", "methotrexate", "vincristine"], "is_initial_treatment": true}
 			],
-			"imaging": [
-				{"day": 999, "date": "2017-11-28", "session_id": "ses-1", "session_name": "MRI Brain", "anatomical_site": "Brain",
-				 "imaging_modality": "MR", "flywheel_url": "https://flywheel.example/ses-1"},
-				{"day": 1525, "date": "2019-02-01", "session_id": "ses-2", "session_name": "MRI Brain w/wo", "anatomical_site": "Brain",
-				 "imaging_modality": "MR", "flywheel_url": "https://flywheel.example/ses-2"}
-			],
-			"treatment_summary": {
-				"initial_dx": {"day": 1000, "date": "2017-11-29"}, "first_event": {"day": 1000, "date": "2017-11-29"},
-				"first_radiation_ever": {"day": 1047, "date": "2018-01-15"}, "initial_radiation": {"day": 1047, "date": "2018-01-15"},
-				"first_chemo_ever": {"day": 1021, "date": "2017-12-20"}, "initial_chemo": {"day": 1021, "date": "2017-12-20"},
-				"first_methotrexate_ever": {"day": null, "date": null},
-				"had_initial_radiation": true, "had_initial_chemo": true, "had_initial_methotrexate": false,
-				"initial_treatment_order": "chemo_before_radiation"
-			},
-			"cases": null,
-			"interpretations": null
-		}`, string(actual))
+			"trial_enrollments": [
+				{"start": {"day": 1021, "date": "2017-12-20"}, "stop": {"day": 1184, "date": "2018-06-01"},
+				 "protocol_name": "ACNS0333", "protocol_arm": "Arm I",
+				 "chemotherapy_agents": ["carboplatin", "methotrexate", "vincristine"], "is_initial_treatment": true}
+			]
+		}`, treatments)
 	})
 }
 
+func Test_GetPcxPatientImaging_SessionsOfAPatientWithPhiAccess(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		imaging := getPcxPatientImaging(t, env, pcxPatientKey("1"))
+
+		require.NotNil(t, imaging)
+		assertJSON(t, `{
+			"sessions": [
+				{"day": 999, "date": "2017-11-28", "session_id": "ses-1", "session_name": "MRI Brain", "anatomical_site": "Brain",
+				 "imaging_modality": "MR", "flywheel_url": "https://flywheel.example/ses-1",
+				 "clinical_report_url": null},
+				{"day": 1525, "date": "2019-02-01", "session_id": "ses-2", "session_name": "MRI Brain w/wo", "anatomical_site": "Brain",
+				 "imaging_modality": "MR", "flywheel_url": "https://flywheel.example/ses-2",
+				 "clinical_report_url": "https://reports.example/ses-2.pdf"}
+			]
+		}`, imaging)
+	})
+}
+
+func Test_GetPcxPatientExternalRecords_OrganizationsWithTheirDocumentClasses(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		records := getPcxPatientExternalRecords(t, env, pcxPatientKey("1"))
+
+		require.NotNil(t, records)
+		assertJSON(t, `{
+			"organization_count": 4, "document_count": 18, "document_class_count": 3,
+			"organizations": [
+				{"name": "Johns Hopkins Medicine", "network": "tefca", "document_count": 10, "document_classes": [
+					{"name": "Progress Note", "document_count": 8, "types": [
+						{"name": "Office Visit", "document_count": 5},
+						{"name": "Telephone", "document_count": 3}
+					]},
+					{"name": "Lab", "document_count": 2, "types": []}
+				]},
+				{"name": "Temple Health", "network": "tefca", "document_count": 7, "document_classes": [
+					{"name": "Progress Note", "document_count": 7, "types": [{"name": "Telephone", "document_count": 7}]}
+				]},
+				{"name": "Health Gorilla", "network": null, "document_count": 1, "document_classes": [
+					{"name": "Patient Summary", "document_count": 1, "types": []}
+				]},
+				{"name": "MedStar Health", "network": "carequality", "document_count": 0, "document_classes": []}
+			]
+		}`, records)
+	})
+}
+
+func Test_GetPcxPatientExternalRecords_PatientWithoutExchangeHasNoOrganization(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		records := getPcxPatientExternalRecords(t, env, pcxPatientKey("3"))
+
+		assertJSON(t, `{"organization_count": 0, "document_count": 0, "document_class_count": 0, "organizations": []}`, records)
+	})
+}
+
+func Test_PcxOrgsForPatientKey_OrganizationOfThePatient(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		orgs, err := repo.OrgsForPatientKey(t.Context(), pcxPatientKey("4"))
+
+		require.NoError(t, err)
+		assert.Equal(t, []string{"BCH"}, orgs)
+	})
+}
+
+func Test_PcxOrgsForPatientKey_UnknownKeyHasNone(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		orgs, err := repo.OrgsForPatientKey(t.Context(), pcxPatientKey("999"))
+
+		require.NoError(t, err)
+		assert.Empty(t, orgs)
+	})
+}
+
+func Test_GetPcxPatientProcessingReportURL_OnlyWhatTheCallerCanSee(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+		report := func(key string) *string {
+			url, err := repo.GetPatientProcessingReportURL(t.Context(), pcxPatientKey(key))
+			require.NoError(t, err)
+			return url
+		}
+
+		require.NotNil(t, report("2"))
+		assert.Equal(t, "s3://bucket/processing_report/records.html", *report("2"))
+		assert.True(t, getPcxPatient(t, env, pcxPatientKey("2")).HasProcessingReport)
+		assert.Nil(t, report("4"), "report masked without PHI access")
+		assert.False(t, getPcxPatient(t, env, pcxPatientKey("4")).HasProcessingReport)
+		assert.Nil(t, report("1"), "patient without a report")
+		assert.Nil(t, report("5"), "NULL report URL")
+		assert.Nil(t, report("999"), "unknown key")
+	})
+}
+
+func Test_GetPcxPatientTrialEligibilities_VerdictOfAPatientWithPhiAccess(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		eligibilities := getPcxPatientTrialEligibilities(t, env, pcxPatientKey("1"))
+
+		assertJSON(t, `{"assessments": [{"variable_name": "3.6 PNOC035 Eligibility", "verdict": "Ineligible Temporary", "generated_verdict": "Eligible",
+			"confidence": "0.82", "review_status": "review", "reasoning": "Note of 2019-03-02 for MRN-0002: progression on MRI.",
+			"brim_url": "https://brim.example/p/1", "loaded_at": "2026-10-30T09:15:00Z"}]}`, eligibilities)
+	})
+}
+
+func Test_GetPcxPatientTrialEligibilities_UnreviewedVerdictWithoutPhiAccess(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		eligibilities := getPcxPatientTrialEligibilities(t, env, pcxPatientKey("4"))
+
+		assertJSON(t, `{"assessments": [{"variable_name": "3.6 PNOC035 Eligibility", "verdict": "Ineligible Permanent", "generated_verdict": "Ineligible Permanent",
+			"confidence": "0.95", "review_status": null, "reasoning": null, "brim_url": null, "loaded_at": "2026-10-23T17:00:26Z"}]}`, eligibilities)
+	})
+}
+
+func Test_GetPcxPatientTrialEligibilities_PatientWithoutVerdictHasNoAssessment(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		eligibilities := getPcxPatientTrialEligibilities(t, env, pcxPatientKey("3"))
+
+		assertJSON(t, `{"assessments": []}`, eligibilities)
+	})
+}
+
+func Test_GetPcxPatientTumorBoard_SessionsOfAPatientWithPhiAccess(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		board := getPcxPatientTumorBoard(t, env, pcxPatientKey("1"))
+
+		assertJSON(t, `{"has_deck": true, "sessions": [
+			{"session_id": 2, "day": 3800, "date": "2025-11-04", "reason": "Progression Review", "diagnosis": "AT/RT, SHH subtype",
+			 "consensus": "Disseminated ATRT; on tazemetostat", "recommendations": ["PNOC 028", "LP184", "Temozolomide, Irinotecan and Avastin"],
+			 "status": "Signed", "has_report": false},
+			{"session_id": 1, "day": 3200, "date": "2024-03-12", "reason": "Initial Review", "diagnosis": "AT/RT, SHH subtype",
+			 "consensus": "Localized ATRT", "recommendations": ["ACNS0333"], "status": "Signed", "has_report": true}]}`, board)
+	})
+}
+
+func Test_GetPcxPatientTumorBoard_SessionWithoutPhiAccess(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		board := getPcxPatientTumorBoard(t, env, pcxPatientKey("4"))
+
+		assertJSON(t, `{"has_deck": false, "sessions": [{"session_id": 3, "day": 1500, "date": null, "reason": "Progression Review",
+			"diagnosis": "Medulloblastoma", "consensus": null, "recommendations": [], "status": "Draft", "has_report": false}]}`, board)
+	})
+}
+
+func Test_GetPcxPatientTumorBoard_PatientWithoutSession(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		board := getPcxPatientTumorBoard(t, env, pcxPatientKey("3"))
+
+		assertJSON(t, `{"has_deck": false, "sessions": []}`, board)
+	})
+}
+
+func Test_GetPcxPatientTumorBoardURLs_OnlyWhatTheCallerCanSee(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewPcxPatientsRepository(database.StarrocksDB{DB: env.Starrocks})
+		report := func(key string, sessionID int) *string {
+			url, err := repo.GetPatientTumorBoardReportURL(t.Context(), pcxPatientKey(key), sessionID)
+			require.NoError(t, err)
+			return url
+		}
+		deck := func(key string) *string {
+			url, err := repo.GetPatientTumorBoardDeckURL(t.Context(), pcxPatientKey(key))
+			require.NoError(t, err)
+			return url
+		}
+
+		require.NotNil(t, report("1", 1))
+		assert.Equal(t, "s3://bucket/tumor_board/report_1.pdf", *report("1", 1))
+		assert.Nil(t, report("1", 2), "session without a report")
+		assert.Nil(t, report("1", 3), "session of another patient")
+		assert.Nil(t, report("4", 3), "report masked without PHI access")
+		assert.Nil(t, report("999", 1), "unknown key")
+		require.NotNil(t, deck("1"))
+		assert.Equal(t, "s3://bucket/tumor_board/deck.pptx", *deck("1"))
+		assert.Nil(t, deck("4"), "deck masked without PHI access")
+		assert.Nil(t, deck("3"), "patient without a deck")
+	})
+}
+
+func Test_GetPcxPatientLaboratory_LatestResultsOfAPatientWithPhiAccess(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		laboratory := getPcxPatientLaboratory(t, env, pcxPatientKey("1"))
+
+		require.NotNil(t, laboratory)
+		assertJSON(t, `{
+			"cbc": {
+				"day": 3960, "date": "2025-12-01",
+				"wbc": {"value": 6.2, "unit": "10*3/uL"},
+				"hemoglobin": {"value": 11.8, "unit": "g/dL"},
+				"platelets": {"value": 245, "unit": "10*3/uL"},
+				"anc": {"value": 2.9, "unit": "x10E9/L"}
+			},
+			"performance_status": [
+				{"day": 3961, "date": "2025-12-02", "scale": "lansky", "score": 90,
+				 "score_text": "90 - Minor restrictions in strenuous physical activity"}
+			],
+			"csf": {
+				"protein": {"day": 3786, "date": "2025-06-10", "display": "<10 mg/dL", "value": 10, "comparator": "<", "unit": "mg/dL"},
+				"glucose": {"day": 3786, "date": "2025-06-10", "display": "55 mg/dL", "value": 55, "comparator": null, "unit": "mg/dL"},
+				"wbc": {"day": 3786, "date": "2025-06-10", "display": "2 /uL", "value": 2, "comparator": null, "unit": "/uL"},
+				"rbc": {"day": null, "date": null, "display": null, "value": null, "comparator": null, "unit": null},
+				"cytology": {"day": 3687, "date": "2025-03-01", "test_name": "Cytology, CSF", "malignant_cells": "negative",
+				 "evidence_tier": "named", "multi_specimen_report": false},
+				"cell_free_dna": {"day": 3687, "date": "2025-03-01"}
+			}
+		}`, laboratory)
+	})
+}
+
+func Test_GetPcxPatient_HeaderMatchesTheList(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		listed, _ := searchPcxPatients(t, env, nil, nil, nil)
+		for _, item := range listed {
+			if item.PatientKey == pcxPatientKey("3") || item.PatientKey == pcxPatientKey("5") {
+				continue // their list rows hold values the hand-written view fixtures do not back
+			}
+			patient := getPcxPatient(t, env, item.PatientKey)
+
+			require.NotNil(t, patient, item.PatientKey)
+			assert.Equal(t, item.PatientIdentity, patient.PatientIdentity, item.PatientKey)
+			assert.Equal(t, item.BirthYear, patient.BirthYear, item.PatientKey)
+			assert.Equal(t, item.Gender, patient.Gender, item.PatientKey)
+			assert.Equal(t, item.DiagnosisTypeCohort, patient.DiagnosisTypeCohort, item.PatientKey)
+			assert.Equal(t, item.CnsIntegratedDiagnosis, patient.CnsIntegratedDiagnosis, item.PatientKey)
+			assert.Equal(t, item.CnsIntegratedDiagnosisSource, patient.CnsIntegratedDiagnosisSource, item.PatientKey)
+			assert.Equal(t, item.VitalStatus, patient.VitalStatus, item.PatientKey)
+		}
+	})
+}
+
+func Test_GetPcxPatient_GenderIsTheApiCode(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		patient := getPcxPatient(t, env, pcxPatientKey("5"))
+
+		require.NotNil(t, patient)
+		assert.Equal(t, "not_reported", patient.Gender)
+	})
+}
+
+func pcxInitialEventFixture(day *int, diagnosis *string) types.PatientEvent {
+	return types.PatientEvent{PatientDayDate: types.PatientDayDate{Day: day}, EventType: "initial_cns_tumor", CnsIntegratedDiagnosis: diagnosis}
+}
+
+func Test_PcxInitialEvent_NoInitialEventIsNil(t *testing.T) {
+	events := []types.PatientEvent{{PatientDayDate: types.PatientDayDate{Day: ptr(10)}, EventType: "progressive"}}
+
+	assert.Nil(t, pcxInitialEvent(events))
+}
+
+func Test_PcxInitialEvent_EarliestKnownDayWins(t *testing.T) {
+	events := []types.PatientEvent{
+		pcxInitialEventFixture(ptr(200), ptr("A")),
+		{PatientDayDate: types.PatientDayDate{Day: ptr(50)}, EventType: "progressive", CnsIntegratedDiagnosis: ptr("B")},
+		pcxInitialEventFixture(ptr(100), ptr("C")),
+	}
+
+	assert.Equal(t, ptr("C"), pcxInitialEvent(events).CnsIntegratedDiagnosis)
+}
+
+func Test_PcxInitialEvent_UnknownDayLosesToKnownDay(t *testing.T) {
+	events := []types.PatientEvent{pcxInitialEventFixture(nil, ptr("A")), pcxInitialEventFixture(ptr(300), ptr("B"))}
+
+	assert.Equal(t, ptr("B"), pcxInitialEvent(events).CnsIntegratedDiagnosis)
+}
+
+func Test_PcxInitialEvent_UnknownDayIsKeptWhenAlone(t *testing.T) {
+	events := []types.PatientEvent{pcxInitialEventFixture(nil, ptr("A"))}
+
+	assert.Equal(t, ptr("A"), pcxInitialEvent(events).CnsIntegratedDiagnosis)
+}
+
+func Test_PcxInitialEvent_SameDaySortsOnDiagnosisNullFirst(t *testing.T) {
+	events := []types.PatientEvent{
+		pcxInitialEventFixture(ptr(100), ptr("Medulloblastoma")),
+		pcxInitialEventFixture(ptr(100), ptr("ATRT")),
+		pcxInitialEventFixture(ptr(100), nil),
+	}
+
+	assert.Nil(t, pcxInitialEvent(events).CnsIntegratedDiagnosis)
+	assert.Equal(t, ptr("ATRT"), pcxInitialEvent(events[:2]).CnsIntegratedDiagnosis)
+}
+
 func Test_GetPcxPatient_RestrictedPatientHasNoDates(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
 		patient := getPcxPatient(t, env, pcxPatientKey("4"))
 
 		require.NotNil(t, patient)
@@ -443,27 +807,80 @@ func Test_GetPcxPatient_RestrictedPatientHasNoDates(t *testing.T) {
 		assert.Equal(t, types.PatientDayDate{Day: ptr(3000)}, patient.VitalStatusAt)
 		require.Len(t, patient.Events, 1)
 		assert.Equal(t, types.PatientDayDate{Day: ptr(1000)}, patient.Events[0].PatientDayDate)
+		assert.Equal(t, []string{"Biopsy only"}, patient.InitialTumorResections)
 		assert.Equal(t, types.PatientKeyDate{PatientDayDate: types.PatientDayDate{Day: ptr(1000)}, Source: "clinical"}, patient.KeyDates.InitialDiagnosis)
 		assert.Equal(t, types.PatientKeyDate{PatientDayDate: types.PatientDayDate{Day: ptr(3000)}, Source: "registry"}, patient.KeyDates.LatestEncounter)
-		require.Len(t, patient.Surgeries, 1)
-		assert.Nil(t, patient.Surgeries[0].Date)
+	})
+}
+
+func Test_GetPcxPatientTreatments_RestrictedPatientHasNoDates(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		treatments := getPcxPatientTreatments(t, env, pcxPatientKey("4"))
+
+		require.NotNil(t, treatments)
+		require.Len(t, treatments.Surgeries, 1)
+		assert.Equal(t, ptr(1003), treatments.Surgeries[0].Day)
+		assert.Nil(t, treatments.Surgeries[0].Date)
+	})
+}
+
+func Test_GetPcxPatientLaboratory_RestrictedPatientLabsHaveNoDates(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		laboratory := getPcxPatientLaboratory(t, env, pcxPatientKey("4"))
+
+		require.NotNil(t, laboratory)
+		assertJSON(t, `{
+			"cbc": {
+				"day": 2900, "date": null,
+				"wbc": {"value": 4.1, "unit": "10*3/uL"},
+				"hemoglobin": {"value": null, "unit": null},
+				"platelets": {"value": 180, "unit": "10*3/uL"},
+				"anc": {"value": 1500, "unit": "/uL"}
+			},
+			"performance_status": [
+				{"day": 2950, "date": null, "scale": "karnofsky", "score": 70,
+				 "score_text": "70 - Cares for self, unable to carry on normal activity"}
+			],
+			"csf": {
+				"protein": {"day": 2920, "date": null, "display": "38 mg/dL", "value": 38, "comparator": null, "unit": "mg/dL"},
+				"glucose": {"day": null, "date": null, "display": null, "value": null, "comparator": null, "unit": null},
+				"wbc": {"day": 2920, "date": null, "display": "12 /uL", "value": 12, "comparator": null, "unit": "/uL"},
+				"rbc": {"day": 2920, "date": null, "display": "150 /uL", "value": 150, "comparator": null, "unit": "/uL"},
+				"cytology": {"day": 2925, "date": null, "test_name": "Body Fluid Cytology", "malignant_cells": "suspicious",
+				 "evidence_tier": "text_confirmed", "multi_specimen_report": true},
+				"cell_free_dna": {"day": null, "date": null}
+			}
+		}`, laboratory)
+	})
+}
+
+func Test_GetPcxPatientLaboratory_UnknownPerformanceScaleIsSkipped(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		laboratory := getPcxPatientLaboratory(t, env, pcxPatientKey("2"))
+
+		require.NotNil(t, laboratory)
+		assert.Equal(t, []types.PatientPerformanceScore{}, laboratory.PerformanceStatus)
 	})
 }
 
 func Test_GetPcxPatient_PatientWithoutClinicalDataHasEmptyLists(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		patient := getPcxPatient(t, env, pcxPatientKey("3"))
+		key := pcxPatientKey("3")
+		patient := getPcxPatient(t, env, key)
+		treatments := getPcxPatientTreatments(t, env, key)
+		laboratory := getPcxPatientLaboratory(t, env, key)
+		imaging := getPcxPatientImaging(t, env, key)
+		genomics := getPcxPatientGenomics(t, env, key)
 
 		require.NotNil(t, patient)
-		actual, err := json.Marshal(struct {
-			Events, Surgeries, Radiations, Therapies, Imaging, Cases, Interpretations any
-			TreatmentSummary                                                          any
-			VitalStatusAt                                                             types.PatientDayDate
-		}{patient.Events, patient.Surgeries, patient.Radiations, patient.Therapies, patient.Imaging, patient.Cases,
-			patient.Interpretations, patient.TreatmentSummary, patient.VitalStatusAt})
-		require.NoError(t, err)
-		assert.JSONEq(t, `{"Events": [], "Surgeries": [], "Radiations": [], "Therapies": [], "Imaging": [], "Cases": [],
-			"Interpretations": [], "TreatmentSummary": null, "VitalStatusAt": {"day": null, "date": null}}`, string(actual))
+		assertJSON(t, `{"Events": [], "TreatmentSummary": null, "InitialTumorResections": [], "VitalStatusAt": {"day": null, "date": null}}`, struct {
+			Events, TreatmentSummary, InitialTumorResections any
+			VitalStatusAt                                    types.PatientDayDate
+		}{patient.Events, patient.TreatmentSummary, patient.InitialTumorResections, patient.VitalStatusAt})
+		assertJSON(t, `{"surgeries": [], "radiations": [], "therapies": [], "trial_enrollments": []}`, treatments)
+		assertJSON(t, `{"cbc": null, "performance_status": [], "csf": null}`, laboratory)
+		assertJSON(t, `{"sessions": []}`, imaging)
+		assertJSON(t, `{"cases": [], "interpretations": []}`, genomics)
 	})
 }
 
@@ -475,15 +892,15 @@ func pcxCaseRelationships(cases []types.PatientCase) map[int]string {
 	return relationships
 }
 
-func Test_GetPcxPatient_CasesAsProbandAreListedOnce(t *testing.T) {
+func Test_GetPcxPatientGenomics_CasesAsProbandAreListedOnce(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		// Portal patient 3 is the proband of cases 1 and 70, and the family table lists it in both as well.
-		patient := getPcxPatient(t, env, pcxPatientKey("1"))
+		genomics := getPcxPatientGenomics(t, env, pcxPatientKey("1"))
 
-		require.NotNil(t, patient)
-		assert.Len(t, patient.Cases, 2)
-		assert.Equal(t, map[int]string{1: "proband", 70: "proband"}, pcxCaseRelationships(patient.Cases))
-		for _, c := range patient.Cases {
+		require.NotNil(t, genomics)
+		assert.Len(t, genomics.Cases, 2)
+		assert.Equal(t, map[int]string{1: "proband", 70: "proband"}, pcxCaseRelationships(genomics.Cases))
+		for _, c := range genomics.Cases {
 			switch c.CaseID {
 			case 1:
 				assert.Equal(t, "in_progress", c.StatusCode)
@@ -507,24 +924,24 @@ func Test_GetPcxPatient_CasesAsProbandAreListedOnce(t *testing.T) {
 	})
 }
 
-func Test_GetPcxPatient_SoloGermlineCase(t *testing.T) {
+func Test_GetPcxPatientGenomics_SoloGermlineCase(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		// Portal patient 22 is the only member of case 8.
-		patient := getPcxPatient(t, env, pcxPatientKey("4"))
+		genomics := getPcxPatientGenomics(t, env, pcxPatientKey("4"))
 
-		require.NotNil(t, patient)
-		require.Len(t, patient.Cases, 1)
-		assert.Equal(t, 8, patient.Cases[0].CaseID)
-		assert.Equal(t, "germline", patient.Cases[0].CaseType)
+		require.NotNil(t, genomics)
+		require.Len(t, genomics.Cases, 1)
+		assert.Equal(t, 8, genomics.Cases[0].CaseID)
+		assert.Equal(t, "germline", genomics.Cases[0].CaseType)
 	})
 }
 
-func Test_GetPcxPatient_CasesAsFamilyMember(t *testing.T) {
+func Test_GetPcxPatientGenomics_CasesAsFamilyMember(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		patient := getPcxPatient(t, env, pcxPatientKey("2"))
+		genomics := getPcxPatientGenomics(t, env, pcxPatientKey("2"))
 
-		require.NotNil(t, patient)
-		assert.Equal(t, map[int]string{4: "father"}, pcxCaseRelationships(patient.Cases))
+		require.NotNil(t, genomics)
+		assert.Equal(t, map[int]string{4: "father"}, pcxCaseRelationships(genomics.Cases))
 	})
 }
 
@@ -577,13 +994,13 @@ func Test_OrganizationFilterValues_InvalidJSONIsAnError(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func Test_GetPcxPatient_InterpretationsOfItsCases(t *testing.T) {
+func Test_GetPcxPatientGenomics_InterpretationsOfItsCases(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		// Case 1 carries 3 germline and 3 somatic interpretations of locus 1000, on transcripts T001 and T002.
-		patient := getPcxPatient(t, env, pcxPatientKey("1"))
+		genomics := getPcxPatientGenomics(t, env, pcxPatientKey("1"))
 
-		require.NotNil(t, patient)
-		actual, err := json.Marshal(patient.Interpretations)
+		require.NotNil(t, genomics)
+		actual, err := json.Marshal(genomics.Interpretations)
 		require.NoError(t, err)
 		row := func(origin string, seq int, transcript, classification, updatedAt string) string {
 			aa := map[string]string{"T001": "p.Val600Glu", "T002": "p.Val640Glu"}[transcript]
@@ -602,12 +1019,21 @@ func Test_GetPcxPatient_InterpretationsOfItsCases(t *testing.T) {
 	})
 }
 
-func Test_GetPcxPatient_NoInterpretationsOnItsCases(t *testing.T) {
+func Test_GetPcxPatientGenomics_NoInterpretationsOnItsCases(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		patient := getPcxPatient(t, env, pcxPatientKey("2"))
+		genomics := getPcxPatientGenomics(t, env, pcxPatientKey("2"))
 
-		require.NotNil(t, patient)
-		assert.NotEmpty(t, patient.Cases)
-		assert.Equal(t, []types.PatientInterpretation{}, patient.Interpretations)
+		require.NotNil(t, genomics)
+		assert.NotEmpty(t, genomics.Cases)
+		assert.Equal(t, []types.PatientInterpretation{}, genomics.Interpretations)
+	})
+}
+
+func Test_PcxPatientKeysByRadiantPatientID_OnlyPatientsWithAKey(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		keys, err := pcxPatientKeysByRadiantPatientID(t.Context(), env.Starrocks.WithContext(t.Context()), []int{3, 11, 22, 999})
+
+		require.NoError(t, err)
+		assert.Equal(t, map[int]string{3: pcxPatientKey("1"), 11: pcxPatientKey("2"), 22: pcxPatientKey("4")}, keys)
 	})
 }

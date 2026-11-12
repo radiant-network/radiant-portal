@@ -1,0 +1,53 @@
+/*
+   cbtn_tenant.v_pcx_30_pnoc035_eligibility_combined  (VIEW, access-controlled)
+
+   Upstream builds this view with dbt only (ac_v_pcx_30_pnoc035_eligibility_combined.sql) and ships no template.
+   This is PRD's SHOW CREATE VIEW of 2026-11-04, with the tenant and the identifier quoting put back for the seed.
+   build_seed.py skips it once pcx_tables/access_controlled_views holds a file of the same name.
+ */
+
+CREATE OR REPLACE VIEW cbtn_tenant.v_pcx_30_pnoc035_eligibility_combined AS select
+    s.organization_name,
+    s.organization_code,
+    case when s.can_read_phi then s.mrn else s.research_id end as patient_id,
+    case when s.can_read_phi then 'mrn' else 'research_id' end as patient_id_type,
+    s.radiant_patient_id,
+    s.variable_name,
+    s.generated_value,
+    s.eligibility_value,
+    case when s.can_read_phi then s.reasoning end as reasoning,
+    s.confidence,
+    s.review_status,
+    s.brim_scope,
+    case when s.can_read_phi then s.brim_url end as brim_url,
+    case when s.can_read_phi then s.source_file end as source_file,
+    s.brim_loaded_at,
+    s.can_read_phi
+from (
+    select
+        src.*,
+        p.id as radiant_patient_id,
+        (org_grant.org_code is not null or lab_grant.patient_id is not null) as can_read_phi
+    from radiant_data_dev.v_pcx_30_pnoc035_eligibility_combined src
+    left join radiant_jdbc.public.patient p
+        on p.tenant_code = '{{.TenantCode}}'
+       and p.organization_code = src.organization_code
+       and p.submitter_patient_id_type = 'mrn'
+       and regexp_replace(src.mrn, '^0+', '') <> ''
+       and regexp_replace(p.submitter_patient_id, '^0+', '')
+           = regexp_replace(src.mrn, '^0+', '')
+    left join (
+        select distinct org_code
+        from `default_catalog`.`auth`.`pii_grant`
+        where user_id = substring_index(substr(current_user(), 2), char(39), 1)
+          and tenant_code = '{{.TenantCode}}'
+    ) org_grant
+        on org_grant.org_code = src.organization_code
+    left join (
+        select distinct patient_id
+        from `default_catalog`.`auth`.`pii_lab_patient`
+        where user_id = substring_index(substr(current_user(), 2), char(39), 1)
+          and tenant_code = '{{.TenantCode}}'
+    ) lab_grant
+        on lab_grant.patient_id = p.id
+) s;

@@ -20,6 +20,7 @@ export function QueryBuilderSkeleton({ defaultSidebarOpen, aggregations }: Query
                 variant="sidebar"
                 collapsible="icon"
                 brand
+                disableMobileSheet
                 className={'static! flex flex-col w-full bg-primary dark:bg-secondary '}
               >
                 <SidebarContent>

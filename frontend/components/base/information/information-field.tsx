@@ -22,7 +22,10 @@ function InformationField({
   ) : (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="underline decoration-dotted underline-offset-4">{labelOrPlaceholder}</span>
+        <span className="underline decoration-dotted underline-offset-4">
+          {labelOrPlaceholder}
+          <span className="sr-only">{labelTooltipText}</span>
+        </span>
       </TooltipTrigger>
       <TooltipContent>{labelTooltipText}</TooltipContent>
     </Tooltip>
@@ -35,7 +38,10 @@ function InformationField({
   ) : (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span>{contentOrPlaceholder}</span>
+        <span>
+          {contentOrPlaceholder}
+          <span className="sr-only">{tooltipText}</span>
+        </span>
       </TooltipTrigger>
       <TooltipContent>{tooltipText}</TooltipContent>
     </Tooltip>

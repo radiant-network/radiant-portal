@@ -44,11 +44,7 @@ async function fetchPatientEntity(input: PatientEntityInput) {
   return response.data;
 }
 
-type PatientEntityProps = {
-  onAskAssistant?: () => void;
-};
-
-export default function App({ onAskAssistant }: PatientEntityProps = {}) {
+export default function App() {
   const { t } = useI18n();
   const { tenant } = useTenant();
   const patientId = usePatientIdFromParam();
@@ -100,7 +96,7 @@ export default function App({ onAskAssistant }: PatientEntityProps = {}) {
 
   return (
     <main ref={mainRef} className="bg-muted h-screen overflow-auto">
-      <Header patient={data} isLoading={isLoading} onAskAssistant={onAskAssistant} />
+      <Header patient={data} isLoading={isLoading} />
       <TabsNav value={activeTab} onValueChange={handleOnTabChange}>
         <TabsList className="pt-4 px-3 bg-background" contentClassName="mx-auto">
           {TAB_ORDER.map(({ value, i18nKey }) => (
@@ -117,13 +113,13 @@ export default function App({ onAskAssistant }: PatientEntityProps = {}) {
                 <OverviewTab patient={data} isLoading={isLoading} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Timeline}>
-                <TimelineTab patient={data} isLoading={isLoading} />
+                <TimelineTab patient={data} />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Treatments}>
-                <TreatmentsTab patient={data} isLoading={isLoading} />
+                <TreatmentsTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Genomics}>
-                <GenomicsTab patient={data} isLoading={isLoading} />
+                <GenomicsTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.TumorBoard}>
                 <TumorBoardTab />
@@ -132,10 +128,10 @@ export default function App({ onAskAssistant }: PatientEntityProps = {}) {
                 <LaboratoryTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.Imaging}>
-                <ImagingTab patient={data} isLoading={isLoading} />
+                <ImagingTab />
               </TabsContent>
               <TabsContent value={PatientEntityTabs.ClinicalTrials}>
-                <ClinicalTrialsTab />
+                <ClinicalTrialsTab patient={data} />
               </TabsContent>
             </div>
           </div>

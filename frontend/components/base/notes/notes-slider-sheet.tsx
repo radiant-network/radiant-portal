@@ -57,6 +57,9 @@ function NotesSliderSheet({ ...props }: NotesSliderProps) {
     mutate();
   }, []);
 
+  const noteCount = data?.count ?? 0;
+  const isIconOnly = !isLoading && noteCount === 0;
+
   if (!props.canComment && !isLoading && (data?.count ?? 0) === 0) {
     return (
       <Tooltip>
@@ -64,6 +67,7 @@ function NotesSliderSheet({ ...props }: NotesSliderProps) {
           <Button
             variant="outline"
             size="sm"
+            iconOnly
             aria-disabled
             aria-label={t('notes.variant.tooltip.none')}
             className="cursor-default hover:bg-background"
@@ -81,6 +85,7 @@ function NotesSliderSheet({ ...props }: NotesSliderProps) {
       <Button
         variant="outline"
         size="sm"
+        iconOnly={isIconOnly}
         aria-label={t('a11y.notes.open_count', { count: data?.count ?? 0 })}
         onClick={handleOpen}
       >

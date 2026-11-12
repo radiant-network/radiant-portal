@@ -3,6 +3,7 @@ package starrocks
 import (
 	"context"
 	"fmt"
+	"maps"
 
 	"github.com/radiant-network/radiant-api/internal/types"
 )
@@ -10,7 +11,8 @@ import (
 type Facet = types.Facet
 
 type FacetsRepository struct {
-	facetsDictionary map[string]Facet
+	facetsDictionary            map[string]Facet
+	germlineCNVFacetsDictionary map[string]Facet
 }
 
 func NewFacetsRepository() *FacetsRepository {
@@ -62,7 +64,8 @@ func NewFacetsRepository() *FacetsRepository {
 				"processed_pseudogene", "polymorphic_pseudogene", "retrotransposed", "transcribed_processed_pseudogene", "transcribed_unprocessed_pseudogene",
 				"transcribed_unitary_pseudogene", "translated_processed_pseudogene", "translated_unprocessed_pseudogene", "unitary_pseudogene", "unprocessed_pseudogene",
 				"artifact", "lincRNA", "macro_lncRNA", "3prime_overlapping_ncRNA", "disrupted_domain",
-				"vault_RNA", "bidirectional_promoter_lncRNA", "",
+				"vault_RNA", "bidirectional_promoter_lncRNA", "transcribed_pseudogene", "ncRNA_pseudogene", "ncRNA",
+				"Y_RNA", "RNase_P_RNA", "RNase_MRP_RNA", "telomerase_RNA", "tRNA", "",
 			},
 		},
 		"omim_inheritance": {
@@ -114,25 +117,44 @@ func NewFacetsRepository() *FacetsRepository {
 		},
 	}
 
+	// The cnv-post-processing tags share the field name transmission_mode with the germline SNV
+	// modes, but none of the values, except x_linked_recessive.
+	germlineCNVDictionary := maps.Clone(dictionary)
+	germlineCNVDictionary["transmission_mode"] = Facet{
+		Name: "transmission_mode",
+		Values: []string{
+			"denovo", "denovo_suspect", "possible_denovo", "x_linked_denovo", "x_linked_recessive",
+			"inherited_maternal", "inherited_paternal", "possible_inherited_maternal", "possible_inherited_paternal",
+			"recessive", "recessive_lowconf", "inheritance_unresolved", "mendelian_inconsistent", "unknown_cn",
+		},
+	}
+
 	return &FacetsRepository{
-		facetsDictionary: dictionary,
+		facetsDictionary:            dictionary,
+		germlineCNVFacetsDictionary: germlineCNVDictionary,
 	}
 }
 
 func (r *FacetsRepository) GetFacets(ctx context.Context, facetNames []string) ([]Facet, error) {
-	var facets []Facet
+	return lookupFacets(facetNames, r.facetsDictionary)
+}
 
+func (r *FacetsRepository) GetGermlineCNVFacets(ctx context.Context, facetNames []string) ([]Facet, error) {
+	return lookupFacets(facetNames, r.germlineCNVFacetsDictionary)
+}
+
+func lookupFacets(facetNames []string, dictionary map[string]Facet) ([]Facet, error) {
 	if len(facetNames) == 0 {
 		return nil, fmt.Errorf("no facet names provided")
 	}
 
+	var facets []Facet
 	for _, name := range facetNames {
-		if facet, exists := r.facetsDictionary[name]; exists {
-			facets = append(facets, facet)
-		} else {
+		facet, exists := dictionary[name]
+		if !exists {
 			return nil, fmt.Errorf("facet \"%s\" not found", name)
 		}
+		facets = append(facets, facet)
 	}
-
 	return facets, nil
 }

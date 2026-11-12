@@ -1,6 +1,8 @@
-import { type ComponentProps, useCallback, useMemo, useState } from 'react';
+import { type ComponentProps, useCallback, useEffect, useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 
+import Empty from '@/components/base/empties/empty';
+import { Button } from '@/components/base/shadcn/button';
 import { Toggle } from '@/components/base/shadcn/toggle';
 import { useI18n } from '@/components/hooks/i18n';
 import { cn } from '@/components/lib/utils';
@@ -22,11 +24,14 @@ type TimelineProps = {
   chemotherapies?: ComponentProps<typeof Chemotherapy>[];
 };
 
-type TimelineItem =
-  | { kind: 'event'; day: number | undefined; props: ComponentProps<typeof Event> }
-  | { kind: 'surgery'; day: number | undefined; props: ComponentProps<typeof Surgery> }
-  | { kind: 'radiation'; day: number | undefined; props: ComponentProps<typeof Radiation> }
-  | { kind: 'chemotherapy'; day: number | undefined; props: ComponentProps<typeof Chemotherapy> };
+type EventItem = { kind: 'event'; day: number | undefined; props: ComponentProps<typeof Event> };
+type SurgeryItem = { kind: 'surgery'; day: number | undefined; props: ComponentProps<typeof Surgery> };
+type RadiationItem = { kind: 'radiation'; day: number | undefined; props: ComponentProps<typeof Radiation> };
+type ChemoItem = { kind: 'chemotherapy'; day: number | undefined; props: ComponentProps<typeof Chemotherapy> };
+type TimelineItem = EventItem | SurgeryItem | RadiationItem | ChemoItem;
+type TreatmentItem = SurgeryItem | RadiationItem | ChemoItem;
+
+type Group = { event: (EventItem & { eventIndex: number }) | null; treatments: TreatmentItem[] };
 
 type TypeButton = {
   kind: TypeKind;
@@ -54,13 +59,18 @@ const TYPE_BUTTONS: TypeButton[] = [
 
 const PILL_CLASS = 'h-7 gap-2 rounded-md px-2 text-sm font-normal';
 
+const EMPTY_EVENTS: NonNullable<TimelineProps['events']> = [];
+const EMPTY_SURGERIES: NonNullable<TimelineProps['surgeries']> = [];
+const EMPTY_RADIATIONS: NonNullable<TimelineProps['radiations']> = [];
+const EMPTY_CHEMOTHERAPIES: NonNullable<TimelineProps['chemotherapies']> = [];
+
 function Timeline({
   title,
   description,
-  events = [],
-  surgeries = [],
-  radiations = [],
-  chemotherapies = [],
+  events = EMPTY_EVENTS,
+  surgeries = EMPTY_SURGERIES,
+  radiations = EMPTY_RADIATIONS,
+  chemotherapies = EMPTY_CHEMOTHERAPIES,
 }: TimelineProps) {
   const { t } = useI18n();
   const [selected, setSelected] = useState<Set<TypeKind>>(new Set());
@@ -76,16 +86,89 @@ function Timeline({
     return items.sort((a, b) => (a.day ?? Infinity) - (b.day ?? Infinity));
   }, [events, surgeries, radiations, chemotherapies]);
 
+  const groups = useMemo<Group[]>(() => {
+    const out: Group[] = [];
+    let currentEventIdx = -1;
+    let current: Group | null = null;
+    for (const item of sorted) {
+      if (item.kind === 'event') {
+        currentEventIdx += 1;
+        current = { event: { ...item, eventIndex: currentEventIdx }, treatments: [] };
+        out.push(current);
+      } else {
+        if (!current) {
+          current = { event: null, treatments: [] };
+          out.push(current);
+        }
+        current.treatments.push(item);
+      }
+    }
+    return out;
+  }, [sorted]);
+
+  const [openEventIndices, setOpenEventIndices] = useState<Set<number>>(new Set());
+
+  useEffect(() => {
+    const initial = new Set<number>();
+    for (const group of groups) {
+      if (group.event) initial.add(group.event.eventIndex);
+    }
+    setOpenEventIndices(initial);
+  }, [groups]);
+
+  const toggleEvent = useCallback((idx: number) => {
+    setOpenEventIndices(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  }, []);
+
+  const collapsibleEventIndices = useMemo(
+    () => groups.filter(g => g.event && g.treatments.length > 0).map(g => g.event!.eventIndex),
+    [groups],
+  );
+  const allExpanded =
+    collapsibleEventIndices.length > 0 && collapsibleEventIndices.every(idx => openEventIndices.has(idx));
+
+  const toggleAll = useCallback(() => {
+    setOpenEventIndices(prev => {
+      const everyOpen = collapsibleEventIndices.every(idx => prev.has(idx));
+      return everyOpen ? new Set() : new Set(collapsibleEventIndices);
+    });
+  }, [collapsibleEventIndices]);
+
   const counts = useMemo(() => {
     const perKind: Record<TypeKind, number> = { event: 0, surgery: 0, radiation: 0, chemotherapy: 0 };
     for (const item of sorted) perKind[item.kind] += 1;
     return { all: sorted.length, ...perKind };
   }, [sorted]);
 
-  const visible = useMemo(
-    () => (isAllActive ? sorted : sorted.filter(item => selected.has(item.kind))),
-    [sorted, selected, isAllActive],
-  );
+  const visible = useMemo<Array<{ item: TimelineItem; open?: boolean; onToggle?: () => void }>>(() => {
+    if (!isAllActive) {
+      return sorted.filter(item => selected.has(item.kind)).map(item => ({ item }));
+    }
+    const result: Array<{ item: TimelineItem; open?: boolean; onToggle?: () => void }> = [];
+    for (const group of groups) {
+      if (group.event) {
+        const idx = group.event.eventIndex;
+        const hasTreatments = group.treatments.length > 0;
+        const open = openEventIndices.has(idx);
+        result.push({
+          item: group.event,
+          open: hasTreatments ? open : undefined,
+          onToggle: hasTreatments ? () => toggleEvent(idx) : undefined,
+        });
+        if (hasTreatments && open) {
+          for (const treatment of group.treatments) result.push({ item: treatment });
+        }
+      } else {
+        for (const treatment of group.treatments) result.push({ item: treatment });
+      }
+    }
+    return result;
+  }, [groups, sorted, selected, isAllActive, openEventIndices, toggleEvent]);
 
   const handleAllClick = useCallback(() => {
     setSelected(prev => (prev.size === 0 ? prev : new Set()));
@@ -101,77 +184,93 @@ function Timeline({
     });
   }, []);
 
+  const hasAnyItem = counts.all > 0;
+
   return (
     <div className="flex flex-col gap-4">
       {(title || description) && (
         <div className="flex flex-col gap-1">
-          {title && <h2 className="text-xl font-semibold">{title}</h2>}
-          {description && <p className="text-muted-foreground text-sm">{description}</p>}
+          {title && <h2 className="text-base font-semibold">{title}</h2>}
+          {description &&
+            (hasAnyItem ? (
+              <p className="text-muted-foreground text-sm">{description}</p>
+            ) : (
+              <Empty size="inline" showIcon={false} description={description} />
+            ))}
         </div>
       )}
-      <div
-        role="group"
-        aria-label={t('a11y.timeline.filters_group')}
-        className="bg-background sticky top-0 z-10 flex flex-wrap items-center gap-2 py-2"
-      >
-        <Toggle
-          pressed={isAllActive}
-          onPressedChange={handleAllClick}
-          className={cn(PILL_CLASS, isAllActive && 'bg-muted')}
-        >
-          <span>{t('timeline.filters.all')}</span>
-          <span className="text-muted-foreground">{counts.all}</span>
-        </Toggle>
-        {TYPE_BUTTONS.map(button => {
-          const isActive = selected.has(button.kind);
-          return (
+      {hasAnyItem && (
+        <>
+          <div
+            role="group"
+            aria-label={t('a11y.timeline.filters_group')}
+            className="bg-background sticky top-0 z-10 flex flex-wrap items-center gap-2 py-2"
+          >
             <Toggle
-              key={button.kind}
-              pressed={isActive}
-              onPressedChange={() => handleTypeToggle(button.kind)}
-              className={cn(PILL_CLASS, isActive && button.activeClassName)}
+              pressed={isAllActive}
+              onPressedChange={handleAllClick}
+              className={cn(PILL_CLASS, isAllActive && 'bg-muted')}
             >
-              <TimelineBadge type={button.badgeType} size="sm" />
-              <span>{t(button.i18nKey)}</span>
-              <span className="text-muted-foreground">{counts[button.kind]}</span>
+              <span>{t('timeline.filters.all')}</span>
+              <span className="text-muted-foreground">{counts.all}</span>
             </Toggle>
-          );
-        })}
-      </div>
-      <div role="status" aria-live="polite" className="sr-only">
-        {t('a11y.timeline.results_count', { count: visible.length })}
-      </div>
-      {visible.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed p-10">
-          <div className="flex size-10 items-center justify-center rounded-md border bg-background">
-            <Search className="size-5" aria-hidden />
+            {TYPE_BUTTONS.map(button => {
+              const isActive = selected.has(button.kind);
+              return (
+                <Toggle
+                  key={button.kind}
+                  pressed={isActive}
+                  onPressedChange={() => handleTypeToggle(button.kind)}
+                  className={cn(PILL_CLASS, isActive && button.activeClassName)}
+                >
+                  <TimelineBadge type={button.badgeType} size="sm" />
+                  <span>{t(button.i18nKey)}</span>
+                  <span className="text-muted-foreground">{counts[button.kind]}</span>
+                </Toggle>
+              );
+            })}
+            {isAllActive && collapsibleEventIndices.length > 0 && (
+              <Button type="button" variant="link" size="sm" onClick={toggleAll} className="ml-auto h-7 px-2">
+                {t(allExpanded ? 'timeline.collapse_all' : 'timeline.expand_all')}
+              </Button>
+            )}
           </div>
-          <p className="text-base font-semibold">{t('timeline.empty.title')}</p>
-          <p className="text-muted-foreground text-sm">{t('timeline.empty.description')}</p>
-        </div>
-      ) : (
-        <ol className="list-none pl-0">
-          {visible.map((item, i) => {
-            const showLine = i < visible.length - 1;
-            const key = `${item.kind}-${item.day}-${i}`;
-            let row: React.ReactNode;
-            switch (item.kind) {
-              case 'event':
-                row = <Event {...item.props} showLine={showLine} />;
-                break;
-              case 'surgery':
-                row = <Surgery {...item.props} showLine={showLine} />;
-                break;
-              case 'radiation':
-                row = <Radiation {...item.props} showLine={showLine} />;
-                break;
-              case 'chemotherapy':
-                row = <Chemotherapy {...item.props} showLine={showLine} />;
-                break;
-            }
-            return <li key={key}>{row}</li>;
-          })}
-        </ol>
+          <div role="status" aria-live="polite" className="sr-only">
+            {t('a11y.timeline.results_count', { count: visible.length })}
+          </div>
+          {visible.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed p-10">
+              <div className="flex size-10 items-center justify-center rounded-md border bg-background">
+                <Search className="size-5" aria-hidden />
+              </div>
+              <p className="text-base font-semibold">{t('timeline.empty.title')}</p>
+              <p className="text-muted-foreground text-sm">{t('timeline.empty.description')}</p>
+            </div>
+          ) : (
+            <ol className="flex list-none flex-col gap-2 pl-0">
+              {visible.map(({ item, open, onToggle }, i) => {
+                const showLine = i < visible.length - 1;
+                const key = `${item.kind}-${item.day}-${i}`;
+                let row: React.ReactNode;
+                switch (item.kind) {
+                  case 'event':
+                    row = <Event {...item.props} showLine={showLine} open={open} onToggle={onToggle} />;
+                    break;
+                  case 'surgery':
+                    row = <Surgery {...item.props} showLine={showLine} />;
+                    break;
+                  case 'radiation':
+                    row = <Radiation {...item.props} showLine={showLine} />;
+                    break;
+                  case 'chemotherapy':
+                    row = <Chemotherapy {...item.props} showLine={showLine} />;
+                    break;
+                }
+                return <li key={key}>{row}</li>;
+              })}
+            </ol>
+          )}
+        </>
       )}
     </div>
   );

@@ -4,7 +4,7 @@
 Companion to UPSTREAM_SOURCES.md in this directory; read that first for the source
 map, the PHI boundary, and the downstream rebuild order.
 
-    # load today's existing extracts (all five tables)
+    # load today's existing extracts (all six tables)
     python3 load_upstream_tables.py --load
 
     # extract fresh, then load
@@ -73,6 +73,7 @@ REGISTRY = {
     "diagnosis":                 ("deid",       "prod_access"),
     "treatment":                 ("deid",       "prod_access"),
     "updates":                   ("deid",       "prod_access"),
+    "imaging_sessions":          ("deid",       "prod_access"),
     "stg_cbtn_enrollment_final": ("identified", "stg_cbtn"),
 }
 
@@ -127,6 +128,19 @@ def extract(table: str, stamp: str) -> Path:
 
 # ---------------------------------------------------------------- StarRocks
 
+def starrocks_host(cfg: dict[str, str]) -> str:
+    """The prod FE endpoint, from the credential file -- never hardcoded here.
+
+    Deliberately NOT in the repo, alongside the user and password the same file
+    already supplies. Docs refer to it as <starrocks-prod-host>.
+    """
+    host = cfg.get("STARROCKS_PROD_HOST", "").strip()
+    if not host:
+        sys.exit(f"STARROCKS_PROD_HOST is not set in {STARROCKS_ENV}\n"
+                 f"  add:  export STARROCKS_PROD_HOST=<starrocks-prod-host>")
+    return host
+
+
 def connect_starrocks():
     try:
         import pymysql
@@ -134,7 +148,7 @@ def connect_starrocks():
         sys.exit("pymysql is required:  python3 -m pip install pymysql")
     cfg = read_env(STARROCKS_ENV)
     return pymysql.connect(
-        host="celerdata-private-nlb-hnsIFJjH-47198fe90f6ce7c2.elb.us-east-1.amazonaws.com",
+        host=starrocks_host(cfg),
         port=80, user=cfg["STARROCKS_PROD_USER"], password=cfg["STARROCKS_PROD_PASSWORD"],
         autocommit=True, charset="utf8mb4", local_infile=False,
     )
@@ -214,7 +228,7 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--tables", default=",".join(REGISTRY),
-                    help="comma-separated subset (default: all five)")
+                    help="comma-separated subset (default: all six)")
     ap.add_argument("--extract", action="store_true", help="re-extract from the warehouses first")
     ap.add_argument("--load", action="store_true", help="load extracts into StarRocks")
     ap.add_argument("--dry-run", action="store_true",

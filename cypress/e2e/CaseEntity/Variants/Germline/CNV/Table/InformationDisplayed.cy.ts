@@ -66,9 +66,24 @@ describe('Case Entity - Variants - Germline - CNV - Table - Information displaye
     CaseEntity_Variants_CNV_Table.validations.shouldShowColumnContent('cn', data.cnvGermline);
   });
 
-  it('gnomAD', () => {
+  it('gnomAD SF', () => {
     setupTest();
-    CaseEntity_Variants_CNV_Table.validations.shouldShowColumnContent('gnomad', data.cnvGermline);
+    CaseEntity_Variants_CNV_Table.validations.shouldShowColumnContent('gnomad_sf', data.cnvGermline);
+  });
+
+  it('gnomAD AF', () => {
+    setupTest();
+    CaseEntity_Variants_CNV_Table.validations.shouldShowColumnContent('gnomad_af', data.cnvGermline);
+  });
+
+  it('gnomAD AC', () => {
+    setupTest();
+    CaseEntity_Variants_CNV_Table.validations.shouldShowColumnContent('gnomad_ac', data.cnvGermline);
+  });
+
+  it('gnomAD SC', () => {
+    setupTest();
+    CaseEntity_Variants_CNV_Table.validations.shouldShowColumnContent('gnomad_sc', data.cnvGermline);
   });
 
   it('# Genes', () => {

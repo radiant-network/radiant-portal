@@ -4,12 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/internal/utils"
+	"golang.org/x/sync/errgroup"
 	"gorm.io/gorm"
 )
 
@@ -183,48 +186,391 @@ func dayDate(day *string, date *types.DateISO8601) types.PatientDayDate {
 	return types.PatientDayDate{Day: pcxDay(day), Date: date}
 }
 
-// GetPatient returns the patient page of patient_key, nil when the key matches no patient the caller can see.
-// Every view is read as the caller, with the identifier the caller sees, so PHI is already resolved per row.
+// GetPatient returns the header, sidebar and overview of patient_key, nil when the key matches no patient the caller
+// can see. Every view is read as the caller, with the identifier the caller sees, so PHI is already resolved per row.
+// It does not read the list view: one row of it costs every secured view it joins.
 func (r *PcxPatientsRepository) GetPatient(ctx context.Context, patientKey string) (*types.PatientEntity, error) {
-	db := r.db.WithContext(ctx)
-	columns := make([]string, len(types.PcxPatientsQueryConfig.DefaultFields))
-	for i, field := range types.PcxPatientsQueryConfig.DefaultFields {
-		columns[i] = fmt.Sprintf("%s.%s AS %s", field.Table.Alias, field.Name, field.GetAlias())
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
 	}
-	var items []types.PatientListItem
-	tx := db.Table(fmt.Sprintf("%s %s", types.PcxPatientListTable.TenantQualifiedName(ctx), types.PcxPatientListTable.Alias)).
-		Select(columns).Where("pl.patient_key = ?", patientKey).Limit(1)
-	if err := tx.Find(&items).Error; err != nil {
-		return nil, fmt.Errorf("error fetching patient: %w", err)
+	patient := types.PatientEntity{PatientIdentity: types.PatientIdentity{
+		PatientKey: patientKey, OrganizationCode: id.organizationCode, PatientIDType: id.patientIDType, PatientID: id.patientID,
+	}}
+	g, gctx := errgroup.WithContext(ctx)
+	db := r.db.WithContext(gctx)
+	g.Go(func() error { return fillPcxDemographics(gctx, db, *id, &patient) })
+	g.Go(func() (err error) {
+		patient.VitalStatus, patient.VitalStatusAt, err = pcxVitalStatus(gctx, db, *id)
+		return err
+	})
+	g.Go(func() (err error) {
+		patient.Events, err = pcxEvents(gctx, db, *id)
+		return err
+	})
+	g.Go(func() (err error) {
+		patient.TreatmentSummary, err = pcxTreatmentSummary(gctx, db, *id)
+		return err
+	})
+	g.Go(func() (err error) {
+		patient.InitialTumorResections, err = pcxInitialTumorResections(gctx, db, *id)
+		return err
+	})
+	g.Go(func() (err error) {
+		reportURL, err := pcxProcessingReportURL(gctx, db, *id)
+		patient.HasProcessingReport = reportURL != nil
+		return err
+	})
+	if err := g.Wait(); err != nil {
+		return nil, err
 	}
-	if len(items) == 0 {
+	if initial := pcxInitialEvent(patient.Events); initial != nil {
+		patient.CnsIntegratedDiagnosis, patient.CnsIntegratedDiagnosisSource = initial.CnsIntegratedDiagnosis, initial.CnsIntegratedDiagnosisSource
+	}
+	patient.KeyDates = pcxKeyDates(patient.TreatmentSummary, patient.Events, patient.VitalStatusAt)
+	return &patient, nil
+}
+
+// patientIdentifier resolves patient_key through the key view alone, nil when the caller cannot see the patient.
+func (r *PcxPatientsRepository) patientIdentifier(ctx context.Context, patientKey string) (*pcxPatientIdentifier, error) {
+	var rows []struct {
+		OrganizationCode string
+		PatientIDType    string
+		PatientID        string
+	}
+	tx := r.db.WithContext(ctx).Table(types.PcxPatientKeyTable.TenantQualifiedName(ctx)).
+		Select("organization_code, patient_id_type, patient_id").Where("patient_key = ?", patientKey).Limit(1)
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient key: %w", err)
+	}
+	if len(rows) == 0 {
 		return nil, nil
 	}
+	return &pcxPatientIdentifier{rows[0].OrganizationCode, rows[0].PatientIDType, rows[0].PatientID}, nil
+}
 
-	patient := types.PatientEntity{PatientListItem: items[0]}
-	id := pcxPatientIdentifier{patient.OrganizationCode, patient.PatientIDType, patient.PatientID}
-	for _, fill := range []func(context.Context, *gorm.DB, pcxPatientIdentifier, *types.PatientEntity) error{
-		fillPcxDemographics, fillPcxVitalStatus, fillPcxEvents, fillPcxSurgeries, fillPcxRadiations, fillPcxTherapies,
-		fillPcxImaging, fillPcxTreatmentSummary,
-	} {
-		if err := fill(ctx, db, id, &patient); err != nil {
-			return nil, err
-		}
+// OrgsForPatientKey returns the organization of the patient, none for an unknown key.
+func (r *PcxPatientsRepository) OrgsForPatientKey(ctx context.Context, patientKey string) ([]string, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return []string{}, err
 	}
-	cases, err := r.patientCases(ctx, patient.RadiantPatientID)
+	return []string{id.organizationCode}, nil
+}
+
+func (r *PcxPatientsRepository) GetPatientTreatments(ctx context.Context, patientKey string) (*types.PatientTreatments, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	var treatments types.PatientTreatments
+	g, gctx := errgroup.WithContext(ctx)
+	db := r.db.WithContext(gctx)
+	g.Go(func() (err error) {
+		treatments.Surgeries, err = pcxSurgeries(gctx, db, *id)
+		return err
+	})
+	g.Go(func() (err error) {
+		treatments.Radiations, err = pcxRadiations(gctx, db, *id)
+		return err
+	})
+	g.Go(func() (err error) {
+		treatments.Therapies, err = pcxTherapies(gctx, db, *id)
+		return err
+	})
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+	treatments.TrialEnrollments = pcxTrialEnrollments(treatments.Therapies)
+	return &treatments, nil
+}
+
+func (r *PcxPatientsRepository) GetPatientLaboratory(ctx context.Context, patientKey string) (*types.PatientLaboratory, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	var laboratory types.PatientLaboratory
+	g, gctx := errgroup.WithContext(ctx)
+	db := r.db.WithContext(gctx)
+	g.Go(func() (err error) {
+		laboratory.Cbc, err = pcxCbc(gctx, db, *id)
+		return err
+	})
+	g.Go(func() (err error) {
+		laboratory.PerformanceStatus, err = pcxPerformanceStatus(gctx, db, *id)
+		return err
+	})
+	g.Go(func() (err error) {
+		laboratory.Csf, err = pcxCsf(gctx, db, *id)
+		return err
+	})
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+	return &laboratory, nil
+}
+
+func (r *PcxPatientsRepository) GetPatientImaging(ctx context.Context, patientKey string) (*types.PatientImaging, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	sessions, err := pcxImaging(ctx, r.db.WithContext(ctx), *id)
 	if err != nil {
 		return nil, err
 	}
-	patient.Cases = cases
+	return &types.PatientImaging{Sessions: sessions}, nil
+}
+
+func (r *PcxPatientsRepository) GetPatientTrialEligibilities(ctx context.Context, patientKey string) (*types.PatientTrialEligibilities, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	var rows []struct {
+		VariableName     string
+		EligibilityValue string
+		GeneratedValue   *string
+		Confidence       *string
+		ReviewStatus     *string
+		Reasoning        *string
+		BrimURL          *string `gorm:"column:brim_url"`
+		BrimLoadedAt     time.Time
+	}
+	// BRIM writes '' for an unreviewed verdict, not NULL.
+	tx := pcxView(ctx, r.db.WithContext(ctx), types.PcxPnoc035EligibilityTable, *id).
+		Select("variable_name, eligibility_value, generated_value, confidence, nullif(review_status, '') AS review_status, reasoning, brim_url, brim_loaded_at").
+		Order("brim_loaded_at DESC, variable_name")
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient trial eligibilities: %w", err)
+	}
+	assessments := make([]types.PatientTrialEligibility, len(rows))
+	for i, row := range rows {
+		assessments[i] = types.PatientTrialEligibility{VariableName: row.VariableName, Verdict: row.EligibilityValue,
+			GeneratedVerdict: row.GeneratedValue, Confidence: row.Confidence, ReviewStatus: row.ReviewStatus,
+			Reasoning: row.Reasoning, BrimURL: row.BrimURL, LoadedAt: row.BrimLoadedAt}
+	}
+	return &types.PatientTrialEligibilities{Assessments: assessments}, nil
+}
+
+func (r *PcxPatientsRepository) GetPatientTumorBoard(ctx context.Context, patientKey string) (*types.PatientTumorBoard, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	board := types.PatientTumorBoard{}
+	g, gctx := errgroup.WithContext(ctx)
+	db := r.db.WithContext(gctx)
+	g.Go(func() (err error) {
+		board.Sessions, err = pcxTumorBoardSessions(gctx, db, *id)
+		return err
+	})
+	g.Go(func() (err error) {
+		deckURL, err := pcxTumorBoardDeckURL(gctx, db, *id)
+		board.HasDeck = deckURL != nil
+		return err
+	})
+	if err := g.Wait(); err != nil {
+		return nil, err
+	}
+	return &board, nil
+}
+
+// GetPatientTumorBoardDeckURL returns the S3 URL of the patient's deck, nil for an unknown key, without a deck or without
+// PHI access.
+func (r *PcxPatientsRepository) GetPatientTumorBoardDeckURL(ctx context.Context, patientKey string) (*string, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	return pcxTumorBoardDeckURL(ctx, r.db.WithContext(ctx), *id)
+}
+
+// GetPatientTumorBoardReportURL returns the S3 URL of a session's report, nil for an unknown key or session, without a
+// report or without PHI access.
+func (r *PcxPatientsRepository) GetPatientTumorBoardReportURL(ctx context.Context, patientKey string, sessionID int) (*string, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	var urls []string
+	tx := pcxView(ctx, r.db.WithContext(ctx), types.PcxTumorBoardSessionTable, *id).
+		Where("session_id = ? AND report_url IS NOT NULL", sessionID).Limit(1).Pluck("report_url", &urls)
+	if tx.Error != nil {
+		return nil, fmt.Errorf("error fetching tumor board report: %w", tx.Error)
+	}
+	if len(urls) == 0 {
+		return nil, nil
+	}
+	return &urls[0], nil
+}
+
+func pcxTumorBoardSessions(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]types.PatientTumorBoardSession, error) {
+	var rows []struct {
+		SessionID       int
+		BoardDay        *string
+		BoardDate       *types.DateISO8601
+		Reason          *string
+		Diagnosis       *string
+		Consensus       *string
+		Recommendations *string
+		Status          *string
+		ReportURL       *string `gorm:"column:report_url"`
+	}
+	tx := pcxView(ctx, db, types.PcxTumorBoardSessionTable, id).
+		Select("session_id, " + pcxDayDate("age_at_tumor_board_days", "tumor_board_date", "board") +
+			", reason, diagnosis, consensus, recommendations, status, report_url").
+		Order("age_at_tumor_board_days IS NULL, age_at_tumor_board_days DESC, session_id DESC")
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient tumor board sessions: %w", err)
+	}
+	sessions := make([]types.PatientTumorBoardSession, len(rows))
+	for i, row := range rows {
+		sessions[i] = types.PatientTumorBoardSession{PatientDayDate: dayDate(row.BoardDay, row.BoardDate), SessionID: row.SessionID,
+			Reason: row.Reason, Diagnosis: row.Diagnosis, Consensus: row.Consensus,
+			Recommendations: pcxList(row.Recommendations, ";"), Status: row.Status, HasReport: row.ReportURL != nil}
+	}
+	return sessions, nil
+}
+
+func pcxTumorBoardDeckURL(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) (*string, error) {
+	var urls []string
+	tx := pcxView(ctx, db, types.PcxTumorBoardDeckTable, id).Where("deck_url IS NOT NULL").Limit(1).Pluck("deck_url", &urls)
+	if tx.Error != nil {
+		return nil, fmt.Errorf("error fetching tumor board deck: %w", tx.Error)
+	}
+	if len(urls) == 0 {
+		return nil, nil
+	}
+	return &urls[0], nil
+}
+
+// GetPatientProcessingReportURL returns the S3 URL of the patient's CHARM processing report, nil
+// for an unknown key, without a report or without PHI access.
+func (r *PcxPatientsRepository) GetPatientProcessingReportURL(ctx context.Context, patientKey string) (*string, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	return pcxProcessingReportURL(ctx, r.db.WithContext(ctx), *id)
+}
+
+func pcxProcessingReportURL(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) (*string, error) {
+	var urls []string
+	tx := pcxView(ctx, db, types.PcxProcessingReportTable, id).Where("report_url IS NOT NULL").Limit(1).Pluck("report_url", &urls)
+	if tx.Error != nil {
+		return nil, fmt.Errorf("error fetching processing report: %w", tx.Error)
+	}
+	if len(urls) == 0 {
+		return nil, nil
+	}
+	return &urls[0], nil
+}
+
+func (r *PcxPatientsRepository) GetPatientExternalRecords(ctx context.Context, patientKey string) (*types.PatientExternalRecords, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	var rows []struct {
+		HinOrgName    string
+		Network       *string
+		ClassName     string
+		TypeName      string
+		DocumentCount *int
+	}
+	tx := pcxView(ctx, r.db.WithContext(ctx), types.PcxHinExchangeTable, *id).
+		Select("hin_org_name, network, coalesce(document_class_name, document_type_name, '') AS class_name, " +
+			"coalesce(document_type_name, document_class_name, '') AS type_name, document_count").
+		Order("document_count DESC, type_name")
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient exchanges: %w", err)
+	}
+
+	byName := map[string]*types.PatientExchangeOrganization{}
+	classes := map[string]map[string]*types.PatientDocumentClass{}
+	organization := func(name string) *types.PatientExchangeOrganization {
+		if o, ok := byName[name]; ok {
+			return o
+		}
+		o := &types.PatientExchangeOrganization{Name: name}
+		byName[name], classes[name] = o, map[string]*types.PatientDocumentClass{}
+		return o
+	}
+	records := types.PatientExternalRecords{Organizations: []types.PatientExchangeOrganization{}}
+	distinctClasses := map[string]bool{}
+	for _, row := range rows {
+		o := organization(row.HinOrgName)
+		if o.Network == nil {
+			o.Network = row.Network
+		}
+		if row.DocumentCount == nil {
+			continue
+		}
+		count := *row.DocumentCount
+		c, ok := classes[row.HinOrgName][row.ClassName]
+		if !ok {
+			c = &types.PatientDocumentClass{Name: row.ClassName, Types: []types.PatientDocumentType{}}
+			classes[row.HinOrgName][row.ClassName] = c
+		}
+		c.Types = append(c.Types, types.PatientDocumentType{Name: row.TypeName, DocumentCount: count})
+		c.DocumentCount += count
+		o.DocumentCount += count
+		records.DocumentCount += count
+		distinctClasses[row.ClassName] = true
+	}
+	for name, o := range byName {
+		o.DocumentClasses = []types.PatientDocumentClass{}
+		for _, c := range classes[name] {
+			if len(c.Types) == 1 && c.Types[0].Name == c.Name {
+				c.Types = []types.PatientDocumentType{}
+			}
+			o.DocumentClasses = append(o.DocumentClasses, *c)
+		}
+		sort.Slice(o.DocumentClasses, func(i, j int) bool {
+			a, b := o.DocumentClasses[i], o.DocumentClasses[j]
+			if a.DocumentCount != b.DocumentCount {
+				return a.DocumentCount > b.DocumentCount
+			}
+			return a.Name < b.Name
+		})
+		records.Organizations = append(records.Organizations, *o)
+	}
+	sort.Slice(records.Organizations, func(i, j int) bool {
+		a, b := records.Organizations[i], records.Organizations[j]
+		if a.DocumentCount != b.DocumentCount {
+			return a.DocumentCount > b.DocumentCount
+		}
+		return a.Name < b.Name
+	})
+	records.OrganizationCount = len(records.Organizations)
+	records.DocumentClassCount = len(distinctClasses)
+	return &records, nil
+}
+
+func (r *PcxPatientsRepository) GetPatientGenomics(ctx context.Context, patientKey string) (*types.PatientGenomics, error) {
+	id, err := r.patientIdentifier(ctx, patientKey)
+	if err != nil || id == nil {
+		return nil, err
+	}
+	radiantPatientID, err := pcxRadiantPatientID(ctx, r.db.WithContext(ctx), *id)
+	if err != nil {
+		return nil, err
+	}
+	cases, err := r.patientCases(ctx, radiantPatientID)
+	if err != nil {
+		return nil, err
+	}
 	caseIDs := make([]int, len(cases))
 	for i, c := range cases {
 		caseIDs[i] = c.CaseID
 	}
-	if patient.Interpretations, err = r.patientInterpretations(ctx, caseIDs); err != nil {
+	interpretations, err := r.patientInterpretations(ctx, caseIDs)
+	if err != nil {
 		return nil, err
 	}
-	patient.KeyDates = pcxKeyDates(patient.TreatmentSummary, patient.Events, patient.VitalStatusAt)
-	return &patient, nil
+	return &types.PatientGenomics{Cases: cases, Interpretations: interpretations}, nil
 }
 
 func pcxView(ctx context.Context, db *gorm.DB, table types.Table, id pcxPatientIdentifier) *gorm.DB {
@@ -232,8 +578,46 @@ func pcxView(ctx context.Context, db *gorm.DB, table types.Table, id pcxPatientI
 		Where("organization_code = ? AND patient_id_type = ? AND patient_id = ?", id.organizationCode, id.patientIDType, id.patientID)
 }
 
+// pcxPatientKeysByRadiantPatientID maps portal patient ids to the patient_key of the PCX patients the caller can see.
+func pcxPatientKeysByRadiantPatientID(ctx context.Context, db *gorm.DB, radiantPatientIDs []int) (map[int]string, error) {
+	var rows []struct {
+		RadiantPatientID int
+		PatientKey       string
+	}
+	tx := db.Table(types.PcxPatientKeyTable.TenantQualifiedName(ctx)).
+		Select("radiant_patient_id, patient_key").
+		Where("radiant_patient_id IN ?", radiantPatientIDs)
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient keys: %w", err)
+	}
+	keys := make(map[int]string, len(rows))
+	for _, row := range rows {
+		keys[row.RadiantPatientID] = row.PatientKey
+	}
+	return keys, nil
+}
+
+func pcxRadiantPatientID(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) (*int, error) {
+	var rows []struct{ RadiantPatientID *int }
+	if err := pcxView(ctx, db, types.PcxDemographicsTable, id).Select("radiant_patient_id").Limit(1).Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient radiant_patient_id: %w", err)
+	}
+	if len(rows) == 0 {
+		return nil, nil
+	}
+	return rows[0].RadiantPatientID, nil
+}
+
+// fillPcxDemographics converts birth_year and gender as the list view does.
 func fillPcxDemographics(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p *types.PatientEntity) error {
 	var rows []struct {
+		OrganizationName    string
+		RadiantPatientID    *int
+		GivenName           string
+		FamilyName          string
+		CanReadPhi          bool
+		BirthYear           *int
+		Gender              string
 		BirthDate           *types.DateISO8601
 		Race                *string
 		Ethnicity           *string
@@ -242,31 +626,71 @@ func fillPcxDemographics(ctx context.Context, db *gorm.DB, id pcxPatientIdentifi
 		DataTypeCohort      *string
 	}
 	tx := pcxView(ctx, db, types.PcxDemographicsTable, id).
-		Select("CAST(birth_date AS DATE) AS birth_date, race, ethnicity, address_postal_code, diagnosis_type_cohort, data_type_cohort").Limit(1)
+		Select("organization_name, radiant_patient_id, given_name, family_name, can_read_phi, CAST(birth_year AS INT) AS birth_year, " +
+			"replace(lower(gender), ' ', '_') AS gender, CAST(birth_date AS DATE) AS birth_date, race, ethnicity, address_postal_code, " +
+			"diagnosis_type_cohort, data_type_cohort").Limit(1)
 	if err := tx.Find(&rows).Error; err != nil {
 		return fmt.Errorf("error fetching patient demographics: %w", err)
 	}
 	if len(rows) == 1 {
 		row := rows[0]
+		p.OrganizationName, p.RadiantPatientID, p.GivenName, p.FamilyName = row.OrganizationName, row.RadiantPatientID, row.GivenName, row.FamilyName
+		p.CanReadPhi, p.BirthYear, p.Gender = row.CanReadPhi, row.BirthYear, row.Gender
 		p.BirthDate, p.Race, p.Ethnicity, p.PostalCode = row.BirthDate, row.Race, row.Ethnicity, row.AddressPostalCode
 		p.DiagnosisTypeCohort, p.DataTypeCohort = row.DiagnosisTypeCohort, row.DataTypeCohort
 	}
 	return nil
 }
 
-func fillPcxVitalStatus(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p *types.PatientEntity) error {
+func pcxVitalStatus(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) (string, types.PatientDayDate, error) {
 	var rows []struct {
-		VitalDay  *string
-		VitalDate *types.DateISO8601
+		VitalStatus string
+		VitalDay    *string
+		VitalDate   *types.DateISO8601
 	}
-	tx := pcxView(ctx, db, types.PcxPatientLevelTable, id).Select(pcxDayDate("age_at_vital_status_days", "vital_status_date", "vital")).Limit(1)
+	tx := pcxView(ctx, db, types.PcxPatientLevelTable, id).
+		Select("lower(vital_status) AS vital_status, " + pcxDayDate("age_at_vital_status_days", "vital_status_date", "vital")).Limit(1)
 	if err := tx.Find(&rows).Error; err != nil {
-		return fmt.Errorf("error fetching patient vital status: %w", err)
+		return "", types.PatientDayDate{}, fmt.Errorf("error fetching patient vital status: %w", err)
 	}
-	if len(rows) == 1 {
-		p.VitalStatusAt = dayDate(rows[0].VitalDay, rows[0].VitalDate)
+	if len(rows) == 0 {
+		return "", types.PatientDayDate{}, nil
 	}
-	return nil
+	return rows[0].VitalStatus, dayDate(rows[0].VitalDay, rows[0].VitalDate), nil
+}
+
+// pcxInitialEvent picks the diagnosis the list view shows: the earliest initial CNS tumor event, an unknown day last,
+// then by diagnosis.
+func pcxInitialEvent(events []types.PatientEvent) *types.PatientEvent {
+	var initial *types.PatientEvent
+	for i := range events {
+		event := &events[i]
+		if event.EventType != "initial_cns_tumor" {
+			continue
+		}
+		if initial == nil || pcxEventBefore(event, initial) {
+			initial = event
+		}
+	}
+	return initial
+}
+
+func pcxEventBefore(a, b *types.PatientEvent) bool {
+	if (a.Day == nil) != (b.Day == nil) {
+		return a.Day != nil
+	}
+	if a.Day != nil && *a.Day != *b.Day {
+		return *a.Day < *b.Day
+	}
+	return pcxDiagnosisBefore(a.CnsIntegratedDiagnosis, b.CnsIntegratedDiagnosis)
+}
+
+// pcxDiagnosisBefore sorts a NULL diagnosis first, as StarRocks sorts NULL first in ascending order.
+func pcxDiagnosisBefore(a, b *string) bool {
+	if a == nil || b == nil {
+		return a == nil && b != nil
+	}
+	return *a < *b
 }
 
 // pcxOrderByDay sorts on a day column of mixed INT/VARCHAR values: known days first, in order.
@@ -275,7 +699,7 @@ func pcxOrderByDay(column string) string {
 	return fmt.Sprintf("%s IS NULL, %s", day, day)
 }
 
-func fillPcxEvents(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p *types.PatientEntity) error {
+func pcxEvents(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]types.PatientEvent, error) {
 	var rows []struct {
 		EventType                    *string
 		EventDay                     *string
@@ -295,15 +719,15 @@ func fillPcxEvents(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p 
 			"metastasis_location, metastasis_location_other").
 		Order(pcxOrderByDay("age_at_event_days") + ", event_type")
 	if err := tx.Find(&rows).Error; err != nil {
-		return fmt.Errorf("error fetching patient events: %w", err)
+		return nil, fmt.Errorf("error fetching patient events: %w", err)
 	}
-	p.Events = make([]types.PatientEvent, len(rows))
+	events := make([]types.PatientEvent, len(rows))
 	for i, row := range rows {
 		eventType, err := pcxEventType(row.EventType)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		p.Events[i] = types.PatientEvent{
+		events[i] = types.PatientEvent{
 			PatientDayDate: dayDate(row.EventDay, row.EventDate), EventType: eventType,
 			CnsDiagnosisCategory: row.CnsDiagnosisCategory, CnsIntegratedDiagnosis: row.CnsIntegratedDiagnosis,
 			CnsIntegratedDiagnosisSource: row.CnsIntegratedDiagnosisSource,
@@ -312,31 +736,53 @@ func fillPcxEvents(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p 
 			MetastasisLocationOther: row.MetastasisLocationOther,
 		}
 	}
-	return nil
+	return events, nil
 }
 
-func fillPcxSurgeries(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p *types.PatientEntity) error {
+func pcxSurgeries(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]types.PatientSurgery, error) {
 	var rows []struct {
 		SurgeryDay             *string
 		SurgeryDate            *types.DateISO8601
 		ExtentOfTumorResection *string
 		IsInitialTreatment     *string
+		BrimURL                *string `gorm:"column:brim_url"`
 	}
 	tx := pcxView(ctx, db, types.PcxSurgeryLevelTable, id).
-		Select(pcxDayDate("age_at_surgery_days", "surgery_date", "surgery") + ", extent_of_tumor_resection, is_initial_treatment").
+		Select(pcxDayDate("age_at_surgery_days", "surgery_date", "surgery") + ", extent_of_tumor_resection, is_initial_treatment, brim_url").
 		Order(pcxOrderByDay("age_at_surgery_days"))
 	if err := tx.Find(&rows).Error; err != nil {
-		return fmt.Errorf("error fetching patient surgeries: %w", err)
+		return nil, fmt.Errorf("error fetching patient surgeries: %w", err)
 	}
-	p.Surgeries = make([]types.PatientSurgery, len(rows))
+	surgeries := make([]types.PatientSurgery, len(rows))
 	for i, row := range rows {
-		p.Surgeries[i] = types.PatientSurgery{PatientDayDate: dayDate(row.SurgeryDay, row.SurgeryDate),
-			ExtentOfTumorResection: row.ExtentOfTumorResection, IsInitialTreatment: pcxYesNo(row.IsInitialTreatment)}
+		surgeries[i] = types.PatientSurgery{PatientDayDate: dayDate(row.SurgeryDay, row.SurgeryDate),
+			ExtentOfTumorResection: row.ExtentOfTumorResection, IsInitialTreatment: pcxYesNo(row.IsInitialTreatment),
+			EvidenceURL: row.BrimURL}
 	}
-	return nil
+	return surgeries, nil
 }
 
-func fillPcxRadiations(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p *types.PatientEntity) error {
+func pcxInitialTumorResections(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]string, error) {
+	var rows []struct {
+		ExtentOfTumorResection *string
+		IsInitialTreatment     *string
+	}
+	tx := pcxView(ctx, db, types.PcxSurgeryLevelTable, id).
+		Select("extent_of_tumor_resection, is_initial_treatment").
+		Order(pcxOrderByDay("age_at_surgery_days"))
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient initial tumor resections: %w", err)
+	}
+	resections := []string{}
+	for _, row := range rows {
+		if initial := pcxYesNo(row.IsInitialTreatment); initial != nil && *initial && row.ExtentOfTumorResection != nil {
+			resections = append(resections, *row.ExtentOfTumorResection)
+		}
+	}
+	return resections, nil
+}
+
+func pcxRadiations(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]types.PatientRadiation, error) {
 	var rows []struct {
 		StartDay                    *string
 		StartDate                   *types.DateISO8601
@@ -360,23 +806,23 @@ func fillPcxRadiations(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier
 			"total_radiation_dose_focal_unit, is_initial_treatment").
 		Order(pcxOrderByDay("age_at_radiation_start_days"))
 	if err := tx.Find(&rows).Error; err != nil {
-		return fmt.Errorf("error fetching patient radiations: %w", err)
+		return nil, fmt.Errorf("error fetching patient radiations: %w", err)
 	}
-	p.Radiations = make([]types.PatientRadiation, len(rows))
+	radiations := make([]types.PatientRadiation, len(rows))
 	for i, row := range rows {
 		craniospinal := types.PatientDose{Value: row.TotalRadiationDose, Unit: row.TotalRadiationDoseUnit}
 		primary := types.PatientDose{Value: row.TotalRadiationDoseFocal, Unit: row.TotalRadiationDoseFocalUnit}
-		p.Radiations[i] = types.PatientRadiation{
+		radiations[i] = types.PatientRadiation{
 			Start: dayDate(row.StartDay, row.StartDate), Stop: dayDate(row.StopDay, row.StopDate),
 			Site: row.RadiationSite, SiteOther: row.RadiationSiteOther, Type: row.RadiationType, TypeOther: row.RadiationTypeOther,
 			CraniospinalDose: craniospinal, TotalPrimaryDose: primary, FocalBoostDose: pcxFocalBoost(craniospinal, primary),
 			IsInitialTreatment: pcxYesNo(row.IsInitialTreatment),
 		}
 	}
-	return nil
+	return radiations, nil
 }
 
-func fillPcxTherapies(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p *types.PatientEntity) error {
+func pcxTherapies(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]types.PatientTherapy, error) {
 	var rows []struct {
 		StartDay           *string
 		StartDate          *types.DateISO8601
@@ -395,47 +841,49 @@ func fillPcxTherapies(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier,
 			"protocol_arm, chemotherapy_type, chemotherapy_agents, is_initial_treatment").
 		Order(pcxOrderByDay("age_at_regimen_start_days"))
 	if err := tx.Find(&rows).Error; err != nil {
-		return fmt.Errorf("error fetching patient therapies: %w", err)
+		return nil, fmt.Errorf("error fetching patient therapies: %w", err)
 	}
-	p.Therapies = make([]types.PatientTherapy, len(rows))
+	therapies := make([]types.PatientTherapy, len(rows))
 	for i, row := range rows {
-		p.Therapies[i] = types.PatientTherapy{
+		therapies[i] = types.PatientTherapy{
 			Start: dayDate(row.StartDay, row.StartDate), Stop: dayDate(row.StopDay, row.StopDate),
 			ProtocolNameAndArm: row.ProtocolNameAndArm, ProtocolName: row.ProtocolName, ProtocolArm: row.ProtocolArm,
 			ChemotherapyType: row.ChemotherapyType, ChemotherapyAgents: pcxList(row.ChemotherapyAgents, ","),
 			IsInitialTreatment: pcxYesNo(row.IsInitialTreatment),
 		}
 	}
-	return nil
+	return therapies, nil
 }
 
-func fillPcxImaging(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p *types.PatientEntity) error {
+func pcxImaging(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]types.PatientImagingSession, error) {
 	var rows []struct {
-		SessionDay      *string
-		SessionDate     *types.DateISO8601
-		SessionID       string
-		SessionName     string
-		AnatomicalSite  *string
-		ImagingModality *string
-		FlywheelURL     *string `gorm:"column:flywheel_url"`
+		SessionDay        *string
+		SessionDate       *types.DateISO8601
+		SessionID         string
+		SessionName       string
+		AnatomicalSite    *string
+		ImagingModality   *string
+		FlywheelURL       *string `gorm:"column:flywheel_url"`
+		ClinicalReportURL *string `gorm:"column:clinical_report_url"`
 	}
 	tx := pcxView(ctx, db, types.PcxMriImagesTable, id).
 		Select(pcxDayDate("age_at_session_days", "session_date", "session") + ", session_id, session_name, anatomical_site, " +
-			"imaging_modality, flywheel_url").
+			"imaging_modality, flywheel_url, clinical_report_url").
 		Order(pcxOrderByDay("age_at_session_days") + ", session_id")
 	if err := tx.Find(&rows).Error; err != nil {
-		return fmt.Errorf("error fetching patient imaging: %w", err)
+		return nil, fmt.Errorf("error fetching patient imaging: %w", err)
 	}
-	p.Imaging = make([]types.PatientImagingSession, len(rows))
+	sessions := make([]types.PatientImagingSession, len(rows))
 	for i, row := range rows {
-		p.Imaging[i] = types.PatientImagingSession{PatientDayDate: dayDate(row.SessionDay, row.SessionDate),
+		sessions[i] = types.PatientImagingSession{PatientDayDate: dayDate(row.SessionDay, row.SessionDate),
 			SessionID: row.SessionID, SessionName: row.SessionName, AnatomicalSite: row.AnatomicalSite,
-			ImagingModality: row.ImagingModality, FlywheelURL: row.FlywheelURL}
+			ImagingModality: row.ImagingModality, FlywheelURL: row.FlywheelURL,
+			ClinicalReportURL: row.ClinicalReportURL}
 	}
-	return nil
+	return sessions, nil
 }
 
-func fillPcxTreatmentSummary(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier, p *types.PatientEntity) error {
+func pcxTreatmentSummary(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) (*types.PatientTreatmentSummary, error) {
 	var rows []struct {
 		InitialDxDay              *string
 		InitialDxDate             *types.DateISO8601
@@ -465,14 +913,14 @@ func fillPcxTreatmentSummary(ctx context.Context, db *gorm.DB, id pcxPatientIden
 		Select(strings.Join(selects, ", ") + ", had_initial_radiation, had_initial_chemo, had_initial_methotrexate, initial_treatment_order").
 		Limit(1)
 	if err := tx.Find(&rows).Error; err != nil {
-		return fmt.Errorf("error fetching patient treatment summary: %w", err)
+		return nil, fmt.Errorf("error fetching patient treatment summary: %w", err)
 	}
 	if len(rows) == 0 {
-		return nil
+		return nil, nil
 	}
 	row := rows[0]
 	yes := func(v *string) bool { b := pcxYesNo(v); return b != nil && *b }
-	p.TreatmentSummary = &types.PatientTreatmentSummary{
+	return &types.PatientTreatmentSummary{
 		InitialDx:              dayDate(row.InitialDxDay, row.InitialDxDate),
 		FirstEvent:             dayDate(row.FirstEventDay, row.FirstEventDate),
 		FirstRadiationEver:     dayDate(row.FirstRadiationEverDay, row.FirstRadiationEverDate),
@@ -484,8 +932,112 @@ func fillPcxTreatmentSummary(ctx context.Context, db *gorm.DB, id pcxPatientIden
 		HadInitialChemo:        yes(row.HadInitialChemo),
 		HadInitialMethotrexate: yes(row.HadInitialMethotrexate),
 		InitialTreatmentOrder:  row.InitialTreatmentOrder,
+	}, nil
+}
+
+// pcxObserved selects the day and date of a component observed at <component>_observed_at.
+func pcxObserved(component string) string {
+	return pcxDayDate("age_at_"+component+"_days", component+"_observed_at", component)
+}
+
+func pcxCbc(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) (*types.PatientCbc, error) {
+	var rows []struct {
+		PanelDay                                            *string
+		PanelDate                                           *types.DateISO8601
+		WbcValue, HemoglobinValue, PlateletsValue, AncValue *float64
+		WbcUnit, HemoglobinUnit, PlateletsUnit, AncUnit     *string
 	}
-	return nil
+	selects := []string{pcxDayDate("age_at_panel_days", "panel_observed_at", "panel")}
+	for _, analyte := range []string{"wbc", "hemoglobin", "platelets", "anc"} {
+		selects = append(selects, analyte+"_value", analyte+"_unit")
+	}
+	tx := pcxView(ctx, db, types.PcxCbcTable, id).Select(strings.Join(selects, ", ")).Limit(1)
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient cbc: %w", err)
+	}
+	if len(rows) == 0 {
+		return nil, nil
+	}
+	row := rows[0]
+	return &types.PatientCbc{
+		PatientDayDate: dayDate(row.PanelDay, row.PanelDate),
+		Wbc:            types.PatientLabResult{Value: row.WbcValue, Unit: row.WbcUnit},
+		Hemoglobin:     types.PatientLabResult{Value: row.HemoglobinValue, Unit: row.HemoglobinUnit},
+		Platelets:      types.PatientLabResult{Value: row.PlateletsValue, Unit: row.PlateletsUnit},
+		Anc:            types.PatientLabResult{Value: row.AncValue, Unit: row.AncUnit},
+	}, nil
+}
+
+// pcxPerformanceStatus: the view holds the latest score of either scale, a list so a score per scale fits later.
+func pcxPerformanceStatus(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]types.PatientPerformanceScore, error) {
+	var rows []struct {
+		Scale     *string
+		Score     *int
+		ScoreDay  *string
+		ScoreDate *types.DateISO8601
+		ScoreText *string
+	}
+	tx := pcxView(ctx, db, types.PcxPerformanceStatusTable, id).
+		Select("scale, score, " + pcxDayDate("age_at_score_days", "scored_at", "score") + ", score_text").
+		Where("score IS NOT NULL").
+		Order(pcxOrderByDay("age_at_score_days") + ", scale")
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient performance status: %w", err)
+	}
+	scores := make([]types.PatientPerformanceScore, 0, len(rows))
+	for _, row := range rows {
+		scale, err := pcxPerformanceScale(row.Scale)
+		if err != nil {
+			slog.WarnContext(ctx, "skipping performance status score", slog.Any("error", err))
+			continue
+		}
+		scores = append(scores, types.PatientPerformanceScore{PatientDayDate: dayDate(row.ScoreDay, row.ScoreDate),
+			Scale: scale, Score: *row.Score, ScoreText: row.ScoreText})
+	}
+	return scores, nil
+}
+
+func pcxCsf(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) (*types.PatientCsf, error) {
+	var rows []struct {
+		ProteinDay, GlucoseDay, WbcDay, RbcDay                 *string
+		ProteinDate, GlucoseDate, WbcDate, RbcDate             *types.DateISO8601
+		ProteinDisplay, GlucoseDisplay, WbcDisplay, RbcDisplay *string
+		ProteinValue, GlucoseValue, WbcValue, RbcValue         *float64
+		ProteinComparator, GlucoseComparator                   *string
+		ProteinUnit, GlucoseUnit, WbcUnit, RbcUnit             *string
+		CytologyDay, CellFreeDnaDay                            *string
+		CytologyDate, CellFreeDnaDate                          *types.DateISO8601
+		CytologyTestName, MalignantCells                       *string
+		CytologyEvidenceTier                                   *string
+		MultiSpecimenReport                                    *bool
+	}
+	selects := []string{}
+	for _, component := range []string{"protein", "glucose", "wbc", "rbc"} {
+		selects = append(selects, pcxObserved(component), component+"_display", component+"_value", component+"_unit")
+	}
+	selects = append(selects, "protein_comparator", "glucose_comparator", pcxObserved("cytology"), pcxObserved("cell_free_dna"),
+		"cytology_test_name", "malignant_cells", "cytology_evidence_tier", "multi_specimen_report")
+	tx := pcxView(ctx, db, types.PcxCsfTable, id).Select(strings.Join(selects, ", ")).Limit(1)
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("error fetching patient csf: %w", err)
+	}
+	if len(rows) == 0 {
+		return nil, nil
+	}
+	row := rows[0]
+	return &types.PatientCsf{
+		Protein: types.PatientCsfResult{PatientDayDate: dayDate(row.ProteinDay, row.ProteinDate), Display: row.ProteinDisplay,
+			Value: row.ProteinValue, Comparator: row.ProteinComparator, Unit: row.ProteinUnit},
+		Glucose: types.PatientCsfResult{PatientDayDate: dayDate(row.GlucoseDay, row.GlucoseDate), Display: row.GlucoseDisplay,
+			Value: row.GlucoseValue, Comparator: row.GlucoseComparator, Unit: row.GlucoseUnit},
+		Wbc: types.PatientCsfResult{PatientDayDate: dayDate(row.WbcDay, row.WbcDate), Display: row.WbcDisplay, Value: row.WbcValue,
+			Unit: row.WbcUnit},
+		Rbc: types.PatientCsfResult{PatientDayDate: dayDate(row.RbcDay, row.RbcDate), Display: row.RbcDisplay, Value: row.RbcValue,
+			Unit: row.RbcUnit},
+		Cytology: types.PatientCsfCytology{PatientDayDate: dayDate(row.CytologyDay, row.CytologyDate), TestName: row.CytologyTestName,
+			MalignantCells: row.MalignantCells, EvidenceTier: row.CytologyEvidenceTier, MultiSpecimenReport: row.MultiSpecimenReport},
+		CellFreeDna: dayDate(row.CellFreeDnaDay, row.CellFreeDnaDate),
+	}, nil
 }
 
 // patientCases are the portal cases of the patient, as proband or as a family member. The family table also lists

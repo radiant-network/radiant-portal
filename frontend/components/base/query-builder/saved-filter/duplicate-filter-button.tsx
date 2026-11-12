@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useId } from 'react';
 import { CopyIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { v4 } from 'uuid';
@@ -36,6 +36,7 @@ const generateUniqueName = (baseName: string, existingFilters: SavedFilter[]): s
 
 function DuplicateFilterButton() {
   const { t } = useI18n();
+  const reasonId = useId();
   const dispatchSavedFilter = useSavedFiltersDispatch();
   const dispatchQB = useQBDispatch();
   const { savedFilterType, selectedSavedFilter, isUnsaved, savedFilters } = useSavedFiltersContext();
@@ -124,10 +125,16 @@ function DuplicateFilterButton() {
             size="sm"
             disabled={!selectedSavedFilter}
             aria-label={t('a11y.saved_filter.duplicate')}
+            aria-describedby={!selectedSavedFilter ? reasonId : undefined}
             onClick={handleDuplicate}
           >
             <CopyIcon />
           </Button>
+          {!selectedSavedFilter && (
+            <span id={reasonId} hidden>
+              {t('common.saved_filter.no_filter_selected')}
+            </span>
+          )}
         </span>
       </TooltipTrigger>
       <TooltipContent>{getTooltipContent()}</TooltipContent>

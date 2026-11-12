@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 import { BooleanFacet } from '@/components/base/query-builder/facets/boolean-facet';
 import { FavouriteButton } from '@/components/base/query-builder/facets/favourite-button';
@@ -29,6 +29,7 @@ interface AccordionContainerProps extends FacetContainerProps {
 export function AccordionContainer({ field, isOpen, children }: AccordionContainerProps) {
   const { t } = useI18n();
   const { history } = useAccordionContext();
+  const descriptionId = useId();
 
   const label = t(`common.facets.labels.${field.translation_key}`, { defaultValue: field.key });
   const tooltipKey = `common.facets.labels.${field.translation_key}_tooltip`;
@@ -51,7 +52,10 @@ export function AccordionContainer({ field, isOpen, children }: AccordionContain
         data-cy={`facet-state-${isOpen ? 'open' : 'closed'}`}
       >
         <CardHeader size="sm" className="group/facet-header">
-          <AccordionTrigger data-cy={`facet-header-${field.key}`}>
+          <AccordionTrigger
+            data-cy={`facet-header-${field.key}`}
+            aria-describedby={tooltipContent ? descriptionId : undefined}
+          >
             {tooltipContent ? (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -65,6 +69,11 @@ export function AccordionContainer({ field, isOpen, children }: AccordionContain
               renderTrigger()
             )}
           </AccordionTrigger>
+          {tooltipContent && (
+            <span id={descriptionId} className="sr-only">
+              {tooltipContent}
+            </span>
+          )}
           <CardAction className="sm:self-center">
             <FavouriteButton facetKey={field.key} label={label} />
           </CardAction>

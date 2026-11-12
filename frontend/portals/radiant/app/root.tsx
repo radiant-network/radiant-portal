@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { isRouteErrorResponse, Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from 'react-router';
 
 import { AlertDialogProvider } from '@/components/base/dialog/alert-dialog-provider';
@@ -8,6 +9,7 @@ import { ConfigProvider, type PortalConfig } from '@/components/cores/applicatio
 import { BetaFeatureProvider } from '@/components/hooks/beta-feature-provider';
 import { detectLanguageFromRequest } from '@/components/hooks/i18n.server';
 import { I18nProvider } from '@/components/hooks/I18nProvider';
+import { isEdgeSessionExpired, redirectToLogout, reloadForEdgeReauth } from '@/utils/auth-redirect';
 
 import type { Route } from './+types/root';
 import stylesheet from './app.css?url';
@@ -15,10 +17,25 @@ import { featureDefinitions } from './beta-features';
 
 declare const __PROJECT__: PortalConfig;
 
+const CASE_VARIANTS_REPORT_ENV_SUFFIX = '_CASE_VARIANTS_REPORT_ENABLED';
+
+function getEnabledTenants(envSuffix: string): string[] {
+  return Object.entries(process.env)
+    .filter(([key, value]) => key.endsWith(envSuffix) && value === 'true')
+    .map(([key]) => key.slice(0, -envSuffix.length).toLowerCase());
+}
+
 export async function loader({ request }: Route.LoaderArgs) {
   // Just detect and return the language for consistent server/client behavior
   return {
     language: detectLanguageFromRequest(request),
+    features: {
+      caseVariantsReportTenants: getEnabledTenants(CASE_VARIANTS_REPORT_ENV_SUFFIX),
+    },
+    // Public-safe runtime config; never put secrets here — the loader data is serialized to the client.
+    runtimeConfig: {
+      librechatDavidUrl: process.env.APPS_LIBRECHAT_DAVID_URL ?? '',
+    },
   };
 }
 
@@ -57,7 +74,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-128x128.png`} sizes="128x128" />
         <link rel="icon" type="image/png" href={`/${import.meta.env.THEME}/favicon-196x196.png`} sizes="196x196" />
         <link rel="manifest" href={`/${import.meta.env.THEME}/site.webmanifest`} />
-        <script src="https://cdn.jsdelivr.net/npm/igv@3.7.0/dist/igv.min.js"></script>
       </head>
       <body>
         <I18nProvider initialLanguage={loaderData?.language}>
@@ -88,7 +104,53 @@ export default function App() {
   return <Outlet />;
 }
 
+function isUnauthorizedError(error: unknown): boolean {
+  if (isRouteErrorResponse(error) && error.status === 401) return true;
+  const status =
+    (error as { status?: number; response?: { status?: number } })?.status ??
+    (error as { response?: { status?: number } })?.response?.status;
+  return status === 401;
+}
+
+// Fires during HTML parse so a 401 reaching the SSR ErrorBoundary never lingers as a blank page
+// before hydration. No-ops on the client once hydration renders the ErrorBoundary — React does not
+// re-execute inline scripts inserted through dangerouslySetInnerHTML.
+const SSR_REDIRECT_SCRIPT = `(function(){try{var r=window.location.pathname+window.location.search;window.location.href='/auth/logout?returnTo='+encodeURIComponent(r)}catch(e){}})()`;
+
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
+  const unauthorized = isUnauthorizedError(error);
+  const [redirecting, setRedirecting] = useState(unauthorized);
+
+  // A failed client-side data request (e.g. an expired Verified Access session) surfaces as a raw
+  // fetch TypeError. Server-rendered errors never match, so hydration stays consistent.
+  const maybeEdgeExpired = !unauthorized && typeof window !== 'undefined' && error instanceof TypeError;
+  const [edgeCheckPending, setEdgeCheckPending] = useState(maybeEdgeExpired);
+
+  useEffect(() => {
+    if (unauthorized) setRedirecting(redirectToLogout());
+  }, [unauthorized]);
+
+  useEffect(() => {
+    if (!maybeEdgeExpired) return;
+    let cancelled = false;
+    isEdgeSessionExpired().then(expired => {
+      if (!cancelled) setEdgeCheckPending(expired && reloadForEdgeReauth());
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [maybeEdgeExpired]);
+
+  if (unauthorized && redirecting) {
+    return (
+      <main className="pt-16 p-4 container mx-auto">
+        <script dangerouslySetInnerHTML={{ __html: SSR_REDIRECT_SCRIPT }} />
+      </main>
+    );
+  }
+
+  if (edgeCheckPending) return <main className="pt-16 p-4 container mx-auto" />;
+
   let message = 'Oops!';
   let details = 'An unexpected error occurred.';
   let stack: string | undefined;

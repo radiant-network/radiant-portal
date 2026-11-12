@@ -10,11 +10,11 @@ import type Surgery from '@/components/base/timeline/surgery';
 import Timeline from '@/components/base/timeline/timeline';
 import { useI18n } from '@/components/hooks/i18n';
 
+import { usePatientTreatments } from '../hooks/use-patient-entity';
 import { formatDose } from '../treatments/treatment-rows';
 
 type TimelineTabProps = {
   patient?: PatientEntity;
-  isLoading: boolean;
 };
 
 function dayToYears(day: number | undefined): number | undefined {
@@ -31,14 +31,15 @@ function mapEvent(event: PatientEvent, t: TFunction): ComponentProps<typeof Even
   const tumorLocs = joinNonEmpty([...event.tumor_locations, event.tumor_location_other]);
   if (tumorLocs)
     description.push({ label: t('patient_entity.timeline.event_fields.tumor_locations'), value: tumorLocs });
+  if (event.metastasis) {
+    description.push({ label: t('patient_entity.timeline.event_fields.metastasis'), value: event.metastasis });
+  }
   const metastasisLocs = joinNonEmpty([...event.metastasis_locations, event.metastasis_location_other]);
   if (metastasisLocs) {
     description.push({
       label: t('patient_entity.timeline.event_fields.metastasis_locations'),
       value: metastasisLocs,
     });
-  } else if (event.metastasis) {
-    description.push({ label: t('patient_entity.timeline.event_fields.metastasis'), value: event.metastasis });
   }
 
   return {
@@ -54,6 +55,7 @@ function mapSurgery(s: PatientSurgery): ComponentProps<typeof Surgery> {
   return {
     extentOfTumorResection: s.extent_of_tumor_resection ?? '—',
     isInitialTreatment: s.is_initial_treatment ?? undefined,
+    evidenceHref: s.evidence_url,
     startDay: s.day,
     years: dayToYears(s.day),
   };
@@ -95,18 +97,24 @@ function mapRadiation(r: PatientRadiation, t: TFunction): ComponentProps<typeof 
 
 function TimelineTab({ patient }: TimelineTabProps) {
   const { t } = useI18n();
+  const { data: treatments } = usePatientTreatments();
 
-  const events = useMemo(() => (patient?.events ?? []).map(e => mapEvent(e, t)), [patient, t]);
-  const surgeries = useMemo(() => (patient?.surgeries ?? []).map(mapSurgery), [patient]);
-  const chemotherapies = useMemo(() => (patient?.therapies ?? []).map(mapTherapy), [patient]);
-  const radiations = useMemo(() => (patient?.radiations ?? []).map(r => mapRadiation(r, t)), [patient, t]);
+  const events = useMemo(() => {
+    const list = patient?.events ?? [];
+    return list.map(e => mapEvent(e, t));
+  }, [patient, t]);
+  const surgeries = useMemo(() => (treatments?.surgeries ?? []).map(mapSurgery), [treatments]);
+  const chemotherapies = useMemo(() => (treatments?.therapies ?? []).map(mapTherapy), [treatments]);
+  const radiations = useMemo(() => (treatments?.radiations ?? []).map(r => mapRadiation(r, t)), [treatments, t]);
+
+  const isEmpty = events.length + surgeries.length + chemotherapies.length + radiations.length === 0;
 
   return (
     <Card>
       <CardContent>
         <Timeline
           title={t('patient_entity.timeline.title')}
-          description={t('patient_entity.timeline.description')}
+          description={t(isEmpty ? 'patient_entity.timeline.empty' : 'patient_entity.timeline.description')}
           events={events}
           surgeries={surgeries}
           chemotherapies={chemotherapies}

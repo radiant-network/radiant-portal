@@ -205,15 +205,10 @@ func Test_GetTaskContextBySequencingExperimentId_OK(t *testing.T) {
 				TaskID:                 5,
 				SequencingExperimentID: 1,
 			},
-			{
-				CaseID:                 &caseId,
-				TaskID:                 6,
-				SequencingExperimentID: 1,
-			},
 		}
 
 		assert.NoError(t, err)
-		assert.Len(t, result, 4)
+		assert.Len(t, result, 3)
 		assert.Equal(t, expected, result)
 	})
 }
@@ -249,21 +244,6 @@ func Test_ListTasksByCaseAndSequencing_GermlineSNV_ReturnsGermlineAnnotationTask
 		assert.Equal(t, 5, result[0].ID)
 		assert.Equal(t, types.RadiantGermlineAnnotationTask, result[0].TaskTypeCode)
 		assert.Equal(t, "RADIANT Germline Annotation", result[0].TaskTypeName)
-	})
-}
-
-func Test_ListTasksByCaseAndSequencing_GermlineCNV_ReturnsGermlineAlignmentTaskAttachedToSequencing(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
-
-		selector, _ := types.OccurrenceTypeGermlineCNV.TaskSelector()
-		result, err := repo.ListTasksByCaseAndSequencing(t.Context(), 1, 1, selector)
-
-		// Task 1 has task_context.case_id = NULL — included via the OR-NULL branch.
-		assert.NoError(t, err)
-		assert.Len(t, result, 1)
-		assert.Equal(t, 1, result[0].ID)
-		assert.Equal(t, types.AlignmentGermlineVariantCallingTaskTypeCode, result[0].TaskTypeCode)
 	})
 }
 

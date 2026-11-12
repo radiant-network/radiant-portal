@@ -142,6 +142,8 @@ components:
           type: number
         overlapping_gene_percent:
           type: number
+        refseq_transcript_id:
+          type: string
         symbol:
           type: string
         tenant_gene_panels:
@@ -689,6 +691,11 @@ components:
           type: string
         patient_id:
           type: integer
+        patient_key:
+          description: Key of the PCX patient page, absent when the patient view is
+            off or the caller cannot see the patient there
+          format: uuid
+          type: string
         relationship_to_proband:
           type: string
         sex_code:
@@ -766,6 +773,11 @@ components:
           type: string
         project_name:
           type: string
+        run_names:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         status_code:
           $ref: '#/components/schemas/CaseStatus'
         submitter_proband_id:
@@ -2055,10 +2067,68 @@ components:
           uniqueItems: false
         end:
           type: integer
+        father_bc:
+          type: integer
+        father_calls:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        father_cn:
+          type: integer
+        father_name:
+          type: string
+        father_pe:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        father_sm:
+          type: number
         filter:
           type: string
         flag_type:
           $ref: '#/components/schemas/OccurrenceFlagType'
+        germline_pc_wgs:
+          type: integer
+        germline_pc_wgs_affected:
+          type: integer
+        germline_pc_wgs_not_affected:
+          type: integer
+        germline_pc_wxs:
+          type: integer
+        germline_pc_wxs_affected:
+          type: integer
+        germline_pc_wxs_not_affected:
+          type: integer
+        germline_pf_wgs:
+          type: number
+        germline_pf_wgs_affected:
+          type: number
+        germline_pf_wgs_not_affected:
+          type: number
+        germline_pf_wxs:
+          type: number
+        germline_pf_wxs_affected:
+          type: number
+        germline_pf_wxs_not_affected:
+          type: number
+        germline_pn_wgs:
+          type: integer
+        germline_pn_wgs_affected:
+          type: integer
+        germline_pn_wgs_not_affected:
+          type: integer
+        germline_pn_wxs:
+          type: integer
+        germline_pn_wxs_affected:
+          type: integer
+        germline_pn_wxs_not_affected:
+          type: integer
+        gnomad_ac:
+          type: integer
+        gnomad_af:
+          type: number
         gnomad_sc:
           type: integer
         gnomad_sf:
@@ -2069,12 +2139,32 @@ components:
           type: boolean
         length:
           type: integer
+        mother_bc:
+          type: integer
+        mother_calls:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        mother_cn:
+          type: integer
+        mother_name:
+          type: string
+        mother_pe:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        mother_sm:
+          type: number
         name:
           type: string
         nb_genes:
           type: integer
         nb_snv:
           type: integer
+        parental_origin:
+          type: string
         pe:
           items:
             type: integer
@@ -2101,6 +2191,8 @@ components:
           uniqueItems: false
         task_id:
           type: integer
+        transmission_mode:
+          type: string
         type:
           type: string
       required:
@@ -2656,6 +2748,11 @@ components:
       properties:
         field:
           type: string
+        overrideValuesName:
+          description: |-
+            OverrideValuesName is a display label for the values (e.g. a variant's HGVSg instead of its locus_id).
+            It is stored with saved filters and has no effect on the query.
+          type: string
         value:
           items: {}
           type: array
@@ -2998,6 +3095,104 @@ components:
       - status_code
       - updated_on
       type: object
+    PatientCbc:
+      description: Most recent CBC panel. All its analytes come from that panel, so
+        they share its day and date.
+      properties:
+        anc:
+          $ref: '#/components/schemas/PatientLabResult'
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        hemoglobin:
+          $ref: '#/components/schemas/PatientLabResult'
+        platelets:
+          $ref: '#/components/schemas/PatientLabResult'
+        wbc:
+          $ref: '#/components/schemas/PatientLabResult'
+      required:
+      - anc
+      - hemoglobin
+      - platelets
+      - wbc
+      type: object
+    PatientCsf:
+      description: Latest result of each CSF component. Each component is its own
+        latest, so they may come from different punctures.
+      properties:
+        cell_free_dna:
+          $ref: '#/components/schemas/PatientDayDate'
+        cytology:
+          $ref: '#/components/schemas/PatientCsfCytology'
+        glucose:
+          $ref: '#/components/schemas/PatientCsfResult'
+        protein:
+          $ref: '#/components/schemas/PatientCsfResult'
+        rbc:
+          $ref: '#/components/schemas/PatientCsfResult'
+        wbc:
+          $ref: '#/components/schemas/PatientCsfResult'
+      required:
+      - cell_free_dna
+      - cytology
+      - glucose
+      - protein
+      - rbc
+      - wbc
+      type: object
+    PatientCsfCytology:
+      description: Latest CSF cytology, with the finding derived from the report
+      properties:
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        evidence_tier:
+          description: How the report was attributed to CSF
+          enum:
+          - named
+          - text_confirmed
+          - same_day_only
+          type: string
+        malignant_cells:
+          enum:
+          - positive
+          - suspicious
+          - negative
+          - non_diagnostic
+          - no_malignancy_statement
+          type: string
+        multi_specimen_report:
+          description: The finding may pertain to a non-CSF specimen
+          type: boolean
+        test_name:
+          type: string
+      type: object
+    PatientCsfResult:
+      description: 'Latest result of one CSF component. Read display: the comparator
+        is load-bearing ("<1.0" is undetectable).'
+      properties:
+        comparator:
+          type: string
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        display:
+          description: Comparator, value and unit
+          type: string
+        unit:
+          type: string
+        value:
+          type: number
+      type: object
     PatientDayDate:
       description: Age in days, and the calendar date when the caller can read PHI
       properties:
@@ -3007,6 +3202,37 @@ components:
           type: string
         day:
           type: integer
+      type: object
+    PatientDocumentClass:
+      description: Documents of one class retrieved from an organization, with its
+        document types
+      properties:
+        document_count:
+          type: integer
+        name:
+          type: string
+        types:
+          description: Most documents first, then by name; empty when the class's
+            only type has its own name
+          items:
+            $ref: '#/components/schemas/PatientDocumentType'
+          type: array
+          uniqueItems: false
+      required:
+      - document_count
+      - name
+      - types
+      type: object
+    PatientDocumentType:
+      description: Number of documents of one type within a document class
+      properties:
+        document_count:
+          type: integer
+        name:
+          type: string
+      required:
+      - document_count
+      - name
       type: object
     PatientDose:
       description: Radiation dose, raw from the source, not normalized. The unit is
@@ -3019,12 +3245,9 @@ components:
           type: string
       type: object
     PatientEntity:
-      description: Data of the patient page
+      description: Header, sidebar and overview of the patient page; each other tab
+        has its own endpoint
       properties:
-        age_at_initial_dx_days:
-          type: integer
-        age_at_vital_status_days:
-          type: integer
         birth_date:
           example: "2020-01-31"
           format: date
@@ -3033,16 +3256,8 @@ components:
           type: integer
         can_read_phi:
           type: boolean
-        case_count:
-          description: Portal cases, 0 outside the portal
-          type: integer
-        cases:
-          items:
-            $ref: '#/components/schemas/PatientCase'
-          type: array
-          uniqueItems: false
         cns_integrated_diagnosis:
-          description: From the initial event
+          description: From the initial event, as in the list
           type: string
         cns_integrated_diagnosis_source:
           description: Dataset of the diagnosis, e.g. CBTN or OpenPedCan
@@ -3071,20 +3286,17 @@ components:
         given_name:
           description: Placeholder when can_read_phi is false
           type: string
-        has_imaging:
+        has_processing_report:
+          description: A CHARM processing report can be opened; false without PHI
+            access
           type: boolean
-        imaging:
-          items:
-            $ref: '#/components/schemas/PatientImagingSession'
-          type: array
-          uniqueItems: false
         initial_diagnosis_evidence_url:
           description: BRIM link, format to be defined
           type: string
-        interpretations:
-          description: Germline and somatic, of the patient's cases
+        initial_tumor_resections:
+          description: Extent of tumor resection of each initial treatment surgery
           items:
-            $ref: '#/components/schemas/PatientInterpretation'
+            type: string
           type: array
           uniqueItems: false
         key_dates:
@@ -3112,24 +3324,6 @@ components:
         radiant_patient_id:
           description: Portal patient id, null outside the portal
           type: integer
-        radiations:
-          items:
-            $ref: '#/components/schemas/PatientRadiation'
-          type: array
-          uniqueItems: false
-        surgeries:
-          items:
-            $ref: '#/components/schemas/PatientSurgery'
-          type: array
-          uniqueItems: false
-        survival_days:
-          description: Vital status day minus initial diagnosis day
-          type: integer
-        therapies:
-          items:
-            $ref: '#/components/schemas/PatientTherapy'
-          type: array
-          uniqueItems: false
         treatment_summary:
           $ref: '#/components/schemas/PatientTreatmentSummary'
         vital_status:
@@ -3141,24 +3335,18 @@ components:
           $ref: '#/components/schemas/PatientDayDate'
       required:
       - can_read_phi
-      - case_count
-      - cases
       - events
       - family_name
       - gender
       - given_name
-      - has_imaging
-      - imaging
-      - interpretations
+      - has_processing_report
+      - initial_tumor_resections
       - key_dates
       - organization_code
       - organization_name
       - patient_id
       - patient_id_type
       - patient_key
-      - radiations
-      - surgeries
-      - therapies
       - vital_status
       - vital_status_at
       type: object
@@ -3209,6 +3397,55 @@ components:
       - event_type
       - metastasis_locations
       - tumor_locations
+      type: object
+    PatientExchangeOrganization:
+      description: Organization linked to a patient through TEFCA or Carequality.
+        Linked with no document means nothing was retrieved from it.
+      properties:
+        document_classes:
+          description: Most documents first, then by name
+          items:
+            $ref: '#/components/schemas/PatientDocumentClass'
+          type: array
+          uniqueItems: false
+        document_count:
+          type: integer
+        name:
+          type: string
+        network:
+          description: null when documents came from an organization the patient is
+            not linked to
+          enum:
+          - tefca
+          - carequality
+          type: string
+      required:
+      - document_classes
+      - document_count
+      - name
+      type: object
+    PatientExternalRecords:
+      description: Organizations linked to the patient through the health information
+        network (TEFCA or Carequality), and the documents retrieved from them
+      properties:
+        document_class_count:
+          description: Distinct document classes across the organizations
+          type: integer
+        document_count:
+          type: integer
+        organization_count:
+          type: integer
+        organizations:
+          description: Most documents first, then by name
+          items:
+            $ref: '#/components/schemas/PatientExchangeOrganization'
+          type: array
+          uniqueItems: false
+      required:
+      - document_class_count
+      - document_count
+      - organization_count
+      - organizations
       type: object
     PatientFilters:
       description: Values of the patient list filters
@@ -3262,10 +3499,42 @@ components:
       - organization_code
       - vital_status
       type: object
+    PatientGenomics:
+      description: Portal cases of a patient and the variant interpretations recorded
+        on them
+      properties:
+        cases:
+          items:
+            $ref: '#/components/schemas/PatientCase'
+          type: array
+          uniqueItems: false
+        interpretations:
+          description: Germline and somatic, of the patient's cases
+          items:
+            $ref: '#/components/schemas/PatientInterpretation'
+          type: array
+          uniqueItems: false
+      required:
+      - cases
+      - interpretations
+      type: object
+    PatientImaging:
+      description: Imaging sessions of a patient
+      properties:
+        sessions:
+          items:
+            $ref: '#/components/schemas/PatientImagingSession'
+          type: array
+          uniqueItems: false
+      required:
+      - sessions
+      type: object
     PatientImagingSession:
       description: Imaging session of a patient
       properties:
         anatomical_site:
+          type: string
+        clinical_report_url:
           type: string
         date:
           example: "2020-01-31"
@@ -3354,6 +3623,30 @@ components:
       - initial_diagnosis
       - latest_encounter
       type: object
+    PatientLabResult:
+      description: 'Result of one analyte, raw from the source: units are not normalized
+        (ANC comes in /uL and x10E9/L)'
+      properties:
+        unit:
+          type: string
+        value:
+          type: number
+      type: object
+    PatientLaboratory:
+      description: Latest CBC, performance status and CSF of a patient
+      properties:
+        cbc:
+          $ref: '#/components/schemas/PatientCbc'
+        csf:
+          $ref: '#/components/schemas/PatientCsf'
+        performance_status:
+          items:
+            $ref: '#/components/schemas/PatientPerformanceScore'
+          type: array
+          uniqueItems: false
+      required:
+      - performance_status
+      type: object
     PatientListItem:
       description: A PCX patient in the patient list
       properties:
@@ -3431,22 +3724,30 @@ components:
       - patient_key
       - vital_status
       type: object
-    PatientOrganizationVitalCount:
-      description: Alive and deceased patients of one organization
+    PatientPerformanceScore:
+      description: Lansky or Karnofsky score. The date is when the result was released,
+        not when it was assessed.
       properties:
-        alive:
-          type: integer
-        deceased:
-          type: integer
-        organization_code:
+        date:
+          example: "2020-01-31"
+          format: date
           type: string
-        organization_name:
+        day:
+          type: integer
+        scale:
+          enum:
+          - lansky
+          - karnofsky
+          type: string
+        score:
+          type: integer
+        score_text:
+          description: As recorded, e.g. "90 - Minor restrictions in strenuous physical
+            activity"
           type: string
       required:
-      - alive
-      - deceased
-      - organization_code
-      - organization_name
+      - scale
+      - score
       type: object
     PatientRadiation:
       description: Radiation course of a patient
@@ -3478,54 +3779,6 @@ components:
       - stop
       - total_primary_dose
       type: object
-    PatientStatistics:
-      description: Statistics on every patient the caller can see, regardless of the
-        list filters
-      properties:
-        by_age_bucket:
-          description: Keys 0-4, 5-9, 10-14, 15-19, 20+
-          items:
-            $ref: '#/components/schemas/Aggregation'
-          type: array
-          uniqueItems: false
-        by_diagnosis:
-          items:
-            $ref: '#/components/schemas/Aggregation'
-          type: array
-          uniqueItems: false
-        by_organization:
-          items:
-            $ref: '#/components/schemas/PatientOrganizationVitalCount'
-          type: array
-          uniqueItems: false
-        by_protocol:
-          description: Patients per protocol_name, a patient counted once per protocol
-          items:
-            $ref: '#/components/schemas/Aggregation'
-          type: array
-          uniqueItems: false
-        imaging_count:
-          type: integer
-        survival:
-          description: Input of the Kaplan-Meier
-          items:
-            $ref: '#/components/schemas/PatientSurvival'
-          type: array
-          uniqueItems: false
-        total:
-          type: integer
-        with_cases_count:
-          type: integer
-      required:
-      - by_age_bucket
-      - by_diagnosis
-      - by_organization
-      - by_protocol
-      - imaging_count
-      - survival
-      - total
-      - with_cases_count
-      type: object
     PatientSurgery:
       description: Surgery of a patient
       properties:
@@ -3535,28 +3788,14 @@ components:
           type: string
         day:
           type: integer
+        evidence_url:
+          description: BRIM link to the source of the surgery
+          type: string
         extent_of_tumor_resection:
           type: string
         is_initial_treatment:
           description: null when Not Reported
           type: boolean
-      type: object
-    PatientSurvival:
-      description: Survival time of one patient, for the Kaplan-Meier
-      properties:
-        cns_integrated_diagnosis:
-          type: string
-        days:
-          type: integer
-        event:
-          description: true when deceased
-          type: boolean
-        organization_code:
-          type: string
-      required:
-      - days
-      - event
-      - organization_code
       type: object
     PatientTherapy:
       description: Medical therapy of a patient
@@ -3622,6 +3861,165 @@ components:
       - initial_chemo
       - initial_dx
       - initial_radiation
+      type: object
+    PatientTreatments:
+      description: Surgeries, radiations and medical therapies of a patient
+      properties:
+        radiations:
+          items:
+            $ref: '#/components/schemas/PatientRadiation'
+          type: array
+          uniqueItems: false
+        surgeries:
+          items:
+            $ref: '#/components/schemas/PatientSurgery'
+          type: array
+          uniqueItems: false
+        therapies:
+          items:
+            $ref: '#/components/schemas/PatientTherapy'
+          type: array
+          uniqueItems: false
+        trial_enrollments:
+          description: Most recent first
+          items:
+            $ref: '#/components/schemas/PatientTrialEnrollment'
+          type: array
+          uniqueItems: false
+      required:
+      - radiations
+      - surgeries
+      - therapies
+      - trial_enrollments
+      type: object
+    PatientTrialEligibilities:
+      description: Clinical trial eligibility verdicts of a patient, extracted from
+        the patient's notes by BRIM
+      properties:
+        assessments:
+          description: Most recently loaded first
+          items:
+            $ref: '#/components/schemas/PatientTrialEligibility'
+          type: array
+          uniqueItems: false
+      required:
+      - assessments
+      type: object
+    PatientTrialEligibility:
+      description: 'Eligibility verdict of a patient for one clinical trial. reasoning
+        and brim_url are PHI: null without PHI access.'
+      properties:
+        brim_url:
+          description: Re-identifies the patient in BRIM
+          type: string
+        confidence:
+          description: BRIM's score, as BRIM writes it
+          example: "0.95"
+          type: string
+        generated_verdict:
+          description: As BRIM produced it, before review
+          type: string
+        loaded_at:
+          description: When the BRIM export was loaded, not a clinical date
+          type: string
+        reasoning:
+          description: Quotes the patient's notes
+          type: string
+        review_status:
+          description: null when not reviewed
+          type: string
+        variable_name:
+          description: The BRIM variable assessed, naming the trial
+          example: 3.6 PNOC035 Eligibility
+          type: string
+        verdict:
+          description: After any human review edit, the operative value
+          example: Ineligible Permanent
+          type: string
+      required:
+      - loaded_at
+      - variable_name
+      - verdict
+      type: object
+    PatientTrialEnrollment:
+      description: Enrollment of the patient on a treatment protocol, one per medical
+        therapy record
+      properties:
+        chemotherapy_agents:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        is_initial_treatment:
+          type: boolean
+        protocol_arm:
+          description: null when Not Applicable
+          type: string
+        protocol_name:
+          type: string
+        start:
+          $ref: '#/components/schemas/PatientDayDate'
+        stop:
+          $ref: '#/components/schemas/PatientDayDate'
+      required:
+      - chemotherapy_agents
+      - is_initial_treatment
+      - protocol_name
+      - start
+      - stop
+      type: object
+    PatientTumorBoard:
+      description: Tumor board sessions of a patient, and whether the caller can download
+        the patient's presentation deck
+      properties:
+        has_deck:
+          description: false without PHI access
+          type: boolean
+        sessions:
+          description: Most recent first
+          items:
+            $ref: '#/components/schemas/PatientTumorBoardSession'
+          type: array
+          uniqueItems: false
+      required:
+      - has_deck
+      - sessions
+      type: object
+    PatientTumorBoardSession:
+      description: Tumor board session of a patient. The date is PHI, like every date
+        of the patient view.
+      properties:
+        consensus:
+          type: string
+        date:
+          example: "2020-01-31"
+          format: date
+          type: string
+        day:
+          type: integer
+        diagnosis:
+          example: AT/RT, SHH subtype
+          type: string
+        has_report:
+          description: false without PHI access
+          type: boolean
+        reason:
+          example: Progression Review
+          type: string
+        recommendations:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        session_id:
+          type: integer
+        status:
+          example: Signed
+          type: string
+      required:
+      - has_report
+      - recommendations
+      - session_id
       type: object
     PatientsSearchResponse:
       properties:
@@ -3974,6 +4372,10 @@ components:
           type: string
         flag_type:
           $ref: '#/components/schemas/OccurrenceFlagType'
+        gnomad_ac:
+          type: integer
+        gnomad_af:
+          type: number
         gnomad_sc:
           description: |-
             NULL by design on CNLOH rows: the gnomAD-SV join keys on type, and a copy-neutral segment
@@ -4022,6 +4424,18 @@ components:
           type: integer
         sm:
           type: number
+        somatic_pc_to_wgs:
+          type: integer
+        somatic_pc_to_wxs:
+          type: integer
+        somatic_pf_to_wgs:
+          type: number
+        somatic_pf_to_wxs:
+          type: number
+        somatic_pn_to_wgs:
+          type: integer
+        somatic_pn_to_wxs:
+          type: integer
         start:
           type: integer
         svlen:
@@ -5495,7 +5909,8 @@ paths:
     get:
       description: Return tasks attached to the given case and sequencing experiment
         whose task type produces occurrences of the requested occurrence type. Sorted
-        by created_on DESC. Returns an empty list (200) when no task matches.
+        by created_on DESC. Returns an empty list (200) when no task matches. germline_cnv
+        returns the tasks that have CNV occurrences for the sequencing.
       operationId: caseTasksWithOccurrences
       parameters:
       - description: Tenant code
@@ -10104,8 +10519,9 @@ paths:
       - organizations
   /{tenant}/patients/{patient_key}:
     get:
-      description: Retrieve PatientEntity by its patient_key. 404 for an unknown
-        or malformed key, with no hint that the patient exists.
+      description: Retrieve PatientEntity, the header, sidebar and overview
+        of the patient page, by its patient_key. 404 for an unknown or malformed key,
+        with no hint that the patient exists.
       operationId: patientEntity
       parameters:
       - description: Tenant code
@@ -10161,6 +10577,637 @@ paths:
       security:
       - bearerauth: []
       summary: Get PatientEntity patient entity
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/external_records:
+    get:
+      description: Retrieve PatientExternalRecords, the organizations linked
+        to the patient through TEFCA or Carequality and the documents retrieved from
+        them, by its patient_key. 404 for an unknown or malformed key, with no hint
+        that the patient exists.
+      operationId: patientExternalRecords
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientExternalRecords'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get PatientExternalRecords of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/genomics:
+    get:
+      description: Retrieve PatientGenomics, the genomics tab of the patient
+        page, by its patient_key. 404 for an unknown or malformed key, with no hint
+        that the patient exists.
+      operationId: patientGenomics
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientGenomics'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get PatientGenomics of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/imaging:
+    get:
+      description: Retrieve PatientImaging, the imaging tab of the patient page,
+        by its patient_key. 404 for an unknown or malformed key, with no hint that
+        the patient exists.
+      operationId: patientImaging
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientImaging'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get PatientImaging of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/laboratory:
+    get:
+      description: Retrieve PatientLaboratory, the laboratory tab of the patient
+        page, by its patient_key. 404 for an unknown or malformed key, with no hint
+        that the patient exists.
+      operationId: patientLaboratory
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientLaboratory'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get PatientLaboratory of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/processing_report/download_url:
+    get:
+      description: Retrieve a presigned URL of the CHARM processing report (a self-contained
+        HTML page) of the patient. Requires can_read_pii at the patient's organization
+        (403 otherwise, and for an unknown or malformed key). 404 for a patient without
+        a report, or one the view masks.
+      operationId: patientProcessingReportDownloadUrl
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/utils.PreSignedURL'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get a presigned URL to open the processing report of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/treatments:
+    get:
+      description: Retrieve PatientTreatments, the treatments tab of the patient
+        page, by its patient_key. 404 for an unknown or malformed key, with no hint
+        that the patient exists.
+      operationId: patientTreatments
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientTreatments'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get PatientTreatments of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/trial_eligibilities:
+    get:
+      description: Retrieve PatientTrialEligibilities, the eligibility verdicts
+        BRIM extracted from the patient's notes, by its patient_key. 404 for an unknown
+        or malformed key, with no hint that the patient exists.
+      operationId: patientTrialEligibilities
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientTrialEligibilities'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get PatientTrialEligibilities of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/tumor_board:
+    get:
+      description: Retrieve PatientTumorBoard, the tumor board sessions of the
+        patient and whether the caller can download its presentation deck, by its
+        patient_key. 404 for an unknown or malformed key, with no hint that the patient
+        exists.
+      operationId: patientTumorBoard
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientTumorBoard'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get PatientTumorBoard of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/tumor_board/deck/download_url:
+    get:
+      description: Retrieve a presigned URL of the patient's tumor board presentation
+        deck. Requires can_read_pii at the patient's organization (403 otherwise,
+        and for an unknown or malformed key). 404 for a patient without a deck, or
+        one the view masks.
+      operationId: patientTumorBoardDeckDownloadUrl
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/utils.PreSignedURL'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get a presigned URL to download the tumor board deck of a patient
+      tags:
+      - patients
+  /{tenant}/patients/{patient_key}/tumor_board/sessions/{session_id}/download_url:
+    get:
+      description: Retrieve a presigned URL of the report of one of the patient's
+        tumor board sessions. Requires can_read_pii at the patient's organization
+        (403 otherwise, and for an unknown or malformed key). 404 for an unknown or
+        malformed session, a session without a report, or one the view masks.
+      operationId: patientTumorBoardReportDownloadUrl
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Patient key
+        in: path
+        name: patient_key
+        required: true
+        schema:
+          format: uuid
+          type: string
+      - description: Tumor board session id
+        in: path
+        name: session_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/utils.PreSignedURL'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Not Found
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get a presigned URL to download the report of a tumor board session
       tags:
       - patients
   /{tenant}/patients/autocomplete:
@@ -10466,54 +11513,6 @@ paths:
       security:
       - bearerauth: []
       summary: Search PCX patients
-      tags:
-      - patients
-  /{tenant}/patients/statistics:
-    get:
-      description: Retrieve PatientStatistics on every PCX patient the caller
-        can see, regardless of the list filters
-      operationId: patientsStatistics
-      parameters:
-      - description: Tenant code
-        in: path
-        name: tenant
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PatientStatistics'
-          description: OK
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Forbidden
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-          headers:
-            X-Correlation-ID:
-              description: Unique id correlating this error with the server-side log
-                entry
-              schema:
-                type: string
-      security:
-      - bearerauth: []
-      summary: Get PatientStatistics cohort analytics
       tags:
       - patients
   /{tenant}/roles:

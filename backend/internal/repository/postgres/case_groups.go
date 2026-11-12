@@ -129,11 +129,11 @@ func (r *CaseGroupsRepository) ListCases(ctx context.Context, tenantCode string,
 	return rows, nil
 }
 
-// ListDocuments returns the output documents of the cases, index files (crai, tbi) included, with
-// the sample and patient they were produced from. It follows the same join path as the StarRocks
-// document search: task_has_document (output) → task_context → case_has_sequencing_experiment →
-// cases / sequencing_experiment → sample. A document reached through several samples comes back
-// once per sample; the manifest writer folds them.
+// ListDocuments returns the output documents of the cases, index files (crai, tbi) included and
+// the QC metrics.json left out, with the sample and patient they were produced from. It follows
+// the same join path as the StarRocks document search: task_has_document (output) → task_context
+// → case_has_sequencing_experiment → cases / sequencing_experiment → sample. A document reached
+// through several samples comes back once per sample; the manifest writer folds them.
 func (r *CaseGroupsRepository) ListDocuments(ctx context.Context, tenantCode string, caseIDs []int) ([]types.CaseGroupDocumentRow, error) {
 	rows := []types.CaseGroupDocumentRow{}
 	if len(caseIDs) == 0 {
@@ -143,7 +143,8 @@ func (r *CaseGroupsRepository) ListDocuments(ctx context.Context, tenantCode str
 	tx := r.db.WithContext(ctx).
 		Table(fmt.Sprintf("%s %s", types.DocumentTable.Name, types.DocumentTable.Alias)).
 		Select("doc.id AS document_id, doc.name, doc.size, doc.data_type_code, doc.format_code, COALESCE(spl.submitter_sample_id, '') AS submitter_sample_id, COALESCE(spl.patient_id, 0) AS patient_id, c.id AS case_id, COALESCE(c.diagnosis_lab_code, '') AS diagnosis_lab_code").
-		Where("c.id IN ? AND c.tenant_code = ? AND doc.tenant_code = ?", caseIDs, tenantCode, tenantCode)
+		Where("c.id IN ? AND c.tenant_code = ? AND doc.tenant_code = ?", caseIDs, tenantCode, tenantCode).
+		Where(types.NotQCMetricsJSON)
 	tx = joiner.DocumentWithTaskHasDocument(tx)
 	tx = joiner.TaskHasDocWithTaskContext(tx)
 	tx = joiner.TaskContextWithCaseHasSeqExp(tx)

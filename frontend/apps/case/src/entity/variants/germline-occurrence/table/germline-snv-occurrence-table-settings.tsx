@@ -29,15 +29,23 @@ import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
 import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
 import GermlineInterpretationDialog from '../interpretation/germline-interpretation-dialog';
 
+import ComphetGenesCell from './cells/comphet-genes-cell';
+
 const columnHelper = createAppColumnHelper<GermlineSNVOccurrence>();
 
 type GermlineSNVOccurrenceTableSettingsProps = {
   caseEntity?: CaseEntity;
   patientId?: number;
+  canDownloadReport?: boolean;
   t: TFunction<string, undefined>;
 };
 
-function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineSNVOccurrenceTableSettingsProps) {
+function getGermlineSNVOccurrenceColumns({
+  t,
+  caseEntity,
+  patientId,
+  canDownloadReport,
+}: GermlineSNVOccurrenceTableSettingsProps) {
   return [
     // interpretation and note cell
     columnHelper.accessor(row => row, {
@@ -283,6 +291,26 @@ function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineS
       minSize: 40,
       enableSorting: false,
     }),
+    // Compound het.
+    columnHelper.accessor(row => row.comphet_genes, {
+      id: 'comphet_genes',
+      cell: info => (
+        <ComphetGenesCell
+          genes={info.getValue()}
+          locusId={info.row.original.locus_id}
+          hgvsg={info.row.original.hgvsg}
+          locus={info.row.original.locus}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.comphet_genes_tooltip')}>
+          {t('variant.headers.comphet_genes')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
     // Ratio PA
     columnHelper.accessor(row => row.ad_ratio, {
       id: 'ad_ratio',
@@ -296,7 +324,13 @@ function getGermlineSNVOccurrenceColumns({ t, caseEntity, patientId }: GermlineS
     // Actions Buttons
     {
       id: 'actions',
-      cell: info => <OccurrenceActionsMenu row={info.row} caseEntity={caseEntity} />,
+      cell: info => (
+        <OccurrenceActionsMenu
+          row={info.row}
+          caseEntity={caseEntity}
+          reportKind={canDownloadReport ? 'germline' : undefined}
+        />
+      ),
       size: 86,
       enableResizing: false,
       enablePinning: true,
@@ -408,6 +442,12 @@ const defaultGermlineSNVSettings = createColumnSettings([
     id: 'zygosity',
     visible: true,
     label: 'variant.headers.zygosity',
+  },
+  {
+    id: 'comphet_genes',
+    visible: false,
+    label: 'variant.headers.comphet_genes',
+    additionalFields: ['comphet_genes'],
   },
   {
     id: 'ad_ratio',

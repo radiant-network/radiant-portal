@@ -65,7 +65,7 @@ export function SidebarGroups({
   brand = true,
 }: SidebarGroupsProps) {
   const { t } = useI18n();
-  const { open, toggleSidebar } = useSidebar();
+  const { open, setOpen } = useSidebar();
   const favourites = useFacetFavourites();
   const [internalSelectedItemId, setInternalSelectedItemId] = useState<string | null>(null);
 
@@ -86,6 +86,7 @@ export function SidebarGroups({
       variant="sidebar"
       collapsible="icon"
       brand={brand}
+      disableMobileSheet
       className={cn('static! flex flex-col w-full', brand && 'bg-primary dark:bg-secondary')}
     >
       <SidebarContent>
@@ -96,7 +97,7 @@ export function SidebarGroups({
                 id="sidebar-group-toggle-sidebar"
                 iconOnly
                 aria-label={open ? t('a11y.facets_sidebar.collapse') : t('a11y.facets_sidebar.expand')}
-                onClick={() => toggleSidebar()}
+                onClick={() => setOpen(!open)}
                 className={buttonVariants({
                   className: 'mb-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                 })}

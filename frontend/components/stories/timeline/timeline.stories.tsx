@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import Timeline from '@/components/base/timeline/timeline';
 
 const meta = {
-  title: 'Components/Timeline',
+  title: 'Features/Timeline',
   component: Timeline,
 } satisfies Meta<typeof Timeline>;
 
@@ -35,6 +35,7 @@ export const Default: Story = {
             description: [
               { label: 'Tumor locations', value: 'Posterior fossa' },
               { label: 'Metastasis', value: 'Yes' },
+              { label: 'Metastasis locations', value: 'Spine, Lung' },
             ],
             evidenceHref: '#',
             startDay: 1135,
@@ -47,7 +48,8 @@ export const Default: Story = {
             extentOfTumorResection: 'Gross/Near total resection',
             description: 'Treatment follows a protocol but subject is not enrolled',
             isInitialTreatment: true,
-            evidenceHref: '#',
+            evidenceHref:
+              'https://brim.example.org/overview/project/54/visualize_variable/?var_ids=3608&patient_id=669199',
             startDay: 820,
             years: 2.2,
           },
@@ -93,10 +95,7 @@ export const Default: Story = {
 export const Empty: Story = {
   render: () => (
     <div className="w-[720px]">
-      <Timeline
-        title="Clinical Timeline"
-        description="Disease events, surgeries, radiation and medical therapy by age in days since birth."
-      />
+      <Timeline title="Clinical Timeline" description="No clinical timeline for this patient." />
     </div>
   ),
 };

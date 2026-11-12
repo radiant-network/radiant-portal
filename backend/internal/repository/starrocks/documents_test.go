@@ -427,8 +427,8 @@ func Test_GetDocumentsFilters_WithLabAndProject(t *testing.T) {
 		assert.Equal(t, 2, len((*filters).Project))
 		assert.Equal(t, 2, len((*filters).DiagnosisLab))
 		assert.Equal(t, 7, len((*filters).RelationshipToProband))
-		assert.Equal(t, 15, len((*filters).Format))
-		assert.Equal(t, 21, len((*filters).DataType))
+		assert.Equal(t, 16, len((*filters).Format))
+		assert.Equal(t, 22, len((*filters).DataType))
 	})
 }
 
@@ -440,8 +440,8 @@ func Test_GetDocumentsFilters_WithoutLabAndProject(t *testing.T) {
 		assert.Nil(t, (*filters).Project)
 		assert.Nil(t, (*filters).DiagnosisLab)
 		assert.Equal(t, 7, len((*filters).RelationshipToProband))
-		assert.Equal(t, 15, len((*filters).Format))
-		assert.Equal(t, 21, len((*filters).DataType))
+		assert.Equal(t, 16, len((*filters).Format))
+		assert.Equal(t, 22, len((*filters).DataType))
 	})
 }
 
@@ -474,5 +474,42 @@ func Test_GetById_IndexFile(t *testing.T) {
 		assert.NotNil(t, document)
 		assert.Equal(t, "FI0037662.S13230.cram.crai", document.Name)
 		assert.Equal(t, "crai", document.FileFormatCode)
+	})
+}
+
+func Test_SearchDocuments_QCMetricsJSONHidden(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		testutils.InsertQCTaskDocuments(t, env.Postgres)
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+		searchCriteria := []types.SearchCriterion{
+			{
+				FieldName: types.TaskHasDocumentTaskIdField.GetName(),
+				Value:     []interface{}{testutils.QCTaskID},
+			},
+		}
+		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
+		require.NoError(t, err)
+		documents, count, err := repo.SearchDocuments(t.Context(), query)
+		require.NoError(t, err)
+		require.Len(t, *documents, 1)
+		assert.Equal(t, int64(1), *count)
+		assert.Equal(t, testutils.QCReportDocumentID, (*documents)[0].DocumentID)
+	})
+}
+
+func Test_Documents_SearchById_QCMetricsJSONHidden(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		testutils.InsertQCTaskDocuments(t, env.Postgres)
+		repo := NewDocumentsRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		byName, err := repo.SearchById(t.Context(), "RAD179", 10)
+		require.NoError(t, err)
+		assert.Equal(t, []AutocompleteResult{{Type: "name", Value: "RAD179_multiqc_report.html"}}, *byName)
+
+		byID, err := repo.SearchById(t.Context(), "1791", 10)
+		require.NoError(t, err)
+		for _, result := range *byID {
+			assert.NotEqual(t, AutocompleteResult{Type: "document_id", Value: "1791"}, result)
+		}
 	})
 }

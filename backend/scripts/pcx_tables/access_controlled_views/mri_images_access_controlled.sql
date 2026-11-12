@@ -24,7 +24,8 @@
 
    VISIBLE TO ALL CALLERS (accepted, non-PHI): flywheel_subject_id,
    flywheel_project_id, flywheel_project_name, session_id, session_name,
-   flywheel_url, age_at_session_days, anatomical_site, imaging_modality.
+   flywheel_url, clinical_report_url, age_at_session_days, anatomical_site,
+   imaging_modality.
    session_name embeds age-in-days + time-of-day (e.g. '5766d_B_brain_18h40m')
    but no calendar date, so it is de-identified alone; only session_date turns it
    into a precise timestamp, and that is gated.
@@ -33,7 +34,7 @@
    every row from every institution, de-identified. Matches the patient_level
    projection's behaviour.
 
-   FAIL-CLOSED: organization_code comes from a LEFT JOIN on the 41-row
+   FAIL-CLOSED: organization_code comes from a LEFT JOIN on the 42-row
    pcx_30_organization_ref seed. A NULL organization_code cannot match
    phi.org_code, so the row degrades to research_id + NULL date rather than
    leaking. Verified 2026-09-28: 0 of 8,920 rows have a NULL organization_code
@@ -92,6 +93,7 @@ SELECT s.organization_name,
        s.anatomical_site,
        s.imaging_modality,
        s.flywheel_url,
+       s.clinical_report_url,
        s.can_read_phi
 FROM (SELECT src.*,
              p.id AS radiant_patient_id,

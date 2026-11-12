@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { useState } from 'react';
 import { BrowserRouter } from 'react-router';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SearchIcon } from 'lucide-react';
@@ -7,9 +8,11 @@ import { SortBodyOrderEnum } from '@/api/api';
 import TableFilters from '@/apps/case/src/exploration/table/case-exploration-table-filters';
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import DataTable, { type TableColumnDef } from '@/components/base/data-table/data-table';
+import TableSelectionSummary from '@/components/base/data-table/data-table-selection-summary';
 import EmptyState from '@/components/base/empties/empty';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent } from '@/components/base/shadcn/card';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
 import { StorySection } from '../story-section';
@@ -316,4 +319,49 @@ export const Footer: Story = {
     ],
   },
   render: args => <DataTableStory args={args} title="Footer" />,
+};
+
+function SelectableDataTableStory({ args }: { args: any }) {
+  const [rowSelection, setRowSelection] = useState({});
+  const selectedCount = Object.keys(rowSelection).length;
+
+  return (
+    <DataTableStory
+      title="Row selection"
+      description="`enableRowSelectionColumn` adds the checkbox column, pinned first; `toolbarActions` renders left of the table settings; `selectionSummary` replaces the results index while rows are selected."
+      args={{
+        ...args,
+        rowSelection,
+        onRowSelectionChange: setRowSelection,
+        toolbarActions:
+          selectedCount === 0 ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- focusable so keyboard users can open the tooltip */}
+                <span tabIndex={0}>
+                  <Button size="sm" disabled>
+                    Download report
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Select at least one item</TooltipContent>
+            </Tooltip>
+          ) : (
+            <Button size="sm">Download report</Button>
+          ),
+        selectionSummary: selectedCount > 0 ? <TableSelectionSummary count={selectedCount} /> : undefined,
+      }}
+    />
+  );
+}
+
+export const RowSelection: Story = {
+  args: {
+    data: data.slice(0, 10),
+    enableFullscreen: true,
+    enableColumnOrdering: true,
+    enableRowSelectionColumn: true,
+    getRowId: (row: TableMockData) => `${row.firstName}-${row.lastName}`,
+  },
+  render: args => <SelectableDataTableStory args={args} />,
 };

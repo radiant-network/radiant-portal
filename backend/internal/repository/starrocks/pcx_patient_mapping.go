@@ -1,7 +1,9 @@
 package starrocks
 
 import (
+	"cmp"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -75,6 +77,19 @@ func pcxEventType(value *string) (string, error) {
 	return code, nil
 }
 
+var pcxPerformanceScales = map[string]string{"lansky": "lansky", "karnofsky": "karnofsky"}
+
+func pcxPerformanceScale(value *string) (string, error) {
+	if value == nil {
+		return "", fmt.Errorf("missing performance status scale")
+	}
+	code, ok := pcxPerformanceScales[strings.ToLower(strings.TrimSpace(*value))]
+	if !ok {
+		return "", fmt.Errorf("unknown performance status scale %q", *value)
+	}
+	return code, nil
+}
+
 // pcxFocalBoost is the total to primary minus the craniospinal dose, only when both are numbers in the same unit.
 func pcxFocalBoost(craniospinal, primary types.PatientDose) *types.PatientDose {
 	if craniospinal.Value == nil || primary.Value == nil || craniospinal.Unit == nil || primary.Unit == nil ||
@@ -89,4 +104,49 @@ func pcxFocalBoost(craniospinal, primary types.PatientDose) *types.PatientDose {
 	value := strconv.FormatFloat(p-c, 'f', -1, 64)
 	unit := *primary.Unit
 	return &types.PatientDose{Value: &value, Unit: &unit}
+}
+
+const pcxEnrolledOnProtocol = "treatment follows a protocol and subject is enrolled on a protocol"
+
+// pcxTrialEnrollments lists one enrollment per therapy the patient was enrolled for, as the treatments timeline does.
+// The most recent start comes first, an enrollment without a start day last.
+func pcxTrialEnrollments(therapies []types.PatientTherapy) []types.PatientTrialEnrollment {
+	enrollments := []types.PatientTrialEnrollment{}
+	for _, therapy := range therapies {
+		if therapy.ChemotherapyType == nil || !strings.EqualFold(strings.TrimSpace(*therapy.ChemotherapyType), pcxEnrolledOnProtocol) {
+			continue
+		}
+		name := pcxTrimmed(therapy.ProtocolName)
+		if name == "" {
+			name = pcxTrimmed(therapy.ProtocolNameAndArm)
+		}
+		var arm *string
+		if a := pcxTrimmed(therapy.ProtocolArm); a != "" && !strings.EqualFold(a, "Not Applicable") {
+			arm = &a
+		}
+		enrollments = append(enrollments, types.PatientTrialEnrollment{Start: therapy.Start, Stop: therapy.Stop, ProtocolName: name,
+			ProtocolArm: arm, ChemotherapyAgents: slices.Clone(therapy.ChemotherapyAgents),
+			IsInitialTreatment: therapy.IsInitialTreatment != nil && *therapy.IsInitialTreatment})
+	}
+	slices.SortStableFunc(enrollments, func(a, b types.PatientTrialEnrollment) int {
+		if a.Start.Day == nil || b.Start.Day == nil {
+			return cmp.Compare(pcxUnknown(a.Start.Day), pcxUnknown(b.Start.Day))
+		}
+		return cmp.Compare(*b.Start.Day, *a.Start.Day)
+	})
+	return enrollments
+}
+
+func pcxUnknown(day *int) int {
+	if day == nil {
+		return 1
+	}
+	return 0
+}
+
+func pcxTrimmed(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return strings.TrimSpace(*value)
 }

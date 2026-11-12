@@ -1,5 +1,6 @@
 import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { SquarePen } from 'lucide-react';
 import { toast } from 'sonner';
 import useSWRMutation from 'swr/mutation';
 
@@ -34,9 +35,11 @@ import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 import { SELECTED_VARIANT_PARAM } from '../../constants';
 import InterpretationVariantHeader from '../../interpretation/header';
 import InterpretationLastUpdatedBanner from '../../interpretation/last-updated-banner';
-import type { Interpretation, InterpretationFormRef } from '../../interpretation/types';
+import type { Interpretation, InterpretationDialogMode, InterpretationFormRef } from '../../interpretation/types';
+import { useCaseVariantPermissions } from '../../use-case-variant-permissions';
 
 import GermlineInterpretationForm from './germline-interpretation-form';
+import GermlineInterpretationView from './germline-interpretation-view';
 
 type GermlineInterpretationDialogProps = {
   locusId: string;
@@ -45,7 +48,7 @@ type GermlineInterpretationDialogProps = {
   patientId?: number;
   handleSaveCallback?: () => void;
   renderTrigger: (handleOpen: () => void) => ReactNode;
-  isCreation?: boolean;
+  mode?: InterpretationDialogMode;
 };
 
 type CaseEntityInput = {
@@ -129,12 +132,14 @@ function GermlineInterpretationDialog({
   patientId,
   handleSaveCallback,
   renderTrigger,
-  isCreation = false,
+  mode = 'edit',
 }: GermlineInterpretationDialogProps) {
   const { t } = useI18n();
   const { tenant } = useTenant();
+  const { canInterpret } = useCaseVariantPermissions();
   const [searchParams, setSearchParams] = useSearchParams();
   const [open, setOpen] = useState(false);
+  const [isReadOnly, setIsReadOnly] = useState(mode === 'view');
   const [isDirty, setIsDirty] = useState(false);
   const germlineFormRef = useRef<InterpretationFormRef>(null);
   const caseId = useCaseIdFromParam();
@@ -154,15 +159,29 @@ function GermlineInterpretationDialog({
     (url, opts) => fetchInterpretationGermline(url, opts, tenant),
   );
 
+  const fetchInterpretation = () =>
+    interpretation.trigger({
+      caseId: caseId.toString(),
+      seqId: seqId.toString(),
+      locusId,
+      transcriptId: transcriptId ?? '',
+    });
+
   const saveInterpretation = useSWRMutation<InterpretationGermline, any, string, GermlineInterpretationFormInput>(
     `save-germline-interpretation-${seqId}-${locusId}-${transcriptId}`,
     (url, opts) => saveGermlineInterpretation(url, opts, tenant),
     {
       onSuccess: () => {
-        setOpen(false);
+        if (mode === 'view') {
+          setIsReadOnly(true);
+          setIsDirty(false);
+          fetchInterpretation();
+        } else {
+          setOpen(false);
+        }
         handleSaveCallback && handleSaveCallback();
 
-        if (isCreation) {
+        if (mode === 'create') {
           toast.success(t('variant.interpretation_form.notification.success.title'), {
             action: {
               label: t('variant.interpretation_form.notification.success.button'),
@@ -203,29 +222,35 @@ function GermlineInterpretationDialog({
     germlineFormRef.current?.submit();
   }, [germlineFormRef]);
 
-  const handleOpen = useCallback(async () => {
+  const handleCancelEdit = () => {
+    setIsDirty(false);
+    setIsReadOnly(true);
+  };
+
+  const handleOpen = () => {
     setOpen(true);
+    setIsReadOnly(mode === 'view');
     caseEntity.trigger({ key: 'case-entity', caseId });
-    interpretation.trigger({
-      caseId: caseId.toString(),
-      seqId: seqId.toString(),
-      locusId,
-      transcriptId: transcriptId ?? '',
-    });
+    fetchInterpretation();
     occurrenceExpand.trigger({
       caseId,
       seqId,
       taskId,
       locusId,
     });
-  }, []);
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       {renderTrigger(handleOpen)}
       <DialogContent
         size="lg"
-        onEscapeKeyDown={e => e.preventDefault()}
+        onEscapeKeyDown={e => {
+          if (!isReadOnly) e.preventDefault();
+        }}
+        onInteractOutside={e => {
+          if ((e.target as Element | null)?.closest('[role="alertdialog"]')) e.preventDefault();
+        }}
         variant="stickyBoth"
         className="overflow-hidden flex flex-col"
       >
@@ -249,26 +274,32 @@ function GermlineInterpretationDialog({
         ) : (
           <>
             <DialogBody className="flex-1 min-h-0 overflow-y-auto space-y-6 max-h-none">
-              <InterpretationLastUpdatedBanner
-                updated_by_name={interpretation.data?.updated_by_name}
-                updated_at={interpretation.data?.updated_at}
-              />
               <div className="grid gap-6 grid-cols-12">
-                <div className="rounded-sm col-span-7 border p-6 bg-muted">
-                  <GermlineInterpretationForm
-                    ref={germlineFormRef}
-                    interpretation={interpretation.data}
-                    saveInterpretation={interpretation =>
-                      saveInterpretation.trigger({
-                        caseId: caseId.toString(),
-                        seqId: seqId.toString(),
-                        locusId,
-                        transcriptId: transcriptId ?? '',
-                        interpretationGermline: interpretation,
-                      })
-                    }
-                    onDirtyChange={setIsDirty}
+                <div className="rounded-sm col-span-7 border bg-muted-subdued overflow-hidden">
+                  <InterpretationLastUpdatedBanner
+                    updated_by_name={interpretation.data?.updated_by_name}
+                    updated_at={interpretation.data?.updated_at}
                   />
+                  <div className="p-6">
+                    {isReadOnly ? (
+                      <GermlineInterpretationView interpretation={interpretation.data} />
+                    ) : (
+                      <GermlineInterpretationForm
+                        ref={germlineFormRef}
+                        interpretation={interpretation.data}
+                        saveInterpretation={interpretation =>
+                          saveInterpretation.trigger({
+                            caseId: caseId.toString(),
+                            seqId: seqId.toString(),
+                            locusId,
+                            transcriptId: transcriptId ?? '',
+                            interpretationGermline: interpretation,
+                          })
+                        }
+                        onDirtyChange={setIsDirty}
+                      />
+                    )}
+                  </div>
                 </div>
                 <div className="col-span-5 flex flex-col gap-3">
                   <GeneCard
@@ -326,39 +357,61 @@ function GermlineInterpretationDialog({
               </div>
             </DialogBody>
             <DialogFooter>
-              <DialogClose asChild>
-                <Button variant="outline">{t('variant.interpretation_form.cancel_text')}</Button>
-              </DialogClose>
-              <Button
-                type="submit"
-                color="primary"
-                loading={saveInterpretation.isMutating}
-                onClick={() => {
-                  // Do not warn use if the interpretation is created. Only show if edited
-                  if (isCreation) {
-                    handleSave();
-                    return;
-                  }
-                  alertDialog.open({
-                    type: 'warning',
-                    title: t('variant.interpretation_form.alert.title'),
-                    description: t('variant.interpretation_form.alert.description'),
-                    actionProps: {
-                      children: t('variant.interpretation_form.alert.save'),
-                      onClick: e => {
-                        e.preventDefault();
+              {isReadOnly ? (
+                <>
+                  <DialogClose asChild>
+                    <Button variant="outline">{t('common.close')}</Button>
+                  </DialogClose>
+                  {canInterpret && (
+                    <Button onClick={() => setIsReadOnly(false)}>
+                      <SquarePen />
+                      {t('common.edit')}
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <>
+                  {mode === 'view' ? (
+                    <Button variant="outline" onClick={handleCancelEdit}>
+                      {t('variant.interpretation_form.cancel_text')}
+                    </Button>
+                  ) : (
+                    <DialogClose asChild>
+                      <Button variant="outline">{t('variant.interpretation_form.cancel_text')}</Button>
+                    </DialogClose>
+                  )}
+                  <Button
+                    type="submit"
+                    color="primary"
+                    loading={saveInterpretation.isMutating}
+                    onClick={() => {
+                      // Do not warn use if the interpretation is created. Only show if edited
+                      if (mode === 'create') {
                         handleSave();
-                      },
-                    },
-                    cancelProps: {
-                      children: t('variant.interpretation_form.alert.cancel'),
-                    },
-                  });
-                }}
-                disabled={!isDirty}
-              >
-                {t('variant.interpretation_form.ok_text')}
-              </Button>
+                        return;
+                      }
+                      alertDialog.open({
+                        type: 'warning',
+                        title: t('variant.interpretation_form.alert.title'),
+                        description: t('variant.interpretation_form.alert.description'),
+                        actionProps: {
+                          children: t('variant.interpretation_form.alert.save'),
+                          onClick: e => {
+                            e.preventDefault();
+                            handleSave();
+                          },
+                        },
+                        cancelProps: {
+                          children: t('variant.interpretation_form.alert.cancel'),
+                        },
+                      });
+                    }}
+                    disabled={!isDirty}
+                  >
+                    {t('variant.interpretation_form.ok_text')}
+                  </Button>
+                </>
+              )}
             </DialogFooter>
           </>
         )}

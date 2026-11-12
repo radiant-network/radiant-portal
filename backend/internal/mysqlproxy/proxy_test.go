@@ -43,13 +43,13 @@ func selfSignedTLS(t *testing.T) (*tls.Config, *tls.Config) {
 	pool := x509.NewCertPool()
 	pool.AddCert(leaf)
 	return &tls.Config{
-			MinVersion:   tls.VersionTLS12,
-			Certificates: []tls.Certificate{{Certificate: [][]byte{der}, PrivateKey: key, Leaf: leaf}},
-		}, &tls.Config{
-			MinVersion: tls.VersionTLS12,
-			RootCAs:    pool,
-			ServerName: "localhost",
-		}
+		MinVersion:   tls.VersionTLS12,
+		Certificates: []tls.Certificate{{Certificate: [][]byte{der}, PrivateKey: key, Leaf: leaf}},
+	}, &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		RootCAs:    pool,
+		ServerName: "localhost",
+	}
 }
 
 // backendResult is what the fake StarRocks observed during a login.

@@ -238,7 +238,7 @@ export function SomaticOccurrenceSheetContent({
             </NotesProvider>
             {!occurrence.has_interpretation && canInterpret && (
               <SomaticInterpretationDialog
-                isCreation
+                mode="create"
                 locusId={occurrence.locus_id}
                 taskId={occurrence.task_id}
                 handleSaveCallback={handleInterpretationSaveCallback}

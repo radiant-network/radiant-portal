@@ -13,35 +13,27 @@ function DiscardFilterButton() {
   const dispatchQB = useQBDispatch();
   const { selectedSavedFilter, isUnsaved } = useSavedFiltersContext();
 
-  const getTooltipContent = () => {
-    if (!selectedSavedFilter || !isUnsaved) {
-      return t('common.saved_filter.no_discard_tooltip');
-    }
-    return t('common.saved_filter.discard_tooltip');
-  };
+  if (!selectedSavedFilter || !isUnsaved) return null;
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="inline-flex">
-          <Button
-            iconOnly
-            variant="ghost"
-            size="sm"
-            disabled={!selectedSavedFilter || !isUnsaved}
-            aria-label={t('a11y.saved_filter.discard')}
-            onClick={() => {
-              dispatchQB({
-                type: QBActionType.LOAD_QUERIES,
-                payload: selectedSavedFilter?.queries,
-              });
-            }}
-          >
-            <RotateCcw />
-          </Button>
-        </span>
+        <Button
+          iconOnly
+          variant="ghost"
+          size="sm"
+          aria-label={t('a11y.saved_filter.discard')}
+          onClick={() => {
+            dispatchQB({
+              type: QBActionType.LOAD_QUERIES,
+              payload: selectedSavedFilter.queries,
+            });
+          }}
+        >
+          <RotateCcw />
+        </Button>
       </TooltipTrigger>
-      <TooltipContent>{getTooltipContent()}</TooltipContent>
+      <TooltipContent>{t('common.saved_filter.discard_tooltip')}</TooltipContent>
     </Tooltip>
   );
 }

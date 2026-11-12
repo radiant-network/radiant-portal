@@ -42,7 +42,8 @@ func (r *ExomiserRepository) GetExomiser(ctx context.Context, locusId int) ([]Ex
 func (r *ExomiserRepository) GetExomiserACMGClassificationCounts(ctx context.Context, locusId int) (map[string]int, error) {
 	var exomiser []ExomiserACMGClassificationCounts
 	tx := r.db.WithContext(ctx).Table(types.ExomiserTable.TenantQualifiedName(ctx))
-	tx = tx.Select("acmg_classification, COUNT(1) as acmg_classification_count")
+	// Several annotation tasks (e.g. a duo then a trio) can classify one sequencing: count it once per class.
+	tx = tx.Select("acmg_classification, COUNT(DISTINCT seq_id) as acmg_classification_count")
 	tx = tx.Where("locus_id = ? and variant_rank=1", locusId)
 	tx = tx.Group("acmg_classification")
 	tx = tx.Order("acmg_classification_count DESC")

@@ -64,3 +64,30 @@ func Test_Unmarshall_SQON_Return_Expected_Struct(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, sqon)
 }
+
+func Test_Unmarshall_SQON_Keeps_OverrideValuesName(t *testing.T) {
+	t.Parallel()
+	jsonData := `{"op": "in", "content": {"field": "comphet_of", "value": ["-8889630551825186816"], "overrideValuesName": "chr1:g.169542092T>C"}}`
+	sqon, err := parse(jsonData)
+	assert.NoError(t, err)
+	assert.Equal(t, LeafContent{
+		Field:              "comphet_of",
+		Value:              []interface{}{"-8889630551825186816"},
+		OverrideValuesName: "chr1:g.169542092T>C",
+	}, sqon.Content)
+
+	out, err := json.Marshal(sqon)
+	assert.NoError(t, err)
+	assert.JSONEq(t, jsonData, string(out))
+}
+
+func Test_Marshall_SQON_Without_OverrideValuesName_Omits_It(t *testing.T) {
+	t.Parallel()
+	jsonData := `{"op": "in", "content": {"field": "chromosome", "value": ["1"]}}`
+	sqon, err := parse(jsonData)
+	assert.NoError(t, err)
+
+	out, err := json.Marshal(sqon)
+	assert.NoError(t, err)
+	assert.JSONEq(t, jsonData, string(out))
+}

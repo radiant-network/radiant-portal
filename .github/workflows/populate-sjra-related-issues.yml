@@ -21,32 +21,39 @@ jobs:
           echo "$COMMITS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Extract SJRA ticket keys from conventional-commit subjects
+      - name: Extract SJRA and RAD ticket keys from conventional-commit subjects
         id: extract
+        # Through env, not ${{ }} in the script: expanded there, a backtick or $( ) in a commit
+        # message would run as a command.
+        env:
+          COMMITS: ${{ steps.commits.outputs.commits }}
         run: |
-          # Read commits from previous step
-          COMMITS="${{ steps.commits.outputs.commits }}"
-          # Extract SJRA-<digits> only if it appears after a colon (conventional commit style)
-          # Example matches: "feat: SJRA-1324", "fix(scope): SJRA-12 details"
+          # Extract SJRA-<digits> or RAD-<digits> only if it appears after a colon (conventional commit style)
+          # Example matches: "feat: SJRA-1324", "fix(scope): RAD-12 details"
           TICKETS=$(printf "%s\n" "$COMMITS" \
-            | grep -oP '(?<=:)\s*SJRA-[0-9]+' \
-            | grep -oE 'SJRA-[0-9]+' \
+            | grep -oP '(?<=:)\s*(SJRA|RAD)-[0-9]+' \
+            | grep -oE '(SJRA|RAD)-[0-9]+' \
             | sort -u \
             | tr '\n' ' ')
 
           echo "tickets=$TICKETS" >> $GITHUB_OUTPUT
 
-      - name: Update PR body with SJRA links
+      - name: Update PR body with SJRA and RAD links
         if: steps.extract.outputs.tickets != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          JIRA_BASE: "https://d3b.atlassian.net/browse"
+          SJRA_JIRA_BASE: "https://d3b.atlassian.net/browse"
+          RAD_JIRA_BASE: "https://ferlab-crsj.atlassian.net/browse"
         run: |
           PR_NUMBER=${{ github.event.pull_request.number }}
           TICKETS="${{ steps.extract.outputs.tickets }}"
 
           LINKS=""
           for T in $TICKETS; do
+            case "$T" in
+              RAD-*) JIRA_BASE="$RAD_JIRA_BASE" ;;
+              *) JIRA_BASE="$SJRA_JIRA_BASE" ;;
+            esac
             LINKS="${LINKS}- [$T](${JIRA_BASE}/$T)\n"
           done
           LINKS=$(printf "%b" "$LINKS")

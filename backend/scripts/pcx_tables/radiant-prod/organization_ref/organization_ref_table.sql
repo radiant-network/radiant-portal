@@ -8,7 +8,9 @@
    radiant_tenant.organization. In the QA cluster that returns 41 rows, but in
    PROD the underlying JDBC source holds only 1 row (chusj / CHU Ste-Justine)
    and cbtn_tenant.organization returns 0 rows -- so prod has nothing to join
-   to. These 41 rows are therefore seeded from the QA cluster as of 2026-09-24.
+   to. These rows are therefore seeded from the QA cluster as of 2026-09-24, with BCH
+   corrected to Boston Children's Hospital and UCSF Benioff moved to UCSF-BCH
+   on 2026-10-29 (42 rows).
 
    Contents are non-PHI: public institution names and short codes.
 
@@ -18,7 +20,7 @@
    The dependent pcx_30 views need no change -- they only reference
    pcx_30_organization_ref.name and .code.
 
-   name and code are both unique across all 41 rows (verified), so the
+   name and code are both unique across all 42 rows (verified), so the
    LEFT JOIN in the pcx_30 views cannot fan out rows.
  */
 
@@ -38,7 +40,7 @@ insert into radiant_data_dev.pcx_30_organization_ref (code, name, category_code,
 values
   ('ACH', 'Akron Children''s Hospital', 'healthcare_provider', 'radiant'),
   ('APH', 'Orlando Health Arnold Palmer Hospital', 'healthcare_provider', 'radiant'),
-  ('BCH', 'UCSF Benioff Children''s Hospital', 'healthcare_provider', 'radiant'),
+  ('BCH', 'Boston Children''s Hospital', 'healthcare_provider', 'radiant'),
   ('CHOA', 'Children''s Hospital of Atlanta (CHOA)', 'healthcare_provider', 'radiant'),
   ('CHOP', 'The Children''s Hospital of Philadelphia', 'healthcare_provider', 'radiant'),
   ('CNM', 'CBTN Non-Consortium Member', 'healthcare_provider', 'radiant'),
@@ -63,6 +65,7 @@ values
   ('Pitt', 'University of Pittsburgh', 'healthcare_provider', 'radiant'),
   ('SCH', 'Seattle Children''s Hospital', 'healthcare_provider', 'radiant'),
   ('UAB', 'UAB', 'healthcare_provider', 'radiant'),
+  ('UCSF-BCH', 'UCSF Benioff Children''s Hospital', 'healthcare_provider', 'radiant'),
   ('UOI', 'University of Iowa', 'healthcare_provider', 'radiant'),
   ('UPenn', 'Penn', 'healthcare_provider', 'radiant'),
   ('WCMC', 'Weill Cornell Medical College', 'healthcare_provider', 'radiant'),

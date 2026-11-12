@@ -5,6 +5,7 @@
     },
     "assignment_picker": {
       "open": "Modifier l'assignation du cas",
+      "open_assigned": "Modifier l'assignation du cas, assigné à {{names}}",
       "remove_user": "Retirer {{name}}"
     },
     "auto_complete": {
@@ -44,6 +45,9 @@
       "no_data": "Aucune donnée",
       "open_franklin": "{{tier}}, ouvrir dans Franklin (nouvel onglet)"
     },
+    "comphet_genes_cell": {
+      "filter_variants": "Afficher les {{count}} variants hét. composés dans {{gene}} dans une nouvelle requête"
+    },
     "data_table": {
       "collapse_row": "Replier la ligne",
       "column_settings": "Paramètres des colonnes",
@@ -52,6 +56,8 @@
       "grouped_by": "Regroupé par {{value}}",
       "pin_column": "Épingler la colonne",
       "pin_row": "Épingler la ligne",
+      "select_page_rows": "Sélectionner toutes les lignes de la page",
+      "select_row": "Sélectionner la ligne",
       "sort": "Trier",
       "sorted_asc": "Trié par ordre croissant",
       "sorted_desc": "Trié par ordre décroissant",
@@ -112,7 +118,8 @@
     },
     "query_bar": {
       "delete": "Supprimer la requête",
-      "duplicate": "Dupliquer la requête"
+      "duplicate": "Dupliquer la requête",
+      "select": "Sélectionner la requête {{index}}"
     },
     "query_builder": {
       "close_facets": "Fermer le panneau des filtres"
@@ -590,6 +597,9 @@
       "no_classification_for_the_single_variant": "Pas de classification pour le variant unique",
       "no_classification_for_the_single_variant.abbrev": "NC",
       "no_classification_for_the_single_variant.tooltip": "Pas de classification",
+      "no_classifications_from_unflagged_records": "Aucune classification issue des soumissions non signalées",
+      "no_classifications_from_unflagged_records.abbrev": "NCU",
+      "no_classifications_from_unflagged_records.tooltip": "Aucune classification issue des soumissions non signalées",
       "no_data": "Aucune donnée",
       "no_data.abbrev": "ND",
       "no_data.tooltip": "Aucune donnée",
@@ -647,7 +657,8 @@
       "txt": "Fichier texte",
       "gvcf": "Fichier GVCF",
       "zip": "Fichier archive ZIP",
-      "xlsx": "Fichier XLSX"
+      "xlsx": "Fichier XLSX",
+      "maf": "Fichier MAF"
     },
     "data_type_code": {
       "alignment": "Lectures alignées",
@@ -665,6 +676,7 @@
       "covgene": "Rapport de couverture par gène",
       "qcrun": "Rapport de QC de séquençage",
       "exomiser": "Rapport Exomiser",
+      "exomiser_cnv": "Rapport Exomiser CNV",
       "clinical_report": "Rapport clinique",
       "aggqc": "Rapport de contrôle qualité agrégé",
       "chrmr": "Rapport mitochondrial",
@@ -771,7 +783,6 @@
         "default": "Enregistrer le filtre"
       },
       "discard_tooltip": "Annuler les modifications non enregistrées",
-      "no_discard_tooltip": "Aucune modification à annuler",
       "no_saved_filters": "Vous n'avez aucun filtre enregistré",
       "untitled_filter": "Filtre sans titre",
       "notifications": {
@@ -824,6 +835,7 @@
           "sample_id": "ID Échantillon",
           "task_id": "Tâche",
           "sequencing_experiment_id": "Séquençage",
+          "proband_submitter_sample_ids": "Échantillon",
           "placeholder": "Rechercher..."
         },
         "buttons": {
@@ -842,6 +854,10 @@
       "results": "Résultats {{from}} - {{to}} de {{total}}",
       "results_filtered": "{{shown}} affichés sur {{total}}",
       "no_result": "Aucun résultat",
+      "items_selected_one": "{{value}} élément sélectionné",
+      "items_selected_other": "{{value}} éléments sélectionnés",
+      "select_all": "Tout sélectionner",
+      "clear_selection": "Effacer la sélection",
       "no_result_description": "Ajuster vos filtres et essayer à nouveau.",
       "has_error": "Erreur lors du chargement du contenu",
       "has_error_description": "Essayer de rafraichir la page ou essayer à nouveau dans quelques minutes."
@@ -950,7 +966,10 @@
         "gnomad_pli": "gnomAD pLI",
         "gnomad_sf": "gnomAD 4.1.0",
         "gnomad_sc": "gnomAD 4.1.0 ALT",
-        "gnomad_v3_af": "gnomAD Genome 3.1.2",
+        "gnomad_v3_af": "gnomAD 4.1.0",
+        "comphet_of": "Hét. composé de",
+        "has_comphet": "Hét. composé",
+        "has_comphet_tooltip": "Hétérozygotie composite (slivar) : seuls les variants PASS à impact (LoF, Missense, Inframe, Splice Region) hétérozygotes chez le Proband, avec GQ ≥ 20, profondeur ≥ 6 et équilibre allélique entre 0,2 et 0,8, sont pris en compte. Dans les trios, exactement un parent doit porter le variant et aucun ne doit être homozygote.",
         "hotspot": "Hotspot",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
@@ -1023,6 +1042,8 @@
           "ig_v_gene": "Gène IG V",
           "ig_v_pseudogene": "Pseudogène IG V",
           "lncrna": "lncRNA",
+          "ncrna": "ncRNA",
+          "ncrna_pseudogene": "Pseudogène ncRNA",
           "non_stop_decay": "Dégradation sans arrêt",
           "nonsense_mediated_decay": "Dégradation médiée par non-sens",
           "processed_pseudogene": "Pseudogène traité",
@@ -1031,15 +1052,21 @@
           "protein_coding_cds_not_defined": "Codant pour une protéine (CDS non défini)",
           "protein_coding_lof": "Codant pour une protéine (perte de fonction)",
           "retained_intron": "Intron retenu",
+          "rnase_mrp_rna": "ARN de la RNase MRP",
+          "rnase_p_rna": "ARN de la RNase P",
           "tec": "TEC",
+          "telomerase_rna": "ARN de la télomérase",
           "transcribed_processed_pseudogene": "Pseudogène traité transcrit",
+          "transcribed_pseudogene": "Pseudogène transcrit",
           "transcribed_unitary_pseudogene": "Pseudogène unitaire transcrit",
           "transcribed_unprocessed_pseudogene": "Pseudogène non traité transcrit",
           "tr_c_gene": "Gène TR C",
           "tr_v_gene": "Gène TR V",
           "tr_v_pseudogene": "Pseudogène TR V",
+          "trna": "ARNt",
           "unitary_pseudogene": "Pseudogène unitaire",
           "unprocessed_pseudogene": "Pseudogène non traité",
+          "y_rna": "ARN Y",
           "": "Aucune donnée"
         },
         "cmc_tier": {
@@ -1098,6 +1125,10 @@
         "fathmm_pred": {
           "t": "Toléré",
           "d": "Délétère"
+        },
+        "has_comphet": {
+          "0": "Faux",
+          "1": "Vrai"
         },
         "lrt_pred": {
           "n": "Neutre",
@@ -1286,7 +1317,6 @@
       "born_year": "Né en {{year}}",
       "phi_restricted": "Restreint",
       "phi_restricted_tooltip": "Identité restreinte hors de votre organisation",
-      "ask_assistant": "Interroger l'IA sur ce patient",
       "vital_status": {
         "alive": "Vivant",
         "deceased": "Décédé"
@@ -1308,9 +1338,13 @@
         "cns_diagnosis_category": "Catégorie de diagnostic SNC",
         "cns_integrated_diagnosis": "Diagnostic intégré SNC",
         "event_date": "Date du diagnostic",
-        "day": "Jour {{day}}"
+        "day": "Jour {{day}}",
+        "tumor_locations": "Localisations tumorales",
+        "tumor_location_other": "Autre localisation",
+        "metastasis": "Métastase",
+        "initial_tumor_resections": "Résections tumorales initiales"
       },
-      "tumour_and_metastasis": {
+      "tumor_and_metastasis": {
         "title": "Tumeur et métastases",
         "tumor_locations": "Localisations tumorales",
         "tumor_location_other": "Autre localisation",
@@ -1341,6 +1375,7 @@
       },
       "interpretations": {
         "title": "Interprétations de variants",
+        "empty": "Aucune interprétation de variant pour ce patient.",
         "aa_tooltip": "Changement d'acide aminé",
         "date_tooltip": "Dernière date d'interprétation",
         "headers": {
@@ -1356,6 +1391,7 @@
       },
       "cases": {
         "title": "Cas génomiques",
+        "empty": "Aucun cas génomique pour ce patient.",
         "type": {
           "somatic": "Somatique",
           "germline": "Germinal solo",
@@ -1378,7 +1414,7 @@
         "title": "Dates clés",
         "initial_diagnosis": "Diagnostic initial",
         "latest_encounter": "Dernière rencontre",
-        "day_age": "Jour {{day}} · {{age}} ans",
+        "day_age": "{{age}} a · Jour {{day}}",
         "sources": {
           "clinical": "Clinique",
           "registry": "Registre"
@@ -1386,16 +1422,32 @@
       },
       "external_records": {
         "title": "Dossiers externes",
-        "tefca_exchange": "Échange TEFCA",
-        "query_status": "Statut de la requête",
-        "query_status_description": "Localisation et récupération des dossiers QHIN",
-        "linked": "Lié",
-        "connected": "Connecté"
+        "organizations": "Organisations",
+        "documents": "Documents",
+        "document_types": "Types de document",
+        "view_external_records": "Voir les dossiers externes",
+        "networks": "TEFCA / Carequality",
+        "header_summary": "{{orgs}} organisations · {{docs}} documents",
+        "network": {
+          "tefca": "TEFCA",
+          "carequality": "Carequality"
+        },
+        "not_connected": {
+          "description": "Les dossiers externes ne sont pas encore liés pour ce patient."
+        }
+      },
+      "clinical_note_extraction": {
+        "title": "Extraction de notes cliniques",
+        "description": "Traite les notes cliniques de ce patient et extrait les observations sous forme de données FHIR structurées.",
+        "run": "Lancer l'extraction",
+        "iframe_title": "Résultat de l'extraction des notes cliniques",
+        "open_in_new_tab": "Ouvrir dans un nouvel onglet"
       }
     },
     "timeline": {
       "title": "Chronologie clinique",
       "description": "Événements de maladie, chirurgies, radiothérapie et traitement médical selon l'âge en jours depuis la naissance.",
+      "empty": "Aucune chronologie clinique pour ce patient.",
       "event_type": {
         "initial_cns_tumor": "Tumeur SNC initiale",
         "progressive": "Progression",
@@ -1444,12 +1496,133 @@
       "columns": {
         "date": "Date",
         "modality": "Modalité",
+        "body_part": "Partie du corps",
+        "body_part_tooltip": "Partie du corps examinée",
         "viewer": "Visionneuse"
+      },
+      "livai_report": "Rapport LivAI"
+    },
+    "clinical_trials": {
+      "title": "Inscriptions antérieures",
+      "empty": "Aucune inscription antérieure pour ce patient.",
+      "day_value": "Jour {{day}}",
+      "initial_badge": "Traitement initial",
+      "columns": {
+        "protocol": "Protocole",
+        "start": "Début",
+        "stop": "Fin",
+        "agents": "Agents"
+      },
+      "trial_eligibilities": {
+        "title": "Admissibilité aux essais",
+        "subtitle": "Verdicts extraits par BRIM des notes cliniques du patient.",
+        "empty": "Ce patient n'a pas encore été évalué dans BRIM afin de déterminer son admissibilité aux essais cliniques.",
+        "confidence": "Confiance",
+        "not_reviewed": "Non révisé",
+        "date_tooltip": "Dernière évaluation",
+        "reasoning_label": "Raisonnement :",
+        "view_in_brim": "Ouvrir dans BRIM",
+        "phi_restricted": "Raisonnement restreint hors de votre organisation",
+        "verdict": {
+          "eligible": "Admissible",
+          "ineligible_modifiable": "Non admissible modifiable",
+          "ineligible_permanent": "Non admissible permanent"
+        }
+      }
+    },
+    "tumor_board": {
+      "title": "Séances de tumor board",
+      "create_presentation": "Créer la présentation",
+      "consensus": "Consensus",
+      "recommendations": "Recommandations",
+      "empty": "Aucune séance de tumor board pour ce patient."
+    },
+    "laboratory": {
+      "date": {
+        "no_date_on_file": "Aucune date au dossier",
+        "age_day": "{{age}} a · Jour {{day}}",
+        "age_day_capped": "90+ a · Jour {{day}}"
+      },
+      "lab_tile": {
+        "reported": "rapporté {{reported}}",
+        "aria_empty": "{{label}} : aucun résultat au dossier",
+        "aria_value": "{{label}} : {{value}} {{unit}}"
+      },
+      "cbc": {
+        "title": "Dernière formule sanguine",
+        "empty": "Aucune formule sanguine au dossier.",
+        "analytes": {
+          "wbc": "GB",
+          "hemoglobin": "Hémoglobine",
+          "platelets": "Plaquettes",
+          "anc": "PNN"
+        }
+      },
+      "performance_status": {
+        "title": "Statut de performance",
+        "empty": "Aucun score de performance au dossier.",
+        "released": "Publié",
+        "score_suffix": "/ 100",
+        "aria_box": "{{scale}} : {{score}} sur 100",
+        "scales": {
+          "lansky": "Lansky",
+          "karnofsky": "Karnofsky"
+        },
+        "mismatch": {
+          "lansky-adult": "Lansky enregistré à 16 ans ou plus",
+          "karnofsky-paediatric": "Karnofsky enregistré avant 16 ans"
+        }
+      },
+      "csf": {
+        "title": "Analyse du LCR",
+        "empty": "Aucune analyse du LCR au dossier.",
+        "analytes": {
+          "protein": "Protéines",
+          "glucose": "Glucose",
+          "nucleated_cells": "Cellules nucléées",
+          "rbc": "GR"
+        },
+        "cytology": {
+          "title": "Cytologie",
+          "multi_specimen_warning": "Le rapport couvre plus d'un spécimen — le résultat pourrait ne pas provenir du LCR.",
+          "multi_specimen": {
+            "yes": "Oui",
+            "no": "Non"
+          },
+          "fields": {
+            "test_name": "Nom du test",
+            "multi_specimen": "Couvre plusieurs spécimens",
+            "result_date": "Date du résultat"
+          },
+          "badge": {
+            "positive": "Cellules malignes présentes",
+            "suspicious": "Suspect de malignité",
+            "negative": "Aucune cellule maligne rapportée",
+            "non_diagnostic": "Spécimen non diagnostique",
+            "no_malignancy_statement": "Le rapport ne se prononce pas sur la malignité",
+            "unknown": "Résultat de cytologie non reconnu",
+            "empty": "Aucune cytologie au dossier"
+          },
+          "tier_note": {
+            "text_confirmed": "Attribué au LCR à partir du texte du rapport.",
+            "same_day_only": "Attribué au LCR uniquement parce que prélevé le même jour — ce résultat pourrait ne pas provenir du LCR."
+          }
+        },
+        "chemistry": {
+          "title": "Biochimie et numération cellulaire"
+        },
+        "specimen": {
+          "title": "Spécimen prélevé — résultat non affiché dans RADIANT",
+          "cell_free_dna": "ADN libre circulant",
+          "collected": "Prélevé"
+        }
       }
     }
   },
   "timeline": {
+    "collapse_all": "Tout replier",
     "evidence": "Preuve",
+    "expand_all": "Tout déplier",
     "initial_treatment": "Traitement initial",
     "marker": {
       "day": "Jour {{day}}",
@@ -1471,7 +1644,7 @@
   },
   "patient_exploration": {
     "title": "{{total}} Patients",
-    "description": "Cohorte ATRT · CHOP, UCSF et Seattle Children's",
+    "description": "",
     "search_placeholder": "Rechercher par nom, ID de recherche ou dossier",
     "tabs": {
       "cohort_analytics": "Analyse de cohorte",
@@ -1479,8 +1652,8 @@
     },
     "chat": {
       "title": "Analyse de cohorte",
-      "description": "État actuel du registre · dérivé des données de la cohorte",
-      "source": "Roster en direct"
+      "explore": "Explorer les graphiques",
+      "explore_tooltip": "Posez des questions sur ces graphiques et générez de nouvelles vues avec l'IA"
     },
     "cells": {
       "patient": {
@@ -1503,6 +1676,17 @@
       "organization_code": "Site",
       "cns_integrated_diagnosis": "Diagnostic",
       "age_at_initial_dx_group": "Âge au diagnostic",
+      "age_at_initial_dx_group_values": {
+        "congenital": "Congénital (à la naissance)",
+        "neonatal": "Néonatal (moins de 28 jours)",
+        "infantile": "Nourrisson (≥ 28 jours et < 1 an)",
+        "childhood": "Enfance (≥ 1 an et < 5 ans)",
+        "juvenile": "Juvénile (≥ 5 ans et < 16 ans)",
+        "young_adult": "Jeune adulte (≥ 16 ans et < 40 ans)",
+        "middle_age": "Âge moyen (≥ 40 ans et < 60 ans)",
+        "senior": "Aîné (≥ 60 ans)",
+        "unknown": "Inconnu (âge non disponible)"
+      },
       "chemotherapy_agents": "Agents de chimiothérapie",
       "got_radiation_ever": "Radiothérapie",
       "diagnosis_type_cohort": "Cohorte"
@@ -1598,6 +1782,10 @@
         "analysis_catalog_code": "Analyse",
         "ordering_organization_code": "Req. par",
         "ordering_organization_code_tooltip": "Requête faite par",
+        "proband_submitter_sample_ids": "Échantillon",
+        "proband_submitter_sample_ids_tooltip": "Identifiant d'échantillon du proband (échantillon tumoral pour les cas somatiques)",
+        "run_names": "Lot",
+        "run_names_tooltip": "Numéro de lot pour l'échantillon du proband",
         "project_code": "Projet",
         "updated_on": "Dernière modification",
         "updated_on_tooltip": "Date de la dernière modification du cas (aaaa-mm-jj)",
@@ -1897,6 +2085,19 @@
   },
   "variant": {
     "no_data_for_variant": "Aucune donnée pour ce variant.",
+    "report": {
+      "download": "Télécharger rapport",
+      "select_at_least_one": "Sélectionner au moins un élément",
+      "max_exceeded": {
+        "title": "Nombre maximum dépassé",
+        "description": "Un maximum de 100 éléments peut être exporté à la fois. Veuillez réduire votre sélection et réessayer."
+      },
+      "toast": {
+        "loading": "Génération du rapport…",
+        "success": "Rapport téléchargé",
+        "error": "Impossible de télécharger le rapport. Veuillez réessayer."
+      }
+    },
     "headers": {
       "aa_change": "AA",
       "aa_change_tooltip": "Substitution acide aminé",
@@ -1917,6 +2118,8 @@
       "cmc_sample_mutated_tooltip": "Nombre d’échantillons dans COSMIC avec cette mutation suivi de son ratio",
       "cmc_tier": "Tier",
       "cmc_tier_tooltip": "CMC tier. Signification de la mutation. 1 - haute signification, 2 - signification moyenne, 3 - faible signification, Other - Pas de signification prédite (autres mutations)",
+      "comphet_genes": "HC",
+      "comphet_genes_tooltip": "Hétérozygotie composite (slivar) : seuls les variants PASS à impact (LoF, Missense, Inframe, Splice Region) hétérozygotes chez le Proband, avec GQ ≥ 20, profondeur ≥ 6 et équilibre allélique entre 0,2 et 0,8, sont pris en compte. Dans les trios, exactement un parent doit porter le variant et aucun ne doit être homozygote.",
       "cn": "CN",
       "cn_tooltip": "Nombre de copies estimé",
       "cytoband": "Cytobande",
@@ -1937,10 +2140,16 @@
       "gene_length_tooltip": "Longueur du gène en bases",
       "genotype_quality": "QG",
       "genotype_quality_tooltip": "Qualité du génotypage : seules les occurrences rencontrant le critère QG ≥ 20 sont considérées pour le calcul des fréquences.",
-      "gnomad_sf": "gnomAD",
-      "gnomad_sf_tooltip": "gnomAD 4.1.0 (fréquence allélique)",
+      "gnomad_sf": "gnomAD SF",
+      "gnomad_sf_tooltip": "gnomAD 4.1.0 (fréquence de site)",
+      "gnomad_sv_ac": "gnomAD AC",
+      "gnomad_sv_ac_tooltip": "gnomAD 4.1.0 (nombre d'allèles)",
+      "gnomad_sv_af": "gnomAD AF",
+      "gnomad_sv_af_tooltip": "gnomAD 4.1.0 (fréquence allélique)",
+      "gnomad_sv_sc": "gnomAD SC",
+      "gnomad_sv_sc_tooltip": "gnomAD 4.1.0 (nombre de sites)",
       "gnomad_v3_af": "gnomAD",
-      "gnomad_v3_af_tooltip": "gnomAD Genome 3.1.2 (fréquence allélique)",
+      "gnomad_v3_af_tooltip": "gnomAD 4.1.0 Joint (fréquence)",
       "hgvsg": "Variant",
       "hotspot": "Hotspot",
       "hotspot_tooltip": "Hotspot Cancer",
@@ -2067,7 +2276,31 @@
     },
     "canonical_transcript": "Canonical transcript",
     "igv": {
-      "title": "Alignement et variant"
+      "title": "Alignement et variant",
+      "dense_reads_hidden": {
+        "title": "Lectures masquées dans une région dense",
+        "description": "Certaines pistes sont très profondes ici. Pour qu'IGV reste réactif, leurs lectures s'affichent seulement dans les vues de {{window}} pb ou moins. Zoomez pour les voir."
+      },
+      "failed_tracks": {
+        "title_one": "Une piste n'a pas pu être chargée",
+        "title_other": "{{count}} pistes n'ont pas pu être chargées"
+      },
+      "public_tracks": {
+        "menu": "Pistes",
+        "clinvar": "ClinVar",
+        "dgv": "DGV",
+        "clinvar_sv": "SV ClinVar",
+        "clingen_region_haploinsufficiency": "Haploinsuffisance des régions ClinGen",
+        "clingen_region_triplosensitivity": "Triplosensibilité des régions ClinGen",
+        "gnomad_sv": "SV gnomAD v4.1",
+        "gnomad_cnv": "CNV gnomAD v4.1",
+        "clingen_gene_haploinsufficiency": "Haploinsuffisance des gènes ClinGen",
+        "clingen_gene_triplosensitivity": "Triplosensibilité des gènes ClinGen",
+        "segmental_duplications": "Duplications segmentaires",
+        "repeat_masker": "RepeatMasker",
+        "simple_repeats": "Répétitions simples",
+        "self_chain": "Self chain"
+      }
     },
     "interpretation_form": {
       "alert": {
@@ -2079,7 +2312,7 @@
       "title": "Interprétation clinique",
       "cancel_text": "Annuler",
       "ok_text": "Sauvegarder l'interprétation",
-      "last_update": "Dernière mise à jour :",
+      "last_update": "<strong>Dernière mise à jour :</strong> {{name}} le <date/>",
       "header": {
         "germline": "Germinal",
         "germline_family": "Germinal",
@@ -2417,7 +2650,8 @@
       "sex": "Sexe",
       "submitter_patient_id": "ID patient org.",
       "submitter_patient_id_tooltip": "ID patient de l’organisation",
-      "title": "Information du patient"
+      "title": "Information du patient",
+      "view_patient": "Voir patient"
     },
     "details": {
       "aliquot": "Aliquot",
@@ -2578,7 +2812,7 @@
       "patients": "Patients",
       "patients_tooltip": "Nombre de génomes germinaux comportant ce variant et la fréquence sur l’ensemble du réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
       "gnom_ad": "gnomAD",
-      "gnom_ad_info_tooltip": "gnomAD Genome 3.1.2 (fréquence allélique)",
+      "gnom_ad_info_tooltip": "gnomAD 4.1.0 Joint (fréquence)",
       "exon": "Exon",
       "most_deleterious_consequence_notice": "Ce transcrit a été sélectionné car il représente la conséquence la plus délétère.",
       "view_all_transcripts": "Voir tous les transcrits",
@@ -2695,7 +2929,7 @@
         "af": "Fréquence",
         "af_tooltip": "Fréquence allélique",
         "topmed_bravo": "TopMed",
-        "gnomad_genomes_v3": "gnomAD Génomes (v3.1.2)",
+        "gnomad_genomes_v3": "gnomAD 4.1.0 Joint",
         "1000_genomes": "1000 Génomes"
       }
     },
@@ -2855,7 +3089,7 @@
       "admin": "Admin",
       "analysis": "Analyse",
       "cases": "Cas",
-      "files": "Fichiers",
+      "files": "Archive de fichiers",
       "patients": "Patients",
       "dashboard": "Tableau de bord",
       "data_exploration": "Exploration des données",
@@ -2867,8 +3101,7 @@
       "resources": "Ressources",
       "website": "Site web",
       "documentation": "Documentation",
-      "contact": "Contact",
-      "david": "D.A.V.I.D"
+      "contact": "Contact"
     },
     "tenant_switcher": {
       "title": "Changer de tenant"
@@ -2895,7 +3128,14 @@
       "badge": "Assistant IA",
       "description": "Analytique prédictive par IA pour des soins oncologiques personnalisés",
       "frame_title": "Assistant D.A.V.I.D",
-      "not_configured": "D.A.V.I.D n'est pas configuré pour cet environnement."
+      "new_analysis": "Nouvelle analyse",
+      "not_configured": "D.A.V.I.D n'est pas configuré pour cet environnement.",
+      "open_in_new_tab": "Ouvrir dans un onglet",
+      "resume_history": "Reprendre l'historique",
+      "tooltip": "Posez à D.A.V.I.D n'importe quelle question sur vos patients, cas et fichiers, à partir de ce qui est à l'écran",
+      "prompt_case": "Contexte : cas {{caseId}} (tenant {{tenant}}). Charge le contexte de ce cas et présente un bref résumé clinique (structure familiale, phénotypes HPO). Ensuite, attends les questions de l'utilisateur.",
+      "prompt_patient": "Contexte : clé patient {{patientKey}} (tenant {{tenant}}). Charge le contexte clinique de ce patient et présente un bref résumé clinique. Ensuite, attends les questions de l'utilisateur.",
+      "prompt_cohort": "Contexte : la cohorte de patients du tenant {{tenant}}. En deux phrases, dis ce que tu peux répondre sur cette cohorte. Ensuite, attends les questions de l'utilisateur."
     }
   }
 }

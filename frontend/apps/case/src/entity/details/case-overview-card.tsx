@@ -12,7 +12,7 @@ function CaseOverviewCard({ data, ...props }: { data: CaseEntity } & ComponentPr
 
   return (
     <Card id="case-overview-card" data-cy="case-overview-card" {...props}>
-      <CardHeader className="border-b [.border-b]:pb-2">
+      <CardHeader bordered>
         <CardTitle size="xl">{t('case_entity.details.case_overview')}</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">

@@ -37,7 +37,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
           <AnchorLink
             data-cy="gnomad"
             size="sm"
-            href={`https://gnomad.broadinstitute.org/variant/${data?.locus}?dataset=gnomad_r3`}
+            href={`https://gnomad.broadinstitute.org/variant/${data?.locus}?dataset=gnomad_r4`}
             variant="secondary"
             target="_blank"
             rel="noreferrer"

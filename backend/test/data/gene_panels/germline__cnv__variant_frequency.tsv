@@ -1,0 +1,5 @@
+cnv_id	pc_wgs	pn_wgs	pf_wgs	pc_wgs_affected	pn_wgs_affected	pf_wgs_affected	pc_wgs_not_affected	pn_wgs_not_affected	pf_wgs_not_affected	pc_wxs	pn_wxs	pf_wxs	pc_wxs_affected	pn_wxs_affected	pf_wxs_affected	pc_wxs_not_affected	pn_wxs_not_affected	pf_wxs_not_affected
+1	1	10	0.1	1	6	0.1667	0	4	0.0	0	4	0.0	0	4	0.0	0	0	NULL
+2	2	10	0.2	2	6	0.3333	0	4	0.0	1	4	0.25	1	4	0.25	0	0	NULL
+3	5	10	0.5	5	6	0.8333	0	4	0.0	2	4	0.5	2	4	0.5	0	0	NULL
+4	2	10	0.2	2	6	0.3333	0	4	0.0	0	4	0.0	0	4	0.0	0	0	NULL

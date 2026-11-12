@@ -10,7 +10,7 @@ Writes, in load order:
                       the API creates at startup (VIEW_REFRESH_ON_STARTUP_ENABLED)
 Everything is derived from the CSVs and hashes of the research ids: the same input gives the same SQL, except the\npatient URL keys (uuid4), which are only inserted for patients without one.
 """
-import argparse, datetime as dt, json, os, re, sys, uuid
+import argparse, csv, datetime as dt, gzip, json, os, re, sys, uuid
 
 import genomics, pcx
 
@@ -19,6 +19,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PCX_DIR = os.path.join(HERE, "..", "pcx_tables")
 # The upstream templates hard-code PRD's names; only the tenant code is a placeholder.
 TEMPLATE_VIEW_DB, TEMPLATE_SOURCE_DB = "cbtn_tenant", "radiant_data_dev"
+# Pre-aggregated EFS and OS cubes (CBTN PCX 30 V7, 2026-11-02 delivery, pooled with Cumulus-BCH), read by the YAC agent
+# (compose/yac/backends.json). Gzipped CSVs: about 250,000 rows each.
+CUBES_DIR = os.path.join(HERE, "data", "cubes")
 SHARED_DB = "radiant"
 JDBC_PATIENT_JOIN = "LEFT JOIN radiant_jdbc.public.patient p"
 
@@ -37,6 +40,8 @@ cli.add_argument("--tenant", default="cbtn", help="tenant code, [a-z][a-z0-9_]*"
 cli.add_argument("--name", help="tenant display name")
 cli.add_argument("--source-db", help="StarRocks database of the PCX source tables (default <tenant>_pcx_source; PRD: radiant_data_dev). "
                                      "One per tenant: the secured views read it without a tenant filter")
+cli.add_argument("--extra-deid", default=os.path.join(HERE, "data", "hin_patients"),
+                 help="local only: deid CSVs of patients added to --deid (default data/hin_patients: the TEFCA patients the cohort lacks)")
 cli.add_argument("--migrate-from", help="qa only: the deid directory the environment was seeded from. Instead of a full seed, writes "
                                         "migrate_postgres.sql and migrate_starrocks.sql, which bring it to --deid (see README)")
 cli.add_argument("--new-id-base", type=int, help="with --migrate-from: first integer id of the rows the migration adds, above every "
@@ -231,7 +236,7 @@ def occurrence_rows(sr):
                ["part", "seq_id", "task_id", "cnv_id", "aliquot", "chromosome", "start", "end", "type", "alternate", "length", "name",
                 "quality", "calls", "filter", "bc", "pe", "sm", "svtype", "svlen", "reflen", "ciend", "cipos", "cn", "cnf", "cnq", "mcn",
                 "mcnf", "mcnq", "maf", "sd", "ascn_as", "cytoband", "symbol", "nb_genes", "nb_snv"], sr["somatic__cnv__occurrence"]),
-        insert(f"{TENANT_DB}.exomiser", ["part", "seq_id", "locus_id", "id", "locus_hash", "moi", "variant_score", "gene_combined_score",
+        insert(f"{TENANT_DB}.exomiser", ["part", "seq_id", "task_id", "locus_id", "id", "locus_hash", "moi", "variant_score", "gene_combined_score",
                                           "variant_rank", "rank", "symbol", "acmg_classification", "acmg_evidence"], sr["exomiser"])]
 
 
@@ -265,9 +270,46 @@ def source_tables(pcx_tables, swap=False):
         out.append(f"CREATE TABLE {table} (\n    {coldefs}\n)\nDUPLICATE KEY(`{cols[0][0]}`)\n"
                    f"DISTRIBUTED BY HASH(`{cols[0][0]}`) BUCKETS 1\nPROPERTIES (\"replication_num\" = \"1\");")
         out.append(insert(table, [f"`{c}`" for c, _ in cols], rows))
-        if swap:
-            out += [f"ALTER TABLE {SOURCE_DB}.`{name}` SWAP WITH `{name}__next`;", f"DROP TABLE {table};"]
+        if swap:  # a table the environment does not hold yet gets an empty one to swap with
+            out += [f"CREATE TABLE IF NOT EXISTS {SOURCE_DB}.`{name}` LIKE {table};",
+                    f"ALTER TABLE {SOURCE_DB}.`{name}` SWAP WITH `{name}__next`;", f"DROP TABLE {table};"]
     return out
+
+
+def cube_tables():
+    """The survival cubes of data/cubes, one source table per .csv.gz. An empty cell is NULL: in a dimension it means rolled
+    up, never missing."""
+    tables = {}
+    for file in sorted(os.listdir(CUBES_DIR)):
+        with gzip.open(os.path.join(CUBES_DIR, file), "rt", encoding="utf-8", newline="") as f:
+            reader = csv.DictReader(f)
+            cols = [(c, "INT" if c == "cnt" or c.endswith("_months") else "VARCHAR(255)") for c in reader.fieldnames]
+            rows = [[None if r[c] == "" else int(r[c]) if t == "INT" else r[c] for c, t in cols] for r in reader]
+        tables[file.removesuffix(".csv.gz")] = (cols, rows)
+    return tables
+
+
+HIN_COLUMNS = {"hin_org_patient": ["research_id", "hin_org_name", "hin_short_code"],
+               "hin_document_metadata": ["count", "hin_bare_org_id", "hin_org_name", "document_type_name",
+                                         "document_class_name", "research_id"]}
+
+
+def hin_tables(deid_dir):
+    """The TEFCA / Carequality exchanges of the health information network (HIN), keyed on research_id: the organizations
+    linked to each patient, and the documents retrieved from them per type. The CSVs carry their export timestamp in their
+    name; the latest wins. A directory without them gives empty tables, so the views still have something to read."""
+    tables = {}
+    for name, names in HIN_COLUMNS.items():
+        cols = [(c, "INT" if c == "count" else "VARCHAR(255)") for c in names]
+        files = sorted(f for f in os.listdir(deid_dir) if f.startswith(f"{name}_") and f.endswith("_deid.csv"))
+        rows = []
+        if files:
+            path = os.path.join(deid_dir, files[-1])
+            if pcx.read_csv_header(path) != names:
+                sys.exit(f"{path}: expected the columns {names}")
+            rows = [[None if r[c] is None else int(r[c]) if t == "INT" else r[c] for c, t in cols] for r in pcx.read_csv(path)]
+        tables[name] = (cols, rows)
+    return tables
 
 
 def patient_keys(patients):
@@ -391,7 +433,7 @@ FROM (
 ) f
 WHERE snv__variant.locus_id = f.locus_id;""")
     S.append(f"DELETE FROM {TENANT_DB}.snv__variant WHERE germline_pc_wgs = 0 AND somatic_pc_tn_wgs = 0;")
-    S += source_tables(pcx_tables, swap=True) + patient_keys(patients)
+    S += source_tables(pcx_tables, swap=True) + source_tables(hin_tables(args.deid), swap=True) + patient_keys(patients)
 
     os.makedirs(args.out, exist_ok=True)
     for name, parts in [("migrate_postgres.sql", P), ("migrate_starrocks.sql", S)]:
@@ -410,7 +452,12 @@ org_ref = {r["code"]: r for r in organizations}
 old_patients = old_data = None
 if args.migrate_from:
     old_patients, old_data, _ = pcx.build(args.migrate_from, organizations)
-patients, data, pcx_tables = pcx.build(args.deid, organizations, old_patients and {rid: (p.mrn, p.dob) for rid, p in old_patients.items()})
+pins = old_patients and {rid: (p.mrn, p.dob) for rid, p in old_patients.items()}
+extra_deid = None if QA else args.extra_deid
+if extra_deid:
+    # The added patients would shift the MRNs of the cohort (an MRN depends on how many patients sort before it).
+    pins = {rid: (p.mrn, p.dob) for rid, p in pcx.build(args.deid, organizations)[0].items()}
+patients, data, pcx_tables = pcx.build(args.deid, organizations, pins, extra_deid)
 add_mri_labs_dictionary(pcx_tables, patients, data)
 providers = sorted({p.org for p in patients.values()})
 if args.migrate_from:
@@ -559,29 +606,36 @@ REFERENCE = [] if QA else [
 S += REFERENCE
 S += occurrence_rows(sr)
 
-# PCX source tables, MRI and labs, the data dictionary, and the URL keys.
+# PCX source tables, MRI and labs, the data dictionary, the URL keys and the HIN exchanges.
 S += source_tables(pcx_tables)
 S += patient_keys(patients)
+S += source_tables(hin_tables(args.deid))
+cubes = cube_tables()
+S += source_tables(cubes)
 
 # ---------------------------------------------------------------- StarRocks: views
 V = [f"""/* PCX secured views for tenant {TENANT}, rendered from scripts/pcx_tables/access_controlled_views (owned by the
    RADIANT-Timeline-Abstraction team), then Radiant's own views (scripts/seed/views).
    Needs the auth.* and {TENANT_DB}.* views the API creates at startup. */"""]
 views_dir = os.path.join(PCX_DIR, "access_controlled_views")
+# Stand-ins for the views upstream builds with dbt only, dropped as soon as upstream ships the template.
+local_views_dir = os.path.join(HERE, "access_controlled_views")
+templates = {f: os.path.join(local_views_dir, f) for f in os.listdir(local_views_dir)}
+templates.update({f: os.path.join(views_dir, f) for f in os.listdir(views_dir)})
 seeded = set(pcx_tables)
-for file in sorted(os.listdir(views_dir)):
+for file, path in sorted(templates.items()):
     if not file.endswith(".sql.tmpl"):
         continue
-    sql = open(os.path.join(views_dir, file), encoding="utf-8").read()
+    sql = open(path, encoding="utf-8").read()
     sql = sql[sql.index("CREATE OR REPLACE VIEW"):].rstrip().rstrip(";")
-    source = re.search(rf"FROM {TEMPLATE_SOURCE_DB}\.(\w+)", sql).group(1)
+    source = re.search(rf"FROM {TEMPLATE_SOURCE_DB}\.(\w+)", sql, re.I).group(1)
     if source not in seeded:
         sys.exit(f"{file} reads {TEMPLATE_SOURCE_DB}.{source}, which the seed does not create")
     # StarRocks 4.0.16 drops a slot ("slot_id not found") when it broadcasts this JDBC table against a regexp_replace
     # join key; a shuffle join avoids it. The templates are upstream's, so the hint is added here.
-    if sql.count(JDBC_PATIENT_JOIN) != 1:
+    sql, joins = re.subn(re.escape(JDBC_PATIENT_JOIN), JDBC_PATIENT_JOIN.replace("JOIN", "JOIN [SHUFFLE]"), sql, flags=re.I)
+    if joins != 1:
         sys.exit(f"{file}: expected one '{JDBC_PATIENT_JOIN}' to add the [SHUFFLE] hint to")
-    sql = sql.replace(JDBC_PATIENT_JOIN, JDBC_PATIENT_JOIN.replace("JOIN", "JOIN [SHUFFLE]"))
     sql = (sql.replace("{{.TenantCode}}", TENANT).replace(f"{TEMPLATE_VIEW_DB}.", f"{TENANT_DB}.")
               .replace(f"{TEMPLATE_SOURCE_DB}.", f"{SOURCE_DB}."))
     if "{{" in sql:
@@ -589,6 +643,8 @@ for file in sorted(os.listdir(views_dir)):
     V.append(sql + ";")
 V.append(f"CREATE OR REPLACE VIEW {TENANT_DB}.v_pcx_30_data_dictionary AS\n"
          f"SELECT display_order, table_name, source_file, field_name, description FROM {SOURCE_DB}.v_pcx_30_data_dictionary;")
+for name in cubes:
+    V.append(f"CREATE OR REPLACE VIEW {TENANT_DB}.v_{name} AS\nSELECT * FROM {SOURCE_DB}.`{name}`;")
 for file in sorted(os.listdir(os.path.join(HERE, "views"))):
     if file.endswith(".sql.tmpl"):
         sql = (open(os.path.join(HERE, "views", file), encoding="utf-8").read().replace("{{.TenantCode}}", TENANT)

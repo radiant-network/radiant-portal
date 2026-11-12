@@ -54,40 +54,6 @@ type PatientFilters struct {
 	GotRadiationEver       []FiltersValue `json:"got_radiation_ever" validate:"required"`      // Keys true, false; labels Yes, No
 }
 
-// PatientStatistics - Cohort analytics of the patient list
-// @Description Statistics on every patient the caller can see, regardless of the list filters
-// @Name PatientStatistics
-type PatientStatistics struct {
-	Total          int64                           `json:"total" validate:"required"`
-	ImagingCount   int64                           `json:"imaging_count" validate:"required"`
-	WithCasesCount int64                           `json:"with_cases_count" validate:"required"`
-	ByDiagnosis    []Aggregation                   `json:"by_diagnosis" validate:"required"`
-	ByAgeBucket    []Aggregation                   `json:"by_age_bucket" validate:"required"` // Keys 0-4, 5-9, 10-14, 15-19, 20+
-	ByProtocol     []Aggregation                   `json:"by_protocol" validate:"required"`   // Patients per protocol_name, a patient counted once per protocol
-	ByOrganization []PatientOrganizationVitalCount `json:"by_organization" validate:"required"`
-	Survival       []PatientSurvival               `json:"survival" validate:"required"` // Input of the Kaplan-Meier
-}
-
-// PatientOrganizationVitalCount - Vital status counts of one organization
-// @Description Alive and deceased patients of one organization
-// @Name PatientOrganizationVitalCount
-type PatientOrganizationVitalCount struct {
-	OrganizationCode string `json:"organization_code" validate:"required"`
-	OrganizationName string `json:"organization_name" validate:"required"`
-	Alive            int64  `json:"alive" validate:"required"`
-	Deceased         int64  `json:"deceased" validate:"required"`
-}
-
-// PatientSurvival - Survival of one patient
-// @Description Survival time of one patient, for the Kaplan-Meier
-// @Name PatientSurvival
-type PatientSurvival struct {
-	OrganizationCode       string  `json:"organization_code" validate:"required"`
-	CnsIntegratedDiagnosis *string `json:"cns_integrated_diagnosis"`
-	Days                   int     `json:"days" validate:"required"`
-	Event                  bool    `json:"event" validate:"required"` // true when deceased
-}
-
 // PatientDayDate - When something happened to a patient
 // @Description Age in days, and the calendar date when the caller can read PHI
 // @Name PatientDayDate
@@ -113,26 +79,99 @@ type PatientKeyDates struct {
 }
 
 // PatientEntity - Patient page
-// @Description Data of the patient page
+// @Description Header, sidebar and overview of the patient page; each other tab has its own endpoint
 // @Name PatientEntity
 type PatientEntity struct {
-	PatientListItem
-	BirthDate                   *DateISO8601             `json:"birth_date" swaggertype:"string" format:"date" example:"2020-01-31"`
-	Race                        *string                  `json:"race"`
-	Ethnicity                   *string                  `json:"ethnicity"`
-	PostalCode                  *string                  `json:"postal_code"` // Full with PHI access, 3 digits + XX otherwise
-	DataTypeCohort              *string                  `json:"data_type_cohort"`
-	KeyDates                    PatientKeyDates          `json:"key_dates" validate:"required"`
-	InitialDiagnosisEvidenceURL *string                  `json:"initial_diagnosis_evidence_url"` // BRIM link, format to be defined
-	VitalStatusAt               PatientDayDate           `json:"vital_status_at" validate:"required"`
-	Events                      []PatientEvent           `json:"events" validate:"required"`
-	Surgeries                   []PatientSurgery         `json:"surgeries" validate:"required"`
-	Radiations                  []PatientRadiation       `json:"radiations" validate:"required"`
-	Therapies                   []PatientTherapy         `json:"therapies" validate:"required"`
-	Imaging                     []PatientImagingSession  `json:"imaging" validate:"required"`
-	TreatmentSummary            *PatientTreatmentSummary `json:"treatment_summary"`
-	Cases                       []PatientCase            `json:"cases" validate:"required"`
-	Interpretations             []PatientInterpretation  `json:"interpretations" validate:"required"` // Germline and somatic, of the patient's cases
+	PatientIdentity
+	BirthYear                    *int                     `json:"birth_year"`
+	Gender                       string                   `json:"gender" validate:"required" enums:"female,male,not_reported,not_available"`
+	DiagnosisTypeCohort          *string                  `json:"diagnosis_type_cohort"`
+	CnsIntegratedDiagnosis       *string                  `json:"cns_integrated_diagnosis"`        // From the initial event, as in the list
+	CnsIntegratedDiagnosisSource *string                  `json:"cns_integrated_diagnosis_source"` // Dataset of the diagnosis, e.g. CBTN or OpenPedCan
+	VitalStatus                  string                   `json:"vital_status" validate:"required" enums:"alive,deceased"`
+	BirthDate                    *DateISO8601             `json:"birth_date" swaggertype:"string" format:"date" example:"2020-01-31"`
+	Race                         *string                  `json:"race"`
+	Ethnicity                    *string                  `json:"ethnicity"`
+	PostalCode                   *string                  `json:"postal_code"` // Full with PHI access, 3 digits + XX otherwise
+	DataTypeCohort               *string                  `json:"data_type_cohort"`
+	KeyDates                     PatientKeyDates          `json:"key_dates" validate:"required"`
+	InitialDiagnosisEvidenceURL  *string                  `json:"initial_diagnosis_evidence_url"` // BRIM link, format to be defined
+	VitalStatusAt                PatientDayDate           `json:"vital_status_at" validate:"required"`
+	Events                       []PatientEvent           `json:"events" validate:"required"`
+	InitialTumorResections       []string                 `json:"initial_tumor_resections" validate:"required"` // Extent of tumor resection of each initial treatment surgery
+	TreatmentSummary             *PatientTreatmentSummary `json:"treatment_summary"`
+	HasProcessingReport          bool                     `json:"has_processing_report" validate:"required"` // A CHARM processing report can be opened; false without PHI access
+}
+
+// PatientTreatments - Treatments tab of the patient page
+// @Description Surgeries, radiations and medical therapies of a patient
+// @Name PatientTreatments
+type PatientTreatments struct {
+	Surgeries        []PatientSurgery         `json:"surgeries" validate:"required"`
+	Radiations       []PatientRadiation       `json:"radiations" validate:"required"`
+	Therapies        []PatientTherapy         `json:"therapies" validate:"required"`
+	TrialEnrollments []PatientTrialEnrollment `json:"trial_enrollments" validate:"required"` // Most recent first
+}
+
+// PatientLaboratory - Laboratory tab of the patient page
+// @Description Latest CBC, performance status and CSF of a patient
+// @Name PatientLaboratory
+type PatientLaboratory struct {
+	Cbc               *PatientCbc               `json:"cbc"`
+	PerformanceStatus []PatientPerformanceScore `json:"performance_status" validate:"required"`
+	Csf               *PatientCsf               `json:"csf"`
+}
+
+// PatientImaging - Imaging tab of the patient page
+// @Description Imaging sessions of a patient
+// @Name PatientImaging
+type PatientImaging struct {
+	Sessions []PatientImagingSession `json:"sessions" validate:"required"`
+}
+
+// PatientGenomics - Genomics tab of the patient page
+// @Description Portal cases of a patient and the variant interpretations recorded on them
+// @Name PatientGenomics
+type PatientGenomics struct {
+	Cases           []PatientCase           `json:"cases" validate:"required"`
+	Interpretations []PatientInterpretation `json:"interpretations" validate:"required"` // Germline and somatic, of the patient's cases
+}
+
+// PatientExternalRecords - External records of the patient sidebar
+// @Description Organizations linked to the patient through the health information network (TEFCA or Carequality), and the documents retrieved from them
+// @Name PatientExternalRecords
+type PatientExternalRecords struct {
+	OrganizationCount  int                           `json:"organization_count" validate:"required"`
+	DocumentCount      int                           `json:"document_count" validate:"required"`
+	DocumentClassCount int                           `json:"document_class_count" validate:"required"` // Distinct document classes across the organizations
+	Organizations      []PatientExchangeOrganization `json:"organizations" validate:"required"`        // Most documents first, then by name
+}
+
+// PatientExchangeOrganization - Organization linked to a patient through the health information network
+// @Description Organization linked to a patient through TEFCA or Carequality. Linked with no document means nothing was retrieved from it.
+// @Name PatientExchangeOrganization
+type PatientExchangeOrganization struct {
+	Name            string                 `json:"name" validate:"required"`
+	Network         *string                `json:"network" enums:"tefca,carequality"` // null when documents came from an organization the patient is not linked to
+	DocumentCount   int                    `json:"document_count" validate:"required"`
+	DocumentClasses []PatientDocumentClass `json:"document_classes" validate:"required"` // Most documents first, then by name
+}
+
+// PatientDocumentClass - Documents of one class retrieved from an organization
+// @Description Documents of one class retrieved from an organization, with its document types
+// @Name PatientDocumentClass
+type PatientDocumentClass struct {
+	Name          string                `json:"name" validate:"required"`
+	DocumentCount int                   `json:"document_count" validate:"required"`
+	Types         []PatientDocumentType `json:"types" validate:"required"` // Most documents first, then by name; empty when the class's only type has its own name
+}
+
+// PatientDocumentType - Documents of one type within a document class
+// @Description Number of documents of one type within a document class
+// @Name PatientDocumentType
+type PatientDocumentType struct {
+	Name          string `json:"name" validate:"required"`
+	DocumentCount int    `json:"document_count" validate:"required"`
 }
 
 // PatientEvent - Disease event of a patient
@@ -158,6 +197,7 @@ type PatientSurgery struct {
 	PatientDayDate
 	ExtentOfTumorResection *string `json:"extent_of_tumor_resection"`
 	IsInitialTreatment     *bool   `json:"is_initial_treatment"` // null when Not Reported
+	EvidenceURL            *string `json:"evidence_url"`         // BRIM link to the source of the surgery
 }
 
 // PatientDose - Radiation dose
@@ -198,16 +238,72 @@ type PatientTherapy struct {
 	IsInitialTreatment *bool          `json:"is_initial_treatment"` // null when Not Reported
 }
 
+// PatientTrialEnrollment - Treatment protocol the patient was enrolled on
+// @Description Enrollment of the patient on a treatment protocol, one per medical therapy record
+// @Name PatientTrialEnrollment
+type PatientTrialEnrollment struct {
+	Start              PatientDayDate `json:"start" validate:"required"`
+	Stop               PatientDayDate `json:"stop" validate:"required"`
+	ProtocolName       string         `json:"protocol_name" validate:"required"`
+	ProtocolArm        *string        `json:"protocol_arm"` // null when Not Applicable
+	ChemotherapyAgents []string       `json:"chemotherapy_agents" validate:"required"`
+	IsInitialTreatment bool           `json:"is_initial_treatment" validate:"required"`
+}
+
+// PatientTrialEligibilities - Trial eligibility assessments of the clinical trials tab
+// @Description Clinical trial eligibility verdicts of a patient, extracted from the patient's notes by BRIM
+// @Name PatientTrialEligibilities
+type PatientTrialEligibilities struct {
+	Assessments []PatientTrialEligibility `json:"assessments" validate:"required"` // Most recently loaded first
+}
+
+// PatientTrialEligibility - Eligibility verdict of a patient for one clinical trial
+// @Description Eligibility verdict of a patient for one clinical trial. reasoning and brim_url are PHI: null without PHI access.
+// @Name PatientTrialEligibility
+type PatientTrialEligibility struct {
+	VariableName     string    `json:"variable_name" validate:"required" example:"3.6 PNOC035 Eligibility"` // The BRIM variable assessed, naming the trial
+	Verdict          string    `json:"verdict" validate:"required" example:"Ineligible Permanent"`          // After any human review edit, the operative value
+	GeneratedVerdict *string   `json:"generated_verdict"`                                                   // As BRIM produced it, before review
+	Confidence       *string   `json:"confidence" example:"0.95"`                                           // BRIM's score, as BRIM writes it
+	ReviewStatus     *string   `json:"review_status"`                                                       // null when not reviewed
+	Reasoning        *string   `json:"reasoning"`                                                           // Quotes the patient's notes
+	BrimURL          *string   `json:"brim_url"`                                                            // Re-identifies the patient in BRIM
+	LoadedAt         time.Time `json:"loaded_at" validate:"required"`                                       // When the BRIM export was loaded, not a clinical date
+}
+
+// PatientTumorBoard - Tumor board tab
+// @Description Tumor board sessions of a patient, and whether the caller can download the patient's presentation deck
+// @Name PatientTumorBoard
+type PatientTumorBoard struct {
+	Sessions []PatientTumorBoardSession `json:"sessions" validate:"required"` // Most recent first
+	HasDeck  bool                       `json:"has_deck" validate:"required"` // false without PHI access
+}
+
+// PatientTumorBoardSession - Tumor board session of a patient
+// @Description Tumor board session of a patient. The date is PHI, like every date of the patient view.
+// @Name PatientTumorBoardSession
+type PatientTumorBoardSession struct {
+	PatientDayDate
+	SessionID       int      `json:"session_id" validate:"required"`
+	Reason          *string  `json:"reason" example:"Progression Review"`
+	Diagnosis       *string  `json:"diagnosis" example:"AT/RT, SHH subtype"`
+	Consensus       *string  `json:"consensus"`
+	Recommendations []string `json:"recommendations" validate:"required"`
+	Status          *string  `json:"status" example:"Signed"`
+	HasReport       bool     `json:"has_report" validate:"required"` // false without PHI access
+}
+
 // PatientImagingSession - Imaging session of a patient
 // @Description Imaging session of a patient
 // @Name PatientImagingSession
 type PatientImagingSession struct {
 	PatientDayDate
-	SessionID       string  `json:"session_id" validate:"required"`
-	SessionName     string  `json:"session_name" validate:"required"`
-	AnatomicalSite  *string `json:"anatomical_site"`
-	ImagingModality *string `json:"imaging_modality"`
-	FlywheelURL     *string `json:"flywheel_url"`
+	SessionID         string  `json:"session_id" validate:"required"`
+	SessionName       string  `json:"session_name" validate:"required"`
+	AnatomicalSite    *string `json:"anatomical_site"`
+	ImagingModality   *string `json:"imaging_modality"`
+	FlywheelURL       *string `json:"flywheel_url"`
+	ClinicalReportURL *string `json:"clinical_report_url"`
 }
 
 // PatientTreatmentSummary - Initial treatment summary of a patient
@@ -225,6 +321,69 @@ type PatientTreatmentSummary struct {
 	HadInitialChemo        bool           `json:"had_initial_chemo" validate:"required"`
 	HadInitialMethotrexate bool           `json:"had_initial_methotrexate" validate:"required"`
 	InitialTreatmentOrder  *string        `json:"initial_treatment_order"`
+}
+
+// PatientLabResult - Lab result of a patient
+// @Description Result of one analyte, raw from the source: units are not normalized (ANC comes in /uL and x10E9/L)
+// @Name PatientLabResult
+type PatientLabResult struct {
+	Value *float64 `json:"value"`
+	Unit  *string  `json:"unit"`
+}
+
+// PatientCbc - Latest complete blood count of a patient
+// @Description Most recent CBC panel. All its analytes come from that panel, so they share its day and date.
+// @Name PatientCbc
+type PatientCbc struct {
+	PatientDayDate
+	Wbc        PatientLabResult `json:"wbc" validate:"required"`
+	Hemoglobin PatientLabResult `json:"hemoglobin" validate:"required"`
+	Platelets  PatientLabResult `json:"platelets" validate:"required"`
+	Anc        PatientLabResult `json:"anc" validate:"required"`
+}
+
+// PatientPerformanceScore - Performance status score of a patient
+// @Description Lansky or Karnofsky score. The date is when the result was released, not when it was assessed.
+// @Name PatientPerformanceScore
+type PatientPerformanceScore struct {
+	PatientDayDate
+	Scale     string  `json:"scale" validate:"required" enums:"lansky,karnofsky"`
+	Score     int     `json:"score" validate:"required"`
+	ScoreText *string `json:"score_text"` // As recorded, e.g. "90 - Minor restrictions in strenuous physical activity"
+}
+
+// PatientCsfResult - CSF lab result of a patient
+// @Description Latest result of one CSF component. Read display: the comparator is load-bearing ("<1.0" is undetectable).
+// @Name PatientCsfResult
+type PatientCsfResult struct {
+	PatientDayDate
+	Display    *string  `json:"display"` // Comparator, value and unit
+	Value      *float64 `json:"value"`
+	Comparator *string  `json:"comparator"`
+	Unit       *string  `json:"unit"`
+}
+
+// PatientCsfCytology - Latest CSF cytology of a patient
+// @Description Latest CSF cytology, with the finding derived from the report
+// @Name PatientCsfCytology
+type PatientCsfCytology struct {
+	PatientDayDate
+	TestName            *string `json:"test_name"`
+	MalignantCells      *string `json:"malignant_cells" enums:"positive,suspicious,negative,non_diagnostic,no_malignancy_statement"`
+	EvidenceTier        *string `json:"evidence_tier" enums:"named,text_confirmed,same_day_only"` // How the report was attributed to CSF
+	MultiSpecimenReport *bool   `json:"multi_specimen_report"`                                    // The finding may pertain to a non-CSF specimen
+}
+
+// PatientCsf - Latest CSF analysis of a patient
+// @Description Latest result of each CSF component. Each component is its own latest, so they may come from different punctures.
+// @Name PatientCsf
+type PatientCsf struct {
+	Protein     PatientCsfResult   `json:"protein" validate:"required"`
+	Glucose     PatientCsfResult   `json:"glucose" validate:"required"`
+	Wbc         PatientCsfResult   `json:"wbc" validate:"required"` // Nucleated cells
+	Rbc         PatientCsfResult   `json:"rbc" validate:"required"`
+	Cytology    PatientCsfCytology `json:"cytology" validate:"required"`
+	CellFreeDna PatientDayDate     `json:"cell_free_dna" validate:"required"` // Only when the test was done; the source has no value
 }
 
 // PatientCase - Portal case of a patient

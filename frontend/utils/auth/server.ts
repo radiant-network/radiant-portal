@@ -123,6 +123,26 @@ export const refreshAccessToken = async (
   return { accessToken: tokens.accessToken(), cookies };
 };
 
+const TOKEN_MIN_VALIDITY_SECONDS = 30;
+
+// Dedupes parallel refreshes keyed by the expired access token: all callers share one Keycloak round-trip.
+const refreshing = new Map<string, ReturnType<typeof refreshAccessToken>>();
+
+export const ensureFreshAccessToken = async (
+  request: Request,
+): Promise<{ accessToken: string; cookies: string[] } | null> => {
+  const accessToken = await getSessionAccessToken(request);
+  if (!accessToken) return null;
+  if (isTokenValid(accessToken, TOKEN_MIN_VALIDITY_SECONDS)) return { accessToken, cookies: [] };
+
+  let refresh = refreshing.get(accessToken);
+  if (!refresh) {
+    refresh = refreshAccessToken(request).finally(() => refreshing.delete(accessToken));
+    refreshing.set(accessToken, refresh);
+  }
+  return refresh;
+};
+
 export const login = async (request: Request): Promise<Response> => {
   const { refresh_token, access_token, ...user } = await authenticateRequest(request);
 
@@ -150,43 +170,50 @@ export const login = async (request: Request): Promise<Response> => {
 
 export const logout = async (request: Request) => {
   const refreshTokenSession = await getRefreshTokenSessionStorage(request);
+  const refreshToken = refreshTokenSession.get('token');
 
-  await fetch(getKeycloakOauth2Url('logout'), {
-    method: 'POST',
-    body: new URLSearchParams({
-      refresh_token: refreshTokenSession.get('token'),
-      client_id: process.env.KEYCLOAK_CLIENT!,
-      client_secret: process.env.KEYCLOAK_CLIENT_SECRET!,
-    }).toString(),
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-  });
+  // A Keycloak outage must not prevent us from clearing the local session: the user still
+  // needs to land on sign-in rather than the generic error page.
+  if (refreshToken) {
+    try {
+      await fetch(getKeycloakOauth2Url('logout'), {
+        method: 'POST',
+        body: new URLSearchParams({
+          refresh_token: refreshToken,
+          client_id: process.env.KEYCLOAK_CLIENT!,
+          client_secret: process.env.KEYCLOAK_CLIENT_SECRET!,
+        }).toString(),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+    } catch {
+      // ignore: local session cleanup below is the one guarantee this function makes
+    }
+  }
 
   return await clearSession(request);
 };
 
 export const requireAuth = async (request: Request): Promise<boolean> => {
-  const token = await getSessionAccessToken(request);
-
-  if (!token) {
-    return true;
-  }
-
   try {
-    if (!isTokenValid(token)) {
-      return true;
-    }
+    const session = await ensureFreshAccessToken(request);
+    if (!session) return true;
 
     const user = await getSessionUser(request);
-    if (!user) {
-      return true;
+    if (!user) return true;
+
+    if (session.cookies.length > 0) {
+      // Refreshed mid-loader: re-run with the new cookies so downstream code sees the fresh token.
+      const headers = new Headers();
+      session.cookies.forEach(c => headers.append('Set-Cookie', c));
+      throw redirect(getPageUrl(request), { headers });
     }
 
     return false;
   } catch (err) {
-    await clearSession(request);
-    return true;
+    if (err instanceof Response) throw err;
+    throw await clearSession(request);
   }
 };
 

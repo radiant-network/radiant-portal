@@ -5,6 +5,7 @@
     },
     "assignment_picker": {
       "open": "Edit case assignment",
+      "open_assigned": "Edit case assignment, assigned to {{names}}",
       "remove_user": "Remove {{name}}"
     },
     "auto_complete": {
@@ -44,6 +45,9 @@
       "no_data": "No data",
       "open_franklin": "{{tier}}, open in Franklin (new tab)"
     },
+    "comphet_genes_cell": {
+      "filter_variants": "Show the {{count}} compound het variants in {{gene}} in a new query"
+    },
     "data_table": {
       "collapse_row": "Collapse row",
       "column_settings": "Column settings",
@@ -52,6 +56,8 @@
       "grouped_by": "Grouped by {{value}}",
       "pin_column": "Pin column",
       "pin_row": "Pin row",
+      "select_page_rows": "Select all rows on this page",
+      "select_row": "Select row",
       "sort": "Sort",
       "sorted_asc": "Sorted ascending",
       "sorted_desc": "Sorted descending",
@@ -112,7 +118,8 @@
     },
     "query_bar": {
       "delete": "Delete query",
-      "duplicate": "Duplicate query"
+      "duplicate": "Duplicate query",
+      "select": "Select query {{index}}"
     },
     "query_builder": {
       "close_facets": "Close filters panel"
@@ -590,6 +597,9 @@
       "no_classification_for_the_single_variant": "No Classification for the Single Variant",
       "no_classification_for_the_single_variant.abbrev": "NC",
       "no_classification_for_the_single_variant.tooltip": "No Classification",
+      "no_classifications_from_unflagged_records": "No Classifications from Unflagged Records",
+      "no_classifications_from_unflagged_records.abbrev": "NCU",
+      "no_classifications_from_unflagged_records.tooltip": "No Classifications from Unflagged Records",
       "no_data": "No Data",
       "no_data.abbrev": "ND",
       "no_data.tooltip": "No Data",
@@ -647,7 +657,8 @@
       "txt": "Text File",
       "gvcf": "GVCF File",
       "zip": "ZIP Archive File",
-      "xlsx": "XLSX File"
+      "xlsx": "XLSX File",
+      "maf": "MAF File"
     },
     "data_type_code": {
       "alignment": "Aligned Reads",
@@ -665,6 +676,7 @@
       "covgene": "Coverage by Gene Report",
       "qcrun": "Sequencing Run QC Report",
       "exomiser": "Exomiser Report",
+      "exomiser_cnv": "Exomiser CNV Report",
       "clinical_report": "Clinical Report",
       "aggqc": "Aggregate Quality Control Report",
       "chrmr": "Mitochondrial Report",
@@ -771,7 +783,6 @@
         "default": "Save filter"
       },
       "discard_tooltip": "Discard unsaved changes",
-      "no_discard_tooltip": "No changes to discard",
       "no_saved_filters": "You have no saved filters",
       "untitled_filter": "Untitled filter",
       "notifications": {
@@ -824,6 +835,7 @@
           "sample_id": "Sample ID",
           "task_id": "Task",
           "sequencing_experiment_id": "Sequencing",
+          "proband_submitter_sample_ids": "Sample",
           "placeholder": "Search..."
         },
         "buttons": {
@@ -842,6 +854,10 @@
       "results": "Results {{from}} - {{to}} of {{total}}",
       "results_filtered": "{{shown}} shown of {{total}}",
       "no_result": "No results",
+      "items_selected_one": "{{value}} item selected",
+      "items_selected_other": "{{value}} items selected",
+      "select_all": "Select all",
+      "clear_selection": "Clear selection",
       "no_result_description": "Adjust your filters and try again.",
       "has_error": "Error loading this content",
       "has_error_description": "Try refreshing the page or try again in a few minutes."
@@ -949,7 +965,10 @@
         "gnomad_pli": "gnomAD pLI",
         "gnomad_sf": "gnomAD 4.1.0",
         "gnomad_sc": "gnomAD 4.1.0 ALT",
-        "gnomad_v3_af": "gnomAD Genome 3.1.2",
+        "gnomad_v3_af": "gnomAD 4.1.0",
+        "comphet_of": "Compound Het of",
+        "has_comphet": "Compound Het",
+        "has_comphet_tooltip": "Compound heterozygous (slivar): only PASS, impactful variants (LoF, Missense, Inframe, Splice Region) heterozygous in the proband with GQ ≥ 20, depth ≥ 6 and allele balance between 0.2 and 0.8 are considered. In trios, exactly one parent must carry the variant and neither may be homozygous.",
         "hotspot": "Hotspot",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
@@ -1022,6 +1041,8 @@
           "ig_v_gene": "IG V Gene",
           "ig_v_pseudogene": "IG V Pseudogene",
           "lncrna": "lncRNA",
+          "ncrna": "ncRNA",
+          "ncrna_pseudogene": "ncRNA Pseudogene",
           "non_stop_decay": "Non Stop Decay",
           "nonsense_mediated_decay": "Nonsense Mediated Decay",
           "processed_pseudogene": "Processed Pseudogene",
@@ -1030,15 +1051,21 @@
           "protein_coding_cds_not_defined": "Protein Coding CDS Not Defined",
           "protein_coding_lof": "Protein Coding LOF",
           "retained_intron": "Retained Intron",
+          "rnase_mrp_rna": "RNase MRP RNA",
+          "rnase_p_rna": "RNase P RNA",
           "tec": "TEC",
+          "telomerase_rna": "Telomerase RNA",
           "transcribed_processed_pseudogene": "Transcribed Processed Pseudogene",
+          "transcribed_pseudogene": "Transcribed Pseudogene",
           "transcribed_unitary_pseudogene": "Transcribed Unitary Pseudogene",
           "transcribed_unprocessed_pseudogene": "Transcribed Unprocessed Pseudogene",
           "tr_c_gene": "TR C Gene",
           "tr_v_gene": "TR V Gene",
           "tr_v_pseudogene": "TR V Pseudogene",
+          "trna": "tRNA",
           "unitary_pseudogene": "Unitary Pseudogene",
           "unprocessed_pseudogene": "Unprocessed Pseudogene",
+          "y_rna": "Y RNA",
           "": "No Data"
         },
         "cmc_tier": {
@@ -1097,6 +1124,10 @@
         "fathmm_pred": {
           "t": "Tolerated",
           "d": "Damaging"
+        },
+        "has_comphet": {
+          "0": "False",
+          "1": "True"
         },
         "lrt_pred": {
           "n": "Neutral",
@@ -1285,7 +1316,6 @@
       "born_year": "Born {{year}}",
       "phi_restricted": "Restricted",
       "phi_restricted_tooltip": "Identity restricted outside your organisation",
-      "ask_assistant": "Ask about this patient",
       "vital_status": {
         "alive": "Alive",
         "deceased": "Deceased"
@@ -1307,11 +1337,15 @@
         "cns_diagnosis_category": "CNS diagnosis category",
         "cns_integrated_diagnosis": "CNS integrated diagnosis",
         "event_date": "Date of diagnosis",
-        "day": "Day {{day}}"
+        "day": "Day {{day}}",
+        "tumor_locations": "Tumor locations",
+        "tumor_location_other": "Other location",
+        "metastasis": "Metastasis",
+        "initial_tumor_resections": "Initial tumor resections"
       },
-      "tumour_and_metastasis": {
-        "title": "Tumour and metastasis",
-        "tumor_locations": "Tumour locations",
+      "tumor_and_metastasis": {
+        "title": "Tumor and metastasis",
+        "tumor_locations": "Tumor locations",
         "tumor_location_other": "Other location",
         "metastasis": "Metastasis",
         "metastasis_locations": "Metastasis sites",
@@ -1340,6 +1374,7 @@
       },
       "interpretations": {
         "title": "Variant interpretations",
+        "empty": "No variant interpretation for this patient.",
         "aa_tooltip": "Amino acid change",
         "date_tooltip": "Last interpretation date",
         "headers": {
@@ -1355,6 +1390,7 @@
       },
       "cases": {
         "title": "Genomic cases",
+        "empty": "No genomic case for this patient.",
         "type": {
           "somatic": "Somatic",
           "germline": "Solo germline",
@@ -1377,7 +1413,7 @@
         "title": "Key Dates",
         "initial_diagnosis": "Initial diagnosis",
         "latest_encounter": "Latest encounter",
-        "day_age": "Day {{day}} · age {{age}}y",
+        "day_age": "{{age}}y · Day {{day}}",
         "sources": {
           "clinical": "Clinical",
           "registry": "Registry"
@@ -1385,16 +1421,32 @@
       },
       "external_records": {
         "title": "External Records",
-        "tefca_exchange": "TEFCA exchange",
-        "query_status": "Query status",
-        "query_status_description": "QHIN record locate & retrieve",
-        "linked": "Linked",
-        "connected": "Connected"
+        "organizations": "Organizations",
+        "documents": "Documents",
+        "document_types": "Document types",
+        "view_external_records": "View external records",
+        "networks": "TEFCA / Carequality",
+        "header_summary": "{{orgs}} organizations · {{docs}} documents",
+        "network": {
+          "tefca": "TEFCA",
+          "carequality": "Carequality"
+        },
+        "not_connected": {
+          "description": "External records have not yet been linked for this patient."
+        }
+      },
+      "clinical_note_extraction": {
+        "title": "Clinical note extraction",
+        "description": "Process this patient's clinical notes and extract the findings into structured FHIR data.",
+        "run": "Run extraction",
+        "iframe_title": "Clinical note extraction output",
+        "open_in_new_tab": "Open in new tab"
       }
     },
     "timeline": {
       "title": "Clinical Timeline",
       "description": "Disease events, surgeries, radiation and medical therapy by age in days since birth.",
+      "empty": "No clinical timeline for this patient.",
       "event_type": {
         "initial_cns_tumor": "Initial CNS Tumor",
         "progressive": "Progressive",
@@ -1443,12 +1495,133 @@
       "columns": {
         "date": "Date",
         "modality": "Modality",
+        "body_part": "Body Part",
+        "body_part_tooltip": "Body Part Examined",
         "viewer": "Viewer"
+      },
+      "livai_report": "LivAI Report"
+    },
+    "clinical_trials": {
+      "title": "Previous enrollment",
+      "empty": "No previous enrollment for this patient.",
+      "day_value": "Day {{day}}",
+      "initial_badge": "Initial treatment",
+      "columns": {
+        "protocol": "Protocol",
+        "start": "Start",
+        "stop": "Stop",
+        "agents": "Agents"
+      },
+      "trial_eligibilities": {
+        "title": "Trial Eligibility",
+        "subtitle": "Verdicts extracted by BRIM from patient clinical notes.",
+        "empty": "This patient has not yet been screened in BRIM for clinical trial eligibility.",
+        "confidence": "Confidence",
+        "not_reviewed": "Not reviewed",
+        "date_tooltip": "Latest assessment",
+        "reasoning_label": "Reasoning:",
+        "view_in_brim": "Open in BRIM",
+        "phi_restricted": "Reasoning restricted outside your organization",
+        "verdict": {
+          "eligible": "Eligible",
+          "ineligible_modifiable": "Ineligible modifiable",
+          "ineligible_permanent": "Ineligible permanent"
+        }
+      }
+    },
+    "tumor_board": {
+      "title": "Tumor board sessions",
+      "create_presentation": "Create Presentation",
+      "consensus": "Consensus",
+      "recommendations": "Recommendations",
+      "empty": "No tumor board session for this patient."
+    },
+    "laboratory": {
+      "date": {
+        "no_date_on_file": "No date on file",
+        "age_day": "{{age}}y · Day {{day}}",
+        "age_day_capped": "90+y · Day {{day}}"
+      },
+      "lab_tile": {
+        "reported": "reported {{reported}}",
+        "aria_empty": "{{label}}: no result on file",
+        "aria_value": "{{label}}: {{value}} {{unit}}"
+      },
+      "cbc": {
+        "title": "Latest blood counts",
+        "empty": "No complete blood count on file.",
+        "analytes": {
+          "wbc": "WBC",
+          "hemoglobin": "Hemoglobin",
+          "platelets": "Platelets",
+          "anc": "ANC"
+        }
+      },
+      "performance_status": {
+        "title": "Performance status",
+        "empty": "No performance status score on file.",
+        "released": "Released",
+        "score_suffix": "/ 100",
+        "aria_box": "{{scale}}: {{score}} out of 100",
+        "scales": {
+          "lansky": "Lansky",
+          "karnofsky": "Karnofsky"
+        },
+        "mismatch": {
+          "lansky-adult": "Lansky recorded at age 16+",
+          "karnofsky-paediatric": "Karnofsky recorded under age 16"
+        }
+      },
+      "csf": {
+        "title": "CSF analysis",
+        "empty": "No CSF analysis on file.",
+        "analytes": {
+          "protein": "Protein",
+          "glucose": "Glucose",
+          "nucleated_cells": "Nucleated cells",
+          "rbc": "RBC"
+        },
+        "cytology": {
+          "title": "Cytology",
+          "multi_specimen_warning": "The report covers more than one specimen — the finding may pertain to a non-CSF sample.",
+          "multi_specimen": {
+            "yes": "Yes",
+            "no": "No"
+          },
+          "fields": {
+            "test_name": "Test name",
+            "multi_specimen": "Covers multiple specimens",
+            "result_date": "Result date"
+          },
+          "badge": {
+            "positive": "Malignant cells present",
+            "suspicious": "Suspicious for malignancy",
+            "negative": "No malignant cells reported",
+            "non_diagnostic": "Non-diagnostic specimen",
+            "no_malignancy_statement": "Report makes no malignancy statement",
+            "unknown": "Unrecognised cytology result",
+            "empty": "No cytology on file"
+          },
+          "tier_note": {
+            "text_confirmed": "Attributed to CSF from the report text.",
+            "same_day_only": "Attributed to CSF only because it was collected the same day — this result may not be from CSF."
+          }
+        },
+        "chemistry": {
+          "title": "Chemistry and cell count"
+        },
+        "specimen": {
+          "title": "Specimen collected — result not shown in RADIANT",
+          "cell_free_dna": "Cell-free DNA",
+          "collected": "Collected"
+        }
       }
     }
   },
   "timeline": {
+    "collapse_all": "Collapse all",
     "evidence": "Evidence",
+    "expand_all": "Expand all",
     "initial_treatment": "Initial treatment",
     "marker": {
       "day": "Day {{day}}",
@@ -1470,7 +1643,7 @@
   },
   "patient_exploration": {
     "title": "{{total}} Patients",
-    "description": "ATRT cohort · CHOP, UCSF and Seattle Children's",
+    "description": "",
     "search_placeholder": "Search by name, research ID or MRN",
     "tabs": {
       "cohort_analytics": "Cohort analytics",
@@ -1478,8 +1651,8 @@
     },
     "chat": {
       "title": "Cohort analytics",
-      "description": "Current registry snapshot · derived from roster fields",
-      "source": "Live roster"
+      "explore": "Explore charts",
+      "explore_tooltip": "Ask questions about these charts and generate new views with AI"
     },
     "cells": {
       "patient": {
@@ -1502,6 +1675,17 @@
       "organization_code": "Site",
       "cns_integrated_diagnosis": "Diagnosis",
       "age_at_initial_dx_group": "Age at diagnosis",
+      "age_at_initial_dx_group_values": {
+        "congenital": "Congenital (at birth)",
+        "neonatal": "Neonatal (under 28 days)",
+        "infantile": "Infantile (≥ 28 days and < 1 year)",
+        "childhood": "Childhood (≥ 1 year and < 5 years)",
+        "juvenile": "Juvenile (≥ 5 years and < 16 years)",
+        "young_adult": "Young Adult (≥ 16 years and < 40 years)",
+        "middle_age": "Middle Age (≥ 40 years and < 60 years)",
+        "senior": "Senior (≥ 60 years)",
+        "unknown": "Unknown (age not available)"
+      },
       "chemotherapy_agents": "Chemotherapy agents",
       "got_radiation_ever": "Radiation",
       "diagnosis_type_cohort": "Cohort"
@@ -1597,6 +1781,10 @@
         "primary_condition": "Primary Condition",
         "ordering_organization_code": "Req. By",
         "ordering_organization_code_tooltip": "Requested by",
+        "proband_submitter_sample_ids": "Sample",
+        "proband_submitter_sample_ids_tooltip": "Proband's sample ID (tumor sample for somatic cases)",
+        "run_names": "Run",
+        "run_names_tooltip": "Run ID for the proband's sample",
         "project_code": "Project",
         "updated_on": "Updated",
         "updated_on_tooltip": "Date of last case modification (yyyy-mm-dd)",
@@ -1896,6 +2084,19 @@
   },
   "variant": {
     "no_data_for_variant": "No data for this variant.",
+    "report": {
+      "download": "Download report",
+      "select_at_least_one": "Select at least one item",
+      "max_exceeded": {
+        "title": "Maximum number exceeded",
+        "description": "A maximum of 100 items can be exported at a time. Please narrow your selection and try again."
+      },
+      "toast": {
+        "loading": "Generating report…",
+        "success": "Report downloaded",
+        "error": "Unable to download the report. Please try again."
+      }
+    },
     "headers": {
       "aa_change": "AA",
       "aa_change_tooltip": "Amino acid change",
@@ -1916,6 +2117,8 @@
       "cmc_sample_mutated_tooltip": "Number of samples in COSMIC with this mutation followed by its ratio",
       "cmc_tier": "Tier",
       "cmc_tier_tooltip": "CMC Tier. Mutation significance. 1 - high significance, 2 - medium significance, 3 - low significance, Other - No predicted significance (other mutations)",
+      "comphet_genes": "CH",
+      "comphet_genes_tooltip": "Compound heterozygous (slivar): only PASS, impactful variants (LoF, Missense, Inframe, Splice Region) heterozygous in the proband with GQ ≥ 20, depth ≥ 6 and allele balance between 0.2 and 0.8 are considered. In trios, exactly one parent must carry the variant and neither may be homozygous.",
       "cn": "CN",
       "cn_tooltip": "Estimated copy number",
       "cytoband": "Cytoband",
@@ -1936,10 +2139,16 @@
       "gene_length_tooltip": "Gene base length",
       "genotype_quality": "GQ",
       "genotype_quality_tooltip": "Genotype quality: only occurrences with GQ ≥ 20 are taken into account for frequency calculation.",
-      "gnomad_sf": "gnomAD",
-      "gnomad_sf_tooltip": "gnomAD 4.1.0 (Allele Frequency)",
+      "gnomad_sf": "gnomAD SF",
+      "gnomad_sf_tooltip": "gnomAD 4.1.0 (Site Frequency)",
+      "gnomad_sv_ac": "gnomAD AC",
+      "gnomad_sv_ac_tooltip": "gnomAD 4.1.0 (Allele Count)",
+      "gnomad_sv_af": "gnomAD AF",
+      "gnomad_sv_af_tooltip": "gnomAD 4.1.0 (Allele Frequency)",
+      "gnomad_sv_sc": "gnomAD SC",
+      "gnomad_sv_sc_tooltip": "gnomAD 4.1.0 (Site Count)",
       "gnomad_v3_af": "gnomAD",
-      "gnomad_v3_af_tooltip": "gnomAD Genome 3.1.2 (Allele Frequency)",
+      "gnomad_v3_af_tooltip": "gnomAD 4.1.0 Joint (Frequency)",
       "hgvsg": "Variant",
       "hotspot": "Hotspot",
       "hotspot_tooltip": "Hotspot Cancer",
@@ -2066,7 +2275,31 @@
     },
     "canonical_transcript": "Canonical transcript",
     "igv": {
-      "title": "Alignment and variant"
+      "title": "Alignment and variant",
+      "dense_reads_hidden": {
+        "title": "Reads hidden in a dense region",
+        "description": "Some tracks are very deep here. To keep IGV responsive, their reads show only in views of {{window}} bp or less. Zoom in to see them."
+      },
+      "failed_tracks": {
+        "title_one": "A track could not be loaded",
+        "title_other": "{{count}} tracks could not be loaded"
+      },
+      "public_tracks": {
+        "menu": "Tracks",
+        "clinvar": "ClinVar",
+        "dgv": "DGV",
+        "clinvar_sv": "ClinVar SVs",
+        "clingen_region_haploinsufficiency": "ClinGen region haploinsufficiency",
+        "clingen_region_triplosensitivity": "ClinGen region triplosensitivity",
+        "gnomad_sv": "gnomAD SV v4.1",
+        "gnomad_cnv": "gnomAD CNV v4.1",
+        "clingen_gene_haploinsufficiency": "ClinGen gene haploinsufficiency",
+        "clingen_gene_triplosensitivity": "ClinGen gene triplosensitivity",
+        "segmental_duplications": "Segmental duplications",
+        "repeat_masker": "RepeatMasker",
+        "simple_repeats": "Simple repeats",
+        "self_chain": "Self chain"
+      }
     },
     "interpretation_form": {
       "alert": {
@@ -2078,7 +2311,7 @@
       "title": "Clinical Interpretation",
       "cancel_text": "Cancel",
       "ok_text": "Save interpretation",
-      "last_update": "Last update:",
+      "last_update": "<strong>Last updated:</strong> {{name}} on <date/>",
       "header": {
         "germline": "Germline",
         "germline_family": "Germline",
@@ -2090,7 +2323,10 @@
         "exon": "Exon"
       },
       "notification": {
-        "success": { "title": "Interpretation saved", "button": "View interpretation" },
+        "success": {
+          "title": "Interpretation saved",
+          "button": "View interpretation"
+        },
         "error": {
           "title": "Failed to save interpretation",
           "text": "Failed to save interpretation. Please try again."
@@ -2413,7 +2649,8 @@
       "sex": "Sex",
       "submitter_patient_id": "Org. patient ID",
       "submitter_patient_id_tooltip": "Organisation patient ID",
-      "title": "Patient Information"
+      "title": "Patient Information",
+      "view_patient": "View Patient"
     },
     "details": {
       "aliquot": "Aliquot",
@@ -2574,7 +2811,7 @@
       "patients": "Patients",
       "patients_tooltip": "Number of germline genomes containing this variant and their frequency across this organization. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
       "gnom_ad": "gnomAD",
-      "gnom_ad_info_tooltip": "gnomAD Genome 3.1.2 (allele frequency)",
+      "gnom_ad_info_tooltip": "gnomAD 4.1.0 Joint (Frequency)",
       "exon": "Exon",
       "most_deleterious_consequence_notice": "This transcript was selected because it represents the most deleterious consequence.",
       "view_all_transcripts": "View all transcripts",
@@ -2691,7 +2928,7 @@
         "af": "Frequency",
         "af_tooltip": "Allele Frequency",
         "topmed_bravo": "TopMed",
-        "gnomad_genomes_v3": "gnomAD Genomes (v3.1.2)",
+        "gnomad_genomes_v3": "gnomAD 4.1.0 Joint",
         "1000_genomes": "1000 Genomes"
       }
     },
@@ -2851,7 +3088,7 @@
       "admin": "Admin",
       "analysis": "Analysis",
       "cases": "Cases",
-      "files": "Files",
+      "files": "File Archive",
       "patients": "Patients",
       "dashboard": "Dashboard",
       "data_exploration": "Data Exploration",
@@ -2863,8 +3100,7 @@
       "resources": "Resources",
       "website": "Website",
       "documentation": "Documentation",
-      "contact": "Contact",
-      "david": "D.A.V.I.D"
+      "contact": "Contact"
     },
     "tenant_switcher": {
       "title": "Switch Tenant"
@@ -2891,7 +3127,14 @@
       "badge": "AI assistant",
       "description": "AI-driven predictive analytics for personalized cancer care",
       "frame_title": "D.A.V.I.D assistant",
-      "not_configured": "D.A.V.I.D is not configured for this environment."
+      "new_analysis": "New analysis",
+      "not_configured": "D.A.V.I.D is not configured for this environment.",
+      "open_in_new_tab": "Open in tab",
+      "resume_history": "Resume history",
+      "tooltip": "Ask D.A.V.I.D anything about your patients, cases, and files, starting from what's on screen",
+      "prompt_case": "Context: case {{caseId}} (tenant {{tenant}}). Load this case's context and give a brief clinical summary (family structure, HPO phenotypes). Then wait for the user's questions.",
+      "prompt_patient": "Context: patient key {{patientKey}} (tenant {{tenant}}). Load this patient's clinical context and give a brief clinical summary. Then wait for the user's questions.",
+      "prompt_cohort": "Context: the patient cohort of tenant {{tenant}}. In two sentences, say what you can answer about this cohort. Then wait for the user's questions."
     }
   }
 }

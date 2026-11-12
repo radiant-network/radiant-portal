@@ -3,6 +3,7 @@ import { createContext, useContext } from 'react';
 export type TabsNavContextType = {
   value?: any;
   onValueChange?: (value: any) => void;
+  baseId: string;
 };
 
 export const TabsNavContext = createContext<TabsNavContextType | null>(null);

@@ -14,12 +14,15 @@ describe('Case Entity - Variants - Germline - CNV - Query builder - Empty query'
 
   it('Build a first pill', () => {
     setupTest();
+    CaseEntity_Variants_QueryBuilder.cnv.validations.shouldShowLabelsSwitch(false /*shouldExist*/);
     CaseEntity_Variants_QueryBuilder.cnv.actions.buildFirstPill();
 
     CaseEntity_Variants_QueryBuilder.cnv.validations.shouldHaveChromosomePill();
     CaseEntity_Variants_QueryBuilder.cnv.validations.shouldHaveActivePillCount(1);
     CaseEntity_Variants_QueryBuilder.cnv.validations.shouldHaveQueryCount();
     CaseEntity_Variants_QueryBuilder.cnv.validations.shouldShowClearAll(false /*shouldExist*/);
+    CaseEntity_Variants_QueryBuilder.cnv.validations.shouldShowLabelsSwitch(true /*shouldExist*/);
+    CaseEntity_Variants_QueryBuilder.cnv.validations.shouldShowQuerySelectCheckboxes(false /*shouldShow*/);
   });
 
   it('Collapse and expand the query panel', () => {

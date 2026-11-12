@@ -1,4 +1,15 @@
-import type { ListBodyWithCriteria, PatientFilters, PatientsSearchResponse } from '@/api/api';
+import type {
+  ListBodyWithCriteria,
+  PatientExternalRecords,
+  PatientFilters,
+  PatientGenomics,
+  PatientImaging,
+  PatientLaboratory,
+  PatientsSearchResponse,
+  PatientTreatments,
+  PatientTrialEligibilities,
+  PatientTumorBoard,
+} from '@/api/api';
 import { patientsApi } from '@/utils/api';
 
 export async function fetchPatientsList(
@@ -14,22 +25,59 @@ export async function fetchPatientFilters(tenant: string): Promise<PatientFilter
   return response.data;
 }
 
+export async function fetchPatientTreatments(tenant: string, patientKey: string): Promise<PatientTreatments> {
+  const response = await patientsApi.patientTreatments(tenant, patientKey);
+  return response.data;
+}
+
+export async function fetchPatientLaboratory(tenant: string, patientKey: string): Promise<PatientLaboratory> {
+  const response = await patientsApi.patientLaboratory(tenant, patientKey);
+  return response.data;
+}
+
+export async function fetchPatientImaging(tenant: string, patientKey: string): Promise<PatientImaging> {
+  const response = await patientsApi.patientImaging(tenant, patientKey);
+  return response.data;
+}
+
+export async function fetchPatientGenomics(tenant: string, patientKey: string): Promise<PatientGenomics> {
+  const response = await patientsApi.patientGenomics(tenant, patientKey);
+  return response.data;
+}
+
+export async function fetchPatientExternalRecords(tenant: string, patientKey: string): Promise<PatientExternalRecords> {
+  const response = await patientsApi.patientExternalRecords(tenant, patientKey);
+  return response.data;
+}
+
+export async function fetchPatientTrialEligibilities(
+  tenant: string,
+  patientKey: string,
+): Promise<PatientTrialEligibilities> {
+  const response = await patientsApi.patientTrialEligibilities(tenant, patientKey);
+  return response.data;
+}
+
+export async function fetchPatientTumorBoard(tenant: string, patientKey: string): Promise<PatientTumorBoard> {
+  const response = await patientsApi.patientTumorBoard(tenant, patientKey);
+  return response.data;
+}
+
+export async function fetchPatientTumorBoardDeckUrl(tenant: string, patientKey: string): Promise<string | undefined> {
+  const response = await patientsApi.patientTumorBoardDeckDownloadUrl(tenant, patientKey);
+  return response.data.url;
+}
+
+export async function fetchPatientTumorBoardReportUrl(
+  tenant: string,
+  patientKey: string,
+  sessionId: number,
+): Promise<string | undefined> {
+  const response = await patientsApi.patientTumorBoardReportDownloadUrl(tenant, patientKey, sessionId);
+  return response.data.url;
+}
+
 const MOCK_LATENCY_MS = 300;
-
-// TODO: replace with generated type from frontend/api/ once backend endpoint exists
-export type PatientExternalRecords = {
-  organization: string;
-  linked: boolean;
-  connected: boolean;
-};
-
-// Same placeholder for every patient, lifted from the v6.2 wireframe (Kai Ellery).
-// TODO: replace once the backend provides external records
-export const PATIENT_EXTERNAL_RECORDS_MOCK: PatientExternalRecords = {
-  organization: "The Children's Hospital of Philadelphia",
-  linked: true,
-  connected: true,
-};
 
 // TODO: replace with generated type from frontend/api/ once backend endpoint exists.
 // Not in the SJRA-1998 PatientEntity contract — lower priority for November (Build readiness)

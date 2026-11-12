@@ -4,17 +4,25 @@
 runs its agent back-end (`packages/agent`, FastAPI) in the local compose stack. Service definition:
 `yac-compose.yml`. The chat sits above the patient exploration table (`/patient`).
 
-Which LLM answers depends on the user:
+The chat doesn't ask for an OpenAI key (QA and production run the agent on Bedrock, which refuses
+one), so the agent answers with its own model. Locally that is:
 
-- **OpenAI**, for a user who enters their own OpenAI key in the chat (the key icon in the chat
-  header). The key is stored in the browser and sent per request as `X-OpenAI-Key`. Ollama is not
-  needed.
-- **Local Ollama** (`qwen3:14b`), for a user without a key. It needs Ollama on the host:
+- **Local Ollama** (`qwen3:14b`), the default. It needs Ollama on the host:
 
-```bash
-ollama serve                 # on the host (GPU); skip if the Ollama app is already running
-ollama pull qwen3:14b
-```
+  ```bash
+  ollama serve                 # on the host (GPU); skip if the Ollama app is already running
+  ollama pull qwen3:14b
+  ```
+
+- **OpenAI**, with a key in the environment (the shell, or the gitignored `backend/compose/.env`):
+
+  ```bash
+  YAC_OPENAI_API_KEY=sk-...
+  YAC_LLM_BASE_URL=https://api.openai.com/v1
+  YAC_MODEL=gpt-5.4
+  ```
+
+  Ollama is then not needed. Any other OpenAI-compatible endpoint works the same way.
 
 ## Start
 
@@ -56,11 +64,12 @@ points at the local StarRocks, and that StarRocks doesn't know remote users.
 | Variable | Default | Purpose |
 |---|---|---|
 | `YAC_ENABLED` | unset | `true` adds the `yac` profile in `make docker-run` |
-| `YAC_MODEL` | `qwen3:14b` | Model for requests without a user key. Needs tool calling and strict JSON-schema output |
-| `YAC_LLM_BASE_URL` | `http://host.docker.internal:11434/v1` | Any OpenAI-compatible endpoint, for requests without a user key. Requests with a user key always go to OpenAI |
+| `YAC_MODEL` | `qwen3:14b` | Model id at `YAC_LLM_BASE_URL`. Needs tool calling and strict JSON-schema output |
+| `YAC_LLM_BASE_URL` | `http://host.docker.internal:11434/v1` | Any OpenAI-compatible endpoint, e.g. `https://api.openai.com/v1` |
+| `YAC_OPENAI_API_KEY` | unset | Key for `YAC_LLM_BASE_URL`. Not needed for Ollama |
 | `YAC_PORT` | `8007` | Host port |
 | `YAC_CORS_ORIGINS` | `http://localhost:3000` | Comma-separated origins |
-| `YAC_BUILD_CONTEXT` | `https://github.com/hms-dbmi/udi-yac.git#main` | Git ref or local clone path (relative to `compose/`) |
+| `YAC_BUILD_CONTEXT` | `https://github.com/hms-dbmi/udi-yac.git#udi-yac-v0.12.3` | Git ref or local clone path (relative to `compose/`) |
 | `YAC_KEYCLOAK` | unset | Keycloak realm URL of another environment, e.g. QA: `https://auth.dev.qlin.aws.sante.quebec/realms/qlin`. It becomes the token issuer (`JWT_ISSUER`), and the signing keys are fetched from `<realm>/protocol/openid-connect/certs`. The audience stays `radiant`. |
 
 Unset, the agent trusts the local realm: the issuer is `http://localhost:8080/realms/radiant` (the URL
@@ -73,22 +82,21 @@ The agent verifies Keycloak JWTs (realm `radiant`, audience `radiant`, the same 
 every StarRocks query **as the caller**: the token is forwarded as the StarRocks password and the
 StarRocks user is the Keycloak `sub`. Ranger masks and row filters therefore apply per user.
 
-`yac/backends.json` exposes one package, `cbtn`: the PCX secured views of tenant `cbtn`, in
-database `cbtn_tenant`, seeded by the stack (see `scripts/seed/README.md`).
+`yac/backends.json` exposes one package, `cbtn`: two views of tenant `cbtn`, in database
+`cbtn_tenant`, seeded by the stack (see `scripts/seed/README.md`).
 
-- `patient` (`v_pcx_30_patient_level_combined`) is the parent entity, one row per patient. The other
-  eleven views (`demographics`, `event`, `medical_therapy`, `radiation`, `surgery`,
-  `treatment_summary`, `mri_image` and the latest labs) link to it on `patient_id`.
-- The descriptions come from the seed's data dictionaries, so the LLM knows what each column means.
-- The PHI rule lives in the views and reads `current_user()`, so it applies per caller. With PHI
-  access, `patient_id` is the MRN and calendar dates are filled; without it, `patient_id` is the
-  research id and the dates are NULL.
+- `Efs` and `Os` (`v_pcx30_efs_pooled_v7_months_cube`, `v_pcx30_os_pooled_v7_months_cube`) are
+  pre-aggregated event-free and overall survival cubes (`udi:cube`): patient counts over diagnosis,
+  protocol arm, subtype, site and data source, where NULL means the dimension is rolled up. `Os`
+  links its dimensions to `Efs`'s, so one filter reaches both. They pool CBTN PCX 30 V7 with
+  Cumulus-BCH (`scripts/seed/data/cubes`, 7,440 patients), so they hold far more patients than the
+  patient views.
+- The descriptions and cube settings come from the cubes' datapackage, so the LLM knows what each
+  column means.
+- The cubes hold counts only, no PHI: every user with access to the tenant sees the same rows.
 
 Log in with the seed's demo users (`cbtn-admin`, `cbtn-phi-chop`, `cbtn-phi-sch`, `cbtn-lab`,
 `cbtn-nophi`). The password is the username.
-
-Known StarRocks 4.0.16 bug in the upstream PCX views: a `WHERE` on `radiant_patient_id` fails with
-"slot_id not found". A chart selection on that column hits it.
 
 ## Smoke test
 
@@ -101,12 +109,11 @@ tok() { curl -s -d client_id=radiant --data-urlencode "client_secret=$SECRET" -d
   -d "password=$1" -d grant_type=password \
   http://localhost:8080/realms/radiant/protocol/openid-connect/token | jq -r .access_token; }
 
-# Same query, different users: patients whose MRN (PHI) each user sees.
-# cbtn-admin 966 mrn, cbtn-phi-chop 255 mrn / 711 research_id, cbtn-nophi 966 research_id.
+# Same query, different users, read as each of them: 249587 cube rows for every user.
 for u in cbtn-admin cbtn-phi-chop cbtn-nophi; do
   curl -s -X POST localhost:8007/v1/yac/query -H "Authorization: Bearer $(tok $u)" -H 'Content-Type: application/json' \
-    -d '{"package":"cbtn","queries":[{"vizId":"q","source":[{"name":"patient","source":"patient"}],
-         "transformation":[{"groupby":["patient_id_type"]},{"rollup":{"n":{"op":"count"}}}]}]}' \
+    -d '{"package":"cbtn","queries":[{"vizId":"q","source":[{"name":"Efs","source":"Efs"}],
+         "transformation":[{"rollup":{"n":{"op":"count"}}}]}]}' \
     | jq -c "{user: \"$u\", result: .results.q.displayData}"
 done
 

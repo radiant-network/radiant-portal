@@ -31,6 +31,18 @@ const CRITERIAS = {
   diagnosis_type_cohort: { key: 'diagnosis_type_cohort', visible: false },
 };
 
+const AGE_AT_INITIAL_DX_GROUP_ORDER = [
+  'congenital',
+  'neonatal',
+  'infantile',
+  'childhood',
+  'juvenile',
+  'young_adult',
+  'middle_age',
+  'senior',
+  'unknown',
+];
+
 export const FILTER_DEFAULTS: StringArrayRecord = {
   vital_status: [],
   organization_code: [],
@@ -65,7 +77,13 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
     return sortedKeys.map(key => {
       const typedKey = key as keyof PatientFilters;
       const rawValues: FiltersValue[] = apiFilters[typedKey] || [];
-      const values = rawValues.map(v => ({ ...v, label: v.label ?? v.key }));
+      const values = rawValues.map(v => ({
+        ...v,
+        label:
+          key === 'age_at_initial_dx_group'
+            ? t(`patient_exploration.filters.age_at_initial_dx_group_values.${v.key}`)
+            : (v.label ?? v.key),
+      }));
       const baseOption: IFilterButton = {
         key,
         label: t(`patient_exploration.filters.${key}`),
@@ -83,8 +101,18 @@ function FiltersGroupForm({ loading = true, setSearchCriteria }: FiltersGroupFor
             options: sortOptions(values),
             popoverSize: 'lg' as PopoverSize,
           };
+        case 'age_at_initial_dx_group':
+          return {
+            ...baseOption,
+            options: [...values].sort(
+              (a, b) => AGE_AT_INITIAL_DX_GROUP_ORDER.indexOf(a.key) - AGE_AT_INITIAL_DX_GROUP_ORDER.indexOf(b.key),
+            ),
+            popoverSize: 'lg' as PopoverSize,
+            withTooltip: true,
+          };
         case 'organization_code':
         case 'cns_integrated_diagnosis':
+        case 'chemotherapy_agents':
           return {
             ...baseOption,
             options: sortOptions(values),

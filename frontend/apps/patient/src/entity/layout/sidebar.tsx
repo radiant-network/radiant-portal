@@ -1,6 +1,6 @@
 import type { PatientEntity } from '@/api/api';
 
-import { PATIENT_EXTERNAL_RECORDS_MOCK } from '../../api/patient';
+import ClinicalNoteExtractionCard from '../sidebar/clinical-note-extraction-card';
 import ExternalRecordsCard from '../sidebar/external-records-card';
 import KeyDatesCard from '../sidebar/key-dates-card';
 
@@ -17,7 +17,8 @@ function Sidebar({ patient, isLoading }: SidebarProps) {
         latestEncounter={patient?.key_dates.latest_encounter}
         isLoading={isLoading}
       />
-      <ExternalRecordsCard externalRecords={PATIENT_EXTERNAL_RECORDS_MOCK} isLoading={isLoading} />
+      <ExternalRecordsCard />
+      {patient?.has_processing_report && <ClinicalNoteExtractionCard patientKey={patient.patient_key} />}
     </aside>
   );
 }
