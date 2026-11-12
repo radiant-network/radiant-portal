@@ -191,6 +191,7 @@ type AddOrUpdateFacetAction = {
 type RemoveFacetPillAction = {
   type: QBActionType.REMOVE_FACET_PILL;
   payload: IValueFacet;
+  queryId?: string;
 };
 type RemoveCombinedPillAction = {
   type: QBActionType.REMOVE_COMBINED_PILL;
@@ -575,27 +576,28 @@ function reduceQB(context: IQBContext, action: ActionType) {
       };
     }
     /**
-     * Remove pill from active query
+     * Remove pill from its query (the active query when no queryId is given)
      */
     case QBActionType.REMOVE_FACET_PILL: {
       const { activeQueryId } = context;
-      const index = context.sqons.findIndex(sqon => sqon.id === activeQueryId);
+      const queryId: string = action.queryId ?? activeQueryId;
+      const index = context.sqons.findIndex(sqon => sqon.id === queryId);
 
-      // verify active query exists
-      if (!context.sqons.some(sqon => sqon.id === activeQueryId)) {
-        throw new Error(`Cannot remove pill: ${action.type} ${activeQueryId} ${action.payload}`);
+      // verify query exists
+      if (index < 0) {
+        throw new Error(`Cannot remove pill: ${action.type} ${queryId} ${action.payload}`);
       }
 
       const combinedQueries = { ...context.settings.combinedQueries };
       const combinedQueryReferences = Object.keys(combinedQueries).filter(key =>
-        combinedQueries[key].includes(activeQueryId),
+        combinedQueries[key].includes(queryId),
       );
 
       let isQueryNowEmpty = false;
       const sqons = context.sqons
         .map(sqon => {
           // update sqon
-          if (sqon.id === activeQueryId) {
+          if (sqon.id === queryId) {
             const content = (sqon.content ?? []).filter(c => !isEqualToField(c, action.payload.content.field));
             if (content.length > 0) {
               return {
@@ -610,7 +612,7 @@ function reduceQB(context: IQBContext, action: ActionType) {
           if (combinedQueryReferences.includes(sqon.id)) {
             const content = ((sqon.content as ISqonGroupFacet[]) ?? [])
               .map(content => {
-                if (content.id !== activeQueryId) {
+                if (content.id !== queryId) {
                   return content;
                 }
 
@@ -640,7 +642,7 @@ function reduceQB(context: IQBContext, action: ActionType) {
       if (isQueryNowEmpty) {
         // remove sqon from combined queries sqons, clean combinedQueries
         Object.keys(combinedQueries).forEach(key => {
-          combinedQueries[key] = combinedQueries[key].filter(id => id != action.payload.id);
+          combinedQueries[key] = combinedQueries[key].filter(id => id != queryId);
         });
       }
 
@@ -665,9 +667,14 @@ function reduceQB(context: IQBContext, action: ActionType) {
         };
       }
 
+      let nextActiveQueryId = activeQueryId;
+      if (isQueryNowEmpty && queryId === activeQueryId) {
+        nextActiveQueryId = index < sqons.length ? sqons[index].id : sqons[index - 1].id;
+      }
+
       return {
         ...context,
-        activeQueryId: index < sqons.length ? sqons[index].id : sqons[index - 1].id,
+        activeQueryId: nextActiveQueryId,
         sqons,
         settings: {
           ...context.settings,

@@ -78,3 +78,44 @@ describe('qBReducer selectedQueries', () => {
     expect(next.cache.selectedQueries).toEqual([]);
   });
 });
+
+describe('qBReducer REMOVE_FACET_PILL', () => {
+  const q1 = query('q1', 'chromosome');
+  const q2: ISyntheticSqon = { id: 'q2', op: BooleanOperators.And, content: [pill('variant_type'), pill('position')] };
+
+  function contextWithQ1Active(sqons: ISyntheticSqon[]): IQBContext {
+    return { ...getDefaultQBContext(), activeQueryId: 'q1', sqons } as IQBContext;
+  }
+
+  it('removes the pill from its own query, not from the active one', () => {
+    const next = qBReducer(contextWithQ1Active([q1, q2]), {
+      type: QBActionType.REMOVE_FACET_PILL,
+      payload: pill('variant_type'),
+      queryId: 'q2',
+    });
+
+    expect(next.sqons).toEqual([q1, { ...q2, content: [pill('position')] }]);
+    expect(next.activeQueryId).toBe('q1');
+  });
+
+  it('deletes a non-active query emptied by the removal and keeps the active one', () => {
+    const next = qBReducer(contextWithQ1Active([q1, query('q2', 'variant_type')]), {
+      type: QBActionType.REMOVE_FACET_PILL,
+      payload: pill('variant_type'),
+      queryId: 'q2',
+    });
+
+    expect(next.sqons).toEqual([q1]);
+    expect(next.activeQueryId).toBe('q1');
+  });
+
+  it('removes the pill from the active query when no queryId is given', () => {
+    const next = qBReducer(contextWithQ1Active([{ ...q1, content: [pill('chromosome'), pill('position')] }, q2]), {
+      type: QBActionType.REMOVE_FACET_PILL,
+      payload: pill('chromosome'),
+    });
+
+    expect(next.sqons).toEqual([{ ...q1, content: [pill('position')] }, q2]);
+    expect(next.activeQueryId).toBe('q1');
+  });
+});

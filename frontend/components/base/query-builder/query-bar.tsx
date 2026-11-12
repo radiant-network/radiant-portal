@@ -63,18 +63,18 @@ function factory(uuid: string, content: TSyntheticSqonContentValue, aggregations
   }
 
   if (isSearchField(content as IValueFacet, aggregations)) {
-    return <SearchQueryPill sqon={content as IValueFacet} />;
+    return <SearchQueryPill queryId={uuid} sqon={content as IValueFacet} />;
   }
 
   if (isRange(content as IValueFacet)) {
-    return <NumericalQueryPill sqon={content as IValueFacet} />;
+    return <NumericalQueryPill queryId={uuid} sqon={content as IValueFacet} />;
   }
 
   if (isBoolean(content as IValueFacet)) {
-    return <BooleanQueryPill sqon={content as IValueFacet} />;
+    return <BooleanQueryPill queryId={uuid} sqon={content as IValueFacet} />;
   }
 
-  return <MultiSelectQueryPill sqon={content as IValueFacet} />;
+  return <MultiSelectQueryPill queryId={uuid} sqon={content as IValueFacet} />;
 }
 
 /**
