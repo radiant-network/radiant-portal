@@ -56,7 +56,7 @@ export function FavouriteButton({ facetKey, label }: FavouriteButtonProps) {
             <>
               <Star
                 className={cn(
-                  'fill-current',
+                  'fill-current opacity-80',
                   showHover && 'group-hover/favourite:hidden group-focus-visible/favourite:hidden',
                 )}
               />

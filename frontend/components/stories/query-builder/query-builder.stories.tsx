@@ -413,7 +413,7 @@ export const FacetFavouritesSaveError: Story = {
   },
   render: args => (
     <>
-      <Toaster />
+      <Toaster position="top-right" />
       <QueryBuilderStory
         args={args}
         title="Facet favourites – save error"
