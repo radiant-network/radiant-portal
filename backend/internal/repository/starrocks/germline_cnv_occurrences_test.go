@@ -1178,3 +1178,219 @@ func Test_GermlineCNV_ListTasks_TaskOfOtherCase_NotListed(t *testing.T) {
 		assert.Empty(t, tasks)
 	})
 }
+
+// In the `simple` fixture, CNV annotation task 86 of seq 70 carries the Exomiser result of its two slivar records
+// (CNV1 rank 1 pathogenic, CNV4 rank 3 uncertain_significance). The DRAGEN row of alignment task 91020 has none.
+
+func Test_GermlineCNV_GetOccurrences_SlivarSet_ReturnsExomiserFields(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sort := []types.SortBody{{Field: "start", Order: "asc"}}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, sort)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		require.Len(t, occurrences, 2)
+		best := occurrences[0]
+		assert.Equal(t, "CNV1", best.Name)
+		if assert.NotNil(t, best.ExomiserRank) {
+			assert.Equal(t, 1, *best.ExomiserRank)
+		}
+		if assert.NotNil(t, best.ExomiserVariantScore) {
+			assert.InDelta(t, 0.95, *best.ExomiserVariantScore, 1e-6)
+		}
+		if assert.NotNil(t, best.ExomiserGeneCombinedScore) {
+			assert.InDelta(t, 0.88, *best.ExomiserGeneCombinedScore, 1e-6)
+		}
+		assert.Equal(t, "AD", best.ExomiserMoi)
+		assert.Equal(t, "pathogenic", best.ExomiserAcmgClassification)
+		assert.Equal(t, types.JsonArray[string]{"PVS1", "PM2"}, best.ExomiserAcmgEvidence)
+
+		other := occurrences[1]
+		assert.Equal(t, "CNV4", other.Name)
+		if assert.NotNil(t, other.ExomiserRank) {
+			assert.Equal(t, 3, *other.ExomiserRank)
+		}
+		assert.Equal(t, "AR", other.ExomiserMoi)
+		assert.Equal(t, "uncertain_significance", other.ExomiserAcmgClassification)
+		assert.Equal(t, types.JsonArray[string]{"PM2"}, other.ExomiserAcmgEvidence)
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_AlignmentSet_ExomiserFieldsEmpty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, nil, nil, nil)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 70, 91020, query)
+
+		require.NoError(t, err)
+		require.Len(t, occurrences, 1)
+		o := occurrences[0]
+		assert.Nil(t, o.ExomiserRank)
+		assert.Nil(t, o.ExomiserVariantScore)
+		assert.Nil(t, o.ExomiserGeneCombinedScore)
+		assert.Empty(t, o.ExomiserMoi)
+		assert.Empty(t, o.ExomiserAcmgClassification)
+		assert.Nil(t, o.ExomiserAcmgEvidence)
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_SortByExomiserRank(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sort := []types.SortBody{{Field: "exomiser_rank", Order: "desc"}}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, []string{"exomiser_rank"}, nil, nil, sort)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		names := sliceutils.Map(occurrences, func(o types.GermlineCNVOccurrence, _ int, _ []types.GermlineCNVOccurrence) string { return o.Name })
+		assert.Equal(t, []string{"CNV4", "CNV1"}, names)
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_FilterByExomiserAcmgClassification(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: "in", Content: types.LeafContent{Field: "exomiser_acmg_classification", Value: []interface{}{"pathogenic"}}}},
+			Op:      "and",
+		}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "CNV1", occurrences[0].Name)
+		}
+	})
+}
+
+func Test_GermlineCNV_CountOccurrences_FilterByExomiserAcmgClassification(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: "in", Content: types.LeafContent{Field: "exomiser_acmg_classification", Value: []interface{}{"uncertain_significance"}}}},
+			Op:      "and",
+		}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
+		require.NoError(t, err)
+
+		count, err := repo.CountOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		assert.Equal(t, int64(1), count.Count)
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_FilterByExomiserGeneCombinedScore(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: ">", Content: types.LeafContent{Field: "exomiser_gene_combined_score", Value: []interface{}{0.5}}}},
+			Op:      "and",
+		}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "CNV1", occurrences[0].Name)
+		}
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_FilterByExomiserAcmgEvidence(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: "in", Content: types.LeafContent{Field: "exomiser_acmg_evidence", Value: []interface{}{"PVS1"}}}},
+			Op:      "and",
+		}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "CNV1", occurrences[0].Name)
+		}
+	})
+}
+
+func Test_GermlineCNV_AggregateOccurrences_ByExomiserAcmgClassification(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("exomiser_acmg_classification", nil, GermlineCnvQueryConfigForTest.AllFields)
+		require.NoError(t, err)
+
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		buckets := map[string]int64{}
+		for _, a := range aggregate {
+			buckets[a.Bucket] = a.Count
+		}
+		assert.Equal(t, map[string]int64{"pathogenic": 1, "uncertain_significance": 1}, buckets)
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_FilterByExomiserMoi(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sqon := &types.Sqon{
+			Content: types.SqonArray{{Op: "in", Content: types.LeafContent{Field: "exomiser_moi", Value: []interface{}{"AR"}}}},
+			Op:      "and",
+		}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, allGermlineCnvFields, sqon, nil, nil)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		if assert.Len(t, occurrences, 1) {
+			assert.Equal(t, "CNV4", occurrences[0].Name)
+		}
+	})
+}
+
+func Test_GermlineCNV_AggregateOccurrences_ByExomiserAcmgEvidence(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewAggregationQueryFromSqon("exomiser_acmg_evidence", nil, GermlineCnvQueryConfigForTest.AllFields)
+		require.NoError(t, err)
+
+		aggregate, err := repo.AggregateOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		buckets := map[string]int64{}
+		for _, a := range aggregate {
+			buckets[a.Bucket] = a.Count
+		}
+		assert.Equal(t, map[string]int64{"PVS1": 1, "PM2": 2}, buckets)
+	})
+}
+
+func Test_GermlineCNV_GetStatisticsOccurrences_ExomiserGeneCombinedScore(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		query, err := types.NewStatisticsQueryFromSqon("exomiser_gene_combined_score", nil, GermlineCnvQueryConfigForTest.AllFields)
+		require.NoError(t, err)
+
+		statistics, err := repo.GetStatisticsOccurrences(t.Context(), 70, 70, 86, query)
+
+		require.NoError(t, err)
+		assert.InDelta(t, 0.42, statistics.Min, 1e-6)
+		assert.InDelta(t, 0.88, statistics.Max, 1e-6)
+	})
+}
