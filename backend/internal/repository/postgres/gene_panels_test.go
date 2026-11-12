@@ -36,6 +36,18 @@ func genePanelScratchTenant(t *testing.T, pg *gorm.DB) string {
 	return code
 }
 
+// insertCatalogUsingPanel takes an explicit id: the seeded catalog rows set theirs, so the identity
+// sequence lags behind, and MAX(id)+1 collides between tests running in parallel. Each caller uses
+// its own id, outside the ids other tests insert (cases_test.go 9020/9021/9030, worker 9000).
+func insertCatalogUsingPanel(t *testing.T, pg *gorm.DB, id int, tenantCode, panelCode string) {
+	t.Helper()
+	require.NoError(t, pg.Exec(`
+		INSERT INTO analysis_catalog (id, code, name, panel_id, tenant_code)
+		SELECT ?, 'GPTEST', 'Gene panel test', id, tenant_code
+		FROM panel WHERE tenant_code = ? AND code = ?`,
+		id, tenantCode, panelCode).Error)
+}
+
 func readTenantPanels(t *testing.T, pg *gorm.DB, tenantCode string) []storedPanelGene {
 	t.Helper()
 	var rows []storedPanelGene
@@ -162,12 +174,7 @@ func Test_ReplaceGenePanels_UploadedPanelUsedByAnalysisCatalogIsAConflictAndRoll
 		tenant := genePanelScratchTenant(t, env.Postgres)
 		repo := NewGenePanelsRepository(database.PostgresDB{DB: env.Postgres})
 		require.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel, heartPanel}))
-		// The seeded catalog rows set their ids explicitly, so the identity sequence lags behind.
-		require.NoError(t, env.Postgres.Exec(`
-			INSERT INTO analysis_catalog (id, code, name, panel_id, tenant_code)
-			SELECT (SELECT MAX(id) + 1 FROM analysis_catalog), 'GPTEST', 'Gene panel test', id, tenant_code
-			FROM panel WHERE tenant_code = ? AND code = 'EPILEP'`,
-			tenant).Error)
+		insertCatalogUsingPanel(t, env.Postgres, 9040, tenant, "EPILEP")
 		before := readTenantPanels(t, env.Postgres, tenant)
 
 		err := repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{
@@ -186,11 +193,7 @@ func Test_ReplaceGenePanels_KeepingTheCatalogPanelInTheFileIsAccepted(t *testing
 		tenant := genePanelScratchTenant(t, env.Postgres)
 		repo := NewGenePanelsRepository(database.PostgresDB{DB: env.Postgres})
 		require.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel}))
-		require.NoError(t, env.Postgres.Exec(`
-			INSERT INTO analysis_catalog (id, code, name, panel_id, tenant_code)
-			SELECT (SELECT MAX(id) + 1 FROM analysis_catalog), 'GPTEST', 'Gene panel test', id, tenant_code
-			FROM panel WHERE tenant_code = ? AND code = 'EPILEP'`,
-			tenant).Error)
+		insertCatalogUsingPanel(t, env.Postgres, 9041, tenant, "EPILEP")
 
 		assert.NoError(t, repo.ReplaceGenePanels(t.Context(), tenant, []types.GenePanel{epilepsyPanel}),
 			"the panel keeps its id, so the catalog link holds")
