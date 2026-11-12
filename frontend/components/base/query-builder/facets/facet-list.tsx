@@ -35,9 +35,15 @@ export function FacetList({ groupKey, aggregations, defaultExpanded = false }: F
   // If groupKey is provided, use that group's aggregations, otherwise get all aggregations from all groups
   let allFields = groupKey ? aggregations[groupKey]?.items || [] : everyField;
   if (isFavouritesGroup) {
-    allFields = (favourites?.favourites ?? [])
-      .map(key => everyField.find(field => field.key === key))
-      .filter((field): field is Aggregation => !!field && FAVOURITABLE_TYPES.includes(field.type));
+    const favouriteKeys = new Set(favourites?.favourites ?? []);
+    const seen = new Set<string>();
+    allFields = everyField.filter((field: Aggregation) => {
+      if (!favouriteKeys.has(field.key) || seen.has(field.key) || !FAVOURITABLE_TYPES.includes(field.type)) {
+        return false;
+      }
+      seen.add(field.key);
+      return true;
+    });
   }
 
   // Separate search by filters from other filters

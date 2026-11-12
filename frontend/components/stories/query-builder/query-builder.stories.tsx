@@ -371,7 +371,7 @@ export const FacetFavourites: Story = {
         http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
         http.get(userPreferenceApi, ({ params }: any) => {
           if (params.key === `facet-favourites-${ApplicationId.germline_cnv_occurrence}`) {
-            return HttpResponse.json({ key: params.key, content: { favourites: ['lastName'] } });
+            return HttpResponse.json({ key: params.key, content: { favourites: ['age', 'lastName'] } });
           }
           return new HttpResponse(null, { status: 404 });
         }),
@@ -388,7 +388,7 @@ export const FacetFavourites: Story = {
     <QueryBuilderStory
       args={args}
       title="Facet favourites"
-      description="Hover a facet header and click the star. Favourites are listed under the star at the top of the rail."
+      description="Hover a facet header and click the star. Favourites are listed under the star at the top of the rail, in sidebar order."
     />
   ),
 };
