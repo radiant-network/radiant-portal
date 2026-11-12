@@ -82,7 +82,7 @@ export function FacetList({ groupKey, aggregations, defaultExpanded = false }: F
     return (
       <div data-cy="facet-favourites-loading" aria-busy="true" className="flex flex-col gap-1">
         {['first', 'second', 'third'].map(row => (
-          <Skeleton key={row} className="h-8 w-full" />
+          <Skeleton key={row} className="h-8 w-full bg-card" />
         ))}
       </div>
     );
