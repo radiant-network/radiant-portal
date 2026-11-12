@@ -334,6 +334,7 @@ export const data = {
   },
   cnvOverlappingGenes: {
     gene: 'GUSBP11',
+    refseq_transcript_id: null,
     cytoband: 'q11.23',
     length: '57.4 kb',
     nb_overlap_bases: '8.0 kb',
