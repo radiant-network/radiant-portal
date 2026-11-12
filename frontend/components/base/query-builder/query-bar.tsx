@@ -33,7 +33,7 @@ import SearchQueryPill from './pills/search-query-pill';
 import type { ISqonGroupFacet, ISyntheticSqon, IValueFacet, TSyntheticSqonContentValue } from './type';
 
 const queryBar = tv({
-  base: 'flex flex-1 py-1.5 px-3 border ',
+  base: 'flex flex-1 py-1.5 px-3 border rounded-e-md',
   variants: {
     active: {
       true: ['border-primary/50 bg-primary/10'],
@@ -63,18 +63,18 @@ function factory(uuid: string, content: TSyntheticSqonContentValue, aggregations
   }
 
   if (isSearchField(content as IValueFacet, aggregations)) {
-    return <SearchQueryPill sqon={content as IValueFacet} />;
+    return <SearchQueryPill queryId={uuid} sqon={content as IValueFacet} />;
   }
 
   if (isRange(content as IValueFacet)) {
-    return <NumericalQueryPill sqon={content as IValueFacet} />;
+    return <NumericalQueryPill queryId={uuid} sqon={content as IValueFacet} />;
   }
 
   if (isBoolean(content as IValueFacet)) {
-    return <BooleanQueryPill sqon={content as IValueFacet} />;
+    return <BooleanQueryPill queryId={uuid} sqon={content as IValueFacet} />;
   }
 
-  return <MultiSelectQueryPill sqon={content as IValueFacet} />;
+  return <MultiSelectQueryPill queryId={uuid} sqon={content as IValueFacet} />;
 }
 
 /**
@@ -212,7 +212,7 @@ function QueryBar({ index, sqon, swrId }: QueryBarProps) {
 
       {/* Identifier: color for combined query quick identification */}
       <div
-        className={cn('w-1 rounded-s-sm bg-muted-foreground', {
+        className={cn('w-1 rounded-s-md bg-muted-foreground', {
           'bg-primary': active,
         })}
         style={identifierStyle}
@@ -265,7 +265,7 @@ function QueryBar({ index, sqon, swrId }: QueryBarProps) {
           </div>
 
           {/* actions */}
-          <div className={cn('flex items-center gap-1 px-2 border-r border-t border-b', backgroundColor)}>
+          <div className={cn('flex items-center gap-1 px-2 border-r border-t border-b rounded-e-md', backgroundColor)}>
             <Button
               data-cy="query-duplicate-button"
               iconOnly

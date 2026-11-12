@@ -103,6 +103,16 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Query builder - Two quer
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowClearAll(false /*shouldExist*/);
   });
 
+  it('Remove a pill of a non-active query', () => {
+    setupTest();
+    CaseEntity_Variants_QueryBuilder.somatic.actions.setActiveQuery(0);
+    CaseEntity_Variants_QueryBuilder.somatic.actions.removePillFromQuery(1);
+
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHaveQueryCountTotal(1);
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHaveChromosomePill();
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHaveActivePillCount(1);
+  });
+
   it('Hide Combine after deleting a selected query', () => {
     setupTest();
     CaseEntity_Variants_QueryBuilder.somatic.actions.selectQuery(0);

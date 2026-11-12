@@ -103,6 +103,16 @@ describe('Case Entity - Variants - Germline - SNV - Query builder - Two queries'
     CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowClearAll(false /*shouldExist*/);
   });
 
+  it('Remove a pill of a non-active query', () => {
+    setupTest();
+    CaseEntity_Variants_QueryBuilder.snv.actions.setActiveQuery(0);
+    CaseEntity_Variants_QueryBuilder.snv.actions.removePillFromQuery(1);
+
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldHaveQueryCountTotal(1);
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldHaveChromosomePill();
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldHaveActivePillCount(1);
+  });
+
   it('Hide Combine after deleting a selected query', () => {
     setupTest();
     CaseEntity_Variants_QueryBuilder.snv.actions.selectQuery(0);

@@ -109,7 +109,7 @@ function SaveFilterButton() {
           <Button
             iconOnly
             variant="ghost"
-            size="sm"
+            size="xs"
             disabled={!hasFilters || (isPristine && !!selectedSavedFilter)}
             aria-label={t('a11y.saved_filter.save')}
             aria-describedby={!hasFilters ? reasonId : undefined}

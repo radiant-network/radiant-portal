@@ -11,6 +11,7 @@ import type { IValueFacet } from '@/components/base/query-builder/type';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/base/shadcn/popover';
 
 type MultiSelectPillProps = {
+  queryId: string;
   sqon: IValueFacet;
 };
 
@@ -21,7 +22,7 @@ type MultiSelectPillProps = {
  * └───────└──────────────────────────────────────────┘─────────────────┘
  *          └────────────────────────┘
  */
-function MultiSelectQueryPill({ sqon }: MultiSelectPillProps) {
+function MultiSelectQueryPill({ queryId, sqon }: MultiSelectPillProps) {
   const { aggregations } = useQBContext();
   const aggregation = getAggregationByField(aggregations, sqon.content.field);
   const dispatch = useQBDispatch();
@@ -30,8 +31,9 @@ function MultiSelectQueryPill({ sqon }: MultiSelectPillProps) {
     dispatch({
       type: QBActionType.REMOVE_FACET_PILL,
       payload: sqon,
+      queryId,
     });
-  }, [dispatch, sqon]);
+  }, [dispatch, queryId, sqon]);
 
   return (
     <QueryPillContainer onRemovePill={onRemovePill}>

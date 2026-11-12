@@ -144,6 +144,14 @@ const generateQueryBuilderFunctions = (
       cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.queryPill}`).eq(index).find(CommonSelectors.queryPillRemove).clickAndWait({ force: true });
     },
     /**
+     * Removes a pill of a given query (active or not) using its X button.
+     * @param queryIndex The query index (0-based).
+     * @param pillIndex The pill index within the query (0-based, default: 0).
+     */
+    removePillFromQuery(queryIndex: number, pillIndex: number = 0) {
+      cy.get(CommonSelectors.queryBar).eq(queryIndex).find(CommonSelectors.queryPill).eq(pillIndex).find(CommonSelectors.queryPillRemove).clickAndWait({ force: true });
+    },
+    /**
      * Selects (checks) a query for combination using its checkbox.
      * @param index The query index (0-based).
      */
