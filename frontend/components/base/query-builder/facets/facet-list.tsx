@@ -10,6 +10,7 @@ import {
 import { SearchFacet } from '@/components/base/query-builder/facets/search-facet';
 import { Accordion } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
+import { Skeleton } from '@/components/base/shadcn/skeleton';
 import { type Aggregation, type AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
@@ -32,10 +33,21 @@ export function FacetList({ groupKey, aggregations, defaultExpanded = false }: F
   const isFavouritesGroup = groupKey === FAVOURITES_GROUP_KEY;
   const everyField = Object.values(aggregations).flatMap(group => group.items);
 
+  // Unstarred facets stay listed until the panel is left, so a stray click is easy to undo
+  const savedFavouriteKeys = favourites?.favourites ?? [];
+  const [visitFavouriteKeys, setVisitFavouriteKeys] = useState<string[]>(savedFavouriteKeys);
+  const [visitGroupKey, setVisitGroupKey] = useState(groupKey);
+  if (visitGroupKey !== groupKey) {
+    setVisitGroupKey(groupKey);
+    setVisitFavouriteKeys(savedFavouriteKeys);
+  } else if (savedFavouriteKeys.some(key => !visitFavouriteKeys.includes(key))) {
+    setVisitFavouriteKeys([...new Set([...visitFavouriteKeys, ...savedFavouriteKeys])]);
+  }
+
   // If groupKey is provided, use that group's aggregations, otherwise get all aggregations from all groups
   let allFields = groupKey ? aggregations[groupKey]?.items || [] : everyField;
   if (isFavouritesGroup) {
-    const favouriteKeys = new Set(favourites?.favourites ?? []);
+    const favouriteKeys = new Set(visitFavouriteKeys);
     const seen = new Set<string>();
     allFields = everyField.filter((field: Aggregation) => {
       if (!favouriteKeys.has(field.key) || seen.has(field.key) || !FAVOURITABLE_TYPES.includes(field.type)) {
@@ -66,6 +78,16 @@ export function FacetList({ groupKey, aggregations, defaultExpanded = false }: F
     setPrevGroupKey(groupKey);
   }, [groupKey, prevGroupKey]);
 
+  if (isFavouritesGroup && favourites?.isLoading) {
+    return (
+      <div data-cy="facet-favourites-loading" aria-busy="true" className="flex flex-col gap-1">
+        {['first', 'second', 'third'].map(row => (
+          <Skeleton key={row} className="h-8 w-full" />
+        ))}
+      </div>
+    );
+  }
+
   if (isFavouritesGroup && fields.length === 0) {
     return (
       <Empty
@@ -85,7 +107,7 @@ export function FacetList({ groupKey, aggregations, defaultExpanded = false }: F
   }
 
   return (
-    <div>
+    <div data-facet-favourites-panel={isFavouritesGroup || undefined}>
       {(searchByFilters.length > 0 || uploadListFilters.length > 0) && (
         <div className="flex flex-col gap-3 mb-3">
           {searchByFilters.map((search, index) => (

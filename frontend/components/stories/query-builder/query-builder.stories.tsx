@@ -423,6 +423,37 @@ export const FacetFavouritesSaveError: Story = {
   ),
 };
 
+export const FacetFavouritesLoading: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get(userPreferenceApi, async ({ params }: any) => {
+          if (params.key === `facet-favourites-${ApplicationId.germline_cnv_occurrence}`) {
+            await delay('infinite');
+          }
+          return new HttpResponse(null, { status: 404 });
+        }),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.germline_cnv_occurrence,
+    children: <></>, // unused
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilderStory
+      args={args}
+      title="Facet favourites – loading"
+      description="Favourites never finish loading: the panel shows a skeleton instead of the empty state."
+    />
+  ),
+};
+
 export const Multiselect: Story = {
   parameters: {
     msw: {

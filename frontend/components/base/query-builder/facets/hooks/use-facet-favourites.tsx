@@ -11,6 +11,7 @@ export const FAVOURITES_GROUP_KEY = 'favourites';
 
 type FacetFavouritesContextProps = {
   favourites: string[];
+  isLoading: boolean;
   isFavourite: (facetKey: string) => boolean;
   toggleFavourite: (facetKey: string) => Promise<void>;
 };
@@ -47,7 +48,7 @@ type FacetFavouritesProviderProps = {
 export function FacetFavouritesProvider({ appId, children }: FacetFavouritesProviderProps) {
   const { t } = useI18n();
   const key = getPreferenceKey(appId);
-  const { data, mutate } = useSWR(`facet-favourites-get-${appId}`, () => fetchFavourites(key), {
+  const { data, isLoading, mutate } = useSWR(`facet-favourites-get-${appId}`, () => fetchFavourites(key), {
     revalidateIfStale: false,
     revalidateOnFocus: false,
     shouldRetryOnError: false,
@@ -84,8 +85,8 @@ export function FacetFavouritesProvider({ appId, children }: FacetFavouritesProv
   );
 
   const value = useMemo(
-    () => ({ favourites, isFavourite, toggleFavourite }),
-    [favourites, isFavourite, toggleFavourite],
+    () => ({ favourites, isLoading, isFavourite, toggleFavourite }),
+    [favourites, isLoading, isFavourite, toggleFavourite],
   );
 
   return <FacetFavouritesContext value={value}>{children}</FacetFavouritesContext>;

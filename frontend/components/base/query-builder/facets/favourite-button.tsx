@@ -14,7 +14,7 @@ type FavouriteButtonProps = {
 
 /**
  * Star toggle shown in a facet header. Hidden until the header (group/facet-header) is hovered,
- * unless the facet is already a favourite or the button has keyboard focus.
+ * unless the facet is already a favourite, the button has keyboard focus, or it sits in the Favourites panel.
  */
 export function FavouriteButton({ facetKey, label }: FavouriteButtonProps) {
   const { t } = useI18n();
@@ -49,7 +49,8 @@ export function FavouriteButton({ facetKey, label }: FavouriteButtonProps) {
           onBlur={() => setIsSettling(false)}
           className={cn(
             'group/favourite text-foreground hover:bg-transparent hover:text-foreground [&_svg]:size-3',
-            !isFavourite && 'opacity-0 group-hover/facet-header:opacity-100 focus-visible:opacity-100',
+            !isFavourite &&
+              'opacity-0 group-hover/facet-header:opacity-100 focus-visible:opacity-100 in-data-facet-favourites-panel:opacity-100',
           )}
         >
           {isFavourite ? (
