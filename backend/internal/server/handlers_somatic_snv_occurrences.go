@@ -13,6 +13,10 @@ type somaticInterpretationCountsReader interface {
 	RetrieveSomaticInterpretationClassificationCounts(ctx context.Context, locusId int) (types.JsonMap[string, int], error)
 }
 
+type somaticInterpretationListCountsReader interface {
+	ListSomaticInterpretationClassificationCounts(ctx context.Context, locusIds []string) (map[string]types.JsonMap[string, int], error)
+}
+
 type somaticSNVOccurrencesReader interface {
 	GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.OccurrenceListQuery) ([]types.SomaticSNVOccurrence, error)
 	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (types.OccurrenceCount, error)
@@ -43,7 +47,7 @@ type somaticSNVOccurrencesReader interface {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list [post]
-func OccurrencesSomaticSNVListHandler(repo somaticSNVOccurrencesReader) gin.HandlerFunc {
+func OccurrencesSomaticSNVListHandler(repo somaticSNVOccurrencesReader, interpretationRepo somaticInterpretationListCountsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.ListBodyWithSqon
@@ -87,6 +91,10 @@ func OccurrencesSomaticSNVListHandler(repo somaticSNVOccurrencesReader) gin.Hand
 			HandleError(c, err)
 			return
 		}
+
+		addInterpretationCounts(c.Request.Context(), occurrences, func(o *types.SomaticSNVOccurrence) (string, *types.JsonMap[string, int]) {
+			return o.LocusId, &o.InterpretationClassificationCounts
+		}, interpretationRepo.ListSomaticInterpretationClassificationCounts)
 
 		c.JSON(http.StatusOK, occurrences)
 	}

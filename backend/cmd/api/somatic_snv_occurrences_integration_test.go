@@ -20,7 +20,7 @@ func testSomaticSNVList(t *testing.T, data string, taskId string, body string, e
 	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
-		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesSomaticSNVListHandler(repo))
+		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesSomaticSNVListHandler(repo, noInterpretationListCounts{}))
 
 		req, _ := http.NewRequest("POST", fmt.Sprintf("/radiant/occurrences/somatic/snv/71/74/%s/list", taskId), bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
