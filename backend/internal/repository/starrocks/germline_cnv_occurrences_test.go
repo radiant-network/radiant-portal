@@ -1254,6 +1254,38 @@ func Test_GermlineCNV_GetOccurrences_SortByExomiserRank(t *testing.T) {
 	})
 }
 
+// Task 92086 of seq 70 holds a record Exomiser did not rank (CNV10) between rank 1 (CNV9) and rank 2 (CNV11).
+
+func Test_GermlineCNV_GetOccurrences_SortByExomiserRankAsc_UnrankedLast(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sort := []types.SortBody{{Field: "exomiser_rank", Order: "asc"}}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, []string{"exomiser_rank"}, nil, nil, sort)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 70, 92086, query)
+
+		require.NoError(t, err)
+		names := sliceutils.Map(occurrences, func(o types.GermlineCNVOccurrence, _ int, _ []types.GermlineCNVOccurrence) string { return o.Name })
+		assert.Equal(t, []string{"CNV9", "CNV11", "CNV10"}, names)
+	})
+}
+
+func Test_GermlineCNV_GetOccurrences_SortByExomiserRankDesc_UnrankedLast(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sort := []types.SortBody{{Field: "exomiser_rank", Order: "desc"}}
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineCnvQueryConfigForTest, []string{"exomiser_rank"}, nil, nil, sort)
+		require.NoError(t, err)
+
+		occurrences, err := repo.GetOccurrences(t.Context(), 70, 70, 92086, query)
+
+		require.NoError(t, err)
+		names := sliceutils.Map(occurrences, func(o types.GermlineCNVOccurrence, _ int, _ []types.GermlineCNVOccurrence) string { return o.Name })
+		assert.Equal(t, []string{"CNV11", "CNV9", "CNV10"}, names)
+	})
+}
+
 func Test_GermlineCNV_GetOccurrences_FilterByExomiserAcmgClassification(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})

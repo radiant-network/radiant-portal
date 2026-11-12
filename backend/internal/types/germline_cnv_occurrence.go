@@ -472,6 +472,7 @@ var GermlineCNVExomiserRankField = Field{
 	CanBeSelected: true,
 	CanBeFiltered: true,
 	CanBeSorted:   true,
+	SortNullsLast: true,
 	Type:          IntegerType,
 	Table:         GermlineCNVOccurrenceTable,
 }
