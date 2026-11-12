@@ -70,6 +70,7 @@ function SequencingVariantFiltersSelectItem({ caseSeqExp, sequencingExperiments 
 type SequencingVariantFiltersOption = {
   value: string;
   tooltip?: string;
+  disabled?: boolean;
 };
 type SequencingVariantFiltersProps = {
   sequencingExperiments?: CaseSequencingExperiment[];
@@ -129,31 +130,34 @@ function SequencingVariantFilters({
     <div className="inline-flex gap-4 items-center border-b px-6 py-2.5">
       <Tabs id="sequencing-experiment-variant-type" value={activeInterface}>
         <TabsList className="w-full h-7">
-          {options.map(({ tooltip, value }: SequencingVariantFiltersOption) => (
-            <TabsTrigger
-              key={value}
-              value={value}
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
-              data-cy={`tabs-trigger-${value}`}
-              aria-describedby={tooltip ? `${descriptionBaseId}-${value}` : undefined}
-              onClick={() => {
-                onActiveInterfaceChange(value);
-              }}
-            >
-              {tooltip ? (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span>{t(`case_entity.variants.filters.${value.toLowerCase()}`)}</span>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <>{tooltip}</>
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <>{t(`case_entity.variants.filters.${value.toLowerCase()}`)}</>
-              )}
-            </TabsTrigger>
-          ))}
+          {options.map(({ tooltip, value, disabled }: SequencingVariantFiltersOption) => {
+            const trigger = (
+              <TabsTrigger
+                value={value}
+                disabled={disabled}
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-muted-foreground"
+                data-cy={`tabs-trigger-${value}`}
+                aria-describedby={tooltip ? `${descriptionBaseId}-${value}` : undefined}
+                onClick={() => {
+                  onActiveInterfaceChange(value);
+                }}
+              >
+                {t(`case_entity.variants.filters.${value.toLowerCase()}`)}
+              </TabsTrigger>
+            );
+            return tooltip ? (
+              <Tooltip key={value}>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex flex-1">{trigger}</span>
+                </TooltipTrigger>
+                <TooltipContent>{tooltip}</TooltipContent>
+              </Tooltip>
+            ) : (
+              <span key={value} className="inline-flex flex-1">
+                {trigger}
+              </span>
+            );
+          })}
         </TabsList>
         {options.map(({ tooltip, value }: SequencingVariantFiltersOption) =>
           tooltip ? (

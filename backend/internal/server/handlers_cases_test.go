@@ -148,8 +148,8 @@ func (m *MockRepository) GetCaseEntity(ctx context.Context, caseId int) (*types.
 		PanelCode:                "EPILEP",
 		PanelName:                "Epilepsy",
 		SequencingExperiments: types.JsonArray[types.CaseSequencingExperiment]{
-			{SeqID: 1, PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", SampleID: 1, SampleSubmitterID: "S13224", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
-			{SeqID: 2, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2, SampleSubmitterID: "S13225", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true},
+			{SeqID: 1, PatientID: 3, RelationshipToProband: "proband", AffectedStatusCode: "affected", SampleID: 1, SampleSubmitterID: "S13224", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true, HasSnv: true},
+			{SeqID: 2, PatientID: 1, RelationshipToProband: "mother", AffectedStatusCode: "affected", SampleID: 2, SampleSubmitterID: "S13225", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: true, HasSnv: true},
 			{SeqID: 3, PatientID: 2, RelationshipToProband: "father", AffectedStatusCode: "non_affected", SampleID: 3, SampleSubmitterID: "S13226", SampleTypeCode: "dna", HistologyCode: "normal", HasVariants: false},
 		},
 		Tasks: types.JsonArray[types.CaseTask]{
@@ -312,9 +312,9 @@ func Test_CaseEntityHandler(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
 		"sequencing_experiments":[
-			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true},
-			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":1, "relationship_to_proband":"mother", "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true},
-			{"affected_status_code":"non_affected", "experimental_strategy_code":"", "patient_id":2, "relationship_to_proband":"father", "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": false}
+			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":3, "relationship_to_proband":"proband", "sample_id":1, "sample_submitter_id":"S13224", "sample_type_code": "dna", "seq_id":1, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true, "has_snv": true, "has_cnv": false},
+			{"affected_status_code":"affected", "experimental_strategy_code":"", "patient_id":1, "relationship_to_proband":"mother", "sample_id":2, "sample_submitter_id":"S13225", "sample_type_code": "dna", "seq_id":2, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": true, "has_snv": true, "has_cnv": false},
+			{"affected_status_code":"non_affected", "experimental_strategy_code":"", "patient_id":2, "relationship_to_proband":"father", "sample_id":3, "sample_submitter_id":"S13226", "sample_type_code": "dna", "seq_id":3, "status_code":"", "updated_on":"0001-01-01T00:00:00Z", "histology_code": "normal", "has_variants": false, "has_snv": false, "has_cnv": false}
 		],
 		"analysis_catalog_code":"WGA",
 		"analysis_catalog_name":"Whole Genome Analysis",

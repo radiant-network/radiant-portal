@@ -263,6 +263,8 @@ type CaseSequencingExperiment struct {
 	StatusCode               string    `json:"status_code" validate:"required"`
 	UpdatedOn                time.Time `json:"updated_on" validate:"required"`
 	HasVariants              bool      `json:"has_variants" validate:"required"`
+	HasSnv                   bool      `json:"has_snv" validate:"required"`
+	HasCnv                   bool      `json:"has_cnv" validate:"required"`
 }
 
 // CasePatientClinicalInformation - Patient clinical information

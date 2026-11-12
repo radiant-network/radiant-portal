@@ -51,6 +51,1650 @@ components:
       - message
       - status
       type: object
+    CaseGroupEmailContext:
+      description: Values the tenant template was rendered with, echoed so a pipeline
+        log explains the email.
+      properties:
+        analysis_codes:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        case_ids:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        has_stat:
+          type: boolean
+        manifest_filename:
+          type: string
+      required:
+      - analysis_codes
+      - case_ids
+      type: object
+    CaseGroupEmailReport:
+      description: Outcome of the notification for one diagnosis laboratory of the
+        group.
+      properties:
+        case_count:
+          type: integer
+        context:
+          $ref: '#/components/schemas/CaseGroupEmailContext'
+        document_count:
+          type: integer
+        error:
+          type: string
+        organization_code:
+          type: string
+        recipients:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        status:
+          enum:
+          - sent
+          - skipped_no_contact
+          - skipped_no_documents
+          - failed
+          type: string
+        template:
+          type: string
+      required:
+      - organization_code
+      - recipients
+      - status
+      type: object
+    CaseGroupRequest:
+      description: Payload to create a case group, or overwrite the case list of an
+        existing one (same name in the tenant). An empty case_ids list is accepted
+        and empties the group.
+      properties:
+        case_ids:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        name:
+          type: string
+      required:
+      - case_ids
+      - name
+      type: object
+    CaseGroupResponse:
+      description: A named set of cases within a tenant.
+      properties:
+        case_ids:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        created_on:
+          type: string
+        name:
+          type: string
+        tenant_code:
+          type: string
+      required:
+      - case_ids
+      - created_on
+      - name
+      - tenant_code
+      type: object
+    CaseStatusChange:
+      description: One case status change, applied only if the case is still in one
+        of expected_status_codes.
+      properties:
+        case_id:
+          example: 123
+          type: integer
+        expected_status_codes:
+          example:
+          - processing
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        status_code:
+          example: in_progress
+          type: string
+      required:
+      - case_id
+      - expected_status_codes
+      - status_code
+      type: object
+    CaseStatusChangeResult:
+      description: updated is false when the case was no longer in an expected status;
+        it is then left unchanged and current_status_code tells what it is. current_status_code
+        may be any case status, including a tenant's own.
+      properties:
+        case_id:
+          example: 123
+          type: integer
+        current_status_code:
+          example: in_progress
+          type: string
+        updated:
+          type: boolean
+      required:
+      - case_id
+      - current_status_code
+      - updated
+      type: object
+    CasesStatusRequest:
+      description: Status changes to apply to cases. A change between two user statuses
+        needs can_edit_case at the case's lab. A change involving a system status
+        (draft, submitted, processing) needs can_ingest_data there, and is limited
+        to submitted -> processing and processing -> in_progress.
+      properties:
+        cases:
+          items:
+            $ref: '#/components/schemas/CaseStatusChange'
+          type: array
+          uniqueItems: false
+      required:
+      - cases
+      type: object
+    CasesStatusResponse:
+      description: Outcome of each requested status change, in request order.
+      properties:
+        cases:
+          items:
+            $ref: '#/components/schemas/CaseStatusChangeResult'
+          type: array
+          uniqueItems: false
+      required:
+      - cases
+      type: object
+    ClientAuthConfig:
+      description: Public Keycloak settings for the OAuth2 device authorization grant.
+      properties:
+        client_id:
+          example: radiant-client-cli
+          type: string
+        keycloak_url:
+          example: https://auth.example.org
+          type: string
+        method:
+          example: device
+          type: string
+        realm:
+          example: radiant
+          type: string
+      required:
+      - client_id
+      - keycloak_url
+      - method
+      - realm
+      type: object
+    ClientConfig:
+      description: Public configuration a command-line client needs before any authenticated
+        call.
+      properties:
+        auth:
+          $ref: '#/components/schemas/ClientAuthConfig'
+      required:
+      - auth
+      type: object
+    ComphetGene:
+      description: ComphetGene is the number of compound heterozygous partners of
+        a variant in one gene
+      properties:
+        nb:
+          type: integer
+        symbol:
+          type: string
+      required:
+      - nb
+      - symbol
+      type: object
+    Count:
+      description: Count represents count result
+      properties:
+        count:
+          description: Number of results
+          type: integer
+      type: object
+    CountBodyWithSqon:
+      properties:
+        sqon:
+          $ref: '#/components/schemas/Sqon'
+        with_flag:
+          items:
+            $ref: '#/components/schemas/OccurrenceFlagType'
+          type: array
+          uniqueItems: false
+        with_interpretation:
+          type: boolean
+        with_note:
+          type: boolean
+      type: object
+    CreateBatchResponse:
+      description: CreateBatchResponse represents the response returned when creating
+        a new batch
+      properties:
+        batch_type:
+          type: string
+        created_on:
+          type: string
+        dry_run:
+          type: boolean
+        id:
+          type: string
+        status:
+          $ref: '#/components/schemas/BatchStatus'
+        username:
+          type: string
+      type: object
+    CreateOrganizationRequest:
+      description: Payload to create an organization in a tenant.
+      properties:
+        category_code:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        notification_emails:
+          type: string
+      required:
+      - category_code
+      - code
+      - name
+      type: object
+    CreatePatientBatchBody:
+      description: CreatePatientBatchBody represents the body required to create a
+        patient batch
+      properties:
+        patients:
+          items:
+            $ref: '#/components/schemas/PatientBatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+      required:
+      - patients
+      type: object
+    CreateSampleBatchBody:
+      description: CreateSampleBatchBody represents the body required to create a
+        sample batch
+      properties:
+        samples:
+          items:
+            $ref: '#/components/schemas/SampleBatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+      required:
+      - samples
+      type: object
+    CreateSequencingExperimentBatchBody:
+      description: CreateSequencingExperimentBatchBody represents the body required
+        to create a sequencing experiment batch
+      properties:
+        sequencing_experiments:
+          items:
+            $ref: '#/components/schemas/SequencingExperimentBatch'
+          minItems: 1
+          type: array
+          uniqueItems: false
+      required:
+      - sequencing_experiments
+      type: object
+    CreateUserRequest:
+      description: Payload to add a user to a tenant, with the roles to grant them.
+      properties:
+        email:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        roles:
+          items:
+            $ref: '#/components/schemas/CreateUserRole'
+          type: array
+          uniqueItems: false
+      required:
+      - email
+      - first_name
+      - last_name
+      type: object
+    CreateUserRole:
+      description: Role to grant to a user, with the organizations it applies at.
+      properties:
+        org_codes:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        role_code:
+          type: string
+      required:
+      - role_code
+      type: object
+    ExpandedGermlineSNVOccurrence:
+      properties:
+        aa_change:
+          type: string
+        ad_alt:
+          type: integer
+        ad_total:
+          type: integer
+        cadd_phred:
+          type: number
+        cadd_score:
+          type: number
+        chromosome:
+          type: string
+        clinvar:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        dann_score:
+          type: number
+        dna_change:
+          type: string
+        end:
+          type: integer
+        ensembl_gene_id:
+          type: string
+        exomiser_acmg_classification:
+          type: string
+        exomiser_acmg_classification_counts:
+          $ref: '#/components/schemas/JsonMap-string-int'
+        exomiser_acmg_evidence:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        exomiser_gene_combined_score:
+          type: number
+        exon_rank:
+          type: integer
+        exon_total:
+          type: integer
+        father_calls:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        fathmm_pred:
+          type: string
+        fathmm_score:
+          type: number
+        filter:
+          type: string
+        genotype_quality:
+          type: integer
+        germline_af_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_hom_wgs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_pc_wgs:
+          type: integer
+        germline_pc_wgs_affected:
+          type: integer
+        germline_pc_wgs_not_affected:
+          type: integer
+        germline_pc_wxs:
+          type: integer
+        germline_pc_wxs_affected:
+          type: integer
+        germline_pc_wxs_not_affected:
+          type: integer
+        germline_pf_wgs:
+          type: number
+        germline_pf_wgs_affected:
+          type: number
+        germline_pf_wgs_not_affected:
+          type: number
+        germline_pf_wxs:
+          type: number
+        germline_pf_wxs_affected:
+          type: number
+        germline_pf_wxs_not_affected:
+          type: number
+        germline_pn_wgs:
+          type: integer
+        germline_pn_wgs_affected:
+          type: integer
+        germline_pn_wgs_not_affected:
+          type: integer
+        germline_pn_wxs:
+          type: integer
+        germline_pn_wxs_affected:
+          type: integer
+        germline_pn_wxs_not_affected:
+          type: integer
+        gnomad_loeuf:
+          type: number
+        gnomad_pli:
+          type: number
+        gnomad_v3_af:
+          type: number
+        hgvsg:
+          type: string
+        interpretation_classification_counts:
+          $ref: '#/components/schemas/JsonMap-string-int'
+        is_canonical:
+          type: boolean
+        is_mane_plus:
+          type: boolean
+        is_mane_select:
+          type: boolean
+        locus:
+          type: string
+        locus_id:
+          type: string
+        lrt_pred:
+          type: string
+        lrt_score:
+          type: number
+        mother_calls:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        omim_conditions:
+          items:
+            $ref: '#/components/schemas/OmimGenePanel'
+          type: array
+          uniqueItems: false
+        parental_origin:
+          type: string
+        picked_consequences:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        polyphen2_hvar_pred:
+          type: string
+        polyphen2_hvar_score:
+          type: number
+        qd:
+          type: number
+        revel_score:
+          type: number
+        rsnumber:
+          type: string
+        sift_pred:
+          type: string
+        sift_score:
+          type: number
+        somatic_af_tn_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_tn_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_hom_tn_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_tn_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_pc_tn_wgs:
+          type: integer
+        somatic_pc_tn_wxs:
+          type: integer
+        somatic_pc_to_wgs:
+          type: integer
+        somatic_pc_to_wxs:
+          type: integer
+        somatic_pf_tn_wgs:
+          type: number
+        somatic_pf_tn_wxs:
+          type: number
+        somatic_pf_to_wgs:
+          type: number
+        somatic_pf_to_wxs:
+          type: number
+        somatic_pn_tn_wgs:
+          type: integer
+        somatic_pn_tn_wxs:
+          type: integer
+        somatic_pn_to_wgs:
+          type: integer
+        somatic_pn_to_wxs:
+          type: integer
+        spliceai_ds:
+          type: number
+        spliceai_type:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        start:
+          type: integer
+        symbol:
+          type: string
+        transcript_id:
+          type: string
+        transmission:
+          type: string
+        vep_impact:
+          $ref: '#/components/schemas/VepImpact'
+        zygosity:
+          type: string
+      required:
+      - exomiser_acmg_evidence
+      - exomiser_gene_combined_score
+      - genotype_quality
+      - gnomad_v3_af
+      - hgvsg
+      - locus
+      - locus_id
+      - picked_consequences
+      type: object
+    ExternalFrequencies:
+      properties:
+        ac:
+          type: integer
+        af:
+          type: number
+        an:
+          type: integer
+        cohort:
+          type: string
+        hom:
+          type: integer
+      required:
+      - cohort
+      type: object
+    FiltersValue:
+      description: FiltersValue represents an item in filters
+      properties:
+        key:
+          description: Bucket key
+          type: string
+        label:
+          description: Label corresponding to the key
+          type: string
+      required:
+      - key
+      type: object
+    GenePanelUploadForm:
+      description: Multipart body of a gene panel upload.
+      properties:
+        file:
+          format: binary
+          type: string
+      required:
+      - file
+      type: object
+    GenePanelUploadResult:
+      description: 'Result of a gene panel upload: the panels of the file and the
+        genes they now hold.'
+      properties:
+        genes:
+          type: integer
+        panels:
+          type: integer
+        warnings:
+          items:
+            $ref: '#/components/schemas/GenePanelUploadWarning'
+          type: array
+          uniqueItems: false
+      type: object
+    GenePanelUploadWarning:
+      description: A gene row of the file that the upload skipped, or kept with the
+        Ensembl gene name.
+      properties:
+        line:
+          type: integer
+        message:
+          type: string
+        symbol:
+          type: string
+      type: object
+    GermlineSNVOccurrence:
+      description: GermlineSNVOccurrence represents a germline SNV occurrence
+      properties:
+        aa_change:
+          type: string
+        ad_ratio:
+          type: number
+        chromosome:
+          type: string
+        clinvar:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        cmc_mutation_url:
+          type: string
+        cmc_sample_mutated:
+          type: integer
+        cmc_sample_ratio:
+          type: number
+        cmc_tier:
+          type: string
+        comphet_genes:
+          description: Number of compound heterozygous partners per gene
+          items:
+            $ref: '#/components/schemas/ComphetGene'
+          type: array
+          uniqueItems: false
+        end:
+          type: integer
+        exomiser_acmg_classification:
+          type: string
+        exomiser_acmg_evidence:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        exomiser_gene_combined_score:
+          type: number
+        exomiser_moi:
+          type: string
+        exomiser_variant_score:
+          type: number
+        filter:
+          type: string
+        flag_type:
+          $ref: '#/components/schemas/OccurrenceFlagType'
+        genotype_quality:
+          type: integer
+        germline_af_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wgs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_af_wxs_not_affected:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM.
+          type: number
+        germline_hom_wgs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wgs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_hom_wxs_not_affected:
+          description: Number of patients with a HOM or HEM call
+          type: integer
+        germline_pc_wgs:
+          type: integer
+        germline_pc_wgs_affected:
+          type: integer
+        germline_pc_wgs_not_affected:
+          type: integer
+        germline_pc_wxs:
+          type: integer
+        germline_pc_wxs_affected:
+          type: integer
+        germline_pc_wxs_not_affected:
+          type: integer
+        germline_pf_wgs:
+          type: number
+        germline_pf_wgs_affected:
+          type: number
+        germline_pf_wgs_not_affected:
+          type: number
+        germline_pf_wxs:
+          type: number
+        germline_pf_wxs_affected:
+          type: number
+        germline_pf_wxs_not_affected:
+          type: number
+        germline_pn_wgs:
+          type: integer
+        germline_pn_wgs_affected:
+          type: integer
+        germline_pn_wgs_not_affected:
+          type: integer
+        germline_pn_wxs:
+          type: integer
+        germline_pn_wxs_affected:
+          type: integer
+        germline_pn_wxs_not_affected:
+          type: integer
+        gnomad_v3_af:
+          type: number
+        has_comphet:
+          description: True when the variant has a compound heterozygous partner (slivar),
+            false otherwise, absent when not computed
+          type: boolean
+        has_interpretation:
+          type: boolean
+        has_note:
+          type: boolean
+        hgvsg:
+          type: string
+        is_canonical:
+          type: boolean
+        is_mane_plus:
+          type: boolean
+        is_mane_select:
+          type: boolean
+        locus:
+          type: string
+        locus_id:
+          type: string
+        max_impact_score:
+          type: integer
+        omim_inheritance_code:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        picked_consequences:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        rsnumber:
+          type: string
+        seq_id:
+          type: integer
+        somatic_af_tn_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_tn_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wgs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_af_to_wxs:
+          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
+            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
+            copy number or loss of heterozygosity.
+          type: number
+        somatic_hom_tn_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_tn_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wgs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_hom_to_wxs:
+          description: Number of patients with a HOM or HEM tumor call
+          type: integer
+        somatic_pc_tn_wgs:
+          type: integer
+        somatic_pc_tn_wxs:
+          type: integer
+        somatic_pc_to_wgs:
+          type: integer
+        somatic_pc_to_wxs:
+          type: integer
+        somatic_pf_tn_wgs:
+          type: number
+        somatic_pf_tn_wxs:
+          type: number
+        somatic_pf_to_wgs:
+          type: number
+        somatic_pf_to_wxs:
+          type: number
+        somatic_pn_tn_wgs:
+          type: integer
+        somatic_pn_tn_wxs:
+          type: integer
+        somatic_pn_to_wgs:
+          type: integer
+        somatic_pn_to_wxs:
+          type: integer
+        start:
+          type: integer
+        symbol:
+          type: string
+        task_id:
+          type: integer
+        transcript_id:
+          type: string
+        variant_class:
+          type: string
+        vep_impact:
+          $ref: '#/components/schemas/VepImpact'
+        zygosity:
+          type: string
+      required:
+      - ad_ratio
+      - chromosome
+      - end
+      - exomiser_acmg_classification
+      - exomiser_acmg_evidence
+      - exomiser_gene_combined_score
+      - exomiser_moi
+      - exomiser_variant_score
+      - genotype_quality
+      - germline_pf_wgs
+      - gnomad_v3_af
+      - has_interpretation
+      - has_note
+      - hgvsg
+      - locus
+      - locus_id
+      - max_impact_score
+      - picked_consequences
+      - seq_id
+      - start
+      - task_id
+      - variant_class
+      - zygosity
+      type: object
+    GetBatchResponse:
+      description: GetBatchResponse represents the response returned when retrieving
+        a batch
+      properties:
+        batch_type:
+          type: string
+        created_on:
+          type: string
+        dry_run:
+          type: boolean
+        finished_on:
+          type: string
+        id:
+          type: string
+        report:
+          $ref: '#/components/schemas/BatchReport'
+        started_on:
+          type: string
+        status:
+          $ref: '#/components/schemas/BatchStatus'
+        summary:
+          $ref: '#/components/schemas/BatchSummary'
+        username:
+          type: string
+      type: object
+    InterpretationGermline:
+      properties:
+        case_id:
+          type: string
+        classification:
+          type: string
+        classification_criterias:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        condition:
+          type: string
+        condition_name:
+          type: string
+        created_at:
+          type: string
+        created_by:
+          type: string
+        created_by_name:
+          type: string
+        id:
+          type: string
+        interpretation:
+          type: string
+        locus_id:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/InterpretationMetadata'
+        pubmed:
+          items:
+            $ref: '#/components/schemas/InterpretationPubmed'
+          type: array
+          uniqueItems: false
+        sequencing_id:
+          type: string
+        transcript_id:
+          type: string
+        transmission_modes:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        updated_at:
+          type: string
+        updated_by:
+          type: string
+        updated_by_name:
+          type: string
+      type: object
+    InterpretationPubmed:
+      properties:
+        citation:
+          type: string
+        citation_id:
+          type: string
+      type: object
+    InterpretationSomatic:
+      properties:
+        case_id:
+          type: string
+        clinical_utility:
+          type: string
+        created_at:
+          type: string
+        created_by:
+          type: string
+        created_by_name:
+          type: string
+        id:
+          type: string
+        interpretation:
+          type: string
+        locus_id:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/InterpretationMetadata'
+        oncogenicity:
+          type: string
+        oncogenicity_classification_criterias:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        pubmed:
+          items:
+            $ref: '#/components/schemas/InterpretationPubmed'
+          type: array
+          uniqueItems: false
+        sequencing_id:
+          type: string
+        transcript_id:
+          type: string
+        tumoral_name:
+          type: string
+        tumoral_type:
+          type: string
+        updated_at:
+          type: string
+        updated_by:
+          type: string
+        updated_by_name:
+          type: string
+      type: object
+    NotifyCaseGroupResponse:
+      description: 'Report of a case group notification: the group and one entry per
+        diagnosis laboratory.'
+      properties:
+        emails:
+          items:
+            $ref: '#/components/schemas/CaseGroupEmailReport'
+          type: array
+          uniqueItems: false
+        group:
+          $ref: '#/components/schemas/CaseGroupResponse'
+      required:
+      - emails
+      - group
+      type: object
+    OccurrenceCount:
+      description: 'OccurrenceCount holds both totals of an occurrence count: the
+        query builder total and the one left by the annotation filters'
+      properties:
+        count:
+          description: Number of results matching the sqon, ignoring the annotation
+            filters
+          type: integer
+        filtered_count:
+          description: Number of results also matching with_note / with_flag / with_interpretation;
+            equal to count when none is set
+          type: integer
+      type: object
+    OmimGenePanel:
+      properties:
+        inheritance_code:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        omim_phenotype_id:
+          type: string
+        panel:
+          type: string
+      type: object
+    OrganizationResponse:
+      description: Organization within a tenant, with its category label.
+      properties:
+        category_code:
+          type: string
+        category_name:
+          type: string
+        code:
+          type: string
+        name:
+          type: string
+        notification_emails:
+          type: string
+      type: object
+    PatchCase:
+      description: Case fields to change. Omitted fields are left untouched.
+      properties:
+        status_code:
+          enum:
+          - in_progress
+          - in_review
+          - completed
+          - resolved
+          - unresolved
+          - inconclusive
+          - reopened
+          - revoked
+          example: in_review
+          type: string
+      type: object
+    PubmedCitation:
+      properties:
+        id:
+          type: string
+        nlm:
+          $ref: '#/components/schemas/PubmedCitationDetails'
+      type: object
+    SequencingExperimentDetail:
+      properties:
+        aliquot:
+          type: string
+        capture_kit:
+          type: string
+        created_on:
+          type: string
+        experimental_strategy_code:
+          type: string
+        experimental_strategy_name:
+          type: string
+        histology_code:
+          type: string
+        patient_id:
+          type: integer
+        platform_code:
+          type: string
+        run_alias:
+          type: string
+        run_date:
+          type: string
+        run_name:
+          type: string
+        sample_id:
+          type: integer
+        sample_type_code:
+          type: string
+        seq_id:
+          type: integer
+        sequencing_lab_code:
+          type: string
+        sequencing_lab_name:
+          type: string
+        sequencing_read_technology_code:
+          type: string
+        sequencing_read_technology_name:
+          type: string
+        status_code:
+          type: string
+        submitter_sample_id:
+          type: string
+        tissue_site:
+          type: string
+        updated_on:
+          type: string
+      required:
+      - patient_id
+      type: object
+    SortBody:
+      properties:
+        field:
+          type: string
+        order:
+          enum:
+          - asc
+          - desc
+          type: string
+      type: object
+    Statistics:
+      description: Statistics represents statistics about a column
+      properties:
+        max:
+          description: Max for numeric facet
+          type: number
+        min:
+          description: Min for numeric facet
+          type: number
+        type:
+          description: To tell UI if it's an integer or a decimal
+          type: string
+      type: object
+    StatisticsBodyWithSqon:
+      properties:
+        field:
+          type: string
+        sqon:
+          $ref: '#/components/schemas/Sqon'
+      type: object
+    TenantMembership:
+      description: Caller's effective authorization within a single tenant
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        orgs_by_action:
+          additionalProperties:
+            items:
+              type: string
+            type: array
+          type: object
+        tenant_actions:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      type: object
+    Transcript:
+      properties:
+        aa_change:
+          type: string
+        cadd_phred:
+          type: number
+        cadd_score:
+          type: number
+        consequences:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        dann_score:
+          type: number
+        dna_change:
+          type: string
+        exon_rank:
+          type: integer
+        exon_total:
+          type: integer
+        fathmm_pred:
+          type: string
+        fathmm_score:
+          type: number
+        is_canonical:
+          type: boolean
+        is_mane_plus:
+          type: boolean
+        is_mane_select:
+          type: boolean
+        lrt_pred:
+          type: string
+        lrt_score:
+          type: number
+        phyloP17way_primate:
+          type: number
+        polyphen2_hvar_pred:
+          type: string
+        polyphen2_hvar_score:
+          type: number
+        revel_score:
+          type: number
+        sift_pred:
+          type: string
+        sift_score:
+          type: number
+        transcript_id:
+          type: string
+        vep_impact:
+          $ref: '#/components/schemas/VepImpact'
+          description: TODO
+      type: object
+    UpdateCaseAssignmentsRequest:
+      properties:
+        user_ids:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+      required:
+      - user_ids
+      type: object
+    UpdateOrganizationRequest:
+      description: Payload to update an organization. Code and category are immutable
+        after creation. notification_emails is comma-separated and replaced as a whole;
+        blank clears it.
+      properties:
+        name:
+          type: string
+        notification_emails:
+          type: string
+      required:
+      - name
+      type: object
+    UpdateUserRequest:
+      description: Payload to update the roles granted to a user within a tenant.
+      properties:
+        roles:
+          items:
+            $ref: '#/components/schemas/CreateUserRole'
+          type: array
+          uniqueItems: false
+      type: object
+    UserSet:
+      properties:
+        active:
+          type: boolean
+        id:
+          type: string
+        ids:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        name:
+          type: string
+        type:
+          type: string
+        updated_at:
+          type: string
+        user_id:
+          type: string
+      type: object
+    ValueSetItem:
+      description: 'A value-set option: the stored code and its English label.'
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+      type: object
+    VariantCasesCount:
+      properties:
+        count_interpreted:
+          type: integer
+        count_uninterpreted:
+          type: integer
+      required:
+      - count_interpreted
+      - count_uninterpreted
+      type: object
+    VariantCasesFilters:
+      properties:
+        analysis_catalog_code:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        classification:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        diagnosis_lab_code:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        sex_code:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        transmission_mode:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+        zygosity:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
+      required:
+      - analysis_catalog_code
+      - classification
+      - diagnosis_lab_code
+      - sex_code
+      - transmission_mode
+      - zygosity
+      type: object
+    VariantConsequence:
+      properties:
+        biotype:
+          type: string
+        gnomad_loeuf:
+          type: number
+        gnomad_pli:
+          type: number
+        is_picked:
+          type: boolean
+        spliceai_ds:
+          type: number
+        spliceai_type:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        symbol:
+          type: string
+        transcripts:
+          items:
+            $ref: '#/components/schemas/Transcript'
+          type: array
+          uniqueItems: false
+      type: object
+    VariantExternalFrequencies:
+      properties:
+        external_frequencies:
+          items:
+            $ref: '#/components/schemas/ExternalFrequencies'
+          type: array
+          uniqueItems: false
+        locus:
+          type: string
+      required:
+      - external_frequencies
+      - locus
+      type: object
+    VariantInterpretedCase:
+      properties:
+        affected_status:
+          type: string
+        analysis_catalog_code:
+          type: string
+        analysis_catalog_name:
+          type: string
+        case_id:
+          type: integer
+        classification:
+          type: string
+        condition_id:
+          type: string
+        condition_name:
+          type: string
+        diagnosis_lab_code:
+          type: string
+        diagnosis_lab_name:
+          type: string
+        interpretation_updated_on:
+          type: string
+        observed_phenotypes:
+          items:
+            $ref: '#/components/schemas/Term'
+          type: array
+          uniqueItems: false
+        patient_id:
+          type: integer
+        relationship_to_proband:
+          type: string
+        seq_id:
+          type: integer
+        status_code:
+          type: string
+        submitter_sample_id:
+          type: string
+        transcript_id:
+          type: string
+        zygosity:
+          type: string
+      required:
+      - case_id
+      - classification
+      - condition_id
+      - condition_name
+      - interpretation_updated_on
+      - patient_id
+      - seq_id
+      - status_code
+      - transcript_id
+      - zygosity
+      type: object
+    VariantOverview:
+      properties:
+        aa_change:
+          type: string
+        cadd_phred:
+          type: number
+        cadd_score:
+          type: number
+        clinvar:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        clinvar_name:
+          type: string
+        dann_score:
+          type: number
+        dna_change:
+          type: string
+        exomiser_acmg_classification_counts:
+          additionalProperties:
+            type: integer
+          type: object
+        exon_rank:
+          type: integer
+        exon_total:
+          type: integer
+        fathmm_pred:
+          type: string
+        fathmm_score:
+          type: number
+        germline_pc_wgs:
+          type: integer
+        germline_pf_wgs:
+          type: number
+        germline_pn_wgs:
+          type: integer
+        gnomad_loeuf:
+          type: number
+        gnomad_pli:
+          type: number
+        gnomad_v3_af:
+          type: number
+        interpretation_classification_counts:
+          additionalProperties:
+            type: integer
+          type: object
+        is_canonical:
+          type: boolean
+        is_mane_plus:
+          type: boolean
+        is_mane_select:
+          type: boolean
+        locus:
+          type: string
+        lrt_pred:
+          type: string
+        lrt_score:
+          type: number
+        omim_conditions:
+          items:
+            $ref: '#/components/schemas/OmimGenePanel'
+          type: array
+          uniqueItems: false
+        phyloP17way_primate:
+          type: number
+        picked_consequences:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        polyphen2_hvar_pred:
+          type: string
+        polyphen2_hvar_score:
+          type: number
+        revel_score:
+          type: number
+        rsnumber:
+          type: string
+        sift_pred:
+          type: string
+        sift_score:
+          type: number
+        spliceai_ds:
+          type: number
+        spliceai_type:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        symbol:
+          type: string
+        transcript_id:
+          type: string
+        vep_impact:
+          $ref: '#/components/schemas/VepImpact'
+      required:
+      - germline_pf_wgs
+      - gnomad_v3_af
+      - is_canonical
+      - is_mane_plus
+      - is_mane_select
+      - locus
+      - picked_consequences
+      type: object
+    VariantUninterpretedCase:
+      properties:
+        ad_alt:
+          type: integer
+        ad_ratio:
+          type: number
+        ad_total:
+          type: integer
+        affected_status:
+          type: string
+        analysis_catalog_code:
+          type: string
+        analysis_catalog_name:
+          type: string
+        case_id:
+          type: integer
+        diagnosis_lab_code:
+          type: string
+        diagnosis_lab_name:
+          type: string
+        filter_is_pass:
+          type: boolean
+        genotype_quality:
+          type: integer
+        info_qd:
+          type: number
+        observed_phenotypes:
+          items:
+            $ref: '#/components/schemas/Term'
+          type: array
+          uniqueItems: false
+        patient_id:
+          type: integer
+        primary_condition_id:
+          type: string
+        primary_condition_name:
+          type: string
+        relationship_to_proband:
+          type: string
+        seq_id:
+          type: integer
+        sex_code:
+          type: string
+        submitter_sample_id:
+          type: string
+        transmission_mode:
+          type: string
+        updated_on:
+          type: string
+        zygosity:
+          type: string
+      required:
+      - affected_status
+      - case_id
+      - diagnosis_lab_code
+      - diagnosis_lab_name
+      - filter_is_pass
+      - observed_phenotypes
+      - patient_id
+      - seq_id
+      - submitter_sample_id
+      - transmission_mode
+      - updated_on
+      - zygosity
+      type: object
     AutoCompleteGene:
       properties:
         highlight:
@@ -103,6 +1747,11 @@ components:
           uniqueItems: false
       type: object
     BatchStatus:
+      enum:
+      - PENDING
+      - RUNNING
+      - SUCCESS
+      - ERROR
       type: string
       x-enum-varnames:
       - BatchStatusPending
@@ -499,97 +2148,6 @@ components:
       - project_code
       - status_code
       type: object
-    CaseGroupEmailContext:
-      description: Values the tenant template was rendered with, echoed so a pipeline
-        log explains the email.
-      properties:
-        analysis_codes:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        case_ids:
-          items:
-            type: integer
-          type: array
-          uniqueItems: false
-        has_stat:
-          type: boolean
-        manifest_filename:
-          type: string
-      required:
-      - analysis_codes
-      - case_ids
-      type: object
-    CaseGroupEmailReport:
-      description: Outcome of the notification for one diagnosis laboratory of the
-        group.
-      properties:
-        case_count:
-          type: integer
-        context:
-          $ref: '#/components/schemas/CaseGroupEmailContext'
-        document_count:
-          type: integer
-        error:
-          type: string
-        organization_code:
-          type: string
-        recipients:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        status:
-          enum:
-          - sent
-          - skipped_no_contact
-          - skipped_no_documents
-          - failed
-          type: string
-        template:
-          type: string
-      required:
-      - organization_code
-      - recipients
-      - status
-      type: object
-    CaseGroupRequest:
-      description: Payload to create a case group, or overwrite the case list of an
-        existing one (same name in the tenant). An empty case_ids list is accepted
-        and empties the group.
-      properties:
-        case_ids:
-          items:
-            type: integer
-          type: array
-          uniqueItems: false
-        name:
-          type: string
-      required:
-      - case_ids
-      - name
-      type: object
-    CaseGroupResponse:
-      description: A named set of cases within a tenant.
-      properties:
-        case_ids:
-          items:
-            type: integer
-          type: array
-          uniqueItems: false
-        created_on:
-          type: string
-        name:
-          type: string
-        tenant_code:
-          type: string
-      required:
-      - case_ids
-      - created_on
-      - name
-      - tenant_code
-      type: object
     CasePatientBatch:
       properties:
         affected_status_code:
@@ -803,6 +2361,10 @@ components:
           type: string
         fetus_id:
           type: integer
+        has_cnv:
+          type: boolean
+        has_snv:
+          type: boolean
         has_variants:
           type: boolean
         histology_code:
@@ -826,6 +2388,8 @@ components:
       required:
       - affected_status_code
       - experimental_strategy_code
+      - has_cnv
+      - has_snv
       - has_variants
       - patient_id
       - relationship_to_proband
@@ -873,46 +2437,6 @@ components:
       - CaseStatusInconclusive
       - CaseStatusReopened
       - CaseStatusRevoked
-    CaseStatusChange:
-      description: One case status change, applied only if the case is still in one
-        of expected_status_codes.
-      properties:
-        case_id:
-          example: 123
-          type: integer
-        expected_status_codes:
-          example:
-          - processing
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        status_code:
-          example: in_progress
-          type: string
-      required:
-      - case_id
-      - expected_status_codes
-      - status_code
-      type: object
-    CaseStatusChangeResult:
-      description: updated is false when the case was no longer in an expected status;
-        it is then left unchanged and current_status_code tells what it is. current_status_code
-        may be any case status, including a tenant's own.
-      properties:
-        case_id:
-          example: 123
-          type: integer
-        current_status_code:
-          example: in_progress
-          type: string
-        updated:
-          type: boolean
-      required:
-      - case_id
-      - current_status_code
-      - updated
-      type: object
     CaseTask:
       properties:
         created_on:
@@ -979,61 +2503,6 @@ components:
       - count
       - list
       type: object
-    CasesStatusRequest:
-      description: Status changes to apply to cases. A change between two user statuses
-        needs can_edit_case at the case's lab. A change involving a system status
-        (draft, submitted, processing) needs can_ingest_data there, and is limited
-        to submitted -> processing and processing -> in_progress.
-      properties:
-        cases:
-          items:
-            $ref: '#/components/schemas/CaseStatusChange'
-          type: array
-          uniqueItems: false
-      required:
-      - cases
-      type: object
-    CasesStatusResponse:
-      description: Outcome of each requested status change, in request order.
-      properties:
-        cases:
-          items:
-            $ref: '#/components/schemas/CaseStatusChangeResult'
-          type: array
-          uniqueItems: false
-      required:
-      - cases
-      type: object
-    ClientAuthConfig:
-      description: Public Keycloak settings for the OAuth2 device authorization grant.
-      properties:
-        client_id:
-          example: radiant-client-cli
-          type: string
-        keycloak_url:
-          example: https://auth.example.org
-          type: string
-        method:
-          example: device
-          type: string
-        realm:
-          example: radiant
-          type: string
-      required:
-      - client_id
-      - keycloak_url
-      - method
-      - realm
-      type: object
-    ClientConfig:
-      description: Public configuration a command-line client needs before any authenticated
-        call.
-      properties:
-        auth:
-          $ref: '#/components/schemas/ClientAuthConfig'
-      required:
-      - auth
-      type: object
     ClinvarRCV:
       description: ClinvarRCV represents a Reference ClinVar record - data aggregated
         by variant-condition pair
@@ -1086,61 +2555,6 @@ components:
           type: array
           uniqueItems: false
       type: object
-    ComphetGene:
-      description: ComphetGene is the number of compound heterozygous partners of
-        a variant in one gene
-      properties:
-        nb:
-          type: integer
-        symbol:
-          type: string
-      required:
-      - nb
-      - symbol
-      type: object
-    Count:
-      description: Count represents count result
-      properties:
-        count:
-          description: Number of results
-          type: integer
-      type: object
-    CountBodyWithSqon:
-      properties:
-        sqon:
-          $ref: '#/components/schemas/Sqon'
-        with_flag:
-          items:
-            $ref: '#/components/schemas/OccurrenceFlagType'
-          type: array
-          uniqueItems: false
-        with_interpretation:
-          type: boolean
-        with_note:
-          type: boolean
-      type: object
-    CreateBatchResponse:
-      description: CreateBatchResponse represents the response returned when creating
-        a new batch
-      properties:
-        batch_type:
-          type: string
-        created_on:
-          type: string
-        dry_run:
-          type: boolean
-        id:
-          type: string
-        status:
-          type: string
-          x-enum-varnames:
-          - BatchStatusPending
-          - BatchStatusRunning
-          - BatchStatusSuccess
-          - BatchStatusError
-        username:
-          type: string
-      type: object
     CreateCaseBatchBody:
       properties:
         cases:
@@ -1172,35 +2586,6 @@ components:
       - seq_id
       - task_id
       type: object
-    CreateOrganizationRequest:
-      description: Payload to create an organization in a tenant.
-      properties:
-        category_code:
-          type: string
-        code:
-          type: string
-        name:
-          type: string
-        notification_emails:
-          type: string
-      required:
-      - category_code
-      - code
-      - name
-      type: object
-    CreatePatientBatchBody:
-      description: CreatePatientBatchBody represents the body required to create a
-        patient batch
-      properties:
-        patients:
-          items:
-            $ref: '#/components/schemas/PatientBatch'
-          minItems: 1
-          type: array
-          uniqueItems: false
-      required:
-      - patients
-      type: object
     CreateRoleRequest:
       description: Payload to create a custom role in a tenant
       properties:
@@ -1223,64 +2608,6 @@ components:
       - actions
       - code
       - name_en
-      type: object
-    CreateSampleBatchBody:
-      description: CreateSampleBatchBody represents the body required to create a
-        sample batch
-      properties:
-        samples:
-          items:
-            $ref: '#/components/schemas/SampleBatch'
-          minItems: 1
-          type: array
-          uniqueItems: false
-      required:
-      - samples
-      type: object
-    CreateSequencingExperimentBatchBody:
-      description: CreateSequencingExperimentBatchBody represents the body required
-        to create a sequencing experiment batch
-      properties:
-        sequencing_experiments:
-          items:
-            $ref: '#/components/schemas/SequencingExperimentBatch'
-          minItems: 1
-          type: array
-          uniqueItems: false
-      required:
-      - sequencing_experiments
-      type: object
-    CreateUserRequest:
-      description: Payload to add a user to a tenant, with the roles to grant them.
-      properties:
-        email:
-          type: string
-        first_name:
-          type: string
-        last_name:
-          type: string
-        roles:
-          items:
-            $ref: '#/components/schemas/CreateUserRole'
-          type: array
-          uniqueItems: false
-      required:
-      - email
-      - first_name
-      - last_name
-      type: object
-    CreateUserRole:
-      description: Role to grant to a user, with the organizations it applies at.
-      properties:
-        org_codes:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        role_code:
-          type: string
-      required:
-      - role_code
       type: object
     DocumentFilters:
       properties:
@@ -1372,279 +2699,6 @@ components:
       required:
       - count
       - list
-      type: object
-    ExpandedGermlineSNVOccurrence:
-      properties:
-        aa_change:
-          type: string
-        ad_alt:
-          type: integer
-        ad_total:
-          type: integer
-        cadd_phred:
-          type: number
-        cadd_score:
-          type: number
-        chromosome:
-          type: string
-        clinvar:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        dann_score:
-          type: number
-        dna_change:
-          type: string
-        end:
-          type: integer
-        ensembl_gene_id:
-          type: string
-        exomiser_acmg_classification:
-          type: string
-        exomiser_acmg_classification_counts:
-          $ref: '#/components/schemas/JsonMap-string-int'
-        exomiser_acmg_evidence:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        exomiser_gene_combined_score:
-          type: number
-        exon_rank:
-          type: integer
-        exon_total:
-          type: integer
-        father_calls:
-          items:
-            type: integer
-          type: array
-          uniqueItems: false
-        fathmm_pred:
-          type: string
-        fathmm_score:
-          type: number
-        filter:
-          type: string
-        genotype_quality:
-          type: integer
-        germline_af_wgs:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM.
-          type: number
-        germline_af_wgs_affected:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM.
-          type: number
-        germline_af_wgs_not_affected:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM.
-          type: number
-        germline_af_wxs:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM.
-          type: number
-        germline_af_wxs_affected:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM.
-          type: number
-        germline_af_wxs_not_affected:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM.
-          type: number
-        germline_hom_wgs:
-          description: Number of patients with a HOM or HEM call
-          type: integer
-        germline_hom_wgs_affected:
-          description: Number of patients with a HOM or HEM call
-          type: integer
-        germline_hom_wgs_not_affected:
-          description: Number of patients with a HOM or HEM call
-          type: integer
-        germline_hom_wxs:
-          description: Number of patients with a HOM or HEM call
-          type: integer
-        germline_hom_wxs_affected:
-          description: Number of patients with a HOM or HEM call
-          type: integer
-        germline_hom_wxs_not_affected:
-          description: Number of patients with a HOM or HEM call
-          type: integer
-        germline_pc_wgs:
-          type: integer
-        germline_pc_wgs_affected:
-          type: integer
-        germline_pc_wgs_not_affected:
-          type: integer
-        germline_pc_wxs:
-          type: integer
-        germline_pc_wxs_affected:
-          type: integer
-        germline_pc_wxs_not_affected:
-          type: integer
-        germline_pf_wgs:
-          type: number
-        germline_pf_wgs_affected:
-          type: number
-        germline_pf_wgs_not_affected:
-          type: number
-        germline_pf_wxs:
-          type: number
-        germline_pf_wxs_affected:
-          type: number
-        germline_pf_wxs_not_affected:
-          type: number
-        germline_pn_wgs:
-          type: integer
-        germline_pn_wgs_affected:
-          type: integer
-        germline_pn_wgs_not_affected:
-          type: integer
-        germline_pn_wxs:
-          type: integer
-        germline_pn_wxs_affected:
-          type: integer
-        germline_pn_wxs_not_affected:
-          type: integer
-        gnomad_loeuf:
-          type: number
-        gnomad_pli:
-          type: number
-        gnomad_v3_af:
-          type: number
-        hgvsg:
-          type: string
-        interpretation_classification_counts:
-          $ref: '#/components/schemas/JsonMap-string-int'
-        is_canonical:
-          type: boolean
-        is_mane_plus:
-          type: boolean
-        is_mane_select:
-          type: boolean
-        locus:
-          type: string
-        locus_id:
-          type: string
-        lrt_pred:
-          type: string
-        lrt_score:
-          type: number
-        mother_calls:
-          items:
-            type: integer
-          type: array
-          uniqueItems: false
-        omim_conditions:
-          items:
-            $ref: '#/components/schemas/OmimGenePanel'
-          type: array
-          uniqueItems: false
-        parental_origin:
-          type: string
-        picked_consequences:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        polyphen2_hvar_pred:
-          type: string
-        polyphen2_hvar_score:
-          type: number
-        qd:
-          type: number
-        revel_score:
-          type: number
-        rsnumber:
-          type: string
-        sift_pred:
-          type: string
-        sift_score:
-          type: number
-        somatic_af_tn_wgs:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
-            copy number or loss of heterozygosity.
-          type: number
-        somatic_af_tn_wxs:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
-            copy number or loss of heterozygosity.
-          type: number
-        somatic_af_to_wgs:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
-            copy number or loss of heterozygosity.
-          type: number
-        somatic_af_to_wxs:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
-            copy number or loss of heterozygosity.
-          type: number
-        somatic_hom_tn_wgs:
-          description: Number of patients with a HOM or HEM tumor call
-          type: integer
-        somatic_hom_tn_wxs:
-          description: Number of patients with a HOM or HEM tumor call
-          type: integer
-        somatic_hom_to_wgs:
-          description: Number of patients with a HOM or HEM tumor call
-          type: integer
-        somatic_hom_to_wxs:
-          description: Number of patients with a HOM or HEM tumor call
-          type: integer
-        somatic_pc_tn_wgs:
-          type: integer
-        somatic_pc_tn_wxs:
-          type: integer
-        somatic_pc_to_wgs:
-          type: integer
-        somatic_pc_to_wxs:
-          type: integer
-        somatic_pf_tn_wgs:
-          type: number
-        somatic_pf_tn_wxs:
-          type: number
-        somatic_pf_to_wgs:
-          type: number
-        somatic_pf_to_wxs:
-          type: number
-        somatic_pn_tn_wgs:
-          type: integer
-        somatic_pn_tn_wxs:
-          type: integer
-        somatic_pn_to_wgs:
-          type: integer
-        somatic_pn_to_wxs:
-          type: integer
-        spliceai_ds:
-          type: number
-        spliceai_type:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        start:
-          type: integer
-        symbol:
-          type: string
-        transcript_id:
-          type: string
-        transmission:
-          type: string
-        vep_impact:
-          $ref: '#/components/schemas/VepImpact'
-        zygosity:
-          type: string
-      required:
-      - exomiser_acmg_evidence
-      - exomiser_gene_combined_score
-      - genotype_quality
-      - gnomad_v3_af
-      - hgvsg
-      - locus
-      - locus_id
-      - picked_consequences
       type: object
     ExpandedSomaticSNVOccurrence:
       properties:
@@ -1902,21 +2956,6 @@ components:
       - locus_id
       - start
       type: object
-    ExternalFrequencies:
-      properties:
-        ac:
-          type: integer
-        af:
-          type: number
-        an:
-          type: integer
-        cohort:
-          type: string
-        hom:
-          type: integer
-      required:
-      - cohort
-      type: object
     Facet:
       properties:
         name:
@@ -1936,18 +2975,6 @@ components:
       required:
       - condition
       - family_member_code
-      type: object
-    FiltersValue:
-      description: FiltersValue represents an item in filters
-      properties:
-        key:
-          description: Bucket key
-          type: string
-        label:
-          description: Label corresponding to the key
-          type: string
-      required:
-      - key
       type: object
     GenePanelCondition:
       properties:
@@ -1982,40 +3009,6 @@ components:
       - count_hpo
       - count_omim
       - count_orphanet
-      type: object
-    GenePanelUploadForm:
-      description: Multipart body of a gene panel upload.
-      properties:
-        file:
-          format: binary
-          type: string
-      required:
-      - file
-      type: object
-    GenePanelUploadResult:
-      description: 'Result of a gene panel upload: the panels of the file and the
-        genes they now hold.'
-      properties:
-        genes:
-          type: integer
-        panels:
-          type: integer
-        warnings:
-          items:
-            $ref: '#/components/schemas/GenePanelUploadWarning'
-          type: array
-          uniqueItems: false
-      type: object
-    GenePanelUploadWarning:
-      description: A gene row of the file that the upload skipped, or kept with the
-        Ensembl gene name.
-      properties:
-        line:
-          type: integer
-        message:
-          type: string
-        symbol:
-          type: string
       type: object
     GeneResult:
       properties:
@@ -2207,291 +3200,6 @@ components:
       - task_id
       - type
       type: object
-    GermlineSNVOccurrence:
-      description: GermlineSNVOccurrence represents a germline SNV occurrence
-      properties:
-        aa_change:
-          type: string
-        ad_ratio:
-          type: number
-        chromosome:
-          type: string
-        clinvar:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        cmc_mutation_url:
-          type: string
-        cmc_sample_mutated:
-          type: integer
-        cmc_sample_ratio:
-          type: number
-        cmc_tier:
-          type: string
-        comphet_genes:
-          description: Number of compound heterozygous partners per gene
-          items:
-            $ref: '#/components/schemas/ComphetGene'
-          type: array
-          uniqueItems: false
-        end:
-          type: integer
-        exomiser_acmg_classification:
-          type: string
-        exomiser_acmg_evidence:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        exomiser_gene_combined_score:
-          type: number
-        exomiser_moi:
-          type: string
-        exomiser_variant_score:
-          type: number
-        filter:
-          type: string
-        flag_type:
-          $ref: '#/components/schemas/OccurrenceFlagType'
-        genotype_quality:
-          type: integer
-        germline_af_wgs:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM.
-          type: number
-        germline_af_wgs_affected:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM.
-          type: number
-        germline_af_wgs_not_affected:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM.
-          type: number
-        germline_af_wxs:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM.
-          type: number
-        germline_af_wxs_affected:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM.
-          type: number
-        germline_af_wxs_not_affected:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM.
-          type: number
-        germline_hom_wgs:
-          description: Number of patients with a HOM or HEM call
-          type: integer
-        germline_hom_wgs_affected:
-          description: Number of patients with a HOM or HEM call
-          type: integer
-        germline_hom_wgs_not_affected:
-          description: Number of patients with a HOM or HEM call
-          type: integer
-        germline_hom_wxs:
-          description: Number of patients with a HOM or HEM call
-          type: integer
-        germline_hom_wxs_affected:
-          description: Number of patients with a HOM or HEM call
-          type: integer
-        germline_hom_wxs_not_affected:
-          description: Number of patients with a HOM or HEM call
-          type: integer
-        germline_pc_wgs:
-          type: integer
-        germline_pc_wgs_affected:
-          type: integer
-        germline_pc_wgs_not_affected:
-          type: integer
-        germline_pc_wxs:
-          type: integer
-        germline_pc_wxs_affected:
-          type: integer
-        germline_pc_wxs_not_affected:
-          type: integer
-        germline_pf_wgs:
-          type: number
-        germline_pf_wgs_affected:
-          type: number
-        germline_pf_wgs_not_affected:
-          type: number
-        germline_pf_wxs:
-          type: number
-        germline_pf_wxs_affected:
-          type: number
-        germline_pf_wxs_not_affected:
-          type: number
-        germline_pn_wgs:
-          type: integer
-        germline_pn_wgs_affected:
-          type: integer
-        germline_pn_wgs_not_affected:
-          type: integer
-        germline_pn_wxs:
-          type: integer
-        germline_pn_wxs_affected:
-          type: integer
-        germline_pn_wxs_not_affected:
-          type: integer
-        gnomad_v3_af:
-          type: number
-        has_comphet:
-          description: True when the variant has a compound heterozygous partner (slivar),
-            false otherwise, absent when not computed
-          type: boolean
-        has_interpretation:
-          type: boolean
-        has_note:
-          type: boolean
-        hgvsg:
-          type: string
-        is_canonical:
-          type: boolean
-        is_mane_plus:
-          type: boolean
-        is_mane_select:
-          type: boolean
-        locus:
-          type: string
-        locus_id:
-          type: string
-        max_impact_score:
-          type: integer
-        omim_inheritance_code:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        picked_consequences:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        rsnumber:
-          type: string
-        seq_id:
-          type: integer
-        somatic_af_tn_wgs:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
-            copy number or loss of heterozygosity.
-          type: number
-        somatic_af_tn_wxs:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
-            copy number or loss of heterozygosity.
-          type: number
-        somatic_af_to_wgs:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
-            copy number or loss of heterozygosity.
-          type: number
-        somatic_af_to_wxs:
-          description: Approximate allele frequency, (pc + hom) / (2 * pn). Assumes
-            diploid genotypes; HEM is counted as HOM. Does not account for tumor purity,
-            copy number or loss of heterozygosity.
-          type: number
-        somatic_hom_tn_wgs:
-          description: Number of patients with a HOM or HEM tumor call
-          type: integer
-        somatic_hom_tn_wxs:
-          description: Number of patients with a HOM or HEM tumor call
-          type: integer
-        somatic_hom_to_wgs:
-          description: Number of patients with a HOM or HEM tumor call
-          type: integer
-        somatic_hom_to_wxs:
-          description: Number of patients with a HOM or HEM tumor call
-          type: integer
-        somatic_pc_tn_wgs:
-          type: integer
-        somatic_pc_tn_wxs:
-          type: integer
-        somatic_pc_to_wgs:
-          type: integer
-        somatic_pc_to_wxs:
-          type: integer
-        somatic_pf_tn_wgs:
-          type: number
-        somatic_pf_tn_wxs:
-          type: number
-        somatic_pf_to_wgs:
-          type: number
-        somatic_pf_to_wxs:
-          type: number
-        somatic_pn_tn_wgs:
-          type: integer
-        somatic_pn_tn_wxs:
-          type: integer
-        somatic_pn_to_wgs:
-          type: integer
-        somatic_pn_to_wxs:
-          type: integer
-        start:
-          type: integer
-        symbol:
-          type: string
-        task_id:
-          type: integer
-        transcript_id:
-          type: string
-        variant_class:
-          type: string
-        vep_impact:
-          $ref: '#/components/schemas/VepImpact'
-        zygosity:
-          type: string
-      required:
-      - ad_ratio
-      - chromosome
-      - end
-      - exomiser_acmg_classification
-      - exomiser_acmg_evidence
-      - exomiser_gene_combined_score
-      - exomiser_moi
-      - exomiser_variant_score
-      - genotype_quality
-      - germline_pf_wgs
-      - gnomad_v3_af
-      - has_interpretation
-      - has_note
-      - hgvsg
-      - locus
-      - locus_id
-      - max_impact_score
-      - picked_consequences
-      - seq_id
-      - start
-      - task_id
-      - variant_class
-      - zygosity
-      type: object
-    GetBatchResponse:
-      description: GetBatchResponse represents the response returned when retrieving
-        a batch
-      properties:
-        batch_type:
-          type: string
-        created_on:
-          type: string
-        dry_run:
-          type: boolean
-        finished_on:
-          type: string
-        id:
-          type: string
-        report:
-          $ref: '#/components/schemas/BatchReport'
-        started_on:
-          type: string
-        status:
-          $ref: '#/components/schemas/BatchStatus'
-        summary:
-          $ref: '#/components/schemas/BatchSummary'
-        username:
-          type: string
-      type: object
     IGVPublicTrack:
       properties:
         indexURL:
@@ -2627,56 +3335,6 @@ components:
       - split_value_code
       - split_value_name
       type: object
-    InterpretationGermline:
-      properties:
-        case_id:
-          type: string
-        classification:
-          type: string
-        classification_criterias:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        condition:
-          type: string
-        condition_name:
-          type: string
-        created_at:
-          type: string
-        created_by:
-          type: string
-        created_by_name:
-          type: string
-        id:
-          type: string
-        interpretation:
-          type: string
-        locus_id:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/InterpretationMetadata'
-        pubmed:
-          items:
-            $ref: '#/components/schemas/InterpretationPubmed'
-          type: array
-          uniqueItems: false
-        sequencing_id:
-          type: string
-        transcript_id:
-          type: string
-        transmission_modes:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        updated_at:
-          type: string
-        updated_by:
-          type: string
-        updated_by_name:
-          type: string
-      type: object
     InterpretationMetadata:
       properties:
         analysis_id:
@@ -2684,60 +3342,6 @@ components:
         patient_id:
           type: string
         variant_hash:
-          type: string
-      type: object
-    InterpretationPubmed:
-      properties:
-        citation:
-          type: string
-        citation_id:
-          type: string
-      type: object
-    InterpretationSomatic:
-      properties:
-        case_id:
-          type: string
-        clinical_utility:
-          type: string
-        created_at:
-          type: string
-        created_by:
-          type: string
-        created_by_name:
-          type: string
-        id:
-          type: string
-        interpretation:
-          type: string
-        locus_id:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/InterpretationMetadata'
-        oncogenicity:
-          type: string
-        oncogenicity_classification_criterias:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        pubmed:
-          items:
-            $ref: '#/components/schemas/InterpretationPubmed'
-          type: array
-          uniqueItems: false
-        sequencing_id:
-          type: string
-        transcript_id:
-          type: string
-        tumoral_name:
-          type: string
-        tumoral_type:
-          type: string
-        updated_at:
-          type: string
-        updated_by:
-          type: string
-        updated_by_name:
           type: string
       type: object
     JsonMap-string-int:
@@ -2814,21 +3418,6 @@ components:
         with_note:
           type: boolean
       type: object
-    NotifyCaseGroupResponse:
-      description: 'Report of a case group notification: the group and one entry per
-        diagnosis laboratory.'
-      properties:
-        emails:
-          items:
-            $ref: '#/components/schemas/CaseGroupEmailReport'
-          type: array
-          uniqueItems: false
-        group:
-          $ref: '#/components/schemas/CaseGroupResponse'
-      required:
-      - emails
-      - group
-      type: object
     ObservationCategoricalBatch:
       properties:
         code:
@@ -2874,19 +3463,6 @@ components:
       - code
       - value
       type: object
-    OccurrenceCount:
-      description: 'OccurrenceCount holds both totals of an occurrence count: the
-        query builder total and the one left by the annotation filters'
-      properties:
-        count:
-          description: Number of results matching the sqon, ignoring the annotation
-            filters
-          type: integer
-        filtered_count:
-          description: Number of results also matching with_note / with_flag / with_interpretation;
-            equal to count when none is set
-          type: integer
-      type: object
     OccurrenceFlagType:
       enum:
       - flag
@@ -2931,32 +3507,6 @@ components:
       - user_id
       - user_name
       type: object
-    OmimGenePanel:
-      properties:
-        inheritance_code:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        omim_phenotype_id:
-          type: string
-        panel:
-          type: string
-      type: object
-    OrganizationResponse:
-      description: Organization within a tenant, with its category label.
-      properties:
-        category_code:
-          type: string
-        category_name:
-          type: string
-        code:
-          type: string
-        name:
-          type: string
-        notification_emails:
-          type: string
-      type: object
     OutputDocumentBatch:
       properties:
         data_category_code:
@@ -2981,22 +3531,6 @@ components:
       - name
       - size
       - url
-      type: object
-    PatchCase:
-      description: Case fields to change. Omitted fields are left untouched.
-      properties:
-        status_code:
-          enum:
-          - in_progress
-          - in_review
-          - completed
-          - resolved
-          - unresolved
-          - inconclusive
-          - reopened
-          - revoked
-          example: in_review
-          type: string
       type: object
     PatchCaseBatchBody:
       properties:
@@ -3125,6 +3659,7 @@ components:
       properties:
         cell_free_dna:
           $ref: '#/components/schemas/PatientDayDate'
+          description: Only when the test was done; the source has no value
         cytology:
           $ref: '#/components/schemas/PatientCsfCytology'
         glucose:
@@ -3135,6 +3670,7 @@ components:
           $ref: '#/components/schemas/PatientCsfResult'
         wbc:
           $ref: '#/components/schemas/PatientCsfResult'
+          description: Nucleated cells
       required:
       - cell_free_dna
       - cytology
@@ -3754,8 +4290,11 @@ components:
       properties:
         craniospinal_dose:
           $ref: '#/components/schemas/PatientDose'
+          description: total_radiation_dose
         focal_boost_dose:
           $ref: '#/components/schemas/PatientDose'
+          description: Total to primary minus craniospinal; null unless both are numbers
+            in the same unit
         is_initial_treatment:
           description: null when Not Reported
           type: boolean
@@ -3769,6 +4308,7 @@ components:
           $ref: '#/components/schemas/PatientDayDate'
         total_primary_dose:
           $ref: '#/components/schemas/PatientDose'
+          description: total_radiation_dose_focal
         type:
           type: string
         type_other:
@@ -4034,13 +4574,6 @@ components:
       - count
       - list
       type: object
-    PubmedCitation:
-      properties:
-        id:
-          type: string
-        nlm:
-          $ref: '#/components/schemas/PubmedCitationDetails'
-      type: object
     PubmedCitationDetails:
       properties:
         format:
@@ -4274,55 +4807,6 @@ components:
       - sequencing_read_technology_code
       - status_code
       - submitter_sample_id
-      type: object
-    SequencingExperimentDetail:
-      properties:
-        aliquot:
-          type: string
-        capture_kit:
-          type: string
-        created_on:
-          type: string
-        experimental_strategy_code:
-          type: string
-        experimental_strategy_name:
-          type: string
-        histology_code:
-          type: string
-        patient_id:
-          type: integer
-        platform_code:
-          type: string
-        run_alias:
-          type: string
-        run_date:
-          type: string
-        run_name:
-          type: string
-        sample_id:
-          type: integer
-        sample_type_code:
-          type: string
-        seq_id:
-          type: integer
-        sequencing_lab_code:
-          type: string
-        sequencing_lab_name:
-          type: string
-        sequencing_read_technology_code:
-          type: string
-        sequencing_read_technology_name:
-          type: string
-        status_code:
-          type: string
-        submitter_sample_id:
-          type: string
-        tissue_site:
-          type: string
-        updated_on:
-          type: string
-      required:
-      - patient_id
       type: object
     SomaticCNVOccurrence:
       description: SomaticCNVOccurrence represents a somatic CNV occurrence
@@ -4711,16 +5195,6 @@ components:
       - variant_class
       - vep_impact
       type: object
-    SortBody:
-      properties:
-        field:
-          type: string
-        order:
-          enum:
-          - asc
-          - desc
-          type: string
-      type: object
     Sqon:
       properties:
         content:
@@ -4745,26 +5219,6 @@ components:
           - not-in
           - all
           type: string
-      type: object
-    Statistics:
-      description: Statistics represents statistics about a column
-      properties:
-        max:
-          description: Max for numeric facet
-          type: number
-        min:
-          description: Min for numeric facet
-          type: number
-        type:
-          description: To tell UI if it's an integer or a decimal
-          type: string
-      type: object
-    StatisticsBodyWithSqon:
-      properties:
-        field:
-          type: string
-        sqon:
-          $ref: '#/components/schemas/Sqon'
       type: object
     TaskOccurrenceType:
       description: Task attached to a (case, sequencing) pair, used by the Variants
@@ -4791,25 +5245,6 @@ components:
       - task_type_code
       - task_type_name
       type: object
-    TenantMembership:
-      description: Caller's effective authorization within a single tenant
-      properties:
-        code:
-          type: string
-        name:
-          type: string
-        orgs_by_action:
-          additionalProperties:
-            items:
-              type: string
-            type: array
-          type: object
-        tenant_actions:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-      type: object
     Term:
       properties:
         id:
@@ -4820,68 +5255,6 @@ components:
           type: string
         term:
           type: string
-      type: object
-    Transcript:
-      properties:
-        aa_change:
-          type: string
-        cadd_phred:
-          type: number
-        cadd_score:
-          type: number
-        consequences:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        dann_score:
-          type: number
-        dna_change:
-          type: string
-        exon_rank:
-          type: integer
-        exon_total:
-          type: integer
-        fathmm_pred:
-          type: string
-        fathmm_score:
-          type: number
-        is_canonical:
-          type: boolean
-        is_mane_plus:
-          type: boolean
-        is_mane_select:
-          type: boolean
-        lrt_pred:
-          type: string
-        lrt_score:
-          type: number
-        phyloP17way_primate:
-          type: number
-        polyphen2_hvar_pred:
-          type: string
-        polyphen2_hvar_score:
-          type: number
-        revel_score:
-          type: number
-        sift_pred:
-          type: string
-        sift_score:
-          type: number
-        transcript_id:
-          type: string
-        vep_impact:
-          $ref: '#/components/schemas/VepImpact'
-      type: object
-    UpdateCaseAssignmentsRequest:
-      properties:
-        user_ids:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-      required:
-      - user_ids
       type: object
     UpdateCaseBatch:
       properties:
@@ -4974,18 +5347,6 @@ components:
       required:
       - content
       type: object
-    UpdateOrganizationRequest:
-      description: Payload to update an organization. Code and category are immutable
-        after creation. notification_emails is comma-separated and replaced as a whole;
-        blank clears it.
-      properties:
-        name:
-          type: string
-        notification_emails:
-          type: string
-      required:
-      - name
-      type: object
     UpdateRoleRequest:
       description: Payload to edit a custom role of a tenant
       properties:
@@ -5005,15 +5366,6 @@ components:
       required:
       - actions
       - name_en
-      type: object
-    UpdateUserRequest:
-      description: Payload to update the roles granted to a user within a tenant.
-      properties:
-        roles:
-          items:
-            $ref: '#/components/schemas/CreateUserRole'
-          type: array
-          uniqueItems: false
       type: object
     UserPreference:
       properties:
@@ -5071,26 +5423,6 @@ components:
       - role_code
       - scope
       type: object
-    UserSet:
-      properties:
-        active:
-          type: boolean
-        id:
-          type: string
-        ids:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        name:
-          type: string
-        type:
-          type: string
-        updated_at:
-          type: string
-        user_id:
-          type: string
-      type: object
     UsersSearchResponse:
       properties:
         count:
@@ -5104,116 +5436,6 @@ components:
       - count
       - list
       type: object
-    ValueSetItem:
-      description: 'A value-set option: the stored code and its English label.'
-      properties:
-        code:
-          type: string
-        name:
-          type: string
-      type: object
-    VariantCasesCount:
-      properties:
-        count_interpreted:
-          type: integer
-        count_uninterpreted:
-          type: integer
-      required:
-      - count_interpreted
-      - count_uninterpreted
-      type: object
-    VariantCasesFilters:
-      properties:
-        analysis_catalog_code:
-          items:
-            $ref: '#/components/schemas/FiltersValue'
-          type: array
-          uniqueItems: false
-        classification:
-          items:
-            $ref: '#/components/schemas/FiltersValue'
-          type: array
-          uniqueItems: false
-        diagnosis_lab_code:
-          items:
-            $ref: '#/components/schemas/FiltersValue'
-          type: array
-          uniqueItems: false
-        sex_code:
-          items:
-            $ref: '#/components/schemas/FiltersValue'
-          type: array
-          uniqueItems: false
-        transmission_mode:
-          items:
-            $ref: '#/components/schemas/FiltersValue'
-          type: array
-          uniqueItems: false
-        zygosity:
-          items:
-            $ref: '#/components/schemas/FiltersValue'
-          type: array
-          uniqueItems: false
-      required:
-      - analysis_catalog_code
-      - classification
-      - diagnosis_lab_code
-      - sex_code
-      - transmission_mode
-      - zygosity
-      type: object
-    VariantConsequence:
-      properties:
-        biotype:
-          type: string
-        gnomad_loeuf:
-          type: number
-        gnomad_pli:
-          type: number
-        is_picked:
-          type: boolean
-        spliceai_ds:
-          type: number
-        spliceai_type:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        symbol:
-          type: string
-        transcripts:
-          items:
-            $ref: '#/components/schemas/Transcript'
-          type: array
-          uniqueItems: false
-      type: object
-    VariantExternalFrequencies:
-      properties:
-        external_frequencies:
-          items:
-            $ref: '#/components/schemas/ExternalFrequencies'
-          type: array
-          uniqueItems: false
-        locus:
-          type: string
-      required:
-      - external_frequencies
-      - locus
-      type: object
-    VariantHeader:
-      properties:
-        assembly_version:
-          type: string
-        hgvsg:
-          type: string
-        source:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-      required:
-      - hgvsg
-      type: object
     VariantInternalFrequencies:
       properties:
         split_rows:
@@ -5223,59 +5445,6 @@ components:
           uniqueItems: false
       required:
       - split_rows
-      type: object
-    VariantInterpretedCase:
-      properties:
-        affected_status:
-          type: string
-        analysis_catalog_code:
-          type: string
-        analysis_catalog_name:
-          type: string
-        case_id:
-          type: integer
-        classification:
-          type: string
-        condition_id:
-          type: string
-        condition_name:
-          type: string
-        diagnosis_lab_code:
-          type: string
-        diagnosis_lab_name:
-          type: string
-        interpretation_updated_on:
-          type: string
-        observed_phenotypes:
-          items:
-            $ref: '#/components/schemas/Term'
-          type: array
-          uniqueItems: false
-        patient_id:
-          type: integer
-        relationship_to_proband:
-          type: string
-        seq_id:
-          type: integer
-        status_code:
-          type: string
-        submitter_sample_id:
-          type: string
-        transcript_id:
-          type: string
-        zygosity:
-          type: string
-      required:
-      - case_id
-      - classification
-      - condition_id
-      - condition_name
-      - interpretation_updated_on
-      - patient_id
-      - seq_id
-      - status_code
-      - transcript_id
-      - zygosity
       type: object
     VariantInterpretedCasesSearchResponse:
       properties:
@@ -5289,176 +5458,6 @@ components:
       required:
       - count
       - list
-      type: object
-    VariantOverview:
-      properties:
-        aa_change:
-          type: string
-        cadd_phred:
-          type: number
-        cadd_score:
-          type: number
-        clinvar:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        clinvar_name:
-          type: string
-        dann_score:
-          type: number
-        dna_change:
-          type: string
-        exomiser_acmg_classification_counts:
-          additionalProperties:
-            type: integer
-          type: object
-        exon_rank:
-          type: integer
-        exon_total:
-          type: integer
-        fathmm_pred:
-          type: string
-        fathmm_score:
-          type: number
-        germline_pc_wgs:
-          type: integer
-        germline_pf_wgs:
-          type: number
-        germline_pn_wgs:
-          type: integer
-        gnomad_loeuf:
-          type: number
-        gnomad_pli:
-          type: number
-        gnomad_v3_af:
-          type: number
-        interpretation_classification_counts:
-          additionalProperties:
-            type: integer
-          type: object
-        is_canonical:
-          type: boolean
-        is_mane_plus:
-          type: boolean
-        is_mane_select:
-          type: boolean
-        locus:
-          type: string
-        lrt_pred:
-          type: string
-        lrt_score:
-          type: number
-        omim_conditions:
-          items:
-            $ref: '#/components/schemas/OmimGenePanel'
-          type: array
-          uniqueItems: false
-        phyloP17way_primate:
-          type: number
-        picked_consequences:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        polyphen2_hvar_pred:
-          type: string
-        polyphen2_hvar_score:
-          type: number
-        revel_score:
-          type: number
-        rsnumber:
-          type: string
-        sift_pred:
-          type: string
-        sift_score:
-          type: number
-        spliceai_ds:
-          type: number
-        spliceai_type:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        symbol:
-          type: string
-        transcript_id:
-          type: string
-        vep_impact:
-          $ref: '#/components/schemas/VepImpact'
-      required:
-      - germline_pf_wgs
-      - gnomad_v3_af
-      - is_canonical
-      - is_mane_plus
-      - is_mane_select
-      - locus
-      - picked_consequences
-      type: object
-    VariantUninterpretedCase:
-      properties:
-        ad_alt:
-          type: integer
-        ad_ratio:
-          type: number
-        ad_total:
-          type: integer
-        affected_status:
-          type: string
-        analysis_catalog_code:
-          type: string
-        analysis_catalog_name:
-          type: string
-        case_id:
-          type: integer
-        diagnosis_lab_code:
-          type: string
-        diagnosis_lab_name:
-          type: string
-        filter_is_pass:
-          type: boolean
-        genotype_quality:
-          type: integer
-        info_qd:
-          type: number
-        observed_phenotypes:
-          items:
-            $ref: '#/components/schemas/Term'
-          type: array
-          uniqueItems: false
-        patient_id:
-          type: integer
-        primary_condition_id:
-          type: string
-        primary_condition_name:
-          type: string
-        relationship_to_proband:
-          type: string
-        seq_id:
-          type: integer
-        sex_code:
-          type: string
-        submitter_sample_id:
-          type: string
-        transmission_mode:
-          type: string
-        updated_on:
-          type: string
-        zygosity:
-          type: string
-      required:
-      - affected_status
-      - case_id
-      - diagnosis_lab_code
-      - diagnosis_lab_name
-      - filter_is_pass
-      - observed_phenotypes
-      - patient_id
-      - seq_id
-      - submitter_sample_id
-      - transmission_mode
-      - updated_on
-      - zygosity
       type: object
     VariantUninterpretedCasesSearchResponse:
       properties:
@@ -5474,7 +5473,6 @@ components:
       - list
       type: object
     VepImpact:
-      description: TODO
       enum:
       - MODIFIER
       - LOW
@@ -5494,8 +5492,7 @@ components:
           type: string
       type: object
   securitySchemes:
-    bearerauth:
-      bearerFormat: JWT
+    '@securitydefinitions.bearerauth':
       scheme: bearer
       type: http
 externalDocs:
@@ -5594,6 +5591,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CaseGroupRequest'
+              description: Case group to create or overwrite
+              summary: message
         description: Case group to create or overwrite
         required: true
       responses:
@@ -5859,6 +5858,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PatchCase'
+              description: Fields to change
+              summary: message
         description: Fields to change
         required: true
       responses:
@@ -6116,6 +6117,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateCaseAssignmentsRequest'
+              description: Assignees to set
+              summary: message
         description: Assignees to set
         required: true
       responses:
@@ -6244,6 +6247,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ListBodyWithCriteria'
+              description: List Body
+              summary: message
         description: List Body
         required: true
       responses:
@@ -6373,6 +6378,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PatchCaseBatchBody'
+              description: Attach Body
+              summary: message
         description: Attach Body
         required: true
       responses:
@@ -6438,6 +6445,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateCaseBatchBody'
+              description: Create Body
+              summary: message
         description: Create Body
         required: true
       responses:
@@ -6507,6 +6516,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateCaseBatchBody'
+              description: Update Body
+              summary: message
         description: Update Body
         required: true
       responses:
@@ -6614,6 +6625,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ListBodyWithCriteria'
+              description: List Body
+              summary: message
         description: List Body
         required: true
       responses:
@@ -6681,6 +6694,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CasesStatusRequest'
+              description: Status changes
+              summary: message
         description: Status changes
         required: true
       responses:
@@ -6913,6 +6928,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ListBodyWithCriteria'
+              description: List Body
+              summary: message
         description: List Body
         required: true
       responses:
@@ -6994,9 +7011,14 @@ paths:
           type: boolean
       requestBody:
         content:
-          multipart/form-data:
+          application/json:
             schema:
               $ref: '#/components/schemas/GenePanelUploadForm'
+              description: Gene panel file (.tsv) in the part named file
+              summary: request
+          multipart/form-data:
+            schema:
+              type: object
         description: Gene panel file (.tsv) in the part named file
         required: true
       responses:
@@ -7136,6 +7158,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/GeneSearchBody'
+              description: Search Body
+              summary: message
         description: Search Body
         required: true
       responses:
@@ -7589,6 +7613,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/InterpretationGermline'
+              description: Interpretation Body
+              summary: message
         description: Interpretation Body
         required: true
       responses:
@@ -7755,6 +7781,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/InterpretationSomatic'
+              description: Interpretation Body
+              summary: message
         description: Interpretation Body
         required: true
       responses:
@@ -7876,6 +7904,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateOccurrenceNoteInput'
+              description: Note to create
+              summary: message
         description: Note to create
         required: true
       responses:
@@ -8154,6 +8184,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateOccurrenceNoteInput'
+              description: Updated content
+              summary: message
         description: Updated content
         required: true
       responses:
@@ -8476,6 +8508,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AggregationBodyWithSqon'
+              description: Aggregation Body
+              summary: message
         description: Aggregation Body
         required: true
       responses:
@@ -8562,6 +8596,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CountBodyWithSqon'
+              description: Count Body
+              summary: message
         description: Count Body
         required: true
       responses:
@@ -8646,6 +8682,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ListBodyWithSqon'
+              description: List Body
+              summary: message
         description: List Body
         required: true
       responses:
@@ -8732,6 +8770,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/StatisticsBodyWithSqon'
+              description: Statistics Body
+              summary: message
         description: Statistics Body
         required: true
       responses:
@@ -8899,6 +8939,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AggregationBodyWithSqon'
+              description: Aggregation Body
+              summary: message
         description: Aggregation Body
         required: true
       responses:
@@ -8985,6 +9027,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CountBodyWithSqon'
+              description: Count Body
+              summary: message
         description: Count Body
         required: true
       responses:
@@ -9069,6 +9113,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ListBodyWithSqon'
+              description: List Body
+              summary: message
         description: List Body
         required: true
       responses:
@@ -9161,12 +9207,8 @@ paths:
       responses:
         "200":
           content:
-            application/json:
-              schema:
-                type: string
             application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
-                format: binary
                 type: string
           description: xlsx workbook
           headers:
@@ -9176,31 +9218,31 @@ paths:
                 type: string
         "400":
           content:
-            application/json:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Zero, more than 100 or malformed locus ids
         "401":
           content:
-            application/json:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Unauthorized
         "403":
           content:
-            application/json:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Forbidden
         "404":
           content:
-            application/json:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: A locus is not an occurrence of the task
         "500":
           content:
-            application/json:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
@@ -9212,7 +9254,7 @@ paths:
                 type: string
         "503":
           content:
-            application/json:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: The tenant has no transcript report template loaded
@@ -9256,6 +9298,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/StatisticsBodyWithSqon'
+              description: Statistics Body
+              summary: message
         description: Statistics Body
         required: true
       responses:
@@ -9493,6 +9537,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AggregationBodyWithSqon'
+              description: Aggregation Body
+              summary: message
         description: Aggregation Body
         required: true
       responses:
@@ -9579,6 +9625,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CountBodyWithSqon'
+              description: Count Body
+              summary: message
         description: Count Body
         required: true
       responses:
@@ -9663,6 +9711,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ListBodyWithSqon'
+              description: List Body
+              summary: message
         description: List Body
         required: true
       responses:
@@ -9749,6 +9799,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/StatisticsBodyWithSqon'
+              description: Statistics Body
+              summary: message
         description: Statistics Body
         required: true
       responses:
@@ -9916,6 +9968,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AggregationBodyWithSqon'
+              description: Aggregation Body
+              summary: message
         description: Aggregation Body
         required: true
       responses:
@@ -10002,6 +10056,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CountBodyWithSqon'
+              description: Count Body
+              summary: message
         description: Count Body
         required: true
       responses:
@@ -10086,6 +10142,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ListBodyWithSqon'
+              description: List Body
+              summary: message
         description: List Body
         required: true
       responses:
@@ -10178,12 +10236,8 @@ paths:
       responses:
         "200":
           content:
-            application/json:
-              schema:
-                type: string
             application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
-                format: binary
                 type: string
           description: xlsx workbook
           headers:
@@ -10193,31 +10247,31 @@ paths:
                 type: string
         "400":
           content:
-            application/json:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Zero, more than 100 or malformed locus ids
         "401":
           content:
-            application/json:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Unauthorized
         "403":
           content:
-            application/json:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Forbidden
         "404":
           content:
-            application/json:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: A locus is not an occurrence of the task
         "500":
           content:
-            application/json:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: Internal Server Error
@@ -10229,7 +10283,7 @@ paths:
                 type: string
         "503":
           content:
-            application/json:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
                 $ref: '#/components/schemas/ApiError'
           description: The tenant has no transcript report template loaded
@@ -10273,6 +10327,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/StatisticsBodyWithSqon'
+              description: Statistics Body
+              summary: message
         description: Statistics Body
         required: true
       responses:
@@ -10392,6 +10448,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateOrganizationRequest'
+              description: Organization to create
+              summary: message
         description: Organization to create
         required: true
       responses:
@@ -10467,6 +10525,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateOrganizationRequest'
+              description: Organization fields to update
+              summary: message
         description: Organization fields to update
         required: true
       responses:
@@ -11294,6 +11354,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreatePatientBatchBody'
+              description: Create Body
+              summary: message
         description: Create Body
         required: true
       responses:
@@ -11361,6 +11423,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreatePatientBatchBody'
+              description: Update Body
+              summary: message
         description: Update Body
         required: true
       responses:
@@ -11471,6 +11535,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ListBodyWithCriteria'
+              description: List Body
+              summary: message
         description: List Body
         required: true
       responses:
@@ -11599,6 +11665,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateRoleRequest'
+              description: Role to create
+              summary: message
         description: Role to create
         required: true
       responses:
@@ -11811,6 +11879,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateRoleRequest'
+              description: Desired state of the role
+              summary: message
         description: Desired state of the role
         required: true
       responses:
@@ -11895,6 +11965,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateSampleBatchBody'
+              description: Create Body
+              summary: message
         description: Create Body
         required: true
       responses:
@@ -11962,6 +12034,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateSampleBatchBody'
+              description: Update Body
+              summary: message
         description: Update Body
         required: true
       responses:
@@ -12087,6 +12161,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateSequencingExperimentBatchBody'
+              description: Create Body
+              summary: message
         description: Create Body
         required: true
       responses:
@@ -12154,6 +12230,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateSequencingExperimentBatchBody'
+              description: Update Body
+              summary: message
         description: Update Body
         required: true
       responses:
@@ -12302,6 +12380,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateUserRequest'
+              description: User to add
+              summary: message
         description: User to add
         required: true
       responses:
@@ -12454,6 +12534,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UpdateUserRequest'
+              description: Roles the user should end up with
+              summary: message
         description: Roles the user should end up with
         required: true
       responses:
@@ -12591,6 +12673,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ListBodyWithCriteria'
+              description: Search Body with criteria
+              summary: message
         description: Search Body with criteria
         required: true
       responses:
@@ -12657,6 +12741,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ListBodyWithCriteria'
+              description: Search Body with criteria
+              summary: message
         description: Search Body with criteria
         required: true
       responses:
@@ -12977,7 +13063,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VariantHeader'
+                $ref: '#/components/schemas/VariantOverview'
           description: OK
         "401":
           content:
@@ -13429,6 +13515,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/UserPreference'
+              description: User Preference to create or update
+              summary: message
         description: User Preference to create or update
         required: true
       responses:
@@ -13529,6 +13617,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SavedFilterCreationInput'
+              description: New Saved Filter to create
+              summary: message
         description: New Saved Filter to create
         required: true
       responses:
@@ -13677,6 +13767,8 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/SavedFilterUpdateInput'
+              description: Saved Filter to update
+              summary: message
         description: Saved Filter to update
         required: true
       responses:
@@ -13813,5 +13905,3 @@ paths:
       summary: List a value set
       tags:
       - value_sets
-servers:
-- url: /

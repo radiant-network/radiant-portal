@@ -75,7 +75,7 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 
 	txStg := db.Table(fmt.Sprintf("%s chse", types.CaseHasSequencingExperimentTable.TenantQualifiedName(ctx)))
 	txStg = txStg.Select("DISTINCT(chse.case_id)")
-	txStg = txStg.Where("se.ingested_at IS NOT NULL AND (se.task_type = 'radiant_germline_annotation' OR (se.task_type = 'radiant_somatic_annotation' AND se.histology_type = 'tumoral'))")
+	txStg = txStg.Where("se.ingested_at IS NOT NULL AND (se.task_type = 'radiant_germline_annotation' OR se.task_type = 'radiant_germline_cnv_annotation' OR (se.task_type = 'radiant_somatic_annotation' AND se.histology_type = 'tumoral'))")
 	txStg = txStg.Joins(fmt.Sprintf("JOIN %s se ON se.seq_id = chse.sequencing_experiment_id", types.SequencingTable.TenantQualifiedName(ctx)))
 
 	txMembersCount := caseMembersCount(ctx, db)
@@ -298,15 +298,22 @@ func (r *CasesRepository) retrieveCaseSequencingExperiments(ctx context.Context,
 	txSeqExp = r.joiner.CaseHasSeqExpWithSequencingExperiment(txSeqExp)
 	txSeqExp = r.joiner.SeqExpWithSample(txSeqExp)
 	txSeqExp = r.joiner.SampleAndCaseHasSeqExpWithFamily(txSeqExp)
-	// DISTINCT, not a direct join: staging is keyed (case_id, seq_id, task_id), so a tumor
-	// sequencing carried by both a tumor-normal and a tumor-only task matches twice.
+	// GROUP BY seq_id collapses the (case_id, seq_id, task_id) staging rows so a tumor sequencing
+	// carried by both a tumor-normal and a tumor-only task matches once, and so SNV and CNV
+	// annotation tasks on the same seq both surface in the MAX(...) flags.
 	txIngested := db.Table(types.SequencingTable.TenantQualifiedName(ctx)).
-		Select("DISTINCT(seq_id)").
-		Where("ingested_at is not null and (task_type = 'radiant_germline_annotation' OR (task_type = 'radiant_somatic_annotation' AND histology_type = 'tumoral')) and case_id = ?", caseId)
+		Select("seq_id, "+
+			"MAX(CASE WHEN task_type = 'radiant_germline_annotation' OR (task_type = 'radiant_somatic_annotation' AND histology_type = 'tumoral') THEN 1 ELSE 0 END) as has_snv_flag, "+
+			"MAX(CASE WHEN task_type = 'radiant_germline_cnv_annotation' THEN 1 ELSE 0 END) as has_cnv_flag").
+		Where("ingested_at is not null AND case_id = ?", caseId).
+		Group("seq_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN (?) se ON se.seq_id = s.id", txIngested)
 	// patient_id and fetus_id both appear: a fetal sample is drawn from the mother, so patient_id
 	// is hers while fetus_id names whose genome was sequenced.
-	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, spl.fetus_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, se.seq_id is not null as has_variants")
+	txSeqExp = txSeqExp.Select("s.id as seq_id, spl.patient_id, spl.fetus_id, f.relationship_to_proband_code as relationship_to_proband, f.affected_status_code, s.sample_id, spl.submitter_sample_id as sample_submitter_id, spl.type_code as sample_type_code, spl.histology_code, s.status_code, s.updated_on, s.experimental_strategy_code, " +
+		"COALESCE(se.has_snv_flag, 0) = 1 as has_snv, " +
+		"COALESCE(se.has_cnv_flag, 0) = 1 as has_cnv, " +
+		"COALESCE(se.has_snv_flag, 0) = 1 OR COALESCE(se.has_cnv_flag, 0) = 1 as has_variants")
 	txSeqExp = txSeqExp.Where("chseq.case_id = ?", caseId)
 	txSeqExp = txSeqExp.Order("affected_status_code asc, s.run_date desc, relationship_to_proband desc, seq_id desc")
 	if err := txSeqExp.Find(&sequencingExperiments).Error; err != nil {

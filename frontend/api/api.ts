@@ -1512,7 +1512,19 @@ export interface CaseSequencingExperiment {
      */
     'fetus_id'?: number;
     /**
-     * 
+     *
+     * @type {boolean}
+     * @memberof CaseSequencingExperiment
+     */
+    'has_cnv': boolean;
+    /**
+     *
+     * @type {boolean}
+     * @memberof CaseSequencingExperiment
+     */
+    'has_snv': boolean;
+    /**
+     *
      * @type {boolean}
      * @memberof CaseSequencingExperiment
      */
