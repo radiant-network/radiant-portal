@@ -569,7 +569,7 @@ func (r *CasesRepository) retrieveCaseTasks(ctx context.Context, caseId int) (*[
 	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.TaskContextTable.TenantQualifiedName(ctx), types.TaskContextTable.Alias))
 	tx = r.joiner.TaskContextWithCaseHasSeqExp(tx)
 	tx = r.joiner.TaskContextWithTask(tx)
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_type_code = %s.code", types.TaskTypeTable.TenantQualifiedName(ctx), types.TaskTypeTable.Alias, types.TaskTable.Alias, types.TaskTypeTable.Alias))
+	tx = r.joiner.TaskWithTaskType(tx)
 	tx = r.joiner.TaskContextWithSeqExp(tx)
 	tx = r.joiner.SeqExpWithSample(tx)
 	tx = r.joiner.SampleAndCaseHasSeqExpWithFamily(tx)

@@ -34,6 +34,8 @@ type DocumentResult struct {
 	PatientID                 int       `json:"patient_id" validate:"required"`
 	SubmitterSampleID         string    `json:"submitter_sample_id,omitempty"`
 	TaskID                    int       `json:"task_id" validate:"required"`
+	TaskTypeCode              string    `json:"task_type_code,omitempty"`
+	TaskTypeName              string    `json:"task_type_name,omitempty"`
 	SeqID                     int       `json:"seq_id,omitempty"`
 	Hash                      string    `json:"hash,omitempty"`
 	RunAlias                  string    `json:"run_alias,omitempty"`
@@ -60,6 +62,8 @@ var DocumentFields = []Field{
 	SequencingExperimentRunAliasField,
 	SequencingExperimentRunNameField,
 	TaskHasDocumentTaskIdField,
+	TaskTypeCodeField,
+	TaskTypeNameField,
 }
 
 var DocumentDefaultFields = []Field{
@@ -76,6 +80,8 @@ var DocumentDefaultFields = []Field{
 	SampleSubmitterSampleIdField,
 	SamplePatientIdField,
 	TaskHasDocumentTaskIdField,
+	TaskTypeCodeField,
+	TaskTypeNameField,
 }
 
 var DocumentsDefaultSort = []SortField{{Field: DocumentIdField, Order: "desc"}, {Field: SequencingExperimentIdField, Order: "desc"}}

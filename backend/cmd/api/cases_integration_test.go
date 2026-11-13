@@ -488,7 +488,9 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 				"relationship_to_proband_code":"proband", 
 				"size":1.02778567393e+11, 
 				"submitter_sample_id":"S14857", 
-				"task_id":68
+				"task_id":68,
+				"task_type_code":"alignment_germline_variant_calling",
+				"task_type_name":"Genome Alignment and Germline Variant Calling"
 			}, {
 				"case_id":21, 
 				"created_on":"2021-09-12T13:08:00Z",
@@ -502,7 +504,9 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 				"relationship_to_proband_code":"mother", 
 				"size":1.03970420817e+11, 
 				"submitter_sample_id":"S14858", 
-				"task_id":69
+				"task_id":69,
+				"task_type_code":"alignment_germline_variant_calling",
+				"task_type_name":"Genome Alignment and Germline Variant Calling"
 			}
 		], 
 		"count": 6}`

@@ -30,6 +30,8 @@ func (m *MockRepository) SearchDocuments(ctx context.Context, userQuery types.Li
 			PatientID:                 58,
 			SubmitterSampleID:         "S14786",
 			TaskID:                    20,
+			TaskTypeCode:              "alignment_germline_variant_calling",
+			TaskTypeName:              "Genome Alignment and Germline Variant Calling",
 			SeqID:                     56,
 			Hash:                      "5d41402abc4b2a76b9719d911017c794",
 			RunAlias:                  "A00516_0224",
@@ -113,7 +115,9 @@ func Test_SearchDocumentsHandler(t *testing.T) {
 			"submitter_sample_id":"S14786", 
 			"seq_id":56, 
 			"size":325362647, 
-			"task_id":20
+			"task_id":20,
+			"task_type_code":"alignment_germline_variant_calling",
+			"task_type_name":"Genome Alignment and Germline Variant Calling"
 		}],
 		"count": 1
 	}`, w.Body.String())

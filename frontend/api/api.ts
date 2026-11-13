@@ -2395,6 +2395,18 @@ export interface DocumentResult {
      * @memberof DocumentResult
      */
     'task_id': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
+    'task_type_code'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof DocumentResult
+     */
+    'task_type_name'?: string;
 }
 /**
  * 
