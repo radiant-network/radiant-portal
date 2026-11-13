@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"html"
+	"log/slog"
 	"strings"
 
 	"github.com/Goldziher/go-utils/sliceutils"
@@ -427,4 +428,50 @@ func (r *InterpretationsRepository) RetrieveSomaticInterpretationClassificationC
 	}
 
 	return results, nil
+}
+
+type locusClassificationCount struct {
+	LocusId             string
+	Classification      *string
+	ClassificationCount int
+}
+
+// Skips an empty value (a form saved without classification) silently and an unknown one with a warning, so one bad
+// row never fails a list. Two stored forms of one classification add up under one key.
+func (r *InterpretationsRepository) listClassificationCountsByLocus(ctx context.Context, table string, column string, locusIds []string, toKey func(string) (string, error)) (map[string]types.JsonMap[string, int], error) {
+	results := make(map[string]types.JsonMap[string, int])
+	if len(locusIds) == 0 {
+		return results, nil
+	}
+	var rows []locusClassificationCount
+	tx := r.db.WithContext(ctx).Table(table).Scopes(WithTenant(ctx))
+	tx = tx.Select(fmt.Sprintf("locus_id, %s AS classification, COUNT(1) AS classification_count", column))
+	tx = tx.Where("locus_id IN ?", locusIds)
+	tx = tx.Group("locus_id, " + column)
+	if err := tx.Find(&rows).Error; err != nil {
+		return nil, fmt.Errorf("list %s classification counts: %w", table, err)
+	}
+	for _, row := range rows {
+		if row.Classification == nil || *row.Classification == "" {
+			continue
+		}
+		key, err := toKey(*row.Classification)
+		if err != nil {
+			slog.WarnContext(ctx, "interpretation classification skipped", "table", table, "locus_id", row.LocusId, "error", err)
+			continue
+		}
+		if results[row.LocusId] == nil {
+			results[row.LocusId] = types.JsonMap[string, int]{}
+		}
+		results[row.LocusId][key] += row.ClassificationCount
+	}
+	return results, nil
+}
+
+func (r *InterpretationsRepository) ListGermlineInterpretationClassificationCounts(ctx context.Context, locusIds []string) (map[string]types.JsonMap[string, int], error) {
+	return r.listClassificationCountsByLocus(ctx, "interpretation_germline", "classification", locusIds, types.GetLabelFromCode)
+}
+
+func (r *InterpretationsRepository) ListSomaticInterpretationClassificationCounts(ctx context.Context, locusIds []string) (map[string]types.JsonMap[string, int], error) {
+	return r.listClassificationCountsByLocus(ctx, "interpretation_somatic", "oncogenicity", locusIds, types.GetSomaticOncogenicityKey)
 }

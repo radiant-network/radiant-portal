@@ -75,6 +75,7 @@ class SomaticSNVOccurrence(BaseModel):
     has_note: StrictBool
     hgvsg: StrictStr
     hotspot: StrictBool
+    interpretation_classification_counts: Optional[Dict[str, StrictInt]] = None
     is_canonical: StrictBool
     is_mane_plus: StrictBool
     is_mane_select: StrictBool
@@ -111,7 +112,7 @@ class SomaticSNVOccurrence(BaseModel):
     transcript_id: Optional[StrictStr] = None
     variant_class: StrictStr
     vep_impact: VepImpact
-    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "alternate", "aq", "chromosome", "clinvar", "cmc_mutation_url", "cmc_sample_mutated", "cmc_sample_ratio", "cmc_tier", "end", "flag_type", "germline_af_wgs", "germline_af_wgs_affected", "germline_af_wgs_not_affected", "germline_af_wxs", "germline_af_wxs_affected", "germline_af_wxs_not_affected", "germline_hom_wgs", "germline_hom_wgs_affected", "germline_hom_wgs_not_affected", "germline_hom_wxs", "germline_hom_wxs_affected", "germline_hom_wxs_not_affected", "germline_pc_wgs", "germline_pc_wgs_affected", "germline_pc_wgs_not_affected", "germline_pc_wxs", "germline_pc_wxs_affected", "germline_pc_wxs_not_affected", "germline_pf_wgs", "germline_pf_wgs_affected", "germline_pf_wgs_not_affected", "germline_pf_wxs", "germline_pf_wxs_affected", "germline_pf_wxs_not_affected", "germline_pn_wgs", "germline_pn_wgs_affected", "germline_pn_wgs_not_affected", "germline_pn_wxs", "germline_pn_wxs_affected", "germline_pn_wxs_not_affected", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "hotspot", "is_canonical", "is_mane_plus", "is_mane_select", "locus_id", "omim_inheritance_code", "picked_consequences", "reference", "rsnumber", "seq_id", "somatic_af_tn_wgs", "somatic_af_tn_wxs", "somatic_af_to_wgs", "somatic_af_to_wxs", "somatic_hom_tn_wgs", "somatic_hom_tn_wxs", "somatic_hom_to_wgs", "somatic_hom_to_wxs", "somatic_pc_tn_wgs", "somatic_pc_tn_wxs", "somatic_pc_to_wgs", "somatic_pc_to_wxs", "somatic_pf_tn_wgs", "somatic_pf_tn_wxs", "somatic_pf_to_wgs", "somatic_pf_to_wxs", "somatic_pn_tn_wgs", "somatic_pn_tn_wxs", "somatic_pn_to_wgs", "somatic_pn_to_wxs", "sq", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact"]
+    __properties: ClassVar[List[str]] = ["aa_change", "ad_ratio", "alternate", "aq", "chromosome", "clinvar", "cmc_mutation_url", "cmc_sample_mutated", "cmc_sample_ratio", "cmc_tier", "end", "flag_type", "germline_af_wgs", "germline_af_wgs_affected", "germline_af_wgs_not_affected", "germline_af_wxs", "germline_af_wxs_affected", "germline_af_wxs_not_affected", "germline_hom_wgs", "germline_hom_wgs_affected", "germline_hom_wgs_not_affected", "germline_hom_wxs", "germline_hom_wxs_affected", "germline_hom_wxs_not_affected", "germline_pc_wgs", "germline_pc_wgs_affected", "germline_pc_wgs_not_affected", "germline_pc_wxs", "germline_pc_wxs_affected", "germline_pc_wxs_not_affected", "germline_pf_wgs", "germline_pf_wgs_affected", "germline_pf_wgs_not_affected", "germline_pf_wxs", "germline_pf_wxs_affected", "germline_pf_wxs_not_affected", "germline_pn_wgs", "germline_pn_wgs_affected", "germline_pn_wgs_not_affected", "germline_pn_wxs", "germline_pn_wxs_affected", "germline_pn_wxs_not_affected", "gnomad_v3_af", "has_interpretation", "has_note", "hgvsg", "hotspot", "interpretation_classification_counts", "is_canonical", "is_mane_plus", "is_mane_select", "locus_id", "omim_inheritance_code", "picked_consequences", "reference", "rsnumber", "seq_id", "somatic_af_tn_wgs", "somatic_af_tn_wxs", "somatic_af_to_wgs", "somatic_af_to_wxs", "somatic_hom_tn_wgs", "somatic_hom_tn_wxs", "somatic_hom_to_wgs", "somatic_hom_to_wxs", "somatic_pc_tn_wgs", "somatic_pc_tn_wxs", "somatic_pc_to_wgs", "somatic_pc_to_wxs", "somatic_pf_tn_wgs", "somatic_pf_tn_wxs", "somatic_pf_to_wgs", "somatic_pf_to_wxs", "somatic_pn_tn_wgs", "somatic_pn_tn_wxs", "somatic_pn_to_wgs", "somatic_pn_to_wxs", "sq", "start", "symbol", "task_id", "transcript_id", "variant_class", "vep_impact"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -211,6 +212,7 @@ class SomaticSNVOccurrence(BaseModel):
             "has_note": obj.get("has_note"),
             "hgvsg": obj.get("hgvsg"),
             "hotspot": obj.get("hotspot"),
+            "interpretation_classification_counts": obj.get("interpretation_classification_counts"),
             "is_canonical": obj.get("is_canonical"),
             "is_mane_plus": obj.get("is_mane_plus"),
             "is_mane_select": obj.get("is_mane_select"),

@@ -21,6 +21,10 @@ type germlineInterpretationCountsReader interface {
 	RetrieveGermlineInterpretationClassificationCounts(ctx context.Context, locusId int) (types.JsonMap[string, int], error)
 }
 
+type germlineInterpretationListCountsReader interface {
+	ListGermlineInterpretationClassificationCounts(ctx context.Context, locusIds []string) (map[string]types.JsonMap[string, int], error)
+}
+
 type germlineSNVOccurrencesReader interface {
 	GetOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userFilter types.OccurrenceListQuery) ([]types.GermlineSNVOccurrence, error)
 	CountOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.OccurrenceCountQuery) (types.OccurrenceCount, error)
@@ -50,7 +54,7 @@ type germlineSNVOccurrencesReader interface {
 // @Failure 500 {object} types.ApiError
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Router /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/list [post]
-func OccurrencesGermlineSNVListHandler(repo germlineSNVOccurrencesReader) gin.HandlerFunc {
+func OccurrencesGermlineSNVListHandler(repo germlineSNVOccurrencesReader, interpretationRepo germlineInterpretationListCountsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var (
 			body  types.ListBodyWithSqon
@@ -94,6 +98,10 @@ func OccurrencesGermlineSNVListHandler(repo germlineSNVOccurrencesReader) gin.Ha
 			HandleError(c, err)
 			return
 		}
+
+		addInterpretationCounts(c.Request.Context(), occurrences, func(o *types.GermlineSNVOccurrence) (string, *types.JsonMap[string, int]) {
+			return o.LocusId, &o.InterpretationClassificationCounts
+		}, interpretationRepo.ListGermlineInterpretationClassificationCounts)
 
 		c.JSON(http.StatusOK, occurrences)
 	}

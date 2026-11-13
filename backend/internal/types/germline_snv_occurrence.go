@@ -93,6 +93,8 @@ type GermlineSNVOccurrence struct {
 	CmcMutationUrl             *string                `json:"cmc_mutation_url,omitempty"`
 	HasComphet                 *bool                  `json:"has_comphet,omitempty"`                    // True when the variant has a compound heterozygous partner (slivar), false otherwise, absent when not computed
 	ComphetGenes               JsonArray[ComphetGene] `gorm:"type:json" json:"comphet_genes,omitempty"` // Number of compound heterozygous partners per gene
+
+	InterpretationClassificationCounts JsonMap[string, int] `gorm:"-" json:"interpretation_classification_counts,omitempty"`
 } // @name GermlineSNVOccurrence
 
 // ComphetGene is the number of compound heterozygous partners of a variant in one gene

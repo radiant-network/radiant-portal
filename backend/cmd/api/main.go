@@ -244,7 +244,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 
 	occurrencesGermlineSNVGroup := occurrencesGermlineGroup.Group("/snv")
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/count", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVCountHandler(repoGermlineSNVOccurrences))
-	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/list", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVListHandler(repoGermlineSNVOccurrences))
+	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/list", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVListHandler(repoGermlineSNVOccurrences, repoInterpretations))
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVAggregateHandler(repoGermlineSNVOccurrences, repoFacets))
 	occurrencesGermlineSNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesGermlineSNVStatisticsHandler(repoGermlineSNVOccurrences))
 	occurrencesGermlineSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", requireAction(types.ActionSearchCase), server.GetExpandedGermlineSNVOccurrence(repoGermlineSNVOccurrences, repoExomiser, repoInterpretations))
@@ -260,7 +260,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 
 	occurrencesSomaticSNVGroup := occurrencesSomaticGroup.Group("/snv")
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/count", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVCountHandler(repoSomaticSNVOccurrences))
-	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/list", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVListHandler(repoSomaticSNVOccurrences))
+	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/list", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVListHandler(repoSomaticSNVOccurrences, repoInterpretations))
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVAggregateHandler(repoSomaticSNVOccurrences, repoFacets))
 	occurrencesSomaticSNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesSomaticSNVStatisticsHandler(repoSomaticSNVOccurrences))
 	occurrencesSomaticSNVGroup.GET("/:case_id/:seq_id/:task_id/:locus_id/expanded", requireAction(types.ActionSearchCase), server.GetExpandedSomaticSNVOccurrence(repoSomaticSNVOccurrences, repoInterpretations))

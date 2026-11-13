@@ -84,6 +84,8 @@ type SomaticSNVOccurrence struct {
 	CmcSampleRatio            *float64           `json:"cmc_sample_ratio,omitempty"`
 	CmcTier                   *string            `json:"cmc_tier,omitempty"`
 	CmcMutationUrl            *string            `json:"cmc_mutation_url,omitempty"`
+
+	InterpretationClassificationCounts JsonMap[string, int] `gorm:"-" json:"interpretation_classification_counts,omitempty"`
 }
 
 type ExpandedSomaticSNVOccurrence struct {

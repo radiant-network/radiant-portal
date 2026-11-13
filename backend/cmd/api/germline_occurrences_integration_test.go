@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -12,15 +13,26 @@ import (
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
+
+type noInterpretationListCounts struct{}
+
+func (noInterpretationListCounts) ListGermlineInterpretationClassificationCounts(context.Context, []string) (map[string]types.JsonMap[string, int], error) {
+	return nil, nil
+}
+
+func (noInterpretationListCounts) ListSomaticInterpretationClassificationCounts(context.Context, []string) (map[string]types.JsonMap[string, int], error) {
+	return nil, nil
+}
 
 func testList(t *testing.T, data string, body string, expected string) {
 	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
-		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineSNVListHandler(repo))
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineSNVListHandler(repo, noInterpretationListCounts{}))
 
 		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/5/list", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()

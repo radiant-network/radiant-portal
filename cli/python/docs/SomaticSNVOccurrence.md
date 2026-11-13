@@ -52,6 +52,7 @@ Name | Type | Description | Notes
 **has_note** | **bool** |  | 
 **hgvsg** | **str** |  | 
 **hotspot** | **bool** |  | 
+**interpretation_classification_counts** | **Dict[str, int]** |  | [optional] 
 **is_canonical** | **bool** |  | 
 **is_mane_plus** | **bool** |  | 
 **is_mane_select** | **bool** |  | 
