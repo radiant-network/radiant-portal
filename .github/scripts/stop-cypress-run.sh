@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Stop the Cypress run that a workflow started on ECS with --started-by <key>, then post the reason to Slack.
-# Usage: stop-cypress-run.sh <key> <slack title> <reason>, with SLACK_WEBHOOK set. Does nothing when no run is in progress.
+# Usage: stop-cypress-run.sh <key> <slack title> <stopped run> <reason>, with SLACK_WEBHOOK set. Does nothing when no run is in progress.
 set -euo pipefail
 
 KEY=$1
 TITLE=$2
-REASON=$3
+STOPPED_RUN=$3
+REASON=$4
 CLUSTER=pipelines
 
 running_tasks() {
@@ -33,5 +34,6 @@ for arn in $AGGREGATOR $SHARDS; do
   aws ecs stop-task --cluster "$CLUSTER" --task "$arn" --reason "$REASON" --query 'task.taskArn' --output text
 done
 
-PAYLOAD=$(jq -cn --arg title "$TITLE" --arg text "$REASON" '{attachments: [{title: $title, text: $text, color: "warning"}]}')
+PAYLOAD=$(jq -cn --arg title "$TITLE" --arg run "$STOPPED_RUN" --arg reason "$REASON" \
+  '{attachments: [{title: $title, text: "Test has been stopped for \($run)\nReason: \($reason)", color: "warning"}]}')
 curl -sf -X POST "$SLACK_WEBHOOK" -H 'Content-Type: application/json' -d "$PAYLOAD" || echo "Slack post failed"

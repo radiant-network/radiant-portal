@@ -121,7 +121,7 @@ jobs:
             unlabeled) REASON="The cypress label was removed" ;;
             closed) REASON="The PR was closed" ;;
           esac
-          bash .github/scripts/stop-cypress-run.sh "ferlease-$RELEASE" "Ferlease - $RELEASE - Cypress run stopped ⏹️" "$REASON"
+          bash .github/scripts/stop-cypress-run.sh "ferlease-$RELEASE" "Ferlease - Cypress run stopped ⏹️" "branch: $RELEASE" "$REASON"
 
   cypress:
     needs: [ferlease-release, cypress-stop]

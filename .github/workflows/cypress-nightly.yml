@@ -44,7 +44,17 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_CYPRESS_WEBHOOK }}
           REASON: ${{ inputs.stop_only && format('Stopped on demand by {0}', github.actor) || 'Replaced by a new nightly' }}
-        run: bash .github/scripts/stop-cypress-run.sh cypress-nightly "Radiant - Cypress run stopped ⏹️" "$REASON"
+        run: bash .github/scripts/stop-cypress-run.sh cypress-nightly "Radiant - Cypress run stopped ⏹️" "the nightly" "$REASON"
+
+      - name: Notify Slack launch
+        if: ${{ github.event_name == 'workflow_dispatch' && !inputs.stop_only }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_CYPRESS_WEBHOOK }}
+        run: |
+          curl -sf -X POST "$SLACK_WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -d '{"attachments":[{"title":"Radiant QA - Cypress Launch Attempt ⚙️","text":"Cypress tests are starting ✈️ on QA (manual trigger)","color":"good"}]}' \
+            || echo "Slack post failed"
 
       - name: Upload source to S3
         if: ${{ !inputs.stop_only }}
