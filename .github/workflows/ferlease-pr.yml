@@ -86,9 +86,10 @@ jobs:
 
   cypress:
     needs: ferlease-release
+    # Not on `opened`: a PR created with the label also sends `labeled`, so Cypress would run twice
     if: >
-      github.event.action != 'closed' &&
-      contains(github.event.pull_request.labels.*.name, 'cypress') &&
+      ((github.event.action == 'labeled' && github.event.label.name == 'cypress') ||
+       (contains(fromJSON('["synchronize", "reopened"]'), github.event.action) && contains(github.event.pull_request.labels.*.name, 'cypress'))) &&
       (startsWith(github.event.pull_request.head.ref, 'feat/') || startsWith(github.event.pull_request.head.ref, 'fix/') ||
        startsWith(github.event.pull_request.head.ref, 'refactor/') || startsWith(github.event.pull_request.head.ref, 'perf/'))
     runs-on: ubuntu-latest
@@ -161,6 +162,8 @@ jobs:
           )
 
           PROXY_BASE=$(aws ssm get-parameter --region ca-central-1 --name /ferlease/cypress-proxy-url --query Parameter.Value --output text)
+          # A shard that writes nothing must not leave the aggregator the files of an earlier run
+          aws s3 rm "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/" --recursive --only-show-errors
           TASK_ARNS=()
           for i in "${!SHARDS[@]}"; do
             OVERRIDES=$(jq -cn \
