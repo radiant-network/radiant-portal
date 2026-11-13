@@ -1,9 +1,10 @@
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { CNVGeneOverlap } from '@/api/api';
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
+import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { toKiloBases } from '@/components/lib/number-format';
@@ -30,6 +31,18 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
             </AnchorLinkCell>
           ),
           header: t('variant.headers.symbol_overlapping'),
+          size: 124,
+          minSize: 40,
+          enableSorting: false,
+          enablePinning: false,
+        }),
+        // RefSeq
+        columnHelper.accessor(row => row.refseq_transcript_id, {
+          id: 'refseq_transcript_id',
+          cell: info => info.getValue() ?? <EmptyCell />,
+          header: () => (
+            <TooltipHeader tooltip={t('variant.headers.refseq_tooltip')}>{t('variant.headers.refseq')}</TooltipHeader>
+          ),
           size: 124,
           minSize: 40,
           enableSorting: false,
@@ -161,6 +174,11 @@ const defaultCNVOverlappingGenesSettings = createColumnSettings([
     id: 'symbol',
     visible: true,
     label: 'variant.headers.symbol',
+  },
+  {
+    id: 'refseq_transcript_id',
+    visible: true,
+    label: 'variant.headers.refseq',
   },
   {
     id: 'cytoband',

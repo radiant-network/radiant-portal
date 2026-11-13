@@ -24,7 +24,7 @@ function QueryPillContainer({ children, onRemovePill }: QueryPillContainerProps)
   return (
     <div
       data-cy="query-pill"
-      className="flex items-center rounded-xs p-0.5 bg-muted group-data-[query-active=true]/query:bg-primary/25"
+      className="flex items-center rounded-md p-0.5 bg-muted group-data-[query-active=true]/query:bg-primary/25"
     >
       {children}
 

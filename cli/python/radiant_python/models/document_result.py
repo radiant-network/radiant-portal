@@ -42,7 +42,9 @@ class DocumentResult(BaseModel):
     size: StrictInt
     submitter_sample_id: Optional[StrictStr] = None
     task_id: StrictInt
-    __properties: ClassVar[List[str]] = ["case_id", "created_on", "data_type_code", "diagnosis_lab_code", "diagnosis_lab_name", "document_id", "format_code", "hash", "name", "patient_id", "relationship_to_proband_code", "run_alias", "seq_id", "size", "submitter_sample_id", "task_id"]
+    task_type_code: Optional[StrictStr] = None
+    task_type_name: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["case_id", "created_on", "data_type_code", "diagnosis_lab_code", "diagnosis_lab_name", "document_id", "format_code", "hash", "name", "patient_id", "relationship_to_proband_code", "run_alias", "seq_id", "size", "submitter_sample_id", "task_id", "task_type_code", "task_type_name"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -110,7 +112,9 @@ class DocumentResult(BaseModel):
             "seq_id": obj.get("seq_id"),
             "size": obj.get("size"),
             "submitter_sample_id": obj.get("submitter_sample_id"),
-            "task_id": obj.get("task_id")
+            "task_id": obj.get("task_id"),
+            "task_type_code": obj.get("task_type_code"),
+            "task_type_name": obj.get("task_type_name")
         })
         return _obj
 

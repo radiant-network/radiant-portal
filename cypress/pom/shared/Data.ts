@@ -334,6 +334,7 @@ export const data = {
   },
   cnvOverlappingGenes: {
     gene: 'GUSBP11',
+    refseq_transcript_id: null,
     cytoband: 'q11.23',
     length: '57.4 kb',
     nb_overlap_bases: '8.0 kb',
@@ -341,6 +342,11 @@ export const data = {
     overlapping_gene_percent: '14',
     overlapping_cnv_percent: '75.17',
     overlap_type: 'partial',
+  },
+  // Its overlapping genes differ in # Exons, those of cnvGermline tie.
+  cnvDistinctExons: {
+    cnv_variant: 'GAIN:chr16:22545169-22698638',
+    sqon: '{"content":[{"content":{"field":"name","value":["DRAGEN:GAIN:chr16:22545169-22698638"]},"op":"in"}],"op":"and"}',
   },
   genePanel: {
     my_network: 'TUPED_V3',

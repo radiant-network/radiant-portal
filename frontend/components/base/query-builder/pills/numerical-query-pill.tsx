@@ -12,6 +12,7 @@ import Operator from './operators/operator';
 import QueryPillValues from './values/query-pill-values';
 
 type NumericalPillProps = {
+  queryId: string;
   sqon: IValueFacet;
 };
 
@@ -22,7 +23,7 @@ type NumericalPillProps = {
  * └───────└──────────────────────────────────────────┘─────────────────┘
  *          └───────────────────┘
  */
-function NumericalQueryPill({ sqon }: NumericalPillProps) {
+function NumericalQueryPill({ queryId, sqon }: NumericalPillProps) {
   const { aggregations } = useQBContext();
   const aggregation = getAggregationByField(aggregations, sqon.content.field);
   const dispatch = useQBDispatch();
@@ -31,8 +32,9 @@ function NumericalQueryPill({ sqon }: NumericalPillProps) {
     dispatch({
       type: QBActionType.REMOVE_FACET_PILL,
       payload: sqon,
+      queryId,
     });
-  }, [dispatch, sqon]);
+  }, [dispatch, queryId, sqon]);
 
   return (
     <QueryPillContainer onRemovePill={onRemovePill}>
