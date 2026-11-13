@@ -9,6 +9,10 @@ on:
         description: 'Cypress base URL'
         required: false
         default: 'https://portail.dev.qlin.aws.sante.quebec/'
+      stop_only:
+        description: 'Stop the nightly in progress without starting a new one'
+        type: boolean
+        default: false
 
 concurrency:
   group: cypress-nightly
@@ -36,7 +40,24 @@ jobs:
           role-to-assume: arn:aws:iam::311752058468:role/qlin-ferlease-cypress
           aws-region: ca-central-1
 
+      - name: Stop the nightly in progress
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_CYPRESS_WEBHOOK }}
+          REASON: ${{ inputs.stop_only && format('Stopped on demand by {0}', github.actor) || 'Replaced by a new nightly' }}
+        run: bash .github/scripts/stop-cypress-run.sh cypress-nightly "Radiant - Cypress run stopped ⏹️" "the nightly" "$REASON"
+
+      - name: Notify Slack launch
+        if: ${{ github.event_name == 'workflow_dispatch' && !inputs.stop_only }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_CYPRESS_WEBHOOK }}
+        run: |
+          curl -sf -X POST "$SLACK_WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -d '{"attachments":[{"title":"Radiant QA - Cypress Launch Attempt ⚙️","text":"Cypress tests are starting ✈️ on QA (manual trigger)","color":"good"}]}' \
+            || echo "Slack post failed"
+
       - name: Upload source to S3
+        if: ${{ !inputs.stop_only }}
         env:
           RUN_ID: ${{ steps.run.outputs.value }}
         run: |
@@ -47,6 +68,7 @@ jobs:
             "s3://qlin-dev-cypress-artifacts/$RUN_ID/source.tar.gz"
 
       - name: Launch shards and aggregator
+        if: ${{ !inputs.stop_only }}
         env:
           RUN_ID: ${{ steps.run.outputs.value }}
           CYPRESS_BASE_URL: ${{ inputs.base_url || 'https://portail.dev.qlin.aws.sante.quebec/' }}
@@ -133,6 +155,7 @@ jobs:
               --launch-type FARGATE \
               --network-configuration "awsvpcConfiguration={subnets=[subnet-07cac0f9ab50d76ed,subnet-0be9fa70291f7c86c],assignPublicIp=DISABLED,securityGroups=[$SG_ID]}" \
               --overrides "$OVERRIDES" \
+              --started-by cypress-nightly \
               --query 'tasks[0].taskArn' \
               --output text)
             TASK_ARNS+=("$ARN")
@@ -236,5 +259,6 @@ jobs:
             --launch-type FARGATE \
             --network-configuration "awsvpcConfiguration={subnets=[subnet-07cac0f9ab50d76ed,subnet-0be9fa70291f7c86c],assignPublicIp=DISABLED,securityGroups=[$SG_ID]}" \
             --overrides "$AGG_OVERRIDES" \
+            --started-by cypress-nightly/aggregator \
             --query 'tasks[0].taskArn' \
             --output text | xargs -I{} echo "Aggregator launched: {}"
