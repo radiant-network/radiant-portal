@@ -2071,6 +2071,21 @@ components:
           uniqueItems: false
         end:
           type: integer
+        exomiser_acmg_classification:
+          type: string
+        exomiser_acmg_evidence:
+          items:
+            type: string
+          type: array
+          uniqueItems: false
+        exomiser_gene_combined_score:
+          type: number
+        exomiser_moi:
+          type: string
+        exomiser_rank:
+          type: integer
+        exomiser_variant_score:
+          type: number
         father_bc:
           type: integer
         father_calls:

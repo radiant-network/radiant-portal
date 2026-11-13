@@ -534,7 +534,13 @@ CREATE TABLE IF NOT EXISTS {tenant}.`germline__cnv__occurrence` (
      father_bc int(11) NULL,
      father_pe array<int(11)> NULL,
      father_sm FLOAT NULL,
-     father_name varchar(1048576) NULL
+     father_name varchar(1048576) NULL,
+     exomiser_rank int(11) NULL,
+     exomiser_variant_score FLOAT NULL,
+     exomiser_gene_combined_score FLOAT NULL,
+     exomiser_moi varchar(10) NULL,
+     exomiser_acmg_classification varchar(300) NULL,
+     exomiser_acmg_evidence array<varchar(10)> NULL
 ) ENGINE=OLAP
 DUPLICATE KEY(part, seq_id, task_id, cnv_id)
 PARTITION BY (part);

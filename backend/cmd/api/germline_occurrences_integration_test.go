@@ -690,3 +690,77 @@ func Test_SNVOccurrences_Search_NotFoundInRun(t *testing.T) {
 		assert.JSONEq(t, `{"status": "not_found_in_run", "matched_field": "rsnumber", "normalized_input": "rs111111111", "variants": []}`, w.Body.String())
 	})
 }
+
+func postGermlineCNV(t *testing.T, env *testutils.Env, endpoint string, taskID string, body string) *httptest.ResponseRecorder {
+	repo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+	router := tenantRouter()
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineCNVListHandler(repo))
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/count", server.OccurrencesGermlineCNVCountHandler(repo))
+	router.POST("/:tenant/occurrences/germline/cnv/:case_id/:seq_id/:task_id/aggregate", server.OccurrencesGermlineCNVAggregateHandler(repo, starrocks.NewFacetsRepository()))
+
+	req, _ := http.NewRequest("POST", fmt.Sprintf("/radiant/occurrences/germline/cnv/70/70/%s/%s", taskID, endpoint), bytes.NewBufferString(body))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+const germlineCNVExomiserSelectedFields = `"additional_fields": ["exomiser_rank", "exomiser_variant_score", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_acmg_classification", "exomiser_acmg_evidence"]`
+
+func Test_CNVOccurrence_List_Return_Exomiser_Fields_Sorted_By_Exomiser_Rank(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		body := `{` + germlineCNVExomiserSelectedFields + `, "sort": [{"field": "exomiser_rank", "order": "desc"}]}`
+
+		w := postGermlineCNV(t, env, "list", "86", body)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		expected := `[
+			{"seq_id":70, "task_id":86, "cnv_id":"5", "chromosome":"2", "start":20000, "end":20500, "type":"DUP", "length":500, "name":"CNV4", "cn":3, "has_note": false, "nb_snv": 0, "exomiser_rank": 3, "exomiser_variant_score": 0.6, "exomiser_gene_combined_score": 0.42, "exomiser_moi": "AR", "exomiser_acmg_classification": "uncertain_significance", "exomiser_acmg_evidence": ["PM2"]},
+			{"seq_id":70, "task_id":86, "cnv_id":"4", "chromosome":"1", "start":10000, "end":10500, "type":"DEL", "length":500, "name":"CNV1", "cn":1, "has_note": false, "nb_snv": 0, "exomiser_rank": 1, "exomiser_variant_score": 0.95, "exomiser_gene_combined_score": 0.88, "exomiser_moi": "AD", "exomiser_acmg_classification": "pathogenic", "exomiser_acmg_evidence": ["PVS1","PM2"]}
+		]`
+		assert.JSONEq(t, expected, w.Body.String())
+	})
+}
+
+func Test_CNVOccurrence_List_Omit_Exomiser_Fields_On_Alignment_Task_Rows(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		body := `{` + germlineCNVExomiserSelectedFields + `}`
+
+		w := postGermlineCNV(t, env, "list", "91020", body)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `[{"seq_id":70, "task_id":91020, "cnv_id":"6", "chromosome":"1", "start":10000, "end":10500, "type":"DEL", "length":500, "name":"CNV1", "cn":1, "has_note": false, "nb_snv": 0}]`, w.Body.String())
+	})
+}
+
+const germlineCNVPathogenicSqon = `"sqon": {"op": "and", "content": [{"op": "in", "content": {"field": "exomiser_acmg_classification", "value": ["pathogenic"]}}]}`
+
+func Test_CNVOccurrence_List_Filter_On_Exomiser_Acmg_Classification(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		body := `{"additional_fields": ["exomiser_acmg_classification"], ` + germlineCNVPathogenicSqon + `}`
+
+		w := postGermlineCNV(t, env, "list", "86", body)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `[{"seq_id":70, "task_id":86, "cnv_id":"4", "chromosome":"1", "start":10000, "end":10500, "type":"DEL", "length":500, "name":"CNV1", "cn":1, "has_note": false, "nb_snv": 0, "exomiser_acmg_classification": "pathogenic"}]`, w.Body.String())
+	})
+}
+
+func Test_CNVOccurrence_Count_Filter_On_Exomiser_Acmg_Classification(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		body := `{` + germlineCNVPathogenicSqon + `}`
+
+		w := postGermlineCNV(t, env, "count", "86", body)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `{"count":1, "filtered_count":1}`, w.Body.String())
+	})
+}
+
+func Test_CNVOccurrence_Aggregation_By_Exomiser_Acmg_Classification(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		w := postGermlineCNV(t, env, "aggregate", "86", `{"field":"exomiser_acmg_classification"}`)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `[{"key":"pathogenic","count":1},{"key":"uncertain_significance","count":1}]`, w.Body.String())
+	})
+}
