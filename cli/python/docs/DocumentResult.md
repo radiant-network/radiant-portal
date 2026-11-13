@@ -21,6 +21,8 @@ Name | Type | Description | Notes
 **size** | **int** |  | 
 **submitter_sample_id** | **str** |  | [optional] 
 **task_id** | **int** |  | 
+**task_type_code** | **str** |  | [optional] 
+**task_type_name** | **str** |  | [optional] 
 
 ## Example
 

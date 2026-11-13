@@ -86,9 +86,10 @@ jobs:
 
   cypress:
     needs: ferlease-release
+    # Not on `opened`: a PR created with the label also sends `labeled`, so Cypress would run twice
     if: >
-      github.event.action != 'closed' &&
-      contains(github.event.pull_request.labels.*.name, 'cypress') &&
+      ((github.event.action == 'labeled' && github.event.label.name == 'cypress') ||
+       (contains(fromJSON('["synchronize", "reopened"]'), github.event.action) && contains(github.event.pull_request.labels.*.name, 'cypress'))) &&
       (startsWith(github.event.pull_request.head.ref, 'feat/') || startsWith(github.event.pull_request.head.ref, 'fix/') ||
        startsWith(github.event.pull_request.head.ref, 'refactor/') || startsWith(github.event.pull_request.head.ref, 'perf/'))
     runs-on: ubuntu-latest
@@ -161,6 +162,8 @@ jobs:
           )
 
           PROXY_BASE=$(aws ssm get-parameter --region ca-central-1 --name /ferlease/cypress-proxy-url --query Parameter.Value --output text)
+          # A shard that writes nothing must not leave the aggregator the files of an earlier run
+          aws s3 rm "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/" --recursive --only-show-errors
           TASK_ARNS=()
           for i in "${!SHARDS[@]}"; do
             OVERRIDES=$(jq -cn \
@@ -202,6 +205,7 @@ jobs:
             sleep 60
           done
           REPORT_LINKS=""
+          REPORTS=()
           ALL_PASSED=true
           mkdir -p /tmp/all_screenshots
           for i in $(seq 0 $((SHARDS_COUNT - 1))); do
@@ -211,6 +215,8 @@ jobs:
             [ "$EC" != "0" ] && ALL_PASSED=false
             aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/screenshots.zip" "/tmp/shard_${i}.zip" 2>/dev/null || true
             [ -f "/tmp/shard_${i}.zip" ] && unzip -oq "/tmp/shard_${i}.zip" -d /tmp/all_screenshots/ 2>/dev/null || true
+            aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/shards/$i/report.html" "/tmp/shard_${i}.html" 2>/dev/null || true
+            [ -f "/tmp/shard_${i}.html" ] && REPORTS+=("/tmp/shard_${i}.html")
             [ -n "$RURL" ] && REPORT_LINKS="${REPORT_LINKS}<${PROXY_BASE}/?key=${RURL#s3://qlin-dev-cypress-artifacts/}|Shard ${i}>  "
           done
           # Retries=2 (defaut) generates "(attempt 3)" images and known fails are tagged "SJRA-", "CLIN-" or "RAD-"
@@ -227,6 +233,18 @@ jobs:
             aws s3 cp /tmp/combined_screenshots.zip "s3://qlin-dev-cypress-artifacts/$RELEASE/combined_screenshots.zip"
             COMBINED_ZURL="${PROXY_BASE}/?key=$RELEASE/combined_screenshots.zip"
           fi
+          # Every failure, tagged ones included, read from the JSON that marge embeds in each shard report
+          FAILURES_XURL=""
+          if [ ${#REPORTS[@]} -gt 0 ]; then
+            mkdir -p /tmp/src
+            aws s3 cp "s3://qlin-dev-cypress-artifacts/$RELEASE/source.tar.gz" /tmp/source.tar.gz 2>/dev/null || true
+            tar -xzf /tmp/source.tar.gz -C /tmp/src cypress/scripts/junit-failures.mjs 2>/dev/null || true
+            node /tmp/src/cypress/scripts/junit-failures.mjs "${REPORTS[@]}" > /tmp/combined-results.xml || true
+            if [ -s /tmp/combined-results.xml ]; then
+              aws s3 cp /tmp/combined-results.xml "s3://qlin-dev-cypress-artifacts/$RELEASE/combined-results.xml" --content-disposition "attachment; filename=combined-results.xml" \
+                && FAILURES_XURL="${PROXY_BASE}/?key=$RELEASE/combined-results.xml"
+            fi
+          fi
           $ALL_PASSED && STATUS="All passed ✅" || { [ "$NEW_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🐞 (${TOTAL_FAILS} total fails)" || { [ "$TOTAL_FAILS" -gt 0 ] && STATUS="${NEW_FAILS} new fails 🚀 (${TOTAL_FAILS} total fails)" || STATUS="Failed 💥"; }; }
           if $ALL_PASSED; then
             COLOR="good"
@@ -239,6 +257,7 @@ jobs:
           BODY_PARTS=()
           [ -n "$COMBINED_ZURL" ] && BODY_PARTS+=("Download all screenshots as a zip file: <${COMBINED_ZURL}|View Results>")
           [ -n "$REPORT_LINKS" ] && BODY_PARTS+=("Reports: $REPORT_LINKS")
+          [ -n "$FAILURES_XURL" ] && BODY_PARTS+=("Failures XML: <${FAILURES_XURL}|Download>")
           TEXT=$(printf "%s\n" "${BODY_PARTS[@]}")
           PAYLOAD=$(node -e "process.stdout.write(JSON.stringify({attachments:[{title:process.argv[1],text:process.argv[2],color:process.argv[3]}]}))" "$TITLE" "$TEXT" "$COLOR")
           curl -sf -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" -d "$PAYLOAD" || true

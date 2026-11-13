@@ -152,6 +152,8 @@ func prepareDocumentsQuery(ctx context.Context, userQuery types.Query, r *Docume
 	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s %s", types.DocumentTable.TenantQualifiedName(ctx), types.DocumentTable.Alias))
 	tx = r.joiner.DocumentWithTaskHasDocument(tx)
 	tx = r.joiner.TaskHasDocWithTaskContext(tx)
+	tx = r.joiner.TaskHasDocWithTask(tx)
+	tx = r.joiner.TaskWithTaskType(tx)
 	tx = r.joiner.TaskContextWithCaseHasSeqExp(tx)
 	tx = r.joiner.CaseHasSeqExpWithSequencingExperiment(tx)
 	tx = r.joiner.CaseHasSeqExpWithCase(tx)

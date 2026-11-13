@@ -49,7 +49,9 @@ func Test_SearchDocumentsHandler_WithCriteria(t *testing.T) {
 				"relationship_to_proband_code":"mother", 
 				"submitter_sample_id":"S13228", 
 				"size":3.06718965e+08, 
-				"task_id":12
+				"task_id":12,
+				"task_type_code":"alignment_germline_variant_calling",
+				"task_type_name":"Genome Alignment and Germline Variant Calling"
 			}, {
 				"case_id":2, 
 				"created_on":"2021-09-12T13:08:00Z",
@@ -63,7 +65,9 @@ func Test_SearchDocumentsHandler_WithCriteria(t *testing.T) {
 				"relationship_to_proband_code":"mother", 
 				"submitter_sample_id":"S13228", 
 				"size":1.09940425359e+11, 
-				"task_id":12
+				"task_id":12,
+				"task_type_code":"alignment_germline_variant_calling",
+				"task_type_name":"Genome Alignment and Germline Variant Calling"
 			}
 		], 
 		"count": 2}`
@@ -92,7 +96,9 @@ func Test_SearchDocumentsHandler_WithAdditionalFields(t *testing.T) {
 				"submitter_sample_id":"S13228", 
 				"seq_id": 5,
 				"size":3.06718965e+08, 
-				"task_id":12
+				"task_id":12,
+				"task_type_code":"alignment_germline_variant_calling",
+				"task_type_name":"Genome Alignment and Germline Variant Calling"
 			}, {
 				"case_id":2, 
 				"created_on":"2021-09-12T13:08:00Z",
@@ -108,7 +114,9 @@ func Test_SearchDocumentsHandler_WithAdditionalFields(t *testing.T) {
 				"submitter_sample_id":"S13228", 
 				"seq_id": 5,
 				"size":1.09940425359e+11, 
-				"task_id":12
+				"task_id":12,
+				"task_type_code":"alignment_germline_variant_calling",
+				"task_type_name":"Genome Alignment and Germline Variant Calling"
 			}
 		], 
 		"count": 2}`
@@ -135,7 +143,9 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 				"relationship_to_proband_code":"proband", 
 				"submitter_sample_id":"S13224",
 				"size":3.03866839e+08, 
-				"task_id":5
+				"task_id":5,
+				"task_type_code":"radiant_germline_annotation",
+				"task_type_name":"RADIANT Germline Annotation"
 			},
 			{
 				"case_id":1, 
@@ -150,7 +160,9 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 				"relationship_to_proband_code":"mother", 
 				"submitter_sample_id":"S13225", 
 				"size":3.03866839e+08, 
-				"task_id":5
+				"task_id":5,
+				"task_type_code":"radiant_germline_annotation",
+				"task_type_name":"RADIANT Germline Annotation"
 			}
 		], 
 		"count": 171}`
