@@ -85,7 +85,7 @@ type SomaticSNVOccurrence struct {
 	CmcTier                   *string            `json:"cmc_tier,omitempty"`
 	CmcMutationUrl            *string            `json:"cmc_mutation_url,omitempty"`
 
-	InterpretationClassificationCounts JsonMap[string, int] `gorm:"-" json:"interpretation_classification_counts,omitempty"`
+	InterpretationClassificationCounts JsonMap[string, int] `gorm:"type:json" json:"interpretation_classification_counts,omitempty"`
 }
 
 type ExpandedSomaticSNVOccurrence struct {

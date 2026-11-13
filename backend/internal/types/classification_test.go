@@ -84,3 +84,31 @@ func Test_GetSomaticOncogenicityKey_Empty(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, "", key)
 }
+
+func Test_GetGermlineClassificationKey_ReturnsSnakeCaseKey(t *testing.T) {
+	key, err := GetGermlineClassificationKey("LA26333-7")
+
+	assert.NoError(t, err)
+	assert.Equal(t, "uncertain_significance", key)
+}
+
+func Test_GetGermlineClassificationKey_CoversEveryClassificationCode(t *testing.T) {
+	for _, c := range Classifications {
+		_, err := GetGermlineClassificationKey(c.Code)
+		assert.NoError(t, err, c.Code)
+	}
+}
+
+func Test_GetGermlineClassificationKey_Unknown(t *testing.T) {
+	key, err := GetGermlineClassificationKey("tier_1")
+
+	assert.Error(t, err)
+	assert.Equal(t, "", key)
+}
+
+func Test_GetGermlineClassificationKey_Empty(t *testing.T) {
+	key, err := GetGermlineClassificationKey("")
+
+	assert.Error(t, err)
+	assert.Equal(t, "", key)
+}

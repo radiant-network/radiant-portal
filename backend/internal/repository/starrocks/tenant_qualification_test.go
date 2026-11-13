@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -13,6 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func buildSNVSQL(db *gorm.DB) string {
@@ -199,5 +201,66 @@ func Test_CaseWithRuns_BoundTenant_QualifiesSubqueryTables(t *testing.T) {
 		assert.Contains(t, sql, "tenant1_tenant.sequencing_experiment s")
 		assert.Contains(t, sql, "tenant1_tenant.sample spl")
 		assert.NotContains(t, sql, "radiant_jdbc")
+	})
+}
+
+type sqlCapture struct {
+	logger.Interface
+	statements []string
+}
+
+func (c *sqlCapture) LogMode(logger.LogLevel) logger.Interface { return c }
+
+func (c *sqlCapture) Trace(_ context.Context, _ time.Time, fc func() (string, int64), _ error) {
+	sql, _ := fc()
+	c.statements = append(c.statements, sql)
+}
+
+// The multi-tenant loader builds no federated view, so the list query fails on the first one it reads;
+// the SQL it sent still shows which interpretation table the counts join reads.
+func capturedSNVListSQL(t *testing.T, env *testutils.Env, list func(db *gorm.DB) error) string {
+	t.Helper()
+	capture := &sqlCapture{Interface: logger.Discard}
+	_ = list(env.Starrocks.Session(&gorm.Session{Logger: capture}))
+	for i := len(capture.statements) - 1; i >= 0; i-- {
+		if strings.Contains(capture.statements[i], "AS interpretation_classification_counts") {
+			return capture.statements[i]
+		}
+	}
+	require.FailNow(t, "no list statement captured", capture.statements)
+	return ""
+}
+
+func Test_Germline_SNV_GetOccurrences_Interpretation_Counts_Read_Only_The_Bound_Tenant(t *testing.T) {
+	// Need must match Test_SNVOccurrences_TenantIsolation_Executes exactly (see Test_VariantOverview_CrossDatabaseJoin_Executes).
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Tenants: []string{"tenant1", "tenant2"}, TenantKeyColumns: []string{"seq_id"}}, func(t *testing.T, env *testutils.Env) {
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
+		require.NoError(t, err)
+
+		sql := capturedSNVListSQL(t, env, func(db *gorm.DB) error {
+			_, err := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: db}).GetOccurrences(env.TenantCtx("tenant1"), 1, 1, 5, query)
+			return err
+		})
+
+		assert.Contains(t, sql, "COUNT(1) AS classification_count FROM tenant1_tenant.interpretation_germline WHERE")
+		assert.NotContains(t, sql, "radiant_jdbc.public.interpretation_germline")
+		assert.NotContains(t, sql, "tenant2_tenant")
+	})
+}
+
+func Test_Somatic_SNV_GetOccurrences_Interpretation_Counts_Read_Only_The_Bound_Tenant(t *testing.T) {
+	// Need must match Test_SNVOccurrences_TenantIsolation_Executes exactly (see Test_VariantOverview_CrossDatabaseJoin_Executes).
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Tenants: []string{"tenant1", "tenant2"}, TenantKeyColumns: []string{"seq_id"}}, func(t *testing.T, env *testutils.Env) {
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
+		require.NoError(t, err)
+
+		sql := capturedSNVListSQL(t, env, func(db *gorm.DB) error {
+			_, err := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: db}).GetOccurrences(env.TenantCtx("tenant1"), 2, 74, 74, query)
+			return err
+		})
+
+		assert.Contains(t, sql, "COUNT(1) AS classification_count FROM tenant1_tenant.interpretation_somatic WHERE")
+		assert.NotContains(t, sql, "radiant_jdbc.public.interpretation_somatic")
+		assert.NotContains(t, sql, "tenant2_tenant")
 	})
 }

@@ -43,6 +43,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 	columns = append(columns, "i.locus_id IS NOT NULL AS has_interpretation")
 	columns = append(columns, "note.occurrence_id IS NOT NULL AS has_note")
 	columns = append(columns, "flag.flag_type")
+	columns = append(columns, "ic.classification_counts AS interpretation_classification_counts")
 	columns = append(columns, "v.locus")
 
 	utils.AddPaginationAndSort(tx, userQuery)
@@ -52,6 +53,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 	// 		LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM <schema>.interpretation_germline) i ON i.locus_id = g_snv_o.locus_id AND i.sequencing_id = ?
 	// 		LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM <schema>.occurrence_note WHERE deleted = false) note ON note.occurrence_id = g_snv_o.locus_id AND note.task_id = g_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?
 	// 		LEFT JOIN <schema>.occurrence_flag flag ON flag.occurrence_id = g_snv_o.locus_id AND flag.task_id = g_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?
+	// 		LEFT JOIN (SELECT locus_id, to_json(map_agg(classification, classification_count)) AS classification_counts FROM (<count per locus_id, classification in <schema>.interpretation_germline>) GROUP BY locus_id) ic ON ic.locus_id = g_snv_o.locus_id
 	// WHERE g_snv_o.locus_id in (
 	//	SELECT g_snv_o.locus_id FROM germline__snv__occurrence JOIN ... WHERE quality > 100 ORDER BY ad_ratio DESC LIMIT 10
 	// ) AND g_snv_o.seq_id=? AND g_snv_o.task_id=? AND g_snv_o.part=? AND v.locus_id=g_snv_o.locus_id ORDER BY ad_ratio DESC
@@ -60,6 +62,7 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 		Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM %s) i ON i.locus_id = g_snv_o.locus_id AND i.sequencing_id = ? AND i.case_id = ?", types.InterpretationGermlineTable.TenantQualifiedName(ctx)), fmt.Sprintf("%d", seqId), fmt.Sprintf("%d", caseId)).
 		Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s WHERE deleted = false) note ON note.occurrence_id = g_snv_o.locus_id AND note.task_id = g_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?", types.OccurrenceNoteTable.TenantQualifiedName(ctx)), seqId, caseId).
 		Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = g_snv_o.locus_id AND flag.task_id = g_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx)), seqId, caseId).
+		Joins(fmt.Sprintf("LEFT JOIN (SELECT locus_id, to_json(map_agg(classification, classification_count)) AS classification_counts FROM (SELECT locus_id, classification, COUNT(1) AS classification_count FROM %s WHERE classification IS NOT NULL AND classification <> '' GROUP BY locus_id, classification) ic_rows GROUP BY locus_id) ic ON ic.locus_id = g_snv_o.locus_id", types.InterpretationGermlineTable.TenantQualifiedName(ctx))).
 		Select(columns).
 		Where("g_snv_o.seq_id = ? and g_snv_o.task_id = ? and part=? and v.locus_id = g_snv_o.locus_id and g_snv_o.locus_id in (?)", seqId, taskId, part, tx)
 
@@ -68,6 +71,9 @@ func (r *GermlineSNVOccurrencesRepository) GetOccurrences(ctx context.Context, c
 
 	if err = tx.Find(&occurrences).Error; err != nil {
 		return nil, fmt.Errorf("error fetching occurrences: %w", err)
+	}
+	for i := range occurrences {
+		occurrences[i].InterpretationClassificationCounts = keyClassificationCounts(ctx, occurrences[i].LocusId, occurrences[i].InterpretationClassificationCounts, types.GetGermlineClassificationKey)
 	}
 	return occurrences, nil
 }

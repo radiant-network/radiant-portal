@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -13,26 +12,15 @@ import (
 	"github.com/radiant-network/radiant-api/internal/repository/postgres"
 	"github.com/radiant-network/radiant-api/internal/repository/starrocks"
 	"github.com/radiant-network/radiant-api/internal/server"
-	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 )
-
-type noInterpretationListCounts struct{}
-
-func (noInterpretationListCounts) ListGermlineInterpretationClassificationCounts(context.Context, []string) (map[string]types.JsonMap[string, int], error) {
-	return nil, nil
-}
-
-func (noInterpretationListCounts) ListSomaticInterpretationClassificationCounts(context.Context, []string) (map[string]types.JsonMap[string, int], error) {
-	return nil, nil
-}
 
 func testList(t *testing.T, data string, body string, expected string) {
 	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
-		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineSNVListHandler(repo, noInterpretationListCounts{}))
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/list", server.OccurrencesGermlineSNVListHandler(repo))
 
 		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/5/list", bytes.NewBufferString(body))
 		w := httptest.NewRecorder()
@@ -90,7 +78,7 @@ func testStatistics(t *testing.T, data string, body string, expected string) {
 }
 
 func Test_SNVOccurrences_List(t *testing.T) {
-	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "end": 0, "exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "has_note": true, "hgvsg":"hgvsg1", "locus":"locus1", "locus_id":"1000", "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "max_impact_score":4, "germline_pf_wgs":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "task_id":5, "transcript_id":"T001", "start":1111, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"MODIFIER", "zygosity":"HET"}]`)
+	testList(t, "simple", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "ad_ratio":1, "chromosome":"1", "clinvar":["Benign", "Pathogenic"], "end": 0, "exomiser_acmg_classification":"UNCERTAIN_SIGNIFICANCE", "exomiser_acmg_evidence":["PS1", "PVS2"], "exomiser_gene_combined_score":0.7, "exomiser_moi":"", "exomiser_variant_score":0, "genotype_quality":100, "gnomad_v3_af":0.001, "has_interpretation": true, "has_note": true, "hgvsg":"hgvsg1", "locus":"locus1", "locus_id":"1000", "interpretation_classification_counts": {"pathogenic": 1, "likely_pathogenic": 1, "benign": 1}, "is_canonical":false, "is_mane_plus":false, "is_mane_select":true, "max_impact_score":4, "germline_pf_wgs":0.99, "picked_consequences":["splice acceptor"], "seq_id":1, "task_id":5, "transcript_id":"T001", "start":1111, "symbol":"BRAF", "variant_class":"class1", "vep_impact":"MODIFIER", "zygosity":"HET"}]`)
 }
 
 func Test_SNVOccurrences_List_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
@@ -123,7 +111,7 @@ func Test_SNVOccurrences_List_Return_Filtered_Occurrences_When_Sqon_Specified(t 
 				"has_note": true,
 				"hgvsg": "hgvsg1",
 				"locus": "locus_1_1000",
-				"locus_id": "1000",
+				"locus_id": "1000", "interpretation_classification_counts": {"pathogenic": 1, "likely_pathogenic": 1, "benign": 1},
 				"max_impact_score": 4,
 				"is_canonical": false,
 				"is_mane_plus": false,
@@ -167,7 +155,7 @@ func Test_SNVOccurrences_List_Return_Only_Occurrences_Having_A_Note_When_With_No
 				"has_note": true,
 				"hgvsg": "hgvsg1",
 				"locus": "locus_1_1000",
-				"locus_id": "1000",
+				"locus_id": "1000", "interpretation_classification_counts": {"pathogenic": 1, "likely_pathogenic": 1, "benign": 1},
 				"max_impact_score": 4,
 				"is_canonical": false,
 				"is_mane_plus": false,
@@ -319,7 +307,7 @@ func Test_SNVOccurrence_List_Filter_On_Consequence_Column(t *testing.T) {
 			"has_note": true,
 			"hgvsg": "hgvsg1",
 			"locus": "locus_1_1000",
-			"locus_id": "1000",
+			"locus_id": "1000", "interpretation_classification_counts": {"pathogenic": 1, "likely_pathogenic": 1, "benign": 1},
 			"max_impact_score": 4,
 			"is_canonical": false,
 			"is_mane_plus": false,

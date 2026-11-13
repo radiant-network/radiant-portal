@@ -115,7 +115,7 @@ func (m *MockSomaticSNVOccurrencesRepository) SearchOccurrencesByVariantIdentifi
 func Test_SomaticSNVListHandler(t *testing.T) {
 	repo := &MockSomaticSNVOccurrencesRepository{}
 	router := gin.Default()
-	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(repo, &MockRepository{}))
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(repo))
 	body := `{
 			"additional_fields":[
 				"ad_ratio"
@@ -144,9 +144,8 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 		"has_interpretation":false,
 		"has_note":false,
 		"hgvsg":"hgvsg1",
-		"hotspot": true,
-		"interpretation_classification_counts": {"oncogenic": 2, "likely_oncogenic": 1},
-		"is_canonical":true,
+		"hotspot": true, 
+		"is_canonical":true, 
 		"is_mane_plus": null, 
 		"is_mane_select":true, 
 		"locus_id":"1000", 
@@ -167,18 +166,6 @@ func Test_SomaticSNVListHandler(t *testing.T) {
 		"variant_class":"class1", 
 		"vep_impact":"MODIFIER"
 	}]`, w.Body.String())
-}
-
-func Test_SomaticSNVListHandler_InterpretationCountsFailure_ReturnsListWithoutCounts(t *testing.T) {
-	router := gin.Default()
-	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(&MockSomaticSNVOccurrencesRepository{}, failingInterpretationListCounts{}))
-	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/list", bytes.NewBuffer([]byte("{}")))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.Contains(t, w.Body.String(), `"locus_id":"1000"`)
-	assert.NotContains(t, w.Body.String(), "interpretation_classification_counts")
 }
 
 func Test_SomaticSNVCountHandler(t *testing.T) {
@@ -374,7 +361,7 @@ func (m *somaticSNVFiltersRecorder) CountOccurrences(_ context.Context, _ int, _
 func Test_SomaticSNVOccurrencesListHandler_Forwards_Annotation_Filters(t *testing.T) {
 	repo := &somaticSNVFiltersRecorder{}
 	router := gin.Default()
-	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(repo, emptyInterpretationListCounts{}))
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(repo))
 
 	body := `{"with_note":true,"with_flag":["pin","star"],"with_interpretation":true}`
 	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/list", bytes.NewBuffer([]byte(body)))
@@ -410,7 +397,7 @@ func Test_SomaticSNVOccurrencesCountHandler_Forwards_Annotation_Filters(t *testi
 func Test_SomaticSNVOccurrencesListHandler_Rejects_Unknown_Flag_Type(t *testing.T) {
 	repo := &somaticSNVFiltersRecorder{}
 	router := gin.Default()
-	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(repo, emptyInterpretationListCounts{}))
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/list", OccurrencesSomaticSNVListHandler(repo))
 
 	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/list", bytes.NewBuffer([]byte(`{"with_flag":["bogus"]}`)))
 	w := httptest.NewRecorder()

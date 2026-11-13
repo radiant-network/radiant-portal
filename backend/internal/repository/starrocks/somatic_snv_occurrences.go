@@ -38,6 +38,7 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 	columns = append(columns, "i.locus_id IS NOT NULL AS has_interpretation")
 	columns = append(columns, "note.occurrence_id IS NOT NULL AS has_note")
 	columns = append(columns, "flag.flag_type")
+	columns = append(columns, "ic.classification_counts AS interpretation_classification_counts")
 	columns = append(columns, "v.locus")
 
 	utils.AddPaginationAndSort(tx, userQuery)
@@ -47,6 +48,7 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 	// 		LEFT JOIN (SELECT DISTINCT locus_id, sequencing_id FROM <schema>.interpretation_somatic) i ON i.locus_id = s_snv_o.locus_id AND i.sequencing_id = ?
 	// 		LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM <schema>.occurrence_note WHERE deleted = false) note ON note.occurrence_id = s_snv_o.locus_id AND note.task_id = s_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?
 	// 		LEFT JOIN <schema>.occurrence_flag flag ON flag.occurrence_id = s_snv_o.locus_id AND flag.task_id = s_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?
+	// 		LEFT JOIN (SELECT locus_id, to_json(map_agg(oncogenicity, classification_count)) AS classification_counts FROM (<count per locus_id, oncogenicity in <schema>.interpretation_somatic>) GROUP BY locus_id) ic ON ic.locus_id = s_snv_o.locus_id
 	// WHERE s_snv_o.locus_id in (
 	//	SELECT s_snv_o.locus_id FROM somatic__snv__occurrence JOIN ... WHERE quality > 100 ORDER BY ad_ratio DESC LIMIT 10
 	// ) AND s_snv_o.tumor_seq_id=? AND s_snv_o.task_id=? AND s_snv_o.part=? AND v.locus_id=s_snv_o.locus_id ORDER BY ad_ratio DESC
@@ -55,6 +57,7 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 		Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM %s) i ON i.locus_id = s_snv_o.locus_id AND i.sequencing_id = ? AND i.case_id = ?", types.InterpretationSomaticTable.TenantQualifiedName(ctx)), fmt.Sprintf("%d", seqId), fmt.Sprintf("%d", caseId)).
 		Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s WHERE deleted = false) note ON note.occurrence_id = s_snv_o.locus_id AND note.task_id = s_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?", types.OccurrenceNoteTable.TenantQualifiedName(ctx)), seqId, caseId).
 		Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = s_snv_o.locus_id AND flag.task_id = s_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx)), seqId, caseId).
+		Joins(fmt.Sprintf("LEFT JOIN (SELECT locus_id, to_json(map_agg(oncogenicity, classification_count)) AS classification_counts FROM (SELECT locus_id, oncogenicity, COUNT(1) AS classification_count FROM %s WHERE oncogenicity IS NOT NULL AND oncogenicity <> '' GROUP BY locus_id, oncogenicity) ic_rows GROUP BY locus_id) ic ON ic.locus_id = s_snv_o.locus_id", types.InterpretationSomaticTable.TenantQualifiedName(ctx))).
 		Select(columns).
 		Where("s_snv_o.tumor_seq_id = ? and s_snv_o.task_id = ? and part=? and v.locus_id = s_snv_o.locus_id and s_snv_o.locus_id in (?)", seqId, taskId, part, tx)
 
@@ -63,6 +66,9 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 
 	if err = tx.Find(&occurrences).Error; err != nil {
 		return nil, fmt.Errorf("error fetching occurrences: %w", err)
+	}
+	for i := range occurrences {
+		occurrences[i].InterpretationClassificationCounts = keyClassificationCounts(ctx, occurrences[i].LocusId, occurrences[i].InterpretationClassificationCounts, types.GetSomaticOncogenicityKey)
 	}
 	return occurrences, nil
 }
