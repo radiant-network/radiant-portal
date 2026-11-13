@@ -54,10 +54,10 @@ export const data = {
     // No tenant has cases in two diagnostic labs anymore: OrgScoping is skipped until one does.
     case_other_lab: 'NO_CASE_OTHER_LAB',
     diagnostic_lab_other: 'LDM-CHUSJ',
+    // Every account of the pool has this name; the email is the account of the run (cy.getUsername)
     self: {
       first_name: 'Cypress',
       last_name: 'Cypress',
-      email: 'cypress@email.me',
     },
     other_lab_only: {
       first_name: 'Test Cypress',

@@ -104,11 +104,60 @@ Cypress.Commands.add('getToken', () => {
 });
 
 /**
+ * Gets the username of the account the run logs in with.
+ * @returns A Cypress chain containing the username.
+ */
+Cypress.Commands.add('getUsername', () => {
+  return cy.env(['user_username']).then(({ user_username }) => user_username);
+});
+
+/**
  * Forces every data-table user-preference read to return 404 so each table loads with
  * its default configuration (column pinning, order, sizing, visibility, pagination).
  */
 Cypress.Commands.add('resetTablePreferences', () => {
   cy.intercept('GET', '**/users/preferences/data-table-*', { statusCode: 404 });
+});
+
+// The database may return the keys of a query in another order than the fixture
+const sortedKeys = (value: any): any => {
+  if (Array.isArray(value)) return value.map(sortedKeys);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map(key => [key, sortedKeys(value[key])])
+    );
+  }
+  return value;
+};
+const sameQueries = (a: any, b: any) => JSON.stringify(sortedKeys(a)) === JSON.stringify(sortedKeys(b));
+
+/**
+ * Gives the account of the run the reference saved filters of the fixture: creates the missing ones
+ * and updates the ones whose queries differ. Saved filters belong to one user.
+ * @param token The Bearer authentication token of the account.
+ */
+Cypress.Commands.add('ensureReferenceSavedFilters', (token: string) => {
+  const url = `${Cypress.expose('api_base_url')}users/saved_filters`;
+  const headers = { Authorization: `Bearer ${token}` };
+
+  return cy.fixture('reference-saved-filters.json').then((references: { name: string; type: string; queries: any[] }[]) => {
+    [...new Set(references.map(reference => reference.type))].forEach(type => {
+      cy.request({ url: `${url}?type=${type}`, headers }).then(res => {
+        references
+          .filter(reference => reference.type === type)
+          .forEach(({ name, queries }) => {
+            const existing = res.body.find((filter: { name: string }) => filter.name === name);
+            if (!existing) {
+              cy.request({ method: 'POST', url, headers, body: { name, type, queries } });
+            } else if (!sameQueries(existing.queries, queries)) {
+              cy.request({ method: 'PUT', url: `${url}/${existing.id}`, headers, body: { name, queries, favorite: existing.favorite } });
+            }
+          });
+      });
+    });
+  });
 });
 
 /**
@@ -123,8 +172,8 @@ Cypress.Commands.add('validateAcceptedBatchResponse', (response: any, batch_type
     dry_run: true,
     batch_type: batch_type,
     status: 'PENDING',
-    username: 'cypress@email.me',
   });
+  cy.getUsername().then(username => expect(response.body.username).to.eq(username));
   expect(response.body.id)
     .to.be.a('string')
     .and.match(/^[0-9a-f-]{36}$/i);
@@ -181,16 +230,17 @@ Cypress.Commands.add('validateReport', (response: any, level: string, code: stri
  * @param response The API response object from a batch processed.
  * @param batch_type The type of the batch processed (create_patient, create_sample, etc.).
  * @param batch_id The id of the batch processed.
+ * @param creator The username that created the batch, when it is not the account of the run.
  */
-Cypress.Commands.add('validateSuccessBatchProcessed', (response: any, batch_type: string, batch_id: string) => {
+Cypress.Commands.add('validateSuccessBatchProcessed', (response: any, batch_type: string, batch_id: string, creator?: string) => {
   expect(response.body).to.have.all.keys('id', 'dry_run', 'batch_type', 'status', 'created_on', 'started_on', 'finished_on', 'username', 'summary', 'report');
   expect(response.body).to.include({
     id: batch_id,
     dry_run: true,
     batch_type: batch_type,
     status: 'SUCCESS',
-    username: 'cypress@email.me',
   });
+  (creator ? cy.wrap(creator) : cy.getUsername()).then(username => expect(response.body.username).to.eq(username));
   expect(response.body.created_on)
     .to.be.a('string')
     .and.match(/^\d{4}-\d{2}-\d{2}T/);
