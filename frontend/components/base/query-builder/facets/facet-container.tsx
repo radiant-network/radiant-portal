@@ -1,6 +1,7 @@
 import React, { useId } from 'react';
 
 import { BooleanFacet } from '@/components/base/query-builder/facets/boolean-facet';
+import { FavoriteButton } from '@/components/base/query-builder/facets/favorite-button';
 import { MultiSelectFacet } from '@/components/base/query-builder/facets/multiselect-facet';
 import { NumericalFacet } from '@/components/base/query-builder/facets/numerical-facet';
 import {
@@ -9,7 +10,7 @@ import {
   AccordionTrigger,
   useAccordionContext,
 } from '@/components/base/shadcn/accordion';
-import { Card, CardHeader } from '@/components/base/shadcn/card';
+import { Card, CardAction, CardHeader } from '@/components/base/shadcn/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { type Aggregation as AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
@@ -50,7 +51,7 @@ export function AccordionContainer({ field, isOpen, children }: AccordionContain
         className="border-none"
         data-cy={`facet-state-${isOpen ? 'open' : 'closed'}`}
       >
-        <CardHeader size="sm">
+        <CardHeader size="sm" className="group/facet-header">
           <AccordionTrigger
             data-cy={`facet-header-${field.key}`}
             aria-describedby={tooltipContent ? descriptionId : undefined}
@@ -73,6 +74,9 @@ export function AccordionContainer({ field, isOpen, children }: AccordionContain
               {tooltipContent}
             </span>
           )}
+          <CardAction className="sm:self-center">
+            <FavoriteButton facetKey={field.key} label={label} />
+          </CardAction>
         </CardHeader>
         <AccordionContent className="pb-0" forceMount={history.includes(field.key) ? true : undefined}>
           {children}

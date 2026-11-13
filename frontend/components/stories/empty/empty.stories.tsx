@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Dna } from 'lucide-react';
 
 import Empty from '@/components/base/empties/empty';
+import FacetFavoritesEmptyImage from '@/components/base/icons/facet-favorites-empty-image';
 import { Button } from '@/components/base/shadcn/button';
 
 import { StorySection } from '../story-section';
@@ -127,6 +128,24 @@ export const WithAction: Story = {
             Action
           </Button>
         </Empty>
+      </div>
+    </StorySection>
+  ),
+};
+
+export const WithContentTop: Story = {
+  args: {
+    title: 'Optional Header',
+    description: 'No data message',
+    size: 'mini',
+    showIcon: false,
+    contentTop: <FacetFavoritesEmptyImage />,
+    classNames: { title: 'text-sm text-sidebar-foreground', description: 'text-sidebar-foreground' },
+  },
+  render: args => (
+    <StorySection title="With content top">
+      <div className="w-[280px]">
+        <Empty {...args} />
       </div>
     </StorySection>
   ),
