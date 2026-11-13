@@ -99,6 +99,13 @@ func (m *MockRepository) GetExpandedOccurrence(context.Context, int, int, int, i
 	}, nil
 }
 
+func (m *MockRepository) SearchOccurrencesByVariantIdentifier(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
+	return []types.VariantSearchHit{
+		{Hgvsg: "chr11:g.5227002T>A", Locus: "11-5227002-T-A", Rsnumber: "rs334", ClinvarId: "15333", Symbol: "HBB", AaChange: "p.Glu7Val"},
+		{Hgvsg: "chr11:g.5227002T>G", Locus: "11-5227002-T-G", Rsnumber: "rs334"},
+	}, nil
+}
+
 func Test_OccurrencesListHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
@@ -616,13 +623,6 @@ func Test_OccurrencesCountHandler_Forwards_WithInterpretation(t *testing.T) {
 	}
 }
 
-func (m *MockRepository) SearchOccurrencesByVariantIdentifier(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
-	return []types.VariantSearchHit{
-		{Hgvsg: "chr11:g.5227002T>A", Locus: "11-5227002-T-A", Rsnumber: "rs334", ClinvarId: "15333", Symbol: "HBB", AaChange: "p.Glu7Val"},
-		{Hgvsg: "chr11:g.5227002T>G", Locus: "11-5227002-T-G", Rsnumber: "rs334"},
-	}, nil
-}
-
 type MockNotFoundGermlineSNVSearchRepository struct {
 	MockRepository
 }
@@ -639,7 +639,7 @@ func (m *MockErrorGermlineSNVSearchRepository) SearchOccurrencesByVariantIdentif
 	return nil, fmt.Errorf("starrocks down")
 }
 
-func Test_OccurrencesGermlineSNVSearchHandler(t *testing.T) {
+func Test_OccurrencesSearchHandler(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
 	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/search", OccurrencesGermlineSNVSearchHandler(repo))
@@ -660,7 +660,7 @@ func Test_OccurrencesGermlineSNVSearchHandler(t *testing.T) {
 	}`, w.Body.String())
 }
 
-func Test_OccurrencesGermlineSNVSearchHandler_notFoundInRun(t *testing.T) {
+func Test_OccurrencesSearchHandler_notFoundInRun(t *testing.T) {
 	repo := &MockNotFoundGermlineSNVSearchRepository{}
 	router := gin.Default()
 	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/search", OccurrencesGermlineSNVSearchHandler(repo))
@@ -673,7 +673,7 @@ func Test_OccurrencesGermlineSNVSearchHandler_notFoundInRun(t *testing.T) {
 	assert.JSONEq(t, `{"status": "not_found_in_run", "matched_field": "locus", "normalized_input": "8-43159045-G-A", "variants": []}`, w.Body.String())
 }
 
-func Test_OccurrencesGermlineSNVSearchHandler_unrecognizedFormat(t *testing.T) {
+func Test_OccurrencesSearchHandler_unrecognizedFormat(t *testing.T) {
 	for _, body := range []string{`{"input":"("}`, `{"input":""}`, `{}`} {
 		repo := &MockRepository{}
 		router := gin.Default()
@@ -688,7 +688,7 @@ func Test_OccurrencesGermlineSNVSearchHandler_unrecognizedFormat(t *testing.T) {
 	}
 }
 
-func Test_OccurrencesGermlineSNVSearchHandler_malformedBody(t *testing.T) {
+func Test_OccurrencesSearchHandler_malformedBody(t *testing.T) {
 	repo := &MockRepository{}
 	router := gin.Default()
 	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/search", OccurrencesGermlineSNVSearchHandler(repo))
@@ -700,7 +700,7 @@ func Test_OccurrencesGermlineSNVSearchHandler_malformedBody(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
 
-func Test_OccurrencesGermlineSNVSearchHandler_invalidIds(t *testing.T) {
+func Test_OccurrencesSearchHandler_invalidIds(t *testing.T) {
 	for path, param := range map[string]string{"abc/1/1": "case_id", "1/abc/1": "seq_id", "1/1/abc": "task_id"} {
 		repo := &MockRepository{}
 		router := gin.Default()
@@ -715,7 +715,7 @@ func Test_OccurrencesGermlineSNVSearchHandler_invalidIds(t *testing.T) {
 	}
 }
 
-func Test_OccurrencesGermlineSNVSearchHandler_repositoryError(t *testing.T) {
+func Test_OccurrencesSearchHandler_repositoryError(t *testing.T) {
 	repo := &MockErrorGermlineSNVSearchRepository{}
 	router := gin.Default()
 	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/search", OccurrencesGermlineSNVSearchHandler(repo))

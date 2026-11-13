@@ -656,7 +656,7 @@ func Test_SNVOccurrence_Statistics_Germline_Af_Wgs_Affected(t *testing.T) {
 	testStatistics(t, "pagination", body, expected)
 }
 
-func Test_Germline_SNV_Search(t *testing.T) {
+func Test_SNVOccurrences_Search(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
@@ -676,7 +676,7 @@ func Test_Germline_SNV_Search(t *testing.T) {
 	})
 }
 
-func Test_Germline_SNV_Search_NotFoundInRun(t *testing.T) {
+func Test_SNVOccurrences_Search_NotFoundInRun(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()

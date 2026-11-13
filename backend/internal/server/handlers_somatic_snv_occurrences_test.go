@@ -108,6 +108,10 @@ func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(context.Context, in
 	}, nil
 }
 
+func (m *MockSomaticSNVOccurrencesRepository) SearchOccurrencesByVariantIdentifier(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
+	return []types.VariantSearchHit{{Hgvsg: "chr7:g.140753336A>T", Locus: "7-140753336-A-T", Symbol: "BRAF", AaChange: "p.Val600Glu"}}, nil
+}
+
 func Test_SomaticSNVListHandler(t *testing.T) {
 	repo := &MockSomaticSNVOccurrencesRepository{}
 	router := gin.Default()
@@ -402,10 +406,6 @@ func Test_SomaticSNVOccurrencesListHandler_Rejects_Unknown_Flag_Type(t *testing.
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.Contains(t, w.Body.String(), "invalid flag type")
 	assert.Nil(t, repo.listQuery)
-}
-
-func (m *MockSomaticSNVOccurrencesRepository) SearchOccurrencesByVariantIdentifier(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
-	return []types.VariantSearchHit{{Hgvsg: "chr7:g.140753336A>T", Locus: "7-140753336-A-T", Symbol: "BRAF", AaChange: "p.Val600Glu"}}, nil
 }
 
 func Test_SomaticSNVSearchHandler(t *testing.T) {

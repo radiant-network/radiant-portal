@@ -902,7 +902,7 @@
               }
             },
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/germline/snv/1/1/1/search",
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/germline/snv/1/1/5/search",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -913,7 +913,7 @@
                 "snv",
                 "1",
                 "1",
-                "1",
+                "5",
                 "search"
               ]
             }

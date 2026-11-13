@@ -13,6 +13,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var searchHitLocus1 = types.VariantSearchHit{Hgvsg: "hgvsg1", Locus: "locus1", Rsnumber: "rs111111111", ClinvarId: "11111", Symbol: "BRAF", AaChange: "p.Arg19His"}
+var searchHitLocus2 = types.VariantSearchHit{Hgvsg: "hgvsg2", Locus: "locus2", Rsnumber: "rs222222222", Symbol: "symbol1", AaChange: "p.Arg19His"}
+
 var allGermlineSNVFields = sliceutils.Map(types.GermlineSNVOccurrencesFields, func(value types.Field, index int, slice []types.Field) string {
 	return value.Name
 })
@@ -1456,9 +1459,6 @@ func Test_Germline_SNV_GetOccurrences_Sort_By_Topmed_Af_Without_Selecting_It(t *
 		assert.Equal(t, []string{"2000", "1000"}, locusIds)
 	})
 }
-
-var searchHitLocus1 = types.VariantSearchHit{Hgvsg: "hgvsg1", Locus: "locus1", Rsnumber: "rs111111111", ClinvarId: "11111", Symbol: "BRAF", AaChange: "p.Arg19His"}
-var searchHitLocus2 = types.VariantSearchHit{Hgvsg: "hgvsg2", Locus: "locus2", Rsnumber: "rs222222222", Symbol: "symbol1", AaChange: "p.Arg19His"}
 
 func Test_Germline_SNV_SearchOccurrencesByVariantIdentifier_ByRsnumber(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {

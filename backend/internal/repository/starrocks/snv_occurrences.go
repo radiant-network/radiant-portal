@@ -261,20 +261,21 @@ func StatisticsSNV(snvTable types.Table, seqId int, taskId int, userQuery types.
 	return &statistics, nil
 }
 
-// searchSNVOccurrencesByVariantIdentifier returns the variants of one run whose identifier equals the searched value. It reads only the
-// run's variant part of snv__variant_partitioned, semi-joined to the run's occurrences (colocated on locus_id).
+// searchSNVOccurrencesByVariantIdentifier returns the variants of one run whose identifier equals the searched
+// value. It reads only the run's variant part of snv__variant_partitioned, semi-joined to the run's occurrences
+// (colocated on locus_id).
 func searchSNVOccurrencesByVariantIdentifier(snvTable types.Table, seqId int, taskId int, identifier types.VariantIdentifier, db *gorm.DB) ([]types.VariantSearchHit, error) {
 	column, err := identifier.Field.Column()
 	if err != nil {
-		return nil, fmt.Errorf("search variants: %w", err)
+		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
 	seqIdColumn, err := snvSeqIdColumn(snvTable)
 	if err != nil {
-		return nil, fmt.Errorf("search variants: %w", err)
+		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
 	part, err := utils.GetSequencingPart(seqId, db)
 	if err != nil {
-		return nil, fmt.Errorf("search variants: %w", err)
+		return nil, fmt.Errorf("error during partition fetch %w", err)
 	}
 
 	ctx := utils.CtxOf(db)
@@ -290,7 +291,7 @@ func searchSNVOccurrencesByVariantIdentifier(snvTable types.Table, seqId int, ta
 
 	var hits []types.VariantSearchHit
 	if err := tx.Find(&hits).Error; err != nil {
-		return nil, fmt.Errorf("search variants: %w", err)
+		return nil, fmt.Errorf("error searching occurrences: %w", err)
 	}
 	return hits, nil
 }
