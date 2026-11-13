@@ -9364,7 +9364,7 @@ paths:
                 type: string
       security:
       - bearerauth: []
-      summary: Search a variant in the germline SNVs of a run
+      summary: Search a variant in germline SNV occurrences
       tags:
       - occurrences
   /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics:
@@ -10467,7 +10467,7 @@ paths:
                 type: string
       security:
       - bearerauth: []
-      summary: Search a variant in the somatic SNVs of a run
+      summary: Search a variant in somatic SNV occurrences
       tags:
       - occurrences
   /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/statistics:

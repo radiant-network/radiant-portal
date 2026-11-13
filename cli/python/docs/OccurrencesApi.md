@@ -23,8 +23,8 @@ Method | HTTP request | Description
 [**list_somatic_cnv_genes_overlap**](OccurrencesApi.md#list_somatic_cnv_genes_overlap) | **GET** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/{cnv_id}/genes_overlap | List genes overlapping a somatic CNV with a given ID
 [**list_somatic_cnv_occurrences**](OccurrencesApi.md#list_somatic_cnv_occurrences) | **POST** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/list | List somatic CNV occurrences
 [**list_somatic_snv_occurrences**](OccurrencesApi.md#list_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/list | List somatic SNV occurrences
-[**search_germline_snv_occurrences**](OccurrencesApi.md#search_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/search | Search a variant in the germline SNVs of a run
-[**search_somatic_snv_occurrences**](OccurrencesApi.md#search_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/search | Search a variant in the somatic SNVs of a run
+[**search_germline_snv_occurrences**](OccurrencesApi.md#search_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/search | Search a variant in germline SNV occurrences
+[**search_somatic_snv_occurrences**](OccurrencesApi.md#search_somatic_snv_occurrences) | **POST** /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/search | Search a variant in somatic SNV occurrences
 [**statistics_germline_cnv_occurrences**](OccurrencesApi.md#statistics_germline_cnv_occurrences) | **POST** /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline CNV occurrences
 [**statistics_germline_snv_occurrences**](OccurrencesApi.md#statistics_germline_snv_occurrences) | **POST** /{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of germline SNV occurrences
 [**statistics_somatic_cnv_occurrences**](OccurrencesApi.md#statistics_somatic_cnv_occurrences) | **POST** /{tenant}/occurrences/somatic/cnv/{case_id}/{seq_id}/{task_id}/statistics | Statistics of somatic CNV occurrences
@@ -1773,7 +1773,7 @@ Name | Type | Description  | Notes
 # **search_germline_snv_occurrences**
 > VariantSearchResult search_germline_snv_occurrences(tenant, case_id, seq_id, task_id, variant_search_body)
 
-Search a variant in the germline SNVs of a run
+Search a variant in germline SNV occurrences
 
 Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the germline SNVs of a run.
 Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
@@ -1816,7 +1816,7 @@ with radiant_python.ApiClient(configuration) as api_client:
     variant_search_body = radiant_python.VariantSearchBody() # VariantSearchBody | Search Body
 
     try:
-        # Search a variant in the germline SNVs of a run
+        # Search a variant in germline SNV occurrences
         api_response = api_instance.search_germline_snv_occurrences(tenant, case_id, seq_id, task_id, variant_search_body)
         print("The response of OccurrencesApi->search_germline_snv_occurrences:\n")
         pprint(api_response)
@@ -1866,7 +1866,7 @@ Name | Type | Description  | Notes
 # **search_somatic_snv_occurrences**
 > VariantSearchResult search_somatic_snv_occurrences(tenant, case_id, seq_id, task_id, variant_search_body)
 
-Search a variant in the somatic SNVs of a run
+Search a variant in somatic SNV occurrences
 
 Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing.
 Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
@@ -1909,7 +1909,7 @@ with radiant_python.ApiClient(configuration) as api_client:
     variant_search_body = radiant_python.VariantSearchBody() # VariantSearchBody | Search Body
 
     try:
-        # Search a variant in the somatic SNVs of a run
+        # Search a variant in somatic SNV occurrences
         api_response = api_instance.search_somatic_snv_occurrences(tenant, case_id, seq_id, task_id, variant_search_body)
         print("The response of OccurrencesApi->search_somatic_snv_occurrences:\n")
         pprint(api_response)

@@ -403,3 +403,38 @@ func Test_SomaticSNVOccurrencesListHandler_Rejects_Unknown_Flag_Type(t *testing.
 	assert.Contains(t, w.Body.String(), "invalid flag type")
 	assert.Nil(t, repo.listQuery)
 }
+
+func (m *MockSomaticSNVOccurrencesRepository) SearchVariants(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
+	return []types.VariantSearchHit{{Hgvsg: "chr7:g.140753336A>T", Locus: "7-140753336-A-T", Symbol: "BRAF", AaChange: "p.Val600Glu"}}, nil
+}
+
+func Test_SomaticSNVSearchHandler(t *testing.T) {
+	repo := &MockSomaticSNVOccurrencesRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/search", OccurrencesSomaticSNVSearchHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/search", bytes.NewBuffer([]byte(`{"input":"7:g.140753336a>t"}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"status": "found",
+		"matched_field": "hgvsg",
+		"normalized_input": "chr7:g.140753336A>T",
+		"variants": [{"hgvsg": "chr7:g.140753336A>T", "locus": "7-140753336-A-T", "symbol": "BRAF", "aa_change": "p.Val600Glu"}]
+	}`, w.Body.String())
+}
+
+func Test_SomaticSNVSearchHandler_unrecognizedFormat(t *testing.T) {
+	repo := &MockSomaticSNVOccurrencesRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/search", OccurrencesSomaticSNVSearchHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/1/1/1/search", bytes.NewBuffer([]byte(`{"input":"BRAF"}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"status": "unrecognized_format", "variants": []}`, w.Body.String())
+}

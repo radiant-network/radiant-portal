@@ -8,17 +8,14 @@ import (
 	"strings"
 )
 
-// PartsPerVariantPart mirrors PARTS_PER_VARIANT_PART of the ETL: variant part n of snv__variant_partitioned
-// holds the variants of the occurrence parts 10n to 10n + 9. Changing it on one side only silently breaks the search.
-const PartsPerVariantPart = 10
-
-const maxVariantSearchInputLength = 2000
-
-var VariantPartitionedTable = Table{
-	Name:      "snv__variant_partitioned",
-	Alias:     "vp",
-	PerTenant: true,
-}
+const (
+	// PartsPerVariantPart mirrors PARTS_PER_VARIANT_PART of the ETL: variant part n of snv__variant_partitioned
+	// holds the variants of the occurrence parts 10n to 10n + 9. Changing it on one side only silently breaks the search.
+	PartsPerVariantPart = 10
+	// VariantSearchMaxHits caps the variants returned for one searched identifier.
+	VariantSearchMaxHits        = 100
+	maxVariantSearchInputLength = 2000
+)
 
 type VariantSearchStatus string
 
@@ -82,6 +79,26 @@ type VariantSearchResult struct {
 	NormalizedInput string              `json:"normalized_input,omitempty"`
 	Variants        []VariantSearchHit  `json:"variants" validate:"required"`
 } // @name VariantSearchResult
+
+// NewVariantSearchResult reports the variants of the run found for a recognized identifier, or their absence.
+func NewVariantSearchResult(identifier VariantIdentifier, hits []VariantSearchHit) VariantSearchResult {
+	result := VariantSearchResult{
+		Status:          VariantSearchFound,
+		MatchedField:    identifier.Field,
+		NormalizedInput: identifier.Value,
+		Variants:        hits,
+	}
+	if len(hits) == 0 {
+		result.Status = VariantSearchNotFoundInRun
+		result.Variants = []VariantSearchHit{}
+	}
+	return result
+}
+
+// NewUnrecognizedVariantSearchResult reports an input of no known identifier format.
+func NewUnrecognizedVariantSearchResult() VariantSearchResult {
+	return VariantSearchResult{Status: VariantSearchUnrecognizedFormat, Variants: []VariantSearchHit{}}
+}
 
 var (
 	rsidPattern      = regexp.MustCompile(`^(?i)rs(\d+)$`)

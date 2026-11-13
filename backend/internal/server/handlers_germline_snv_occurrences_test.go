@@ -615,3 +615,115 @@ func Test_OccurrencesCountHandler_Forwards_WithInterpretation(t *testing.T) {
 		assert.True(t, repo.countQuery.WithInterpretation())
 	}
 }
+
+func (m *MockRepository) SearchVariants(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
+	return []types.VariantSearchHit{
+		{Hgvsg: "chr11:g.5227002T>A", Locus: "11-5227002-T-A", Rsnumber: "rs334", ClinvarId: "15333", Symbol: "HBB", AaChange: "p.Glu7Val"},
+		{Hgvsg: "chr11:g.5227002T>G", Locus: "11-5227002-T-G", Rsnumber: "rs334"},
+	}, nil
+}
+
+type MockNotFoundGermlineSNVSearchRepository struct {
+	MockRepository
+}
+
+func (m *MockNotFoundGermlineSNVSearchRepository) SearchVariants(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
+	return nil, nil
+}
+
+type MockErrorGermlineSNVSearchRepository struct {
+	MockRepository
+}
+
+func (m *MockErrorGermlineSNVSearchRepository) SearchVariants(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
+	return nil, fmt.Errorf("starrocks down")
+}
+
+func Test_OccurrencesGermlineSNVSearchHandler(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/search", OccurrencesGermlineSNVSearchHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/search", bytes.NewBuffer([]byte(`{"input":"RS334"}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{
+		"status": "found",
+		"matched_field": "rsnumber",
+		"normalized_input": "rs334",
+		"variants": [
+			{"hgvsg": "chr11:g.5227002T>A", "locus": "11-5227002-T-A", "rsnumber": "rs334", "clinvar_id": "15333", "symbol": "HBB", "aa_change": "p.Glu7Val"},
+			{"hgvsg": "chr11:g.5227002T>G", "locus": "11-5227002-T-G", "rsnumber": "rs334"}
+		]
+	}`, w.Body.String())
+}
+
+func Test_OccurrencesGermlineSNVSearchHandler_notFoundInRun(t *testing.T) {
+	repo := &MockNotFoundGermlineSNVSearchRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/search", OccurrencesGermlineSNVSearchHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/search", bytes.NewBuffer([]byte(`{"input":"8:43159045:g:a"}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"status": "not_found_in_run", "matched_field": "locus", "normalized_input": "8-43159045-G-A", "variants": []}`, w.Body.String())
+}
+
+func Test_OccurrencesGermlineSNVSearchHandler_unrecognizedFormat(t *testing.T) {
+	for _, body := range []string{`{"input":"("}`, `{"input":""}`, `{}`} {
+		repo := &MockRepository{}
+		router := gin.Default()
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/search", OccurrencesGermlineSNVSearchHandler(repo))
+
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/search", bytes.NewBuffer([]byte(body)))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code, body)
+		assert.JSONEq(t, `{"status": "unrecognized_format", "variants": []}`, w.Body.String(), body)
+	}
+}
+
+func Test_OccurrencesGermlineSNVSearchHandler_malformedBody(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/search", OccurrencesGermlineSNVSearchHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/search", bytes.NewBuffer([]byte(`{"input":`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func Test_OccurrencesGermlineSNVSearchHandler_invalidIds(t *testing.T) {
+	for path, param := range map[string]string{"abc/1/1": "case_id", "1/abc/1": "seq_id", "1/1/abc": "task_id"} {
+		repo := &MockRepository{}
+		router := gin.Default()
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/search", OccurrencesGermlineSNVSearchHandler(repo))
+
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/"+path+"/search", bytes.NewBuffer([]byte(`{"input":"rs334"}`)))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusNotFound, w.Code, path)
+		assert.JSONEq(t, `{"status":404, "message":"`+param+` not found"}`, w.Body.String(), path)
+	}
+}
+
+func Test_OccurrencesGermlineSNVSearchHandler_repositoryError(t *testing.T) {
+	repo := &MockErrorGermlineSNVSearchRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/search", OccurrencesGermlineSNVSearchHandler(repo))
+
+	req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/1/search", bytes.NewBuffer([]byte(`{"input":"rs334"}`)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
+}

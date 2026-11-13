@@ -16370,7 +16370,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         },
         /**
          * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the germline SNVs of a run. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
-         * @summary Search a variant in the germline SNVs of a run
+         * @summary Search a variant in germline SNV occurrences
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
@@ -16426,7 +16426,7 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
         },
         /**
          * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
-         * @summary Search a variant in the somatic SNVs of a run
+         * @summary Search a variant in somatic SNV occurrences
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Tumor sequence ID
@@ -17040,7 +17040,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         },
         /**
          * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the germline SNVs of a run. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
-         * @summary Search a variant in the germline SNVs of a run
+         * @summary Search a variant in germline SNV occurrences
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
@@ -17057,7 +17057,7 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
         },
         /**
          * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
-         * @summary Search a variant in the somatic SNVs of a run
+         * @summary Search a variant in somatic SNV occurrences
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Tumor sequence ID
@@ -17419,7 +17419,7 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
         },
         /**
          * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the germline SNVs of a run. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
-         * @summary Search a variant in the germline SNVs of a run
+         * @summary Search a variant in germline SNV occurrences
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Sequence ID
@@ -17433,7 +17433,7 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
         },
         /**
          * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
-         * @summary Search a variant in the somatic SNVs of a run
+         * @summary Search a variant in somatic SNV occurrences
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
          * @param {number} seqId Tumor sequence ID
@@ -17818,7 +17818,7 @@ export class OccurrencesApi extends BaseAPI {
 
     /**
      * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the germline SNVs of a run. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
-     * @summary Search a variant in the germline SNVs of a run
+     * @summary Search a variant in germline SNV occurrences
      * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Sequence ID
@@ -17834,7 +17834,7 @@ export class OccurrencesApi extends BaseAPI {
 
     /**
      * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
-     * @summary Search a variant in the somatic SNVs of a run
+     * @summary Search a variant in somatic SNV occurrences
      * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
      * @param {number} seqId Tumor sequence ID

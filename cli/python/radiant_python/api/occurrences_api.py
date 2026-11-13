@@ -6642,7 +6642,7 @@ class OccurrencesApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> VariantSearchResult:
-        """Search a variant in the germline SNVs of a run
+        """Search a variant in germline SNV occurrences
 
         Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the germline SNVs of a run. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
 
@@ -6730,7 +6730,7 @@ class OccurrencesApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[VariantSearchResult]:
-        """Search a variant in the germline SNVs of a run
+        """Search a variant in germline SNV occurrences
 
         Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the germline SNVs of a run. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
 
@@ -6818,7 +6818,7 @@ class OccurrencesApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Search a variant in the germline SNVs of a run
+        """Search a variant in germline SNV occurrences
 
         Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the germline SNVs of a run. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
 
@@ -6991,7 +6991,7 @@ class OccurrencesApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> VariantSearchResult:
-        """Search a variant in the somatic SNVs of a run
+        """Search a variant in somatic SNV occurrences
 
         Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
 
@@ -7079,7 +7079,7 @@ class OccurrencesApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[VariantSearchResult]:
-        """Search a variant in the somatic SNVs of a run
+        """Search a variant in somatic SNV occurrences
 
         Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
 
@@ -7167,7 +7167,7 @@ class OccurrencesApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Search a variant in the somatic SNVs of a run
+        """Search a variant in somatic SNV occurrences
 
         Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
 
