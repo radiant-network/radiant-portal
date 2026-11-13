@@ -198,6 +198,14 @@ func (j Joiner) TaskHasDocWithTaskContext(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_id=%s.task_id", j.name(types.TaskContextTable, tx), types.TaskContextTable.Alias, types.TaskContextTable.Alias, types.TaskHasDocumentTable.Alias))
 }
 
+func (j Joiner) TaskHasDocWithTask(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_id=%s.id", j.name(types.TaskTable, tx), types.TaskTable.Alias, types.TaskHasDocumentTable.Alias, types.TaskTable.Alias))
+}
+
+func (j Joiner) TaskWithTaskType(tx *gorm.DB) *gorm.DB {
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_type_code=%s.code", j.name(types.TaskTypeTable, tx), types.TaskTypeTable.Alias, types.TaskTable.Alias, types.TaskTypeTable.Alias))
+}
+
 func (j Joiner) TaskContextWithTaskHasDoc(tx *gorm.DB) *gorm.DB {
 	return tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.task_id=%s.task_id", j.name(types.TaskHasDocumentTable, tx), types.TaskHasDocumentTable.Alias, types.TaskContextTable.Alias, types.TaskHasDocumentTable.Alias))
 }

@@ -529,7 +529,9 @@ func Test_CaseEntityDocumentsSearchHandler(t *testing.T) {
 			"submitter_sample_id":"S14786",
 			"seq_id":56,
 			"size":325362647,
-			"task_id":20
+			"task_id":20,
+			"task_type_code":"alignment_germline_variant_calling",
+			"task_type_name":"Genome Alignment and Germline Variant Calling"
 		}],
 		"count": 1
 	}`, w.Body.String())
