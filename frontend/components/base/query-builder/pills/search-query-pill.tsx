@@ -9,6 +9,7 @@ import Operator from './operators/operator';
 import QueryPillValues from './values/query-pill-values';
 
 type SearchPillProps = {
+  queryId: string;
   sqon: IValueFacet;
 };
 
@@ -19,15 +20,16 @@ type SearchPillProps = {
  * └───────└──────────────────────────────────────────┘─────────────────┘
  *          └────────────────────────┘
  */
-function SearchQueryPill({ sqon }: SearchPillProps) {
+function SearchQueryPill({ queryId, sqon }: SearchPillProps) {
   const dispatch = useQBDispatch();
 
   const onRemovePill = useCallback(() => {
     dispatch({
       type: QBActionType.REMOVE_FACET_PILL,
       payload: sqon,
+      queryId,
     });
-  }, [dispatch, sqon]);
+  }, [dispatch, queryId, sqon]);
 
   return (
     <QueryPillContainer onRemovePill={onRemovePill}>

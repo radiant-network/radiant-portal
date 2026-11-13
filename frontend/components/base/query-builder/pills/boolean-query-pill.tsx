@@ -12,6 +12,7 @@ import Operator from './operators/operator';
 import QueryPillValues from './values/query-pill-values';
 
 type BooleanPillProps = {
+  queryId: string;
   sqon: IValueFacet;
 };
 
@@ -22,7 +23,7 @@ type BooleanPillProps = {
  * └───────└──────────────────────────────────────────┘─────────────────┘
  *          └───────────────────┘
  */
-function BooleanQueryPill({ sqon }: BooleanPillProps) {
+function BooleanQueryPill({ queryId, sqon }: BooleanPillProps) {
   const { aggregations } = useQBContext();
   const aggregation = getAggregationByField(aggregations, sqon.content.field);
   const dispatch = useQBDispatch();
@@ -31,8 +32,9 @@ function BooleanQueryPill({ sqon }: BooleanPillProps) {
     dispatch({
       type: QBActionType.REMOVE_FACET_PILL,
       payload: sqon,
+      queryId,
     });
-  }, [dispatch, sqon]);
+  }, [dispatch, queryId, sqon]);
 
   return (
     <QueryPillContainer onRemovePill={onRemovePill}>

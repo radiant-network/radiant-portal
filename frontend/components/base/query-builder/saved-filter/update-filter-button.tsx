@@ -18,7 +18,7 @@ function UpdateFilterButton() {
       <Button
         iconOnly
         variant="ghost"
-        size="sm"
+        size="xs"
         aria-label={t('a11y.saved_filter.edit')}
         onClick={event => {
           event.stopPropagation();

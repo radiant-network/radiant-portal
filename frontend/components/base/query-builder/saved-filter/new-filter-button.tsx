@@ -46,7 +46,7 @@ function NewFilterButton() {
           <Button
             iconOnly
             variant="ghost"
-            size="sm"
+            size="xs"
             aria-label={t('a11y.saved_filter.new')}
             onClick={handleNew}
             disabled={!selectedSavedFilter}
