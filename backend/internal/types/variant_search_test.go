@@ -70,6 +70,42 @@ func Test_ParseVariantIdentifier_HgvsgLowerCaseChromosomeX(t *testing.T) {
 	assertVariantIdentifier(t, "chrx:g.100A>G", VariantSearchFieldHgvsg, "chrX:g.100A>G")
 }
 
+func Test_ParseVariantIdentifier_HgvsgMitochondrial(t *testing.T) {
+	assertVariantIdentifier(t, "chrM:m.1551G>A", VariantSearchFieldHgvsg, "chrM:m.1551G>A")
+}
+
+func Test_ParseVariantIdentifier_HgvsgMitochondrialLowerCase(t *testing.T) {
+	assertVariantIdentifier(t, "chrm:M.7471DEL", VariantSearchFieldHgvsg, "chrM:m.7471del")
+}
+
+func Test_ParseVariantIdentifier_HgvsgMitochondrialMT(t *testing.T) {
+	assertVariantIdentifier(t, "chrMT:m.100A>G", VariantSearchFieldHgvsg, "chrM:m.100A>G")
+}
+
+func Test_ParseVariantIdentifier_HgvsgMitochondrialWrittenWithG(t *testing.T) {
+	assertVariantIdentifier(t, "MT:g.100A>G", VariantSearchFieldHgvsg, "chrM:m.100A>G")
+}
+
+func Test_ParseVariantIdentifier_HgvsgMPrefixOnNuclearChromosome(t *testing.T) {
+	assertUnrecognizedVariantIdentifier(t, "chr7:m.140753336A>T")
+}
+
+func Test_ParseVariantIdentifier_HgvsgFreeText(t *testing.T) {
+	assertUnrecognizedVariantIdentifier(t, "7:g.hello")
+}
+
+func Test_ParseVariantIdentifier_HgvsgWithoutChange(t *testing.T) {
+	assertUnrecognizedVariantIdentifier(t, "chr7:g.140753336")
+}
+
+func Test_ParseVariantIdentifier_HgvsgInsertionWithoutBases(t *testing.T) {
+	assertUnrecognizedVariantIdentifier(t, "chr2:g.100_101ins")
+}
+
+func Test_ParseVariantIdentifier_HgvsgSubstitutionOfTwoBases(t *testing.T) {
+	assertUnrecognizedVariantIdentifier(t, "chr7:g.140753336AC>T")
+}
+
 func Test_ParseVariantIdentifier_Locus(t *testing.T) {
 	assertVariantIdentifier(t, "8-43159045-G-A", VariantSearchFieldLocus, "8-43159045-G-A")
 }
@@ -84,6 +120,10 @@ func Test_ParseVariantIdentifier_LocusIndel(t *testing.T) {
 
 func Test_ParseVariantIdentifier_LocusChromosomeY(t *testing.T) {
 	assertVariantIdentifier(t, "y-2781480-g-a", VariantSearchFieldLocus, "Y-2781480-G-A")
+}
+
+func Test_ParseVariantIdentifier_LocusMitochondrialMT(t *testing.T) {
+	assertVariantIdentifier(t, "chrMT-100-a-g", VariantSearchFieldLocus, "M-100-A-G")
 }
 
 func Test_ParseVariantIdentifier_Empty(t *testing.T) {

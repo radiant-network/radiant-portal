@@ -17,6 +17,10 @@ func SearchSNVVariants(snvTable types.Table, seqId int, taskId int, identifier t
 	if err != nil {
 		return nil, fmt.Errorf("search variants: %w", err)
 	}
+	seqIdColumn, err := snvSeqIdColumn(snvTable)
+	if err != nil {
+		return nil, fmt.Errorf("search variants: %w", err)
+	}
 	part, err := utils.GetSequencingPart(seqId, db)
 	if err != nil {
 		return nil, fmt.Errorf("search variants: %w", err)
@@ -28,7 +32,7 @@ func SearchSNVVariants(snvTable types.Table, seqId int, taskId int, identifier t
 	tx := db.Table(fmt.Sprintf("%s %s", vp.TenantQualifiedName(ctx), vp.Alias)).
 		Select(fmt.Sprintf("%[1]s.hgvsg, %[1]s.locus, %[1]s.rsnumber, %[1]s.clinvar_name AS clinvar_id, %[1]s.symbol, %[1]s.aa_change", vp.Alias)).
 		Joins(fmt.Sprintf("LEFT SEMI JOIN %s %s ON %s.locus_id = %s.locus_id AND %s.part = ? AND %s.%s = ? AND %s.task_id = ?",
-			snvTable.TenantQualifiedName(ctx), o, o, vp.Alias, o, o, snvSeqIdColumn(snvTable), o), part, seqId, taskId).
+			snvTable.TenantQualifiedName(ctx), o, o, vp.Alias, o, o, seqIdColumn, o), part, seqId, taskId).
 		Where(fmt.Sprintf("%s.part = ? AND %s.%s = ?", vp.Alias, vp.Alias, column), part/types.PartsPerVariantPart, identifier.Value).
 		Order(fmt.Sprintf("%s.locus_id", vp.Alias)).
 		Limit(maxVariantSearchHits)

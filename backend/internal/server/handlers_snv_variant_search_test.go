@@ -88,6 +88,24 @@ func Test_OccurrencesGermlineSNVSearchHandler_MissingInput(t *testing.T) {
 	repo := &stubSNVVariantSearcher{}
 	w := postVariantSearch(OccurrencesGermlineSNVSearchHandler(repo), "germline", "1", "2", "3", `{}`)
 
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"status": "unrecognized_format", "variants": []}`, w.Body.String())
+	assert.False(t, repo.called)
+}
+
+func Test_OccurrencesGermlineSNVSearchHandler_EmptyInput(t *testing.T) {
+	repo := &stubSNVVariantSearcher{}
+	w := postVariantSearch(OccurrencesGermlineSNVSearchHandler(repo), "germline", "1", "2", "3", `{"input":""}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, `{"status": "unrecognized_format", "variants": []}`, w.Body.String())
+	assert.False(t, repo.called)
+}
+
+func Test_OccurrencesGermlineSNVSearchHandler_MalformedBody(t *testing.T) {
+	repo := &stubSNVVariantSearcher{}
+	w := postVariantSearch(OccurrencesGermlineSNVSearchHandler(repo), "germline", "1", "2", "3", `{"input":`)
+
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.False(t, repo.called)
 }

@@ -9,21 +9,27 @@ import (
 	"gorm.io/gorm"
 )
 
-func snvSeqIdColumn(snvTable types.Table) string {
-	if snvTable == types.SomaticSNVOccurrenceTable {
-		return "tumor_seq_id"
+func snvSeqIdColumn(snvTable types.Table) (string, error) {
+	switch snvTable {
+	case types.GermlineSNVOccurrenceTable:
+		return "seq_id", nil
+	case types.SomaticSNVOccurrenceTable:
+		return "tumor_seq_id", nil
+	default:
+		return "", fmt.Errorf("no sequencing column for table %q", snvTable.Name)
 	}
-	return "seq_id"
 }
 
 func AddImplicitSNVOccurrencesFilters(snvTable types.Table, seqId int, taskId int, db *gorm.DB, part int) *gorm.DB {
 	alias := snvTable.Alias
 	tx := db.Table(fmt.Sprintf("%s %s", snvTable.TenantQualifiedName(utils.CtxOf(db)), alias))
-	switch snvTable {
-	case types.GermlineSNVOccurrenceTable, types.SomaticSNVOccurrenceTable:
-		tx = tx.Where(fmt.Sprintf("%s.%s = ? AND %s.task_id = ? AND %s.part=?", alias, snvSeqIdColumn(snvTable), alias, alias), seqId, taskId, part)
+	seqIdColumn, err := snvSeqIdColumn(snvTable)
+	if err != nil {
+		// Fails the query: without the run filter it would read every occurrence of the tenant.
+		_ = tx.AddError(err)
+		return tx
 	}
-	return tx
+	return tx.Where(fmt.Sprintf("%s.%s = ? AND %s.task_id = ? AND %s.part=?", alias, seqIdColumn, alias, alias), seqId, taskId, part)
 }
 
 func JoinSNVOccurrencesWithVariants(snvTable types.Table, tx *gorm.DB) *gorm.DB {

@@ -187,10 +187,24 @@ omim_symbols = {o[0] for o in genomics.OMIM}
 REAL_COLS = {"is_mane_select": ("mane", lambda x: x == "1"), "is_canonical": ("canonical", lambda x: x == "1")}
 
 
+def schema_columns(table):
+    """The columns of a {tenant} table, in the order of sql/starrocks_schema.sql."""
+    ddl = open(os.path.join(HERE, "sql", "starrocks_schema.sql")).read()
+    body = re.search(r"CREATE TABLE IF NOT EXISTS \{tenant\}\.`" + table + r"`\s*\((.*?)\n\s*\)", ddl, re.S).group(1)
+    return [line.split()[0].strip("`") for line in body.splitlines()
+            if line.strip() and not line.strip().startswith(("PRIMARY", "INDEX", "KEY"))]
+
+
 def variant_parts():
-    """snv__variant_partitioned as the ETL fills it: the variants of each slice of 10 occurrence parts, under part DIV 10."""
-    return f"""INSERT OVERWRITE {TENANT_DB}.snv__variant_partitioned
-SELECT p.part, v.*
+    """snv__variant_partitioned as the ETL fills it: the variants of each slice of 10 occurrence parts, under part DIV 10.
+    10 is the ETL's PARTS_PER_VARIANT_PART, mirrored by PartsPerVariantPart in internal/types/variant_search.go.
+    The columns are named, so a column added to one table only fails the insert instead of shifting the values."""
+    cols = schema_columns("snv__variant")
+    assert set(cols) == set(schema_columns("snv__variant_partitioned")) - {"part"}, "snv__variant and snv__variant_partitioned differ"
+    names = ", ".join(cols)
+    values = ", ".join(f"v.{c}" for c in cols)
+    return f"""INSERT OVERWRITE {TENANT_DB}.snv__variant_partitioned (part, {names})
+SELECT p.part, {values}
 FROM {TENANT_DB}.snv__variant v
 JOIN (
     SELECT DISTINCT locus_id, part DIV 10 AS part FROM (

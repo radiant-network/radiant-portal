@@ -60,7 +60,7 @@ type VariantIdentifier struct {
 // VariantSearchBody - Body of a search by variant identifier
 // @Description Body of a search by variant identifier: a locus, an HGVSg, an rsID or a ClinVar variation ID
 type VariantSearchBody struct {
-	Input string `json:"input" binding:"required"`
+	Input string `json:"input" validate:"required"`
 } // @name VariantSearchBody
 
 // VariantSearchHit - A variant of the run matching the searched identifier
@@ -86,8 +86,9 @@ type VariantSearchResult struct {
 var (
 	rsidPattern      = regexp.MustCompile(`^(?i)rs(\d+)$`)
 	clinvarIdPattern = regexp.MustCompile(`^\d+$`)
-	hgvsgPattern     = regexp.MustCompile(`^(?i)(?:chr)?([0-9]{1,2}|X|Y|M):g\.(.+)$`)
-	locusPattern     = regexp.MustCompile(`^(?i)(?:chr)?([0-9]{1,2}|X|Y|M)[-:](\d+)[-:]([ACGTN]+)[-:]([ACGTN]+)$`)
+	hgvsgPattern     = regexp.MustCompile(`^(?i)(?:chr)?([0-9]{1,2}|X|Y|MT|M):([gm])\.(.+)$`)
+	hgvsgChange      = regexp.MustCompile(`^\d+(?:_\d+)?(?:[ACGTN]>[ACGTN]|delins[ACGTN]+|del[ACGTN]*|ins[ACGTN]+|dup[ACGTN]*|inv[ACGTN]*)$`)
+	locusPattern     = regexp.MustCompile(`^(?i)(?:chr)?([0-9]{1,2}|X|Y|MT|M)[-:](\d+)[-:]([ACGTN]+)[-:]([ACGTN]+)$`)
 	hgvsKeywords     = strings.NewReplacer("DELINS", "delins", "DEL", "del", "INS", "ins", "DUP", "dup", "INV", "inv")
 )
 
@@ -110,7 +111,18 @@ func ParseVariantIdentifier(input string) (VariantIdentifier, error) {
 		if err != nil {
 			return VariantIdentifier{}, err
 		}
-		return VariantIdentifier{Field: VariantSearchFieldHgvsg, Value: "chr" + chromosome + ":g." + hgvsKeywords.Replace(strings.ToUpper(m[2]))}, nil
+		// The ETL writes the mitochondrial HGVSg with the m. prefix (chrM:m.1551G>A) and every other one with g.
+		prefix := "g."
+		if chromosome == "M" {
+			prefix = "m."
+		} else if strings.EqualFold(m[2], "m") {
+			return VariantIdentifier{}, ErrUnrecognizedVariantIdentifier
+		}
+		change := hgvsKeywords.Replace(strings.ToUpper(m[3]))
+		if !hgvsgChange.MatchString(change) {
+			return VariantIdentifier{}, ErrUnrecognizedVariantIdentifier
+		}
+		return VariantIdentifier{Field: VariantSearchFieldHgvsg, Value: "chr" + chromosome + ":" + prefix + change}, nil
 	}
 	if m := locusPattern.FindStringSubmatch(trimmed); m != nil {
 		chromosome, err := normalizeChromosome(m[1])
@@ -124,8 +136,11 @@ func ParseVariantIdentifier(input string) (VariantIdentifier, error) {
 
 func normalizeChromosome(chromosome string) (string, error) {
 	upper := strings.ToUpper(chromosome)
-	if upper == "X" || upper == "Y" || upper == "M" {
+	switch upper {
+	case "X", "Y", "M":
 		return upper, nil
+	case "MT":
+		return "M", nil
 	}
 	n, err := strconv.Atoi(upper)
 	if err != nil || n < 1 || n > 22 || strings.HasPrefix(upper, "0") {
