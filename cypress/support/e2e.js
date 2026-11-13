@@ -15,33 +15,39 @@ Cypress.Commands.add('setToken', () => {
 // The cached token is checked once per spec: it has to outlive the spec, or its last API calls get a 401.
 const TOKEN_MIN_REMAINING_SECONDS = 180;
 
-const expiresSoon = token => {
+const tokenPayload = token => {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-    return payload.exp - Date.now() / 1000 < TOKEN_MIN_REMAINING_SECONDS;
+    return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
   } catch {
-    return true;
+    return null;
   }
 };
+
+const expiresSoon = payload => payload.exp - Date.now() / 1000 < TOKEN_MIN_REMAINING_SECONDS;
 
 Cypress.Commands.add('isValidToken', token => {
   const apiUrl = Cypress.expose('api_base_url');
   const tenant = Cypress.expose('api_tenant');
+  const payload = token && tokenPayload(token);
 
-  if (!token || expiresSoon(token)) {
+  if (!payload || expiresSoon(payload)) {
     return cy.wrap(false);
   }
 
-  return cy
-    .request({
-      method: 'GET',
-      url: `${apiUrl}${tenant}/batches/${globalData.BatchesId.patientNotFound}`,
-      headers: { Authorization: `Bearer ${token}` },
-      failOnStatusCode: false,
-    })
-    .then(res => {
-      return cy.wrap(res.status !== 401 && res.status !== 403);
-    });
+  return cy.getUsername().then(username => {
+    // The cache keeps the token of the account that ran last, which may not be this run's
+    if (![payload.preferred_username, payload.email].includes(username?.toLowerCase())) {
+      return false;
+    }
+    return cy
+      .request({
+        method: 'GET',
+        url: `${apiUrl}${tenant}/batches/${globalData.BatchesId.patientNotFound}`,
+        headers: { Authorization: `Bearer ${token}` },
+        failOnStatusCode: false,
+      })
+      .then(res => res.status !== 401 && res.status !== 403);
+  });
 });
 
 Cypress.Commands.add('initializeGlobalData', () => {
@@ -52,22 +58,31 @@ Cypress.Commands.add('initializeGlobalData', () => {
 });
 
 before(() => {
-  return cy.task('checkCachedData').then(isExist => {
-    if (isExist) {
-      return cy.task('loadCachedData').then(cachedData => {
-        return cy.isValidToken(cachedData.Authorization.token).then(isValid => {
-          if (isValid) {
-            globalData.Authorization.token = cachedData.Authorization.token;
-            Cypress.expose('globalData', globalData);
-          } else {
-            return cy.initializeGlobalData();
-          }
+  return cy
+    .task('checkCachedData')
+    .then(isExist => {
+      if (isExist) {
+        return cy.task('loadCachedData').then(cachedData => {
+          return cy.isValidToken(cachedData.Authorization.token).then(isValid => {
+            if (isValid) {
+              globalData.Authorization.token = cachedData.Authorization.token;
+              Cypress.expose('globalData', globalData);
+            } else {
+              return cy.initializeGlobalData();
+            }
+          });
         });
-      });
-    } else {
-      return cy.initializeGlobalData();
-    }
-  });
+      } else {
+        return cy.initializeGlobalData();
+      }
+    })
+    .then(() => cy.task('referenceSavedFiltersChecked'))
+    .then(checked => {
+      // Once per Cypress process: the reference filters do not change during a run
+      if (!checked) {
+        return cy.ensureReferenceSavedFilters(globalData.Authorization.token).then(() => cy.task('markReferenceSavedFiltersChecked'));
+      }
+    });
 });
 
 // Ignore uncaught exception so tests doesn't stop mid run

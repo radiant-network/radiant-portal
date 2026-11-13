@@ -111,6 +111,8 @@ jobs:
       - name: Stop the Cypress run in progress
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          LOCK_BUCKET: qlin-dev-cypress-artifacts
+          LOCK_PREFIX: _locks/cypress-accounts/
           ACTION: ${{ github.event.action }}
           BRANCH: ${{ github.event.pull_request.head.ref }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
@@ -155,15 +157,6 @@ jobs:
             exit 1
           fi
 
-      - name: Notify Slack launch
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          BRANCH: ${{ github.head_ref }}
-        run: |
-          curl -sf -X POST "$SLACK_WEBHOOK" \
-            -H 'Content-Type: application/json' \
-            -d "{\"attachments\":[{\"title\":\"Ferlease - Cypress Launch Attempt (Radiant) ⚙️\",\"text\":\"Cypress tests are starting ✈️ for branch: ${BRANCH}\",\"color\":\"good\"}]}"
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v5
         with:
@@ -180,11 +173,34 @@ jobs:
           aws s3 cp /tmp/cypress-source.tar.gz \
             "s3://qlin-dev-cypress-artifacts/$RELEASE/source.tar.gz"
 
+      - name: Reserve a test account
+        id: account
+        env:
+          RELEASE: ${{ needs.ferlease-release.outputs.release }}
+          LOCK_BUCKET: qlin-dev-cypress-artifacts
+          LOCK_PREFIX: _locks/cypress-accounts/
+          ECS_CLUSTER: pipelines
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_TITLE: "Ferlease - ${{ needs.ferlease-release.outputs.release }} - Cypress"
+        run: |
+          USERNAME=$(bash .github/scripts/cypress-account.sh reserve "ferlease-$RELEASE")
+          echo "username=$USERNAME" >> "$GITHUB_OUTPUT"
+
+      - name: Notify Slack launch
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          BRANCH: ${{ github.head_ref }}
+          ACCOUNT: ${{ steps.account.outputs.username }}
+        run: |
+          curl -sf -X POST "$SLACK_WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -d "{\"attachments\":[{\"title\":\"Ferlease - Cypress Launch Attempt (Radiant) ⚙️\",\"text\":\"Cypress tests are starting ✈️ for branch: ${BRANCH}, with the test account ${ACCOUNT}\",\"color\":\"good\"}]}"
+
       - name: Run Cypress via ECS Fargate
         env:
           RELEASE: ${{ needs.ferlease-release.outputs.release }}
           CYPRESS_BASE_URL: ${{ needs.ferlease-release.outputs.url }}/
-          CYPRESS_USER_USERNAME: ${{ secrets.CYPRESS_USER_USERNAME }}
+          CYPRESS_USER_USERNAME: ${{ steps.account.outputs.username }}
           CYPRESS_USER_PASSWORD: ${{ secrets.CYPRESS_USER_PASSWORD }}
           FERLEASE_BUILD_SHA: ${{ github.event.pull_request.head.sha }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
@@ -238,6 +254,9 @@ jobs:
 
           AGGREGATOR_CMD='
           set -e
+          # Frees the test account however the aggregator ends, so the next run can take it at once
+          release_account() { [ "$(aws s3 cp "$ACCOUNT_LOCK" - 2>/dev/null | cut -d " " -f1)" = "$RUN_KEY" ] && aws s3 rm "$ACCOUNT_LOCK" > /dev/null; true; }
+          trap release_account EXIT
           ARNS=($SHARD_TASK_ARNS)
           SHARDS_COUNT=$SHARD_COUNT
           while true; do
@@ -299,6 +318,7 @@ jobs:
           [ -n "$COMBINED_ZURL" ] && BODY_PARTS+=("Download all screenshots as a zip file: <${COMBINED_ZURL}|View Results>")
           [ -n "$REPORT_LINKS" ] && BODY_PARTS+=("Reports: $REPORT_LINKS")
           [ -n "$FAILURES_XURL" ] && BODY_PARTS+=("Failures XML: <${FAILURES_XURL}|Download>")
+          BODY_PARTS+=("Test account: $ACCOUNT")
           TEXT=$(printf "%s\n" "${BODY_PARTS[@]}")
           PAYLOAD=$(node -e "process.stdout.write(JSON.stringify({attachments:[{title:process.argv[1],text:process.argv[2],color:process.argv[3]}]}))" "$TITLE" "$TEXT" "$COLOR")
           curl -sf -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" -d "$PAYLOAD" || true
@@ -311,12 +331,18 @@ jobs:
             --arg count "${#TASK_ARNS[@]}" \
             --arg cmd "$AGGREGATOR_CMD" \
             --arg proxy_base "$PROXY_BASE" \
+            --arg run_key "ferlease-$RELEASE" \
+            --arg account "$CYPRESS_USER_USERNAME" \
+            --arg account_lock "s3://qlin-dev-cypress-artifacts/_locks/cypress-accounts/$CYPRESS_USER_USERNAME" \
             '{containerOverrides:[{name:"ferlease-cypress",command:[$cmd],environment:[
               {name:"RELEASE",value:$release},
               {name:"SLACK_WEBHOOK",value:$slack},
               {name:"SHARD_TASK_ARNS",value:$arns},
               {name:"SHARD_COUNT",value:$count},
-              {name:"PROXY_BASE",value:$proxy_base}
+              {name:"PROXY_BASE",value:$proxy_base},
+              {name:"RUN_KEY",value:$run_key},
+              {name:"ACCOUNT",value:$account},
+              {name:"ACCOUNT_LOCK",value:$account_lock}
             ]}]}')
 
           aws ecs run-task \

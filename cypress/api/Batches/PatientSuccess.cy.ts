@@ -19,6 +19,7 @@ describe('Batches - Patient success', () => {
   });
 
   it('Return content', () => {
-    cy.validateSuccessBatchProcessed(response, 'create_patient', batchId);
+    // A reference batch, created once with the first account of the pool, whatever account runs
+    cy.validateSuccessBatchProcessed(response, 'create_patient', batchId, 'cypress@email.me');
   });
 });
