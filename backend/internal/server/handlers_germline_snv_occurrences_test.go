@@ -616,7 +616,7 @@ func Test_OccurrencesCountHandler_Forwards_WithInterpretation(t *testing.T) {
 	}
 }
 
-func (m *MockRepository) SearchVariants(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
+func (m *MockRepository) SearchOccurrencesByVariantIdentifier(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
 	return []types.VariantSearchHit{
 		{Hgvsg: "chr11:g.5227002T>A", Locus: "11-5227002-T-A", Rsnumber: "rs334", ClinvarId: "15333", Symbol: "HBB", AaChange: "p.Glu7Val"},
 		{Hgvsg: "chr11:g.5227002T>G", Locus: "11-5227002-T-G", Rsnumber: "rs334"},
@@ -627,7 +627,7 @@ type MockNotFoundGermlineSNVSearchRepository struct {
 	MockRepository
 }
 
-func (m *MockNotFoundGermlineSNVSearchRepository) SearchVariants(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
+func (m *MockNotFoundGermlineSNVSearchRepository) SearchOccurrencesByVariantIdentifier(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
 	return nil, nil
 }
 
@@ -635,7 +635,7 @@ type MockErrorGermlineSNVSearchRepository struct {
 	MockRepository
 }
 
-func (m *MockErrorGermlineSNVSearchRepository) SearchVariants(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
+func (m *MockErrorGermlineSNVSearchRepository) SearchOccurrencesByVariantIdentifier(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
 	return nil, fmt.Errorf("starrocks down")
 }
 

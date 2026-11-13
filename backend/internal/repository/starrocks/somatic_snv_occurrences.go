@@ -125,6 +125,6 @@ func (r *SomaticSNVOccurrencesRepository) GetExpandedOccurrence(ctx context.Cont
 	return &expandedOccurrence, nil
 }
 
-func (r *SomaticSNVOccurrencesRepository) SearchVariants(ctx context.Context, _ int, seqId int, taskId int, identifier types.VariantIdentifier) ([]types.VariantSearchHit, error) {
-	return searchSNVVariants(types.SomaticSNVOccurrenceTable, seqId, taskId, identifier, r.db.WithContext(ctx))
+func (r *SomaticSNVOccurrencesRepository) SearchOccurrencesByVariantIdentifier(ctx context.Context, _ int, seqId int, taskId int, identifier types.VariantIdentifier) ([]types.VariantSearchHit, error) {
+	return searchSNVOccurrencesByVariantIdentifier(types.SomaticSNVOccurrenceTable, seqId, taskId, identifier, r.db.WithContext(ctx))
 }

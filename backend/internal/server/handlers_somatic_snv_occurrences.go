@@ -19,7 +19,7 @@ type somaticSNVOccurrencesReader interface {
 	AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
 	GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error)
 	GetExpandedOccurrence(ctx context.Context, caseId int, seqId int, taskId int, locusId int) (*types.ExpandedSomaticSNVOccurrence, error)
-	SearchVariants(ctx context.Context, caseId int, seqId int, taskId int, identifier types.VariantIdentifier) ([]types.VariantSearchHit, error)
+	SearchOccurrencesByVariantIdentifier(ctx context.Context, caseId int, seqId int, taskId int, identifier types.VariantIdentifier) ([]types.VariantSearchHit, error)
 }
 
 // OccurrencesSomaticSNVListHandler handles list of somatic SNV occurrences
@@ -375,7 +375,7 @@ func OccurrencesSomaticSNVSearchHandler(repo somaticSNVOccurrencesReader) gin.Ha
 			c.JSON(http.StatusOK, types.NewUnrecognizedVariantSearchResult())
 			return
 		}
-		hits, err := repo.SearchVariants(c.Request.Context(), caseID, seqID, taskID, identifier)
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(c.Request.Context(), caseID, seqID, taskID, identifier)
 		if err != nil {
 			HandleError(c, err)
 			return

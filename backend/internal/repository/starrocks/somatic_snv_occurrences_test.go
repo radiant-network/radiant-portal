@@ -621,19 +621,19 @@ func Test_Somatic_SNV_GetOccurrences_Sort_By_Topmed_Af_Without_Selecting_It(t *t
 	})
 }
 
-func Test_Somatic_SNV_SearchVariants_ByRsnumber(t *testing.T) {
+func Test_Somatic_SNV_SearchOccurrencesByVariantIdentifier_ByRsnumber(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		hits, err := repo.SearchVariants(t.Context(), 1, 74, 74, types.VariantIdentifier{Field: types.VariantSearchFieldRsnumber, Value: "rs111111111"})
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(t.Context(), 1, 74, 74, types.VariantIdentifier{Field: types.VariantSearchFieldRsnumber, Value: "rs111111111"})
 		assert.NoError(t, err)
 		assert.Equal(t, []types.VariantSearchHit{searchHitLocus1}, hits)
 	})
 }
 
-func Test_Somatic_SNV_SearchVariants_NotInRun(t *testing.T) {
+func Test_Somatic_SNV_SearchOccurrencesByVariantIdentifier_NotInRun(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
-		hits, err := repo.SearchVariants(t.Context(), 1, 74, 74, types.VariantIdentifier{Field: types.VariantSearchFieldRsnumber, Value: "rs222222222"})
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(t.Context(), 1, 74, 74, types.VariantIdentifier{Field: types.VariantSearchFieldRsnumber, Value: "rs222222222"})
 		assert.NoError(t, err)
 		assert.Empty(t, hits)
 	})

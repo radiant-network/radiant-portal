@@ -261,9 +261,9 @@ func StatisticsSNV(snvTable types.Table, seqId int, taskId int, userQuery types.
 	return &statistics, nil
 }
 
-// searchSNVVariants returns the variants of one run whose identifier equals the searched value. It reads only the
+// searchSNVOccurrencesByVariantIdentifier returns the variants of one run whose identifier equals the searched value. It reads only the
 // run's variant part of snv__variant_partitioned, semi-joined to the run's occurrences (colocated on locus_id).
-func searchSNVVariants(snvTable types.Table, seqId int, taskId int, identifier types.VariantIdentifier, db *gorm.DB) ([]types.VariantSearchHit, error) {
+func searchSNVOccurrencesByVariantIdentifier(snvTable types.Table, seqId int, taskId int, identifier types.VariantIdentifier, db *gorm.DB) ([]types.VariantSearchHit, error) {
 	column, err := identifier.Field.Column()
 	if err != nil {
 		return nil, fmt.Errorf("search variants: %w", err)

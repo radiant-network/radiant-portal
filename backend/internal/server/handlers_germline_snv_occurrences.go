@@ -27,7 +27,7 @@ type germlineSNVOccurrencesReader interface {
 	AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
 	GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error)
 	GetExpandedOccurrence(ctx context.Context, caseId int, seqId int, taskId int, locusId int) (*types.ExpandedGermlineSNVOccurrence, error)
-	SearchVariants(ctx context.Context, caseId int, seqId int, taskId int, identifier types.VariantIdentifier) ([]types.VariantSearchHit, error)
+	SearchOccurrencesByVariantIdentifier(ctx context.Context, caseId int, seqId int, taskId int, identifier types.VariantIdentifier) ([]types.VariantSearchHit, error)
 }
 
 // OccurrencesGermlineSNVListHandler handles list of germline SNV occurrences
@@ -383,7 +383,7 @@ func OccurrencesGermlineSNVSearchHandler(repo germlineSNVOccurrencesReader) gin.
 			c.JSON(http.StatusOK, types.NewUnrecognizedVariantSearchResult())
 			return
 		}
-		hits, err := repo.SearchVariants(c.Request.Context(), caseID, seqID, taskID, identifier)
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(c.Request.Context(), caseID, seqID, taskID, identifier)
 		if err != nil {
 			HandleError(c, err)
 			return
