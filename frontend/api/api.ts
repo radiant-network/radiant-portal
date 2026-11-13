@@ -3963,6 +3963,42 @@ export interface GermlineCNVOccurrence {
     'end': number;
     /**
      * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
+    'exomiser_acmg_classification'?: string;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof GermlineCNVOccurrence
+     */
+    'exomiser_acmg_evidence'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'exomiser_gene_combined_score'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GermlineCNVOccurrence
+     */
+    'exomiser_moi'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'exomiser_rank'?: number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GermlineCNVOccurrence
+     */
+    'exomiser_variant_score'?: number;
+    /**
+     * 
      * @type {number}
      * @memberof GermlineCNVOccurrence
      */

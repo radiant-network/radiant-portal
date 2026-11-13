@@ -37,6 +37,12 @@ class GermlineCNVOccurrence(BaseModel):
     cnv_id: StrictStr
     cytoband: Optional[List[StrictStr]] = None
     end: StrictInt
+    exomiser_acmg_classification: Optional[StrictStr] = None
+    exomiser_acmg_evidence: Optional[List[StrictStr]] = None
+    exomiser_gene_combined_score: Optional[Union[StrictFloat, StrictInt]] = None
+    exomiser_moi: Optional[StrictStr] = None
+    exomiser_rank: Optional[StrictInt] = None
+    exomiser_variant_score: Optional[Union[StrictFloat, StrictInt]] = None
     father_bc: Optional[StrictInt] = None
     father_calls: Optional[List[StrictInt]] = None
     father_cn: Optional[StrictInt] = None
@@ -92,7 +98,7 @@ class GermlineCNVOccurrence(BaseModel):
     task_id: StrictInt
     transmission_mode: Optional[StrictStr] = None
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["aliquot", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnv_id", "cytoband", "end", "father_bc", "father_calls", "father_cn", "father_name", "father_pe", "father_sm", "filter", "flag_type", "germline_pc_wgs", "germline_pc_wgs_affected", "germline_pc_wgs_not_affected", "germline_pc_wxs", "germline_pc_wxs_affected", "germline_pc_wxs_not_affected", "germline_pf_wgs", "germline_pf_wgs_affected", "germline_pf_wgs_not_affected", "germline_pf_wxs", "germline_pf_wxs_affected", "germline_pf_wxs_not_affected", "germline_pn_wgs", "germline_pn_wgs_affected", "germline_pn_wgs_not_affected", "germline_pn_wxs", "germline_pn_wxs_affected", "germline_pn_wxs_not_affected", "gnomad_ac", "gnomad_af", "gnomad_sc", "gnomad_sf", "gnomad_sn", "has_note", "length", "mother_bc", "mother_calls", "mother_cn", "mother_name", "mother_pe", "mother_sm", "name", "nb_genes", "nb_snv", "parental_origin", "pe", "quality", "reflen", "seq_id", "sm", "start", "svlen", "svtype", "symbol", "task_id", "transmission_mode", "type"]
+    __properties: ClassVar[List[str]] = ["aliquot", "bc", "calls", "chromosome", "ciend", "cipos", "cn", "cnv_id", "cytoband", "end", "exomiser_acmg_classification", "exomiser_acmg_evidence", "exomiser_gene_combined_score", "exomiser_moi", "exomiser_rank", "exomiser_variant_score", "father_bc", "father_calls", "father_cn", "father_name", "father_pe", "father_sm", "filter", "flag_type", "germline_pc_wgs", "germline_pc_wgs_affected", "germline_pc_wgs_not_affected", "germline_pc_wxs", "germline_pc_wxs_affected", "germline_pc_wxs_not_affected", "germline_pf_wgs", "germline_pf_wgs_affected", "germline_pf_wgs_not_affected", "germline_pf_wxs", "germline_pf_wxs_affected", "germline_pf_wxs_not_affected", "germline_pn_wgs", "germline_pn_wgs_affected", "germline_pn_wgs_not_affected", "germline_pn_wxs", "germline_pn_wxs_affected", "germline_pn_wxs_not_affected", "gnomad_ac", "gnomad_af", "gnomad_sc", "gnomad_sf", "gnomad_sn", "has_note", "length", "mother_bc", "mother_calls", "mother_cn", "mother_name", "mother_pe", "mother_sm", "name", "nb_genes", "nb_snv", "parental_origin", "pe", "quality", "reflen", "seq_id", "sm", "start", "svlen", "svtype", "symbol", "task_id", "transmission_mode", "type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -155,6 +161,12 @@ class GermlineCNVOccurrence(BaseModel):
             "cnv_id": obj.get("cnv_id"),
             "cytoband": obj.get("cytoband"),
             "end": obj.get("end"),
+            "exomiser_acmg_classification": obj.get("exomiser_acmg_classification"),
+            "exomiser_acmg_evidence": obj.get("exomiser_acmg_evidence"),
+            "exomiser_gene_combined_score": obj.get("exomiser_gene_combined_score"),
+            "exomiser_moi": obj.get("exomiser_moi"),
+            "exomiser_rank": obj.get("exomiser_rank"),
+            "exomiser_variant_score": obj.get("exomiser_variant_score"),
             "father_bc": obj.get("father_bc"),
             "father_calls": obj.get("father_calls"),
             "father_cn": obj.get("father_cn"),

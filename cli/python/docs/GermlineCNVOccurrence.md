@@ -16,6 +16,12 @@ Name | Type | Description | Notes
 **cnv_id** | **str** |  | 
 **cytoband** | **List[str]** |  | [optional] 
 **end** | **int** |  | 
+**exomiser_acmg_classification** | **str** |  | [optional] 
+**exomiser_acmg_evidence** | **List[str]** |  | [optional] 
+**exomiser_gene_combined_score** | **float** |  | [optional] 
+**exomiser_moi** | **str** |  | [optional] 
+**exomiser_rank** | **int** |  | [optional] 
+**exomiser_variant_score** | **float** |  | [optional] 
 **father_bc** | **int** |  | [optional] 
 **father_calls** | **List[int]** |  | [optional] 
 **father_cn** | **int** |  | [optional] 
