@@ -17,6 +17,11 @@ describe('Case Entity - Variants - Germline - CNV - Overlapping Genes - Informat
     OverlappingGenesModal.validations.shouldShowColumnContent('gene', data.cnvOverlappingGenes);
   });
 
+  it('RefSeq', () => {
+    setupTest();
+    OverlappingGenesModal.validations.shouldShowColumnContent('refseq_transcript_id', data.cnvOverlappingGenes);
+  });
+
   it('Cytoband', () => {
     setupTest();
     OverlappingGenesModal.validations.shouldShowColumnContent('cytoband', data.cnvOverlappingGenes);

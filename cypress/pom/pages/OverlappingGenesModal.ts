@@ -21,6 +21,17 @@ const tableColumns = [
     tooltip: null,
   },
   {
+    id: 'refseq_transcript_id',
+    name: 'RefSeq',
+    apiField: 'refseq_transcript_id',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: false,
+    position: 1,
+    tooltip: 'MANE Select RefSeq transcript of the gene',
+  },
+  {
     id: 'cytoband',
     name: 'Cytoband',
     apiField: 'cytoband',
@@ -28,7 +39,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: false,
-    position: 1,
+    position: 2,
     tooltip: null,
   },
   {
@@ -39,7 +50,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: false,
-    position: 2,
+    position: 3,
     tooltip: null,
   },
   {
@@ -50,7 +61,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: false,
-    position: 3,
+    position: 4,
     tooltip: 'Gene base length',
   },
   {
@@ -61,7 +72,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: false,
-    position: 4,
+    position: 5,
     tooltip: 'Overlap in bases',
   },
   {
@@ -72,8 +83,8 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: false,
-    position: 5,
-    tooltip: 'Overlapped exon number',
+    position: 6,
+    tooltip: 'Overlapped exons of the reference transcript (MANE Select, or Ensembl canonical when the gene has none)',
   },
   {
     id: 'overlapping_gene_percent',
@@ -83,7 +94,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: false,
-    position: 6,
+    position: 7,
     tooltip: '% overlapped gene length',
   },
   {
@@ -94,7 +105,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: false,
-    position: 7,
+    position: 8,
     tooltip: '% overlapped CNV length',
   },
   {
@@ -105,7 +116,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: false,
-    position: 8,
+    position: 9,
     tooltip: 'Gene and CNV overlapping type',
   },
 ];
