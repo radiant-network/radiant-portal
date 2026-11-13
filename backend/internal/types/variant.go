@@ -140,6 +140,12 @@ var VariantTable = Table{
 	PerTenant: true,
 }
 
+var VariantPartitionedTable = Table{
+	Name:      "snv__variant_partitioned",
+	Alias:     "vp",
+	PerTenant: true,
+}
+
 var VariantInterpretedCasesFields = append(CasesFields, GermlineInterpretationClassificationField, GermlineInterpretationUpdatedOnField, ConditionIdField, ConditionNameField, ConditionTermField, AggregatedPhenotypeTermField)
 var VariantInterpretedCasesDefaultSort = []SortField{{Field: GermlineInterpretationUpdatedOnField, Order: "desc"}}
 
