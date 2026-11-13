@@ -1,7 +1,8 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
 import { type CaseEntity, type CaseSequencingExperiment, CaseTasksWithOccurrencesDataTypeEnum } from '@/api/api';
+import { useI18n } from '@/components/hooks/i18n';
 import { useOccurrenceTasks } from '@/components/hooks/use-occurrence-tasks';
 import { useCaseIdFromParam, useTaskIdFromSearchParam } from '@/utils/helper';
 
@@ -34,15 +35,29 @@ type VariantTabProps = {
 };
 
 function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
+  const { t } = useI18n();
   const [searchParams, setSearchParams] = useSearchParams();
   const caseId = useCaseIdFromParam();
-  const [activeInterface, setActiveInterface] = useState<GermlineVariantInterface>(
-    getInterfaceFromVariantSection(searchParams.get(VARIANT_SECTION_PARAM)) ?? GermlineVariantInterface.SNV,
-  );
   const [patientSelected, setPatientSelected] = useState<CaseSequencingExperiment | undefined>(undefined);
 
   const [seqId, setSeqId] = useState<number>(getDefaultSeqId(searchParams.get('seq_id'), caseEntity));
   const seqExpVariants = caseEntity?.sequencing_experiments.filter(seqExp => seqExp.has_variants) ?? [];
+  const selectedSeqExp = seqExpVariants.find(seqExp => seqExp.seq_id === seqId);
+  const [activeInterface, setActiveInterface] = useState<GermlineVariantInterface>(
+    getInterfaceFromVariantSection(searchParams.get(VARIANT_SECTION_PARAM)) ??
+      (selectedSeqExp && !selectedSeqExp.has_snv && selectedSeqExp.has_cnv
+        ? GermlineVariantInterface.CNV
+        : GermlineVariantInterface.SNV),
+  );
+
+  useEffect(() => {
+    if (!selectedSeqExp) return;
+    if (activeInterface === GermlineVariantInterface.SNV && !selectedSeqExp.has_snv && selectedSeqExp.has_cnv) {
+      setActiveInterface(GermlineVariantInterface.CNV);
+    } else if (activeInterface === GermlineVariantInterface.CNV && !selectedSeqExp.has_cnv && selectedSeqExp.has_snv) {
+      setActiveInterface(GermlineVariantInterface.SNV);
+    }
+  }, [activeInterface, selectedSeqExp]);
 
   const dataType =
     activeInterface === GermlineVariantInterface.CNV
@@ -82,9 +97,20 @@ function GermlineVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
         isLoading={isLoading}
         sequencingExperiments={seqExpVariants}
         selectedSeqId={seqId}
-        options={Object.keys(GermlineVariantInterface).map(key => ({
-          value: key,
-        }))}
+        options={[
+          {
+            value: GermlineVariantInterface.SNV,
+            disabled: selectedSeqExp ? !selectedSeqExp.has_snv : false,
+            tooltip:
+              selectedSeqExp && !selectedSeqExp.has_snv ? t('case_entity.variants.filters.no_snv_tooltip') : undefined,
+          },
+          {
+            value: GermlineVariantInterface.CNV,
+            disabled: selectedSeqExp ? !selectedSeqExp.has_cnv : false,
+            tooltip:
+              selectedSeqExp && !selectedSeqExp.has_cnv ? t('case_entity.variants.filters.no_cnv_tooltip') : undefined,
+          },
+        ]}
         handleChange={handlechange}
         activeInterface={activeInterface}
         onActiveInterfaceChange={value => {

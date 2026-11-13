@@ -115,6 +115,8 @@ const meta = {
       status_code: 'completed',
       updated_on: '2021-10-12T13:08:00Z',
       has_variants: true,
+      has_snv: true,
+      has_cnv: false,
     },
   },
   decorators: [
@@ -192,6 +194,8 @@ export const RelationshipToProband: Story = {
       status_code: 'completed',
       updated_on: '2021-10-12T13:08:00Z',
       has_variants: true,
+      has_snv: true,
+      has_cnv: false,
     },
   },
   render: args => (
