@@ -2,7 +2,7 @@ name: Ferlease PR
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed, labeled]
+    types: [opened, synchronize, reopened, closed, labeled, unlabeled]
 
 concurrency:
   group: ferlease-${{ github.event.pull_request.number }}
@@ -11,7 +11,7 @@ concurrency:
 jobs:
   ferlease-release:
     if: >
-      github.event.action != 'closed' &&
+      github.event.action != 'closed' && github.event.action != 'unlabeled' &&
       (startsWith(github.event.pull_request.head.ref, 'feat/') || startsWith(github.event.pull_request.head.ref, 'fix/') ||
        startsWith(github.event.pull_request.head.ref, 'refactor/') || startsWith(github.event.pull_request.head.ref, 'perf/'))
     runs-on: ubuntu-latest
@@ -84,10 +84,50 @@ jobs:
             -H 'Content-Type: application/json' \
             -d "{\"attachments\":[{\"title\":\"New Radiant Release : Ticket: ${PR_TITLE}\",\"text\":\"You can find the new release for Radiant at ${URL}\",\"color\":\"good\"}]}"
 
+  # Runs beside the redeploy, so the run in progress stops before the Ferlease changes under it
+  cypress-stop:
+    if: >
+      ((contains(fromJSON('["synchronize", "closed"]'), github.event.action) && contains(github.event.pull_request.labels.*.name, 'cypress')) ||
+       (github.event.action == 'unlabeled' && github.event.label.name == 'cypress')) &&
+      (startsWith(github.event.pull_request.head.ref, 'feat/') || startsWith(github.event.pull_request.head.ref, 'fix/') ||
+       startsWith(github.event.pull_request.head.ref, 'refactor/') || startsWith(github.event.pull_request.head.ref, 'perf/'))
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          sparse-checkout: .github/scripts
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: arn:aws:iam::311752058468:role/qlin-ferlease-cypress
+          aws-region: ca-central-1
+
+      - name: Stop the Cypress run in progress
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          ACTION: ${{ github.event.action }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          RELEASE=$(echo "${BRANCH#*/}" | tr '[:upper:]' '[:lower:]')
+          case "$ACTION" in
+            synchronize) REASON="A new commit was pushed (${HEAD_SHA:0:9})" ;;
+            unlabeled) REASON="The cypress label was removed" ;;
+            closed) REASON="The PR was closed" ;;
+          esac
+          bash .github/scripts/stop-cypress-run.sh "ferlease-$RELEASE" "Ferlease - $RELEASE - Cypress run stopped ⏹️" "$REASON"
+
   cypress:
-    needs: ferlease-release
+    needs: [ferlease-release, cypress-stop]
     # Not on `opened`: a PR created with the label also sends `labeled`, so Cypress would run twice
     if: >
+      !cancelled() && needs.ferlease-release.result == 'success' && needs.cypress-stop.result != 'failure' &&
       ((github.event.action == 'labeled' && github.event.label.name == 'cypress') ||
        (contains(fromJSON('["synchronize", "reopened"]'), github.event.action) && contains(github.event.pull_request.labels.*.name, 'cypress'))) &&
       (startsWith(github.event.pull_request.head.ref, 'feat/') || startsWith(github.event.pull_request.head.ref, 'fix/') ||
@@ -189,6 +229,7 @@ jobs:
               --launch-type FARGATE \
               --network-configuration "awsvpcConfiguration={subnets=[subnet-07cac0f9ab50d76ed,subnet-0be9fa70291f7c86c],assignPublicIp=DISABLED,securityGroups=[$SG_ID]}" \
               --overrides "$OVERRIDES" \
+              --started-by "ferlease-$RELEASE" \
               --query 'tasks[0].taskArn' \
               --output text)
             TASK_ARNS+=("$ARN")
@@ -284,12 +325,15 @@ jobs:
             --launch-type FARGATE \
             --network-configuration "awsvpcConfiguration={subnets=[subnet-07cac0f9ab50d76ed,subnet-0be9fa70291f7c86c],assignPublicIp=DISABLED,securityGroups=[$SG_ID]}" \
             --overrides "$AGG_OVERRIDES" \
+            --started-by "ferlease-$RELEASE/aggregator" \
             --query 'tasks[0].taskArn' \
             --output text | xargs -I{} echo "Aggregator launched: {}"
 
   ferlease-teardown:
+    needs: cypress-stop
+    # `!cancelled()`: tear down even when the stop failed or was skipped
     if: >
-      github.event.action == 'closed' &&
+      !cancelled() && github.event.action == 'closed' &&
       (startsWith(github.event.pull_request.head.ref, 'feat/') || startsWith(github.event.pull_request.head.ref, 'fix/') ||
        startsWith(github.event.pull_request.head.ref, 'refactor/') || startsWith(github.event.pull_request.head.ref, 'perf/'))
     runs-on: ubuntu-latest
