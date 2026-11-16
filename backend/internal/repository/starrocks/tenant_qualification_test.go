@@ -242,7 +242,7 @@ func Test_Germline_SNV_GetOccurrences_Interpretation_Counts_Read_Only_The_Bound_
 			return err
 		})
 
-		assert.Contains(t, sql, "COUNT(1) AS classification_count FROM tenant1_tenant.interpretation_germline WHERE")
+		assert.Contains(t, sql, "FROM tenant1_tenant.interpretation_germline GROUP BY")
 		assert.NotContains(t, sql, "radiant_jdbc.public.interpretation_germline")
 		assert.NotContains(t, sql, "tenant2_tenant")
 	})
@@ -259,7 +259,7 @@ func Test_Somatic_SNV_GetOccurrences_Interpretation_Counts_Read_Only_The_Bound_T
 			return err
 		})
 
-		assert.Contains(t, sql, "COUNT(1) AS classification_count FROM tenant1_tenant.interpretation_somatic WHERE")
+		assert.Contains(t, sql, "FROM tenant1_tenant.interpretation_somatic GROUP BY")
 		assert.NotContains(t, sql, "radiant_jdbc.public.interpretation_somatic")
 		assert.NotContains(t, sql, "tenant2_tenant")
 	})

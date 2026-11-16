@@ -683,3 +683,28 @@ func Test_Somatic_SNV_GetOccurrences_Interpretation_Classification_Counts_Add_Up
 		assert.True(t, found)
 	})
 }
+
+func Test_Somatic_SNV_GetOccurrences_Unclassified_Interpretation_Sets_Has_Interpretation_And_Leaves_Counts_Unchanged(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		err := env.Postgres.Exec(`INSERT INTO interpretation_somatic (sequencing_id, case_id, locus_id, transcript_id, oncogenicity, tenant_code) VALUES
+			('74', '2', '1000', 'T001', '', ?), ('74', '2', '1000', 'T002', NULL, ?)`,
+			types.DefaultTenantCode, types.DefaultTenantCode).Error
+		assert.NoError(t, err)
+
+		query, err := types.NewOccurrenceListQueryFromSqon(SomaticSNVQueryConfigForTest, allSomaticSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 2, 74, 74, query)
+		assert.NoError(t, err)
+		found := false
+		for _, o := range occurrences {
+			if o.LocusId == "1000" {
+				found = true
+				assert.True(t, o.HasInterpretation)
+				assert.Equal(t, types.JsonMap[string, int]{"oncogenic": 2, "likely_oncogenic": 1}, o.InterpretationClassificationCounts)
+			}
+		}
+		assert.True(t, found)
+	})
+}
