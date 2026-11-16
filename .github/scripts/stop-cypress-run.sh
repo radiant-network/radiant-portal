@@ -31,6 +31,9 @@ else
   for arn in $AGGREGATOR $SHARDS; do
     aws ecs stop-task --cluster "$CLUSTER" --task "$arn" --reason "$REASON" --query 'task.taskArn' --output text
   done
+  # stop-task returns at once, and a stopping shard still uploads its files: wait, so that no file lands after a cleanup
+  # shellcheck disable=SC2086
+  aws ecs wait tasks-stopped --cluster "$CLUSTER" --tasks $AGGREGATOR $SHARDS
 
   PAYLOAD=$(jq -cn --arg title "$TITLE" --arg run "$STOPPED_RUN" --arg reason "$REASON" \
     '{attachments: [{title: $title, text: "Test has been stopped for \($run)\nReason: \($reason)", color: "warning"}]}')
