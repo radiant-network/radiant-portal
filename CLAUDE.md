@@ -95,6 +95,7 @@ Tests in `cypress/` run against a live QA environment:
 - **Pattern**: Page Object Model (`cypress/pom/pages/`)
 - **Categories**: `Connexion`, `Cases`, `CaseEntity`, `VariantEntity`, `Files`
 - **API tests**: `cypress/api/` with request/response fixtures
+- **Account**: each CI run logs in with one account of a pool (see the README). Compare with `cy.getUsername()`, never a fixed email. The reference saved filters come from `cypress/fixtures/reference-saved-filters.json`.
 
 ### Documentation Site
 

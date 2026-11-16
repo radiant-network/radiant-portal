@@ -24,10 +24,20 @@ jobs:
     steps:
       - name: Extract release
         id: release
+        env:
+          BRANCH: ${{ github.head_ref }}
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         run: |
-          branch="${{ github.head_ref }}"
-          release="${branch#*/}"
+          release="${BRANCH#*/}"
           release=$(echo "$release" | tr '[:upper:]' '[:lower:]')
+          # Kubernetes caps the Ferlease names, radiant-portal-ui-release-<release>, at 63 characters
+          if [ "${#release}" -gt 37 ]; then
+            MESSAGE="Branch ${BRANCH} has ${#release} characters after the /, over the limit of 37: Kubernetes cannot deploy its Ferlease. Open the PR from a shorter branch."
+            echo "::error::$MESSAGE"
+            PAYLOAD=$(jq -cn --arg text "$MESSAGE" '{attachments: [{title: "Ferlease - Release Failed (Radiant) 🚨", text: $text, color: "danger"}]}')
+            curl -sf -X POST "$SLACK_WEBHOOK" -H 'Content-Type: application/json' -d "$PAYLOAD" || echo "Slack post failed"
+            exit 1
+          fi
           echo "value=${release}" >> "$GITHUB_OUTPUT"
           echo "url=https://portail-${release}.dev.qlin.aws.sante.quebec" >> "$GITHUB_OUTPUT"
 
@@ -354,6 +364,36 @@ jobs:
             --started-by "ferlease-$RELEASE/aggregator" \
             --query 'tasks[0].taskArn' \
             --output text | xargs -I{} echo "Aggregator launched: {}"
+
+  cypress-cleanup:
+    needs: cypress-stop
+    # Also when the stop was skipped (no `cypress` label), but not after a failed one: its tasks may still write
+    if: >
+      !cancelled() && github.event.action == 'closed' && needs.cypress-stop.result != 'failure' &&
+      (startsWith(github.event.pull_request.head.ref, 'feat/') || startsWith(github.event.pull_request.head.ref, 'fix/') ||
+       startsWith(github.event.pull_request.head.ref, 'refactor/') || startsWith(github.event.pull_request.head.ref, 'perf/'))
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: arn:aws:iam::311752058468:role/qlin-ferlease-cypress
+          aws-region: ca-central-1
+
+      - name: Delete the Cypress artifacts of the PR
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          RELEASE=$(echo "${BRANCH#*/}" | tr '[:upper:]' '[:lower:]')
+          # These prefixes hold the account locks and the nightly runs, and an empty one the whole bucket
+          case "$RELEASE" in
+            "" | _locks | nightly-*) echo "::error::Refusing to delete the prefix of release '$RELEASE'" && exit 1 ;;
+          esac
+          aws s3 rm "s3://qlin-dev-cypress-artifacts/$RELEASE/" --recursive --only-show-errors
 
   ferlease-teardown:
     needs: cypress-stop
