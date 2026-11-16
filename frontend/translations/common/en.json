@@ -2733,6 +2733,8 @@
         "cnv": "CNV",
         "cnv_to": "CNV (TO)",
         "latest": "Latest",
+        "no_cnv_tooltip": "No CNVs for this sample",
+        "no_snv_tooltip": "No SNVs for this sample",
         "sample_submitter_id": "Submitter sample ID:",
         "sample_id": "Sample ID",
         "select_task_label": "Pipeline run producing aligned reads and called variants.",

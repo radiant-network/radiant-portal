@@ -683,3 +683,77 @@ def add_prenatal_examples(g, pg, sr, ids, org):
 
     cid, _, _, (fetus,) = case(5, "1994-09-08", [("alive", "female", "due")], fetus_affected=True)
     phenotypes(cid, fetus, "antenatal", ["HP:0001562", "HP:0004325"], ["HP:0000003"])
+
+
+def add_variants_toggle_cases(g, pg, sr, ids, org):
+    """Three dedicated germline cases that exercise the Variants-tab visibility and the SNV/CNV
+    toggle behavior (SJRA-1517):
+      SNV-ONLY-TEST stages only radiant_germline_annotation (CNV toggle disabled),
+      CNV-ONLY-TEST stages only radiant_germline_cnv_annotation (SNV toggle disabled),
+      NO-VARIANTS-TEST stages only alignment_germline_variant_calling (no annotation task), so
+        has_variants is false and the Variants tab does not render at all.
+    The two annotated cases also get one occurrence of their kind so the enabled tab has content."""
+    rng = random.Random(h("genomics", "variants-toggle"))
+
+    def nid(kind):
+        ids[kind] += 1
+        return ids[kind]
+
+    made = CREATED + dt.timedelta(days=2)
+
+    def make_case(case_code, task_type, pipeline):
+        pid = nid("patient")
+        pg["patient"].append([pid, case_code, "mrn", org, "female", "1985-03-14", "alive",
+                              pcx.FIRST_F[h("given", case_code) % len(pcx.FIRST_F)],
+                              pcx.LAST[h("family", case_code) % len(pcx.LAST)]])
+        blood = nid("sample")
+        pg["sample"].append([blood, "blood", None, None, "normal", f"S{100000 + blood}", pid, org, None])
+        dna = nid("sample")
+        pg["sample"].append([dna, "dna", blood, None, "normal", f"S{100000 + dna}", pid, org, None])
+        sq = nid("seq")
+        pg["sequencing_experiment"].append([sq, dna, "completed", f"{case_code}-N", "Broad",
+                                            f"{2400 + sq}", f"RUN{sq:05d}",
+                                            (made - dt.timedelta(days=5)).date().isoformat(),
+                                            made, made, "wgs", "short_read", "illumina"])
+        cid = nid("case")
+        pg["cases"].append([cid, pid, "CBTN-GERM", "completed", "DGD", MONDO["glioma"][0],
+                            made, made + dt.timedelta(days=10), "routine", "germline", "postnatal",
+                            "Dr. Jena Lilly", org, case_code, None])
+        pg["family"].append([nid("family"), cid, pid, "proband", "affected", None])
+        pg["case_has_sequencing_experiment"].append([sq, cid])
+        tid = nid("task")
+        pg["task"].append([tid, task_type, pipeline, "2.1.0", "GRCh38", made])
+        pg["task_context"].append([tid, sq, cid])
+        sr["staging_sequencing_experiment"].append([cid, sq, tid, task_type, PART, "germline",
+                                                    f"{case_code}-N", str(pid), "wgs", "normal",
+                                                    made, made, made + dt.timedelta(hours=6)])
+        return cid, sq, tid
+
+    snv_cid, snv_seq, snv_task = make_case("SNV-ONLY-TEST", "radiant_germline_annotation", "radiant-germline")
+    v = rng.choice(g.common)
+    total = rng.randrange(30, 60)
+    alt = rng.randrange(int(total * 0.35), int(total * 0.6))
+    sr["germline__snv__occurrence"].append(germline_snv(rng, snv_seq, snv_task, v, False, total, alt,
+                                                        False, False, None, None))
+
+    cnv_cid, cnv_seq, _ = make_case("CNV-ONLY-TEST", "radiant_germline_cnv_annotation", "radiant-germline-cnv")
+    # Germline CNV occurrences hang off the alignment task, not the annotation task.
+    cnv_align_task = nid("task")
+    pg["task"].append([cnv_align_task, "alignment_germline_variant_calling", "Dragen", "4.4.4", "GRCh38", made])
+    pg["task_context"].append([cnv_align_task, cnv_seq, None])
+    symbol = rng.choice(BACKGROUND)
+    chrom, gs, ge, *_ = GENES[symbol]
+    start = rng.randrange(gs, ge - 20000)
+    length = rng.randrange(2000, 20000)
+    kind = rng.choice(["DEL", "DUP"])
+    cnv_id = nid("cnv")
+    sr["germline__cnv__occurrence"].append([PART, cnv_seq, cnv_align_task, cnv_id, "CNV-ONLY-TEST-N",
+                                            chrom, start, start + length, kind, length,
+                                            f"DRAGEN:{kind}:{chrom}:{start}-{start + length}",
+                                            round(rng.uniform(40, 150), 1), [0, 1], "PASS",
+                                            1 if kind == "DEL" else 3,
+                                            [0, rng.randrange(5, 30)], round(rng.uniform(0.4, 1.6), 2),
+                                            kind, length, length, [0, 0], [0, 0], [symbol], 1, 0,
+                                            round(rng.uniform(0.01, 0.2), 4)])
+
+    make_case("NO-VARIANTS-TEST", "alignment_germline_variant_calling", "Dragen")
