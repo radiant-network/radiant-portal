@@ -1,9 +1,10 @@
 /* eslint-disable no-use-before-define */
 import { MemoryRouter, Route, Routes } from 'react-router';
-import type { Meta, StoryObj } from '@storybook/react-vite';
+import type { Decorator, Meta, StoryObj } from '@storybook/react-vite';
 import axios from 'axios';
 import { delay, http, HttpResponse } from 'msw';
 import { mocked } from 'storybook/test';
+import { SWRConfig } from 'swr';
 
 import { SavedFilterType } from '@/api/index';
 import type { TableColumnDef } from '@/components/base/data-table/data-table';
@@ -15,6 +16,7 @@ import {
 import QueryBuilder from '@/components/base/query-builder/query-builder';
 import QueryBuilderDataTable from '@/components/base/query-builder/query-builder-data-table';
 import { RangeOperators } from '@/components/base/query-builder/type';
+import { Toaster } from '@/components/base/shadcn/sonner';
 import { ApplicationId, ConfigProvider, FilterTypes, type PortalConfig } from '@/components/cores/applications-config';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
@@ -358,6 +360,112 @@ export const Default: Story = {
     defaultSidebarOpen: true,
   },
   render: args => <QueryBuilderStory args={args} title="Default" />,
+};
+
+// Favorites are cached per app; a fresh cache stops one story's favorites leaking into the next
+const withFreshSwrCache: Decorator = Story => (
+  <SWRConfig value={{ provider: () => new Map() }}>
+    <Story />
+  </SWRConfig>
+);
+
+export const FacetFavorites: Story = {
+  decorators: [withFreshSwrCache],
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get('*/users/saved_filters', () => HttpResponse.json([])),
+        http.get(userPreferenceApi, ({ params }: any) => {
+          if (params.key === `facet-favorites-${ApplicationId.germline_cnv_occurrence}`) {
+            return HttpResponse.json({ key: params.key, content: { favorites: ['age', 'lastName'] } });
+          }
+          return new HttpResponse(null, { status: 404 });
+        }),
+        http.post(userPreferenceApi, async ({ request }) => HttpResponse.json(await request.json())),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.germline_cnv_occurrence,
+    children: <></>, // unused
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilderStory
+      args={args}
+      title="Facet favorites"
+      description="Hover a facet header and click the star. Favorites are listed under the star at the top of the rail, in sidebar order."
+    />
+  ),
+};
+
+export const FacetFavoritesSaveError: Story = {
+  decorators: [withFreshSwrCache],
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get('*/users/saved_filters', () => HttpResponse.json([])),
+        http.get(userPreferenceApi, () => new HttpResponse(null, { status: 404 })),
+        http.post(userPreferenceApi, () => new HttpResponse(null, { status: 500 })),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.germline_cnv_occurrence,
+    children: <></>, // unused
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <>
+      <Toaster position="top-right" />
+      <QueryBuilderStory
+        args={args}
+        title="Facet favorites – save error"
+        description="Saving always fails: the star reverts and an error toast is shown."
+      />
+    </>
+  ),
+};
+
+export const FacetFavoritesLoading: Story = {
+  decorators: [withFreshSwrCache],
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get('*/users/saved_filters', () => HttpResponse.json([])),
+        http.get(userPreferenceApi, async ({ params }: any) => {
+          if (params.key === `facet-favorites-${ApplicationId.germline_cnv_occurrence}`) {
+            await delay('infinite');
+          }
+          return new HttpResponse(null, { status: 404 });
+        }),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.germline_cnv_occurrence,
+    children: <></>, // unused
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilderStory
+      args={args}
+      title="Facet favorites – loading"
+      description="Favorites never finish loading: the panel shows a skeleton instead of the empty state."
+    />
+  ),
 };
 
 export const Multiselect: Story = {
