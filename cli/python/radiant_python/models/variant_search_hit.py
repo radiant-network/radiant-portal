@@ -30,9 +30,10 @@ class VariantSearchHit(BaseModel):
     clinvar_id: Optional[StrictStr] = None
     hgvsg: StrictStr
     locus: StrictStr
+    locus_id: StrictStr
     rsnumber: Optional[StrictStr] = None
     symbol: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["aa_change", "clinvar_id", "hgvsg", "locus", "rsnumber", "symbol"]
+    __properties: ClassVar[List[str]] = ["aa_change", "clinvar_id", "hgvsg", "locus", "locus_id", "rsnumber", "symbol"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -89,6 +90,7 @@ class VariantSearchHit(BaseModel):
             "clinvar_id": obj.get("clinvar_id"),
             "hgvsg": obj.get("hgvsg"),
             "locus": obj.get("locus"),
+            "locus_id": obj.get("locus_id"),
             "rsnumber": obj.get("rsnumber"),
             "symbol": obj.get("symbol")
         })

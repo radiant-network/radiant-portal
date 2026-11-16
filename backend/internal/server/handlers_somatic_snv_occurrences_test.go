@@ -109,7 +109,7 @@ func (m *MockSomaticSNVOccurrencesRepository) GetOccurrences(context.Context, in
 }
 
 func (m *MockSomaticSNVOccurrencesRepository) SearchOccurrencesByVariantIdentifier(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
-	return []types.VariantSearchHit{{Hgvsg: "chr7:g.140753336A>T", Locus: "7-140753336-A-T", Symbol: "BRAF", AaChange: "p.Val600Glu"}}, nil
+	return []types.VariantSearchHit{{LocusId: "-7838018437138300928", Hgvsg: "chr7:g.140753336A>T", Locus: "7-140753336-A-T", Symbol: "BRAF", AaChange: "p.Val600Glu"}}, nil
 }
 
 func Test_SomaticSNVListHandler(t *testing.T) {
@@ -422,7 +422,7 @@ func Test_SomaticSNVSearchHandler(t *testing.T) {
 		"status": "found",
 		"matched_field": "hgvsg",
 		"normalized_input": "chr7:g.140753336A>T",
-		"variants": [{"hgvsg": "chr7:g.140753336A>T", "locus": "7-140753336-A-T", "symbol": "BRAF", "aa_change": "p.Val600Glu"}]
+		"variants": [{"locus_id": "-7838018437138300928", "hgvsg": "chr7:g.140753336A>T", "locus": "7-140753336-A-T", "symbol": "BRAF", "aa_change": "p.Val600Glu"}]
 	}`, w.Body.String())
 }
 

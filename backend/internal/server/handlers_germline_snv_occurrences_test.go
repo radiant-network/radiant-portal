@@ -101,8 +101,8 @@ func (m *MockRepository) GetExpandedOccurrence(context.Context, int, int, int, i
 
 func (m *MockRepository) SearchOccurrencesByVariantIdentifier(context.Context, int, int, int, types.VariantIdentifier) ([]types.VariantSearchHit, error) {
 	return []types.VariantSearchHit{
-		{Hgvsg: "chr11:g.5227002T>A", Locus: "11-5227002-T-A", Rsnumber: "rs334", ClinvarId: "15333", Symbol: "HBB", AaChange: "p.Glu7Val"},
-		{Hgvsg: "chr11:g.5227002T>G", Locus: "11-5227002-T-G", Rsnumber: "rs334"},
+		{LocusId: "-6051434786386345984", Hgvsg: "chr11:g.5227002T>A", Locus: "11-5227002-T-A", Rsnumber: "rs334", ClinvarId: "15333", Symbol: "HBB", AaChange: "p.Glu7Val"},
+		{LocusId: "-6051434786252128256", Hgvsg: "chr11:g.5227002T>G", Locus: "11-5227002-T-G", Rsnumber: "rs334"},
 	}, nil
 }
 
@@ -654,8 +654,8 @@ func Test_OccurrencesSearchHandler(t *testing.T) {
 		"matched_field": "rsnumber",
 		"normalized_input": "rs334",
 		"variants": [
-			{"hgvsg": "chr11:g.5227002T>A", "locus": "11-5227002-T-A", "rsnumber": "rs334", "clinvar_id": "15333", "symbol": "HBB", "aa_change": "p.Glu7Val"},
-			{"hgvsg": "chr11:g.5227002T>G", "locus": "11-5227002-T-G", "rsnumber": "rs334"}
+			{"locus_id": "-6051434786386345984", "hgvsg": "chr11:g.5227002T>A", "locus": "11-5227002-T-A", "rsnumber": "rs334", "clinvar_id": "15333", "symbol": "HBB", "aa_change": "p.Glu7Val"},
+			{"locus_id": "-6051434786252128256", "hgvsg": "chr11:g.5227002T>G", "locus": "11-5227002-T-G", "rsnumber": "rs334"}
 		]
 	}`, w.Body.String())
 }

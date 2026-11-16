@@ -5441,6 +5441,8 @@ components:
           type: string
         locus:
           type: string
+        locus_id:
+          type: string
         rsnumber:
           type: string
         symbol:
@@ -5448,6 +5450,7 @@ components:
       required:
       - hgvsg
       - locus
+      - locus_id
       type: object
     VariantSearchResult:
       description: Result of a search by variant identifier in a run

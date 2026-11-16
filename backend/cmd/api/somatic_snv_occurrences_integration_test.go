@@ -484,7 +484,7 @@ func Test_Somatic_SNV_Search(t *testing.T) {
 			"status": "found",
 			"matched_field": "clinvar_id",
 			"normalized_input": "11111",
-			"variants": [{"hgvsg": "hgvsg1", "locus": "locus1", "rsnumber": "rs111111111", "clinvar_id": "11111", "symbol": "BRAF", "aa_change": "p.Arg19His"}]
+			"variants": [{"locus_id": "1000", "hgvsg": "hgvsg1", "locus": "locus1", "rsnumber": "rs111111111", "clinvar_id": "11111", "symbol": "BRAF", "aa_change": "p.Arg19His"}]
 		}`, w.Body.String())
 	})
 }
