@@ -43,18 +43,10 @@ jobs:
       - name: Stop the nightly in progress
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_CYPRESS_WEBHOOK }}
+          LOCK_BUCKET: qlin-dev-cypress-artifacts
+          LOCK_PREFIX: _locks/cypress-accounts/
           REASON: ${{ inputs.stop_only && format('Stopped on demand by {0}', github.actor) || 'Replaced by a new nightly' }}
         run: bash .github/scripts/stop-cypress-run.sh cypress-nightly "Radiant - Cypress run stopped ⏹️" "the nightly" "$REASON"
-
-      - name: Notify Slack launch
-        if: ${{ github.event_name == 'workflow_dispatch' && !inputs.stop_only }}
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_CYPRESS_WEBHOOK }}
-        run: |
-          curl -sf -X POST "$SLACK_WEBHOOK" \
-            -H 'Content-Type: application/json' \
-            -d '{"attachments":[{"title":"Radiant QA - Cypress Launch Attempt ⚙️","text":"Cypress tests are starting ✈️ on QA (manual trigger)","color":"good"}]}' \
-            || echo "Slack post failed"
 
       - name: Upload source to S3
         if: ${{ !inputs.stop_only }}
@@ -67,12 +59,36 @@ jobs:
           aws s3 cp /tmp/cypress-source.tar.gz \
             "s3://qlin-dev-cypress-artifacts/$RUN_ID/source.tar.gz"
 
+      - name: Reserve a test account
+        id: account
+        if: ${{ !inputs.stop_only }}
+        env:
+          LOCK_BUCKET: qlin-dev-cypress-artifacts
+          LOCK_PREFIX: _locks/cypress-accounts/
+          ECS_CLUSTER: pipelines
+          SLACK_WEBHOOK: ${{ secrets.SLACK_CYPRESS_WEBHOOK }}
+          SLACK_TITLE: Radiant - Cypress
+        run: |
+          USERNAME=$(bash .github/scripts/cypress-account.sh reserve cypress-nightly)
+          echo "username=$USERNAME" >> "$GITHUB_OUTPUT"
+
+      - name: Notify Slack launch
+        if: ${{ github.event_name == 'workflow_dispatch' && !inputs.stop_only }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_CYPRESS_WEBHOOK }}
+          ACCOUNT: ${{ steps.account.outputs.username }}
+        run: |
+          curl -sf -X POST "$SLACK_WEBHOOK" \
+            -H 'Content-Type: application/json' \
+            -d "{\"attachments\":[{\"title\":\"Radiant QA - Cypress Launch Attempt ⚙️\",\"text\":\"Cypress tests are starting ✈️ on QA (manual trigger), with the test account ${ACCOUNT}\",\"color\":\"good\"}]}" \
+            || echo "Slack post failed"
+
       - name: Launch shards and aggregator
         if: ${{ !inputs.stop_only }}
         env:
           RUN_ID: ${{ steps.run.outputs.value }}
           CYPRESS_BASE_URL: ${{ inputs.base_url || 'https://portail.dev.qlin.aws.sante.quebec/' }}
-          CYPRESS_USER_USERNAME: ${{ secrets.CYPRESS_USER_USERNAME }}
+          CYPRESS_USER_USERNAME: ${{ steps.account.outputs.username }}
           CYPRESS_USER_PASSWORD: ${{ secrets.CYPRESS_USER_PASSWORD }}
           SLACK_WEBHOOK: ${{ secrets.SLACK_CYPRESS_WEBHOOK }}
         run: |
@@ -164,6 +180,9 @@ jobs:
 
           AGGREGATOR_CMD='
           set -e
+          # Frees the test account however the aggregator ends, so the next run can take it at once
+          release_account() { [ "$(aws s3 cp "$ACCOUNT_LOCK" - 2>/dev/null | cut -d " " -f1)" = "$RUN_KEY" ] && aws s3 rm "$ACCOUNT_LOCK" > /dev/null; true; }
+          trap release_account EXIT
           ARNS=($SHARD_TASK_ARNS)
           SHARDS_COUNT=$SHARD_COUNT
           while true; do
@@ -235,6 +254,7 @@ jobs:
           [ -n "$COMBINED_ZURL" ] && BODY_PARTS+=("Download all screenshots as a zip file: <${COMBINED_ZURL}|Download>")
           [ -n "$COMBINED_RURL" ] && BODY_PARTS+=("Report HTML: <${COMBINED_RURL}|View Report>")
           [ -n "$COMBINED_XURL" ] && BODY_PARTS+=("Report XML: <${COMBINED_XURL}|View Results>")
+          BODY_PARTS+=("Test account: $ACCOUNT")
           TEXT=$(printf "%s\n" "${BODY_PARTS[@]}")
           PAYLOAD=$(node -e "process.stdout.write(JSON.stringify({attachments:[{title:process.argv[1],text:process.argv[2],color:process.argv[3]}]}))" "$TITLE" "$TEXT" "$COLOR")
           curl -sf -X POST "$SLACK_WEBHOOK" -H "Content-Type: application/json" -d "$PAYLOAD" || true
@@ -246,11 +266,16 @@ jobs:
             --arg arns "${TASK_ARNS[*]}" \
             --arg count "${#TASK_ARNS[@]}" \
             --arg cmd "$AGGREGATOR_CMD" \
+            --arg account "$CYPRESS_USER_USERNAME" \
+            --arg account_lock "s3://qlin-dev-cypress-artifacts/_locks/cypress-accounts/$CYPRESS_USER_USERNAME" \
             '{containerOverrides:[{name:"ferlease-cypress",command:[$cmd],environment:[
               {name:"RELEASE",value:$release},
               {name:"SLACK_WEBHOOK",value:$slack},
               {name:"SHARD_TASK_ARNS",value:$arns},
-              {name:"SHARD_COUNT",value:$count}
+              {name:"SHARD_COUNT",value:$count},
+              {name:"RUN_KEY",value:"cypress-nightly"},
+              {name:"ACCOUNT",value:$account},
+              {name:"ACCOUNT_LOCK",value:$account_lock}
             ]}]}')
 
           aws ecs run-task \

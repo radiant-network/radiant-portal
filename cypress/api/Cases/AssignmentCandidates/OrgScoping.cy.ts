@@ -35,8 +35,10 @@ describe.skip('Cases - Assignment Candidates - Org scoping', () => {
     const emailsCase = responseCase.body.map((candidate: { email: string }) => candidate.email);
     const emailsOtherLab = responseOtherLab.body.map((candidate: { email: string }) => candidate.email);
 
-    expect(emailsCase).to.include(dataCandidates.self.email);
-    expect(emailsOtherLab).to.include(dataCandidates.self.email);
+    cy.getUsername().then(email => {
+      expect(emailsCase).to.include(email);
+      expect(emailsOtherLab).to.include(email);
+    });
   });
 
   it('Search is scoped to the case lab', () => {

@@ -27,10 +27,12 @@ describe('Cases - Assignment Candidates - Search', () => {
   it('Search by email', () => {
     const Auth = Cypress.expose('globalData').Authorization;
 
-    cy.apiCallInTenant(dataCandidates.tenant, 'GET', `cases/${dataCandidates.case}/assignment_candidates?search=${encodeURIComponent(dataCandidates.self.email)}`, '', Auth.token).then(res => {
-      expect(res.status).to.eq(200);
-      cy.validateItemCount(res, 1);
-      expect(res.body[0].email).to.eq(dataCandidates.self.email);
+    cy.getUsername().then(email => {
+      cy.apiCallInTenant(dataCandidates.tenant, 'GET', `cases/${dataCandidates.case}/assignment_candidates?search=${encodeURIComponent(email)}`, '', Auth.token).then(res => {
+        expect(res.status).to.eq(200);
+        cy.validateItemCount(res, 1);
+        expect(res.body[0].email).to.eq(email);
+      });
     });
   });
 

@@ -1,0 +1,347 @@
+[
+  {
+    "name": "Cypress_All_Variants",
+    "type": "germline_cnv_occurrence",
+    "queries": [
+      {
+        "id": "1ef3c669-295d-477b-96e9-e8b05c4f0252",
+        "op": "and",
+        "content": [
+          {
+            "op": ">=",
+            "content": {
+              "field": "start",
+              "value": [0]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_QB_1Pill",
+    "type": "germline_cnv_occurrence",
+    "queries": [
+      {
+        "id": "ec1976fc-64d5-48a8-9f19-23132ee56bce",
+        "op": "and",
+        "content": [
+          {
+            "op": "in",
+            "content": {
+              "field": "chromosome",
+              "value": ["1"]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_QB_1NumericalPill",
+    "type": "germline_cnv_occurrence",
+    "queries": [
+      {
+        "id": "e4bbffac-e532-44a8-9122-3da8cac04dd9",
+        "op": "and",
+        "content": [
+          {
+            "op": "between",
+            "content": {
+              "field": "start",
+              "value": [1, 1]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_QB_2Pills",
+    "type": "germline_cnv_occurrence",
+    "queries": [
+      {
+        "id": "cbced645-457a-4280-aa6b-b466e7f1fb5a",
+        "op": "and",
+        "content": [
+          {
+            "op": "in",
+            "content": {
+              "field": "chromosome",
+              "value": ["1"]
+            }
+          },
+          {
+            "op": "in",
+            "content": {
+              "field": "type",
+              "value": ["GAIN"]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_QB_2Queries",
+    "type": "germline_cnv_occurrence",
+    "queries": [
+      {
+        "id": "ddf10bb1-03af-4261-9162-e88a35a5ad43",
+        "op": "and",
+        "content": [
+          {
+            "op": "in",
+            "content": {
+              "field": "chromosome",
+              "value": ["1"]
+            }
+          }
+        ]
+      },
+      {
+        "id": "769efe95-d01b-4f64-8f33-78bbd60c8af6",
+        "op": "and",
+        "content": [
+          {
+            "op": "in",
+            "content": {
+              "field": "type",
+              "value": ["GAIN"]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_All_Variants",
+    "type": "germline_snv_occurrence",
+    "queries": [
+      {
+        "id": "ca7e5b50-91be-4f19-8eda-415bc7771ff1",
+        "op": "and",
+        "content": [
+          {
+            "op": ">=",
+            "content": {
+              "field": "start",
+              "value": [0]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_QB_1Pill",
+    "type": "germline_snv_occurrence",
+    "queries": [
+      {
+        "id": "530ac366-e1da-4567-b9e6-973b784a29f2",
+        "op": "and",
+        "content": [
+          {
+            "op": "in",
+            "content": {
+              "field": "chromosome",
+              "value": ["1"]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_QB_1NumericalPill",
+    "type": "germline_snv_occurrence",
+    "queries": [
+      {
+        "id": "2d0d92d2-0fec-4316-a8b1-28226829547d",
+        "op": "and",
+        "content": [
+          {
+            "op": "between",
+            "content": {
+              "field": "start",
+              "value": [1, 1]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_QB_2Pills",
+    "type": "germline_snv_occurrence",
+    "queries": [
+      {
+        "id": "93880d06-228e-4203-850a-ef864b22ca67",
+        "op": "and",
+        "content": [
+          {
+            "op": "in",
+            "content": {
+              "field": "chromosome",
+              "value": ["1"]
+            }
+          },
+          {
+            "op": "in",
+            "content": {
+              "field": "variant_class",
+              "value": ["SNV"]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_QB_2Queries",
+    "type": "germline_snv_occurrence",
+    "queries": [
+      {
+        "id": "86cc6c21-7046-478e-a292-95de7b05b680",
+        "op": "and",
+        "content": [
+          {
+            "op": "in",
+            "content": {
+              "field": "chromosome",
+              "value": ["1"]
+            }
+          }
+        ]
+      },
+      {
+        "id": "1d2eec5b-5893-4de2-aa6e-4358a26dd1aa",
+        "op": "and",
+        "content": [
+          {
+            "op": "in",
+            "content": {
+              "field": "variant_class",
+              "value": ["SNV"]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_All_Variants",
+    "type": "somatic_snv_occurrence",
+    "queries": [
+      {
+        "id": "98bbb29b-2586-49ea-83c1-8b5a3f529275",
+        "op": "and",
+        "content": [
+          {
+            "op": ">=",
+            "content": {
+              "field": "start",
+              "value": [0]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_QB_1Pill",
+    "type": "somatic_snv_occurrence",
+    "queries": [
+      {
+        "id": "b4a2a91a-c0aa-43da-a709-dfc0c35aa7f5",
+        "op": "and",
+        "content": [
+          {
+            "op": "in",
+            "content": {
+              "field": "chromosome",
+              "value": ["1"]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_QB_1NumericalPill",
+    "type": "somatic_snv_occurrence",
+    "queries": [
+      {
+        "id": "e272b885-f29d-4718-893b-1052bfe4eec7",
+        "op": "and",
+        "content": [
+          {
+            "op": "between",
+            "content": {
+              "field": "start",
+              "value": [1, 1]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_QB_2Pills",
+    "type": "somatic_snv_occurrence",
+    "queries": [
+      {
+        "id": "56eae1f9-397b-4c01-ac52-438529830424",
+        "op": "and",
+        "content": [
+          {
+            "op": "in",
+            "content": {
+              "field": "chromosome",
+              "value": ["1"]
+            }
+          },
+          {
+            "op": "in",
+            "content": {
+              "field": "variant_class",
+              "value": ["SNV"]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Cypress_QB_2Queries",
+    "type": "somatic_snv_occurrence",
+    "queries": [
+      {
+        "id": "1eee03d3-d106-41f6-9924-6dbae8a62aa7",
+        "op": "and",
+        "content": [
+          {
+            "op": "in",
+            "content": {
+              "field": "chromosome",
+              "value": ["1"]
+            }
+          }
+        ]
+      },
+      {
+        "id": "8e1f8837-0ad9-4ffb-9788-16315d6871c2",
+        "op": "and",
+        "content": [
+          {
+            "op": "in",
+            "content": {
+              "field": "variant_class",
+              "value": ["SNV"]
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

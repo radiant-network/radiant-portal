@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Stop the Cypress run that a workflow started on ECS with --started-by <key>, then post the reason to Slack.
-# Usage: stop-cypress-run.sh <key> <slack title> <stopped run> <reason>, with SLACK_WEBHOOK set. Does nothing when no run is in progress.
+# Stop the Cypress run that a workflow started on ECS with --started-by <key>, post the reason to Slack, and free its test account.
+# Usage: stop-cypress-run.sh <key> <slack title> <stopped run> <reason>, with SLACK_WEBHOOK, LOCK_BUCKET and LOCK_PREFIX set.
 set -euo pipefail
 
 KEY=$1
@@ -26,14 +26,16 @@ AGGREGATOR=$(running_tasks "$KEY/aggregator")
 SHARDS=$(running_tasks "$KEY")
 if [ -z "$AGGREGATOR$SHARDS" ]; then
   echo "No Cypress run in progress for $KEY"
-  exit 0
+else
+  # The aggregator first: it posts the results as soon as the shards have stopped
+  for arn in $AGGREGATOR $SHARDS; do
+    aws ecs stop-task --cluster "$CLUSTER" --task "$arn" --reason "$REASON" --query 'task.taskArn' --output text
+  done
+
+  PAYLOAD=$(jq -cn --arg title "$TITLE" --arg run "$STOPPED_RUN" --arg reason "$REASON" \
+    '{attachments: [{title: $title, text: "Test has been stopped for \($run)\nReason: \($reason)", color: "warning"}]}')
+  curl -sf -X POST "$SLACK_WEBHOOK" -H 'Content-Type: application/json' -d "$PAYLOAD" || echo "Slack post failed"
 fi
 
-# The aggregator first: it posts the results as soon as the shards have stopped
-for arn in $AGGREGATOR $SHARDS; do
-  aws ecs stop-task --cluster "$CLUSTER" --task "$arn" --reason "$REASON" --query 'task.taskArn' --output text
-done
-
-PAYLOAD=$(jq -cn --arg title "$TITLE" --arg run "$STOPPED_RUN" --arg reason "$REASON" \
-  '{attachments: [{title: $title, text: "Test has been stopped for \($run)\nReason: \($reason)", color: "warning"}]}')
-curl -sf -X POST "$SLACK_WEBHOOK" -H 'Content-Type: application/json' -d "$PAYLOAD" || echo "Slack post failed"
+# A stopped aggregator never frees the account itself
+bash "$(dirname "$0")/cypress-account.sh" release "$KEY"

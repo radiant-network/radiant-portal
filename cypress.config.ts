@@ -65,7 +65,15 @@ export default defineConfig({
   e2e: {
     setupNodeEvents(on, config) {
       const cachedDataPath = path.join(__dirname, "cypress/.cached-data.json");
+      let referenceSavedFiltersChecked = false;
       on("task", {
+        referenceSavedFiltersChecked() {
+          return referenceSavedFiltersChecked;
+        },
+        markReferenceSavedFiltersChecked() {
+          referenceSavedFiltersChecked = true;
+          return null;
+        },
         checkCachedData() {
           return fs.existsSync(cachedDataPath);
         },

@@ -25,12 +25,14 @@ describe('Cases - Assignment Candidates - Result', () => {
   });
 
   it('Eligible user', () => {
-    const self = response.body.find((candidate: { email: string }) => candidate.email === dataCandidates.self.email);
+    cy.getUsername().then(email => {
+      const self = response.body.find((candidate: { email: string }) => candidate.email === email);
 
-    expect(self, `candidate ${dataCandidates.self.email}`).to.exist;
-    expect(self).to.include({
-      first_name: dataCandidates.self.first_name,
-      last_name: dataCandidates.self.last_name,
+      expect(self, `candidate ${email}`).to.exist;
+      expect(self).to.include({
+        first_name: dataCandidates.self.first_name,
+        last_name: dataCandidates.self.last_name,
+      });
     });
   });
 
@@ -41,7 +43,7 @@ describe('Cases - Assignment Candidates - Result', () => {
   });
 
   it('Self first', () => {
-    expect(response.body[0].email).to.eq(dataCandidates.self.email);
+    cy.getUsername().then(email => expect(response.body[0].email).to.eq(email));
   });
 
   it('Others sorted by last name then first name', () => {
