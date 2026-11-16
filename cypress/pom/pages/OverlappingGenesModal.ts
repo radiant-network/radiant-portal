@@ -257,9 +257,7 @@ export const OverlappingGenesModal = {
               if (column.tooltip) {
                 cy.get(selectors.leafHeadCell()).eq(position).find(CommonSelectors.underlineHeader).should('be.visible').realHover();
                 cy.get(CommonSelectors.tooltipPopper).contains(column.tooltip).first().should('exist');
-                cy.get(`${CommonSelectors.tableHead(selectors.tableId)} tr`)
-                  .eq(0)
-                  .click(); // Close the popper
+                cy.get(CommonSelectors.animateIn).contains('Overlapping Genes with CNV').click(); // Close the popper
                 cy.get(CommonSelectors.tooltipPopper).should('not.exist');
               } else {
                 cy.get(selectors.leafHeadCell()).eq(position).realHover();
