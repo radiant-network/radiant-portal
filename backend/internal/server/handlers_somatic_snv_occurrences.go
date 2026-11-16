@@ -19,6 +19,7 @@ type somaticSNVOccurrencesReader interface {
 	AggregateOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.AggQuery) ([]types.Aggregation, error)
 	GetStatisticsOccurrences(ctx context.Context, caseId int, seqId int, taskId int, userQuery types.StatisticsQuery) (*types.Statistics, error)
 	GetExpandedOccurrence(ctx context.Context, caseId int, seqId int, taskId int, locusId int) (*types.ExpandedSomaticSNVOccurrence, error)
+	SearchOccurrencesByVariantIdentifier(ctx context.Context, caseId int, seqId int, taskId int, identifier types.VariantIdentifier) ([]types.VariantSearchHit, error)
 }
 
 // OccurrencesSomaticSNVListHandler handles list of somatic SNV occurrences
@@ -319,6 +320,67 @@ func OccurrencesSomaticSNVStatisticsHandler(repo somaticSNVOccurrencesReader) gi
 			return
 		}
 		c.JSON(http.StatusOK, statistics)
+	}
+}
+
+// OccurrencesSomaticSNVSearchHandler handles search of a variant identifier among somatic SNV occurrences
+// @Summary Search a variant in somatic SNV occurrences
+// @Id searchSomaticSNVOccurrences
+// @Description Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing.
+// @Description Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
+// @Tags occurrences
+// @Security bearerauth
+// @Param tenant path string true "Tenant code"
+// @Param case_id path int true "Case ID"
+// @Param seq_id path int true "Tumor sequence ID"
+// @Param task_id path int true "Task ID"
+// @Param message body types.VariantSearchBody true "Search Body"
+// @Accept json
+// @Produce json
+// @Success 200 {object} types.VariantSearchResult
+// @Failure 400 {object} types.ApiError
+// @Failure 401 {object} types.ApiError
+// @Failure 403 {object} types.ApiError
+// @Failure 404 {object} types.ApiError
+// @Failure 500 {object} types.ApiError
+// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
+// @Router /{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/search [post]
+func OccurrencesSomaticSNVSearchHandler(repo somaticSNVOccurrencesReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var body types.VariantSearchBody
+
+		// Bind JSON to the struct
+		if err := c.ShouldBindJSON(&body); err != nil {
+			// Return a 400 Bad Request if validation fails
+			HandleValidationError(c, err)
+			return
+		}
+		caseID, err := strconv.Atoi(c.Param("case_id"))
+		if err != nil {
+			HandleNotFoundError(c, "case_id")
+			return
+		}
+		seqID, err := strconv.Atoi(c.Param("seq_id"))
+		if err != nil {
+			HandleNotFoundError(c, "seq_id")
+			return
+		}
+		taskID, err := strconv.Atoi(c.Param("task_id"))
+		if err != nil {
+			HandleNotFoundError(c, "task_id")
+			return
+		}
+		identifier, err := types.ParseVariantIdentifier(body.Input)
+		if err != nil {
+			c.JSON(http.StatusOK, types.NewUnrecognizedVariantSearchResult())
+			return
+		}
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(c.Request.Context(), caseID, seqID, taskID, identifier)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, types.NewVariantSearchResult(identifier, hits))
 	}
 }
 

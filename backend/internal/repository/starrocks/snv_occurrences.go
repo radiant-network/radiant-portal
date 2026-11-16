@@ -9,16 +9,27 @@ import (
 	"gorm.io/gorm"
 )
 
+func snvSeqIdColumn(snvTable types.Table) (string, error) {
+	switch snvTable {
+	case types.GermlineSNVOccurrenceTable:
+		return "seq_id", nil
+	case types.SomaticSNVOccurrenceTable:
+		return "tumor_seq_id", nil
+	default:
+		return "", fmt.Errorf("no sequencing column for table %q", snvTable.Name)
+	}
+}
+
 func AddImplicitSNVOccurrencesFilters(snvTable types.Table, seqId int, taskId int, db *gorm.DB, part int) *gorm.DB {
 	alias := snvTable.Alias
 	tx := db.Table(fmt.Sprintf("%s %s", snvTable.TenantQualifiedName(utils.CtxOf(db)), alias))
-	switch snvTable {
-	case types.GermlineSNVOccurrenceTable:
-		tx = tx.Where(fmt.Sprintf("%s.seq_id = ? AND %s.task_id = ? AND %s.part=?", alias, alias, alias), seqId, taskId, part)
-	case types.SomaticSNVOccurrenceTable:
-		tx = tx.Where(fmt.Sprintf("%s.tumor_seq_id = ? AND %s.task_id = ? AND %s.part=?", alias, alias, alias), seqId, taskId, part)
+	seqIdColumn, err := snvSeqIdColumn(snvTable)
+	if err != nil {
+		// Fails the query: without the run filter it would read every occurrence of the tenant.
+		_ = tx.AddError(err)
+		return tx
 	}
-	return tx
+	return tx.Where(fmt.Sprintf("%s.%s = ? AND %s.task_id = ? AND %s.part=?", alias, seqIdColumn, alias, alias), seqId, taskId, part)
 }
 
 func JoinSNVOccurrencesWithVariants(snvTable types.Table, tx *gorm.DB) *gorm.DB {
@@ -248,4 +259,39 @@ func StatisticsSNV(snvTable types.Table, seqId int, taskId int, userQuery types.
 	}
 	statistics.Type = targetCol.Type
 	return &statistics, nil
+}
+
+// searchSNVOccurrencesByVariantIdentifier returns the variants of one run whose identifier equals the searched
+// value. It reads only the run's variant part of snv__variant_partitioned, semi-joined to the run's occurrences
+// (colocated on locus_id).
+func searchSNVOccurrencesByVariantIdentifier(snvTable types.Table, seqId int, taskId int, identifier types.VariantIdentifier, db *gorm.DB) ([]types.VariantSearchHit, error) {
+	column, err := identifier.Field.Column()
+	if err != nil {
+		return nil, fmt.Errorf("error during query preparation %w", err)
+	}
+	seqIdColumn, err := snvSeqIdColumn(snvTable)
+	if err != nil {
+		return nil, fmt.Errorf("error during query preparation %w", err)
+	}
+	part, err := utils.GetSequencingPart(seqId, db)
+	if err != nil {
+		return nil, fmt.Errorf("error during partition fetch %w", err)
+	}
+
+	ctx := utils.CtxOf(db)
+	vp := types.VariantPartitionedTable
+	o := snvTable.Alias
+	tx := db.Table(fmt.Sprintf("%s %s", vp.TenantQualifiedName(ctx), vp.Alias)).
+		Select(fmt.Sprintf("%[1]s.hgvsg, %[1]s.locus, %[1]s.rsnumber, %[1]s.clinvar_name AS clinvar_id, %[1]s.symbol, %[1]s.aa_change", vp.Alias)).
+		Joins(fmt.Sprintf("LEFT SEMI JOIN %s %s ON %s.locus_id = %s.locus_id AND %s.part = ? AND %s.%s = ? AND %s.task_id = ?",
+			snvTable.TenantQualifiedName(ctx), o, o, vp.Alias, o, o, seqIdColumn, o), part, seqId, taskId).
+		Where(fmt.Sprintf("%s.part = ? AND %s.%s = ?", vp.Alias, vp.Alias, column), part/types.PartsPerVariantPart, identifier.Value).
+		Order(fmt.Sprintf("%s.locus_id", vp.Alias)).
+		Limit(types.VariantSearchMaxHits)
+
+	var hits []types.VariantSearchHit
+	if err := tx.Find(&hits).Error; err != nil {
+		return nil, fmt.Errorf("error searching occurrences: %w", err)
+	}
+	return hits, nil
 }

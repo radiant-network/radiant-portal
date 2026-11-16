@@ -54,6 +54,7 @@ var perTenantTables = map[string]bool{
 	types.SomaticCNVOccurrenceTable.Name:        types.SomaticCNVOccurrenceTable.PerTenant,
 	types.ExomiserTable.Name:                    types.ExomiserTable.PerTenant,
 	types.VariantTable.Name:                     types.VariantTable.PerTenant,
+	types.VariantPartitionedTable.Name:          types.VariantPartitionedTable.PerTenant,
 	types.TenantGenePanelTable.Name:             types.TenantGenePanelTable.PerTenant,
 	types.GermlineSNVComphetTable.Name:          types.GermlineSNVComphetTable.PerTenant,
 	types.GermlineCNVVariantFrequencyTable.Name: types.GermlineCNVVariantFrequencyTable.PerTenant,

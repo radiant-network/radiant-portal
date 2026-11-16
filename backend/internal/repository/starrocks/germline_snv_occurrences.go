@@ -126,3 +126,7 @@ func (r *GermlineSNVOccurrencesRepository) GetExpandedOccurrence(ctx context.Con
 	expandedOccurrence.OmimConditions = omimConditions
 	return &expandedOccurrence, nil
 }
+
+func (r *GermlineSNVOccurrencesRepository) SearchOccurrencesByVariantIdentifier(ctx context.Context, _ int, seqId int, taskId int, identifier types.VariantIdentifier) ([]types.VariantSearchHit, error) {
+	return searchSNVOccurrencesByVariantIdentifier(types.GermlineSNVOccurrenceTable, seqId, taskId, identifier, r.db.WithContext(ctx))
+}

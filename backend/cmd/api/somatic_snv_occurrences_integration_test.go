@@ -468,3 +468,23 @@ func Test_Somatic_SNV_Statistics_Somatic_Hom_To_Wxs(t *testing.T) {
 	expected := `{"min": 0, "max": 6, "type": "integer"}`
 	testSomaticSNVStatistics(t, "pagination", body, expected)
 }
+
+func Test_Somatic_SNV_Search(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewSomaticSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.POST("/:tenant/occurrences/somatic/snv/:case_id/:seq_id/:task_id/search", server.OccurrencesSomaticSNVSearchHandler(repo))
+
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/somatic/snv/71/74/74/search", bytes.NewBufferString(`{"input":"11111"}`))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `{
+			"status": "found",
+			"matched_field": "clinvar_id",
+			"normalized_input": "11111",
+			"variants": [{"hgvsg": "hgvsg1", "locus": "locus1", "rsnumber": "rs111111111", "clinvar_id": "11111", "symbol": "BRAF", "aa_change": "p.Arg19His"}]
+		}`, w.Body.String())
+	})
+}

@@ -656,6 +656,41 @@ func Test_SNVOccurrence_Statistics_Germline_Af_Wgs_Affected(t *testing.T) {
 	testStatistics(t, "pagination", body, expected)
 }
 
+func Test_SNVOccurrences_Search(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/search", server.OccurrencesGermlineSNVSearchHandler(repo))
+
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/1/1/5/search", bytes.NewBufferString(`{"input":"RS111111111"}`))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `{
+			"status": "found",
+			"matched_field": "rsnumber",
+			"normalized_input": "rs111111111",
+			"variants": [{"hgvsg": "hgvsg1", "locus": "locus1", "rsnumber": "rs111111111", "clinvar_id": "11111", "symbol": "BRAF", "aa_change": "p.Arg19His"}]
+		}`, w.Body.String())
+	})
+}
+
+func Test_SNVOccurrences_Search_NotFoundInRun(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.POST("/:tenant/occurrences/germline/snv/:case_id/:seq_id/:task_id/search", server.OccurrencesGermlineSNVSearchHandler(repo))
+
+		req, _ := http.NewRequest("POST", "/radiant/occurrences/germline/snv/16/46/81/search", bytes.NewBufferString(`{"input":"rs111111111"}`))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `{"status": "not_found_in_run", "matched_field": "rsnumber", "normalized_input": "rs111111111", "variants": []}`, w.Body.String())
+	})
+}
+
 func postGermlineCNV(t *testing.T, env *testutils.Env, endpoint string, taskID string, body string) *httptest.ResponseRecorder {
 	repo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 	router := tenantRouter()

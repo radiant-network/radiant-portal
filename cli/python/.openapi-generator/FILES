@@ -205,6 +205,9 @@ docs/VariantInternalFrequencies.md
 docs/VariantInterpretedCase.md
 docs/VariantInterpretedCasesSearchResponse.md
 docs/VariantOverview.md
+docs/VariantSearchBody.md
+docs/VariantSearchHit.md
+docs/VariantSearchResult.md
 docs/VariantUninterpretedCase.md
 docs/VariantUninterpretedCasesSearchResponse.md
 docs/VepImpact.md
@@ -420,9 +423,15 @@ radiant_python/models/variant_internal_frequencies.py
 radiant_python/models/variant_interpreted_case.py
 radiant_python/models/variant_interpreted_cases_search_response.py
 radiant_python/models/variant_overview.py
+radiant_python/models/variant_search_body.py
+radiant_python/models/variant_search_hit.py
+radiant_python/models/variant_search_result.py
 radiant_python/models/variant_uninterpreted_case.py
 radiant_python/models/variant_uninterpreted_cases_search_response.py
 radiant_python/models/vep_impact.py
 radiant_python/py.typed
 radiant_python/rest.py
 test/__init__.py
+test/test_variant_search_body.py
+test/test_variant_search_hit.py
+test/test_variant_search_result.py

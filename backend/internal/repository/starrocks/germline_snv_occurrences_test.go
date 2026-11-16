@@ -13,6 +13,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var searchHitLocus1 = types.VariantSearchHit{Hgvsg: "hgvsg1", Locus: "locus1", Rsnumber: "rs111111111", ClinvarId: "11111", Symbol: "BRAF", AaChange: "p.Arg19His"}
+var searchHitLocus2 = types.VariantSearchHit{Hgvsg: "hgvsg2", Locus: "locus2", Rsnumber: "rs222222222", Symbol: "symbol1", AaChange: "p.Arg19His"}
+
 var allGermlineSNVFields = sliceutils.Map(types.GermlineSNVOccurrencesFields, func(value types.Field, index int, slice []types.Field) string {
 	return value.Name
 })
@@ -1454,5 +1457,97 @@ func Test_Germline_SNV_GetOccurrences_Sort_By_Topmed_Af_Without_Selecting_It(t *
 		require.NoError(t, err)
 		locusIds := sliceutils.Map(occurrences, func(o GermlineSNVOccurrence, _ int, _ []GermlineSNVOccurrence) string { return o.LocusId })
 		assert.Equal(t, []string{"2000", "1000"}, locusIds)
+	})
+}
+
+func Test_Germline_SNV_SearchOccurrencesByVariantIdentifier_ByRsnumber(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(t.Context(), 1, 1, 5, types.VariantIdentifier{Field: types.VariantSearchFieldRsnumber, Value: "rs111111111"})
+		assert.NoError(t, err)
+		assert.Equal(t, []types.VariantSearchHit{searchHitLocus1}, hits)
+	})
+}
+
+func Test_Germline_SNV_SearchOccurrencesByVariantIdentifier_ByLocus(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(t.Context(), 1, 1, 5, types.VariantIdentifier{Field: types.VariantSearchFieldLocus, Value: "locus1"})
+		assert.NoError(t, err)
+		assert.Equal(t, []types.VariantSearchHit{searchHitLocus1}, hits)
+	})
+}
+
+func Test_Germline_SNV_SearchOccurrencesByVariantIdentifier_ByHgvsg(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(t.Context(), 1, 1, 5, types.VariantIdentifier{Field: types.VariantSearchFieldHgvsg, Value: "hgvsg1"})
+		assert.NoError(t, err)
+		assert.Equal(t, []types.VariantSearchHit{searchHitLocus1}, hits)
+	})
+}
+
+func Test_Germline_SNV_SearchOccurrencesByVariantIdentifier_ByClinvarId(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(t.Context(), 1, 1, 5, types.VariantIdentifier{Field: types.VariantSearchFieldClinvarId, Value: "11111"})
+		assert.NoError(t, err)
+		assert.Equal(t, []types.VariantSearchHit{searchHitLocus1}, hits)
+	})
+}
+
+func Test_Germline_SNV_SearchOccurrencesByVariantIdentifier_OmitsUnsetClinvarId(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(t.Context(), 1, 46, 81, types.VariantIdentifier{Field: types.VariantSearchFieldLocus, Value: "locus2"})
+		assert.NoError(t, err)
+		assert.Equal(t, []types.VariantSearchHit{searchHitLocus2}, hits)
+	})
+}
+
+func Test_Germline_SNV_SearchOccurrencesByVariantIdentifier_IgnoresVariantsOfOtherRuns(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		// rs222222222 is carried by locus2 (run 46/81) and locus3 (runs 75/83 and 78/84).
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(t.Context(), 1, 46, 81, types.VariantIdentifier{Field: types.VariantSearchFieldRsnumber, Value: "rs222222222"})
+		assert.NoError(t, err)
+		assert.Equal(t, []types.VariantSearchHit{searchHitLocus2}, hits)
+	})
+}
+
+func Test_Germline_SNV_SearchOccurrencesByVariantIdentifier_NotInRun(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(t.Context(), 1, 46, 81, types.VariantIdentifier{Field: types.VariantSearchFieldRsnumber, Value: "rs111111111"})
+		assert.NoError(t, err)
+		assert.Empty(t, hits)
+	})
+}
+
+func Test_Germline_SNV_SearchOccurrencesByVariantIdentifier_ReadsOnlyTheRunVariantPart(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		// locus2 is in run 46/81 (occurrence part 4, variant part 0); this value only exists in variant part 1.
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(t.Context(), 1, 46, 81, types.VariantIdentifier{Field: types.VariantSearchFieldHgvsg, Value: "hgvsg2-other-part"})
+		assert.NoError(t, err)
+		assert.Empty(t, hits)
+	})
+}
+
+func Test_Germline_SNV_SearchOccurrencesByVariantIdentifier_UnknownValue(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(t.Context(), 1, 1, 5, types.VariantIdentifier{Field: types.VariantSearchFieldRsnumber, Value: "rs999999999"})
+		assert.NoError(t, err)
+		assert.Empty(t, hits)
+	})
+}
+
+func Test_Germline_SNV_SearchOccurrencesByVariantIdentifier_UnknownField(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+		hits, err := repo.SearchOccurrencesByVariantIdentifier(t.Context(), 1, 1, 5, types.VariantIdentifier{Field: "symbol", Value: "BRAF"})
+		assert.Error(t, err)
+		assert.Nil(t, hits)
 	})
 }

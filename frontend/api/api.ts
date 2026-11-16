@@ -10562,6 +10562,93 @@ export interface VariantOverview {
 
 
 /**
+ * Body of a search by variant identifier: a locus, an HGVSg, an rsID or a ClinVar variation ID
+ * @export
+ * @interface VariantSearchBody
+ */
+export interface VariantSearchBody {
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantSearchBody
+     */
+    'input': string;
+}
+/**
+ * A variant of the run matching the searched identifier
+ * @export
+ * @interface VariantSearchHit
+ */
+export interface VariantSearchHit {
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantSearchHit
+     */
+    'aa_change'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantSearchHit
+     */
+    'clinvar_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantSearchHit
+     */
+    'hgvsg': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantSearchHit
+     */
+    'locus': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantSearchHit
+     */
+    'rsnumber'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantSearchHit
+     */
+    'symbol'?: string;
+}
+/**
+ * Result of a search by variant identifier in a run
+ * @export
+ * @interface VariantSearchResult
+ */
+export interface VariantSearchResult {
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantSearchResult
+     */
+    'matched_field'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantSearchResult
+     */
+    'normalized_input'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantSearchResult
+     */
+    'status': string;
+    /**
+     * 
+     * @type {Array<VariantSearchHit>}
+     * @memberof VariantSearchResult
+     */
+    'variants': Array<VariantSearchHit>;
+}
+/**
  * 
  * @export
  * @interface VariantUninterpretedCase
@@ -16330,6 +16417,118 @@ export const OccurrencesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the germline SNVs of a run. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
+         * @summary Search a variant in germline SNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {number} taskId Task ID
+         * @param {VariantSearchBody} variantSearchBody Search Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchGermlineSNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, variantSearchBody: VariantSearchBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('searchGermlineSNVOccurrences', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('searchGermlineSNVOccurrences', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('searchGermlineSNVOccurrences', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('searchGermlineSNVOccurrences', 'taskId', taskId)
+            // verify required parameter 'variantSearchBody' is not null or undefined
+            assertParamExists('searchGermlineSNVOccurrences', 'variantSearchBody', variantSearchBody)
+            const localVarPath = `/{tenant}/occurrences/germline/snv/{case_id}/{seq_id}/{task_id}/search`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(variantSearchBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
+         * @summary Search a variant in somatic SNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor sequence ID
+         * @param {number} taskId Task ID
+         * @param {VariantSearchBody} variantSearchBody Search Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchSomaticSNVOccurrences: async (tenant: string, caseId: number, seqId: number, taskId: number, variantSearchBody: VariantSearchBody, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('searchSomaticSNVOccurrences', 'tenant', tenant)
+            // verify required parameter 'caseId' is not null or undefined
+            assertParamExists('searchSomaticSNVOccurrences', 'caseId', caseId)
+            // verify required parameter 'seqId' is not null or undefined
+            assertParamExists('searchSomaticSNVOccurrences', 'seqId', seqId)
+            // verify required parameter 'taskId' is not null or undefined
+            assertParamExists('searchSomaticSNVOccurrences', 'taskId', taskId)
+            // verify required parameter 'variantSearchBody' is not null or undefined
+            assertParamExists('searchSomaticSNVOccurrences', 'variantSearchBody', variantSearchBody)
+            const localVarPath = `/{tenant}/occurrences/somatic/snv/{case_id}/{seq_id}/{task_id}/search`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)))
+                .replace(`{${"case_id"}}`, encodeURIComponent(String(caseId)))
+                .replace(`{${"seq_id"}}`, encodeURIComponent(String(seqId)))
+                .replace(`{${"task_id"}}`, encodeURIComponent(String(taskId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(variantSearchBody, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline CNV occurrences
          * @param {string} tenant Tenant code
@@ -16888,6 +17087,40 @@ export const OccurrencesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the germline SNVs of a run. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
+         * @summary Search a variant in germline SNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {number} taskId Task ID
+         * @param {VariantSearchBody} variantSearchBody Search Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async searchGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, variantSearchBody: VariantSearchBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantSearchResult>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchGermlineSNVOccurrences(tenant, caseId, seqId, taskId, variantSearchBody, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.searchGermlineSNVOccurrences']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
+         * @summary Search a variant in somatic SNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor sequence ID
+         * @param {number} taskId Task ID
+         * @param {VariantSearchBody} variantSearchBody Search Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async searchSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, variantSearchBody: VariantSearchBody, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantSearchResult>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.searchSomaticSNVOccurrences(tenant, caseId, seqId, taskId, variantSearchBody, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['OccurrencesApi.searchSomaticSNVOccurrences']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Return statistics about a field for a given sequence ID
          * @summary Statistics of germline CNV occurrences
          * @param {string} tenant Tenant code
@@ -17231,6 +17464,34 @@ export const OccurrencesApiFactory = function (configuration?: Configuration, ba
          */
         listSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig): AxiosPromise<Array<SomaticSNVOccurrence>> {
             return localVarFp.listSomaticSNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the germline SNVs of a run. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
+         * @summary Search a variant in germline SNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Sequence ID
+         * @param {number} taskId Task ID
+         * @param {VariantSearchBody} variantSearchBody Search Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, variantSearchBody: VariantSearchBody, options?: RawAxiosRequestConfig): AxiosPromise<VariantSearchResult> {
+            return localVarFp.searchGermlineSNVOccurrences(tenant, caseId, seqId, taskId, variantSearchBody, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
+         * @summary Search a variant in somatic SNV occurrences
+         * @param {string} tenant Tenant code
+         * @param {number} caseId Case ID
+         * @param {number} seqId Tumor sequence ID
+         * @param {number} taskId Task ID
+         * @param {VariantSearchBody} variantSearchBody Search Body
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        searchSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, variantSearchBody: VariantSearchBody, options?: RawAxiosRequestConfig): AxiosPromise<VariantSearchResult> {
+            return localVarFp.searchSomaticSNVOccurrences(tenant, caseId, seqId, taskId, variantSearchBody, options).then((request) => request(axios, basePath));
         },
         /**
          * Return statistics about a field for a given sequence ID
@@ -17601,6 +17862,38 @@ export class OccurrencesApi extends BaseAPI {
      */
     public listSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, listBodyWithSqon: ListBodyWithSqon, options?: RawAxiosRequestConfig) {
         return OccurrencesApiFp(this.configuration).listSomaticSNVOccurrences(tenant, caseId, seqId, taskId, listBodyWithSqon, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the germline SNVs of a run. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
+     * @summary Search a variant in germline SNV occurrences
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {number} seqId Sequence ID
+     * @param {number} taskId Task ID
+     * @param {VariantSearchBody} variantSearchBody Search Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public searchGermlineSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, variantSearchBody: VariantSearchBody, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).searchGermlineSNVOccurrences(tenant, caseId, seqId, taskId, variantSearchBody, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Exact search of a locus, an HGVSg, an rsID or a ClinVar variation ID among the somatic SNVs of a run; seq_id is the tumor sequencing. Answers 200 in every case: the status tells a variant found, absent from the run or an input of no known format.
+     * @summary Search a variant in somatic SNV occurrences
+     * @param {string} tenant Tenant code
+     * @param {number} caseId Case ID
+     * @param {number} seqId Tumor sequence ID
+     * @param {number} taskId Task ID
+     * @param {VariantSearchBody} variantSearchBody Search Body
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OccurrencesApi
+     */
+    public searchSomaticSNVOccurrences(tenant: string, caseId: number, seqId: number, taskId: number, variantSearchBody: VariantSearchBody, options?: RawAxiosRequestConfig) {
+        return OccurrencesApiFp(this.configuration).searchSomaticSNVOccurrences(tenant, caseId, seqId, taskId, variantSearchBody, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

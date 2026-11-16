@@ -187,6 +187,34 @@ omim_symbols = {o[0] for o in genomics.OMIM}
 REAL_COLS = {"is_mane_select": ("mane", lambda x: x == "1"), "is_canonical": ("canonical", lambda x: x == "1")}
 
 
+def schema_columns(table):
+    """The columns of a {tenant} table, in the order of sql/starrocks_schema.sql."""
+    ddl = open(os.path.join(HERE, "sql", "starrocks_schema.sql")).read()
+    body = re.search(r"CREATE TABLE IF NOT EXISTS \{tenant\}\.`" + table + r"`\s*\((.*?)\n\s*\)", ddl, re.S).group(1)
+    return [line.split()[0].strip("`") for line in body.splitlines()
+            if line.strip() and not line.strip().startswith(("PRIMARY", "INDEX", "KEY"))]
+
+
+def variant_parts():
+    """snv__variant_partitioned as the ETL fills it: the variants of each slice of 10 occurrence parts, under part DIV 10.
+    10 is the ETL's PARTS_PER_VARIANT_PART, mirrored by PartsPerVariantPart in internal/types/variant_search.go.
+    The columns are named, so a column added to one table only fails the insert instead of shifting the values."""
+    cols = schema_columns("snv__variant")
+    assert set(cols) == set(schema_columns("snv__variant_partitioned")) - {"part"}, "snv__variant and snv__variant_partitioned differ"
+    names = ", ".join(cols)
+    values = ", ".join(f"v.{c}" for c in cols)
+    return f"""INSERT OVERWRITE {TENANT_DB}.snv__variant_partitioned (part, {names})
+SELECT p.part, {values}
+FROM {TENANT_DB}.snv__variant v
+JOIN (
+    SELECT DISTINCT locus_id, part DIV 10 AS part FROM (
+        SELECT locus_id, part FROM {TENANT_DB}.germline__snv__occurrence
+        UNION ALL
+        SELECT locus_id, part FROM {TENANT_DB}.somatic__snv__occurrence
+    ) o
+) p ON p.locus_id = v.locus_id;"""
+
+
 def variant_row(v, pc, pn, sc, sn):
     hgvsg = f"chr{v.chrom}:g.{v.pos}{v.ref}>{v.alt}"
     row = [v.locus_id, v.chrom, v.pos, v.pos, v.ref, v.alt, v.locus, hgvsg, f"{v.transcript}:{v.hgvsc}" if v.hgvsc else None,
@@ -433,6 +461,7 @@ FROM (
 ) f
 WHERE snv__variant.locus_id = f.locus_id;""")
     S.append(f"DELETE FROM {TENANT_DB}.snv__variant WHERE germline_pc_wgs = 0 AND somatic_pc_tn_wgs = 0;")
+    S.append(variant_parts())
     S += source_tables(pcx_tables, swap=True) + source_tables(hin_tables(args.deid), swap=True) + patient_keys(patients)
 
     os.makedirs(args.out, exist_ok=True)
@@ -605,6 +634,7 @@ REFERENCE = [] if QA else [
     insert(f"{SHARED_DB}.hpo_term", ["id", "name", "term"], [[i, n, f"{i} {n}"] for i, n in genomics.HPO + genomics.PRENATAL_HPO])]
 S += REFERENCE
 S += occurrence_rows(sr)
+S.append(variant_parts())
 
 # PCX source tables, MRI and labs, the data dictionary, the URL keys and the HIN exchanges.
 S += source_tables(pcx_tables)
