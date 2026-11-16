@@ -8,7 +8,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/tbaehler/gin-keycloak/pkg/ginkeycloak"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -149,6 +151,38 @@ func Test_PostInterpretationGermline_update_ok(t *testing.T) {
 				"id":"uuid1"
 			}`
 	assertPostInterpretationGermline(t, "10", "seq1", "locus1", "trans1", http.StatusOK, body, `{"case_id":"10", "created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "metadata": {},  "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z"}`)
+}
+
+func assertPostInterpretationAs(t *testing.T, kind string, handler gin.HandlerFunc, token ginkeycloak.KeyCloakToken, body string, expected string) {
+	router := tenantRouter()
+	router.POST("/:tenant/interpretations/v2/"+kind+"/:case_id/:sequencing_id/:locus_id/:transcript_id", func(c *gin.Context) {
+		c.Set("token", token)
+	}, handler)
+
+	req, _ := http.NewRequest("POST", "/radiant/interpretations/v2/"+kind+"/10/seq1/locus1/trans1", bytes.NewBufferString(body))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_PostInterpretationGermline_UserTokenOverridesAuthorNames(t *testing.T) {
+	body := `{"created_by":"someone", "created_by_name":"Someone Else", "updated_by_name":"Someone Else"}`
+	assertPostInterpretationAs(t, "germline", PostInterpretationGermline(&MockRepository{}), ginkeycloak.KeyCloakToken{Sub: "user-1", Name: "Jane Doe"}, body,
+		`{"case_id":"10", "created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z", "created_by":"user-1", "created_by_name":"Jane Doe", "updated_by":"user-1", "updated_by_name":"Jane Doe"}`)
+}
+
+func Test_PostInterpretationGermline_NamelessTokenKeepsAuthorNames(t *testing.T) {
+	body := `{"created_by":"someone", "created_by_name":"Legacy Geneticist", "updated_by_name":"Legacy Reviewer"}`
+	assertPostInterpretationAs(t, "germline", PostInterpretationGermline(&MockRepository{}), ginkeycloak.KeyCloakToken{Sub: "svc-1"}, body,
+		`{"case_id":"10", "created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z", "created_by":"svc-1", "created_by_name":"Legacy Geneticist", "updated_by":"svc-1", "updated_by_name":"Legacy Reviewer"}`)
+}
+
+func Test_PostInterpretationSomatic_NamelessTokenKeepsAuthorNames(t *testing.T) {
+	body := `{"created_by":"someone", "created_by_name":"Legacy Geneticist", "updated_by_name":"Legacy Reviewer"}`
+	assertPostInterpretationAs(t, "somatic", PostInterpretationSomatic(&MockRepository{}), ginkeycloak.KeyCloakToken{Sub: "svc-1"}, body,
+		`{"case_id":"10", "created_at":"0001-01-01T00:00:00Z", "id":"uuid1", "locus_id":"locus1", "metadata": {}, "sequencing_id":"seq1", "transcript_id":"trans1", "updated_at":"0001-01-01T00:00:00Z", "created_by":"svc-1", "created_by_name":"Legacy Geneticist", "updated_by":"svc-1", "updated_by_name":"Legacy Reviewer"}`)
 }
 
 func Test_PostInterpretationGermline_error(t *testing.T) {

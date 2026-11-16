@@ -68,10 +68,12 @@ func fillInterpretationCommonWithContext(c *gin.Context, interpretation *types.I
 		decodedJWT := ginToken.(ginkeycloak.KeyCloakToken)
 
 		interpretation.CreatedBy = decodedJWT.Sub
-		interpretation.CreatedByName = decodedJWT.Name
-
 		interpretation.UpdatedBy = decodedJWT.Sub
-		interpretation.UpdatedByName = decodedJWT.Name
+		// A service account carries no name: the names it sends (an import on behalf of someone) stay.
+		if decodedJWT.Name != "" {
+			interpretation.CreatedByName = decodedJWT.Name
+			interpretation.UpdatedByName = decodedJWT.Name
+		}
 	}
 	return nil
 }
