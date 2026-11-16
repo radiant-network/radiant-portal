@@ -184,6 +184,7 @@ const SomaticInterpretationForm = forwardRef<InterpretationFormRef, Interpretati
                 <FormLabel>{t('variant.interpretation_form.somatic.classification_criteria')}</FormLabel>
                 <FormControl>
                   <MultipleSelector
+                    commandProps={{ label: t('variant.interpretation_form.somatic.classification_criteria') }}
                     defaultOptions={oncogenicityClassificationCriterias}
                     placeholder={t('variant.interpretation_form.somatic.classification_criteria_placeholder')}
                     emptyIndicator={t('variant.interpretation_form.somatic.no_results')}
