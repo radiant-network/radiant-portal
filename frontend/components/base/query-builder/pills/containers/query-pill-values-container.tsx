@@ -26,7 +26,7 @@ function QueryPillValuesContainer({
   return (
     <div
       className={cn(
-        'bg-background rounded-xs pl-2 text-xs font-medium leading-5 relative',
+        'bg-qb-pill-value-bg-muted group-data-[query-active=true]/query:bg-qb-pill-value-bg rounded-xs pl-2 text-xs font-medium leading-5 relative',
         canExpand ? 'pr-[22px]' : 'pr-2',
         className,
       )}
@@ -35,7 +35,7 @@ function QueryPillValuesContainer({
       <div
         className={cn(
           'flex flex-wrap items-center',
-          clickable ? 'hover:shadow-[inset_0_-4px_0_-2.5px_black] hover:cursor-pointer' : '',
+          clickable ? 'hover:shadow-[inset_0_-4px_0_-2.5px_currentColor] hover:cursor-pointer' : '',
           classNameContent,
         )}
       >

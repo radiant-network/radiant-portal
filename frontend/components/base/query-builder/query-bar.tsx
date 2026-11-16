@@ -36,8 +36,8 @@ const queryBar = tv({
   base: 'flex flex-1 py-1.5 px-3 border rounded-e-md',
   variants: {
     active: {
-      true: ['border-primary/50 bg-primary/10'],
-      false: ['border-input bg-muted/35 text-muted-foreground'],
+      true: ['border-qb-bar-border bg-qb-bar'],
+      false: ['border-qb-bar-border-muted bg-qb-bar-muted text-muted-foreground'],
     },
   },
   defaultVariants: {
@@ -97,8 +97,8 @@ function QueryBar({ index, sqon, swrId }: QueryBarProps) {
   const nonEmptySqonsCount = useMemo(() => sqons.filter(s => !isSqonEmpty(s)).length, [sqons]);
   const backgroundColor = useMemo(
     () => ({
-      'border-primary/50 bg-primary/10': active,
-      'border-input bg-muted/35 text-muted-foreground': !active,
+      'border-qb-bar-border bg-qb-bar': active,
+      'border-qb-bar-border-muted bg-qb-bar-muted text-muted-foreground': !active,
     }),
     [active],
   );
@@ -212,8 +212,8 @@ function QueryBar({ index, sqon, swrId }: QueryBarProps) {
 
       {/* Identifier: color for combined query quick identification */}
       <div
-        className={cn('w-1 rounded-s-md bg-muted-foreground', {
-          'bg-primary': active,
+        className={cn('w-1 rounded-s-md bg-qb-bar-border-muted', {
+          'bg-qb-bar-border': active,
         })}
         style={identifierStyle}
       />
