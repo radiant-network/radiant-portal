@@ -13,8 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var searchHitLocus1 = types.VariantSearchHit{Hgvsg: "hgvsg1", Locus: "locus1", Rsnumber: "rs111111111", ClinvarId: "11111", Symbol: "BRAF", AaChange: "p.Arg19His"}
-var searchHitLocus2 = types.VariantSearchHit{Hgvsg: "hgvsg2", Locus: "locus2", Rsnumber: "rs222222222", Symbol: "symbol1", AaChange: "p.Arg19His"}
+var searchHitLocus1 = types.VariantSearchHit{LocusId: "1000", Hgvsg: "hgvsg1", Locus: "locus1", Rsnumber: "rs111111111", ClinvarId: "11111", Symbol: "BRAF", AaChange: "p.Arg19His"}
+var searchHitLocus2 = types.VariantSearchHit{LocusId: "2000", Hgvsg: "hgvsg2", Locus: "locus2", Rsnumber: "rs222222222", Symbol: "symbol1", AaChange: "p.Arg19His"}
 
 var allGermlineSNVFields = sliceutils.Map(types.GermlineSNVOccurrencesFields, func(value types.Field, index int, slice []types.Field) string {
 	return value.Name

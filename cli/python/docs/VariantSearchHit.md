@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **clinvar_id** | **str** |  | [optional] 
 **hgvsg** | **str** |  | 
 **locus** | **str** |  | 
+**locus_id** | **str** |  | 
 **rsnumber** | **str** |  | [optional] 
 **symbol** | **str** |  | [optional] 
 

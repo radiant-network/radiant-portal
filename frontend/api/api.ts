@@ -10609,6 +10609,12 @@ export interface VariantSearchHit {
      * @type {string}
      * @memberof VariantSearchHit
      */
+    'locus_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof VariantSearchHit
+     */
     'rsnumber'?: string;
     /**
      * 

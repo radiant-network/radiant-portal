@@ -63,6 +63,7 @@ type VariantSearchBody struct {
 // VariantSearchHit - A variant of the run matching the searched identifier
 // @Description A variant of the run matching the searched identifier
 type VariantSearchHit struct {
+	LocusId   string `json:"locus_id" validate:"required"`
 	Hgvsg     string `json:"hgvsg" validate:"required"`
 	Locus     string `json:"locus" validate:"required"`
 	Rsnumber  string `json:"rsnumber,omitempty"`

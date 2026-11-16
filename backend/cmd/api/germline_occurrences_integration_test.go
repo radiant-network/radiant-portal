@@ -671,7 +671,7 @@ func Test_SNVOccurrences_Search(t *testing.T) {
 			"status": "found",
 			"matched_field": "rsnumber",
 			"normalized_input": "rs111111111",
-			"variants": [{"hgvsg": "hgvsg1", "locus": "locus1", "rsnumber": "rs111111111", "clinvar_id": "11111", "symbol": "BRAF", "aa_change": "p.Arg19His"}]
+			"variants": [{"locus_id": "1000", "hgvsg": "hgvsg1", "locus": "locus1", "rsnumber": "rs111111111", "clinvar_id": "11111", "symbol": "BRAF", "aa_change": "p.Arg19His"}]
 		}`, w.Body.String())
 	})
 }
