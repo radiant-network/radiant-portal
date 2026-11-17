@@ -19,7 +19,7 @@ declare namespace Cypress {
     waitForBatchStatus(batchId: string, token: string, expectedStatus: string = 'SUCCESS', maxRetries: number = 10): Cypress.Chainable;
 
     // commands
-    clickAndWait(options?: Partial<ClickOptions>): Chainable<Element>;
+    clickAndWait(options?: Partial<ClickOptions>, settleMs?: number): Chainable<Element>;
     handleColumnNotFound(column: string): cy & CyEventEmitter;
     hideColumn(column: string): cy & CyEventEmitter;
     login(): cy & CyEventEmitter;
@@ -51,6 +51,6 @@ declare namespace Cypress {
     visitVariantFrequencyPage(locusID: string): cy & CyEventEmitter;
     visitVariantOverviewPage(locusID: string): cy & CyEventEmitter;
     visitVariantPatientsPage(locusID: string): cy & CyEventEmitter;
-    waitWhileLoad(ms: number): cy & CyEventEmitter;
+    waitWhileLoad(ms: number, settleMs?: number): cy & CyEventEmitter;
   }
 }
