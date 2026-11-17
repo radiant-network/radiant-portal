@@ -103,6 +103,18 @@
   --color-avatar-rose-foreground: var(--color-rose-800);
   --color-avatar-neutral: var(--color-slate-200);
   --color-avatar-neutral-foreground: var(--color-slate-700);
+
+  /* Query builder */
+  --qb-bar: color-mix(in oklab, var(--primary) 10%, transparent);
+  --qb-bar-muted: transparent;
+  --qb-bar-border: color-mix(in oklab, var(--primary) 50%, transparent);
+  --qb-bar-border-muted: var(--color-slate-300);
+  --qb-pill: color-mix(in oklab, var(--primary) 15%, transparent);
+  --qb-pill-muted: color-mix(in oklab, var(--color-slate-400) 20%, transparent);
+  --qb-pill-value-bg: var(--background);
+  --qb-pill-value-bg-muted: var(--background);
+  --qb-pill-value: var(--foreground);
+  --qb-pill-value-muted: var(--muted-foreground);
 }
 
 .dark {
@@ -202,6 +214,18 @@
   --color-avatar-rose-foreground: var(--color-rose-200);
   --color-avatar-neutral: var(--color-slate-700);
   --color-avatar-neutral-foreground: var(--color-slate-300);
+
+  /* Query builder */
+  --qb-bar: color-mix(in oklab, var(--primary) 10%, transparent);
+  --qb-bar-muted: transparent;
+  --qb-bar-border: color-mix(in oklab, var(--primary) 15%, transparent);
+  --qb-bar-border-muted: var(--color-slate-800);
+  --qb-pill: color-mix(in oklab, var(--primary) 8%, transparent);
+  --qb-pill-muted: color-mix(in oklab, var(--color-slate-500) 20%, transparent);
+  --qb-pill-value-bg: var(--background);
+  --qb-pill-value-bg-muted: var(--background);
+  --qb-pill-value: var(--foreground);
+  --qb-pill-value-muted: var(--muted-foreground);
 }
 
 /* Sidebar brand mode: apply the `sidebar-brand` utility on a Sidebar root to
@@ -329,6 +353,18 @@
   --color-table-accent: var(--table-accent);
   --color-table-active: var(--table-active);
   --color-table-header: var(--table-header);
+
+  /* Query Builder Colors */
+  --color-qb-bar: var(--qb-bar);
+  --color-qb-bar-muted: var(--qb-bar-muted);
+  --color-qb-bar-border: var(--qb-bar-border);
+  --color-qb-bar-border-muted: var(--qb-bar-border-muted);
+  --color-qb-pill: var(--qb-pill);
+  --color-qb-pill-muted: var(--qb-pill-muted);
+  --color-qb-pill-value-bg: var(--qb-pill-value-bg);
+  --color-qb-pill-value-bg-muted: var(--qb-pill-value-bg-muted);
+  --color-qb-pill-value: var(--qb-pill-value);
+  --color-qb-pill-value-muted: var(--qb-pill-value-muted);
 
   /* Alert Colors */
   --color-alert-default: var(--color-alert-default);

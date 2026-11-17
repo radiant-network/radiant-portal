@@ -24,7 +24,7 @@ function QueryPillContainer({ children, onRemovePill }: QueryPillContainerProps)
   return (
     <div
       data-cy="query-pill"
-      className="flex items-center rounded-md p-0.5 bg-muted group-data-[query-active=true]/query:bg-primary/25"
+      className="flex items-center rounded-md p-0.5 bg-qb-pill-muted text-qb-pill-value-muted group-data-[query-active=true]/query:bg-qb-pill group-data-[query-active=true]/query:text-qb-pill-value"
     >
       {children}
 
@@ -33,7 +33,7 @@ function QueryPillContainer({ children, onRemovePill }: QueryPillContainerProps)
         iconOnly
         variant="ghost"
         size="sm"
-        className="mr-0.5 ml-1 py-0.5 enabled:hover:bg-transparent size-4"
+        className="mr-0.5 ml-1 py-0.5 text-qb-pill-value enabled:hover:bg-transparent enabled:hover:text-qb-pill-value size-4"
         aria-label={t('a11y.query_pill.remove')}
         onClick={e => {
           e.stopPropagation();
