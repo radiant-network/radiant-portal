@@ -4,108 +4,91 @@ import { data } from 'pom/shared/Data';
 import { CaseEntity_Variants_SNV_Table } from 'pom/pages/CaseEntity_Variants_SNV_Table';
 import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_SavedFilters';
 
-describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Information displayed', () => {
-  const setupTest = () => {
+// Read-only checks: set the page up once and share it between tests.
+describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Information displayed', { testIsolation: false }, () => {
+  before(() => {
     cy.login();
     cy.visitCaseVariantsPage(data.caseSomatic.case, data.caseSomatic.seq.seq_id, 'SNV', {
       cohort: 'TN',
       sqon: data.variantSomatic.sqon,
     });
     CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder
-  };
+    CaseEntity_Variants_SNV_Table.somatic.actions.showAllColumns();
+  });
 
   it('Variant', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('variant', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('variant', data.variantSomatic, false);
   });
 
   it('Type', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('type', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('type', data.variantSomatic, false);
   });
 
   it('dbSNP', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('dbsnp', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('dbsnp', data.variantSomatic, false);
   });
 
   it('Gene', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('gene', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('gene', data.variantSomatic, false);
   });
 
   it('AA', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('aa_change', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('aa_change', data.variantSomatic, false);
   });
 
   it('MANE', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('mane', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('mane', data.variantSomatic, false);
   });
 
   it('Consequence', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('consequence', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('consequence', data.variantSomatic, false);
   });
 
   it('OMIM', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('omim', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('omim', data.variantSomatic, false);
   });
 
   it('Hotspot', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('hotspot', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('hotspot', data.variantSomatic, false);
   });
 
   it('Tier', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('tier', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('tier', data.variantSomatic, false);
   });
 
   it('CMC', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('cmc', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('cmc', data.variantSomatic, false);
   });
 
   it('ClinVar', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('clinvar', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('clinvar', data.variantSomatic, false);
   });
 
   it('gnomAD', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('gnomad', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('gnomad', data.variantSomatic, false);
   });
 
   it('Freq. TO', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('freq_to', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('freq_to', data.variantSomatic, false);
   });
 
   it('Freq. TN', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('freq_tn', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('freq_tn', data.variantSomatic, false);
   });
 
   it('Freq. G', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('freq_g', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('freq_g', data.variantSomatic, false);
   });
 
   it('SQ', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('sq', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('sq', data.variantSomatic, false);
   });
 
   it('AQ', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('aq', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('aq', data.variantSomatic, false);
   });
 
   it('AD Ratio', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('ad_ratio', data.variantSomatic);
+    CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowColumnContent('ad_ratio', data.variantSomatic, false);
   });
 });

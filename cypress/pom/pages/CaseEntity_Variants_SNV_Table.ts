@@ -1021,9 +1021,12 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
      * Validates the content of a specific column in the table for a given variant.
      * @param columnID The ID of the column to validate.
      * @param dataVariant The variant object containing the expected values.
+     * @param showColumns Show all columns first (false when the spec already did it).
      */
-    shouldShowColumnContent(columnID: string, dataVariant: any) {
-      actions.showAllColumns();
+    shouldShowColumnContent(columnID: string, dataVariant: any, showColumns: boolean = true) {
+      if (showColumns) {
+        actions.showAllColumns();
+      }
       getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
           const handler = contentHandlers[columnID] ?? defaultContentHandler;

@@ -3,57 +3,50 @@ import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { VariantEntity_Patients } from 'pom/pages/VariantEntity_Patients';
 
-describe('VariantEntity - Patients - Uninterpreted - Information displayed', () => {
-  const setupTest = () => {
+// Read-only checks: set the page up once and share it between tests.
+describe('VariantEntity - Patients - Uninterpreted - Information displayed', { testIsolation: false }, () => {
+  before(() => {
     cy.login();
     cy.visitVariantPatientsPage(data.variantGermline.locus_id);
     VariantEntity_Patients.uninterpreted.actions.selectTab();
     VariantEntity_Patients.uninterpreted.actions.sortColumn('case');
     VariantEntity_Patients.uninterpreted.actions.sortColumn('case');
-  };
+    VariantEntity_Patients.uninterpreted.actions.showAllColumns();
+  });
 
   it('Case', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('case', data.variantGermline.uninterpreted);
+    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('case', data.variantGermline.uninterpreted, false);
   });
 
   it('Aff. Status', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('aff_status', data.variantGermline.uninterpreted);
+    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('aff_status', data.variantGermline.uninterpreted, false);
   });
 
   it('Phenotype (HPO)', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('hpo', data.variantGermline.uninterpreted);
+    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('hpo', data.variantGermline.uninterpreted, false);
   });
 
   it('Zygosity', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('zygosity', data.variantGermline.uninterpreted);
+    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('zygosity', data.variantGermline.uninterpreted, false);
   });
 
   it('Diagnostic Lab', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('diag_lab', data.variantGermline.uninterpreted);
+    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('diag_lab', data.variantGermline.uninterpreted, false);
   });
 
   it('Sample', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('sample', data.variantGermline.uninterpreted);
+    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('sample', data.variantGermline.uninterpreted, false);
   });
 
   it('Date', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('date', data.variantGermline.uninterpreted);
+    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('date', data.variantGermline.uninterpreted, false);
   });
 
   it('Analysis', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('analysis', data.variantGermline.uninterpreted);
+    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('analysis', data.variantGermline.uninterpreted, false);
   });
 
   it('Patient', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('patient', data.variantGermline.uninterpreted);
+    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnContent('patient', data.variantGermline.uninterpreted, false);
   });
 });

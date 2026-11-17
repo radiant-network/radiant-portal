@@ -3,71 +3,61 @@ import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { CaseEntity_Files } from 'pom/pages/CaseEntity_Files';
 
-describe('CaseEntity - Files - Information displayed', () => {
-  const setupTest = () => {
+// Read-only checks: set the page up once and share it between tests.
+describe('CaseEntity - Files - Information displayed', { testIsolation: false }, () => {
+  before(() => {
     cy.login();
     cy.visitCaseFilesPage(data.file.case, data.file.search_criteria);
     CaseEntity_Files.actions.sortColumn('name');
     CaseEntity_Files.actions.sortColumn('name');
-  };
+    CaseEntity_Files.actions.showAllColumns();
+  });
 
   it('File Name', () => {
-    setupTest();
-    CaseEntity_Files.validations.shouldShowColumnContent('name', data.file);
+    CaseEntity_Files.validations.shouldShowColumnContent('name', data.file, false);
   });
 
   it('Format', () => {
-    setupTest();
-    CaseEntity_Files.validations.shouldShowColumnContent('format', data.file);
+    CaseEntity_Files.validations.shouldShowColumnContent('format', data.file, false);
   });
 
   it('Type', () => {
-    setupTest();
-    CaseEntity_Files.validations.shouldShowColumnContent('type', data.file);
+    CaseEntity_Files.validations.shouldShowColumnContent('type', data.file, false);
   });
 
   it('Size', () => {
-    setupTest();
-    CaseEntity_Files.validations.shouldShowColumnContent('size', data.file);
+    CaseEntity_Files.validations.shouldShowColumnContent('size', data.file, false);
   });
 
   it('Patient', () => {
-    setupTest();
-    CaseEntity_Files.validations.shouldShowColumnContent('patient', data.file);
+    CaseEntity_Files.validations.shouldShowColumnContent('patient', data.file, false);
   });
 
   it('Relationship', () => {
-    setupTest();
-    CaseEntity_Files.validations.shouldShowColumnContent('relationship', data.file);
+    CaseEntity_Files.validations.shouldShowColumnContent('relationship', data.file, false);
   });
 
   it('Sample', () => {
-    setupTest();
-    CaseEntity_Files.validations.shouldShowColumnContent('sample', data.file);
+    CaseEntity_Files.validations.shouldShowColumnContent('sample', data.file, false);
   });
 
   it('Task', () => {
-    setupTest();
-    CaseEntity_Files.validations.shouldShowColumnContent('task', data.file);
+    CaseEntity_Files.validations.shouldShowColumnContent('task', data.file, false);
   });
 
   it('Created On', () => {
-    setupTest();
-    CaseEntity_Files.validations.shouldShowColumnContent('created_on', data.file);
+    CaseEntity_Files.validations.shouldShowColumnContent('created_on', data.file, false);
   });
 
   it('Sequencing', () => {
-    setupTest();
-    CaseEntity_Files.validations.shouldShowColumnContent('sequencing', data.file);
+    CaseEntity_Files.validations.shouldShowColumnContent('sequencing', data.file, false);
   });
 
   it('Hash', () => {
-    setupTest();
-    CaseEntity_Files.validations.shouldShowColumnContent('hash', data.file);
+    CaseEntity_Files.validations.shouldShowColumnContent('hash', data.file, false);
   });
 
   it('Run', () => {
-    setupTest();
-    CaseEntity_Files.validations.shouldShowColumnContent('run', data.file);
+    CaseEntity_Files.validations.shouldShowColumnContent('run', data.file, false);
   });
 });

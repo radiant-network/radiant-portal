@@ -716,8 +716,8 @@ export const VariantEntity_Patients = {
         shouldShowAllColumns() {
           baseValidations.shouldShowAllColumns(() => actions.showAllColumns());
         },
-        shouldShowColumnContent(columnID: string, data: any) {
-          baseValidations.shouldShowColumnContent(columnID, data, () => actions.showAllColumns());
+        shouldShowColumnContent(columnID: string, data: any, showColumns: boolean = true) {
+          baseValidations.shouldShowColumnContent(columnID, data, () => showColumns && actions.showAllColumns());
         },
         shouldShowColumnTooltips() {
           baseValidations.shouldShowColumnTooltips(() => actions.showAllColumns());
@@ -768,8 +768,8 @@ export const VariantEntity_Patients = {
         shouldShowAllColumns() {
           baseValidations.shouldShowAllColumns(() => actions.showAllColumns());
         },
-        shouldShowColumnContent(columnID: string, data: any) {
-          baseValidations.shouldShowColumnContent(columnID, data, () => actions.showAllColumns());
+        shouldShowColumnContent(columnID: string, data: any, showColumns: boolean = true) {
+          baseValidations.shouldShowColumnContent(columnID, data, () => showColumns && actions.showAllColumns());
         },
         shouldShowColumnTooltips() {
           baseValidations.shouldShowColumnTooltips(() => actions.showAllColumns());

@@ -512,8 +512,8 @@ export const CaseEntity_Details = {
       const baseValidations = generateTableValidationsFunctions(selectors.sequencingCard.tableId, tableColumns.sequencingCard, sequencingColumnContentHandler);
       return {
         ...baseValidations,
-        shouldShowColumnContent(columnID: string, data: any) {
-          baseValidations.shouldShowColumnContent(columnID, data, () => actions.sortColumn('seq_id'));
+        shouldShowColumnContent(columnID: string, data: any, sort: boolean = true) {
+          baseValidations.shouldShowColumnContent(columnID, data, () => sort && actions.sortColumn('seq_id'));
         },
         shouldSortColumn(columnID: string, hasUniqueValues: boolean) {
           baseValidations.shouldSortColumn(columnID, hasUniqueValues, () => actions.sortColumn(columnID));
