@@ -9,11 +9,14 @@ import (
 	"github.com/Goldziher/go-utils/sliceutils"
 )
 
+// SemiJoinRows holds, by table alias, the SQL of the rows of each semi-join table (see Table.SemiJoin).
+type SemiJoinRows map[string]string
+
 type FilterNode interface {
-	ToSQL(overrideTableAliases map[string]string) (string, []interface{})
+	ToSQL(overrideTableAliases map[string]string, semiJoinRows SemiJoinRows) (string, []interface{})
 }
 type FilterNodeWithChildren interface {
-	ToSQL(overrideTableAliases map[string]string) (string, []interface{})
+	ToSQL(overrideTableAliases map[string]string, semiJoinRows SemiJoinRows) (string, []interface{})
 	GetChildren() []FilterNode
 }
 
@@ -43,20 +46,20 @@ type ComparisonNode struct {
 	Field    Field
 }
 
-func (n *AndNode) ToSQL(overrideTableAliases map[string]string) (string, []interface{}) {
-	return childrenToSQL(n, "AND", overrideTableAliases)
+func (n *AndNode) ToSQL(overrideTableAliases map[string]string, semiJoinRows SemiJoinRows) (string, []interface{}) {
+	return childrenToSQL(n, "AND", overrideTableAliases, semiJoinRows)
 }
 
-func (n *OrNode) ToSQL(overrideTableAliases map[string]string) (string, []interface{}) {
-	return childrenToSQL(n, "OR", overrideTableAliases)
+func (n *OrNode) ToSQL(overrideTableAliases map[string]string, semiJoinRows SemiJoinRows) (string, []interface{}) {
+	return childrenToSQL(n, "OR", overrideTableAliases, semiJoinRows)
 }
 
-func childrenToSQL(n FilterNodeWithChildren, op string, overrideTableAliases map[string]string) (string, []interface{}) {
+func childrenToSQL(n FilterNodeWithChildren, op string, overrideTableAliases map[string]string, semiJoinRows SemiJoinRows) (string, []interface{}) {
 	children := n.GetChildren()
 	parts := make([]string, len(children))
 	var newParams []interface{}
 	for i, child := range children {
-		part, params := child.ToSQL(overrideTableAliases)
+		part, params := child.ToSQL(overrideTableAliases, semiJoinRows)
 		newParams = append(newParams, params...)
 		parts[i] = part
 	}
@@ -64,12 +67,15 @@ func childrenToSQL(n FilterNodeWithChildren, op string, overrideTableAliases map
 	return fmt.Sprintf("(%s)", join), newParams
 }
 
-func (n *NotNode) ToSQL(overrideTableAliases map[string]string) (string, []interface{}) {
-	part, params := n.Child.ToSQL(overrideTableAliases)
+func (n *NotNode) ToSQL(overrideTableAliases map[string]string, semiJoinRows SemiJoinRows) (string, []interface{}) {
+	part, params := n.Child.ToSQL(overrideTableAliases, semiJoinRows)
 	return fmt.Sprintf("NOT (%s)", part), params
 }
 
-func (n *ComparisonNode) ToSQL(overrideTableAliases map[string]string) (string, []interface{}) {
+func (n *ComparisonNode) ToSQL(overrideTableAliases map[string]string, semiJoinRows SemiJoinRows) (string, []interface{}) {
+	if n.Field.Table.SemiJoin {
+		return n.semiJoinToSQL(semiJoinRows)
+	}
 	var (
 		field  string
 		params []interface{}
@@ -149,6 +155,52 @@ func (n *ComparisonNode) ToSQL(overrideTableAliases map[string]string) (string, 
 	}
 
 }
+
+// semiJoinToSQL wraps the rows in a derived table named after the field's table alias, so the inner condition
+// is the one a plain field writes. not-in negates the whole sub-query: a case is excluded as soon as one of its
+// rows matches, which a NOT on each row cannot do. Without rows (a query that does not provide them), it returns
+// no SQL, as an unsupported operator does; such a field is kept out of the query's fields.
+func (n *ComparisonNode) semiJoinToSQL(semiJoinRows SemiJoinRows) (string, []interface{}) {
+	rows, ok := semiJoinRows[n.Field.Table.Alias]
+	if !ok || rows == "" {
+		return "", nil
+	}
+	membership := "IN"
+	inner := *n
+	inner.Field.Table.SemiJoin = false
+	if n.Operator == "not-in" {
+		membership = "NOT IN"
+		inner.Operator = "in"
+	}
+	condition, params := inner.ToSQL(nil, nil)
+	if condition == "" {
+		return "", nil
+	}
+	return fmt.Sprintf("%s.id %s (SELECT case_id FROM (%s) %s WHERE %s)", CaseTable.Alias, membership, rows, n.Field.Table.Alias, condition), params
+}
+
+// validateSemiJoinCriterion refuses what a semi-join field cannot turn into SQL, so the search answers 400
+// instead of failing on an empty condition.
+func validateSemiJoinCriterion(field Field, operator string, values []interface{}) error {
+	if !field.Table.SemiJoin {
+		return nil
+	}
+	if len(values) == 0 {
+		return fmt.Errorf("value must be defined: %s", field.GetAlias())
+	}
+	switch operator {
+	case "in", "not-in":
+		return nil
+	case "contains":
+		if len(values) == 1 {
+			return nil
+		}
+		return fmt.Errorf("operation contains must have exactly one value: %s", field.GetAlias())
+	default:
+		return fmt.Errorf("operation %s is not supported on field %s", operator, field.GetAlias())
+	}
+}
+
 func placeholders(count int) string {
 	return strings.TrimSuffix(strings.Repeat("?, ", count), ", ")
 }
@@ -214,6 +266,10 @@ func sqonToFilter(sqon *Sqon, fields []Field, excludedFields []Field) (FilterNod
 			return nil, nil, nil
 		}
 
+		if err := validateSemiJoinCriterion(*meta, sqon.Op, sqon.Content.Leaf().Value); err != nil {
+			return nil, nil, err
+		}
+
 		if sqon.Op == "between" {
 			if len(sqon.Content.Leaf().Value) != 2 {
 				return nil, nil, fmt.Errorf("value array should contain exactly 2 elements when operation is 'between': %s", sqon.Content.Leaf().Field)
@@ -254,6 +310,9 @@ func criteriaToFilter(searchCriteria []SearchCriterion, fields []Field) (FilterN
 			operator := "in"
 			if criterion.Operator != "" {
 				operator = criterion.Operator
+			}
+			if err := validateSemiJoinCriterion(*filteredField, operator, criterion.Value); err != nil {
+				return nil, nil, err
 			}
 			filters = append(filters, &ComparisonNode{
 				Operator: operator,

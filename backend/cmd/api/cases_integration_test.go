@@ -136,7 +136,8 @@ func assertCaseIdsAutoComplete(t *testing.T, data string, prefix string, limit i
 }
 
 func Test_CaseIdsAutoComplete(t *testing.T) {
-	expected := `[{"type":"case_id", "value":"1"}, {"type":"patient_id", "value":"1"}, {"type":"sequencing_experiment_id", "value":"1"}, {"type":"case_id", "value":"10"}, {"type":"patient_id", "value":"10"}]`
+	// The exact matches first, then the types interleaved: run 1617 is the first run, ahead of case 10.
+	expected := `[{"type":"case_id", "value":"1"}, {"type":"patient_id", "value":"1"}, {"type":"sequencing_experiment_id", "value":"1"}, {"type":"run_name", "value":"1617"}, {"type":"case_id", "value":"10"}]`
 	assertCaseIdsAutoComplete(t, "simple", "1", 5, expected)
 }
 
@@ -592,4 +593,19 @@ func Test_CaseEntityDocumentsFiltersHandler(t *testing.T) {
 func Test_CaseIdsAutoComplete_SuggestsProbandSamples(t *testing.T) {
 	expected := `[{"type":"proband_submitter_sample_ids", "value":"SRX1091647"}]`
 	assertCaseIdsAutoComplete(t, "simple", "srx109164", 5, expected)
+}
+
+func Test_SearchCasesHandler_WithRunName_FindsCaseByNormalSampleRun(t *testing.T) {
+	// Run 1678 holds only the normal sample of somatic case 71; the Run column shows its tumoral run 1679.
+	expected := `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "assignees":[], "case_id":71, "case_type":"somatic", "created_on":"2026-03-09T13:08:00Z", "diagnosis_lab_code":"CQGC", "has_variants":true, "ordering_organization_code":"CHUSJ", "ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine", "priority_code":"stat", "proband_id":62, "proband_submitter_sample_ids":["SRX1091647"], "project_code":"N1", "project_name":"NeuroDev Phase I", "run_names":["1679"], "status_code":"in_progress", "submitter_proband_id":"MRN-283834", "updated_on":"2026-03-09T13:08:00Z"}], "count": 1}`
+	body := `{
+			"additional_fields":["run_names"],
+			"search_criteria":[{"field": "run_name", "value": ["1678"]}]
+		}`
+	assertSearchCasesHandler(t, "simple", body, expected)
+}
+
+func Test_CaseIdsAutoComplete_SuggestsRuns(t *testing.T) {
+	expected := `[{"type":"run_name", "value":"1701"}, {"type":"run_name", "value":"1702"}, {"type":"run_name", "value":"1703"}, {"type":"run_name", "value":"1704"}]`
+	assertCaseIdsAutoComplete(t, "simple", "170", 10, expected)
 }

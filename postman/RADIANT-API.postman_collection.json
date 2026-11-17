@@ -1903,6 +1903,83 @@
           "response": []
         },
         {
+          "name": "Autocomplete by run",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/cases/autocomplete?prefix=1617&limit=10",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "cases",
+                "autocomplete"
+              ],
+              "query": [
+                {
+                  "key": "prefix",
+                  "value": "1617"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Search by run",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"additional_fields\": [\n        \"run_names\"\n    ],\n    \"search_criteria\": [\n        {\n            \"field\": \"run_name\",\n            \"operator\": \"in\",\n            \"value\": [\n                \"1617\"\n            ]\n        }\n    ],\n    \"limit\": 20,\n    \"page_index\": 0,\n    \"sort\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/cases/search",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "cases",
+                "search"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Entity",
           "request": {
             "auth": {

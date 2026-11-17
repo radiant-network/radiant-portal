@@ -34,8 +34,13 @@ func AddSort(tx *gorm.DB, userQuery types.ListQuery) {
 }
 
 func AddWhere(userQuery types.Query, tx *gorm.DB) {
+	AddWhereWithSemiJoins(userQuery, tx, nil)
+}
+
+// AddWhereWithSemiJoins is AddWhere for a query whose fields include semi-join fields (see types.Table.SemiJoin).
+func AddWhereWithSemiJoins(userQuery types.Query, tx *gorm.DB, semiJoinRows types.SemiJoinRows) {
 	if userQuery.Filters() != nil {
-		filters, params := userQuery.Filters().ToSQL(nil)
+		filters, params := userQuery.Filters().ToSQL(nil, semiJoinRows)
 		tx.Where(filters, params...)
 	}
 }

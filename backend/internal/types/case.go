@@ -341,6 +341,13 @@ var CaseRunTable = Table{
 	Alias: "case_run",
 }
 
+// CaseMemberRunTable holds one (case_id, run_name) row per sequencing of the case, whatever the member.
+var CaseMemberRunTable = Table{
+	Name:     "case_member_run",
+	Alias:    "case_member_run",
+	SemiJoin: true,
+}
+
 func (Case) TableName() string {
 	return CaseTable.Name
 }
@@ -373,6 +380,7 @@ var CasesFields = []Field{
 	CaseOrderingOrganizationCodeField,
 	CaseProbandSubmitterSampleIdsField,
 	CaseRunNamesField,
+	CaseMemberRunNameField,
 	CaseDiagnosisLabCodeField,
 	CaseDiagnosisLabNameField,
 	PatientOrganizationCodeField,
@@ -558,6 +566,13 @@ var CaseRunNamesField = Field{
 	CanBeSelected: true,
 	IsArray:       true,
 	Table:         CaseRunTable,
+}
+
+var CaseMemberRunNameField = Field{
+	Name:          "run_name",
+	Alias:         "run_name",
+	CanBeFiltered: true,
+	Table:         CaseMemberRunTable,
 }
 
 var CaseSequencingExperimentIdField = Field{
