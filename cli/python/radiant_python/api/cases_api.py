@@ -2221,7 +2221,7 @@ class CasesApi:
     ) -> None:
         """Update a case
 
-        Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+        Apply a partial update to a case. Only the fields present in the body are changed: status_code (a user-applied status) and priority_code, in any case status. At least one is required. Returns 200 with no body on success.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -2301,7 +2301,7 @@ class CasesApi:
     ) -> ApiResponse[None]:
         """Update a case
 
-        Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+        Apply a partial update to a case. Only the fields present in the body are changed: status_code (a user-applied status) and priority_code, in any case status. At least one is required. Returns 200 with no body on success.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -2381,7 +2381,7 @@ class CasesApi:
     ) -> RESTResponseType:
         """Update a case
 
-        Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+        Apply a partial update to a case. Only the fields present in the body are changed: status_code (a user-applied status) and priority_code, in any case status. At least one is required. Returns 200 with no body on success.
 
         :param tenant: Tenant code (required)
         :type tenant: str

@@ -329,6 +329,71 @@ func Test_PatchCase_OwnTenantCaseIsWritable(t *testing.T) {
 	})
 }
 
+func priorityOfCase(t *testing.T, db *gorm.DB, caseID int) string {
+	t.Helper()
+	var priority string
+	require.NoError(t, db.Table("cases").Select("priority_code").Where("id = ?", caseID).Scan(&priority).Error)
+	return priority
+}
+
+func Test_PatchCase_PersistsThePriorityAndLeavesTheStatus(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100120, types.CaseStatusInProgress)
+
+		var before time.Time
+		require.NoError(t, env.Postgres.Table("cases").Select("updated_on").Where("id = ?", caseID).Scan(&before).Error)
+
+		found, err := repo.PatchCase(t.Context(), caseID, &types.Case{PriorityCode: types.CasePriorityStat})
+		assert.NoError(t, err)
+		assert.True(t, found)
+		assert.Equal(t, types.CasePriorityStat, priorityOfCase(t, env.Postgres, caseID))
+		assert.Equal(t, types.CaseStatusInProgress, statusOfCase(t, env.Postgres, caseID), "a priority patch must leave the status untouched")
+
+		var after time.Time
+		require.NoError(t, env.Postgres.Table("cases").Select("updated_on").Where("id = ?", caseID).Scan(&after).Error)
+		assert.True(t, after.After(before), "updated_on did not advance: before %s, after %s", before, after)
+	})
+}
+
+func Test_PatchCase_StatusPatchLeavesThePriority(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100121, types.CaseStatusInProgress)
+
+		found, err := repo.PatchCase(t.Context(), caseID, statusPatch(types.CaseStatusInReview))
+		assert.NoError(t, err)
+		assert.True(t, found)
+		assert.Equal(t, types.CasePriorityRoutine, priorityOfCase(t, env.Postgres, caseID))
+	})
+}
+
+func Test_PatchCase_PersistsStatusAndPriorityTogether(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100122, types.CaseStatusInProgress)
+
+		found, err := repo.PatchCase(t.Context(), caseID, &types.Case{StatusCode: types.CaseStatusCompleted, PriorityCode: types.CasePriorityASAP})
+		assert.NoError(t, err)
+		assert.True(t, found)
+		assert.Equal(t, types.CaseStatusCompleted, statusOfCase(t, env.Postgres, caseID))
+		assert.Equal(t, types.CasePriorityASAP, priorityOfCase(t, env.Postgres, caseID))
+	})
+}
+
+func Test_PatchCase_PriorityOnCrossTenantCaseIsNotFoundAndUnchanged(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})
+		caseID := seedCaseForStatus(t, repo, env.Postgres, 100123, types.CaseStatusInProgress)
+
+		ctx := types.ContextWithTenant(t.Context(), "tenant_b")
+		found, err := repo.PatchCase(ctx, caseID, &types.Case{PriorityCode: types.CasePriorityStat})
+		assert.NoError(t, err)
+		assert.False(t, found, "radiant's case must not be writable from tenant_b")
+		assert.Equal(t, types.CasePriorityRoutine, priorityOfCase(t, env.Postgres, caseID), "the priority must be left untouched")
+	})
+}
+
 func Test_SetCaseStatusIfExpected_MovesSubmittedToProcessing(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.PostgresDB{DB: env.Postgres})

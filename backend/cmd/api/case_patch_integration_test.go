@@ -224,3 +224,89 @@ func Test_PatchCase_UnknownCaseDenied(t *testing.T) {
 		assert.Equal(t, http.StatusForbidden, w.Code)
 	})
 }
+
+func casePriority(t *testing.T, db *gorm.DB, caseID int) string {
+	t.Helper()
+	var priority string
+	require.NoError(t, db.Table("cases").Select("priority_code").Where("id = ?", caseID).Scan(&priority).Error)
+	return priority
+}
+
+func Test_PatchCase_EveryPriorityIsPersisted(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		const caseID = 100130
+		seedCase(t, env.Postgres, caseID, types.CaseStatusInProgress)
+
+		for _, priority := range types.CasePriorities {
+			w := servePatchCase(env.Postgres, wendyID, "radiant", caseID, fmt.Sprintf(`{"priority_code":%q}`, priority))
+			assert.Equalf(t, http.StatusOK, w.Code, "priority %q was refused", priority)
+			assert.Equal(t, priority, casePriority(t, env.Postgres, caseID))
+			assert.Equal(t, types.CaseStatusInProgress, caseStatus(t, env.Postgres, caseID), "a priority patch must leave the status untouched")
+		}
+	})
+}
+
+// Priority stays editable after a case is closed or revoked: no status blocks it.
+func Test_PatchCase_PriorityChangesOnClosedAndRevokedCases(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		for i, status := range []string{types.CaseStatusCompleted, types.CaseStatusResolved, types.CaseStatusUnresolved, types.CaseStatusInconclusive, types.CaseStatusRevoked} {
+			caseID := 100131 + i
+			seedCase(t, env.Postgres, caseID, status)
+
+			w := servePatchCase(env.Postgres, wendyID, "radiant", caseID, `{"priority_code":"urgent"}`)
+
+			assert.Equalf(t, http.StatusOK, w.Code, "priority refused on a %q case", status)
+			assert.Equal(t, types.CasePriorityUrgent, casePriority(t, env.Postgres, caseID))
+			assert.Equal(t, status, caseStatus(t, env.Postgres, caseID))
+		}
+	})
+}
+
+func Test_PatchCase_UnknownPriorityRejected(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		const caseID = 100137
+		seedCase(t, env.Postgres, caseID, types.CaseStatusInProgress)
+
+		w := servePatchCase(env.Postgres, wendyID, "radiant", caseID, `{"priority_code":"critical"}`)
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		assert.Equal(t, types.CasePriorityRoutine, casePriority(t, env.Postgres, caseID))
+	})
+}
+
+func Test_PatchCase_PriorityWithoutEditActionForbidden(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		const caseID = 100138
+		seedCase(t, env.Postgres, caseID, types.CaseStatusInProgress)
+
+		w := servePatchCase(env.Postgres, mikeID, "radiant", caseID, `{"priority_code":"stat"}`)
+
+		assert.Equal(t, http.StatusForbidden, w.Code)
+		assert.JSONEq(t, `{"status":403,"message":"Forbidden"}`, w.Body.String())
+		assert.Equal(t, types.CasePriorityRoutine, casePriority(t, env.Postgres, caseID))
+	})
+}
+
+func Test_PatchCase_PriorityByGranteeAtAnotherLabForbidden(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		const caseID = 100139
+		seedCase(t, env.Postgres, caseID, types.CaseStatusInProgress)
+
+		w := servePatchCase(env.Postgres, aliceID, "radiant", caseID, `{"priority_code":"stat"}`)
+
+		assert.Equal(t, http.StatusForbidden, w.Code)
+		assert.Equal(t, types.CasePriorityRoutine, casePriority(t, env.Postgres, caseID))
+	})
+}
+
+func Test_PatchCase_PriorityOnCrossTenantCaseDeniedAndUnchanged(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		const caseID = 100140
+		seedCase(t, env.Postgres, caseID, types.CaseStatusInProgress)
+
+		w := servePatchCase(env.Postgres, carolID, "tenant_b", caseID, `{"priority_code":"stat"}`)
+
+		assert.Equal(t, http.StatusForbidden, w.Code)
+		assert.Equal(t, types.CasePriorityRoutine, casePriority(t, env.Postgres, caseID), "another tenant must not change a radiant case")
+	})
+}
