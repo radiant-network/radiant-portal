@@ -35,16 +35,17 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 	var columns = sliceutils.Map(userQuery.SelectedFields(), func(field types.Field, index int, slice []types.Field) string {
 		return fmt.Sprintf("%s.%s as %s", field.Table.Alias, field.Name, field.GetAlias())
 	})
-	columns = append(columns, "i.locus_id IS NOT NULL AS has_interpretation")
+	columns = append(columns, "COALESCE(i.own = 1, false) AS has_interpretation")
 	columns = append(columns, "note.occurrence_id IS NOT NULL AS has_note")
 	columns = append(columns, "flag.flag_type")
+	columns = append(columns, "i.classification_counts AS interpretation_classification_counts")
 	columns = append(columns, "v.locus")
 
 	utils.AddPaginationAndSort(tx, userQuery)
 	// we build a TOP-N query like :
-	// SELECT s_snv_o.locus_id, s_snv_o.quality, s_snv_o.ad_ratio, ...., v.variant_class, v.hgvsg..., i.locus_id IS NOT NULL AS has_interpretation
+	// SELECT s_snv_o.locus_id, s_snv_o.quality, s_snv_o.ad_ratio, ...., v.variant_class, v.hgvsg..., COALESCE(i.own = 1, false) AS has_interpretation, i.classification_counts
 	// FROM (somatic__snv__occurrence o, snv__variant v)
-	// 		LEFT JOIN (SELECT DISTINCT locus_id, sequencing_id FROM <schema>.interpretation_somatic) i ON i.locus_id = s_snv_o.locus_id AND i.sequencing_id = ?
+	// 		LEFT JOIN (SELECT locus_id, MAX(own) AS own, to_json(map_agg(NULLIF(oncogenicity, ''), classification_count)) AS classification_counts FROM (<count and own flag (case_id = ? AND sequencing_id = ?) per locus_id, oncogenicity in <schema>.interpretation_somatic>) GROUP BY locus_id) i ON i.locus_id = s_snv_o.locus_id
 	// 		LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM <schema>.occurrence_note WHERE deleted = false) note ON note.occurrence_id = s_snv_o.locus_id AND note.task_id = s_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?
 	// 		LEFT JOIN <schema>.occurrence_flag flag ON flag.occurrence_id = s_snv_o.locus_id AND flag.task_id = s_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?
 	// WHERE s_snv_o.locus_id in (
@@ -52,7 +53,7 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 	// ) AND s_snv_o.tumor_seq_id=? AND s_snv_o.task_id=? AND s_snv_o.part=? AND v.locus_id=s_snv_o.locus_id ORDER BY ad_ratio DESC
 	tx = tx.Select("s_snv_o.locus_id")
 	tx = db.Table(fmt.Sprintf("(%s s_snv_o, %s v)", types.SomaticSNVOccurrenceTable.TenantQualifiedName(ctx), types.VariantTable.TenantQualifiedName(ctx))).
-		Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT locus_id, case_id, sequencing_id FROM %s) i ON i.locus_id = s_snv_o.locus_id AND i.sequencing_id = ? AND i.case_id = ?", types.InterpretationSomaticTable.TenantQualifiedName(ctx)), fmt.Sprintf("%d", seqId), fmt.Sprintf("%d", caseId)).
+		Joins(fmt.Sprintf("LEFT JOIN (SELECT locus_id, MAX(own) AS own, to_json(map_agg(NULLIF(oncogenicity, ''), classification_count)) AS classification_counts FROM (SELECT locus_id, oncogenicity, COUNT(1) AS classification_count, MAX(IF(case_id = ? AND sequencing_id = ?, 1, 0)) AS own FROM %s GROUP BY locus_id, oncogenicity) i_rows GROUP BY locus_id) i ON i.locus_id = s_snv_o.locus_id", types.InterpretationSomaticTable.TenantQualifiedName(ctx)), fmt.Sprintf("%d", caseId), fmt.Sprintf("%d", seqId)).
 		Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s WHERE deleted = false) note ON note.occurrence_id = s_snv_o.locus_id AND note.task_id = s_snv_o.task_id AND note.seq_id = ? AND note.case_id = ?", types.OccurrenceNoteTable.TenantQualifiedName(ctx)), seqId, caseId).
 		Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = s_snv_o.locus_id AND flag.task_id = s_snv_o.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx)), seqId, caseId).
 		Select(columns).
@@ -63,6 +64,9 @@ func (r *SomaticSNVOccurrencesRepository) GetOccurrences(ctx context.Context, ca
 
 	if err = tx.Find(&occurrences).Error; err != nil {
 		return nil, fmt.Errorf("error fetching occurrences: %w", err)
+	}
+	for i := range occurrences {
+		occurrences[i].InterpretationClassificationCounts = keyClassificationCounts(ctx, occurrences[i].LocusId, occurrences[i].InterpretationClassificationCounts, types.GetSomaticOncogenicityKey)
 	}
 	return occurrences, nil
 }

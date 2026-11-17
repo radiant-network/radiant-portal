@@ -78,7 +78,7 @@ func testSomaticSNVStatistics(t *testing.T, data string, body string, expected s
 }
 
 func Test_Somatic_SNV_List(t *testing.T) {
-	testSomaticSNVList(t, "simple", "74", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "alternate":"T", "chromosome": "1", "clinvar":["Benign", "Pathogenic"], "cmc_mutation_url":"https://cancer.sanger.ac.uk/cosmic/search?q=COSV1000", "cmc_sample_mutated":12, "cmc_sample_ratio":0.0012, "cmc_tier":"1", "end": 0, "germline_pc_wgs":3, "germline_pf_wgs":0.99, "gnomad_v3_af":0.001, "has_interpretation":false, "has_note": true, "hgvsg":"hgvsg1", "hotspot":true, "is_canonical":true, "is_mane_plus":null, "is_mane_select":true, "locus_id":"1000", "omim_inheritance_code":["code1"], "picked_consequences":["splice acceptor"], "reference":"A", "rsnumber":"rs111111111", "seq_id":74, "somatic_pc_tn_wgs":6, "somatic_pf_tn_wgs":0.55, "somatic_pc_to_wgs":21, "somatic_pf_to_wgs":0.42, "start": 1111, "symbol":"BRAF", "task_id":74, "transcript_id": "T001", "variant_class":"class1", "vep_impact":"MODIFIER"}]`)
+	testSomaticSNVList(t, "simple", "74", `{"additional_fields":["locus_id"]}`, `[{"aa_change":"p.Arg19His", "alternate":"T", "chromosome": "1", "clinvar":["Benign", "Pathogenic"], "cmc_mutation_url":"https://cancer.sanger.ac.uk/cosmic/search?q=COSV1000", "cmc_sample_mutated":12, "cmc_sample_ratio":0.0012, "cmc_tier":"1", "end": 0, "germline_pc_wgs":3, "germline_pf_wgs":0.99, "gnomad_v3_af":0.001, "has_interpretation":false, "has_note": true, "hgvsg":"hgvsg1", "hotspot":true, "is_canonical":true, "is_mane_plus":null, "is_mane_select":true, "locus_id":"1000", "interpretation_classification_counts": {"oncogenic": 2, "likely_oncogenic": 1}, "omim_inheritance_code":["code1"], "picked_consequences":["splice acceptor"], "reference":"A", "rsnumber":"rs111111111", "seq_id":74, "somatic_pc_tn_wgs":6, "somatic_pf_tn_wgs":0.55, "somatic_pc_to_wgs":21, "somatic_pf_to_wgs":0.42, "start": 1111, "symbol":"BRAF", "task_id":74, "transcript_id": "T001", "variant_class":"class1", "vep_impact":"MODIFIER"}]`)
 }
 
 func Test_Somatic_SNV_List_Return_Filtered_Occurrences_When_Sqon_Specified(t *testing.T) {
@@ -111,7 +111,7 @@ func Test_Somatic_SNV_List_Return_Filtered_Occurrences_When_Sqon_Specified(t *te
 				"is_canonical":true, 
 				"is_mane_plus": null, 
 				"is_mane_select":true, 
-				"locus_id":"1000", 
+				"locus_id":"1000", "interpretation_classification_counts": {"oncogenic": 2, "likely_oncogenic": 1}, 
 				"omim_inheritance_code":["code1"], 
 				"picked_consequences": null, 
 				"reference":"",
@@ -154,7 +154,7 @@ func Test_Somatic_SNV_List_Return_TumorOnly_Occurrence_When_TumorOnlyTask(t *tes
 				"is_canonical":true,
 				"is_mane_plus":null,
 				"is_mane_select":true,
-				"locus_id":"1000",
+				"locus_id":"1000", "interpretation_classification_counts": {"oncogenic": 2, "likely_oncogenic": 1},
 				"omim_inheritance_code":["code1"],
 				"picked_consequences":["splice acceptor"],
 				"reference":"A",
@@ -213,7 +213,7 @@ func Test_Somatic_SNV_List_Return_Sq_And_Aq_When_Requested(t *testing.T) {
 				"is_canonical":true,
 				"is_mane_plus":null,
 				"is_mane_select":true,
-				"locus_id":"1000",
+				"locus_id":"1000", "interpretation_classification_counts": {"oncogenic": 2, "likely_oncogenic": 1},
 				"omim_inheritance_code":["code1"],
 				"picked_consequences":["splice acceptor"],
 				"reference":"A",

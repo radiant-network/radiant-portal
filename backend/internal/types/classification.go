@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"strings"
 )
 
 type Classification = struct {
@@ -15,6 +16,44 @@ var Classifications = []Classification{
 	{Code: "LA26333-7", Label: "vus"},
 	{Code: "LA26334-5", Label: "likelyBenign"},
 	{Code: "LA6675-8", Label: "benign"},
+}
+
+// GermlineClassificationKeys gives the snake_case keys of the occurrence lists; the variant panel keeps the Classifications labels.
+var GermlineClassificationKeys = []Classification{
+	{Code: "LA6668-3", Label: "pathogenic"},
+	{Code: "LA26332-9", Label: "likely_pathogenic"},
+	{Code: "LA26333-7", Label: "uncertain_significance"},
+	{Code: "LA26334-5", Label: "likely_benign"},
+	{Code: "LA6675-8", Label: "benign"},
+}
+
+func GetGermlineClassificationKey(code string) (string, error) {
+	for _, c := range GermlineClassificationKeys {
+		if c.Code == code {
+			return c.Label, nil
+		}
+	}
+	return "", fmt.Errorf("unknown classification code %s", code)
+}
+
+// SomaticOncogenicities maps the LOINC codes the somatic form stores to the keys older rows store as is.
+var SomaticOncogenicities = []Classification{
+	{Code: "LA6668-3", Label: "oncogenic"},
+	{Code: "LA26332-9", Label: "likely_oncogenic"},
+	{Code: "LA26333-7", Label: "uncertain_significance"},
+	{Code: "LA26334-5", Label: "likely_benign"},
+	{Code: "LA6675-8", Label: "benign"},
+}
+
+// GetSomaticOncogenicityKey ignores case and reads a space as "_", so a stored "Likely Oncogenic" maps like "likely_oncogenic".
+func GetSomaticOncogenicityKey(value string) (string, error) {
+	key := strings.ReplaceAll(strings.ToLower(strings.TrimSpace(value)), " ", "_")
+	for _, o := range SomaticOncogenicities {
+		if strings.EqualFold(o.Code, key) || o.Label == key {
+			return o.Label, nil
+		}
+	}
+	return "", fmt.Errorf("unknown oncogenicity %s", value)
 }
 
 func MapToFiltersValueArray() []FiltersValue {

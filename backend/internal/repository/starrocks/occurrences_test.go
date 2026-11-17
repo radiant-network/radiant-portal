@@ -88,3 +88,22 @@ func Test_countWithAndWithoutAnnotations_Counts_Once_When_The_Query_Is_Nil(t *te
 	assert.Equal(t, 1, passes)
 	assert.Equal(t, types.OccurrenceCount{Count: 3, FilteredCount: 3}, counts)
 }
+
+func Test_keyClassificationCounts_Adds_Up_Every_Stored_Form_Under_One_Key(t *testing.T) {
+	stored := types.JsonMap[string, int]{"LA6668-3": 2, "la6668-3": 1, "oncogenic": 1, "Oncogenic": 3, "Likely Oncogenic": 1}
+	assert.Equal(t, types.JsonMap[string, int]{"oncogenic": 7, "likely_oncogenic": 1}, keyClassificationCounts(t.Context(), "1000", stored, types.GetSomaticOncogenicityKey))
+}
+
+func Test_keyClassificationCounts_Skips_Unknown_Value(t *testing.T) {
+	stored := types.JsonMap[string, int]{"LA6675-8": 1, "tier_1": 4}
+	assert.Equal(t, types.JsonMap[string, int]{"benign": 1}, keyClassificationCounts(t.Context(), "1000", stored, types.GetSomaticOncogenicityKey))
+}
+
+func Test_keyClassificationCounts_Returns_Nil_When_Every_Value_Is_Unknown(t *testing.T) {
+	stored := types.JsonMap[string, int]{"tier_1": 4}
+	assert.Nil(t, keyClassificationCounts(t.Context(), "1000", stored, types.GetSomaticOncogenicityKey))
+}
+
+func Test_keyClassificationCounts_Returns_Nil_Without_Interpretation(t *testing.T) {
+	assert.Nil(t, keyClassificationCounts(t.Context(), "1000", nil, types.GetGermlineClassificationKey))
+}

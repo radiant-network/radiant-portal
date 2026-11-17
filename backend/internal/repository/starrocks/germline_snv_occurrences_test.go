@@ -1551,3 +1551,72 @@ func Test_Germline_SNV_SearchOccurrencesByVariantIdentifier_UnknownField(t *test
 		assert.Nil(t, hits)
 	})
 }
+
+func Test_Germline_SNV_GetOccurrences_Returns_Interpretation_Classification_Counts(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
+		assert.NoError(t, err)
+		counts := map[string]types.JsonMap[string, int]{}
+		for _, o := range occurrences {
+			counts[o.LocusId] = o.InterpretationClassificationCounts
+		}
+		assert.Equal(t, map[string]types.JsonMap[string, int]{"1000": {"pathogenic": 1, "likely_pathogenic": 1, "benign": 1}, "2000": nil}, counts)
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Interpretation_Classification_Counts_Include_Other_Cases_And_Skip_Empty_And_Unknown(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		err := env.Postgres.Exec(`INSERT INTO interpretation_germline (sequencing_id, case_id, locus_id, transcript_id, classification, tenant_code) VALUES
+			('22', '2', '1000', 'T001', 'LA6675-8', ?), ('22', '2', '1000', 'T002', '', ?), ('22', '2', '1000', 'T003', 'tier_1', ?), ('22', '2', '1000', 'T004', NULL, ?)`,
+			types.DefaultTenantCode, types.DefaultTenantCode, types.DefaultTenantCode, types.DefaultTenantCode).Error
+		assert.NoError(t, err)
+
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
+		assert.NoError(t, err)
+		found := false
+		for _, o := range occurrences {
+			if o.LocusId == "1000" {
+				found = true
+				assert.Equal(t, types.JsonMap[string, int]{"pathogenic": 1, "likely_pathogenic": 1, "benign": 2}, o.InterpretationClassificationCounts)
+			}
+		}
+		assert.True(t, found)
+	})
+}
+
+func Test_Germline_SNV_GetOccurrences_Unclassified_Interpretation_Sets_Has_Interpretation_Without_Counts(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "multiple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGermlineSNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		err := env.Postgres.Exec(`INSERT INTO interpretation_germline (sequencing_id, case_id, locus_id, transcript_id, classification, tenant_code) VALUES
+			('1', '1', '2000', 'T001', '', ?), ('1', '1', '2000', 'T002', NULL, ?)`,
+			types.DefaultTenantCode, types.DefaultTenantCode).Error
+		assert.NoError(t, err)
+		// The test cleanup keeps every case 1 interpretation, so these rows would leak into other tests.
+		t.Cleanup(func() {
+			assert.NoError(t, env.Postgres.Exec(`DELETE FROM interpretation_germline WHERE case_id = '1' AND locus_id = '2000'`).Error)
+		})
+
+		query, err := types.NewOccurrenceListQueryFromSqon(GermlineSNVQueryConfigForTest, allGermlineSNVFields, nil, nil, nil)
+		assert.NoError(t, err)
+		occurrences, err := repo.GetOccurrences(t.Context(), 1, 1, 5, query)
+		assert.NoError(t, err)
+		found := false
+		for _, o := range occurrences {
+			if o.LocusId == "2000" {
+				found = true
+				assert.True(t, o.HasInterpretation)
+				assert.Nil(t, o.InterpretationClassificationCounts)
+			}
+		}
+		assert.True(t, found)
+	})
+}

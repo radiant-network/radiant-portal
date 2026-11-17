@@ -1,7 +1,9 @@
 package starrocks
 
 import (
+	"context"
 	"fmt"
+	"log/slog"
 	"strings"
 
 	"github.com/radiant-network/radiant-api/internal/types"
@@ -104,6 +106,24 @@ func countWithAndWithoutAnnotations(userQuery types.OccurrenceCountQuery, count 
 		return types.OccurrenceCount{}, err
 	}
 	return types.OccurrenceCount{Count: unfiltered, FilteredCount: filtered}, nil
+}
+
+// keyClassificationCounts maps the stored classifications of one locus to their keys. Two stored forms of one
+// classification add up under one key; an unknown one is skipped with a warning, so one bad row never fails a list.
+func keyClassificationCounts(ctx context.Context, locusId string, stored types.JsonMap[string, int], toKey func(string) (string, error)) types.JsonMap[string, int] {
+	var keyed types.JsonMap[string, int]
+	for value, count := range stored {
+		key, err := toKey(value)
+		if err != nil {
+			slog.WarnContext(ctx, "interpretation classification skipped", "locus_id", locusId, "error", err)
+			continue
+		}
+		if keyed == nil {
+			keyed = types.JsonMap[string, int]{}
+		}
+		keyed[key] += count
+	}
+	return keyed
 }
 
 func interpretationTableFor(snvTable types.Table) (types.Table, bool) {

@@ -2371,6 +2371,8 @@ components:
           type: boolean
         hgvsg:
           type: string
+        interpretation_classification_counts:
+          $ref: '#/components/schemas/JsonMap-string-int'
         is_canonical:
           type: boolean
         is_mane_plus:
@@ -4610,6 +4612,8 @@ components:
           type: string
         hotspot:
           type: boolean
+        interpretation_classification_counts:
+          $ref: '#/components/schemas/JsonMap-string-int'
         is_canonical:
           type: boolean
         is_mane_plus:

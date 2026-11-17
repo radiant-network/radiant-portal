@@ -35,3 +35,80 @@ func Test_GetLabelFromCodeFound(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "benign", label)
 }
+
+func Test_GetSomaticOncogenicityKey_FromLoincCode(t *testing.T) {
+	key, err := GetSomaticOncogenicityKey("LA26332-9")
+
+	assert.NoError(t, err)
+	assert.Equal(t, "likely_oncogenic", key)
+}
+
+func Test_GetSomaticOncogenicityKey_FromStoredKey(t *testing.T) {
+	key, err := GetSomaticOncogenicityKey("oncogenic")
+
+	assert.NoError(t, err)
+	assert.Equal(t, "oncogenic", key)
+}
+
+func Test_GetSomaticOncogenicityKey_IgnoresCase(t *testing.T) {
+	key, err := GetSomaticOncogenicityKey("Oncogenic")
+
+	assert.NoError(t, err)
+	assert.Equal(t, "oncogenic", key)
+}
+
+func Test_GetSomaticOncogenicityKey_ReadsSpaceAsUnderscore(t *testing.T) {
+	key, err := GetSomaticOncogenicityKey("Likely Oncogenic")
+
+	assert.NoError(t, err)
+	assert.Equal(t, "likely_oncogenic", key)
+}
+
+func Test_GetSomaticOncogenicityKey_LowercaseLoincCode(t *testing.T) {
+	key, err := GetSomaticOncogenicityKey("la6668-3")
+
+	assert.NoError(t, err)
+	assert.Equal(t, "oncogenic", key)
+}
+
+func Test_GetSomaticOncogenicityKey_Unknown(t *testing.T) {
+	key, err := GetSomaticOncogenicityKey("tier_1")
+
+	assert.Error(t, err)
+	assert.Equal(t, "", key)
+}
+
+func Test_GetSomaticOncogenicityKey_Empty(t *testing.T) {
+	key, err := GetSomaticOncogenicityKey("")
+
+	assert.Error(t, err)
+	assert.Equal(t, "", key)
+}
+
+func Test_GetGermlineClassificationKey_ReturnsSnakeCaseKey(t *testing.T) {
+	key, err := GetGermlineClassificationKey("LA26333-7")
+
+	assert.NoError(t, err)
+	assert.Equal(t, "uncertain_significance", key)
+}
+
+func Test_GetGermlineClassificationKey_CoversEveryClassificationCode(t *testing.T) {
+	for _, c := range Classifications {
+		_, err := GetGermlineClassificationKey(c.Code)
+		assert.NoError(t, err, c.Code)
+	}
+}
+
+func Test_GetGermlineClassificationKey_Unknown(t *testing.T) {
+	key, err := GetGermlineClassificationKey("tier_1")
+
+	assert.Error(t, err)
+	assert.Equal(t, "", key)
+}
+
+func Test_GetGermlineClassificationKey_Empty(t *testing.T) {
+	key, err := GetGermlineClassificationKey("")
+
+	assert.Error(t, err)
+	assert.Equal(t, "", key)
+}
