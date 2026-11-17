@@ -12,8 +12,8 @@
     "value": "Mock sequencing_experiment_id"
   },
   {
-    "type": "mrn",
-    "value": "Mock mrn"
+    "type": "submitter_patient_id",
+    "value": "Mock submitter_patient_id"
   },
   {
     "type": "proband_submitter_sample_ids",

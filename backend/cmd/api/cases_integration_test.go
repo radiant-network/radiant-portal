@@ -141,6 +141,11 @@ func Test_CaseIdsAutoComplete(t *testing.T) {
 	assertCaseIdsAutoComplete(t, "simple", "1", 5, expected)
 }
 
+func Test_CaseIdsAutoComplete_SuggestsSubmitterPatientIdUnderItsFilterField(t *testing.T) {
+	expected := `[{"type":"submitter_patient_id", "value":"MRN-283775"}]`
+	assertCaseIdsAutoComplete(t, "simple", "mrn-283775", 10, expected)
+}
+
 func assertGetCasesFilters(t *testing.T, data string, expected string) {
 	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})

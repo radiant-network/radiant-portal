@@ -468,6 +468,51 @@ func Test_Cases_SearchById_ProbandSubmitterSampleIds_SuggestsEverySample(t *test
 	})
 }
 
+func Test_Cases_SearchById_SubmitterPatientId_TypedAsFilterField(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		autocompleteResult, err := repo.SearchById(t.Context(), "MRN-283775", 10)
+		require.NoError(t, err)
+		assert.Equal(t, []AutocompleteResult{{Type: "submitter_patient_id", Value: "MRN-283775"}}, *autocompleteResult)
+	})
+}
+
+func Test_Cases_SearchById_SubmitterPatientId_OtherIdentifierType_TypedAsFilterField(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO patient (id, submitter_patient_id, submitter_patient_id_type, organization_code, tenant_code, sex_code, date_of_birth, life_status_code, first_name, last_name, jhn)
+			VALUES (1130, 'NA12878-RAD329', '1KGP', 'CHUSJ', 'radiant', 'female', '2012-02-03', 'alive', 'Test', 'Rad329', 'RAD3291202030')
+		`).Error)
+		defer env.Postgres.Exec("DELETE FROM patient WHERE id = 1130")
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		autocompleteResult, err := repo.SearchById(t.Context(), "na12878-rad329", 10)
+		require.NoError(t, err)
+		assert.Equal(t, []AutocompleteResult{{Type: "submitter_patient_id", Value: "NA12878-RAD329"}}, *autocompleteResult)
+	})
+}
+
+func Test_Cases_SearchById_SubmitterPatientIdSuggestion_FiltersTheCases(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		suggestions, err := repo.SearchById(t.Context(), "MRN-283775", 10)
+		require.NoError(t, err)
+		require.Len(t, *suggestions, 1)
+
+		// The frontend sends the suggestion's type as the search field.
+		suggestion := (*suggestions)[0]
+		criteria := []types.SearchCriterion{{FieldName: suggestion.Type, Value: []interface{}{suggestion.Value}}}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, criteria, nil, nil)
+		require.NoError(t, err)
+		cases, count, err := repo.SearchCases(t.Context(), query)
+		require.NoError(t, err)
+		// Patient 3 is the proband of trio cases 1 and 70.
+		assert.Equal(t, int64(2), *count)
+		require.Len(t, *cases, 2)
+		assert.ElementsMatch(t, []int{1, 70}, []int{(*cases)[0].CaseID, (*cases)[1].CaseID})
+	})
+}
+
 func Test_GetCasesFilters(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})

@@ -110,7 +110,9 @@ func (r *CasesRepository) SearchById(ctx context.Context, prefix string, limit i
 	subQueryProbandId = subQueryProbandId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
 	subQueryOrgPatID := db.Table(fmt.Sprintf("%s %s", types.PatientTable.TenantQualifiedName(ctx), types.PatientTable.Alias))
-	subQueryOrgPatID = subQueryOrgPatID.Select("submitter_patient_id_type as type, submitter_patient_id as value")
+	// A fixed type, as the other branches: the type is the case search field the suggestion filters on, and
+	// the patient's identifier type ("1KGP", "JHN"...) is not one.
+	subQueryOrgPatID = subQueryOrgPatID.Select(fmt.Sprintf("\"%s\" as type, submitter_patient_id as value", types.SubmitterPatientIdField.GetAlias()))
 	subQueryOrgPatID = subQueryOrgPatID.Where("LOWER(submitter_patient_id) LIKE ?", strings.ToLower(searchInput))
 
 	subQuerySeqId := db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.TenantQualifiedName(ctx), types.SequencingExperimentTable.Alias))

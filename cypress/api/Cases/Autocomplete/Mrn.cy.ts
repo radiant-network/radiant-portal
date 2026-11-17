@@ -18,6 +18,6 @@ describe('Cases - Autocomplete - Mrn', () => {
   });
 
   it('Return content', () => {
-    expect(response.body.find((item: { type: string }) => item.type === 'mrn')?.value).to.eq(mrn);
+    expect(response.body.find((item: { type: string }) => item.type === 'submitter_patient_id')?.value).to.eq(mrn);
   });
 });

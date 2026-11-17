@@ -6383,7 +6383,7 @@ paths:
     get:
       description: |-
         Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on:
-        case_id, patient_id, the submitter_patient_id_type of an organization patient id (e.g. mrn), sequencing_experiment_id,
+        case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), sequencing_experiment_id,
         proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
       operationId: autocompleteCases
       parameters:
