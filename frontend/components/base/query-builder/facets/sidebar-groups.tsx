@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BadgeCheckIcon, Droplet, PanelLeftClose, PanelLeftOpen, UserRoundIcon } from 'lucide-react';
+import { BadgeCheckIcon, Droplet, PanelLeftClose, PanelLeftOpen, StarIcon, UserRoundIcon } from 'lucide-react';
 import { tv } from 'tailwind-variants';
 
 import FrequencyIcon from '@/components/base/icons/frequency-icon';
@@ -46,6 +46,8 @@ const buttonVariants = tv({
     selected: false,
   },
 });
+export const FAVORITES_SIDEBAR_ID = 'favorites';
+
 interface SidebarGroupsProps {
   onItemSelect?: (itemId: string | null) => void;
   selectedItemId?: string | null;
@@ -85,27 +87,45 @@ export function SidebarGroups({
     >
       <SidebarContent>
         <SidebarGroup>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                id="sidebar-group-toggle-sidebar"
-                iconOnly
-                aria-label={open ? t('a11y.facets_sidebar.collapse') : t('a11y.facets_sidebar.expand')}
-                onClick={() => setOpen(!open)}
-                className={buttonVariants({
-                  className: 'mb-1 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-                })}
-                size="sm"
-                variant="ghost"
-              >
-                {open ? <PanelLeftClose /> : <PanelLeftOpen />}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right" align="center">
-              {open ? t('query_filters.sidebar_panel.collapse') : t('query_filters.sidebar_panel.expand')}
-            </TooltipContent>
-          </Tooltip>
+          <div className="-mx-2 mb-2 border-b border-sidebar-border px-2 pb-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  id="sidebar-group-toggle-sidebar"
+                  iconOnly
+                  aria-label={open ? t('a11y.facets_sidebar.collapse') : t('a11y.facets_sidebar.expand')}
+                  onClick={() => setOpen(!open)}
+                  className={buttonVariants({
+                    className: 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                  })}
+                  size="sm"
+                  variant="ghost"
+                >
+                  {open ? <PanelLeftClose /> : <PanelLeftOpen />}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right" align="center">
+                {open ? t('query_filters.sidebar_panel.collapse') : t('query_filters.sidebar_panel.expand')}
+              </TooltipContent>
+            </Tooltip>
+          </div>
           <SidebarMenu>
+            <SidebarMenuItem key={FAVORITES_SIDEBAR_ID} className="-mx-2 mb-1 border-b border-sidebar-border px-2 pb-2">
+              <SidebarMenuButton
+                asChild
+                className={buttonVariants({ selected: selectedItemId === FAVORITES_SIDEBAR_ID })}
+                onClick={e => {
+                  e.preventDefault();
+                  handleItemClick(FAVORITES_SIDEBAR_ID);
+                }}
+                tooltip={t('query_filters.sidebar_panel.filters.favorites')}
+              >
+                <div data-cy="sidebar-favorites">
+                  <StarIcon />
+                  <span>{t('query_filters.sidebar_panel.filters.favorites')}</span>
+                </div>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
             {Object.entries(aggregationGroups).map(([id]) => {
               const Icon = iconMap[id as keyof typeof iconMap];
               const label = t(`query_filters.sidebar_panel.filters.${id}`);

@@ -58,8 +58,8 @@
   /* white with 10% opacity */
   --sidebar-brand-accent: rgb(255 255 255 / 0.1);
   --sidebar-brand-accent-foreground: var(--color-slate-50);
-  /* alpha-80 */
-  --sidebar-brand-border: rgb(255 255 255 / 0.8);
+  /* alpha-20 */
+  --sidebar-brand-border: rgb(255 255 255 / 0.2);
   /* alpha-50 */
   --sidebar-brand-ring: rgb(255 255 255 / 0.5);
 

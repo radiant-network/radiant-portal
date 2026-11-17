@@ -119,6 +119,28 @@ Cypress.Commands.add('resetTablePreferences', () => {
   cy.intercept('GET', '**/users/preferences/data-table-*', { statusCode: 404 });
 });
 
+/**
+ * Mocks the favorite-facets user-preference endpoints. Isolates tests from the
+ * QA backend account pool. Pass a list of facet keys to simulate stored favorites,
+ * null to simulate "no favorites yet" (404), or [] for a cleared list.
+ * Pass a number as `favorites` to simulate a GET error status (e.g. 500) for the
+ * load-error + retry flow.
+ * The POST is swallowed with 200 by default so optimistic updates settle; pass
+ * `postStatus` to simulate a save error for the revert + toast flow.
+ */
+Cypress.Commands.add('mockFavoritePreferences', (favorites: string[] | null | number, postStatus = 200) => {
+  cy.intercept('GET', '**/users/preferences/favorites-*', req => {
+    if (favorites === null) return req.reply({ statusCode: 404 });
+    if (typeof favorites === 'number') return req.reply({ statusCode: favorites });
+    const key = req.url.split('/').pop() ?? '';
+    return req.reply({ statusCode: 200, body: { key, content: { favorites } } });
+  }).as('loadFavorites');
+  cy.intercept('POST', '**/users/preferences/favorites-*', req => {
+    if (postStatus >= 400) return req.reply({ statusCode: postStatus });
+    return req.reply({ statusCode: postStatus, body: req.body });
+  }).as('saveFavorites');
+});
+
 // The database may return the keys of a query in another order than the fixture
 const sortedKeys = (value: any): any => {
   if (Array.isArray(value)) return value.map(sortedKeys);

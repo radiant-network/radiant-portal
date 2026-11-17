@@ -10,7 +10,7 @@ export enum ApplicationId {
   'somatic_snv_to_occurrence' = 'somatic_snv_to_occurrence',
   'somatic_snv_tn_occurrence' = 'somatic_snv_tn_occurrence',
   'somatic_cnv_to_occurrence' = 'somatic_cnv_to_occurrence',
-  'variant_entity' = 'germline_snv_occurrence',
+  'variant_entity' = 'variant_entity',
   'study' = 'study',
 }
 
