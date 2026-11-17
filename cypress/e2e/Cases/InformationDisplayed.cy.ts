@@ -3,99 +3,83 @@ import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { CasesTable } from 'pom/pages/CasesTable';
 
-describe('Cases - Information displayed', () => {
-  const setupTest = () => {
+// Read-only checks: set the page up once and share it between tests.
+describe('Cases - Information displayed', { testIsolation: false }, () => {
+  before(() => {
     cy.login();
     cy.visitCasesPage(data.case.search_criteria);
-  };
+    CasesTable.actions.showAllColumns();
+  });
 
   it('Case', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('case', data.case);
+    CasesTable.validations.shouldShowColumnContent('case', data.case, false);
   });
 
   it('Patient', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('patient', data.case);
+    CasesTable.validations.shouldShowColumnContent('patient', data.case, false);
   });
 
   it('MRN', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('mrn', data.case);
+    CasesTable.validations.shouldShowColumnContent('mrn', data.case, false);
   });
 
   it('Priority', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('priority', data.case);
+    CasesTable.validations.shouldShowColumnContent('priority', data.case, false);
   });
 
   it('Status', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('status', data.case);
+    CasesTable.validations.shouldShowColumnContent('status', data.case, false);
   });
 
   it('Type', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('type', data.case);
+    CasesTable.validations.shouldShowColumnContent('type', data.case, false);
   });
 
   it('Analysis', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('analysis', data.case);
+    CasesTable.validations.shouldShowColumnContent('analysis', data.case, false);
   });
 
   it('Primary Condition', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('primary_condition', data.case);
+    CasesTable.validations.shouldShowColumnContent('primary_condition', data.case, false);
   });
 
   it('Req. By', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('req_by', data.case);
+    CasesTable.validations.shouldShowColumnContent('req_by', data.case, false);
   });
 
   it('Sample', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('sample', data.case);
+    CasesTable.validations.shouldShowColumnContent('sample', data.case, false);
   });
 
   it('Run', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('run', data.case);
+    CasesTable.validations.shouldShowColumnContent('run', data.case, false);
   });
 
   it('Project', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('project', data.case);
+    CasesTable.validations.shouldShowColumnContent('project', data.case, false);
   });
 
   it('Created On', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('created_on', data.case);
+    CasesTable.validations.shouldShowColumnContent('created_on', data.case, false);
   });
 
   it('Updated', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('updated_on', data.case);
+    CasesTable.validations.shouldShowColumnContent('updated_on', data.case, false);
   });
 
   it('Prescriber', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('prescriber', data.case);
+    CasesTable.validations.shouldShowColumnContent('prescriber', data.case, false);
   });
 
   it('Diagnostic Lab', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('diagnostic_lab', data.case);
+    CasesTable.validations.shouldShowColumnContent('diagnostic_lab', data.case, false);
   });
 
   it('Managing Org.', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('managing_org', data.case);
+    CasesTable.validations.shouldShowColumnContent('managing_org', data.case, false);
   });
 
   it('Actions', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnContent('actions', data.case);
+    CasesTable.validations.shouldShowColumnContent('actions', data.case, false);
   });
 });
