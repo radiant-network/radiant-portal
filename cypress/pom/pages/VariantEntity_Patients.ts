@@ -462,8 +462,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   /**
    * Validates the default pin state of each column.
    */
-  shouldMatchDefaultPinnedColumns(showColumnsAction: () => void) {
-    showColumnsAction();
+  shouldMatchDefaultPinnedColumns() {
     columns.forEach(column => {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
@@ -481,8 +480,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   /**
    * Validates that all columns are displayed in the correct order in the table.
    */
-  shouldShowAllColumns(showColumnsAction: () => void) {
-    showColumnsAction();
+  shouldShowAllColumns() {
     columns.forEach(column => {
       if (column.name.startsWith('[')) {
         cy.get(CommonSelectors.tableHeadCell(tableId)).eq(column.position).find(column.name).should('exist');
@@ -514,8 +512,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   /**
    * Validates the tooltips on columns.
    */
-  shouldShowColumnTooltips(showColumnsAction: () => void) {
-    showColumnsAction();
+  shouldShowColumnTooltips() {
     columns.forEach(column => {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
@@ -531,8 +528,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   /**
    * Validates that pinnable columns are correctly marked as pinnable.
    */
-  shouldShowPinnableColumns(showColumnsAction: () => void) {
-    showColumnsAction();
+  shouldShowPinnableColumns() {
     columns.forEach(column => {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
@@ -559,8 +555,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
   /**
    * Validates that sortable columns are correctly marked as sortable.
    */
-  shouldShowSortableColumns(showColumnsAction: () => void) {
-    showColumnsAction();
+  shouldShowSortableColumns() {
     columns.forEach(column => {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
@@ -709,21 +704,6 @@ export const VariantEntity_Patients = {
       const baseValidations = generateTableValidationsFunctions(selectors.interpreted.tableId, tableColumns.interpreted, interpretedColumnContentHandler);
       return {
         ...baseValidations,
-        shouldMatchDefaultPinnedColumns() {
-          baseValidations.shouldMatchDefaultPinnedColumns(() => actions.showAllColumns());
-        },
-        shouldShowAllColumns() {
-          baseValidations.shouldShowAllColumns(() => actions.showAllColumns());
-        },
-        shouldShowColumnTooltips() {
-          baseValidations.shouldShowColumnTooltips(() => actions.showAllColumns());
-        },
-        shouldShowPinnableColumns() {
-          baseValidations.shouldShowPinnableColumns(() => actions.showAllColumns());
-        },
-        shouldShowSortableColumns() {
-          baseValidations.shouldShowSortableColumns(() => actions.showAllColumns());
-        },
         shouldSortColumn(columnID: string, hasUniqueValues: boolean) {
           baseValidations.shouldSortColumn(columnID, hasUniqueValues, () => actions.sortColumn(columnID));
         },
@@ -758,21 +738,6 @@ export const VariantEntity_Patients = {
       const baseValidations = generateTableValidationsFunctions(selectors.uninterpreted.tableId, tableColumns.uninterpreted, uninterpretedColumnContentHandler);
       return {
         ...baseValidations,
-        shouldMatchDefaultPinnedColumns() {
-          baseValidations.shouldMatchDefaultPinnedColumns(() => actions.showAllColumns());
-        },
-        shouldShowAllColumns() {
-          baseValidations.shouldShowAllColumns(() => actions.showAllColumns());
-        },
-        shouldShowColumnTooltips() {
-          baseValidations.shouldShowColumnTooltips(() => actions.showAllColumns());
-        },
-        shouldShowPinnableColumns() {
-          baseValidations.shouldShowPinnableColumns(() => actions.showAllColumns());
-        },
-        shouldShowSortableColumns() {
-          baseValidations.shouldShowSortableColumns(() => actions.showAllColumns());
-        },
         shouldSortColumn(columnID: string, hasUniqueValues: boolean) {
           baseValidations.shouldSortColumn(columnID, hasUniqueValues, () => actions.sortColumn(columnID));
         },

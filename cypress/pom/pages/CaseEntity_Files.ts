@@ -321,7 +321,6 @@ export const CaseEntity_Files = {
      * Validates the default pin state of each column.
      */
     shouldMatchDefaultPinnedColumns() {
-      CaseEntity_Files.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -375,7 +374,6 @@ export const CaseEntity_Files = {
      * Validates that all columns are displayed in the correct order in the table.
      */
     shouldShowAllColumns() {
-      CaseEntity_Files.actions.showAllColumns();
       tableColumns.forEach(column => {
         if (column.name.startsWith('[')) {
           cy.get(CommonSelectors.tableHeadCell()).eq(column.position).find(column.name).should('exist');
@@ -414,7 +412,6 @@ export const CaseEntity_Files = {
      * Validates the tooltips on columns.
      */
     shouldShowColumnTooltips() {
-      CaseEntity_Files.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -431,7 +428,6 @@ export const CaseEntity_Files = {
      * Validates that pinnable columns are correctly marked as pinnable.
      */
     shouldShowPinnableColumns() {
-      CaseEntity_Files.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -448,7 +444,6 @@ export const CaseEntity_Files = {
      * Validates that sortable columns are correctly marked as sortable.
      */
     shouldShowSortableColumns() {
-      CaseEntity_Files.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {

@@ -1,59 +1,63 @@
 /// <reference types="cypress"/>
 import 'support/commands';
+import { setupOnce } from 'support/setupOnce';
 import { CasesTable } from 'pom/pages/CasesTable';
 
-describe('Cases - Columns', () => {
-  const setupTest = () => {
-    cy.login();
+// The tests share one page: each one restores what it changes.
+describe('Cases - Columns', { testIsolation: false }, () => {
+  // Cypress drops the intercepts before each test: keep the default table preferences on every test.
+  beforeEach(() => {
     cy.resetTablePreferences();
+  });
+
+  setupOnce(() => {
+    cy.login();
     cy.visitCasesPage();
-  };
+  });
 
   it('Default display', () => {
-    setupTest();
     CasesTable.validations.shouldMatchDefaultColumnVisibility();
   });
 
-  it('Order', () => {
-    setupTest();
-    CasesTable.validations.shouldShowAllColumns();
-  });
+  describe('All columns shown', () => {
+    setupOnce(() => {
+      CasesTable.actions.showAllColumns();
+    });
 
-  it('Pin', () => {
-    setupTest();
-    CasesTable.validations.shouldShowPinnableColumns();
-  });
+    it('Order', () => {
+      CasesTable.validations.shouldShowAllColumns();
+    });
 
-  it('Default pin state', () => {
-    setupTest();
-    CasesTable.validations.shouldMatchDefaultPinnedColumns();
-  });
+    it('Pin', () => {
+      CasesTable.validations.shouldShowPinnableColumns();
+    });
 
-  it('Sort', () => {
-    setupTest();
-    CasesTable.validations.shouldShowSortableColumns();
-  });
+    it('Default pin state', () => {
+      CasesTable.validations.shouldMatchDefaultPinnedColumns();
+    });
 
-  it('Tooltip', () => {
-    setupTest();
-    CasesTable.validations.shouldShowColumnTooltips();
-  });
+    it('Sort', () => {
+      CasesTable.validations.shouldShowSortableColumns();
+    });
 
-  it('Hide and show column', () => {
-    setupTest();
-    CasesTable.validations.shouldDisplayColumn('case');
-    CasesTable.actions.hideColumn('case');
-    CasesTable.validations.shouldNotDisplayColumn('case');
-    CasesTable.actions.showColumn('case');
-    CasesTable.validations.shouldDisplayColumn('case');
-  });
+    it('Tooltip', () => {
+      CasesTable.validations.shouldShowColumnTooltips();
+    });
 
-  it('Pin and unpin column', () => {
-    setupTest();
-    CasesTable.validations.shouldUnpinnedColumn('status');
-    CasesTable.actions.pinColumn('status');
-    CasesTable.validations.shouldPinnedColumn('status');
-    CasesTable.actions.unpinColumn('status');
-    CasesTable.validations.shouldUnpinnedColumn('status');
+    it('Hide and show column', () => {
+      CasesTable.validations.shouldDisplayColumn('case');
+      CasesTable.actions.hideColumn('case');
+      CasesTable.validations.shouldNotDisplayColumn('case');
+      CasesTable.actions.showColumn('case');
+      CasesTable.validations.shouldDisplayColumn('case');
+    });
+
+    it('Pin and unpin column', () => {
+      CasesTable.validations.shouldUnpinnedColumn('status');
+      CasesTable.actions.pinColumn('status');
+      CasesTable.validations.shouldPinnedColumn('status');
+      CasesTable.actions.unpinColumn('status');
+      CasesTable.validations.shouldUnpinnedColumn('status');
+    });
   });
 });

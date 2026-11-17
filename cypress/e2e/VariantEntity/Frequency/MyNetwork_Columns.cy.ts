@@ -1,42 +1,42 @@
 /// <reference types="cypress"/>
 import 'support/commands';
+import { setupOnce } from 'support/setupOnce';
 import { data } from 'pom/shared/Data';
 import { VariantEntity_Frequency } from 'pom/pages/VariantEntity_Frequency';
 
-describe('VariantEntity - Frequency - MyNetwork - Columns', () => {
-  const setupTest = () => {
-    cy.login();
+// The tests share one page: each one restores what it changes.
+describe('VariantEntity - Frequency - MyNetwork - Columns', { testIsolation: false }, () => {
+  // Cypress drops the intercepts before each test: keep the default table preferences on every test.
+  beforeEach(() => {
     cy.resetTablePreferences();
+  });
+
+  setupOnce(() => {
+    cy.login();
     cy.visitVariantFrequencyPage(data.variantGermline.locus_id);
-  };
+  });
 
   it('Default display', () => {
-    setupTest();
     VariantEntity_Frequency.myNetwork.validations.shouldMatchDefaultColumnVisibility();
   });
 
   it('Order', () => {
-    setupTest();
     VariantEntity_Frequency.myNetwork.validations.shouldShowAllColumns();
   });
 
   it('Pin', () => {
-    setupTest();
     VariantEntity_Frequency.myNetwork.validations.shouldShowPinnableColumns();
   });
 
   it('Default pin state', () => {
-    setupTest();
     VariantEntity_Frequency.myNetwork.validations.shouldMatchDefaultPinnedColumns();
   });
 
   it('Sort', () => {
-    setupTest();
     VariantEntity_Frequency.myNetwork.validations.shouldShowSortableColumns();
   });
 
   it('Tooltip', () => {
-    setupTest();
     VariantEntity_Frequency.myNetwork.validations.shouldShowColumnTooltips();
   });
 });
