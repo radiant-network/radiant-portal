@@ -284,9 +284,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    * @param columnID The ID of the column to validate.
    * @param data The data object containing the expected values.
    */
-  shouldShowColumnContent(columnID: string, data: any, sortAction: () => void) {
-    sortAction();
-    sortAction();
+  shouldShowColumnContent(columnID: string, data: any) {
     getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
       if (position !== -1) {
         if (customColumnContent) {
@@ -488,9 +486,6 @@ export const CaseEntity_Details = {
       const baseValidations = generateTableValidationsFunctions(selectors.bioinformaticsCard.tableId, tableColumns.bioinformaticsCard, bioinformaticsColumnContentHandler);
       return {
         ...baseValidations,
-        shouldShowColumnContent(columnID: string, data: any) {
-          baseValidations.shouldShowColumnContent(columnID, data, () => null);
-        },
         shouldSortColumn(columnID: string, hasUniqueValues: boolean) {
           baseValidations.shouldSortColumn(columnID, hasUniqueValues, () => actions.sortColumn(columnID));
         },
@@ -512,9 +507,6 @@ export const CaseEntity_Details = {
       const baseValidations = generateTableValidationsFunctions(selectors.sequencingCard.tableId, tableColumns.sequencingCard, sequencingColumnContentHandler);
       return {
         ...baseValidations,
-        shouldShowColumnContent(columnID: string, data: any, sort: boolean = true) {
-          baseValidations.shouldShowColumnContent(columnID, data, () => sort && actions.sortColumn('seq_id'));
-        },
         shouldSortColumn(columnID: string, hasUniqueValues: boolean) {
           baseValidations.shouldSortColumn(columnID, hasUniqueValues, () => actions.sortColumn(columnID));
         },

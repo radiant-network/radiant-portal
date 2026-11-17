@@ -7,6 +7,7 @@ import { FilesTable } from 'pom/pages/FilesTable';
 describe('Files - Information displayed', { testIsolation: false }, () => {
   before(() => {
     cy.login();
+    cy.resetTablePreferences();
     cy.visitFilesPage(data.file.search_criteria);
     FilesTable.actions.sortColumn('case');
     FilesTable.actions.sortColumn('case');
@@ -16,58 +17,58 @@ describe('Files - Information displayed', { testIsolation: false }, () => {
   });
 
   it('File Name', () => {
-    FilesTable.validations.shouldShowColumnContent('name', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('name', data.file);
   });
 
   it('Format', () => {
-    FilesTable.validations.shouldShowColumnContent('format', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('format', data.file);
   });
 
   it('Type', () => {
-    FilesTable.validations.shouldShowColumnContent('type', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('type', data.file);
   });
 
   it('Size', () => {
-    FilesTable.validations.shouldShowColumnContent('size', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('size', data.file);
   });
 
   it('Case', () => {
-    FilesTable.validations.shouldShowColumnContent('case', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('case', data.file);
   });
 
   it('Diag. Lab', () => {
-    FilesTable.validations.shouldShowColumnContent('diag_lab', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('diag_lab', data.file);
   });
 
   it('Relationship', () => {
-    FilesTable.validations.shouldShowColumnContent('relationship', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('relationship', data.file);
   });
 
   it('Patient', () => {
-    FilesTable.validations.shouldShowColumnContent('patient', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('patient', data.file);
   });
 
   it('Sample', () => {
-    FilesTable.validations.shouldShowColumnContent('sample', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('sample', data.file);
   });
 
   it('Task', () => {
-    FilesTable.validations.shouldShowColumnContent('task', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('task', data.file);
   });
 
   it('Created On', () => {
-    FilesTable.validations.shouldShowColumnContent('created_on', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('created_on', data.file);
   });
 
   it('Sequencing', () => {
-    FilesTable.validations.shouldShowColumnContent('sequencing', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('sequencing', data.file);
   });
 
   it('Hash', () => {
-    FilesTable.validations.shouldShowColumnContent('hash', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('hash', data.file);
   });
 
   it('Run', () => {
-    FilesTable.validations.shouldShowColumnContent('run', data.file, false);
+    FilesTable.validations.shouldShowColumnContent('run', data.file);
   });
 });

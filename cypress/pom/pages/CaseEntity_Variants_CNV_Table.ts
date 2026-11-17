@@ -637,12 +637,8 @@ export const CaseEntity_Variants_CNV_Table = {
      * Validates the content of a specific column in the table for a given cnv.
      * @param columnID The ID of the column to validate.
      * @param dataCNV The cnv object containing the expected values.
-     * @param showColumns Show all columns first (false when the spec already did it).
      */
-    shouldShowColumnContent(columnID: string, dataCNV: any, showColumns: boolean = true) {
-      if (showColumns) {
-        CaseEntity_Variants_CNV_Table.actions.showAllColumns();
-      }
+    shouldShowColumnContent(columnID: string, dataCNV: any) {
       getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
           switch (columnID) {

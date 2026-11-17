@@ -549,12 +549,8 @@ export const CasesTable = {
      * Validates the content of a specific column in the table for a given case.
      * @param columnID The ID of the column to validate.
      * @param dataCase The case object containing the expected values.
-     * @param showColumns Show all columns first (false when the spec already did it).
      */
-    shouldShowColumnContent(columnID: string, dataCase: any, showColumns: boolean = true) {
-      if (showColumns) {
-        CasesTable.actions.showAllColumns();
-      }
+    shouldShowColumnContent(columnID: string, dataCase: any) {
       getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
           switch (columnID) {
