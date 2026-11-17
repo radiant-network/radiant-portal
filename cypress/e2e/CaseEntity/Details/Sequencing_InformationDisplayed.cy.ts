@@ -1,11 +1,12 @@
 /// <reference types="cypress"/>
 import 'support/commands';
+import { setupOnce } from 'support/setupOnce';
 import { data } from 'pom/shared/Data';
 import { CaseEntity_Details } from 'pom/pages/CaseEntity_Details';
 
 // Read-only checks: set the page up once and share it between tests.
 describe('CaseEntity - Details - Sequencing - Information displayed', { testIsolation: false }, () => {
-  before(() => {
+  setupOnce(() => {
     cy.login();
     cy.visitCaseDetailsPage(data.case.case);
     CaseEntity_Details.sequencingCard.actions.sortColumn('seq_id');

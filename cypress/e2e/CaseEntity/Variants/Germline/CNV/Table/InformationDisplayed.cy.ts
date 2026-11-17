@@ -1,12 +1,13 @@
 /// <reference types="cypress"/>
 import 'support/commands';
+import { setupOnce } from 'support/setupOnce';
 import { data } from 'pom/shared/Data';
 import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV_Table';
 import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_SavedFilters';
 
 // Read-only checks: set the page up once and share it between tests.
 describe('Case Entity - Variants - Germline - CNV - Table - Information displayed', { testIsolation: false }, () => {
-  before(() => {
+  setupOnce(() => {
     cy.login();
     cy.resetTablePreferences();
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'CNV', data.cnvGermline.sqon);

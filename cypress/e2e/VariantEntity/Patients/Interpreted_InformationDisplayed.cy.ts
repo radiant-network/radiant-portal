@@ -1,11 +1,12 @@
 /// <reference types="cypress"/>
 import 'support/commands';
+import { setupOnce } from 'support/setupOnce';
 import { data } from 'pom/shared/Data';
 import { VariantEntity_Patients } from 'pom/pages/VariantEntity_Patients';
 
 // Read-only checks: set the page up once and share it between tests.
 describe('VariantEntity - Patients - Interpreted - Information displayed', { testIsolation: false }, () => {
-  before(() => {
+  setupOnce(() => {
     cy.login();
     cy.resetTablePreferences();
     cy.visitVariantPatientsPage(data.variantGermline.locus_id);
