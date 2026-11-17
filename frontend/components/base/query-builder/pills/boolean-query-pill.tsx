@@ -42,7 +42,7 @@ function BooleanQueryPill({ queryId, sqon }: BooleanPillProps) {
         <LabelOperator field={sqon.content.field} operator={<Operator size={14} type={sqon.op} />} />
         <Popover>
           <PopoverTrigger>
-            <QueryPillValues sqon={sqon} />
+            <QueryPillValues sqon={sqon} clickable />
           </PopoverTrigger>
           <PopoverContent align="start" className="p-2.5">
             <FacetComponent field={aggregation} isOpen />

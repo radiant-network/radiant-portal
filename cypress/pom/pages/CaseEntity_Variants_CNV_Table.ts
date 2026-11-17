@@ -639,7 +639,6 @@ export const CaseEntity_Variants_CNV_Table = {
      * @param dataCNV The cnv object containing the expected values.
      */
     shouldShowColumnContent(columnID: string, dataCNV: any) {
-      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
       getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
           switch (columnID) {

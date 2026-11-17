@@ -1,6 +1,7 @@
 package types
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -41,8 +42,52 @@ type Case struct {
 // PatchCase is the body of PATCH /{tenant}/cases/{case_id}.
 // @Description Case fields to change. Omitted fields are left untouched.
 type PatchCase struct {
-	StatusCode string `json:"status_code,omitempty" example:"in_review" enums:"in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
+	StatusCode   string `json:"status_code,omitempty" example:"in_review" enums:"in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
+	PriorityCode string `json:"priority_code,omitempty" example:"urgent" enums:"routine,urgent,asap,stat"`
 } // @name PatchCase
+
+func ValidatePatchCase(patch PatchCase) error {
+	if patch.StatusCode == "" && patch.PriorityCode == "" {
+		return errors.New("no field to update, expected status_code or priority_code")
+	}
+	if patch.StatusCode != "" {
+		if err := ValidateUserAppliedCaseStatus(patch.StatusCode); err != nil {
+			return err
+		}
+	}
+	if patch.PriorityCode != "" {
+		if err := ValidateCasePriority(patch.PriorityCode); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type CasePriority = string
+
+const (
+	CasePriorityRoutine CasePriority = "routine"
+	CasePriorityUrgent  CasePriority = "urgent"
+	CasePriorityASAP    CasePriority = "asap"
+	CasePriorityStat    CasePriority = "stat"
+)
+
+var CasePriorities = []string{
+	CasePriorityRoutine,
+	CasePriorityUrgent,
+	CasePriorityASAP,
+	CasePriorityStat,
+}
+
+func ValidateCasePriority(code string) error {
+	switch {
+	case code == "":
+		return fmt.Errorf("priority_code is required, expected one of: %s", strings.Join(CasePriorities, ", "))
+	case !slices.Contains(CasePriorities, code):
+		return fmt.Errorf("unknown priority_code %q, expected one of: %s", code, strings.Join(CasePriorities, ", "))
+	}
+	return nil
+}
 
 type CaseStatus = string
 

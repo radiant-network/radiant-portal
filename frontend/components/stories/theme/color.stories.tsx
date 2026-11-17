@@ -66,13 +66,30 @@ export const Variants: Story = {
           <Color color="bookmark off" colorClass="bg-bookmark-off" />
         </div>
       </StorySection>
+
+      <StorySection title="Query builder">
+        <div className="grid grid-cols-3 gap-4 w-full">
+          <Color color="qb bar" colorClass="bg-qb-bar" />
+          <Color color="qb bar muted" colorClass="bg-qb-bar-muted" />
+          <Color color="qb bar border" colorClass="bg-qb-bar-border" />
+          <Color color="qb bar border muted" colorClass="bg-qb-bar-border-muted" />
+          <Color color="qb pill" colorClass="bg-qb-pill" />
+          <Color color="qb pill muted" colorClass="bg-qb-pill-muted" />
+          <Color color="qb pill value bg" colorClass="bg-qb-pill-value-bg" />
+          <Color color="qb pill value bg muted" colorClass="bg-qb-pill-value-bg-muted" />
+          <Color color="qb pill value (text)" colorClass="text-qb-pill-value" sample="Aa" />
+          <Color color="qb pill value muted (text)" colorClass="text-qb-pill-value-muted" sample="Aa" />
+        </div>
+      </StorySection>
     </StoryShowcase>
   ),
 };
 
-const Color = ({ color, colorClass }: { color: string; colorClass: string }) => (
+const Color = ({ color, colorClass, sample }: { color: string; colorClass: string; sample?: string }) => (
   <div className="flex flex-col items-center gap-1">
-    <div className={cn('rounded-sm size-10 border', colorClass)} />
+    <div className={cn('rounded-sm size-10 border flex items-center justify-center font-medium', colorClass)}>
+      {sample}
+    </div>
     <div className="text-sm text-center">{color}</div>
   </div>
 );

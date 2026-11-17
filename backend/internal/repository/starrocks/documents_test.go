@@ -69,7 +69,6 @@ func Test_SearchDocumentsPrenatalDocumentFields(t *testing.T) {
 		assert.Equal(t, 63, document272.PatientID)
 		assert.Equal(t, "S-PRENAT-72", document272.SubmitterSampleID)
 		assert.Equal(t, 83, document272.TaskID)
-		assert.Equal(t, "alignment_germline_variant_calling", document272.TaskTypeCode)
 		assert.Equal(t, "Genome Alignment and Germline Variant Calling", document272.TaskTypeName)
 		assert.Equal(t, 75, document272.SeqID)
 		assert.Equal(t, "9d7fa39c3ab46a21c649e057482b8911-9585", document272.Hash)
@@ -129,7 +128,6 @@ func Test_SearchDocumentsTaskTypeOfFamilyVariantCalling(t *testing.T) {
 
 		for _, document := range *documents {
 			assert.Equal(t, 4, document.TaskID)
-			assert.Equal(t, "family_variant_calling", document.TaskTypeCode)
 			assert.Equal(t, "Family Joint Genotyping", document.TaskTypeName)
 		}
 	})

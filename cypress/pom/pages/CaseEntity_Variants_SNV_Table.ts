@@ -169,6 +169,17 @@ const tableGermlineSNVColumns = [
     tooltip: null,
   },
   {
+    id: 'my_network',
+    name: 'My Network',
+    apiField: 'interpretation_classification_counts',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 13,
+    tooltip: 'My Network interpretations',
+  },
+  {
     id: 'exomiser',
     name: 'Exo.',
     apiField: 'exomiser_gene_combined_score',
@@ -176,7 +187,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 13,
+    position: 14,
     tooltip: 'Exomiser score based on variant properties and patient phenotypes',
   },
   {
@@ -187,7 +198,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 14,
+    position: 15,
     tooltip: 'Exomiser ACMG',
   },
   {
@@ -198,7 +209,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 15,
+    position: 16,
     tooltip: 'gnomAD 4.1.0 Joint (Frequency)',
   },
   {
@@ -209,7 +220,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 16,
+    position: 17,
     tooltip: 'Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.',
   },
   {
@@ -220,7 +231,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 17,
+    position: 18,
     tooltip: 'Genotype quality: only occurrences with GQ ≥ 20 are taken into account for frequency calculation.',
   },
   {
@@ -231,7 +242,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 18,
+    position: 19,
     tooltip: 'Zygosity',
   },
   {
@@ -242,7 +253,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: false,
     isPinnable: true,
-    position: 19,
+    position: 20,
     tooltip: 'Compound heterozygous (slivar): only PASS, impactful variants (LoF, Missense, Inframe, Splice Region) heterozygous in the proband with GQ ≥ 20, depth ≥ 6 and allele balance between 0.2 and 0.8 are considered. In trios, exactly one parent must carry the variant and neither may be homozygous.',
   },
   {
@@ -253,7 +264,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 20,
+    position: 21,
     tooltip: null,
   },
   {
@@ -264,7 +275,7 @@ const tableGermlineSNVColumns = [
     pinByDefault: 'right',
     isSortable: false,
     isPinnable: true,
-    position: 21,
+    position: 22,
     tooltip: null,
   },
 ];
@@ -447,6 +458,17 @@ const tableSomaticSNVColumns = [
     tooltip: null,
   },
   {
+    id: 'my_network',
+    name: 'My Network',
+    apiField: 'interpretation_classification_counts',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 14,
+    tooltip: 'My Network interpretations',
+  },
+  {
     id: 'gnomad',
     name: 'gnomAD',
     apiField: 'gnomad_v3_af',
@@ -454,7 +476,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 14,
+    position: 15,
     tooltip: 'gnomAD 4.1.0 Joint (Frequency)',
   },
   {
@@ -465,7 +487,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 15,
+    position: 16,
     tooltip: 'Number of tumor-only genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.',
   },
   {
@@ -476,7 +498,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 16,
+    position: 17,
     tooltip: 'Number of tumor-normal genomes containing this variant and their frequency across this network. Only occurrences meeting the criterion ALT > 2 are considered for frequency calculation.',
   },
   {
@@ -487,7 +509,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 17,
+    position: 18,
     tooltip: 'Number of germline genomes containing this variant and their frequency across this network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.',
   },
   {
@@ -498,7 +520,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 18,
+    position: 19,
     tooltip: 'Somatic Quality',
   },
   {
@@ -509,7 +531,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 19,
+    position: 20,
     tooltip: 'Systematic noise score (AQ)',
   },
   {
@@ -520,7 +542,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 20,
+    position: 21,
     tooltip: 'Allele depth ratio ALT/(ALT+REF)',
   },
   {
@@ -531,7 +553,7 @@ const tableSomaticSNVColumns = [
     pinByDefault: 'right',
     isSortable: false,
     isPinnable: true,
-    position: 21,
+    position: 22,
     tooltip: null,
   },
 ];
@@ -1001,7 +1023,6 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
      * @param dataVariant The variant object containing the expected values.
      */
     shouldShowColumnContent(columnID: string, dataVariant: any) {
-      actions.showAllColumns();
       getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
           const handler = contentHandlers[columnID] ?? defaultContentHandler;

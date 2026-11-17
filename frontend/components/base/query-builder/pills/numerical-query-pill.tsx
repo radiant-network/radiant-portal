@@ -42,7 +42,7 @@ function NumericalQueryPill({ queryId, sqon }: NumericalPillProps) {
         <LabelOperator field={sqon.content.field} operator={<Operator size={14} type={sqon.op} />} />
         <Popover>
           <PopoverTrigger data-cy="query-pill-value">
-            <QueryPillValues sqon={sqon} />
+            <QueryPillValues sqon={sqon} clickable />
           </PopoverTrigger>
           <PopoverContent align="start" className="p-2.5" data-cy="query-pill-editor">
             <FacetComponent field={aggregation} isOpen />

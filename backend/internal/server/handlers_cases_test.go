@@ -530,7 +530,6 @@ func Test_CaseEntityDocumentsSearchHandler(t *testing.T) {
 			"seq_id":56,
 			"size":325362647,
 			"task_id":20,
-			"task_type_code":"alignment_germline_variant_calling",
 			"task_type_name":"Genome Alignment and Germline Variant Calling"
 		}],
 		"count": 1
@@ -629,8 +628,43 @@ func Test_PatchCaseHandler_RejectsEmptyBody(t *testing.T) {
 	w := servePatchCase(repo, "/radiant/cases/1", `{}`)
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.JSONEq(t, `{"status":400,"message":"status_code is required, expected one of: in_progress, in_review, completed, resolved, unresolved, inconclusive, reopened, revoked"}`, w.Body.String())
+	assert.JSONEq(t, `{"status":400,"message":"no field to update, expected status_code or priority_code"}`, w.Body.String())
 	assert.Zero(t, repo.calls)
+}
+
+func Test_PatchCaseHandler_AppliesPriorityOnly(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"priority_code":"stat"}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Empty(t, w.Body.String(), "a successful patch answers 200 with no body")
+	assert.Equal(t, 1, repo.gotCaseId)
+	assert.Equal(t, &types.Case{PriorityCode: "stat"}, repo.gotCase, "a priority-only patch must not carry a status")
+}
+
+func Test_PatchCaseHandler_AppliesStatusAndPriority(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"revoked","priority_code":"urgent"}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, &types.Case{StatusCode: "revoked", PriorityCode: "urgent"}, repo.gotCase)
+}
+
+func Test_PatchCaseHandler_RejectsUnknownPriority(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"priority_code":"critical"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400,"message":"unknown priority_code \"critical\", expected one of: routine, urgent, asap, stat"}`, w.Body.String())
+	assert.Zero(t, repo.calls, "a rejected priority must not reach the database")
+}
+
+func Test_PatchCaseHandler_RejectsUnknownPriorityWithValidStatus(t *testing.T) {
+	repo := &casePatcherMock{found: true}
+	w := servePatchCase(repo, "/radiant/cases/1", `{"status_code":"in_review","priority_code":"critical"}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Zero(t, repo.calls, "a patch with one invalid field must write nothing")
 }
 
 func Test_PatchCaseHandler_RejectsSubmitted(t *testing.T) {

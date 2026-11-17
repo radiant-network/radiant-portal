@@ -119,7 +119,7 @@ func (s *Service) notifyLab(ctx context.Context, tenantCode, groupName, lab, lab
 	for _, c := range cases {
 		caseIDs = append(caseIDs, c.CaseID)
 		data.Cases = append(data.Cases, TemplateCase{CaseID: c.CaseID, Priority: c.PriorityCode, AnalysisCode: c.AnalysisCatalogCode})
-		if c.PriorityCode == "stat" {
+		if c.PriorityCode == types.CasePriorityStat {
 			data.HasStat = true
 		}
 		if c.AnalysisCatalogCode != "" && !seenCodes[c.AnalysisCatalogCode] {

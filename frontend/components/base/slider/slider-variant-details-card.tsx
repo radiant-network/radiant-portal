@@ -670,9 +670,11 @@ export const PredictionCard = ({
   if (Object.keys(exomiser_acmg_classification_counts ?? {}).length) {
     classification.push(
       <DescriptionRow key="exomiser" label={t('preview_sheet.variant_details.sections.classification.exomiser')}>
-        {Object.entries(exomiser_acmg_classification_counts ?? {}).map(([key, count]) => (
-          <ClassificationBadge key={key} value={key} count={count} abbreviated />
-        ))}
+        <div className="flex gap-1">
+          {Object.entries(exomiser_acmg_classification_counts ?? {}).map(([key, count]) => (
+            <ClassificationBadge key={key} value={key} count={count} abbreviated />
+          ))}
+        </div>
       </DescriptionRow>,
     );
   }
@@ -684,9 +686,17 @@ export const PredictionCard = ({
           <DescriptionSection title={t('preview_sheet.variant_details.sections.interpretations.title')}>
             {Object.keys(interpretation_classification_counts ?? {}).length ? (
               <DescriptionRow label={t('preview_sheet.variant_details.sections.interpretations.my_network')}>
-                {Object.entries(interpretation_classification_counts ?? {}).map(([key, count]) => (
-                  <ClassificationBadge key={key} value={key} count={count} abbreviated />
-                ))}
+                <div className="flex gap-1">
+                  {Object.entries(interpretation_classification_counts ?? {}).map(([key, count]) => (
+                    <ClassificationBadge
+                      key={key}
+                      value={key}
+                      count={count}
+                      abbreviated
+                      isSomatic={type === 'somatic'}
+                    />
+                  ))}
+                </div>
               </DescriptionRow>
             ) : (
               <span className="text-muted-foreground text-xs">

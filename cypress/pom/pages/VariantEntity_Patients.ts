@@ -498,8 +498,7 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    * @param columnID The ID of the column to validate.
    * @param data The data object containing the expected values.
    */
-  shouldShowColumnContent(columnID: string, data: any, showColumnsAction: () => void) {
-    showColumnsAction();
+  shouldShowColumnContent(columnID: string, data: any) {
     getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID).then(position => {
       if (position !== -1) {
         if (customColumnContent) {
@@ -716,9 +715,6 @@ export const VariantEntity_Patients = {
         shouldShowAllColumns() {
           baseValidations.shouldShowAllColumns(() => actions.showAllColumns());
         },
-        shouldShowColumnContent(columnID: string, data: any) {
-          baseValidations.shouldShowColumnContent(columnID, data, () => actions.showAllColumns());
-        },
         shouldShowColumnTooltips() {
           baseValidations.shouldShowColumnTooltips(() => actions.showAllColumns());
         },
@@ -767,9 +763,6 @@ export const VariantEntity_Patients = {
         },
         shouldShowAllColumns() {
           baseValidations.shouldShowAllColumns(() => actions.showAllColumns());
-        },
-        shouldShowColumnContent(columnID: string, data: any) {
-          baseValidations.shouldShowColumnContent(columnID, data, () => actions.showAllColumns());
         },
         shouldShowColumnTooltips() {
           baseValidations.shouldShowColumnTooltips(() => actions.showAllColumns());
