@@ -390,9 +390,12 @@ export const CaseEntity_Files = {
      * Validates the content of a specific column in the table for a given file.
      * @param columnID The ID of the column to validate.
      * @param dataFile The file object containing the expected values.
+     * @param showColumns Show all columns first (false when the spec already did it).
      */
-    shouldShowColumnContent(columnID: string, dataFile: any) {
-      CaseEntity_Files.actions.showAllColumns();
+    shouldShowColumnContent(columnID: string, dataFile: any, showColumns: boolean = true) {
+      if (showColumns) {
+        CaseEntity_Files.actions.showAllColumns();
+      }
       getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
           switch (columnID) {

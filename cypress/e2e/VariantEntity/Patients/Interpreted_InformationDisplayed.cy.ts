@@ -3,54 +3,47 @@ import 'support/commands';
 import { data } from 'pom/shared/Data';
 import { VariantEntity_Patients } from 'pom/pages/VariantEntity_Patients';
 
-describe('VariantEntity - Patients - Interpreted - Information displayed', () => {
-  const setupTest = () => {
+// Read-only checks: set the page up once and share it between tests.
+describe('VariantEntity - Patients - Interpreted - Information displayed', { testIsolation: false }, () => {
+  before(() => {
     cy.login();
     cy.visitVariantPatientsPage(data.variantGermline.locus_id);
-  };
+    VariantEntity_Patients.interpreted.actions.showAllColumns();
+  });
 
   it('Case', () => {
-    setupTest();
-    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('case', data.variantGermline.interpreted);
+    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('case', data.variantGermline.interpreted, false);
   });
 
   it('Date', () => {
-    setupTest();
-    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('date', data.variantGermline.interpreted);
+    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('date', data.variantGermline.interpreted, false);
   });
 
   it('Condition (Mondo)', () => {
-    setupTest();
-    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('condition_mondo', data.variantGermline.interpreted);
+    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('condition_mondo', data.variantGermline.interpreted, false);
   });
 
   it('Classification', () => {
-    setupTest();
-    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('classification', data.variantGermline.interpreted);
+    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('classification', data.variantGermline.interpreted, false);
   });
 
   it('Zygosity', () => {
-    setupTest();
-    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('zygosity', data.variantGermline.interpreted);
+    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('zygosity', data.variantGermline.interpreted, false);
   });
 
   it('Inheritance', () => {
-    setupTest();
-    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('inheritance', data.variantGermline.interpreted);
+    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('inheritance', data.variantGermline.interpreted, false);
   });
 
   it('Diagnostic Lab', () => {
-    setupTest();
-    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('diag_lab', data.variantGermline.interpreted);
+    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('diag_lab', data.variantGermline.interpreted, false);
   });
 
   it('Analysis', () => {
-    setupTest();
-    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('analysis', data.variantGermline.interpreted);
+    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('analysis', data.variantGermline.interpreted, false);
   });
 
   it('Status', () => {
-    setupTest();
-    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('status', data.variantGermline.interpreted);
+    VariantEntity_Patients.interpreted.validations.shouldShowColumnContent('status', data.variantGermline.interpreted, false);
   });
 });

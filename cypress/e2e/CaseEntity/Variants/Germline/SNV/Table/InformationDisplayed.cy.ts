@@ -4,100 +4,84 @@ import { data } from 'pom/shared/Data';
 import { CaseEntity_Variants_SNV_Table } from 'pom/pages/CaseEntity_Variants_SNV_Table';
 import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_SavedFilters';
 
-describe('Case Entity - Variants - Germline - SNV - Table - Information displayed', () => {
-  const setupTest = () => {
+// Read-only checks: set the page up once and share it between tests.
+describe('Case Entity - Variants - Germline - SNV - Table - Information displayed', { testIsolation: false }, () => {
+  before(() => {
     cy.login();
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'SNV', data.variantGermline.sqon);
     CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Clean Query Builder
-  };
+    CaseEntity_Variants_SNV_Table.germline.actions.showAllColumns();
+  });
 
   it('Variant', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('variant', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('variant', data.variantGermline, false);
   });
 
   it('Type', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('type', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('type', data.variantGermline, false);
   });
 
   it('dbSNP', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('dbsnp', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('dbsnp', data.variantGermline, false);
   });
 
   it('Gene', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('gene', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('gene', data.variantGermline, false);
   });
 
   it('AA', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('aa_change', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('aa_change', data.variantGermline, false);
   });
 
   it('Consequence', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('consequence', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('consequence', data.variantGermline, false);
   });
 
   it('MANE', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('mane', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('mane', data.variantGermline, false);
   });
 
   it('OMIM', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('omim', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('omim', data.variantGermline, false);
   });
 
   it('Tier', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('tier', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('tier', data.variantGermline, false);
   });
 
   it('CMC', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('cmc', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('cmc', data.variantGermline, false);
   });
 
   it('ClinVar', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('clinvar', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('clinvar', data.variantGermline, false);
   });
 
   it('Exo.', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('exomiser', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('exomiser', data.variantGermline, false);
   });
 
   it('ACMG Exo.', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('acmg_exomiser', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('acmg_exomiser', data.variantGermline, false);
   });
 
   it('gnomAD', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('gnomad', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('gnomad', data.variantGermline, false);
   });
 
   it('Freq.', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('freq', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('freq', data.variantGermline, false);
   });
 
   it('GQ', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('gq', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('gq', data.variantGermline, false);
   });
 
   it('Zyg.', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('zyg', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('zyg', data.variantGermline, false);
   });
 
   it('AD Ratio', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('ad_ratio', data.variantGermline);
+    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnContent('ad_ratio', data.variantGermline, false);
   });
 });
