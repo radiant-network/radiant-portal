@@ -54,6 +54,62 @@ func Test_PatchCase_StatusCodeEnumMatchesUserApplied(t *testing.T) {
 	assert.Equal(t, UserAppliedCaseStatuses, documented, "the `enums` tag on PatchCase.StatusCode has drifted from UserAppliedCaseStatuses")
 }
 
+func Test_PatchCase_PriorityCodeEnumMatchesCasePriorities(t *testing.T) {
+	field, ok := reflect.TypeOf(PatchCase{}).FieldByName("PriorityCode")
+	assert.True(t, ok, "PatchCase.PriorityCode has been renamed; update this guard")
+
+	documented := strings.Split(field.Tag.Get("enums"), ",")
+	assert.Equal(t, CasePriorities, documented, "the `enums` tag on PatchCase.PriorityCode has drifted from CasePriorities")
+}
+
+func Test_ValidateCasePriority_AcceptsEveryPriority(t *testing.T) {
+	for _, code := range CasePriorities {
+		assert.NoErrorf(t, ValidateCasePriority(code), "ValidateCasePriority(%q) = error; want nil", code)
+	}
+}
+
+func Test_ValidateCasePriority_RejectsUnknownCode(t *testing.T) {
+	err := ValidateCasePriority("critical")
+	assert.EqualError(t, err, `unknown priority_code "critical", expected one of: routine, urgent, asap, stat`)
+}
+
+func Test_ValidateCasePriority_RejectsWrongCase(t *testing.T) {
+	err := ValidateCasePriority("URGENT")
+	assert.EqualError(t, err, `unknown priority_code "URGENT", expected one of: routine, urgent, asap, stat`)
+}
+
+func Test_ValidateCasePriority_RejectsEmptyCode(t *testing.T) {
+	err := ValidateCasePriority("")
+	assert.EqualError(t, err, "priority_code is required, expected one of: routine, urgent, asap, stat")
+}
+
+func Test_ValidatePatchCase_AcceptsStatusOnly(t *testing.T) {
+	assert.NoError(t, ValidatePatchCase(PatchCase{StatusCode: CaseStatusInReview}))
+}
+
+func Test_ValidatePatchCase_AcceptsPriorityOnly(t *testing.T) {
+	assert.NoError(t, ValidatePatchCase(PatchCase{PriorityCode: CasePriorityStat}))
+}
+
+func Test_ValidatePatchCase_AcceptsStatusAndPriority(t *testing.T) {
+	assert.NoError(t, ValidatePatchCase(PatchCase{StatusCode: CaseStatusRevoked, PriorityCode: CasePriorityUrgent}))
+}
+
+func Test_ValidatePatchCase_RejectsEmptyPatch(t *testing.T) {
+	err := ValidatePatchCase(PatchCase{})
+	assert.EqualError(t, err, "no field to update, expected status_code or priority_code")
+}
+
+func Test_ValidatePatchCase_RejectsSystemStatusWithValidPriority(t *testing.T) {
+	err := ValidatePatchCase(PatchCase{StatusCode: CaseStatusSubmitted, PriorityCode: CasePriorityUrgent})
+	assert.EqualError(t, err, `status_code "submitted" is system-applied and cannot be set by a user`)
+}
+
+func Test_ValidatePatchCase_RejectsUnknownPriorityWithValidStatus(t *testing.T) {
+	err := ValidatePatchCase(PatchCase{StatusCode: CaseStatusInReview, PriorityCode: "critical"})
+	assert.EqualError(t, err, `unknown priority_code "critical", expected one of: routine, urgent, asap, stat`)
+}
+
 func Test_CaseStatuses_UserAndSystemSetsAreDisjoint(t *testing.T) {
 	for _, code := range SystemAppliedCaseStatuses {
 		assert.NotContainsf(t, UserAppliedCaseStatuses, code, "%q is listed as both system- and user-applied", code)

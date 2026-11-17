@@ -221,11 +221,9 @@ func CaseEntityHandler(repo casesReader, igvRepo igvReader, assignmentsRepo case
 
 // PatchCaseHandler applies a partial update to a case. Only the fields the body carries are
 // written, so the endpoint takes another patchable field without a new route.
-//
-// The only field so far is status_code
 // @Summary Update a case
 // @Id patchCase
-// @Description Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+// @Description Apply a partial update to a case. Only the fields present in the body are changed: status_code (a user-applied status) and priority_code, in any case status. At least one is required. Returns 200 with no body on success.
 // @Tags cases
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
@@ -253,12 +251,12 @@ func PatchCaseHandler(repo casePatcher) gin.HandlerFunc {
 			HandleValidationError(c, err)
 			return
 		}
-		if err := types.ValidateUserAppliedCaseStatus(patch.StatusCode); err != nil {
+		if err := types.ValidatePatchCase(patch); err != nil {
 			HandleValidationError(c, err)
 			return
 		}
 
-		found, err := repo.PatchCase(c.Request.Context(), caseId, &types.Case{StatusCode: patch.StatusCode})
+		found, err := repo.PatchCase(c.Request.Context(), caseId, &types.Case{StatusCode: patch.StatusCode, PriorityCode: patch.PriorityCode})
 		if err != nil {
 			HandleError(c, err)
 			return

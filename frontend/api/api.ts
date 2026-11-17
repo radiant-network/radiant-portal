@@ -6003,9 +6003,23 @@ export interface PatchCase {
      * @type {string}
      * @memberof PatchCase
      */
+    'priority_code'?: PatchCasePriorityCodeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof PatchCase
+     */
     'status_code'?: PatchCaseStatusCodeEnum;
 }
 
+export const PatchCasePriorityCodeEnum = {
+    Routine: 'routine',
+    Urgent: 'urgent',
+    Asap: 'asap',
+    Stat: 'stat'
+} as const;
+
+export type PatchCasePriorityCodeEnum = typeof PatchCasePriorityCodeEnum[keyof typeof PatchCasePriorityCodeEnum];
 export const PatchCaseStatusCodeEnum = {
     InProgress: 'in_progress',
     InReview: 'in_review',
@@ -11805,7 +11819,7 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+         * Apply a partial update to a case. Only the fields present in the body are changed: status_code (a user-applied status) and priority_code, in any case status. At least one is required. Returns 200 with no body on success.
          * @summary Update a case
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -12251,7 +12265,7 @@ export const CasesApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+         * Apply a partial update to a case. Only the fields present in the body are changed: status_code (a user-applied status) and priority_code, in any case status. At least one is required. Returns 200 with no body on success.
          * @summary Update a case
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -12448,7 +12462,7 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.listCaseAssignmentCandidates(tenant, caseId, search, limit, offset, pageIndex, options).then((request) => request(axios, basePath));
         },
         /**
-         * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+         * Apply a partial update to a case. Only the fields present in the body are changed: status_code (a user-applied status) and priority_code, in any case status. At least one is required. Returns 200 with no body on success.
          * @summary Update a case
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
@@ -12638,7 +12652,7 @@ export class CasesApi extends BaseAPI {
     }
 
     /**
-     * Apply a partial update to a case. Only the fields present in the body are changed; status_code is the only one applied today. Returns 200 with no body on success.
+     * Apply a partial update to a case. Only the fields present in the body are changed: status_code (a user-applied status) and priority_code, in any case status. At least one is required. Returns 200 with no body on success.
      * @summary Update a case
      * @param {string} tenant Tenant code
      * @param {number} caseId Case ID

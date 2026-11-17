@@ -100,6 +100,9 @@ func (r *CasesRepository) PatchCase(ctx context.Context, caseID int, c *Case) (b
 	if c.StatusCode != "" {
 		updates["status_code"] = c.StatusCode
 	}
+	if c.PriorityCode != "" {
+		updates["priority_code"] = c.PriorityCode
+	}
 	if len(updates) == 0 {
 		return false, fmt.Errorf("no field to update on case %d", caseID)
 	}

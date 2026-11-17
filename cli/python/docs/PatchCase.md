@@ -6,6 +6,7 @@ Case fields to change. Omitted fields are left untouched.
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**priority_code** | **str** |  | [optional] 
 **status_code** | **str** |  | [optional] 
 
 ## Example

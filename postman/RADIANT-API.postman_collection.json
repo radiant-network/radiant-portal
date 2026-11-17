@@ -1948,7 +1948,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"status_code\": \"in_review\"\n}",
+              "raw": "{\n  \"status_code\": \"in_review\",\n  \"priority_code\": \"urgent\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

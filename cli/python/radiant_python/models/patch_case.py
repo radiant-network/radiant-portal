@@ -26,8 +26,19 @@ class PatchCase(BaseModel):
     """
     Case fields to change. Omitted fields are left untouched.
     """ # noqa: E501
+    priority_code: Optional[StrictStr] = None
     status_code: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["status_code"]
+    __properties: ClassVar[List[str]] = ["priority_code", "status_code"]
+
+    @field_validator('priority_code')
+    def priority_code_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        if value not in set(['routine', 'urgent', 'asap', 'stat']):
+            raise ValueError("must be one of enum values ('routine', 'urgent', 'asap', 'stat')")
+        return value
 
     @field_validator('status_code')
     def status_code_validate_enum(cls, value):
@@ -90,6 +101,7 @@ class PatchCase(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "priority_code": obj.get("priority_code"),
             "status_code": obj.get("status_code")
         })
         return _obj
