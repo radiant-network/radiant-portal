@@ -1354,8 +1354,6 @@ components:
           type: string
         task_id:
           type: integer
-        task_type_code:
-          type: string
         task_type_name:
           type: string
       required:

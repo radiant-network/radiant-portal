@@ -489,7 +489,6 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 				"size":1.02778567393e+11, 
 				"submitter_sample_id":"S14857", 
 				"task_id":68,
-				"task_type_code":"alignment_germline_variant_calling",
 				"task_type_name":"Genome Alignment and Germline Variant Calling"
 			}, {
 				"case_id":21, 
@@ -505,7 +504,6 @@ func Test_CaseEntityDocumentsSearchHandler_WithSortAndLimit(t *testing.T) {
 				"size":1.03970420817e+11, 
 				"submitter_sample_id":"S14858", 
 				"task_id":69,
-				"task_type_code":"alignment_germline_variant_calling",
 				"task_type_name":"Genome Alignment and Germline Variant Calling"
 			}
 		], 

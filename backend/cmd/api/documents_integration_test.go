@@ -50,7 +50,6 @@ func Test_SearchDocumentsHandler_WithCriteria(t *testing.T) {
 				"submitter_sample_id":"S13228", 
 				"size":3.06718965e+08, 
 				"task_id":12,
-				"task_type_code":"alignment_germline_variant_calling",
 				"task_type_name":"Genome Alignment and Germline Variant Calling"
 			}, {
 				"case_id":2, 
@@ -66,7 +65,6 @@ func Test_SearchDocumentsHandler_WithCriteria(t *testing.T) {
 				"submitter_sample_id":"S13228", 
 				"size":1.09940425359e+11, 
 				"task_id":12,
-				"task_type_code":"alignment_germline_variant_calling",
 				"task_type_name":"Genome Alignment and Germline Variant Calling"
 			}
 		], 
@@ -97,7 +95,6 @@ func Test_SearchDocumentsHandler_WithAdditionalFields(t *testing.T) {
 				"seq_id": 5,
 				"size":3.06718965e+08, 
 				"task_id":12,
-				"task_type_code":"alignment_germline_variant_calling",
 				"task_type_name":"Genome Alignment and Germline Variant Calling"
 			}, {
 				"case_id":2, 
@@ -115,7 +112,6 @@ func Test_SearchDocumentsHandler_WithAdditionalFields(t *testing.T) {
 				"seq_id": 5,
 				"size":1.09940425359e+11, 
 				"task_id":12,
-				"task_type_code":"alignment_germline_variant_calling",
 				"task_type_name":"Genome Alignment and Germline Variant Calling"
 			}
 		], 
@@ -144,7 +140,6 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 				"submitter_sample_id":"S13224",
 				"size":3.03866839e+08, 
 				"task_id":5,
-				"task_type_code":"radiant_germline_annotation",
 				"task_type_name":"RADIANT Germline Annotation"
 			},
 			{
@@ -161,7 +156,6 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 				"submitter_sample_id":"S13225", 
 				"size":3.03866839e+08, 
 				"task_id":5,
-				"task_type_code":"radiant_germline_annotation",
 				"task_type_name":"RADIANT Germline Annotation"
 			}
 		], 
