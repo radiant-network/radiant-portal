@@ -518,7 +518,7 @@ func Test_ToSQL_Return_Array_Contains_On_Comphet_Join_When_Filter_On_Comphet_Of(
 	}
 }
 
-var memberRunRows = SemiJoinRows{CaseMemberRunTable.Alias: "SELECT chseq.case_id, s.run_name FROM t1_tenant.case_has_sequencing_experiment chseq INNER JOIN t1_tenant.sequencing_experiment s ON s.id = chseq.sequencing_experiment_id"}
+var memberRunRows = CaseSemiJoinRows{CaseMemberRunTable.Alias: "SELECT chseq.case_id, s.run_name FROM t1_tenant.case_has_sequencing_experiment chseq INNER JOIN t1_tenant.sequencing_experiment s ON s.id = chseq.sequencing_experiment_id"}
 
 const memberRunSubQuery = "SELECT case_id FROM (SELECT chseq.case_id, s.run_name FROM t1_tenant.case_has_sequencing_experiment chseq INNER JOIN t1_tenant.sequencing_experiment s ON s.id = chseq.sequencing_experiment_id) case_member_run WHERE "
 
@@ -592,16 +592,6 @@ func Test_ToSQL_SemiJoinField_OverrideAliasIgnored(t *testing.T) {
 	sqlQuery, _ := node.ToSQL(map[string]string{CaseMemberRunTable.Alias: "other"}, memberRunRows)
 
 	assert.Equal(t, "c.id IN ("+memberRunSubQuery+"case_member_run.run_name = ?)", sqlQuery)
-}
-
-func Test_ToSQL_SemiJoinField_WithoutRows_NoSql(t *testing.T) {
-	t.Parallel()
-	node := ComparisonNode{Operator: "in", Value: []interface{}{"1617"}, Field: CaseMemberRunNameField}
-
-	sqlQuery, params := node.ToSQL(nil, nil)
-
-	assert.Empty(t, sqlQuery)
-	assert.Nil(t, params)
 }
 
 func Test_CriteriaToFilter_SemiJoinField_InDefaultOperator_Accepted(t *testing.T) {
@@ -726,4 +716,51 @@ func Test_CriteriaToFilter_VariantInterpretedCases_RunName_Error(t *testing.T) {
 	_, _, err := criteriaToFilter(criteria, VariantInterpretedCasesFields)
 
 	assert.EqualError(t, err, "run_name can not be filtered")
+}
+
+func Test_CaseSemiJoinTables_NestedFilters_EachTableOnce(t *testing.T) {
+	t.Parallel()
+	node := &AndNode{Children: []FilterNode{
+		&ComparisonNode{Operator: "in", Value: []interface{}{"1"}, Field: CaseIdField},
+		&OrNode{Children: []FilterNode{
+			&ComparisonNode{Operator: "in", Value: []interface{}{"1617"}, Field: CaseMemberRunNameField},
+			&NotNode{Child: &ComparisonNode{Operator: "in", Value: []interface{}{"1619"}, Field: CaseMemberRunNameField}},
+		}},
+	}}
+
+	assert.Equal(t, []Table{CaseMemberRunTable}, CaseSemiJoinTables(node))
+}
+
+func Test_CaseSemiJoinTables_NoSemiJoinField_Empty(t *testing.T) {
+	t.Parallel()
+	node := &AndNode{Children: []FilterNode{&ComparisonNode{Operator: "in", Value: []interface{}{"1"}, Field: CaseIdField}}}
+
+	assert.Empty(t, CaseSemiJoinTables(node))
+}
+
+func Test_CaseSemiJoinTables_NilFilter_Empty(t *testing.T) {
+	t.Parallel()
+	assert.Empty(t, CaseSemiJoinTables(nil))
+}
+
+// Only the case search gives the semi-join rows (CasesRepository.prepareQuery). A case semi-join field in any other
+// field list would be accepted as a filter and then fail the query: leave it out, as VariantInterpretedCasesFields does.
+func Test_QueryConfigs_OnlyCasesHaveCaseSemiJoinFields(t *testing.T) {
+	t.Parallel()
+	others := map[string]QueryConfig{
+		"GermlineSNVOccurrences":    GermlineSNVOccurrencesQueryConfig,
+		"SomaticSNVOccurrences":     SomaticSNVOccurrencesQueryConfig,
+		"GermlineCNVOccurrences":    GermlineCNVOccurrencesQueryConfig,
+		"SomaticCNVOccurrences":     SomaticCNVOccurrencesQueryConfig,
+		"Documents":                 DocumentsQueryConfig,
+		"PcxPatients":               PcxPatientsQueryConfig,
+		"VariantInterpretedCases":   VariantInterpretedCasesQueryConfig,
+		"VariantUninterpretedCases": VariantUninterpretedCasesQueryConfig,
+	}
+	for name, config := range others {
+		for _, field := range config.AllFields {
+			assert.False(t, field.Table.CaseSemiJoin, "%s exposes the case semi-join field %s", name, field.GetAlias())
+		}
+	}
+	assert.Contains(t, CasesQueryConfig.AllFields, CaseMemberRunNameField)
 }

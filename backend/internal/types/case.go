@@ -341,11 +341,10 @@ var CaseRunTable = Table{
 	Alias: "case_run",
 }
 
-// CaseMemberRunTable holds one (case_id, run_name) row per sequencing of the case, whatever the member.
 var CaseMemberRunTable = Table{
-	Name:     "case_member_run",
-	Alias:    "case_member_run",
-	SemiJoin: true,
+	Name:         "case_member_run",
+	Alias:        "case_member_run",
+	CaseSemiJoin: true,
 }
 
 func (Case) TableName() string {

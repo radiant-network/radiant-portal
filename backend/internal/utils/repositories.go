@@ -34,15 +34,23 @@ func AddSort(tx *gorm.DB, userQuery types.ListQuery) {
 }
 
 func AddWhere(userQuery types.Query, tx *gorm.DB) {
-	AddWhereWithSemiJoins(userQuery, tx, nil)
+	AddWhereWithCaseSemiJoins(userQuery, tx, nil)
 }
 
-// AddWhereWithSemiJoins is AddWhere for a query whose fields include semi-join fields (see types.Table.SemiJoin).
-func AddWhereWithSemiJoins(userQuery types.Query, tx *gorm.DB, semiJoinRows types.SemiJoinRows) {
-	if userQuery.Filters() != nil {
-		filters, params := userQuery.Filters().ToSQL(nil, semiJoinRows)
-		tx.Where(filters, params...)
+// A case semi-join field filtered without its rows would write no SQL and leave a broken WHERE: the query fails
+// with an explicit error instead.
+func AddWhereWithCaseSemiJoins(userQuery types.Query, tx *gorm.DB, semiJoinRows types.CaseSemiJoinRows) {
+	if userQuery.Filters() == nil {
+		return
 	}
+	for _, table := range types.CaseSemiJoinTables(userQuery.Filters()) {
+		if semiJoinRows[table.Alias] == "" {
+			_ = tx.AddError(fmt.Errorf("case semi-join table %s is filtered but the query gives none of its rows", table.Alias))
+			return
+		}
+	}
+	filters, params := userQuery.Filters().ToSQL(nil, semiJoinRows)
+	tx.Where(filters, params...)
 }
 
 // AddPagination applies a resolved pagination to any query, whether or not it comes from the

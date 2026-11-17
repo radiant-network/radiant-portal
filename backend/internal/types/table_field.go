@@ -12,9 +12,7 @@ type Table struct {
 	Alias          string // Alias of the table to use in query
 	FederationName string // FederationName name through Starrocks federation
 	PerTenant      bool   // If the table lives in the tenant DB (true) or the shared DB (false).
-	// SemiJoin marks a table whose (case_id, column) rows the repository gives at query time: a filter on one
-	// of its fields becomes c.id [NOT] IN (SELECT case_id FROM (<rows>) <alias> WHERE ...), never a join.
-	SemiJoin bool
+	CaseSemiJoin   bool
 }
 
 // In qualifies the table by a StarRocks schema (database), e.g.
@@ -132,10 +130,10 @@ func findNumericByAlias(fields []Field, alias string) *Field {
 	})
 }
 
-func withoutSemiJoinFields(fields []Field) []Field {
+func withoutCaseSemiJoinFields(fields []Field) []Field {
 	var kept []Field
 	for _, f := range fields {
-		if !f.Table.SemiJoin {
+		if !f.Table.CaseSemiJoin {
 			kept = append(kept, f)
 		}
 	}
