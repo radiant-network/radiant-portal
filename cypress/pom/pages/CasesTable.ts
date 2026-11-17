@@ -551,7 +551,6 @@ export const CasesTable = {
      * @param dataCase The case object containing the expected values.
      */
     shouldShowColumnContent(columnID: string, dataCase: any) {
-      CasesTable.actions.showAllColumns();
       getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
           switch (columnID) {

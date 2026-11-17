@@ -447,7 +447,6 @@ export const FilesTable = {
      * @param dataFile The file object containing the expected values.
      */
     shouldShowColumnContent(columnID: string, dataFile: any) {
-      FilesTable.actions.showAllColumns();
       getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
           switch (columnID) {

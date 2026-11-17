@@ -1023,7 +1023,6 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
      * @param dataVariant The variant object containing the expected values.
      */
     shouldShowColumnContent(columnID: string, dataVariant: any) {
-      actions.showAllColumns();
       getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
         if (position !== -1) {
           const handler = contentHandlers[columnID] ?? defaultContentHandler;
