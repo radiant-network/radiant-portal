@@ -28,6 +28,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # A spec that no shard lists would never run, without any warning
+      - name: Check the shards cover every spec
+        run: node cypress/scripts/check-shards.mjs
+
       - name: Set run ID
         id: run
         run: |

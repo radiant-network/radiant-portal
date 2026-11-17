@@ -152,6 +152,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # A spec that no shard lists would never run, without any warning
+      - name: Check the shards cover every spec
+        run: node cypress/scripts/check-shards.mjs
+
       # The specs come from the merge with the base branch, the Ferlease image from the branch alone: they only match once rebased.
       - name: Check the branch is rebased on main
         env:
