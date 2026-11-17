@@ -1,4 +1,3 @@
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import type { DocumentResult } from '@/api/api';
@@ -7,7 +6,9 @@ import DateCell from '@/components/base/data-table/cells/date-cell';
 import DocumentSizeCell from '@/components/base/data-table/cells/document-size-cell';
 import DownloadFileCell from '@/components/base/data-table/cells/download-file-cell';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
+import TaskCell from '@/components/base/data-table/cells/task-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 
@@ -86,11 +87,10 @@ export function getCaseEntityDocumentsColumns(t: TFunction<string, undefined>) {
     // Task
     columnHelper.accessor(row => row.task_id, {
       id: 'task_id',
-      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      cell: ({ row }) => <TaskCell taskId={row.original.task_id} typeName={row.original.task_type_name} />,
       header: t('file_entity.task_id'),
-      size: 96,
+      size: 280,
       minSize: 40,
-      maxSize: 164,
     }),
     // Created on
     columnHelper.accessor(row => row.created_on, {
