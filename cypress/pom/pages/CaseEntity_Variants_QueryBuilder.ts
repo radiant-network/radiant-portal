@@ -328,18 +328,26 @@ const generateQueryBuilderFunctions = (
      * @param replacements The placeholder → value map to resolve in the fixture (e.g. `_OP`, `_CHROM_FIELD`).
      */
     shouldMatchSentSqon(fixtureName: string, replacements: Record<string, string>) {
-      cy.wait('@postComplexCount').then(interception => {
-        cy.fixture(`RequestBody/${fixtureName}`).then(fixture => {
-          let json = JSON.stringify(fixture);
-          Object.entries(replacements).forEach(([token, value]) => {
-            json = json.split(token).join(value);
-          });
-          const expected = JSON.parse(json);
-          const actual = normalizeSqon(interception.request.body.sqon);
-
-          expect(actual).to.deep.equal(expected);
-          shouldHaveTableResultsCount(interception.response!.body.count);
+      cy.fixture(`RequestBody/${fixtureName}`).then(fixture => {
+        let json = JSON.stringify(fixture);
+        Object.entries(replacements).forEach(([token, value]) => {
+          json = json.split(token).join(value);
         });
+        const expected = JSON.parse(json);
+
+        // A late count of a query already on the page can come first: skip up to 4 of them.
+        const waitForSqon = (requestsLeft: number) => {
+          cy.wait('@postComplexCount').then(interception => {
+            const actual = normalizeSqon(interception.request.body.sqon);
+            if (requestsLeft > 1 && !Cypress._.isEqual(actual, expected)) {
+              waitForSqon(requestsLeft - 1);
+              return;
+            }
+            expect(actual).to.deep.equal(expected);
+            shouldHaveTableResultsCount(interception.response!.body.count);
+          });
+        };
+        waitForSqon(5);
       });
     },
   };
