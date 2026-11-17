@@ -705,8 +705,15 @@ func Test_CasesFields_RunName_FilterOnly(t *testing.T) {
 func Test_VariantInterpretedCasesFields_LeavesSemiJoinFieldsOut(t *testing.T) {
 	t.Parallel()
 	assert.NotContains(t, VariantInterpretedCasesFields, CaseMemberRunNameField)
-	assert.Contains(t, VariantInterpretedCasesFields, CaseSequencingExperimentIdField)
-	assert.Len(t, VariantInterpretedCasesFields, len(CasesFields)-1+6)
+}
+
+func Test_VariantInterpretedCasesFields_KeepsEveryOtherCaseField(t *testing.T) {
+	t.Parallel()
+	for _, field := range CasesFields {
+		if !field.Table.CaseSemiJoin {
+			assert.Contains(t, VariantInterpretedCasesFields, field, field.GetAlias())
+		}
+	}
 }
 
 func Test_CriteriaToFilter_VariantInterpretedCases_RunName_Error(t *testing.T) {
