@@ -2135,6 +2135,8 @@
       "is_mane_select": "MANE",
       "length": "Longueur",
       "length_tooltip": "Longueur du CNV en bases",
+      "my_network": "Mon réseau",
+      "my_network_tooltip": "Interprétations de mon réseau",
       "name": "Variant",
       "nb_exons": "# Exons",
       "nb_exons_tooltip": "Exons chevauchés du transcrit de référence (MANE Select ou canonique Ensembl si le gène n’en a pas)",

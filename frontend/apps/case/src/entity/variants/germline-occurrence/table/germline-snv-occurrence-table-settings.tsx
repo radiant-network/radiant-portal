@@ -24,6 +24,7 @@ import { getFranklinSnvUrl } from '@/components/base/variant/utils';
 
 import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
+import MyNetworkInterpretationCell from '../../table/cells/my-network-interpretation-cell';
 import OccurrenceActionsMenu from '../../table/cells/occurrence-actions-cell';
 import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
 import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
@@ -220,6 +221,19 @@ function getGermlineSNVOccurrenceColumns({
       minSize: 40,
       enableSorting: false,
     }),
+    // My Network
+    columnHelper.accessor(row => row.interpretation_classification_counts, {
+      id: 'interpretation_classification_counts',
+      cell: info => <MyNetworkInterpretationCell counts={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.my_network_tooltip')}>
+          {t('variant.headers.my_network')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
     //Exo.
     columnHelper.accessor(row => row.exomiser_gene_combined_score, {
       id: 'exomiser_gene_combined_score',
@@ -409,6 +423,11 @@ const defaultGermlineSNVSettings = createColumnSettings([
     visible: true,
     label: 'variant.headers.clinvar',
     additionalFields: ['clinvar'],
+  },
+  {
+    id: 'interpretation_classification_counts',
+    visible: true,
+    label: 'variant.headers.my_network',
   },
   {
     id: 'exomiser_gene_combined_score',

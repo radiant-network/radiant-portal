@@ -124,7 +124,7 @@ const SomaticInterpretationForm = forwardRef<InterpretationFormRef, Interpretati
                         <span>
                           <ToggleGroupItem
                             value="LA26332-9"
-                            className="data-[state=on]:bg-orange/20 data-[state=on]:text-orange-foreground border data-[state=on]:border-yellow-foreground data-[state=on]:hover:text-orange-foreground"
+                            className="data-[state=on]:bg-violet/20 data-[state=on]:text-violet-foreground border data-[state=on]:border-violet-foreground data-[state=on]:hover:text-violet-foreground"
                           >
                             {t('variant.interpretation_form.somatic.oncogenicity_options.likely_oncogenic')}
                           </ToggleGroupItem>
