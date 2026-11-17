@@ -1,4 +1,5 @@
 /// <reference types="cypress"/>
+import type { Interception } from 'cypress/types/net-stubbing';
 import { CommonSelectors } from 'pom/shared/Selectors';
 import { buildBilingualRegExp, findFacetData, normalizeSqon, shouldHaveTableResultsCount } from 'pom/shared/Utils';
 import { CaseEntity_Variants_Facets, tableCNVFacets, tableSNVFacets, tableSomaticFacets } from './CaseEntity_Variants_Facets';
@@ -335,19 +336,18 @@ const generateQueryBuilderFunctions = (
         });
         const expected = JSON.parse(json);
 
-        // A late count of a query already on the page can come first: skip up to 4 of them.
-        const waitForSqon = (requestsLeft: number) => {
-          cy.wait('@postComplexCount').then(interception => {
-            const actual = normalizeSqon(interception.request.body.sqon);
-            if (requestsLeft > 1 && !Cypress._.isEqual(actual, expected)) {
-              waitForSqon(requestsLeft - 1);
-              return;
-            }
-            expect(actual).to.deep.equal(expected);
-            shouldHaveTableResultsCount(interception.response!.body.count);
+        // Late counts of the queries already on the page can come first: look for the expected one among all of them.
+        cy.get<Interception[]>('@postComplexCount.all')
+          .should(interceptions => {
+            const sent = interceptions.map(i => normalizeSqon(i.request.body.sqon));
+            const match = interceptions.find(i => Cypress._.isEqual(normalizeSqon(i.request.body.sqon), expected));
+            expect(match, `expected sqon ${JSON.stringify(expected)}\nsent sqons:\n${sent.map(sqon => JSON.stringify(sqon)).join('\n')}`).to.exist;
+            expect(match!.response, 'count response').to.exist;
+          })
+          .then(interceptions => {
+            const match = interceptions.find(i => Cypress._.isEqual(normalizeSqon(i.request.body.sqon), expected))!;
+            shouldHaveTableResultsCount(match.response!.body.count);
           });
-        };
-        waitForSqon(5);
       });
     },
   };
