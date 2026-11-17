@@ -67,12 +67,6 @@ var TaskHasDocumentTaskIdField = Field{
 	Table:         TaskHasDocumentTable,
 }
 
-var TaskTypeCodeField = Field{
-	Name:          "task_type_code",
-	CanBeSelected: true,
-	Table:         TaskTable,
-}
-
 var TaskTypeNameField = Field{
 	Name:          "name_en",
 	Alias:         "task_type_name",

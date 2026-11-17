@@ -2412,12 +2412,6 @@ export interface DocumentResult {
      * @type {string}
      * @memberof DocumentResult
      */
-    'task_type_code'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof DocumentResult
-     */
     'task_type_name'?: string;
 }
 /**
