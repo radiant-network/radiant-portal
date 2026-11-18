@@ -29,7 +29,7 @@ export const filters = [
   },
   {
     key: 'data_type_code',
-    label: 'Type',
+    label: 'File Type',
     field: 'data_type_code',
     isVisibleByDefault: true,
   },
