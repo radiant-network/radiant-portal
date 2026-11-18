@@ -146,6 +146,16 @@ func (j Joiner) CaseMemberRuns(tx *gorm.DB) string {
 	)
 }
 
+// CaseAssignees gives one row per case and assignee, and one types.NotAssignedValue row per case with none.
+func (j Joiner) CaseAssignees(tx *gorm.DB) string {
+	return fmt.Sprintf("SELECT ac.id AS case_id, COALESCE(%[1]s.user_id, '%[2]s') AS assignee_id FROM %[3]s ac LEFT JOIN %[4]s %[1]s ON %[1]s.case_id = ac.id",
+		types.CaseAssignmentTable.Alias,
+		types.NotAssignedValue,
+		j.name(types.CaseTable, tx),
+		j.name(types.CaseAssignmentTable, tx),
+	)
+}
+
 // probandSequencings returns one row per case and distinct value of column over the sequencings of the
 // case's proband, so that the sample and run columns cover the same sequencings. A somatic case keeps the
 // tumoral samples only. A prenatal case's proband is the mother, and a fetus's sample also carries her

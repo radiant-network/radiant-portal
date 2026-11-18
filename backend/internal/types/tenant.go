@@ -35,7 +35,7 @@ var ViewTables = []string{
 	"interpretation_germline", "interpretation_germline_history",
 	"interpretation_somatic", "interpretation_somatic_history",
 	"obs_categorical", "obs_string", "occurrence_flag", "occurrence_note",
-	"panel", "project", "task", "case_group",
+	"panel", "project", "task", "case_group", "case_assignment",
 	// Junctions.
 	"case_has_sequencing_experiment", "case_group_case", "task_context", "task_has_document",
 	// Reference / value-set tables.

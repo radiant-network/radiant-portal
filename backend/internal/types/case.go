@@ -438,6 +438,7 @@ var CasesFields = []Field{
 	ProbandFirstNameField,
 	ProbandLastNameField,
 	CaseGroupField,
+	CaseAssigneeIdField,
 }
 
 var CasesDefaultFields = []Field{
