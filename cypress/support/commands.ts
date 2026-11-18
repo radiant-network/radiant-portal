@@ -6,9 +6,9 @@ import 'cypress-real-events';
 import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV_Table';
 import { CaseEntity_Variants_QueryBuilder } from 'pom/pages/CaseEntity_Variants_QueryBuilder';
 
-// Lets the UI settle after a click (animations, popovers) before a hover or a click that does not wait on its own.
+// Lets the UI settle after a click (animations, popovers, cached requests) before the next step.
 // A command passes 0 only on its inner steps, whose next step waits on its own: its last wait keeps the pause.
-const DEFAULT_SETTLE_MS = 200;
+const DEFAULT_SETTLE_MS = 500;
 
 // Public configuration getter (non-sensitive values)
 const getExpose = (key: string): string => {
