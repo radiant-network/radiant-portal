@@ -13,6 +13,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/internal/utils/joins"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type CaseResult = types.CaseResult
@@ -109,7 +110,9 @@ func (r *CasesRepository) SearchById(ctx context.Context, prefix string, limit i
 	subQueryProbandId = subQueryProbandId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
 
 	subQueryOrgPatID := db.Table(fmt.Sprintf("%s %s", types.PatientTable.TenantQualifiedName(ctx), types.PatientTable.Alias))
-	subQueryOrgPatID = subQueryOrgPatID.Select("submitter_patient_id_type as type, submitter_patient_id as value")
+	// A fixed type, as the other branches: the type is the case search field the suggestion filters on, and
+	// the patient's identifier type ("1KGP", "JHN"...) is not one.
+	subQueryOrgPatID = subQueryOrgPatID.Select(fmt.Sprintf("\"%s\" as type, submitter_patient_id as value", types.SubmitterPatientIdField.GetAlias()))
 	subQueryOrgPatID = subQueryOrgPatID.Where("LOWER(submitter_patient_id) LIKE ?", strings.ToLower(searchInput))
 
 	subQuerySeqId := db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.TenantQualifiedName(ctx), types.SequencingExperimentTable.Alias))
@@ -120,8 +123,18 @@ func (r *CasesRepository) SearchById(ctx context.Context, prefix string, limit i
 	subQueryProbandSampleId = subQueryProbandSampleId.Select(fmt.Sprintf("\"%s\" as type, submitter_sample_id as value", types.CaseProbandSubmitterSampleIdsField.GetAlias()))
 	subQueryProbandSampleId = subQueryProbandSampleId.Where("LOWER(submitter_sample_id) LIKE ?", strings.ToLower(searchInput))
 
-	tx := db.Table("(? UNION ? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID, subQuerySeqId, subQueryProbandSampleId)
-	tx = tx.Order("value asc, type asc")
+	// A run with no case is not suggested. The UNION suggests a run shared by many cases once.
+	subQueryRunName := db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.TenantQualifiedName(ctx), types.SequencingExperimentTable.Alias))
+	subQueryRunName = subQueryRunName.Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.sequencing_experiment_id = %s.id", types.CaseHasSequencingExperimentTable.TenantQualifiedName(ctx), types.CaseHasSequencingExperimentTable.Alias, types.CaseHasSequencingExperimentTable.Alias, types.SequencingExperimentTable.Alias))
+	subQueryRunName = subQueryRunName.Select(fmt.Sprintf("\"%s\" as type, %s.run_name as value", types.CaseMemberRunNameField.GetAlias(), types.SequencingExperimentTable.Alias))
+	subQueryRunName = subQueryRunName.Where(fmt.Sprintf("LOWER(%[1]s.run_name) LIKE ? AND %[1]s.run_name <> ''", types.SequencingExperimentTable.Alias), strings.ToLower(searchInput))
+
+	// Exact matches first, then the types interleaved by the rank of the value within its type: a run sharing
+	// its prefix with many case or patient ids still gets a place within the limit.
+	union := db.Table("(? UNION ? UNION ? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID, subQuerySeqId, subQueryProbandSampleId, subQueryRunName)
+	union = union.Select("type, value, ROW_NUMBER() OVER (PARTITION BY type ORDER BY value) AS type_rank")
+	tx := db.Table("(?) rankedAutocomplete", union).Select("type, value")
+	tx = tx.Clauses(clause.OrderBy{Expression: clause.Expr{SQL: "CASE WHEN LOWER(value) = ? THEN 0 ELSE 1 END, type_rank, value, type", Vars: []interface{}{strings.ToLower(prefix)}}})
 	tx = tx.Limit(limit)
 	if err := tx.Find(&autocompleteResult).Error; err != nil {
 		return nil, fmt.Errorf("error searching for case autocomplete: %w", err)
@@ -236,7 +249,7 @@ func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository
 	tx = r.joiner.CaseWithProject(tx)
 	tx = r.joiner.CaseWithProbandSample(tx)
 	if userQuery != nil {
-		utils.AddWhere(userQuery, tx)
+		utils.AddWhereWithCaseSemiJoins(userQuery, tx, types.CaseSemiJoinRows{types.CaseMemberRunTable.Alias: r.joiner.CaseMemberRuns(tx)})
 
 		if userQuery.HasFieldFromTables(types.PanelTable) {
 			tx = r.joiner.AnalysisCatalogWithPanel(tx)

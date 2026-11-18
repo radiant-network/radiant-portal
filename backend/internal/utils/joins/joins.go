@@ -135,6 +135,17 @@ func (j Joiner) CaseRuns(tx *gorm.DB) string {
 	return j.probandSequencings(tx, fmt.Sprintf("%s.run_name", types.SequencingExperimentTable.Alias))
 }
 
+// CaseMemberRuns returns one (case_id, run_name) row per sequencing of the case: every member (proband,
+// parents, siblings, fetus) and every sample (normal or tumoral), unlike CaseRuns.
+func (j Joiner) CaseMemberRuns(tx *gorm.DB) string {
+	return fmt.Sprintf("SELECT %[1]s.case_id, %[2]s.run_name FROM %[3]s %[1]s INNER JOIN %[4]s %[2]s ON %[2]s.id = %[1]s.sequencing_experiment_id",
+		types.CaseHasSequencingExperimentTable.Alias,
+		types.SequencingExperimentTable.Alias,
+		j.name(types.CaseHasSequencingExperimentTable, tx),
+		j.name(types.SequencingExperimentTable, tx),
+	)
+}
+
 // probandSequencings returns one row per case and distinct value of column over the sequencings of the
 // case's proband, so that the sample and run columns cover the same sequencings. A somatic case keeps the
 // tumoral samples only. A prenatal case's proband is the mother, and a fetus's sample also carries her

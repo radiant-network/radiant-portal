@@ -863,3 +863,40 @@ func Test_PatchCasesStatusHandler_RepositoryErrorIsInternal(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	assert.JSONEq(t, `{"status":500,"message":"Internal Server Error"}`, w.Body.String())
 }
+
+func searchCasesWithBody(body string) *httptest.ResponseRecorder {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/cases/search", SearchCasesHandler(repo, repo))
+	req, _ := http.NewRequest("POST", "/radiant/cases/search", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_SearchCasesHandler_RunName_Accepted(t *testing.T) {
+	w := searchCasesWithBody(`{"search_criteria":[{"field":"run_name","value":["1617"]}]}`)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func Test_SearchCasesHandler_RunNameAllOperator_BadRequest(t *testing.T) {
+	w := searchCasesWithBody(`{"search_criteria":[{"field":"run_name","operator":"all","value":["1617"]}]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400, "message":"error during build list query from search criteria operation all is not supported on field run_name"}`, w.Body.String())
+}
+
+func Test_SearchCasesHandler_RunNameContainsSeveralValues_BadRequest(t *testing.T) {
+	w := searchCasesWithBody(`{"search_criteria":[{"field":"run_name","operator":"contains","value":["1617","1618"]}]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400, "message":"error during build list query from search criteria operation contains must have exactly one value: run_name"}`, w.Body.String())
+}
+
+func Test_SearchCasesHandler_RunNameEmptyValue_BadRequest(t *testing.T) {
+	w := searchCasesWithBody(`{"search_criteria":[{"field":"run_name","value":[]}]}`)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400, "message":"error during build list query from search criteria value must be defined: run_name"}`, w.Body.String())
+}

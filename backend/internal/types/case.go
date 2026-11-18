@@ -386,6 +386,12 @@ var CaseRunTable = Table{
 	Alias: "case_run",
 }
 
+var CaseMemberRunTable = Table{
+	Name:         "case_member_run",
+	Alias:        "case_member_run",
+	CaseSemiJoin: true,
+}
+
 func (Case) TableName() string {
 	return CaseTable.Name
 }
@@ -418,6 +424,7 @@ var CasesFields = []Field{
 	CaseOrderingOrganizationCodeField,
 	CaseProbandSubmitterSampleIdsField,
 	CaseRunNamesField,
+	CaseMemberRunNameField,
 	CaseDiagnosisLabCodeField,
 	CaseDiagnosisLabNameField,
 	PatientOrganizationCodeField,
@@ -603,6 +610,13 @@ var CaseRunNamesField = Field{
 	CanBeSelected: true,
 	IsArray:       true,
 	Table:         CaseRunTable,
+}
+
+var CaseMemberRunNameField = Field{
+	Name:          "run_name",
+	Alias:         "run_name",
+	CanBeFiltered: true,
+	Table:         CaseMemberRunTable,
 }
 
 var CaseSequencingExperimentIdField = Field{

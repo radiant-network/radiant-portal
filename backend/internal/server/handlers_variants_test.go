@@ -763,3 +763,16 @@ func Test_GetGermlineVariantInternalFrequenciesHandler_BadSplit(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
 }
+
+func Test_GetGermlineVariantInterpretedCasesHandler_RunName_BadRequest(t *testing.T) {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.POST("/:tenant/variants/germline/:locus_id/cases/interpreted", GetGermlineVariantInterpretedCases(repo))
+	body := `{"search_criteria":[{"field":"run_name","value":["1617"]}]}`
+	req, _ := http.NewRequest("POST", "/radiant/variants/germline/1000/cases/interpreted", bytes.NewBuffer([]byte(body)))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status":400, "message":"error during build list query from search criteria run_name can not be filtered"}`, w.Body.String())
+}

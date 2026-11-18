@@ -12,6 +12,7 @@ type Table struct {
 	Alias          string // Alias of the table to use in query
 	FederationName string // FederationName name through Starrocks federation
 	PerTenant      bool   // If the table lives in the tenant DB (true) or the shared DB (false).
+	CaseSemiJoin   bool
 }
 
 // In qualifies the table by a StarRocks schema (database), e.g.
@@ -127,6 +128,16 @@ func findNumericByAlias(fields []Field, alias string) *Field {
 	return sliceutils.Find(fields, func(field Field, index int, slice []Field) bool {
 		return field.GetAlias() == alias && field.IsNumeric()
 	})
+}
+
+func withoutCaseSemiJoinFields(fields []Field) []Field {
+	var kept []Field
+	for _, f := range fields {
+		if !f.Table.CaseSemiJoin {
+			kept = append(kept, f)
+		}
+	}
+	return kept
 }
 
 // findSelectedFields returns the fields that can be selected from the list of string field names

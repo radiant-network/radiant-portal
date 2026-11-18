@@ -64,3 +64,40 @@ func Test_AddSort_RegularField_KeepsDefaultNullOrdering(t *testing.T) {
 	assert.Contains(t, sql, "ORDER BY v.gnomad_v3_af asc")
 	assert.NotContains(t, sql, "NULLS")
 }
+
+func whereQuery(t *testing.T, semiJoinRows types.CaseSemiJoinRows) *gorm.DB {
+	t.Helper()
+	db, err := gorm.Open(tests.DummyDialector{}, &gorm.Config{DryRun: true})
+	require.NoError(t, err)
+	criteria := []types.SearchCriterion{{FieldName: types.CaseMemberRunNameField.GetAlias(), Value: []interface{}{"1617"}}}
+	query, err := types.NewListQueryFromCriteria(types.CasesQueryConfig, nil, criteria, nil, nil)
+	require.NoError(t, err)
+
+	var rows []map[string]any
+	tx := db.Session(&gorm.Session{DryRun: true}).Table("cases c")
+	AddWhereWithCaseSemiJoins(query, tx, semiJoinRows)
+	return tx.Find(&rows)
+}
+
+func Test_AddWhereWithCaseSemiJoins_WithRows_CaseIdInSubQuery(t *testing.T) {
+	t.Parallel()
+	tx := whereQuery(t, types.CaseSemiJoinRows{types.CaseMemberRunTable.Alias: "SELECT case_id, run_name FROM runs"})
+
+	require.NoError(t, tx.Error)
+	assert.Contains(t, tx.Statement.SQL.String(), "WHERE (c.id IN (SELECT case_id FROM (SELECT case_id, run_name FROM runs) case_member_run WHERE case_member_run.run_name = ?))")
+}
+
+func Test_AddWhereWithCaseSemiJoins_WithoutRows_QueryFails(t *testing.T) {
+	t.Parallel()
+	tx := whereQuery(t, nil)
+
+	require.Error(t, tx.Error)
+	assert.Contains(t, tx.Error.Error(), "case semi-join table case_member_run is filtered but the query gives none of its rows")
+}
+
+func Test_AddWhereWithCaseSemiJoins_RowsOfAnotherTable_QueryFails(t *testing.T) {
+	t.Parallel()
+	tx := whereQuery(t, types.CaseSemiJoinRows{"other": "SELECT case_id FROM other"})
+
+	require.Error(t, tx.Error)
+}

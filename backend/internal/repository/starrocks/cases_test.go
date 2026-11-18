@@ -389,12 +389,12 @@ func Test_Cases_SearchById(t *testing.T) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		autocompleteResult, err := repo.SearchById(t.Context(), "1", 5)
 		assert.NoError(t, err)
-		assert.Equal(t, len(*autocompleteResult), 5)
+		require.Len(t, *autocompleteResult, 5)
+		// The exact matches (case, patient and sequencing 1) first, then the first value of each other type.
 		assert.Equal(t, "1", (*autocompleteResult)[0].Value)
 		assert.Equal(t, "1", (*autocompleteResult)[1].Value)
 		assert.Equal(t, "1", (*autocompleteResult)[2].Value)
-		assert.Equal(t, "10", (*autocompleteResult)[3].Value)
-		assert.Equal(t, "10", (*autocompleteResult)[4].Value)
+		assert.Equal(t, AutocompleteResult{Type: "run_name", Value: "1617"}, (*autocompleteResult)[3])
 	})
 }
 
@@ -457,13 +457,59 @@ func Test_Cases_SearchById_ProbandSubmitterSampleIds_SuggestsEverySample(t *test
 		defer insertProbandSampleCase(t, env, 1102, "S99999-SECOND", "2026-01-01")()
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 
+		// The helper also names the second sequencing's run after the sample, hence the run_name suggestion.
 		second, err := repo.SearchById(t.Context(), "S99999", 10)
 		require.NoError(t, err)
-		assert.Equal(t, []AutocompleteResult{{Type: "proband_submitter_sample_ids", Value: "S99999-SECOND"}}, *second)
+		assert.ElementsMatch(t, []AutocompleteResult{{Type: "proband_submitter_sample_ids", Value: "S99999-SECOND"}, {Type: "run_name", Value: "S99999-SECOND"}}, *second)
 
 		first, err := repo.SearchById(t.Context(), "S13224", 10)
 		require.NoError(t, err)
 		assert.Equal(t, []AutocompleteResult{{Type: "proband_submitter_sample_ids", Value: "S13224"}}, *first)
+	})
+}
+
+func Test_Cases_SearchById_SubmitterPatientId_TypedAsFilterField(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		autocompleteResult, err := repo.SearchById(t.Context(), "MRN-283775", 10)
+		require.NoError(t, err)
+		assert.Equal(t, []AutocompleteResult{{Type: "submitter_patient_id", Value: "MRN-283775"}}, *autocompleteResult)
+	})
+}
+
+func Test_Cases_SearchById_SubmitterPatientId_OtherIdentifierType_TypedAsFilterField(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO patient (id, submitter_patient_id, submitter_patient_id_type, organization_code, tenant_code, sex_code, date_of_birth, life_status_code, first_name, last_name, jhn)
+			VALUES (1130, 'NA12878-RAD329', '1KGP', 'CHUSJ', 'radiant', 'female', '2012-02-03', 'alive', 'Test', 'Rad329', 'RAD3291202030')
+		`).Error)
+		defer env.Postgres.Exec("DELETE FROM patient WHERE id = 1130")
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		autocompleteResult, err := repo.SearchById(t.Context(), "na12878-rad329", 10)
+		require.NoError(t, err)
+		assert.Equal(t, []AutocompleteResult{{Type: "submitter_patient_id", Value: "NA12878-RAD329"}}, *autocompleteResult)
+	})
+}
+
+func Test_Cases_SearchById_SubmitterPatientIdSuggestion_FiltersTheCases(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		suggestions, err := repo.SearchById(t.Context(), "MRN-283775", 10)
+		require.NoError(t, err)
+		require.Len(t, *suggestions, 1)
+
+		// The frontend sends the suggestion's type as the search field.
+		suggestion := (*suggestions)[0]
+		criteria := []types.SearchCriterion{{FieldName: suggestion.Type, Value: []interface{}{suggestion.Value}}}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, criteria, nil, nil)
+		require.NoError(t, err)
+		cases, count, err := repo.SearchCases(t.Context(), query)
+		require.NoError(t, err)
+		// Patient 3 is the proband of trio cases 1 and 70.
+		assert.Equal(t, int64(2), *count)
+		require.Len(t, *cases, 2)
+		assert.ElementsMatch(t, []int{1, 70}, []int{(*cases)[0].CaseID, (*cases)[1].CaseID})
 	})
 }
 
@@ -1484,5 +1530,224 @@ func Test_RetrieveCasePatients_PcxPatientKeysOnWithoutPcxViews_NoPatientKeyAndNo
 		for _, m := range *members {
 			assert.Nil(t, m.PatientKey)
 		}
+	})
+}
+
+func searchCasesByRunName(t *testing.T, repo *CasesRepository, criteria ...types.SearchCriterion) ([]int, int64) {
+	t.Helper()
+	query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, criteria, nil, nil)
+	require.NoError(t, err)
+	cases, count, err := repo.SearchCases(t.Context(), query)
+	require.NoError(t, err)
+	caseIDs := make([]int, len(*cases))
+	for i, c := range *cases {
+		caseIDs[i] = c.CaseID
+	}
+	return caseIDs, *count
+}
+
+func runNameIn(runNames ...interface{}) types.SearchCriterion {
+	return types.SearchCriterion{FieldName: types.CaseMemberRunNameField.GetAlias(), Value: runNames}
+}
+
+func Test_SearchCases_RunName_ProbandRun_FindsCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Run 1617 is the proband's of trio cases 1 and 70, which share the same sequencings.
+		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("1617"))
+		assert.Equal(t, int64(2), count)
+		assert.ElementsMatch(t, []int{1, 70}, caseIDs)
+	})
+}
+
+func Test_SearchCases_RunName_FatherRun_FindsCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Run 1619 holds only the father's sample of cases 1 and 70.
+		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("1619"))
+		assert.Equal(t, int64(2), count)
+		assert.ElementsMatch(t, []int{1, 70}, caseIDs)
+	})
+}
+
+func Test_SearchCases_RunName_SomaticNormalRun_FindsCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Run 1678 holds the normal sample of somatic case 71; its Run column shows the tumoral run 1679.
+		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("1678"))
+		assert.Equal(t, int64(1), count)
+		assert.Equal(t, []int{71}, caseIDs)
+	})
+}
+
+func Test_SearchCases_RunName_FetusRun_FindsPrenatalCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Run 1701 holds the fetus's sample of prenatal case 72; the mother's is on run 1704.
+		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("1701"))
+		assert.Equal(t, int64(1), count)
+		assert.Equal(t, []int{72}, caseIDs)
+	})
+}
+
+func Test_SearchCases_RunName_Unknown_NoCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("UNKNOWN-RUN"))
+		assert.Equal(t, int64(0), count)
+		assert.Empty(t, caseIDs)
+	})
+}
+
+func Test_SearchCases_RunName_SeveralRuns_EachCaseOnce(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Cases 1 and 70 have a sequencing on each of the three runs, case 71 on run 1678.
+		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("1617", "1618", "1619", "1678"))
+		assert.Equal(t, int64(3), count)
+		assert.ElementsMatch(t, []int{1, 70, 71}, caseIDs)
+	})
+}
+
+func Test_SearchCases_RunName_Contains_FindsCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		caseIDs, count := searchCasesByRunName(t, repo, types.SearchCriterion{FieldName: types.CaseMemberRunNameField.GetAlias(), Operator: "contains", Value: []interface{}{"678"}})
+		assert.Equal(t, int64(1), count)
+		assert.Equal(t, []int{71}, caseIDs)
+	})
+}
+
+func Test_SearchCases_RunName_NotIn_ExcludesCaseWithRunAndKeepsCaseWithoutRun(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO cases (id, proband_id, project_id, analysis_catalog_id, status_code, diagnosis_lab_code, tenant_code, created_on, updated_on, priority_code, case_type_code, case_category_code, ordering_organization_code, submitter_case_id)
+			VALUES (1120, 3, 1, 1, 'in_progress', 'CQGC', 'radiant', now(), now(), 'routine', 'germline', 'postnatal', 'CHUSJ', 'CASE-MEMBER-RUN-NONE')
+		`).Error)
+		defer env.Postgres.Exec("DELETE FROM cases WHERE id = 1120")
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		// Case 1 has runs 1617, 1618 and 1619: not-in 1619 excludes it, though its other runs do not match.
+		caseIDs, count := searchCasesByRunName(t, repo,
+			types.SearchCriterion{FieldName: types.CaseMemberRunNameField.GetAlias(), Operator: "not-in", Value: []interface{}{"1619"}},
+			types.SearchCriterion{FieldName: types.CaseIdField.GetAlias(), Value: []interface{}{1, 71, 1120}},
+		)
+		assert.Equal(t, int64(2), count)
+		assert.ElementsMatch(t, []int{71, 1120}, caseIDs)
+	})
+}
+
+func Test_SearchCases_RunName_CountMatchesList(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("1617", "1701", "1702"))
+		assert.Equal(t, int64(len(caseIDs)), count)
+		assert.ElementsMatch(t, []int{1, 70, 72, 73}, caseIDs)
+	})
+}
+
+func Test_SearchCases_RunName_WithRunColumn_ShowsProbandRuns(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		criteria := []types.SearchCriterion{runNameIn("1619"), {FieldName: types.CaseIdField.GetAlias(), Value: []interface{}{1}}}
+		query, err := types.NewListQueryFromCriteria(types.CasesQueryConfig, []string{types.CaseRunNamesField.GetAlias()}, criteria, nil, nil)
+		require.NoError(t, err)
+		cases, count, err := repo.SearchCases(t.Context(), query)
+		require.NoError(t, err)
+		assert.Equal(t, int64(1), *count)
+		require.Len(t, *cases, 1)
+		// Found by the father's run, the Run column still shows the proband's.
+		assert.Equal(t, types.JsonArray[string]{"1617"}, (*cases)[0].RunNames)
+	})
+}
+
+func Test_SearchById_RunPrefix_ReturnsRunName(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		autocompleteResult, err := repo.SearchById(t.Context(), "170", 10)
+		require.NoError(t, err)
+		assert.Equal(t, []AutocompleteResult{
+			{Type: "run_name", Value: "1701"},
+			{Type: "run_name", Value: "1702"},
+			{Type: "run_name", Value: "1703"},
+			{Type: "run_name", Value: "1704"},
+		}, *autocompleteResult)
+	})
+}
+
+func Test_SearchById_RunPrefix_CaseInsensitive(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		defer insertProbandSampleCase(t, env, 1121, "RUN-MIXED-Case", "2026-01-01")()
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		lower, err := repo.SearchById(t.Context(), "run-mixed", 10)
+		require.NoError(t, err)
+		upper, err := repo.SearchById(t.Context(), "RUN-MIXED", 10)
+		require.NoError(t, err)
+		assert.Contains(t, *lower, AutocompleteResult{Type: "run_name", Value: "RUN-MIXED-Case"})
+		assert.Equal(t, *lower, *upper)
+	})
+}
+
+func Test_SearchById_RunSharedByCases_ReturnedOnce(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Run 1617 is on sequencings 1 and 70, of cases 1 and 70.
+		autocompleteResult, err := repo.SearchById(t.Context(), "1617", 10)
+		require.NoError(t, err)
+		assert.Equal(t, []AutocompleteResult{{Type: "run_name", Value: "1617"}}, *autocompleteResult)
+	})
+}
+
+func Test_SearchById_EmptyRunName_NotSuggested(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		defer insertProbandSampleCase(t, env, 1122, "RUN-EMPTY-SUGGEST", "2026-01-01")()
+		// The worker stores '' when a sequencing batch has no run_name.
+		require.NoError(t, env.Postgres.Exec("UPDATE sequencing_experiment SET run_name = '' WHERE id = 1122").Error)
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		autocompleteResult, err := repo.SearchById(t.Context(), "", 200)
+		require.NoError(t, err)
+		assert.NotContains(t, *autocompleteResult, AutocompleteResult{Type: "run_name", Value: ""})
+	})
+}
+
+func Test_SearchById_PrefixSharedWithIds_StillSuggestsRun(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Prefix 1 matches case, patient and sequencing ids 1, 10, 11... before runs 16xx and 17xx in text order.
+		autocompleteResult, err := repo.SearchById(t.Context(), "1", 10)
+		require.NoError(t, err)
+		require.Len(t, *autocompleteResult, 10)
+		assert.Contains(t, *autocompleteResult, AutocompleteResult{Type: "run_name", Value: "1617"})
+	})
+}
+
+func Test_SearchById_ExactRun_ComesFirst(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		// Runs 16xx rank before run 16 within the run type, and ids 160 to 169 do not exist: only exactness lifts it.
+		defer insertProbandSampleCase(t, env, 1123, "16", "2026-01-01")()
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		autocompleteResult, err := repo.SearchById(t.Context(), "16", 10)
+		require.NoError(t, err)
+		exact := 0
+		for exact < len(*autocompleteResult) && (*autocompleteResult)[exact].Value == "16" {
+			exact++
+		}
+		assert.Contains(t, (*autocompleteResult)[:exact], AutocompleteResult{Type: "run_name", Value: "16"})
+		for _, r := range (*autocompleteResult)[exact:] {
+			assert.NotEqual(t, "16", r.Value)
+		}
+	})
+}
+
+func Test_SearchById_SequencingId_StillSuggested(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// Removed only in task 5, once the MCP routes run_name.
+		autocompleteResult, err := repo.SearchById(t.Context(), "78", 10)
+		require.NoError(t, err)
+		assert.Contains(t, *autocompleteResult, AutocompleteResult{Type: "sequencing_experiment_id", Value: "78"})
 	})
 }
