@@ -37,3 +37,21 @@ var EnsemblGeneTable = Table{
 	Name:  "ensembl_gene",
 	Alias: "g",
 }
+
+// EnsemblExonByGeneTable lists the Ensembl exons of each gene, with the transcripts each exon belongs to.
+var EnsemblExonByGeneTable = Table{
+	Name:  "ensembl_exon_by_gene",
+	Alias: "e",
+}
+
+// GeneReferenceTranscriptTable gives the reference transcript of a gene (MANE Select when it has one).
+var GeneReferenceTranscriptTable = Table{
+	Name:  "gene_reference_transcript",
+	Alias: "rt",
+}
+
+// GnomadConstraintTable holds the gnomAD loss-of-function constraint of each Ensembl transcript.
+var GnomadConstraintTable = Table{
+	Name:  "gnomad_constraint",
+	Alias: "gc",
+}

@@ -380,6 +380,9 @@ func Test_GermlineCNV_GetGenesOverlap(t *testing.T) {
 				assert.EqualValues(t, "NM_003270.4", *fullGeneOverlap.RefseqTranscriptId)
 				assert.EqualValues(t, "ENSG00000000003", fullGeneOverlap.GeneId)
 				assert.EqualValues(t, types.JsonArray[string]{"p1.1"}, fullGeneOverlap.Cytoband)
+				assert.Equal(t, "protein_coding", fullGeneOverlap.Biotype)
+				assert.Equal(t, "-", fullGeneOverlap.Strand)
+				assert.Empty(t, fullGeneOverlap.OmimInheritanceCode)
 
 				partialGeneOverlap := overlaps[1]
 				assert.Equal(t, "DPM1", partialGeneOverlap.Symbol)
@@ -400,6 +403,9 @@ func Test_GermlineCNV_GetGenesOverlap(t *testing.T) {
 				assert.EqualValues(t, 100, fullCnvOverlap.OverlappingCNVPercent)
 				assert.EqualValues(t, 5, fullCnvOverlap.OverlappingGenePercent)
 				assert.EqualValues(t, "full_cnv", fullCnvOverlap.OverlapType)
+				assert.Equal(t, []string{"AR", "XLR"}, fullCnvOverlap.OmimInheritanceCode)
+				assert.Equal(t, ptr(float32(0.95)), fullCnvOverlap.GnomadPli)
+				assert.Equal(t, ptr(float32(0.42)), fullCnvOverlap.GnomadLoeuf, "the LOEUF of its reference transcript, not the lowest of its transcripts")
 				assert.EqualValues(t, 2, fullCnvOverlap.NbExons, "the exon of its other transcript is not counted")
 				assert.EqualValues(t, "NM_022144.3", *fullCnvOverlap.RefseqTranscriptId)
 				assert.EqualValues(t, "ENSG00000000005", fullCnvOverlap.GeneId)

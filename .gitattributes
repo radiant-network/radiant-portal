@@ -1,0 +1,4 @@
+# Generated from backend/docs/swagger.yaml: collapsed in GitHub diffs and left out of the language stats.
+backend/docs/** linguist-generated=true
+frontend/api/** linguist-generated=true
+cli/python/** linguist-generated=true

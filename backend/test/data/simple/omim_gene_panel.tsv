@@ -4,3 +4,6 @@ TP53	Basal cell carcinoma 7	191170	614740	["AD"]	["Autosomal dominant"]
 BRAF	LEOPARD syndrome 3	164757	613707	["AD"]	["Autosomal dominant"]
 TP53	Osteosarcoma	191170	259500	["Smu"]	["Somatic mutation"]
 TML1	Leukemia/lymphoma, T-cell	603769	603769	null	null
+TSPAN6	Tetraspanin disease	613751	100000	null	null
+TNMD	Tenomodulin disease A	300459	100001	["AR"]	["Autosomal recessive"]
+TNMD	Tenomodulin disease B	300459	100002	["AR","XLR"]	["Autosomal recessive","X-linked recessive"]
