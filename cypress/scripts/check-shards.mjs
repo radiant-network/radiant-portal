@@ -4,13 +4,15 @@ import { readFileSync, readdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-let minimatch;
-try {
-  ({ minimatch } = await import('minimatch'));
-} catch {
-  console.error("Failure: Package 'minimatch' not found. Run 'npm install' in the repository root directory.");
-  process.exit(1);
-}
+// The shards only use `dir/*.cy.ts` and `dir/**/*.cy.ts`: a small matcher keeps the script runnable without npm install.
+const minimatch = (path, pattern) =>
+  new RegExp(
+    `^${pattern
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+      .replace(/\*\*\//g, '\u0000')
+      .replace(/\*/g, '[^/]*')
+      .replace(/\u0000/g, '(?:.*/)?')}$`,
+  ).test(path);
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const WORKFLOW = '.github/workflows/cypress-nightly.yml';
@@ -23,7 +25,13 @@ const walk = (dir) =>
 
 const specs = [...walk('cypress/api'), ...walk('cypress/e2e')].sort();
 
-const block = readFileSync(join(ROOT, WORKFLOW), 'utf8').match(/^\s*SHARDS=\(\s*$([\s\S]*?)^\s*\)\s*$/m);
+const readShards = (workflow) => readFileSync(join(ROOT, workflow), 'utf8').match(/^\s*SHARDS=\(\s*$([\s\S]*?)^\s*\)\s*$/m);
+const block = readShards(WORKFLOW);
+const siblingBlock = readShards(SIBLING_WORKFLOW);
+if (block && siblingBlock?.[1].trim() !== block[1].trim()) {
+  console.error(`Failure: the SHARDS arrays of ${WORKFLOW} and ${SIBLING_WORKFLOW} differ.`);
+  process.exit(1);
+}
 if (!block) {
   console.error(`Failure: array SHARDS=( ... ) not found in ${WORKFLOW}.`);
   console.error("If the workflow has been reformatted, adjust the extraction in this script.");

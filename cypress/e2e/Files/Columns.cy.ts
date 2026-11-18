@@ -1,59 +1,63 @@
 /// <reference types="cypress"/>
 import 'support/commands';
+import { setupOnce } from 'support/setupOnce';
 import { FilesTable } from 'pom/pages/FilesTable';
 
-describe('Files - Columns', () => {
-  const setupTest = () => {
-    cy.login();
+// The tests share one page: each one restores what it changes.
+describe('Files - Columns', { testIsolation: false }, () => {
+  // Cypress drops the intercepts before each test: keep the default table preferences on every test.
+  beforeEach(() => {
     cy.resetTablePreferences();
+  });
+
+  setupOnce(() => {
+    cy.login();
     cy.visitFilesPage();
-  };
+  });
 
   it('Default display', () => {
-    setupTest();
     FilesTable.validations.shouldMatchDefaultColumnVisibility();
   });
 
-  it('Order', () => {
-    setupTest();
-    FilesTable.validations.shouldShowAllColumns();
-  });
+  describe('All columns shown', () => {
+    setupOnce(() => {
+      FilesTable.actions.showAllColumns();
+    });
 
-  it('Pin', () => {
-    setupTest();
-    FilesTable.validations.shouldShowPinnableColumns();
-  });
+    it('Order', () => {
+      FilesTable.validations.shouldShowAllColumns();
+    });
 
-  it('Default pin state', () => {
-    setupTest();
-    FilesTable.validations.shouldMatchDefaultPinnedColumns();
-  });
+    it('Pin', () => {
+      FilesTable.validations.shouldShowPinnableColumns();
+    });
 
-  it('Sort', () => {
-    setupTest();
-    FilesTable.validations.shouldShowSortableColumns();
-  });
+    it('Default pin state', () => {
+      FilesTable.validations.shouldMatchDefaultPinnedColumns();
+    });
 
-  it('Tooltip', () => {
-    setupTest();
-    FilesTable.validations.shouldShowColumnTooltips();
-  });
+    it('Sort', () => {
+      FilesTable.validations.shouldShowSortableColumns();
+    });
 
-  it('Hide and show column', () => {
-    setupTest();
-    FilesTable.validations.shouldDisplayColumn('name');
-    FilesTable.actions.hideColumn('name');
-    FilesTable.validations.shouldNotDisplayColumn('name');
-    FilesTable.actions.showColumn('name');
-    FilesTable.validations.shouldDisplayColumn('name');
-  });
+    it('Tooltip', () => {
+      FilesTable.validations.shouldShowColumnTooltips();
+    });
 
-  it('Pin and unpin column', () => {
-    setupTest();
-    FilesTable.validations.shouldUnpinnedColumn('type');
-    FilesTable.actions.pinColumn('type');
-    FilesTable.validations.shouldPinnedColumn('type');
-    FilesTable.actions.unpinColumn('type');
-    FilesTable.validations.shouldUnpinnedColumn('type');
+    it('Hide and show column', () => {
+      FilesTable.validations.shouldDisplayColumn('name');
+      FilesTable.actions.hideColumn('name');
+      FilesTable.validations.shouldNotDisplayColumn('name');
+      FilesTable.actions.showColumn('name');
+      FilesTable.validations.shouldDisplayColumn('name');
+    });
+
+    it('Pin and unpin column', () => {
+      FilesTable.validations.shouldUnpinnedColumn('type');
+      FilesTable.actions.pinColumn('type');
+      FilesTable.validations.shouldPinnedColumn('type');
+      FilesTable.actions.unpinColumn('type');
+      FilesTable.validations.shouldUnpinnedColumn('type');
+    });
   });
 });

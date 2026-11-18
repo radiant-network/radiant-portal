@@ -513,7 +513,6 @@ export const CaseEntity_Variants_CNV_Table = {
      * Validates the default pin state of each column.
      */
     shouldMatchDefaultPinnedColumns() {
-      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -622,7 +621,6 @@ export const CaseEntity_Variants_CNV_Table = {
      * Validates that all columns are displayed in the correct order in the table.
      */
     shouldShowAllColumns() {
-      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
       tableColumns.forEach(column => {
         if (column.name.startsWith('[')) {
           cy.get(CommonSelectors.tableHeadCell()).eq(column.position).find(column.name).should('exist');
@@ -662,7 +660,6 @@ export const CaseEntity_Variants_CNV_Table = {
      * Validates the tooltips on columns.
      */
     shouldShowColumnTooltips() {
-      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -680,7 +677,6 @@ export const CaseEntity_Variants_CNV_Table = {
      * Validates that pinnable columns are correctly marked as pinnable.
      */
     shouldShowPinnableColumns() {
-      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -697,7 +693,6 @@ export const CaseEntity_Variants_CNV_Table = {
      * Validates that sortable columns are correctly marked as sortable.
      */
     shouldShowSortableColumns() {
-      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {

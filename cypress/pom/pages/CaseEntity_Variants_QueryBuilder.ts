@@ -1,4 +1,5 @@
 /// <reference types="cypress"/>
+import type { Interception } from 'cypress/types/net-stubbing';
 import { CommonSelectors } from 'pom/shared/Selectors';
 import { buildBilingualRegExp, findFacetData, normalizeSqon, shouldHaveTableResultsCount } from 'pom/shared/Utils';
 import { CaseEntity_Variants_Facets, tableCNVFacets, tableSNVFacets, tableSomaticFacets } from './CaseEntity_Variants_Facets';
@@ -328,18 +329,25 @@ const generateQueryBuilderFunctions = (
      * @param replacements The placeholder → value map to resolve in the fixture (e.g. `_OP`, `_CHROM_FIELD`).
      */
     shouldMatchSentSqon(fixtureName: string, replacements: Record<string, string>) {
-      cy.wait('@postComplexCount').then(interception => {
-        cy.fixture(`RequestBody/${fixtureName}`).then(fixture => {
-          let json = JSON.stringify(fixture);
-          Object.entries(replacements).forEach(([token, value]) => {
-            json = json.split(token).join(value);
-          });
-          const expected = JSON.parse(json);
-          const actual = normalizeSqon(interception.request.body.sqon);
-
-          expect(actual).to.deep.equal(expected);
-          shouldHaveTableResultsCount(interception.response!.body.count);
+      cy.fixture(`RequestBody/${fixtureName}`).then(fixture => {
+        let json = JSON.stringify(fixture);
+        Object.entries(replacements).forEach(([token, value]) => {
+          json = json.split(token).join(value);
         });
+        const expected = JSON.parse(json);
+
+        // Late counts of the queries already on the page can come first: look for the expected one among all of them.
+        cy.get<Interception[]>('@postComplexCount.all')
+          .should(interceptions => {
+            const sent = interceptions.map(i => normalizeSqon(i.request.body.sqon));
+            const match = interceptions.find(i => Cypress._.isEqual(normalizeSqon(i.request.body.sqon), expected));
+            expect(match, `expected sqon ${JSON.stringify(expected)}\nsent sqons:\n${sent.map(sqon => JSON.stringify(sqon)).join('\n')}`).to.exist;
+            expect(match!.response, 'count response').to.exist;
+          })
+          .then(interceptions => {
+            const match = interceptions.find(i => Cypress._.isEqual(normalizeSqon(i.request.body.sqon), expected))!;
+            shouldHaveTableResultsCount(match.response!.body.count);
+          });
       });
     },
   };

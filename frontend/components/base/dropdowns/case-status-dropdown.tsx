@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { Check, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import useSWRMutation from 'swr/mutation';
 
@@ -20,6 +20,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
+import { cn } from '@/components/lib/utils';
 import { caseApi } from '@/utils/api';
 
 const USER_APPLIED_STATUSES: readonly CaseStatus[] = Object.values(PatchCaseStatusCodeEnum);
@@ -109,6 +110,22 @@ function CaseStatusDropdown({
       });
   }
 
+  function renderStatusItem(code: PatchCaseStatusCodeEnum) {
+    const isCurrent = code === currentStatus;
+    return (
+      <DropdownMenuItem
+        key={code}
+        role="menuitemradio"
+        aria-checked={isCurrent}
+        className={cn({ 'bg-accent': isCurrent })}
+        onSelect={() => selectStatus(code)}
+      >
+        {label(code)}
+        {isCurrent && <Check className="ml-auto" />}
+      </DropdownMenuItem>
+    );
+  }
+
   if (!canEdit || !isUserAppliedStatus(currentStatus)) {
     const badge = <StatusBadge status={currentStatus} size={READ_ONLY_BADGE_SIZES[size]} className={className} />;
     if (!readOnlyTooltip) return badge;
@@ -143,21 +160,17 @@ function CaseStatusDropdown({
         {MENU_ENTRIES.map(entry =>
           entry.submenu ? (
             <DropdownMenuSub key={entry.status}>
-              <DropdownMenuSubTrigger>{label(entry.status)}</DropdownMenuSubTrigger>
+              <DropdownMenuSubTrigger
+                className={cn({ 'bg-accent': entry.submenu.some(code => code === currentStatus) })}
+              >
+                {label(entry.status)}
+              </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
-                <DropdownMenuSubContent>
-                  {entry.submenu.map(code => (
-                    <DropdownMenuItem key={code} onSelect={() => selectStatus(code)}>
-                      {label(code)}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
+                <DropdownMenuSubContent>{entry.submenu.map(renderStatusItem)}</DropdownMenuSubContent>
               </DropdownMenuPortal>
             </DropdownMenuSub>
           ) : (
-            <DropdownMenuItem key={entry.status} onSelect={() => selectStatus(entry.status)}>
-              {label(entry.status)}
-            </DropdownMenuItem>
+            renderStatusItem(entry.status)
           ),
         )}
       </DropdownMenuContent>
