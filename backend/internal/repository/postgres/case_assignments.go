@@ -97,13 +97,36 @@ func eligibleAt(tx *gorm.DB, tenantCode, orgCode string) *gorm.DB {
 	return tx.
 		Table("users u").
 		Where(personalAccount).
-		Where(`EXISTS (
-			SELECT 1
-			FROM user_role ur
-			JOIN role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
-			WHERE ur.user_id = u.user_id AND ur.tenant_code = ?
-			  AND (ur.org_code = ? OR ur.org_code = ?) AND ra.action_code = ?
-		)`, tenantCode, orgCode, types.WildcardOrg, types.ActionInterpretVariant)
+		Where(canInterpret(tenantCode, gorm.Expr("ur.org_code IN (?, ?)", orgCode, types.WildcardOrg)))
+}
+
+// canInterpret is the eligibility rule shared by the picker, the assignment check and the case
+// list filter; orgScope narrows which grants of user_role ur count.
+func canInterpret(tenantCode string, orgScope clause.Expr) clause.Expr {
+	return gorm.Expr(`EXISTS (
+		SELECT 1
+		FROM user_role ur
+		JOIN role_action ra ON ra.tenant_code = ur.tenant_code AND ra.role_code = ur.role_code
+		WHERE ur.user_id = u.user_id AND ur.tenant_code = ? AND ? AND ra.action_code = ?
+	)`, tenantCode, orgScope, types.ActionInterpretVariant)
+}
+
+// AssigneeFilterValues lists the users the case list can be filtered on: those who may be assigned
+// a case at any organization of the tenant, plus those still assigned one after losing that right.
+func (r *CaseAssignmentsRepository) AssigneeFilterValues(ctx context.Context, tenantCode string) ([]types.FiltersValue, error) {
+	values := []types.FiltersValue{}
+	stillAssigned := gorm.Expr("EXISTS (SELECT 1 FROM case_assignment ca WHERE ca.user_id = u.user_id AND ca.tenant_code = ?)", tenantCode)
+	tx := r.db.WithContext(ctx).
+		Table("users u").
+		Where(personalAccount).
+		Where("(? OR ?)", canInterpret(tenantCode, gorm.Expr("ur.org_code IS NOT NULL")), stillAssigned).
+		// Blank names count as missing, so a user without one is labelled by email.
+		Select(`u.user_id AS key, COALESCE(NULLIF(CONCAT_WS(' ', NULLIF(TRIM(u.first_name), ''), NULLIF(TRIM(u.last_name), '')), ''), u.email) AS label`).
+		Order("label, u.user_id")
+	if err := tx.Scan(&values).Error; err != nil {
+		return nil, fmt.Errorf("error listing assignee filter values: %w", err)
+	}
+	return values, nil
 }
 
 // eligibleAssigneeIDs returns which of the given users may be assigned a case at orgCode. The

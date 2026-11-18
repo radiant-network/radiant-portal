@@ -9,6 +9,8 @@ Name | Type | Description | Notes
 **affected_status_code** | **str** |  | 
 **experimental_strategy_code** | **str** |  | 
 **fetus_id** | **int** |  | [optional] 
+**has_cnv** | **bool** |  | 
+**has_snv** | **bool** |  | 
 **has_variants** | **bool** |  | 
 **histology_code** | **str** |  | [optional] 
 **patient_id** | **int** |  | 

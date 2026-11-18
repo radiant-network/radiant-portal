@@ -147,10 +147,12 @@ func Test_CaseIdsAutoComplete_SuggestsSubmitterPatientIdUnderItsFilterField(t *t
 }
 
 func assertGetCasesFilters(t *testing.T, data string, expected string) {
-	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
+	// Exclusive: parallel provisioning tests add users to radiant, and the assignee list is asserted exactly.
+	testutils.RunTest(t, testutils.Need{Starrocks: data, Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		assignees := postgres.NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 		router := tenantRouter()
-		router.GET("/:tenant/cases/filters", server.CasesFiltersHandler(repo))
+		router.GET("/:tenant/cases/filters", server.CasesFiltersHandler(repo, assignees))
 
 		req, _ := http.NewRequest("GET", "/radiant/cases/filters", bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
@@ -208,7 +210,13 @@ func Test_GetCasesFilters(t *testing.T) {
 			{"key":"HEART", "label":"Heart diseases"}],
 		"case_type_code":[
 			{"key":"germline", "label":"Germline"},
-			{"key":"somatic", "label":"Somatic"}]
+			{"key":"somatic", "label":"Somatic"}],
+		"assignee_id":[
+			{"key":"25286548-fbef-4e93-b3c4-c659e6169396", "label":"Alice Adams"},
+			{"key":"b6e6d0dd-7aa5-4018-ae03-1f5076801360", "label":"Carol Cohen"},
+			{"key":"e10fee0b-063b-4dcd-b086-90d1c9eb239d", "label":"Dan Doyle"},
+			{"key":"6c330322-c746-4436-bb76-efd2cd943686", "label":"Pat Patel"},
+			{"key":"79a8855e-3782-4dc8-be2a-8afdb34d6359", "label":"Wendy Walsh"}]
 		}`
 	assertGetCasesFilters(t, "simple", expected)
 }

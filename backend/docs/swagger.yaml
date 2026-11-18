@@ -442,6 +442,11 @@ components:
             $ref: '#/components/schemas/FiltersValue'
           type: array
           uniqueItems: false
+        assignee_id:
+          items:
+            $ref: '#/components/schemas/FiltersValue'
+          type: array
+          uniqueItems: false
         case_category_code:
           items:
             $ref: '#/components/schemas/FiltersValue'
@@ -489,6 +494,7 @@ components:
           uniqueItems: false
       required:
       - analysis_catalog_code
+      - assignee_id
       - case_category_code
       - case_type_code
       - diagnosis_lab_code

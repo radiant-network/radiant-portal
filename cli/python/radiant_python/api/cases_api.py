@@ -76,7 +76,7 @@ class CasesApi:
     ) -> List[AutocompleteResult]:
         """Get AutocompleteResult list of matching prefix
 
-        Retrieve AutocompleteResult list of ids matching prefix
+        Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), sequencing_experiment_id, proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -154,7 +154,7 @@ class CasesApi:
     ) -> ApiResponse[List[AutocompleteResult]]:
         """Get AutocompleteResult list of matching prefix
 
-        Retrieve AutocompleteResult list of ids matching prefix
+        Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), sequencing_experiment_id, proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -232,7 +232,7 @@ class CasesApi:
     ) -> RESTResponseType:
         """Get AutocompleteResult list of matching prefix
 
-        Retrieve AutocompleteResult list of ids matching prefix
+        Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), sequencing_experiment_id, proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
 
         :param tenant: Tenant code (required)
         :type tenant: str

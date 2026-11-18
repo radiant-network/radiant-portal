@@ -6,6 +6,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **analysis_catalog_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
+**assignee_id** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 **case_category_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 **case_type_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 **diagnosis_lab_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 

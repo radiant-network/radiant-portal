@@ -29,6 +29,8 @@ class CaseSequencingExperiment(BaseModel):
     affected_status_code: StrictStr
     experimental_strategy_code: StrictStr
     fetus_id: Optional[StrictInt] = None
+    has_cnv: StrictBool
+    has_snv: StrictBool
     has_variants: StrictBool
     histology_code: Optional[StrictStr] = None
     patient_id: StrictInt
@@ -39,7 +41,7 @@ class CaseSequencingExperiment(BaseModel):
     seq_id: StrictInt
     status_code: StrictStr
     updated_on: StrictStr
-    __properties: ClassVar[List[str]] = ["affected_status_code", "experimental_strategy_code", "fetus_id", "has_variants", "histology_code", "patient_id", "relationship_to_proband", "sample_id", "sample_submitter_id", "sample_type_code", "seq_id", "status_code", "updated_on"]
+    __properties: ClassVar[List[str]] = ["affected_status_code", "experimental_strategy_code", "fetus_id", "has_cnv", "has_snv", "has_variants", "histology_code", "patient_id", "relationship_to_proband", "sample_id", "sample_submitter_id", "sample_type_code", "seq_id", "status_code", "updated_on"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -95,6 +97,8 @@ class CaseSequencingExperiment(BaseModel):
             "affected_status_code": obj.get("affected_status_code"),
             "experimental_strategy_code": obj.get("experimental_strategy_code"),
             "fetus_id": obj.get("fetus_id"),
+            "has_cnv": obj.get("has_cnv"),
+            "has_snv": obj.get("has_snv"),
             "has_variants": obj.get("has_variants"),
             "histology_code": obj.get("histology_code"),
             "patient_id": obj.get("patient_id"),
