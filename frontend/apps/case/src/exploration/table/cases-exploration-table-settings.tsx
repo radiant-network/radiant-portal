@@ -8,7 +8,6 @@ import AnalysisTypeCodeCell, {
 import CaseLinkCell from '@/components/base/data-table/cells/case-link-cell';
 import DateCell from '@/components/base/data-table/cells/date-cell';
 import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
-import PriorityIndicatorCell from '@/components/base/data-table/cells/priority-indicator-cell';
 import TextListCell from '@/components/base/data-table/cells/text-list-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
@@ -17,6 +16,7 @@ import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-he
 
 import CaseActionsMenuCell from './cells/case-actions-menu-cell';
 import CaseAssignmentCell from './cells/case-assignment-cell';
+import CasePriorityCell from './cells/case-priority-cell';
 import CaseStatusCell from './cells/case-status-cell';
 
 const columnHelper = createAppColumnHelper<CaseResult>();
@@ -109,7 +109,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>, onCaseChange
     // Priority
     columnHelper.accessor(row => row.priority_code, {
       id: 'priority_code',
-      cell: info => <PriorityIndicatorCell code={info.getValue()} />,
+      cell: CasePriorityCell,
       header: t('case_exploration.case.headers.priority_code'),
       size: 124,
       minSize: 40,
