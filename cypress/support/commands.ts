@@ -6,6 +6,10 @@ import 'cypress-real-events';
 import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV_Table';
 import { CaseEntity_Variants_QueryBuilder } from 'pom/pages/CaseEntity_Variants_QueryBuilder';
 
+// Lets the UI settle after a click (animations, popovers, cached requests) before the next step.
+// A command passes 0 only on its inner steps, whose next step waits on its own: its last wait keeps the pause.
+const DEFAULT_SETTLE_MS = 500;
+
 // Public configuration getter (non-sensitive values)
 const getExpose = (key: string): string => {
   return Cypress.expose(key) || '';
@@ -15,10 +19,11 @@ const getExpose = (key: string): string => {
  * Clicks an element and waits for loading to complete.
  * @param subject The element to click.
  * @param options Click options to pass to Cypress.
+ * @param settleMs Pause before the check (see waitWhileLoad); 0 when the next step waits on its own.
  */
-Cypress.Commands.add('clickAndWait', { prevSubject: 'element' }, (subject, options) => {
+Cypress.Commands.add('clickAndWait', { prevSubject: 'element' }, (subject, options, settleMs: number = DEFAULT_SETTLE_MS) => {
   cy.wrap(subject).click(options);
-  cy.waitWhileLoad(oneMinute);
+  cy.waitWhileLoad(oneMinute, settleMs);
 });
 
 /**
@@ -34,7 +39,7 @@ Cypress.Commands.add('handleColumnNotFound', (column: string) => {
  * @param column The column name to hide.
  */
 Cypress.Commands.add('hideColumn', (column: string) => {
-  cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true });
+  cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true }, 0);
   getSettingsCheckbox(column).click({ force: true });
   cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true });
   cy.get(CommonSelectors.settingsPopper).should('not.exist');
@@ -126,7 +131,7 @@ Cypress.Commands.add('pinColumn', (position: number, tableId: string = '', headR
  * Resets all table columns to their default configuration.
  */
 Cypress.Commands.add('resetColumns', () => {
-  cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true });
+  cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true }, 0);
   cy.get(`${CommonSelectors.settingsPopper} ${CommonSelectors.resetButton}`).click({ force: true });
   cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true });
   cy.get(CommonSelectors.settingsPopper).should('not.exist');
@@ -240,11 +245,11 @@ Cypress.Commands.add('shouldHaveTooltip', { prevSubject: 'element' }, (subject, 
  * @param column The column name to show.
  */
 Cypress.Commands.add('showColumn', (column: string | RegExp) => {
-  cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true });
+  cy.get(CommonSelectors.settingsIcon).clickAndWait({ force: true }, 0);
   getSettingsCheckbox(column).click({ force: true });
-  cy.get(CommonSelectors.logo).clickAndWait({ force: true }); // Close the popper
+  cy.get(CommonSelectors.logo).clickAndWait({ force: true }, 0); // Close the popper
   cy.get(CommonSelectors.settingsPopper).should('not.exist');
-  cy.get(CommonSelectors.logo).clickAndWait({ force: true }); // Close the 'Columns' tooltip
+  cy.get(CommonSelectors.logo).clickAndWait({ force: true }, 0); // Close the 'Columns' tooltip
   cy.waitWhileLoad(oneMinute);
 });
 
@@ -261,7 +266,7 @@ Cypress.Commands.add('sortTableAndIntercept', (position: number, routeMatcher: s
   cy.get(`${CommonSelectors.tableHeadCell(tableId)}`)
     .eq(position)
     .find(CommonSelectors.sortIcon)
-    .clickAndWait({ force: true });
+    .clickAndWait({ force: true }, 0);
 
   for (let i = 0; i < nbCalls; i++) {
     cy.wait('@routeMatcher', { timeout: oneMinute });
@@ -537,25 +542,13 @@ Cypress.Commands.add('visitVariantPatientsPage', (locusID: string) => {
 /**
  * Waits for loading indicators to disappear within a specified timeout.
  * @param ms The maximum time to wait in milliseconds.
+ * @param settleMs Pause before the check, for the UI to settle after a click; 0 when the next step waits on its own.
  */
-Cypress.Commands.add('waitWhileLoad', (ms: number) => {
-  const start = new Date().getTime();
-
-  function checkForLoadIndicator(): any {
-    cy.wait(500);
-    const now = new Date().getTime();
-    if (now - start > ms) {
-      throw new Error(`Timed out after ${ms}ms waiting for load indicator to disappear`);
-    }
-
-    return cy.get('body').then($body => {
-      if ($body.find(CommonSelectors.loadIndicator).length > 0) {
-        return checkForLoadIndicator();
-      }
-    });
+Cypress.Commands.add('waitWhileLoad', (ms: number, settleMs: number = DEFAULT_SETTLE_MS) => {
+  if (settleMs > 0) {
+    cy.wait(settleMs);
   }
-
-  return checkForLoadIndicator();
+  cy.get(CommonSelectors.loadIndicator, { timeout: ms }).should('not.exist');
 });
 
 /**
