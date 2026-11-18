@@ -1,6 +1,7 @@
 import { Biohazard, Users } from 'lucide-react';
 
 import type { CaseEntity } from '@/api/api';
+import CasePriorityDropdown, { isCasePriority } from '@/components/base/dropdowns/case-priority-dropdown';
 import CaseStatusDropdown from '@/components/base/dropdowns/case-status-dropdown';
 import PriorityIndicator, { type PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
 import LibrechatButton from '@/components/base/librechat/librechat-button';
@@ -16,10 +17,11 @@ type HeaderProps = {
   data?: CaseEntity | null;
   isLoading: boolean;
   onStatusChange?: () => void;
+  onPriorityChange?: () => void;
   onAssignmentChange?: () => void;
 };
 
-export default function Header({ data, isLoading, onStatusChange, onAssignmentChange }: HeaderProps) {
+export default function Header({ data, isLoading, onStatusChange, onPriorityChange, onAssignmentChange }: HeaderProps) {
   const { t } = useI18n();
   const canEditCase = useCanEditCase(data?.diagnosis_lab_code);
 
@@ -59,14 +61,24 @@ export default function Header({ data, isLoading, onStatusChange, onAssignmentCh
               />,
             ]
           : []),
-        <Tooltip key="priority">
-          <TooltipTrigger>
-            <Badge variant="outline" size="lg">
-              <PriorityIndicator code={(data?.priority_code as PriorityIndicatorCode) || 'routine'} size="sm" />
-            </Badge>
-          </TooltipTrigger>
-          <TooltipContent>{t(`case_entity.header.priority_tooltip`)}</TooltipContent>
-        </Tooltip>,
+        data && canEditCase && isCasePriority(data.priority_code) ? (
+          <CasePriorityDropdown
+            key="priority"
+            caseId={data.case_id}
+            priority={data.priority_code}
+            size="sm"
+            onSaved={onPriorityChange}
+          />
+        ) : (
+          <Tooltip key="priority">
+            <TooltipTrigger>
+              <Badge variant="outline" size="lg">
+                <PriorityIndicator code={(data?.priority_code as PriorityIndicatorCode) || 'routine'} size="sm" />
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>{t(`case_entity.header.priority_tooltip`)}</TooltipContent>
+          </Tooltip>
+        ),
         ...(data?.status_code
           ? [
               <CaseStatusDropdown
