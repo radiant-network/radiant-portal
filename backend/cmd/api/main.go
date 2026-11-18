@@ -182,7 +182,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	casesGroup := tenantRoutes.Group("/cases")
 	casesGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchCasesHandler(repoCases, repoCaseAssignments))
 	casesGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.CasesAutocompleteHandler(repoCases))
-	casesGroup.GET("/filters", requireAction(types.ActionSearchCase), server.CasesFiltersHandler(repoCases))
+	casesGroup.GET("/filters", requireAction(types.ActionSearchCase), server.CasesFiltersHandler(repoCases, repoCaseAssignments))
 	casesGroup.GET("/:case_id", requireAction(types.ActionSearchCase), server.CaseEntityHandler(repoCases, repoIGV, repoCaseAssignments))
 	casesGroup.GET("/:case_id/assignment_candidates", requireActionAt(types.ActionEditCase, orgFromCase), server.ListCaseAssignmentCandidatesHandler(repoCaseAssignments, repoAuth, auth))
 	casesGroup.PUT("/:case_id/assignments", requireActionAt(types.ActionEditCase, orgFromCase), server.PutCaseAssignmentsHandler(repoCaseAssignments))

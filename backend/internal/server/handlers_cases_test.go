@@ -227,10 +227,35 @@ func Test_CasesAutocompleteHandler(t *testing.T) {
 	]`, w.Body.String())
 }
 
+type mockAssigneeFilterReader struct {
+	tenantCode string
+	err        error
+}
+
+func (m *mockAssigneeFilterReader) AssigneeFilterValues(_ context.Context, tenantCode string) ([]types.FiltersValue, error) {
+	m.tenantCode = tenantCode
+	if m.err != nil {
+		return nil, m.err
+	}
+	return []types.FiltersValue{{Key: "79a8855e-3782-4dc8-be2a-8afdb34d6359", Label: "Wendy Walsh"}}, nil
+}
+
+func Test_CasesFiltersHandler_AssigneeError(t *testing.T) {
+	router := tenantRouter()
+	router.GET("/:tenant/cases/filters", CasesFiltersHandler(&MockRepository{}, &mockAssigneeFilterReader{err: errors.New("boom")}))
+
+	req, _ := http.NewRequest("GET", "/radiant/cases/filters", nil)
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
 func Test_CasesFiltersHandler(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.GET("/:tenant/cases/filters", CasesFiltersHandler(repo))
+	caseRepo := &MockRepository{}
+	caseAssignmentsRepo := &mockAssigneeFilterReader{}
+	router := tenantRouter()
+	router.GET("/:tenant/cases/filters", CasesFiltersHandler(caseRepo, caseAssignmentsRepo))
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/filters", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -271,8 +296,11 @@ func Test_CasesFiltersHandler(t *testing.T) {
 		], "case_type_code":[
 			{"key":"germline", "label":"Germline"},
 			{"key":"somatic", "label":"Somatic"}
+		], "assignee_id":[
+			{"key":"79a8855e-3782-4dc8-be2a-8afdb34d6359", "label":"Wendy Walsh"}
 		]
 	}`, w.Body.String())
+	assert.Equal(t, "radiant", caseAssignmentsRepo.tenantCode)
 }
 
 func Test_CaseEntityHandler(t *testing.T) {

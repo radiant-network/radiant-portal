@@ -877,6 +877,12 @@ export interface CaseFilters {
      * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
+    'assignee_id': Array<FiltersValue>;
+    /**
+     * 
+     * @type {Array<FiltersValue>}
+     * @memberof CaseFilters
+     */
     'case_category_code': Array<FiltersValue>;
     /**
      * 

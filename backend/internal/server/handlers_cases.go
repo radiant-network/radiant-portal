@@ -19,6 +19,10 @@ type casesReader interface {
 	GetCaseEntity(ctx context.Context, caseId int) (*types.CaseEntity, error)
 }
 
+type assigneeFilterReader interface {
+	AssigneeFilterValues(ctx context.Context, tenantCode string) ([]types.FiltersValue, error)
+}
+
 type caseDocumentsReader interface {
 	SearchDocuments(ctx context.Context, userQuery types.ListQuery) (*[]types.DocumentResult, *int64, error)
 	GetDocumentsFilters(ctx context.Context, withProjectAndLab bool) (*types.DocumentFilters, error)
@@ -160,9 +164,19 @@ func CasesAutocompleteHandler(repo casesReader) gin.HandlerFunc {
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Param tenant path string true "Tenant code"
 // @Router /{tenant}/cases/filters [get]
-func CasesFiltersHandler(repo casesReader) gin.HandlerFunc {
+func CasesFiltersHandler(repo casesReader, caseAssignmentsRepo assigneeFilterReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		tenant, err := GetTenant(c)
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
 		filters, err := repo.GetCasesFilters(c.Request.Context())
+		if err != nil {
+			HandleError(c, err)
+			return
+		}
+		filters.Assignee, err = caseAssignmentsRepo.AssigneeFilterValues(c.Request.Context(), *tenant)
 		if err != nil {
 			HandleError(c, err)
 			return
