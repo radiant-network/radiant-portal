@@ -1,60 +1,64 @@
 /// <reference types="cypress"/>
 import 'support/commands';
+import { setupOnce } from 'support/setupOnce';
 import { data } from 'pom/shared/Data';
 import { CaseEntity_Variants_CNV_Table } from 'pom/pages/CaseEntity_Variants_CNV_Table';
 
-describe('Case Entity - Variants - Germline - CNV - Table - Columns', () => {
-  const setupTest = () => {
-    cy.login();
+// The tests share one page: each one restores what it changes.
+describe('Case Entity - Variants - Germline - CNV - Table - Columns', { testIsolation: false }, () => {
+  // Cypress drops the intercepts before each test: keep the default table preferences on every test.
+  beforeEach(() => {
     cy.resetTablePreferences();
+  });
+
+  setupOnce(() => {
+    cy.login();
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'CNV');
-  };
+  });
 
   it('Default display', () => {
-    setupTest();
     CaseEntity_Variants_CNV_Table.validations.shouldMatchDefaultColumnVisibility();
   });
 
-  it('Order', () => {
-    setupTest();
-    CaseEntity_Variants_CNV_Table.validations.shouldShowAllColumns();
-  });
+  describe('All columns shown', () => {
+    setupOnce(() => {
+      CaseEntity_Variants_CNV_Table.actions.showAllColumns();
+    });
 
-  it('Pin', () => {
-    setupTest();
-    CaseEntity_Variants_CNV_Table.validations.shouldShowPinnableColumns();
-  });
+    it('Order', () => {
+      CaseEntity_Variants_CNV_Table.validations.shouldShowAllColumns();
+    });
 
-  it('Default pin state', () => {
-    setupTest();
-    CaseEntity_Variants_CNV_Table.validations.shouldMatchDefaultPinnedColumns();
-  });
+    it('Pin', () => {
+      CaseEntity_Variants_CNV_Table.validations.shouldShowPinnableColumns();
+    });
 
-  it('Sort', () => {
-    setupTest();
-    CaseEntity_Variants_CNV_Table.validations.shouldShowSortableColumns();
-  });
+    it('Default pin state', () => {
+      CaseEntity_Variants_CNV_Table.validations.shouldMatchDefaultPinnedColumns();
+    });
 
-  it('Tooltip', () => {
-    setupTest();
-    CaseEntity_Variants_CNV_Table.validations.shouldShowColumnTooltips();
-  });
+    it('Sort', () => {
+      CaseEntity_Variants_CNV_Table.validations.shouldShowSortableColumns();
+    });
 
-  it('Hide and show column', () => {
-    setupTest();
-    CaseEntity_Variants_CNV_Table.validations.shouldDisplayColumn('cnv_variant');
-    CaseEntity_Variants_CNV_Table.actions.hideColumn('cnv_variant');
-    CaseEntity_Variants_CNV_Table.validations.shouldNotDisplayColumn('cnv_variant');
-    CaseEntity_Variants_CNV_Table.actions.showColumn('cnv_variant');
-    CaseEntity_Variants_CNV_Table.validations.shouldDisplayColumn('cnv_variant');
-  });
+    it('Tooltip', () => {
+      CaseEntity_Variants_CNV_Table.validations.shouldShowColumnTooltips();
+    });
 
-  it('Pin and unpin column', () => {
-    setupTest();
-    CaseEntity_Variants_CNV_Table.validations.shouldUnpinnedColumn('cnv_variant');
-    CaseEntity_Variants_CNV_Table.actions.pinColumn('cnv_variant');
-    CaseEntity_Variants_CNV_Table.validations.shouldPinnedColumn('cnv_variant');
-    CaseEntity_Variants_CNV_Table.actions.unpinColumn('cnv_variant');
-    CaseEntity_Variants_CNV_Table.validations.shouldUnpinnedColumn('cnv_variant');
+    it('Hide and show column', () => {
+      CaseEntity_Variants_CNV_Table.validations.shouldDisplayColumn('cnv_variant');
+      CaseEntity_Variants_CNV_Table.actions.hideColumn('cnv_variant');
+      CaseEntity_Variants_CNV_Table.validations.shouldNotDisplayColumn('cnv_variant');
+      CaseEntity_Variants_CNV_Table.actions.showColumn('cnv_variant');
+      CaseEntity_Variants_CNV_Table.validations.shouldDisplayColumn('cnv_variant');
+    });
+
+    it('Pin and unpin column', () => {
+      CaseEntity_Variants_CNV_Table.validations.shouldUnpinnedColumn('cnv_variant');
+      CaseEntity_Variants_CNV_Table.actions.pinColumn('cnv_variant');
+      CaseEntity_Variants_CNV_Table.validations.shouldPinnedColumn('cnv_variant');
+      CaseEntity_Variants_CNV_Table.actions.unpinColumn('cnv_variant');
+      CaseEntity_Variants_CNV_Table.validations.shouldUnpinnedColumn('cnv_variant');
+    });
   });
 });

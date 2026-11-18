@@ -1,63 +1,67 @@
 /// <reference types="cypress"/>
 import 'support/commands';
+import { setupOnce } from 'support/setupOnce';
 import { data } from 'pom/shared/Data';
 import { CaseEntity_Variants_SNV_Table } from 'pom/pages/CaseEntity_Variants_SNV_Table';
 import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_SavedFilters';
 
-describe('Case Entity - Variants - Germline - SNV - Table - Columns', () => {
-  const setupTest = () => {
-    cy.login();
+// The tests share one page: each one restores what it changes.
+describe('Case Entity - Variants - Germline - SNV - Table - Columns', { testIsolation: false }, () => {
+  // Cypress drops the intercepts before each test: keep the default table preferences on every test.
+  beforeEach(() => {
     cy.resetTablePreferences();
+  });
+
+  setupOnce(() => {
+    cy.login();
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'SNV');
     CaseEntity_Variants_SavedFilters.snv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Apply a filter for a cleaner query builder
     CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder
-  };
+  });
 
   it('Default display', () => {
-    setupTest();
     CaseEntity_Variants_SNV_Table.germline.validations.shouldMatchDefaultColumnVisibility();
   });
 
-  it('Order', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowAllColumns();
-  });
+  describe('All columns shown', () => {
+    setupOnce(() => {
+      CaseEntity_Variants_SNV_Table.germline.actions.showAllColumns();
+    });
 
-  it('Pin', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowPinnableColumns();
-  });
+    it('Order', () => {
+      CaseEntity_Variants_SNV_Table.germline.validations.shouldShowAllColumns();
+    });
 
-  it('Default pin state', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldMatchDefaultPinnedColumns();
-  });
+    it('Pin', () => {
+      CaseEntity_Variants_SNV_Table.germline.validations.shouldShowPinnableColumns();
+    });
 
-  it('Sort', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowSortableColumns();
-  });
+    it('Default pin state', () => {
+      CaseEntity_Variants_SNV_Table.germline.validations.shouldMatchDefaultPinnedColumns();
+    });
 
-  it('Tooltip', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnTooltips();
-  });
+    it('Sort', () => {
+      CaseEntity_Variants_SNV_Table.germline.validations.shouldShowSortableColumns();
+    });
 
-  it('Hide and show column', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldDisplayColumn('type');
-    CaseEntity_Variants_SNV_Table.germline.actions.hideColumn('type');
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldNotDisplayColumn('type');
-    CaseEntity_Variants_SNV_Table.germline.actions.showColumn('type');
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldDisplayColumn('type');
-  });
+    it('Tooltip', () => {
+      CaseEntity_Variants_SNV_Table.germline.validations.shouldShowColumnTooltips();
+    });
 
-  it('Pin and unpin column', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldUnpinnedColumn('type');
-    CaseEntity_Variants_SNV_Table.germline.actions.pinColumn('type');
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldPinnedColumn('type');
-    CaseEntity_Variants_SNV_Table.germline.actions.unpinColumn('type');
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldUnpinnedColumn('type');
+    it('Hide and show column', () => {
+      CaseEntity_Variants_SNV_Table.germline.validations.shouldDisplayColumn('type');
+      CaseEntity_Variants_SNV_Table.germline.actions.hideColumn('type');
+      CaseEntity_Variants_SNV_Table.germline.validations.shouldNotDisplayColumn('type');
+      CaseEntity_Variants_SNV_Table.germline.actions.showColumn('type');
+      CaseEntity_Variants_SNV_Table.germline.validations.shouldDisplayColumn('type');
+    });
+
+    it('Pin and unpin column', () => {
+      CaseEntity_Variants_SNV_Table.germline.validations.shouldUnpinnedColumn('type');
+      CaseEntity_Variants_SNV_Table.germline.actions.pinColumn('type');
+      CaseEntity_Variants_SNV_Table.germline.validations.shouldPinnedColumn('type');
+      CaseEntity_Variants_SNV_Table.germline.actions.unpinColumn('type');
+      CaseEntity_Variants_SNV_Table.germline.validations.shouldUnpinnedColumn('type');
+    });
   });
 });

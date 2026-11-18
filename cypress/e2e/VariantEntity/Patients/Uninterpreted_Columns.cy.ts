@@ -1,53 +1,58 @@
 /// <reference types="cypress"/>
 import 'support/commands';
+import { setupOnce } from 'support/setupOnce';
 import { data } from 'pom/shared/Data';
 import { VariantEntity_Patients } from 'pom/pages/VariantEntity_Patients';
 
-describe('VariantEntity - Patients - Uninterpreted - Columns', () => {
-  const setupTest = () => {
-    cy.login();
+// The tests share one page: each one restores what it changes.
+describe('VariantEntity - Patients - Uninterpreted - Columns', { testIsolation: false }, () => {
+  // Cypress drops the intercepts before each test: keep the default table preferences on every test.
+  beforeEach(() => {
     cy.resetTablePreferences();
+  });
+
+  setupOnce(() => {
+    cy.login();
     cy.visitVariantPatientsPage(data.variantGermline.locus_id);
     VariantEntity_Patients.uninterpreted.actions.selectTab();
     cy.resetColumns();
-  };
+  });
 
   it('Default display', () => {
-    setupTest();
     VariantEntity_Patients.uninterpreted.validations.shouldMatchDefaultColumnVisibility();
   });
 
-  it('Order', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowAllColumns();
-  });
+  describe('All columns shown', () => {
+    setupOnce(() => {
+      VariantEntity_Patients.uninterpreted.actions.showAllColumns();
+    });
 
-  it('Pin', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowPinnableColumns();
-  });
+    it('Order', () => {
+      VariantEntity_Patients.uninterpreted.validations.shouldShowAllColumns();
+    });
 
-  it('Default pin state', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldMatchDefaultPinnedColumns();
-  });
+    it('Pin', () => {
+      VariantEntity_Patients.uninterpreted.validations.shouldShowPinnableColumns();
+    });
 
-  it('Sort', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowSortableColumns();
-  });
+    it('Default pin state', () => {
+      VariantEntity_Patients.uninterpreted.validations.shouldMatchDefaultPinnedColumns();
+    });
 
-  it('Tooltip', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldShowColumnTooltips();
-  });
+    it('Sort', () => {
+      VariantEntity_Patients.uninterpreted.validations.shouldShowSortableColumns();
+    });
 
-  it('Pin and unpin column', () => {
-    setupTest();
-    VariantEntity_Patients.uninterpreted.validations.shouldUnpinnedColumn('case');
-    VariantEntity_Patients.uninterpreted.actions.pinColumn('case');
-    VariantEntity_Patients.uninterpreted.validations.shouldPinnedColumn('case');
-    VariantEntity_Patients.uninterpreted.actions.unpinColumn('case');
-    VariantEntity_Patients.uninterpreted.validations.shouldUnpinnedColumn('case');
+    it('Tooltip', () => {
+      VariantEntity_Patients.uninterpreted.validations.shouldShowColumnTooltips();
+    });
+
+    it('Pin and unpin column', () => {
+      VariantEntity_Patients.uninterpreted.validations.shouldUnpinnedColumn('case');
+      VariantEntity_Patients.uninterpreted.actions.pinColumn('case');
+      VariantEntity_Patients.uninterpreted.validations.shouldPinnedColumn('case');
+      VariantEntity_Patients.uninterpreted.actions.unpinColumn('case');
+      VariantEntity_Patients.uninterpreted.validations.shouldUnpinnedColumn('case');
+    });
   });
 });

@@ -894,7 +894,6 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
      * Validates the default pin state of each column.
      */
     shouldMatchDefaultPinnedColumns() {
-      actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -1006,7 +1005,6 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
      * Validates that all columns are displayed in the correct order in the table.
      */
     shouldShowAllColumns() {
-      actions.showAllColumns();
       tableColumns.forEach(column => {
         if (column.name.startsWith('[')) {
           cy.get(CommonSelectors.tableHeadCell()).eq(column.position).find(column.name).should('exist');
@@ -1036,7 +1034,6 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
      * Validates the tooltips on columns.
      */
     shouldShowColumnTooltips() {
-      actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -1054,7 +1051,6 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
      * Validates that pinnable columns are correctly marked as pinnable.
      */
     shouldShowPinnableColumns() {
-      actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
@@ -1071,7 +1067,6 @@ const generateSNVTableValidations = (config: SNVTableConfig, actions: SNVTableAc
      * Validates that sortable columns are correctly marked as sortable.
      */
     shouldShowSortableColumns() {
-      actions.showAllColumns();
       tableColumns.forEach(column => {
         cy.then(() =>
           getColumnPosition(CommonSelectors.tableHead(), tableColumns, column.id).then(position => {
