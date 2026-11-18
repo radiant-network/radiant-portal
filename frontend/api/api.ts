@@ -281,6 +281,12 @@ export interface BatchSummary {
 export interface CNVGeneOverlap {
     /**
      * 
+     * @type {string}
+     * @memberof CNVGeneOverlap
+     */
+    'biotype'?: string;
+    /**
+     * 
      * @type {Array<string>}
      * @memberof CNVGeneOverlap
      */
@@ -298,6 +304,18 @@ export interface CNVGeneOverlap {
      */
     'gene_length': number;
     /**
+     * GnomadLoeuf is the gnomAD LOEUF of the reference transcript of the gene
+     * @type {number}
+     * @memberof CNVGeneOverlap
+     */
+    'gnomad_loeuf'?: number;
+    /**
+     * GnomadPli is the gnomAD pLI of the reference transcript of the gene
+     * @type {number}
+     * @memberof CNVGeneOverlap
+     */
+    'gnomad_pli'?: number;
+    /**
      * 
      * @type {number}
      * @memberof CNVGeneOverlap
@@ -309,6 +327,12 @@ export interface CNVGeneOverlap {
      * @memberof CNVGeneOverlap
      */
     'nb_overlap_bases': number;
+    /**
+     * OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene
+     * @type {Array<string>}
+     * @memberof CNVGeneOverlap
+     */
+    'omim_inheritance_code'?: Array<string>;
     /**
      * 
      * @type {string}
@@ -333,6 +357,12 @@ export interface CNVGeneOverlap {
      * @memberof CNVGeneOverlap
      */
     'refseq_transcript_id'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof CNVGeneOverlap
+     */
+    'strand'?: string;
     /**
      * 
      * @type {string}

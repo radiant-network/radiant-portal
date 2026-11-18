@@ -123,6 +123,8 @@ components:
     CNVGeneOverlap:
       description: CNVGeneOverlap represents a gene overlap with a CNV
       properties:
+        biotype:
+          type: string
         cytoband:
           items:
             type: string
@@ -132,10 +134,25 @@ components:
           type: string
         gene_length:
           type: integer
+        gnomad_loeuf:
+          description: GnomadLoeuf is the gnomAD LOEUF of the reference transcript
+            of the gene
+          type: number
+        gnomad_pli:
+          description: GnomadPli is the gnomAD pLI of the reference transcript of
+            the gene
+          type: number
         nb_exons:
           type: integer
         nb_overlap_bases:
           type: integer
+        omim_inheritance_code:
+          description: OmimInheritanceCode lists the OMIM inheritance modes of the
+            phenotypes of the gene
+          items:
+            type: string
+          type: array
+          uniqueItems: false
         overlap_type:
           type: string
         overlapping_cnv_percent:
@@ -143,6 +160,8 @@ components:
         overlapping_gene_percent:
           type: number
         refseq_transcript_id:
+          type: string
+        strand:
           type: string
         symbol:
           type: string

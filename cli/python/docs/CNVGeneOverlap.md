@@ -6,15 +6,20 @@ CNVGeneOverlap represents a gene overlap with a CNV
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**biotype** | **str** |  | [optional] 
 **cytoband** | **List[str]** |  | 
 **gene_id** | **str** |  | 
 **gene_length** | **int** |  | 
+**gnomad_loeuf** | **float** | GnomadLoeuf is the gnomAD LOEUF of the reference transcript of the gene | [optional] 
+**gnomad_pli** | **float** | GnomadPli is the gnomAD pLI of the reference transcript of the gene | [optional] 
 **nb_exons** | **int** |  | 
 **nb_overlap_bases** | **int** |  | 
+**omim_inheritance_code** | **List[str]** | OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene | [optional] 
 **overlap_type** | **str** |  | 
 **overlapping_cnv_percent** | **float** |  | 
 **overlapping_gene_percent** | **float** |  | 
 **refseq_transcript_id** | **str** |  | [optional] 
+**strand** | **str** |  | [optional] 
 **symbol** | **str** |  | 
 **tenant_gene_panels** | **List[str]** |  | 
 
