@@ -1815,7 +1815,7 @@
   },
   "files": {
     "filters": {
-      "data_type_code": "Type",
+      "data_type_code": "File Type",
       "format_code": "Format",
       "project_code": "Project",
       "diagnosis_lab_code": "Diagnostic Lab",
@@ -2789,7 +2789,7 @@
     "search_by_id_placeholder": "File, sample, patient, case, run, or sequencing",
     "name": "File Name",
     "format_code": "Format",
-    "data_type_code": "Type",
+    "data_type_code": "File Type",
     "size": "Size",
     "case_id": "Case",
     "diagnosis_lab": "Diag. Lab",
@@ -2797,6 +2797,7 @@
     "relationship_to_proband_code": "Relationship",
     "submitter_sample_id": "Sample",
     "task_id": "Task",
+    "task_type_name": "Task Type",
     "seq_id": "Sequencing",
     "hash": "Hash",
     "run_alias": "Run"

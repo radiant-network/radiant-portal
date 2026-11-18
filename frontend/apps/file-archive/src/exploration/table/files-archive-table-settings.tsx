@@ -7,7 +7,7 @@ import DateCell from '@/components/base/data-table/cells/date-cell';
 import DocumentSizeCell from '@/components/base/data-table/cells/document-size-cell';
 import DownloadFileCell from '@/components/base/data-table/cells/download-file-cell';
 import RelationshipToProbandCell from '@/components/base/data-table/cells/relationship-to-proband-cell';
-import TaskCell from '@/components/base/data-table/cells/task-cell';
+import TaskTypeCell from '@/components/base/data-table/cells/task-type-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
@@ -110,10 +110,19 @@ export function getFilesArchiveColumns(t: TFunction<string, undefined>) {
     // Task
     columnHelper.accessor(row => row.task_id, {
       id: 'task_id',
-      cell: ({ row }) => <TaskCell taskId={row.original.task_id} typeName={row.original.task_type_name} />,
+      cell: info => info.getValue(),
       header: t('file_entity.task_id'),
-      size: 300,
+      size: 124,
       minSize: 40,
+    }),
+    // Task type
+    columnHelper.accessor(row => row.task_type_name, {
+      id: 'task_type_name',
+      cell: info => <TaskTypeCell name={info.getValue()} />,
+      header: t('file_entity.task_type_name'),
+      size: 200,
+      minSize: 40,
+      enableSorting: false,
     }),
     // Created on
     columnHelper.accessor(row => row.created_on, {
@@ -214,6 +223,11 @@ export const defaultSettings = createColumnSettings([
     id: 'task_id',
     visible: true,
     label: 'file_entity.task_id',
+  },
+  {
+    id: 'task_type_name',
+    visible: true,
+    label: 'file_entity.task_type_name',
   },
   {
     id: 'created_on',
