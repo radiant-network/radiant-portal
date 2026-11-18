@@ -1,6 +1,8 @@
 import React, { useId } from 'react';
 
 import { BooleanFacet } from '@/components/base/query-builder/facets/boolean-facet';
+import FavoriteFacetButton from '@/components/base/query-builder/facets/favorite/favorite-facet-button';
+import { useFavorites } from '@/components/base/query-builder/facets/favorite/hooks/use-favorites';
 import { MultiSelectFacet } from '@/components/base/query-builder/facets/multiselect-facet';
 import { NumericalFacet } from '@/components/base/query-builder/facets/numerical-facet';
 import {
@@ -13,6 +15,7 @@ import { Card, CardHeader } from '@/components/base/shadcn/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { type Aggregation as AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
+import { cn } from '@/components/lib/utils';
 
 interface FacetContainerProps {
   field: AggregationConfig;
@@ -28,11 +31,13 @@ interface AccordionContainerProps extends FacetContainerProps {
 export function AccordionContainer({ field, isOpen, children }: AccordionContainerProps) {
   const { t } = useI18n();
   const { history } = useAccordionContext();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const descriptionId = useId();
 
   const label = t(`common.facets.labels.${field.translation_key}`, { defaultValue: field.key });
   const tooltipKey = `common.facets.labels.${field.translation_key}_tooltip`;
   const tooltipContent = t(tooltipKey) === tooltipKey ? null : t(tooltipKey);
+  const favorite = isFavorite(field.key);
 
   function renderTrigger() {
     return (
@@ -50,10 +55,14 @@ export function AccordionContainer({ field, isOpen, children }: AccordionContain
         className="border-none"
         data-cy={`facet-state-${isOpen ? 'open' : 'closed'}`}
       >
-        <CardHeader size="sm">
+        <CardHeader
+          size="sm"
+          className="group/facet-header relative flex! flex-row items-center gap-2 [&>h3]:min-w-0 [&>h3]:flex-1"
+        >
           <AccordionTrigger
             data-cy={`facet-header-${field.key}`}
             aria-describedby={tooltipContent ? descriptionId : undefined}
+            className="pr-8"
           >
             {tooltipContent ? (
               <Tooltip>
@@ -68,6 +77,18 @@ export function AccordionContainer({ field, isOpen, children }: AccordionContain
               renderTrigger()
             )}
           </AccordionTrigger>
+          <FavoriteFacetButton
+            facetLabel={label}
+            isFavorite={favorite}
+            onToggle={() => toggleFavorite(field.key)}
+            dataCy={`facet-star-${field.key}`}
+            className={cn(
+              'absolute right-2 top-1/2 z-10 -translate-y-1/2',
+              favorite
+                ? 'opacity-100'
+                : 'pointer-events-none opacity-0 focus-visible:pointer-events-auto focus-visible:opacity-100 group-hover/facet-header:pointer-events-auto group-hover/facet-header:opacity-100',
+            )}
+          />
           {tooltipContent && (
             <span id={descriptionId} className="sr-only">
               {tooltipContent}

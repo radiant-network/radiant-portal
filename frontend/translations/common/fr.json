@@ -2061,7 +2061,29 @@
         "pathogenicity": "Pathogénicité",
         "occurrence": "Occurrence",
         "organization": "Mon Organisation",
-        "metric_qc": "Metric QC"
+        "metric_qc": "Metric QC",
+        "favorites": "Favoris"
+      }
+    },
+    "favorites": {
+      "empty": {
+        "title": "Vos favoris apparaîtront ici",
+        "description": "Ajoutez vos facettes les plus utilisées en survolant le titre, puis en cliquant sur l'étoile."
+      },
+      "error": {
+        "title": "Impossible de charger les favoris",
+        "description": "Vérifiez votre connexion et réessayez.",
+        "retry": "Réessayer"
+      },
+      "star": {
+        "tooltip_add": "Ajouter aux favoris",
+        "tooltip_remove": "Retirer des favoris",
+        "a11y_add": "Ajouter {{facet}} aux favoris",
+        "a11y_remove": "Retirer {{facet}} des favoris"
+      },
+      "toast": {
+        "error_add": "Impossible d'ajouter aux favoris. Veuillez réessayer.",
+        "error_remove": "Impossible de retirer des favoris. Veuillez réessayer."
       }
     }
   },

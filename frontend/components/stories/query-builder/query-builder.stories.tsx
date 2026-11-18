@@ -1223,3 +1223,160 @@ export const SavedFilters: Story = {
   },
   render: args => <QueryBuilderStory args={args} title="Saved filters" />,
 };
+
+const favoritesPrefHandler = (favorites: string[] | null) =>
+  http.get(userPreferenceApi, ({ params }) => {
+    const key = params.key as string;
+    if (key.startsWith('favorites-')) {
+      if (favorites === null) return new HttpResponse(null, { status: 404 });
+      return HttpResponse.json({ key, content: { favorites } });
+    }
+    return new HttpResponse(null, { status: 404 });
+  });
+
+export const FavoritesEmpty: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        favoritesPrefHandler(null),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.germline_snv_occurrence,
+    children: <></>,
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilderStory
+      args={args}
+      title="Favorites — empty"
+      description="No favorites yet. Open the Favorites rail item to see the empty illustration + copy."
+    />
+  ),
+};
+
+export const FavoritesPopulated: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        favoritesPrefHandler(['firstName', 'status']),
+        http.post(userPreferenceApi, () => HttpResponse.json({})),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.germline_snv_occurrence,
+    children: <></>,
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilderStory
+      args={args}
+      title="Favorites — populated"
+      description="Two preloaded favorites. Page auto-lands on the Favorites panel. Click a filled star to trigger the 0.5s undo window, then the slide-out animation."
+    />
+  ),
+};
+
+export const FavoritesLoading: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get(userPreferenceApi, async ({ params }) => {
+          const key = params.key as string;
+          if (key.startsWith('favorites-')) {
+            await delay(10000);
+            return new HttpResponse(null, { status: 404 });
+          }
+          return new HttpResponse(null, { status: 404 });
+        }),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.germline_snv_occurrence,
+    children: <></>,
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilderStory
+      args={args}
+      title="Favorites — loading"
+      description="Favorites fetch hangs. The query-builder skeleton stays until the fetch resolves; refresh the story to reset."
+    />
+  ),
+};
+
+export const FavoritesLoadError: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        http.get(userPreferenceApi, ({ params }) => {
+          const key = params.key as string;
+          if (key.startsWith('favorites-')) return new HttpResponse(null, { status: 500 });
+          return new HttpResponse(null, { status: 404 });
+        }),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.germline_snv_occurrence,
+    children: <></>,
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilderStory
+      args={args}
+      title="Favorites — load error"
+      description="GET on favorites keys returns 500. Open the Favorites rail: error state + Retry button."
+    />
+  ),
+};
+
+export const FavoritesSaveError: Story = {
+  parameters: {
+    msw: {
+      handlers: [
+        http.post(mockListApi, httpMockListApiResponse),
+        http.post(mockCountApi, httpMockCountApiResponse),
+        http.post(occurrenceAggregateApi, httpOccurrenceAggregateApiResponse),
+        http.post(occurrenceAggregateStatisticApi, httpOccurrenceAggregateStatisticsApiResponse),
+        favoritesPrefHandler([]),
+        http.post(userPreferenceApi, ({ params }) => {
+          const key = params.key as string;
+          if (key.startsWith('favorites-')) return new HttpResponse(null, { status: 500 });
+          return HttpResponse.json({});
+        }),
+      ],
+    },
+  },
+  args: {
+    appId: ApplicationId.germline_snv_occurrence,
+    children: <></>,
+    defaultSidebarOpen: true,
+  },
+  render: args => (
+    <QueryBuilderStory
+      args={args}
+      title="Favorites — save error"
+      description="POST on favorites keys returns 500. Click any star on a facet: optimistic update, then revert + error toast."
+    />
+  ),
+};

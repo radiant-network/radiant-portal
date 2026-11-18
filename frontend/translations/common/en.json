@@ -2060,7 +2060,29 @@
         "pathogenicity": "Pathogenicity",
         "occurrence": "Occurrence",
         "organization": "My Organization",
-        "metric_qc": "Metric QC"
+        "metric_qc": "Metric QC",
+        "favorites": "Favorites"
+      }
+    },
+    "favorites": {
+      "empty": {
+        "title": "Your favorites will appear here",
+        "description": "Add your most-used facets by hovering over the title and clicking the star."
+      },
+      "error": {
+        "title": "Unable to load favorites",
+        "description": "Check your connection, then try again.",
+        "retry": "Retry"
+      },
+      "star": {
+        "tooltip_add": "Add to favorites",
+        "tooltip_remove": "Remove from favorites",
+        "a11y_add": "Add {{facet}} to favorites",
+        "a11y_remove": "Remove {{facet}} from favorites"
+      },
+      "toast": {
+        "error_add": "Unable to add to favorites. Please try again.",
+        "error_remove": "Unable to remove from favorites. Please try again."
       }
     }
   },
