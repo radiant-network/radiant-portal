@@ -21,5 +21,6 @@ describe('Cases - Filters', () => {
     expectedFilterKeys.forEach(key => {
       expect(response.body[key], `filter "${key}"`).to.be.an('array');
     });
+    expect(response.body.assignee_id, 'filter "assignee_id"').to.be.an('array');
   });
 });

@@ -252,10 +252,10 @@ func Test_CasesFiltersHandler_AssigneeError(t *testing.T) {
 }
 
 func Test_CasesFiltersHandler(t *testing.T) {
-	repo := &MockRepository{}
-	assignees := &mockAssigneeFilterReader{}
+	caseRepo := &MockRepository{}
+	caseAssignmentsRepo := &mockAssigneeFilterReader{}
 	router := tenantRouter()
-	router.GET("/:tenant/cases/filters", CasesFiltersHandler(repo, assignees))
+	router.GET("/:tenant/cases/filters", CasesFiltersHandler(caseRepo, caseAssignmentsRepo))
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/filters", bytes.NewBuffer([]byte("{}")))
 	w := httptest.NewRecorder()
@@ -300,7 +300,7 @@ func Test_CasesFiltersHandler(t *testing.T) {
 			{"key":"79a8855e-3782-4dc8-be2a-8afdb34d6359", "label":"Wendy Walsh"}
 		]
 	}`, w.Body.String())
-	assert.Equal(t, "radiant", assignees.tenantCode)
+	assert.Equal(t, "radiant", caseAssignmentsRepo.tenantCode)
 }
 
 func Test_CaseEntityHandler(t *testing.T) {

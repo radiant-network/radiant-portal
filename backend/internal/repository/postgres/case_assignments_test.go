@@ -620,3 +620,17 @@ func Test_AssigneeFilterValues_LabelSkipsBlankLastName(t *testing.T) {
 		assert.Contains(t, values, types.FiltersValue{Key: firstOnlyID, Label: "Zoe"})
 	})
 }
+
+// The batch client has no email: assigning it a case must not make it a filter value.
+func Test_AssigneeFilterValues_ExcludesAssignedSystemAccount(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+		const batchClientID = "c0ffee00-1111-4222-8333-444455556666"
+		assign(t, env.Postgres, types.DefaultTenantCode, 1, batchClientID)
+
+		values, err := repo.AssigneeFilterValues(t.Context(), types.DefaultTenantCode)
+
+		assert.NoError(t, err)
+		assert.NotContains(t, filterKeys(values), batchClientID)
+	})
+}

@@ -149,10 +149,10 @@ func Test_CaseIdsAutoComplete_SuggestsSubmitterPatientIdUnderItsFilterField(t *t
 func assertGetCasesFilters(t *testing.T, data string, expected string) {
 	// Exclusive: parallel provisioning tests add users to radiant, and the assignee list is asserted exactly.
 	testutils.RunTest(t, testutils.Need{Starrocks: data, Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
-		assignees := postgres.NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+		caseRepo := starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		caseAssignmentsRepo := postgres.NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 		router := tenantRouter()
-		router.GET("/:tenant/cases/filters", server.CasesFiltersHandler(repo, assignees))
+		router.GET("/:tenant/cases/filters", server.CasesFiltersHandler(caseRepo, caseAssignmentsRepo))
 
 		req, _ := http.NewRequest("GET", "/radiant/cases/filters", bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()

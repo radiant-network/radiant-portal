@@ -164,7 +164,7 @@ func CasesAutocompleteHandler(repo casesReader) gin.HandlerFunc {
 // @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
 // @Param tenant path string true "Tenant code"
 // @Router /{tenant}/cases/filters [get]
-func CasesFiltersHandler(repo casesReader, assigneesRepo assigneeFilterReader) gin.HandlerFunc {
+func CasesFiltersHandler(repo casesReader, caseAssignmentsRepo assigneeFilterReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tenant, err := GetTenant(c)
 		if err != nil {
@@ -176,7 +176,7 @@ func CasesFiltersHandler(repo casesReader, assigneesRepo assigneeFilterReader) g
 			HandleError(c, err)
 			return
 		}
-		filters.Assignee, err = assigneesRepo.AssigneeFilterValues(c.Request.Context(), *tenant)
+		filters.Assignee, err = caseAssignmentsRepo.AssigneeFilterValues(c.Request.Context(), *tenant)
 		if err != nil {
 			HandleError(c, err)
 			return
