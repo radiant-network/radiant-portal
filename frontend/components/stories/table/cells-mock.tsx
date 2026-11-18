@@ -49,7 +49,7 @@ import RelationshipToProbandCell from '@/components/base/data-table/cells/relati
 import RowExpandCell from '@/components/base/data-table/cells/row-expand-cell';
 import RowSelectionCell from '@/components/base/data-table/cells/row-selection-cell';
 import StatusCell from '@/components/base/data-table/cells/status-cell';
-import TaskCell from '@/components/base/data-table/cells/task-cell';
+import TaskTypeCell from '@/components/base/data-table/cells/task-type-cell';
 import TextCell from '@/components/base/data-table/cells/text-cell';
 import TextListCell from '@/components/base/data-table/cells/text-list-cell';
 import TextTooltipCell from '@/components/base/data-table/cells/text-tooltip-cell';
@@ -276,10 +276,10 @@ export const firstSetCellColumns = [
     header: 'BadgeCell',
   }),
   baseCellColumnHelper.accessor(row => row.badge, {
-    id: 'task',
-    cell: info => <TaskCell taskId={1000092} typeName={info.getValue()} />,
-    header: 'TaskCell',
-    size: 240,
+    id: 'task_type',
+    cell: info => <TaskTypeCell name={info.getValue()} />,
+    header: 'TaskTypeCell',
+    size: 96,
   }),
   baseCellColumnHelper.accessor(row => row.badge_list, {
     id: 'badge_list',

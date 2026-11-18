@@ -32,7 +32,7 @@ const tableColumns = [
   },
   {
     id: 'type',
-    name: 'Type',
+    name: 'File Type',
     apiField: 'data_type_code',
     isVisibleByDefault: true,
     pinByDefault: null,
@@ -119,6 +119,17 @@ const tableColumns = [
     tooltip: null,
   },
   {
+    id: 'task_type',
+    name: 'Task Type',
+    apiField: 'task_type_name',
+    isVisibleByDefault: true,
+    pinByDefault: null,
+    isSortable: false,
+    isPinnable: true,
+    position: 10,
+    tooltip: null,
+  },
+  {
     id: 'created_on',
     name: 'Created On',
     apiField: 'created_on',
@@ -126,7 +137,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 10,
+    position: 11,
     tooltip: 'Date of case creation (yyyy-mm-dd)',
   },
   {
@@ -137,7 +148,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 11,
+    position: 12,
     tooltip: null,
   },
   {
@@ -148,7 +159,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 12,
+    position: 13,
     tooltip: null,
   },
   {
@@ -159,7 +170,7 @@ const tableColumns = [
     pinByDefault: null,
     isSortable: true,
     isPinnable: true,
-    position: 13,
+    position: 14,
     tooltip: null,
   },
 ];
