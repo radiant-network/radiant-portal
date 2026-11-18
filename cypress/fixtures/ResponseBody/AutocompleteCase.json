@@ -20,6 +20,10 @@
     "value": "Mock proband_submitter_sample_ids"
   },
   {
+    "type": "run_name",
+    "value": "Mock run_name"
+  },
+  {
     "type": "other field",
     "value": "Mock other field"
   }
