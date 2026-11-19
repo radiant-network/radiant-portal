@@ -1,0 +1,6 @@
+# Generated from backend/docs/swagger.yaml: collapsed in GitHub diffs and left out of the language stats.
+backend/docs/** linguist-generated=true
+frontend/api/** linguist-generated=true
+cli/python/** linguist-generated=true
+# The spec itself stays shown: it is where a reviewer reads the API change.
+backend/docs/swagger.yaml -linguist-generated
