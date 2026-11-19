@@ -14,6 +14,11 @@ docs/BatchReport.md
 docs/BatchSummary.md
 docs/BatchesApi.md
 docs/CNVGeneOverlap.md
+docs/CNVProfile.md
+docs/CNVProfileChromosome.md
+docs/CNVProfileROH.md
+docs/CNVProfileSegment.md
+docs/CNVProfileTrack.md
 docs/CaseAssignee.md
 docs/CaseBatch.md
 docs/CaseBatchPatch.md
@@ -59,6 +64,7 @@ docs/CreateSampleBatchBody.md
 docs/CreateSequencingExperimentBatchBody.md
 docs/CreateUserRequest.md
 docs/CreateUserRole.md
+docs/Cytoband.md
 docs/DocumentFilters.md
 docs/DocumentResult.md
 docs/DocumentsApi.md
@@ -288,6 +294,11 @@ radiant_python/models/client_config.py
 radiant_python/models/clinvar_rcv.py
 radiant_python/models/clinvar_variant_conditions.py
 radiant_python/models/cnv_gene_overlap.py
+radiant_python/models/cnv_profile.py
+radiant_python/models/cnv_profile_chromosome.py
+radiant_python/models/cnv_profile_roh.py
+radiant_python/models/cnv_profile_segment.py
+radiant_python/models/cnv_profile_track.py
 radiant_python/models/comphet_gene.py
 radiant_python/models/count.py
 radiant_python/models/count_body_with_sqon.py
@@ -301,6 +312,7 @@ radiant_python/models/create_sample_batch_body.py
 radiant_python/models/create_sequencing_experiment_batch_body.py
 radiant_python/models/create_user_request.py
 radiant_python/models/create_user_role.py
+radiant_python/models/cytoband.py
 radiant_python/models/document_filters.py
 radiant_python/models/document_result.py
 radiant_python/models/documents_search_response.py
