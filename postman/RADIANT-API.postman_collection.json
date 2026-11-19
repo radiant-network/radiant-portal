@@ -1241,6 +1241,55 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Profile region",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/germline/cnv/1/1/1/profile/region?chromosome=1&start=1000000&end=2000000",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "occurrences",
+                "germline",
+                "cnv",
+                "1",
+                "1",
+                "1",
+                "profile",
+                "region"
+              ],
+              "query": [
+                {
+                  "key": "chromosome",
+                  "value": "1"
+                },
+                {
+                  "key": "start",
+                  "value": "1000000"
+                },
+                {
+                  "key": "end",
+                  "value": "2000000"
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },

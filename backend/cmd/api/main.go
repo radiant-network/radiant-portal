@@ -249,6 +249,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVAggregateHandler(repoGermlineCNVOccurrences, repoFacets))
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVStatisticsHandler(repoGermlineCNVOccurrences))
 	occurrencesGermlineCNVGroup.GET("/:case_id/:seq_id/:task_id/profile", requireAction(types.ActionSearchCase), server.GetGermlineCNVProfileHandler(repoCNVProfile, s3Store))
+	occurrencesGermlineCNVGroup.GET("/:case_id/:seq_id/:task_id/profile/region", requireAction(types.ActionSearchCase), server.GetGermlineCNVProfileRegionHandler(repoCNVProfile, s3Store))
 	occurrencesGermlineCNVGroup.GET("/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVGenesOverlapHandler(repoGermlineCNVOccurrences))
 
 	occurrencesGermlineSNVGroup := occurrencesGermlineGroup.Group("/snv")
