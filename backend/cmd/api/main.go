@@ -196,6 +196,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 
 	geneGroup := tenantRoutes.Group("/genes")
 	geneGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.GetGeneAutoCompleteHandler(repoGenes))
+	geneGroup.GET("/track", requireAction(types.ActionSearchCase), server.GetGeneTrackHandler(repoGenes))
 	geneGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchGenesHandler(repoGenes))
 
 	hpoGroup := tenantRoutes.Group("/hpo")

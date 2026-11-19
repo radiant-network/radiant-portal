@@ -82,6 +82,8 @@ from radiant_python.models.gene_panel_upload_result import GenePanelUploadResult
 from radiant_python.models.gene_panel_upload_warning import GenePanelUploadWarning
 from radiant_python.models.gene_result import GeneResult
 from radiant_python.models.gene_search_body import GeneSearchBody
+from radiant_python.models.gene_track_exon import GeneTrackExon
+from radiant_python.models.gene_track_gene import GeneTrackGene
 from radiant_python.models.germline_cnv_occurrence import GermlineCNVOccurrence
 from radiant_python.models.germline_snv_occurrence import GermlineSNVOccurrence
 from radiant_python.models.get_batch_response import GetBatchResponse

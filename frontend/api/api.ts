@@ -3938,6 +3938,110 @@ export interface GeneSearchBody {
     'inputs'?: Array<string>;
 }
 /**
+ * 
+ * @export
+ * @interface GeneTrackExon
+ */
+export interface GeneTrackExon {
+    /**
+     * 
+     * @type {number}
+     * @memberof GeneTrackExon
+     */
+    'end': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof GeneTrackExon
+     */
+    'start': number;
+}
+/**
+ * GeneTrackGene is a gene of the gene track, with the exons of its reference transcript (none when it has no reference transcript)
+ * @export
+ * @interface GeneTrackGene
+ */
+export interface GeneTrackGene {
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneTrackGene
+     */
+    'biotype'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneTrackGene
+     */
+    'chromosome': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneTrackGene
+     */
+    'description'?: string;
+    /**
+     * 
+     * @type {number}
+     * @memberof GeneTrackGene
+     */
+    'end': number;
+    /**
+     * 
+     * @type {Array<GeneTrackExon>}
+     * @memberof GeneTrackGene
+     */
+    'exons': Array<GeneTrackExon>;
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneTrackGene
+     */
+    'gene_id': string;
+    /**
+     * GnomadLoeuf is the gnomAD LOEUF of the reference transcript of the gene
+     * @type {number}
+     * @memberof GeneTrackGene
+     */
+    'gnomad_loeuf'?: number;
+    /**
+     * GnomadPli is the gnomAD pLI of the reference transcript of the gene
+     * @type {number}
+     * @memberof GeneTrackGene
+     */
+    'gnomad_pli'?: number;
+    /**
+     * OmimConditions lists the OMIM phenotypes of the gene, with their inheritance modes
+     * @type {Array<OmimGenePanel>}
+     * @memberof GeneTrackGene
+     */
+    'omim_conditions'?: Array<OmimGenePanel>;
+    /**
+     * OmimInheritanceCode lists the OMIM inheritance modes of the phenotypes of the gene
+     * @type {Array<string>}
+     * @memberof GeneTrackGene
+     */
+    'omim_inheritance_code'?: Array<string>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GeneTrackGene
+     */
+    'start': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneTrackGene
+     */
+    'strand'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof GeneTrackGene
+     */
+    'symbol': string;
+}
+/**
  * GermlineCNVOccurrence represents a germline CNV occurrence
  * @export
  * @interface GermlineCNVOccurrence
@@ -13498,6 +13602,64 @@ export const GenesApiAxiosParamCreator = function (configuration?: Configuration
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with the exons of its reference transcript (none without one). A symbol takes precedence over a region.
+         * @summary List the genes of a region
+         * @param {string} tenant Tenant code
+         * @param {string} [symbol] Gene symbol, ignoring case
+         * @param {string} [chromosome] Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol
+         * @param {number} [start] Region start; required without symbol
+         * @param {number} [end] Region end; required without symbol
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        geneTrack: async (tenant: string, symbol?: string, chromosome?: string, start?: number, end?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'tenant' is not null or undefined
+            assertParamExists('geneTrack', 'tenant', tenant)
+            const localVarPath = `/{tenant}/genes/track`
+                .replace(`{${"tenant"}}`, encodeURIComponent(String(tenant)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerauth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (symbol !== undefined) {
+                localVarQueryParameter['symbol'] = symbol;
+            }
+
+            if (chromosome !== undefined) {
+                localVarQueryParameter['chromosome'] = chromosome;
+            }
+
+            if (start !== undefined) {
+                localVarQueryParameter['start'] = start;
+            }
+
+            if (end !== undefined) {
+                localVarQueryParameter['end'] = end;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -13537,6 +13699,23 @@ export const GenesApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['GenesApi.geneSearch']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with the exons of its reference transcript (none without one). A symbol takes precedence over a region.
+         * @summary List the genes of a region
+         * @param {string} tenant Tenant code
+         * @param {string} [symbol] Gene symbol, ignoring case
+         * @param {string} [chromosome] Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol
+         * @param {number} [start] Region start; required without symbol
+         * @param {number} [end] Region end; required without symbol
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async geneTrack(tenant: string, symbol?: string, chromosome?: string, start?: number, end?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GeneTrackGene>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.geneTrack(tenant, symbol, chromosome, start, end, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['GenesApi.geneTrack']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -13569,6 +13748,20 @@ export const GenesApiFactory = function (configuration?: Configuration, basePath
          */
         geneSearch(tenant: string, geneSearchBody: GeneSearchBody, options?: RawAxiosRequestConfig): AxiosPromise<Array<GeneResult>> {
             return localVarFp.geneSearch(tenant, geneSearchBody, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with the exons of its reference transcript (none without one). A symbol takes precedence over a region.
+         * @summary List the genes of a region
+         * @param {string} tenant Tenant code
+         * @param {string} [symbol] Gene symbol, ignoring case
+         * @param {string} [chromosome] Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol
+         * @param {number} [start] Region start; required without symbol
+         * @param {number} [end] Region end; required without symbol
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        geneTrack(tenant: string, symbol?: string, chromosome?: string, start?: number, end?: number, options?: RawAxiosRequestConfig): AxiosPromise<Array<GeneTrackGene>> {
+            return localVarFp.geneTrack(tenant, symbol, chromosome, start, end, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -13605,6 +13798,22 @@ export class GenesApi extends BaseAPI {
      */
     public geneSearch(tenant: string, geneSearchBody: GeneSearchBody, options?: RawAxiosRequestConfig) {
         return GenesApiFp(this.configuration).geneSearch(tenant, geneSearchBody, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List the genes of every biotype overlapping a region of at most 20 Mb, or the one with a symbol, each with the exons of its reference transcript (none without one). A symbol takes precedence over a region.
+     * @summary List the genes of a region
+     * @param {string} tenant Tenant code
+     * @param {string} [symbol] Gene symbol, ignoring case
+     * @param {string} [chromosome] Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol
+     * @param {number} [start] Region start; required without symbol
+     * @param {number} [end] Region end; required without symbol
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof GenesApi
+     */
+    public geneTrack(tenant: string, symbol?: string, chromosome?: string, start?: number, end?: number, options?: RawAxiosRequestConfig) {
+        return GenesApiFp(this.configuration).geneTrack(tenant, symbol, chromosome, start, end, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

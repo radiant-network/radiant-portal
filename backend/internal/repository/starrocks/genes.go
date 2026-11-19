@@ -125,3 +125,97 @@ func (r *GenesRepository) ResolveGenes(ctx context.Context, inputs []string) ([]
 	}
 	return genes, nil
 }
+
+// GetGeneTrack lists the genes of every biotype overlapping a region, each with the exons of its
+// reference transcript.
+func (r *GenesRepository) GetGeneTrack(ctx context.Context, chromosome string, start int, end int) ([]types.GeneTrackGene, error) {
+	if chromosome == types.MitochondrialChromosome {
+		chromosome = types.EnsemblMitochondrialChromosome
+	}
+	return r.geneTrack(ctx, "chromosome = ? AND end >= ? AND start <= ?", chromosome, start, end)
+}
+
+// GetGeneTrackBySymbol finds a gene of the gene track by its symbol, ignoring case.
+func (r *GenesRepository) GetGeneTrackBySymbol(ctx context.Context, symbol string) ([]types.GeneTrackGene, error) {
+	return r.geneTrack(ctx, "UPPER(name) = ?", strings.ToUpper(symbol))
+}
+
+func (r *GenesRepository) geneTrack(ctx context.Context, where string, args ...any) ([]types.GeneTrackGene, error) {
+	tx := r.db.WithContext(ctx).Table(types.EnsemblGeneTable.TenantQualifiedName(ctx))
+	tx = tx.Select("gene_id, name AS symbol, chromosome, start, end, strand, biotype, description")
+	tx = tx.Where(where, args...)
+	tx = tx.Order("start, gene_id")
+
+	var genes []types.GeneTrackGene
+	if err := tx.Find(&genes).Error; err != nil {
+		return nil, fmt.Errorf("error fetching gene track genes: %w", err)
+	}
+	if len(genes) == 0 {
+		return []types.GeneTrackGene{}, nil
+	}
+
+	geneIDs := make([]string, len(genes))
+	for i, g := range genes {
+		geneIDs[i] = g.GeneID
+		if g.Chromosome == types.EnsemblMitochondrialChromosome {
+			genes[i].Chromosome = types.MitochondrialChromosome
+		}
+	}
+	exonsByGene, err := geneExons(ctx, r.db, geneIDs)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching gene track exons: %w", err)
+	}
+	symbols := make([]string, len(genes))
+	for i, g := range genes {
+		symbols[i] = g.Symbol
+	}
+	omim, err := omimGenes(ctx, r.db, symbols)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching gene track omim phenotypes: %w", err)
+	}
+	constraints, err := geneConstraints(ctx, r.db, geneIDs)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching gene track constraint: %w", err)
+	}
+	for i := range genes {
+		genes[i].Exons = exonsByGene[genes[i].GeneID]
+		if genes[i].Exons == nil {
+			genes[i].Exons = []types.GeneTrackExon{}
+		}
+		genes[i].OmimInheritanceCode = omim[genes[i].Symbol].InheritanceCodes
+		genes[i].OmimConditions = omim[genes[i].Symbol].Conditions
+		genes[i].GnomadPli, genes[i].GnomadLoeuf = constraints[genes[i].GeneID].Pli, constraints[genes[i].GeneID].Loeuf
+	}
+	return genes, nil
+}
+
+// geneExons gives the exons of the reference transcript of each gene, the transcript the CNV
+// genes_overlap counts its exons on, so that the drawn and the counted exons are the same. A gene
+// with no reference transcript has none.
+func geneExons(ctx context.Context, db *gorm.DB, geneIDs []string) (map[string][]types.GeneTrackExon, error) {
+	exonsByGene := map[string][]types.GeneTrackExon{}
+	if len(geneIDs) == 0 {
+		return exonsByGene, nil
+	}
+	e, rt := types.EnsemblExonByGeneTable, types.GeneReferenceTranscriptTable
+	var exons []struct {
+		GeneID string
+		Start  int
+		End    int
+	}
+	err := db.WithContext(ctx).
+		Table(fmt.Sprintf("%s %s", e.TenantQualifiedName(ctx), e.Alias)).
+		Joins(fmt.Sprintf("INNER JOIN %s %s ON %s.ensembl_gene_id = %s.gene_id AND array_contains(%s.transcript_ids, %s.ensembl_transcript_id)",
+			rt.TenantQualifiedName(ctx), rt.Alias, rt.Alias, e.Alias, e.Alias, rt.Alias)).
+		Where(fmt.Sprintf("%s.gene_id IN ?", e.Alias), geneIDs).
+		Distinct(fmt.Sprintf("%[1]s.gene_id, %[1]s.start, %[1]s.end", e.Alias)).
+		Order(fmt.Sprintf("%[1]s.gene_id, %[1]s.start, %[1]s.end", e.Alias)).
+		Find(&exons).Error
+	if err != nil {
+		return nil, fmt.Errorf("error fetching exons: %w", err)
+	}
+	for _, x := range exons {
+		exonsByGene[x.GeneID] = append(exonsByGene[x.GeneID], types.GeneTrackExon{Start: x.Start, End: x.End})
+	}
+	return exonsByGene, nil
+}
