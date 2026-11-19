@@ -33,6 +33,9 @@ internal/
   batchval/    - Batch validation context, caching, record validation
   bigwig/      - Minimal bigWig reader (chromosomes, full-resolution intervals, by region; no zoom
                  levels); reads only the blocks a query needs, so it works over S3 ranged reads
+  cnvprofile/  - CNV profile tracks from the DRAGEN CNV files (tn.bw copy ratio, baf.bw, roh.bed) of
+                 the variant calling task behind the CNVs, served by GET
+                 .../germline/cnv/{case}/{seq}/{task}/profile: an exome reads the files whole (64 MB cap)
   client/      - External clients (PubMed, Keycloak admin, Ranger admin)
   database/    - DB connection setup (postgres.go, starrocks.go)
   provisioning/- Wires service.AdminDeps from env config; shared by cmd/api and cmd/create-user

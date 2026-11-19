@@ -16,9 +16,9 @@ func Test_IGVInternal_GetIGV(t *testing.T) {
 		repo := NewIGVRepository(database.StarrocksDB{DB: env.Starrocks})
 		igvInternal, err := repo.GetIGV(t.Context(), 70)
 		assert.NoError(t, err)
-		// 6 alignment documents, 7 case file documents of the proband and 5 of the mother. The
+		// 6 alignment documents, 8 case file documents of the proband and 5 of the mother. The
 		// family-level CNV annotation VCF (document 286) comes from no variant-calling task.
-		assert.Len(t, igvInternal, 18)
+		assert.Len(t, igvInternal, 19)
 		for _, track := range igvInternal {
 			assert.NotEqual(t, "case70.annotated.cnv.vcf.gz", track.DocumentName)
 		}

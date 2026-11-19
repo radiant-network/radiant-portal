@@ -3,11 +3,13 @@ package server
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -169,4 +171,54 @@ func (m *MockGeneTrackRepository) GetGeneTrack(ctx context.Context, chromosome s
 func (m *MockGeneTrackRepository) GetGeneTrackBySymbol(ctx context.Context, symbol string) ([]types.GeneTrackGene, error) {
 	m.symbol = symbol
 	return m.genes, nil
+}
+
+type MockCNVProfileRepository struct {
+	strategy  string
+	notFound  bool
+	documents []types.CNVProfileDocument
+	segments  []types.CNVProfileSegment
+	cytobands []types.Cytoband
+	err       error
+}
+
+// GetExperimentalStrategy defaults to an exome; notFound stands for a case, sequencing and task
+// that do not go together.
+func (m *MockCNVProfileRepository) GetExperimentalStrategy(ctx context.Context, caseID int, seqID int, taskID int) (string, error) {
+	if m.notFound {
+		return "", nil
+	}
+	if m.strategy == "" {
+		return "wxs", nil
+	}
+	return m.strategy, nil
+}
+
+func (m *MockCNVProfileRepository) GetCNVProfileDocuments(ctx context.Context, seqID int, taskID int) ([]types.CNVProfileDocument, error) {
+	return m.documents, m.err
+}
+
+func (m *MockCNVProfileRepository) GetCNVProfileSegments(ctx context.Context, caseID int, seqID int, taskID int) ([]types.CNVProfileSegment, error) {
+	return m.segments, nil
+}
+
+func (m *MockCNVProfileRepository) GetCytobands(ctx context.Context) ([]types.Cytoband, error) {
+	return m.cytobands, nil
+}
+
+// MockObjectStore serves objects from memory, keyed by S3 URL.
+type MockObjectStore struct {
+	objects map[string][]byte
+	err     error
+}
+
+func (m *MockObjectStore) GetObject(ctx context.Context, url string, maxBytes int64) ([]byte, error) {
+	if m.err != nil {
+		return nil, m.err
+	}
+	data, ok := m.objects[url]
+	if !ok {
+		return nil, fmt.Errorf("get object %s: %w", url, utils.ErrObjectNotFound)
+	}
+	return data, nil
 }

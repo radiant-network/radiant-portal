@@ -31,6 +31,15 @@ const (
 	igvTrackCaptureTargets igvTrackKind = "Capture targets"
 )
 
+// File name suffixes of the DRAGEN CNV files, which share the igv data type.
+const (
+	segSuffix            = ".seg.bw"
+	bafSuffix            = ".baf.bw"
+	copyRatioSuffix      = ".tn.bw"
+	rohSuffix            = ".roh.bed"
+	captureTargetsSuffix = "_targets.bed"
+)
+
 type igvTrackKey struct {
 	kind                   igvTrackKind
 	sequencingExperimentId int
@@ -130,13 +139,13 @@ func igvTrackKindOf(r IGVTrack) (igvTrackKind, bool) {
 	case "igv":
 		name := strings.ToLower(r.DocumentName)
 		switch {
-		case r.FormatCode == "bw" && strings.HasSuffix(name, ".seg.bw"):
+		case r.FormatCode == "bw" && strings.HasSuffix(name, segSuffix):
 			return igvTrackSeg, true
-		case r.FormatCode == "bw" && strings.HasSuffix(name, ".baf.bw"):
+		case r.FormatCode == "bw" && strings.HasSuffix(name, bafSuffix):
 			return igvTrackBAF, true
-		case r.FormatCode == "bed" && strings.HasSuffix(name, ".roh.bed"):
+		case r.FormatCode == "bed" && strings.HasSuffix(name, rohSuffix):
 			return igvTrackROH, true
-		case r.FormatCode == "bed" && strings.HasSuffix(name, "_targets.bed"):
+		case r.FormatCode == "bed" && strings.HasSuffix(name, captureTargetsSuffix):
 			return igvTrackCaptureTargets, true
 		}
 	}

@@ -159,7 +159,7 @@ func Test_SearchDocumentsHandler_WithSortAndLimit(t *testing.T) {
 				"task_type_name":"RADIANT Germline Annotation"
 			}
 		], 
-		"count": 171}`
+		"count": 172}`
 	body := `{
 			"additional_fields":[],
 			"sort":[{"field": "name", "order": "asc"}, {"field": "relationship_to_proband_code", "order": "desc"}],
