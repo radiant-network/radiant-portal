@@ -105,6 +105,7 @@ const SomaticInterpretationForm = forwardRef<InterpretationFormRef, Interpretati
                 </FormLabel>
                 <FormControl>
                   <ToggleGroup
+                    aria-label={t('variant.interpretation_form.somatic.oncogenicity')}
                     type="single"
                     size="default"
                     variant="outline"

@@ -79,6 +79,7 @@ const GermlineInterpretationForm = forwardRef<InterpretationFormRef, Interpretat
                 </FormLabel>
                 <FormControl>
                   <ToggleGroup
+                    aria-label={t('variant.interpretation_form.germline.classification')}
                     type="single"
                     size="default"
                     variant="outline"
