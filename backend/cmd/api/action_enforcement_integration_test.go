@@ -334,6 +334,7 @@ var expectedTenantActions = map[string]string{
 	"PATCH /:tenant/cases/:case_id":                                                    types.ActionEditCase,
 	"PUT /:tenant/gene_panels":                                                         types.ActionManageAnalysisCatalog,
 	"GET /:tenant/genes/autocomplete":                                                  types.ActionSearchCase,
+	"GET /:tenant/genes/track":                                                         types.ActionSearchCase,
 	"POST /:tenant/genes/search":                                                       types.ActionSearchCase,
 	"GET /:tenant/hpo/autocomplete":                                                    types.ActionSearchCase,
 	"GET /:tenant/igv/:case_id":                                                        types.ActionSearchCase,

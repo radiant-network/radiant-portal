@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/radiant-network/radiant-api/internal/database"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -176,5 +177,84 @@ func Test_ResolveGenes_RunsOnRootPoolEvenWithAUserPoolBound(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.Len(t, genes, 1)
+	})
+}
+
+func Test_GetGeneTrack_GenesOfEveryBiotypeWithReferenceTranscriptExonsOmimInheritanceAndConstraint(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
+		genes, err := repo.GetGeneTrack(t.Context(), "1", 10100, 10600)
+		require.NoError(t, err)
+		assert.Equal(t, []types.GeneTrackGene{
+			{GeneID: "ENSG00000000003", Symbol: "TSPAN6", Chromosome: "1", Start: 10000, End: 10200, Strand: "-", Biotype: "protein_coding", Description: "tetraspanin 6",
+				Exons:          []types.GeneTrackExon{{Start: 10000, End: 10100}},
+				OmimConditions: []types.OmimGenePanel{{OmimPhenotypeId: "100000", Panel: "Tetraspanin disease"}}},
+			{GeneID: "ENSG00000000005", Symbol: "TNMD", Chromosome: "1", Start: 10000, End: 20000, Strand: "+", Biotype: "protein_coding", Description: "tenomodulin",
+				// The exons of its reference transcript ENST00000373031 only: not 10450-10650 of ENST00000485971.
+				Exons:               []types.GeneTrackExon{{Start: 10000, End: 10100}, {Start: 10150, End: 10250}, {Start: 10650, End: 10750}},
+				OmimInheritanceCode: []string{"AR", "XLR"},
+				OmimConditions: []types.OmimGenePanel{
+					{OmimPhenotypeId: "100001", Panel: "Tenomodulin disease A", InheritanceCode: types.JsonArray[string]{"AR"}},
+					{OmimPhenotypeId: "100002", Panel: "Tenomodulin disease B", InheritanceCode: types.JsonArray[string]{"AR", "XLR"}},
+				},
+				// The pLI and LOEUF of its reference transcript.
+				GnomadPli: ptr(float32(0.95)), GnomadLoeuf: ptr(float32(0.42))},
+			{GeneID: "ENSG00000000419", Symbol: "DPM1", Chromosome: "1", Start: 10250, End: 10750, Strand: "-", Biotype: "lncRNA", Description: "dolichyl-phosphate mannosyltransferase subunit 1",
+				Exons: []types.GeneTrackExon{{Start: 10300, End: 10350}, {Start: 10600, End: 10700}}, GnomadPli: ptr(float32(0.5))},
+		}, genes)
+	})
+}
+
+func Test_GetGeneTrack_EmptyRegion(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
+		genes, err := repo.GetGeneTrack(t.Context(), "2", 0, 1000000)
+		require.NoError(t, err)
+		assert.Equal(t, []types.GeneTrackGene{}, genes)
+	})
+}
+
+func Test_GetGeneTrackBySymbol_IgnoresCase(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
+		genes, err := repo.GetGeneTrackBySymbol(t.Context(), "tspan6")
+		require.NoError(t, err)
+		assert.Equal(t, []types.GeneTrackGene{
+			{GeneID: "ENSG00000000003", Symbol: "TSPAN6", Chromosome: "1", Start: 10000, End: 10200, Strand: "-", Biotype: "protein_coding", Description: "tetraspanin 6",
+				Exons:          []types.GeneTrackExon{{Start: 10000, End: 10100}},
+				OmimConditions: []types.OmimGenePanel{{OmimPhenotypeId: "100000", Panel: "Tetraspanin disease"}}},
+		}, genes)
+	})
+}
+
+func Test_GetGeneTrackBySymbol_AnyBiotype(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
+		genes, err := repo.GetGeneTrackBySymbol(t.Context(), "DPM1")
+		require.NoError(t, err)
+		assert.Equal(t, []types.GeneTrackGene{
+			{GeneID: "ENSG00000000419", Symbol: "DPM1", Chromosome: "1", Start: 10250, End: 10750, Strand: "-", Biotype: "lncRNA", Description: "dolichyl-phosphate mannosyltransferase subunit 1",
+				Exons: []types.GeneTrackExon{{Start: 10300, End: 10350}, {Start: 10600, End: 10700}}, GnomadPli: ptr(float32(0.5))},
+		}, genes)
+	})
+}
+
+func Test_GetGeneTrackBySymbol_NoReferenceTranscript_NoExon(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// SCYL3 has an exon but no reference transcript.
+		genes, err := repo.GetGeneTrackBySymbol(t.Context(), "SCYL3")
+		require.NoError(t, err)
+		require.Len(t, genes, 1)
+		assert.Equal(t, []types.GeneTrackExon{}, genes[0].Exons)
+	})
+}
+
+func Test_GetGeneTrackBySymbol_UnknownSymbol(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
+		genes, err := repo.GetGeneTrackBySymbol(t.Context(), "NOPE1")
+		require.NoError(t, err)
+		assert.Equal(t, []types.GeneTrackGene{}, genes)
 	})
 }

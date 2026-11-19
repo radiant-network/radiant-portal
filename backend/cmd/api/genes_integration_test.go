@@ -64,3 +64,21 @@ func Test_SearchGenes(t *testing.T) {
 	]`
 	assertSearchGenes(t, "simple", body, expected)
 }
+
+func Test_GetGeneTrackHandler(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := starrocks.NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
+		router := tenantRouter()
+		router.GET("/:tenant/genes/track", server.GetGeneTrackHandler(repo))
+
+		req, _ := http.NewRequest("GET", "/radiant/genes/track?chromosome=1&start=10120&end=10130", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `[
+			{"gene_id":"ENSG00000000003","symbol":"TSPAN6","chromosome":"1","start":10000,"end":10200,"strand":"-","biotype":"protein_coding","description":"tetraspanin 6","exons":[{"start":10000,"end":10100}],"omim_conditions":[{"omim_phenotype_id":"100000","panel":"Tetraspanin disease"}]},
+			{"gene_id":"ENSG00000000005","symbol":"TNMD","chromosome":"1","start":10000,"end":20000,"strand":"+","biotype":"protein_coding","description":"tenomodulin","exons":[{"start":10000,"end":10100},{"start":10150,"end":10250},{"start":10650,"end":10750}],"omim_inheritance_code":["AR","XLR"],"omim_conditions":[{"omim_phenotype_id":"100001","panel":"Tenomodulin disease A","inheritance_code":["AR"]},{"omim_phenotype_id":"100002","panel":"Tenomodulin disease B","inheritance_code":["AR","XLR"]}],"gnomad_pli":0.95,"gnomad_loeuf":0.42}
+		]`, w.Body.String())
+	})
+}

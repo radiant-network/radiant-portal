@@ -2739,6 +2739,49 @@
           "response": []
         },
         {
+          "name": "Track",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/genes/track?chromosome=17&start=43000000&end=43200000",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "genes",
+                "track"
+              ],
+              "query": [
+                {
+                  "key": "chromosome",
+                  "value": "17"
+                },
+                {
+                  "key": "start",
+                  "value": "43000000"
+                },
+                {
+                  "key": "end",
+                  "value": "43200000"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Search",
           "request": {
             "auth": {

@@ -154,3 +154,17 @@ func Test_MondoTermAutoCompleteHandlerWithInvalidLimit(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[{"source":{"id":"MONDO:0000001", "name":"blood group incompatibility"}, "highlight":{"id":"MONDO:0000001", "name":"<strong>blood</strong> group incompatibility"}}]`, w.Body.String())
 }
+
+type MockGeneTrackRepository struct {
+	genes  []types.GeneTrackGene
+	symbol string
+}
+
+func (m *MockGeneTrackRepository) GetGeneTrack(ctx context.Context, chromosome string, start int, end int) ([]types.GeneTrackGene, error) {
+	return m.genes, nil
+}
+
+func (m *MockGeneTrackRepository) GetGeneTrackBySymbol(ctx context.Context, symbol string) ([]types.GeneTrackGene, error) {
+	m.symbol = symbol
+	return m.genes, nil
+}
