@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { Search } from 'lucide-react';
 
 import { Field } from '@/components/base/shadcn/field';
@@ -13,6 +13,7 @@ interface ConditionCasesFilterProps {
 
 const ConditionCasesFilter = ({ onChange }: ConditionCasesFilterProps) => {
   const { t } = useI18n();
+  const inputId = useId();
   const [searchValue, setSearchValue] = useState('');
   const debouncedValue = useDebounce(searchValue, 500);
 
@@ -22,8 +23,9 @@ const ConditionCasesFilter = ({ onChange }: ConditionCasesFilterProps) => {
 
   return (
     <Field className="w-full min-w-[250px] max-w-[385px]">
-      <Label>{t('variant_entity.cases.interpreted_table.filters.search_condition')}</Label>
+      <Label htmlFor={inputId}>{t('variant_entity.cases.interpreted_table.filters.search_condition')}</Label>
       <Input
+        id={inputId}
         onChange={value => setSearchValue(value.target.value)}
         placeholder={t('variant_entity.cases.interpreted_table.filters.search_condition_placeholder')}
         size="sm"

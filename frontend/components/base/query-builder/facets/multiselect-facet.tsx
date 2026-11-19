@@ -278,6 +278,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
           size="xs"
           type="text"
           placeholder={t('common.facets.search.placeholder')}
+          aria-label={t('common.facets.search.placeholder')}
           className="w-full text-xs mt-3 py-1.5 px-3 mb-4 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           onChange={e => setSearchValue(e.target.value)}
           value={searchValue}

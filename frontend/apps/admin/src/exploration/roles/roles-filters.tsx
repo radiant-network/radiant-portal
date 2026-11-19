@@ -29,6 +29,7 @@ function RolesFilters({ search, onSearchChange, customOnly, onCustomOnlyChange }
         size="sm"
         startIcon={Search}
         placeholder={t('admin.roles.filters.search_placeholder')}
+        aria-label={t('admin.roles.filters.search_placeholder')}
         value={search}
         onChange={e => onSearchChange(e.target.value)}
         className="w-72"

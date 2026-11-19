@@ -150,7 +150,11 @@ function TableFiltersSearch({
       <label className="text-sm font-medium text-foreground h-[14px] mb-2">
         {t('case_exploration.filters_group.search_by_id')}
       </label>
-      <Command className="relative h-8 w-[340px] overflow-visible" shouldFilter={false}>
+      <Command
+        className="relative h-8 w-[340px] overflow-visible"
+        shouldFilter={false}
+        label={t('case_exploration.filters_group.search_by_id')}
+      >
         <CommandInput
           data-cy="table-filters-search-input"
           className="px-1.5"
