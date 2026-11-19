@@ -121,6 +121,7 @@ Class | Method | HTTP request | Description
 *GenePanelsApi* | [**put_gene_panels**](docs/GenePanelsApi.md#put_gene_panels) | **PUT** /{tenant}/gene_panels | Replace the tenant&#39;s gene panels
 *GenesApi* | [**gene_auto_complete**](docs/GenesApi.md#gene_auto_complete) | **GET** /{tenant}/genes/autocomplete | Get AutoCompleteGene list of matching input string with highlighted
 *GenesApi* | [**gene_search**](docs/GenesApi.md#gene_search) | **POST** /{tenant}/genes/search | Post search GeneResult list of matching input strings
+*GenesApi* | [**gene_track**](docs/GenesApi.md#gene_track) | **GET** /{tenant}/genes/track | List the genes of a region
 *HpoApi* | [**hpo_term_auto_complete**](docs/HpoApi.md#hpo_term_auto_complete) | **GET** /{tenant}/hpo/autocomplete | Get AutoCompleteTerm list of matching input string with highlighted
 *IgvApi* | [**get_igv**](docs/IgvApi.md#get_igv) | **GET** /{tenant}/igv/{case_id} | Get IGV
 *InterpretationsApi* | [**get_interpretation_germline**](docs/InterpretationsApi.md#get_interpretation_germline) | **GET** /{tenant}/interpretations/v2/germline/{case_id}/{sequencing_id}/{locus_id}/{transcript_id} | Get interpretation germline
@@ -290,6 +291,8 @@ Class | Method | HTTP request | Description
  - [GenePanelUploadWarning](docs/GenePanelUploadWarning.md)
  - [GeneResult](docs/GeneResult.md)
  - [GeneSearchBody](docs/GeneSearchBody.md)
+ - [GeneTrackExon](docs/GeneTrackExon.md)
+ - [GeneTrackGene](docs/GeneTrackGene.md)
  - [GermlineCNVOccurrence](docs/GermlineCNVOccurrence.md)
  - [GermlineSNVOccurrence](docs/GermlineSNVOccurrence.md)
  - [GetBatchResponse](docs/GetBatchResponse.md)
