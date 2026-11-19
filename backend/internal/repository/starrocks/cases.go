@@ -115,10 +115,6 @@ func (r *CasesRepository) SearchById(ctx context.Context, prefix string, limit i
 	subQueryOrgPatID = subQueryOrgPatID.Select(fmt.Sprintf("\"%s\" as type, submitter_patient_id as value", types.SubmitterPatientIdField.GetAlias()))
 	subQueryOrgPatID = subQueryOrgPatID.Where("LOWER(submitter_patient_id) LIKE ?", strings.ToLower(searchInput))
 
-	subQuerySeqId := db.Table(fmt.Sprintf("%s %s", types.SequencingExperimentTable.TenantQualifiedName(ctx), types.SequencingExperimentTable.Alias))
-	subQuerySeqId = subQuerySeqId.Select("\"sequencing_experiment_id\" as type, id as value")
-	subQuerySeqId = subQuerySeqId.Where("CAST(id AS TEXT) LIKE ?", searchInput)
-
 	subQueryProbandSampleId := db.Table(fmt.Sprintf("(%s) %s", r.joiner.ProbandSamples(db), types.CaseProbandSampleTable.Alias))
 	subQueryProbandSampleId = subQueryProbandSampleId.Select(fmt.Sprintf("\"%s\" as type, submitter_sample_id as value", types.CaseProbandSubmitterSampleIdsField.GetAlias()))
 	subQueryProbandSampleId = subQueryProbandSampleId.Where("LOWER(submitter_sample_id) LIKE ?", strings.ToLower(searchInput))
@@ -131,7 +127,7 @@ func (r *CasesRepository) SearchById(ctx context.Context, prefix string, limit i
 
 	// Exact matches first, then the types interleaved by the rank of the value within its type: a run sharing
 	// its prefix with many case or patient ids still gets a place within the limit.
-	union := db.Table("(? UNION ? UNION ? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID, subQuerySeqId, subQueryProbandSampleId, subQueryRunName)
+	union := db.Table("(? UNION ? UNION ? UNION ? UNION ?) autocompleteByIds", subQueryCaseId, subQueryProbandId, subQueryOrgPatID, subQueryProbandSampleId, subQueryRunName)
 	union = union.Select("type, value, ROW_NUMBER() OVER (PARTITION BY type ORDER BY value) AS type_rank")
 	tx := db.Table("(?) rankedAutocomplete", union).Select("type, value")
 	tx = tx.Clauses(clause.OrderBy{Expression: clause.Expr{SQL: "CASE WHEN LOWER(value) = ? THEN 0 ELSE 1 END, type_rank, value, type", Vars: []interface{}{strings.ToLower(prefix)}}})

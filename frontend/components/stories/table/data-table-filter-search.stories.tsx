@@ -17,7 +17,6 @@ const RESULTS: AutocompleteResult[] = [
   { type: 'submitter_patient_id', value: 'MRN-283775' },
   { type: 'proband_submitter_sample_ids', value: 'S13224' },
   { type: 'run_name', value: '1617' },
-  { type: 'sequencing_experiment_id', value: '1' },
 ];
 
 const resultsApi: AutocompleteApiFn = async () => ({ data: RESULTS }) as AutocompleteResponse;

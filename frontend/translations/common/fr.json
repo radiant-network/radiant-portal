@@ -830,7 +830,6 @@
           "run_name": "Lot",
           "sample_id": "ID Échantillon",
           "task_id": "Tâche",
-          "sequencing_experiment_id": "Séquençage",
           "proband_submitter_sample_ids": "Échantillon",
           "placeholder": "Rechercher..."
         },
