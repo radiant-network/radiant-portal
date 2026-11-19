@@ -37,7 +37,6 @@ describe('Case Entity - Variants - Germline - SNV - Favorite facets', () => {
   it('removes a facet instantly when its star is clicked in a regular section', () => {
     cy.mockFavoritePreferences([FOO_KEY, BAR_KEY]);
     visitSNV();
-    CaseEntity_Variants_FavoriteFacets.actions.clickFavoritesRail();
     CaseEntity_Variants_FavoriteFacets.validations.shouldShowFacetInPanel(FOO_KEY);
     CaseEntity_Variants_FavoriteFacets.actions.clickFacetStar(FOO_KEY);
     CaseEntity_Variants_FavoriteFacets.validations.shouldNotShowFacetInPanel(FOO_KEY);
