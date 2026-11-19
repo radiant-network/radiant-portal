@@ -2786,7 +2786,7 @@
   "file_entity": {
     "count_one": "{{total}} File",
     "count_other": "{{total}} Files",
-    "search_by_id_placeholder": "File, sample, patient, case, run, or sequencing",
+    "search_by_id_placeholder": "File, sample, patient, case, or sequencing",
     "name": "File Name",
     "format_code": "Format",
     "data_type_code": "File Type",
