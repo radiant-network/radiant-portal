@@ -1207,6 +1207,40 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{radiant-api-url}}/{{tenant}}/occurrences/germline/cnv/1/1/1/profile",
+              "host": [
+                "{{radiant-api-url}}"
+              ],
+              "path": [
+                "{{tenant}}",
+                "occurrences",
+                "germline",
+                "cnv",
+                "1",
+                "1",
+                "1",
+                "profile"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },

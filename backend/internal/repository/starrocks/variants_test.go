@@ -543,15 +543,15 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByProject(t *testing.T) {
 
 		assert.Equal(t, "N1", project1.SplitValueCode)
 		assert.Equal(t, "NeuroDev Phase I", project1.SplitValueName)
-		// pn grew by 2: the prenatal fixtures add a mother + fetus sequenced in this split, with
-		// no occurrence at locus 1000.
+		// pn counts every staged individual of the split, with or without an occurrence at locus 1000:
+		// the prenatal mother + fetus and the DRAGEN-only probands of cases 2 and 8 included.
 		assert.Equal(t, 5, *(project1.Frequencies.PcAll))
-		assert.Equal(t, 7, *(project1.Frequencies.PnAll))
-		assert.Equal(t, 5.0/7.0, *(project1.Frequencies.PfAll))
+		assert.Equal(t, 9, *(project1.Frequencies.PnAll))
+		assert.Equal(t, 5.0/9.0, *(project1.Frequencies.PfAll))
 		assert.Equal(t, 2, *(project1.Frequencies.HomAll))
 		assert.Equal(t, 4, *(project1.Frequencies.PcAffected))
-		assert.Equal(t, 6, *(project1.Frequencies.PnAffected))
-		assert.Equal(t, 4.0/6.0, *(project1.Frequencies.PfAffected))
+		assert.Equal(t, 8, *(project1.Frequencies.PnAffected))
+		assert.Equal(t, 4.0/8.0, *(project1.Frequencies.PfAffected))
 		assert.Equal(t, 1, *(project1.Frequencies.HomAffected))
 		assert.Equal(t, 1, *(project1.Frequencies.PcNonAffected))
 		assert.Equal(t, 1, *(project1.Frequencies.PnNonAffected))
@@ -603,15 +603,15 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByPrimaryCondition(t *testing.T) 
 
 		assert.Equal(t, "MONDO:0700092", mondo0700092.SplitValueCode)
 		assert.Equal(t, "neurodevelopmental disorder", mondo0700092.SplitValueName)
-		// pn grew by 2: the prenatal fixtures add a mother + fetus sequenced in this split, with
-		// no occurrence at locus 1000.
+		// pn counts every staged individual of the split, with or without an occurrence at locus 1000:
+		// the prenatal mother + fetus and the DRAGEN-only probands of cases 2 and 8 included.
 		assert.Equal(t, 5, *(mondo0700092.Frequencies.PcAll))
-		assert.Equal(t, 8, *(mondo0700092.Frequencies.PnAll))
-		assert.Equal(t, 5.0/8.0, *(mondo0700092.Frequencies.PfAll))
+		assert.Equal(t, 10, *(mondo0700092.Frequencies.PnAll))
+		assert.Equal(t, 5.0/10.0, *(mondo0700092.Frequencies.PfAll))
 		assert.Equal(t, 2, *(mondo0700092.Frequencies.HomAll))
 		assert.Equal(t, 4, *(mondo0700092.Frequencies.PcAffected))
-		assert.Equal(t, 6, *(mondo0700092.Frequencies.PnAffected))
-		assert.Equal(t, 4.0/6.0, *(mondo0700092.Frequencies.PfAffected))
+		assert.Equal(t, 8, *(mondo0700092.Frequencies.PnAffected))
+		assert.Equal(t, 4.0/8.0, *(mondo0700092.Frequencies.PfAffected))
 		assert.Equal(t, 1, *(mondo0700092.Frequencies.HomAffected))
 		assert.Equal(t, 1, *(mondo0700092.Frequencies.PcNonAffected))
 		assert.Equal(t, 2, *(mondo0700092.Frequencies.PnNonAffected))
@@ -648,15 +648,15 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByAnalysis(t *testing.T) {
 
 		assert.Equal(t, "WGA", WGA.SplitValueCode)
 		assert.Equal(t, "Whole Genome Analysis", WGA.SplitValueName)
-		// pn grew by 2: the prenatal fixtures add a mother + fetus sequenced in this split, with
-		// no occurrence at locus 1000.
+		// pn counts every staged individual of the split, with or without an occurrence at locus 1000:
+		// the prenatal mother + fetus and the DRAGEN-only probands of cases 2 and 8 included.
 		assert.Equal(t, 5, *(WGA.Frequencies.PcAll))
-		assert.Equal(t, 8, *(WGA.Frequencies.PnAll))
-		assert.Equal(t, 5.0/8.0, *(WGA.Frequencies.PfAll))
+		assert.Equal(t, 10, *(WGA.Frequencies.PnAll))
+		assert.Equal(t, 5.0/10.0, *(WGA.Frequencies.PfAll))
 		assert.Equal(t, 2, *(WGA.Frequencies.HomAll))
 		assert.Equal(t, 4, *(WGA.Frequencies.PcAffected))
-		assert.Equal(t, 6, *(WGA.Frequencies.PnAffected))
-		assert.Equal(t, 4.0/6.0, *(WGA.Frequencies.PfAffected))
+		assert.Equal(t, 8, *(WGA.Frequencies.PnAffected))
+		assert.Equal(t, 4.0/8.0, *(WGA.Frequencies.PfAffected))
 		assert.Equal(t, 1, *(WGA.Frequencies.HomAffected))
 		assert.Equal(t, 1, *(WGA.Frequencies.PcNonAffected))
 		assert.Equal(t, 2, *(WGA.Frequencies.PnNonAffected))
@@ -671,7 +671,7 @@ func Test_GetVariantInternalFrequenciesSplitBy_MotherAndFetusCountAsTwoDistinctI
 		// Locus 3000 is reached only by case 72: once via seq_exp 75 (fetus 1) and once via
 		// seq_exp 78 (the mother's own sequencing). Both share patient_id 63 but differ by
 		// sample.fetus_id, so they must count as 2. pn covers every sequenced individual in the
-		// project, hence baseline 5 plus these 2; only pc/hom are locus-specific. The mother's call
+		// project, hence baseline 7 plus these 2; only pc/hom are locus-specific. The mother's call
 		// has ad_alt = 3, the lowest value that counts (RAD-57: it used to take ad_alt > 3).
 		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 3000, types.SPLIT_BY_PROJECT)
 		assert.NoError(t, err)
@@ -686,13 +686,13 @@ func Test_GetVariantInternalFrequenciesSplitBy_MotherAndFetusCountAsTwoDistinctI
 		require.NotNil(t, n1, "project N1 must be present")
 		assert.Equal(t, "NeuroDev Phase I", n1.SplitValueName)
 		require.NotNil(t, n1.Frequencies.PnAll)
-		assert.Equal(t, 7, *n1.Frequencies.PnAll)
+		assert.Equal(t, 9, *n1.Frequencies.PnAll)
 		require.NotNil(t, n1.Frequencies.PcAll)
 		assert.Equal(t, 2, *n1.Frequencies.PcAll, "only case 72's mother+fetus have an occurrence at locus 3000")
 		require.NotNil(t, n1.Frequencies.HomAll)
 		assert.Equal(t, 0, *n1.Frequencies.HomAll)
 		require.NotNil(t, n1.Frequencies.PnAffected)
-		assert.Equal(t, 6, *n1.Frequencies.PnAffected)
+		assert.Equal(t, 8, *n1.Frequencies.PnAffected)
 		require.NotNil(t, n1.Frequencies.PcAffected)
 		assert.Equal(t, 2, *n1.Frequencies.PcAffected)
 	})

@@ -662,6 +662,58 @@ func Test_RetrieveCaseSequencingExperiments_CNVOnly(t *testing.T) {
 	})
 }
 
+// Case 8 seq 22 has only its DRAGEN task staged, with a CNV VCF: no CNV annotation ran.
+func Test_RetrieveCaseSequencingExperiments_DragenCNVOnly(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(t.Context(), 8)
+		require.NoError(t, err)
+		require.Len(t, *sequencingExperiments, 1)
+
+		seq := (*sequencingExperiments)[0]
+		assert.Equal(t, 22, seq.SeqID)
+		assert.True(t, seq.HasCnv)
+		assert.False(t, seq.HasSnv)
+		assert.True(t, seq.HasVariants)
+	})
+}
+
+// Case 70 seq 71 has only a DRAGEN task staged, without a CNV VCF.
+func Test_RetrieveCaseSequencingExperiments_DragenWithoutCNVVCF(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sequencingExperiments, err := repo.retrieveCaseSequencingExperiments(t.Context(), 70)
+		require.NoError(t, err)
+
+		var dragenSeq *CaseSequencingExperiment
+		for i := range *sequencingExperiments {
+			if (*sequencingExperiments)[i].SeqID == 71 {
+				dragenSeq = &(*sequencingExperiments)[i]
+				break
+			}
+		}
+		require.NotNil(t, dragenSeq, "seq 71 must be present on case 70")
+		assert.False(t, dragenSeq.HasCnv)
+		assert.False(t, dragenSeq.HasSnv)
+		assert.False(t, dragenSeq.HasVariants)
+	})
+}
+
+func Test_SearchCases_DragenCNVOnly_HasVariants(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		assert.True(t, searchCaseById(t, repo, 8).HasVariants)
+	})
+}
+
+// Case 2 has only its DRAGEN task on seq 4 staged, without a CNV VCF.
+func Test_SearchCases_DragenWithoutCNVVCF_HasNoVariants(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		assert.False(t, searchCaseById(t, repo, 2).HasVariants)
+	})
+}
+
 func Test_RetrieveCaseSequencingExperiments_Somatic(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})

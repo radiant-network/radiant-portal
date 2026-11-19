@@ -182,6 +182,140 @@ components:
       - symbol
       - tenant_gene_panels
       type: object
+    CNVProfile:
+      description: CNVProfile holds the copy ratio and B-allele frequency points,
+        the called CNVs, the regions of homozygosity and the cytobands of a sequencing
+      properties:
+        baf:
+          items:
+            $ref: '#/components/schemas/CNVProfileTrack'
+          type: array
+          uniqueItems: false
+        chromosomes:
+          items:
+            $ref: '#/components/schemas/CNVProfileChromosome'
+          type: array
+          uniqueItems: false
+        copy_ratio:
+          items:
+            $ref: '#/components/schemas/CNVProfileTrack'
+          type: array
+          uniqueItems: false
+        cytobands:
+          items:
+            $ref: '#/components/schemas/Cytoband'
+          type: array
+          uniqueItems: false
+        roh:
+          items:
+            $ref: '#/components/schemas/CNVProfileROH'
+          type: array
+          uniqueItems: false
+        segments:
+          items:
+            $ref: '#/components/schemas/CNVProfileSegment'
+          type: array
+          uniqueItems: false
+      required:
+      - baf
+      - chromosomes
+      - copy_ratio
+      - cytobands
+      - roh
+      - segments
+      type: object
+    CNVProfileChromosome:
+      properties:
+        name:
+          type: string
+        size:
+          type: integer
+      required:
+      - name
+      - size
+      type: object
+    CNVProfileROH:
+      properties:
+        chromosome:
+          type: string
+        end:
+          type: integer
+        nb_het:
+          type: integer
+        nb_hom:
+          type: integer
+        score:
+          type: number
+        start:
+          type: integer
+      required:
+      - chromosome
+      - end
+      - nb_het
+      - nb_hom
+      - score
+      - start
+      type: object
+    CNVProfileSegment:
+      properties:
+        chromosome:
+          type: string
+        cn:
+          type: integer
+        cnv_id:
+          type: string
+        end:
+          type: integer
+        filter:
+          type: string
+        flag_type:
+          $ref: '#/components/schemas/OccurrenceFlagType'
+        gnomad_sf:
+          type: number
+        has_note:
+          type: boolean
+        length:
+          type: integer
+        nb_snv:
+          type: integer
+        quality:
+          type: number
+        sm:
+          type: number
+        start:
+          type: integer
+        type:
+          type: string
+      required:
+      - chromosome
+      - cnv_id
+      - end
+      - has_note
+      - length
+      - start
+      - type
+      type: object
+    CNVProfileTrack:
+      description: 'CNVProfileTrack holds the points of one chromosome as two parallel
+        arrays: the 0-based positions and their values'
+      properties:
+        chromosome:
+          type: string
+        positions:
+          items:
+            type: integer
+          type: array
+          uniqueItems: false
+        values:
+          items:
+            type: number
+          type: array
+          uniqueItems: false
+      required:
+      - chromosome
+      - positions
+      - values
+      type: object
     CaseAssignee:
       description: 'User who is or may be assigned a case: a case''s assignees in
         the cases list and on the case entity page, the assignee picker, and the users
@@ -1314,6 +1448,24 @@ components:
           type: string
       required:
       - role_code
+      type: object
+    Cytoband:
+      properties:
+        chromosome:
+          type: string
+        cytoband:
+          type: string
+        end:
+          type: integer
+        gie_stain:
+          type: string
+        start:
+          type: integer
+      required:
+      - chromosome
+      - cytoband
+      - end
+      - start
       type: object
     DocumentFilters:
       properties:
@@ -8966,6 +9118,87 @@ paths:
       security:
       - bearerauth: []
       summary: List germline CNV occurrences
+      tags:
+      - occurrences
+  /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/profile:
+    get:
+      description: |-
+        Get the CNV profile of a germline sequencing: the copy ratio and the B-allele frequency, read from the
+        DRAGEN tn.bw and baf.bw files, the called CNVs, the regions of homozygosity of the roh.bed file and the
+        cytobands, with every point. Only an exome has one for now: another strategy is refused with a 422.
+      operationId: getGermlineCNVProfile
+      parameters:
+      - description: Tenant code
+        in: path
+        name: tenant
+        required: true
+        schema:
+          type: string
+      - description: Case ID
+        in: path
+        name: case_id
+        required: true
+        schema:
+          type: integer
+      - description: Sequence ID
+        in: path
+        name: seq_id
+        required: true
+        schema:
+          type: integer
+      - description: Task ID
+        in: path
+        name: task_id
+        required: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CNVProfile'
+          description: OK
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: The case has no such sequencing analysed by the task, or detail.missing
+            lists the tracks without a file (copy_ratio, baf)
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Unprocessable Entity
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Internal Server Error
+          headers:
+            X-Correlation-ID:
+              description: Unique id correlating this error with the server-side log
+                entry
+              schema:
+                type: string
+      security:
+      - bearerauth: []
+      summary: Get the CNV profile of a sequencing
       tags:
       - occurrences
   /{tenant}/occurrences/germline/cnv/{case_id}/{seq_id}/{task_id}/statistics:
