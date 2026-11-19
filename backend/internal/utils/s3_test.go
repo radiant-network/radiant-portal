@@ -2,6 +2,8 @@ package utils_test
 
 import (
 	"bytes"
+	"context"
+	"io"
 	"os"
 	"testing"
 
@@ -9,6 +11,7 @@ import (
 	"github.com/radiant-network/radiant-api/internal/utils"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMain(m *testing.M) {
@@ -85,5 +88,102 @@ func Test_GetMetadata_OK(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, metadata)
 		assert.Equal(t, expected, *metadata)
+	})
+}
+
+func putTestObject(t *testing.T, env *testutils.Env, content []byte) {
+	t.Helper()
+	t.Setenv("AWS_ENDPOINT_URL", env.ObjectStore.Endpoint)
+	t.Setenv("AWS_ACCESS_KEY_ID", "admin")
+	t.Setenv("AWS_SECRET_ACCESS_KEY", "password")
+	t.Setenv("AWS_USE_SSL", "false")
+	assert.NoError(t, env.ObjectStore.Client.MakeBucket(env.Ctx, "test-bucket", minio.MakeBucketOptions{}))
+	_, err := env.ObjectStore.Client.PutObject(env.Ctx, "test-bucket", "test-file.txt", bytes.NewReader(content), int64(len(content)), minio.PutObjectOptions{})
+	assert.NoError(t, err)
+}
+
+func Test_GetObject_OK(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		putTestObject(t, env, []byte("hello world"))
+
+		s3fs, _ := utils.NewS3Store()
+		data, err := s3fs.GetObject(context.Background(), "s3://test-bucket/test-file.txt", 11)
+
+		assert.NoError(t, err)
+		assert.Equal(t, "hello world", string(data))
+	})
+}
+
+func Test_GetObject_TooLarge(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		putTestObject(t, env, []byte("hello world"))
+
+		s3fs, _ := utils.NewS3Store()
+		_, err := s3fs.GetObject(context.Background(), "s3://test-bucket/test-file.txt", 10)
+
+		assert.ErrorIs(t, err, utils.ErrObjectTooLarge)
+	})
+}
+
+func Test_GetObject_Missing(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		putTestObject(t, env, []byte("hello world"))
+
+		s3fs, _ := utils.NewS3Store()
+		_, err := s3fs.GetObject(context.Background(), "s3://test-bucket/missing.txt", 10)
+
+		assert.ErrorContains(t, err, "get object s3://test-bucket/missing.txt")
+		assert.ErrorIs(t, err, utils.ErrObjectNotFound)
+	})
+}
+
+func Test_GetObject_NotS3URL(t *testing.T) {
+	s3fs, _ := utils.NewS3Store()
+	_, err := s3fs.GetObject(context.Background(), "https://test-bucket/test-file.txt", 10)
+
+	assert.EqualError(t, err, "locate https://test-bucket/test-file.txt: URL is not an S3 URL")
+}
+
+func Test_OpenObject_ReadsRange(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		putTestObject(t, env, []byte("hello world"))
+
+		s3fs, _ := utils.NewS3Store()
+		r, err := s3fs.OpenObject(context.Background(), "s3://test-bucket/test-file.txt")
+		require.NoError(t, err)
+		buf := make([]byte, 5)
+		n, err := r.ReadAt(buf, 6)
+
+		assert.NoError(t, err)
+		assert.Equal(t, 5, n)
+		assert.Equal(t, "world", string(buf))
+	})
+}
+
+func Test_OpenObject_ReadPastTheEnd(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		putTestObject(t, env, []byte("hello world"))
+
+		s3fs, _ := utils.NewS3Store()
+		r, err := s3fs.OpenObject(context.Background(), "s3://test-bucket/test-file.txt")
+		require.NoError(t, err)
+		buf := make([]byte, 10)
+		n, err := r.ReadAt(buf, 6)
+
+		assert.ErrorIs(t, err, io.EOF)
+		assert.Equal(t, 5, n)
+		assert.Equal(t, "world", string(buf[:n]))
+	})
+}
+
+func Test_OpenObject_Missing(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{ObjectStore: true}, func(t *testing.T, env *testutils.Env) {
+		putTestObject(t, env, []byte("hello world"))
+
+		s3fs, _ := utils.NewS3Store()
+		_, err := s3fs.OpenObject(context.Background(), "s3://test-bucket/missing.txt")
+
+		assert.ErrorContains(t, err, "head object s3://test-bucket/missing.txt")
+		assert.ErrorIs(t, err, utils.ErrObjectNotFound)
 	})
 }
