@@ -31,6 +31,8 @@ internal/
   mysqlproxy/  - MySQL wire-protocol translation shared by cmd/mysql-proxy and
                  cmd/mysql-gateway; the Authenticator seam is the only difference
   batchval/    - Batch validation context, caching, record validation
+  bigwig/      - Minimal bigWig reader (chromosomes, full-resolution intervals, by region; no zoom
+                 levels); reads only the blocks a query needs, so it works over S3 ranged reads
   client/      - External clients (PubMed, Keycloak admin, Ranger admin)
   database/    - DB connection setup (postgres.go, starrocks.go)
   provisioning/- Wires service.AdminDeps from env config; shared by cmd/api and cmd/create-user
