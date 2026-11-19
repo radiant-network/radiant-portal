@@ -827,7 +827,7 @@
           "patient_id": "Patient",
           "patient_name": "Patient",
           "submitter_patient_id": "MRN",
-          "run_name": "Nom du lot",
+          "run_name": "Lot",
           "sample_id": "ID Échantillon",
           "task_id": "Tâche",
           "sequencing_experiment_id": "Séquençage",
@@ -1704,7 +1704,7 @@
       "priority_code": "Priorité",
       "project_code": "Projet",
       "search_by_id": "Recherche par ID",
-      "search_placeholder": "Cas, séquençage, patient ou MRN",
+      "search_placeholder": "Cas, lot, patient ou MRN",
       "status_code": "Statut"
     },
     "priority": {

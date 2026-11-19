@@ -827,7 +827,7 @@
           "patient_id": "Patient",
           "patient_name": "Patient",
           "submitter_patient_id": "MRN",
-          "run_name": "Run Name",
+          "run_name": "Run",
           "sample_id": "Sample ID",
           "task_id": "Task",
           "sequencing_experiment_id": "Sequencing",
@@ -1703,7 +1703,7 @@
       "priority_code": "Priority",
       "project_code": "Project",
       "search_by_id": "Search by ID",
-      "search_placeholder": "Case, sequencing, patient, or MRN",
+      "search_placeholder": "Case, run, patient, or MRN",
       "status_code": "Status"
     },
     "priority": {

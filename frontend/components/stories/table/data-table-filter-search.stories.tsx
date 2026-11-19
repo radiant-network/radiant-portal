@@ -14,6 +14,10 @@ const RESULTS: AutocompleteResult[] = [
   { type: 'case_id', value: '1' },
   { type: 'case_id', value: '10' },
   { type: 'patient_id', value: '10' },
+  { type: 'submitter_patient_id', value: 'MRN-283775' },
+  { type: 'proband_submitter_sample_ids', value: 'S13224' },
+  { type: 'run_name', value: '1617' },
+  { type: 'sequencing_experiment_id', value: '1' },
 ];
 
 const resultsApi: AutocompleteApiFn = async () => ({ data: RESULTS }) as AutocompleteResponse;
@@ -24,7 +28,7 @@ const meta = {
   title: 'Features/Data Table/Filter Search',
   component: TableFiltersSearch,
   args: {
-    placeholder: 'Case, sequencing, patient, or MRN',
+    placeholder: 'Case, run, patient, or MRN',
     minSearchLength: 1,
     api: resultsApi,
     onSelect: () => {},
