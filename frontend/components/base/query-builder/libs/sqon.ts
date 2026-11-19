@@ -35,7 +35,8 @@ export function isBoolean(sqon: IValueFacet): boolean {
  * Is in-between (or range)
  */
 export function isRange(valueFacet: IValueFacet): boolean {
-  return valueFacet.op === RangeOperators.In ? false : valueFacet.op in RangeOperators;
+  if (valueFacet.op === RangeOperators.In) return false;
+  return Object.values(RangeOperators).includes(valueFacet.op as RangeOperators);
 }
 
 /**
