@@ -24,11 +24,11 @@ export function FavoritesProvider({ appId, children }: { appId: ApplicationId; c
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !hydrated) {
+    if (!isLoading && !isError && !hydrated) {
       setFavorites(new Set(initialFavorites));
       setHydrated(true);
     }
-  }, [isLoading, hydrated, initialFavorites]);
+  }, [isLoading, isError, hydrated, initialFavorites]);
 
   const isFavorite = useCallback((key: string) => favorites.has(key), [favorites]);
 
@@ -54,7 +54,7 @@ export function FavoritesProvider({ appId, children }: { appId: ApplicationId; c
   );
 
   const value = useMemo(
-    () => ({ favorites, isFavorite, toggleFavorite, isLoading: isLoading || !hydrated, isError, retry }),
+    () => ({ favorites, isFavorite, toggleFavorite, isLoading: isLoading || (!hydrated && !isError), isError, retry }),
     [favorites, isFavorite, toggleFavorite, isLoading, hydrated, isError, retry],
   );
 
