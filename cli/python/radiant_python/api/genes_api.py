@@ -652,7 +652,7 @@ class GenesApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         symbol: Annotated[Optional[StrictStr], Field(description="Gene symbol, ignoring case")] = None,
-        chromosome: Annotated[Optional[StrictStr], Field(description="Chromosome, without chr prefix; required without symbol")] = None,
+        chromosome: Annotated[Optional[StrictStr], Field(description="Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol")] = None,
         start: Annotated[Optional[StrictInt], Field(description="Region start; required without symbol")] = None,
         end: Annotated[Optional[StrictInt], Field(description="Region end; required without symbol")] = None,
         _request_timeout: Union[
@@ -676,7 +676,7 @@ class GenesApi:
         :type tenant: str
         :param symbol: Gene symbol, ignoring case
         :type symbol: str
-        :param chromosome: Chromosome, without chr prefix; required without symbol
+        :param chromosome: Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol
         :type chromosome: str
         :param start: Region start; required without symbol
         :type start: int
@@ -739,7 +739,7 @@ class GenesApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         symbol: Annotated[Optional[StrictStr], Field(description="Gene symbol, ignoring case")] = None,
-        chromosome: Annotated[Optional[StrictStr], Field(description="Chromosome, without chr prefix; required without symbol")] = None,
+        chromosome: Annotated[Optional[StrictStr], Field(description="Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol")] = None,
         start: Annotated[Optional[StrictInt], Field(description="Region start; required without symbol")] = None,
         end: Annotated[Optional[StrictInt], Field(description="Region end; required without symbol")] = None,
         _request_timeout: Union[
@@ -763,7 +763,7 @@ class GenesApi:
         :type tenant: str
         :param symbol: Gene symbol, ignoring case
         :type symbol: str
-        :param chromosome: Chromosome, without chr prefix; required without symbol
+        :param chromosome: Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol
         :type chromosome: str
         :param start: Region start; required without symbol
         :type start: int
@@ -826,7 +826,7 @@ class GenesApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         symbol: Annotated[Optional[StrictStr], Field(description="Gene symbol, ignoring case")] = None,
-        chromosome: Annotated[Optional[StrictStr], Field(description="Chromosome, without chr prefix; required without symbol")] = None,
+        chromosome: Annotated[Optional[StrictStr], Field(description="Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol")] = None,
         start: Annotated[Optional[StrictInt], Field(description="Region start; required without symbol")] = None,
         end: Annotated[Optional[StrictInt], Field(description="Region end; required without symbol")] = None,
         _request_timeout: Union[
@@ -850,7 +850,7 @@ class GenesApi:
         :type tenant: str
         :param symbol: Gene symbol, ignoring case
         :type symbol: str
-        :param chromosome: Chromosome, without chr prefix; required without symbol
+        :param chromosome: Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol
         :type chromosome: str
         :param start: Region start; required without symbol
         :type start: int

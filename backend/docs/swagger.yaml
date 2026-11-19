@@ -7390,7 +7390,8 @@ paths:
         name: symbol
         schema:
           type: string
-      - description: Chromosome, without chr prefix; required without symbol
+      - description: 'Chromosome without chr prefix: 1-22, X, Y or M (MT is read as
+          M); required without symbol'
         in: query
         name: chromosome
         schema:

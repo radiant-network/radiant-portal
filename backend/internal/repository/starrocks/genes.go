@@ -129,6 +129,9 @@ func (r *GenesRepository) ResolveGenes(ctx context.Context, inputs []string) ([]
 // GetGeneTrack lists the genes of every biotype overlapping a region, each with the exons of its
 // reference transcript.
 func (r *GenesRepository) GetGeneTrack(ctx context.Context, chromosome string, start int, end int) ([]types.GeneTrackGene, error) {
+	if chromosome == types.MitochondrialChromosome {
+		chromosome = types.EnsemblMitochondrialChromosome
+	}
 	return r.geneTrack(ctx, "chromosome = ? AND end >= ? AND start <= ?", chromosome, start, end)
 }
 
@@ -154,6 +157,9 @@ func (r *GenesRepository) geneTrack(ctx context.Context, where string, args ...a
 	geneIDs := make([]string, len(genes))
 	for i, g := range genes {
 		geneIDs[i] = g.GeneID
+		if g.Chromosome == types.EnsemblMitochondrialChromosome {
+			genes[i].Chromosome = types.MitochondrialChromosome
+		}
 	}
 	exonsByGene, err := geneExons(ctx, r.db, geneIDs)
 	if err != nil {

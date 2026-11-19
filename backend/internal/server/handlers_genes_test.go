@@ -94,6 +94,14 @@ func Test_GetGeneTrackHandler_OK(t *testing.T) {
 	assert.JSONEq(t, `[{"gene_id":"ENSG00000012048","symbol":"BRCA1","chromosome":"17","start":43044295,"end":43125483,"strand":"-","biotype":"protein_coding","exons":[{"start":43044295,"end":43045802}]}]`, w.Body.String())
 }
 
+func Test_GetGeneTrackHandler_NormalizesTheChromosome(t *testing.T) {
+	repo := newGeneTrackRepository()
+	w := getGeneTrackFrom(repo, "chromosome=mt&start=0&end=16569")
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "M", repo.chromosome)
+}
+
 func Test_GetGeneTrackHandler_MissingChromosome(t *testing.T) {
 	w := getGeneTrack("start=0&end=10")
 
@@ -105,7 +113,7 @@ func Test_GetGeneTrackHandler_UnknownChromosome(t *testing.T) {
 	w := getGeneTrack("chromosome=chr17&start=0&end=10")
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
-	assert.JSONEq(t, `{"status":400,"message":"chromosome must be one of 1-22, X or Y, got \"chr17\""}`, w.Body.String())
+	assert.JSONEq(t, `{"status":400,"message":"chromosome must be one of 1-22, X, Y or M, got \"chr17\""}`, w.Body.String())
 }
 
 func Test_GetGeneTrackHandler_InvalidStart(t *testing.T) {

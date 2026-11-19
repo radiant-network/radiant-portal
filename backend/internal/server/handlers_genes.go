@@ -100,7 +100,7 @@ type geneTrackReader interface {
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
 // @Param symbol query string false "Gene symbol, ignoring case"
-// @Param chromosome query string false "Chromosome, without chr prefix; required without symbol"
+// @Param chromosome query string false "Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol"
 // @Param start query int false "Region start; required without symbol"
 // @Param end query int false "Region end; required without symbol"
 // @Produce json
@@ -139,12 +139,13 @@ func GetGeneTrackHandler(repo geneTrackReader) gin.HandlerFunc {
 // parseRegionQuery reads the chromosome, start and end query parameters of a region of at most
 // maxSpan bases.
 func parseRegionQuery(c *gin.Context, maxSpan int) (string, int, int, error) {
-	chromosome := c.Query("chromosome")
-	if chromosome == "" {
+	name := c.Query("chromosome")
+	if name == "" {
 		return "", 0, 0, errors.New("chromosome is required")
 	}
-	if !types.IsChromosome(chromosome) {
-		return "", 0, 0, fmt.Errorf("chromosome must be one of 1-22, X or Y, got %q", chromosome)
+	chromosome, ok := types.NormalizeChromosome(name)
+	if !ok {
+		return "", 0, 0, fmt.Errorf("chromosome must be one of 1-22, X, Y or M, got %q", name)
 	}
 	start, err := strconv.Atoi(c.Query("start"))
 	if err != nil {

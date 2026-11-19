@@ -156,11 +156,13 @@ func Test_MondoTermAutoCompleteHandlerWithInvalidLimit(t *testing.T) {
 }
 
 type MockGeneTrackRepository struct {
-	genes  []types.GeneTrackGene
-	symbol string
+	genes      []types.GeneTrackGene
+	symbol     string
+	chromosome string
 }
 
 func (m *MockGeneTrackRepository) GetGeneTrack(ctx context.Context, chromosome string, start int, end int) ([]types.GeneTrackGene, error) {
+	m.chromosome = chromosome
 	return m.genes, nil
 }
 

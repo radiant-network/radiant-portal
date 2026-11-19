@@ -13607,7 +13607,7 @@ export const GenesApiAxiosParamCreator = function (configuration?: Configuration
          * @summary List the genes of a region
          * @param {string} tenant Tenant code
          * @param {string} [symbol] Gene symbol, ignoring case
-         * @param {string} [chromosome] Chromosome, without chr prefix; required without symbol
+         * @param {string} [chromosome] Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol
          * @param {number} [start] Region start; required without symbol
          * @param {number} [end] Region end; required without symbol
          * @param {*} [options] Override http request option.
@@ -13704,7 +13704,7 @@ export const GenesApiFp = function(configuration?: Configuration) {
          * @summary List the genes of a region
          * @param {string} tenant Tenant code
          * @param {string} [symbol] Gene symbol, ignoring case
-         * @param {string} [chromosome] Chromosome, without chr prefix; required without symbol
+         * @param {string} [chromosome] Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol
          * @param {number} [start] Region start; required without symbol
          * @param {number} [end] Region end; required without symbol
          * @param {*} [options] Override http request option.
@@ -13754,7 +13754,7 @@ export const GenesApiFactory = function (configuration?: Configuration, basePath
          * @summary List the genes of a region
          * @param {string} tenant Tenant code
          * @param {string} [symbol] Gene symbol, ignoring case
-         * @param {string} [chromosome] Chromosome, without chr prefix; required without symbol
+         * @param {string} [chromosome] Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol
          * @param {number} [start] Region start; required without symbol
          * @param {number} [end] Region end; required without symbol
          * @param {*} [options] Override http request option.
@@ -13805,7 +13805,7 @@ export class GenesApi extends BaseAPI {
      * @summary List the genes of a region
      * @param {string} tenant Tenant code
      * @param {string} [symbol] Gene symbol, ignoring case
-     * @param {string} [chromosome] Chromosome, without chr prefix; required without symbol
+     * @param {string} [chromosome] Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol
      * @param {number} [start] Region start; required without symbol
      * @param {number} [end] Region end; required without symbol
      * @param {*} [options] Override http request option.

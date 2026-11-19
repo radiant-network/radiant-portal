@@ -214,6 +214,19 @@ func Test_GetGeneTrack_EmptyRegion(t *testing.T) {
 	})
 }
 
+func Test_GetGeneTrack_Mitochondrion(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})
+		// The Ensembl tables name the mitochondrion MT, the gene track M as the variants.
+		genes, err := repo.GetGeneTrack(t.Context(), "M", 0, 16569)
+		require.NoError(t, err)
+		assert.Equal(t, []types.GeneTrackGene{
+			{GeneID: "ENSG00000198888", Symbol: "MT-ND1", Chromosome: "M", Start: 3307, End: 4262, Strand: "+", Biotype: "protein_coding", Description: "NADH dehydrogenase subunit 1",
+				Exons: []types.GeneTrackExon{}},
+		}, genes)
+	})
+}
+
 func Test_GetGeneTrackBySymbol_IgnoresCase(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewGenesRepository(database.StarrocksDB{DB: env.Starrocks})

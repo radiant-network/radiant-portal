@@ -219,7 +219,7 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.GenesApi(api_client)
     tenant = 'tenant_example' # str | Tenant code
     symbol = 'symbol_example' # str | Gene symbol, ignoring case (optional)
-    chromosome = 'chromosome_example' # str | Chromosome, without chr prefix; required without symbol (optional)
+    chromosome = 'chromosome_example' # str | Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol (optional)
     start = 56 # int | Region start; required without symbol (optional)
     end = 56 # int | Region end; required without symbol (optional)
 
@@ -241,7 +241,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **tenant** | **str**| Tenant code | 
  **symbol** | **str**| Gene symbol, ignoring case | [optional] 
- **chromosome** | **str**| Chromosome, without chr prefix; required without symbol | [optional] 
+ **chromosome** | **str**| Chromosome without chr prefix: 1-22, X, Y or M (MT is read as M); required without symbol | [optional] 
  **start** | **int**| Region start; required without symbol | [optional] 
  **end** | **int**| Region end; required without symbol | [optional] 
 

@@ -29,20 +29,3 @@ type GeneTrackExon struct {
 
 // GeneTrackMaxSpan is the widest region the gene track lists, in bases.
 const GeneTrackMaxSpan = 20_000_000
-
-// IsChromosome tells whether name is a chromosome of the human genome: 1-22, X or Y, without the
-// chr prefix.
-func IsChromosome(name string) bool {
-	switch name {
-	case "X", "Y":
-		return true
-	}
-	n := 0
-	for _, r := range name {
-		if r < '0' || r > '9' {
-			return false
-		}
-		n = n*10 + int(r-'0')
-	}
-	return name != "" && name[0] != '0' && n >= 1 && n <= 22
-}
