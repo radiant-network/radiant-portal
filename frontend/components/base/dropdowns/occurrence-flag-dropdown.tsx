@@ -37,6 +37,8 @@ export type OccurrenceFlagDropdownProps = ButtonProps & {
   seqId: number;
   flag?: OccurrenceFlagType;
   canFlag?: boolean;
+  /** Called once a flag change is saved, with the new flag or undefined when it was removed. */
+  onFlagChange?: (flag: OccurrenceFlagType | undefined) => void;
 };
 
 type OccurrenceFlagConfig = Record<
@@ -97,6 +99,7 @@ function OccurrenceFlagDropdown({
   flag,
   variant,
   canFlag = true,
+  onFlagChange,
   ...props
 }: OccurrenceFlagDropdownProps) {
   const { t } = useI18n();
@@ -176,6 +179,7 @@ function OccurrenceFlagDropdown({
                     .then(() => {
                       count?.mutate();
                       list?.mutate();
+                      onFlagChange?.(undefined);
                     })
                     .catch(() => {
                       setSelectedFlag(flag ?? null);
@@ -195,6 +199,7 @@ function OccurrenceFlagDropdown({
                   .then(() => {
                     list?.mutate();
                     count?.mutate();
+                    onFlagChange?.(key as OccurrenceFlagType);
                   })
                   .catch(() => {
                     setSelectedFlag(flag ?? null);

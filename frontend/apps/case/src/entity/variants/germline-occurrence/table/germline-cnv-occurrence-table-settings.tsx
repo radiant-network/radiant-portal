@@ -12,10 +12,12 @@ import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-forma
 
 import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
 import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
+import { cnvFocus } from '../cnv-profile/libs/focus';
 
 import ClingenCell from './cells/clingen-cell';
 import CNVIGVCell from './cells/cnv-igv-cell';
 import CNVNameCell from './cells/cnv-name-cell';
+import CNVProfileLinkCell from './cells/cnv-profile-link-cell';
 import OverlappingGeneLinkCell from './cells/overlapping-gene-link-cell';
 
 const columnHelper = createAppColumnHelper<GermlineCNVOccurrence>();
@@ -65,9 +67,11 @@ function getGermlineCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenc
     columnHelper.accessor(row => row.symbol, {
       id: 'symbol',
       cell: info => (
-        <OverlappingGeneLinkCell occurrence={info.row.original}>
-          {info.getValue() && info.getValue().join(', ')}
-        </OverlappingGeneLinkCell>
+        <CNVProfileLinkCell
+          occurrence={info.row.original}
+          focus={cnvFocus(info.row.original)}
+          label={info.getValue()?.join(', ')}
+        />
       ),
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.symbol_tooltip')}>{t('variant.headers.symbols')}</TooltipHeader>
@@ -80,9 +84,11 @@ function getGermlineCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenc
     columnHelper.accessor(row => row.cytoband, {
       id: 'cytoband',
       cell: info => (
-        <OverlappingGeneLinkCell occurrence={info.row.original}>
-          {info.getValue() && info.getValue().join(', ')}
-        </OverlappingGeneLinkCell>
+        <CNVProfileLinkCell
+          occurrence={info.row.original}
+          focus={cnvFocus(info.row.original)}
+          label={info.getValue()?.join(', ')}
+        />
       ),
       header: t('variant.headers.cytoband'),
       size: 124,
