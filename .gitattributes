@@ -2,3 +2,5 @@
 backend/docs/** linguist-generated=true
 frontend/api/** linguist-generated=true
 cli/python/** linguist-generated=true
+# The spec itself stays shown: it is where a reviewer reads the API change.
+backend/docs/swagger.yaml -linguist-generated
