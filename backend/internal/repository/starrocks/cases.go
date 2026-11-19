@@ -76,7 +76,7 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 
 	txStg := db.Table(fmt.Sprintf("%s chse", types.CaseHasSequencingExperimentTable.TenantQualifiedName(ctx)))
 	txStg = txStg.Select("DISTINCT(chse.case_id)")
-	txStg = txStg.Where("se.ingested_at IS NOT NULL AND (se.task_type = 'radiant_germline_annotation' OR se.task_type = 'radiant_germline_cnv_annotation' OR (se.task_type = 'radiant_somatic_annotation' AND se.histology_type = 'tumoral'))")
+	txStg = txStg.Where("se.ingested_at IS NOT NULL AND (se.task_type = 'radiant_germline_annotation' OR se.task_type = 'radiant_germline_cnv_annotation' OR (se.task_type = 'alignment_germline_variant_calling' AND se.cnv_vcf_filepath IS NOT NULL) OR (se.task_type = 'radiant_somatic_annotation' AND se.histology_type = 'tumoral'))")
 	txStg = txStg.Joins(fmt.Sprintf("JOIN %s se ON se.seq_id = chse.sequencing_experiment_id", types.SequencingTable.TenantQualifiedName(ctx)))
 
 	txMembersCount := caseMembersCount(ctx, db)
@@ -245,7 +245,7 @@ func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository
 	tx = r.joiner.CaseWithProject(tx)
 	tx = r.joiner.CaseWithProbandSample(tx)
 	if userQuery != nil {
-		utils.AddWhereWithCaseSemiJoins(userQuery, tx, types.CaseSemiJoinRows{types.CaseMemberRunTable.Alias: r.joiner.CaseMemberRuns(tx)})
+		utils.AddWhereWithCaseSemiJoins(userQuery, tx, types.CaseSemiJoinRows{types.CaseMemberRunTable.Alias: r.joiner.CaseMemberRuns(tx), types.CaseAssigneeTable.Alias: r.joiner.CaseAssignees(tx)})
 
 		if userQuery.HasFieldFromTables(types.PanelTable) {
 			tx = r.joiner.AnalysisCatalogWithPanel(tx)
@@ -310,10 +310,11 @@ func (r *CasesRepository) retrieveCaseSequencingExperiments(ctx context.Context,
 	// GROUP BY seq_id collapses the (case_id, seq_id, task_id) staging rows so a tumor sequencing
 	// carried by both a tumor-normal and a tumor-only task matches once, and so SNV and CNV
 	// annotation tasks on the same seq both surface in the MAX(...) flags.
+	// The ETL also loads a member's DRAGEN CNVs, with or without a CNV annotation.
 	txIngested := db.Table(types.SequencingTable.TenantQualifiedName(ctx)).
 		Select("seq_id, "+
 			"MAX(CASE WHEN task_type = 'radiant_germline_annotation' OR (task_type = 'radiant_somatic_annotation' AND histology_type = 'tumoral') THEN 1 ELSE 0 END) as has_snv_flag, "+
-			"MAX(CASE WHEN task_type = 'radiant_germline_cnv_annotation' THEN 1 ELSE 0 END) as has_cnv_flag").
+			"MAX(CASE WHEN task_type = 'radiant_germline_cnv_annotation' OR (task_type = 'alignment_germline_variant_calling' AND cnv_vcf_filepath IS NOT NULL) THEN 1 ELSE 0 END) as has_cnv_flag").
 		Where("ingested_at is not null AND case_id = ?", caseId).
 		Group("seq_id")
 	txSeqExp = txSeqExp.Joins("LEFT JOIN (?) se ON se.seq_id = s.id", txIngested)

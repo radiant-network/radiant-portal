@@ -1,7 +1,7 @@
 /* eslint-disable */
 /// <reference types="cypress" />
 import './commands';
-import './apiCommands';
+import { tokenPayload } from './apiCommands';
 import 'cypress-real-events';
 import { globalData } from './globalData';
 
@@ -14,14 +14,6 @@ Cypress.Commands.add('setToken', () => {
 
 // The cached token is checked once per spec: it has to outlive the spec, or its last API calls get a 401.
 const TOKEN_MIN_REMAINING_SECONDS = 180;
-
-const tokenPayload = token => {
-  try {
-    return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-  } catch {
-    return null;
-  }
-};
 
 const expiresSoon = payload => payload.exp - Date.now() / 1000 < TOKEN_MIN_REMAINING_SECONDS;
 

@@ -36,8 +36,17 @@ func prepareCNVQuery(ctx context.Context, db *gorm.DB, cnvTable types.Table, fre
 	if userQuery != nil && userQuery.HasFieldFromTables(frequencyTable) {
 		tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s %s ON %s.cnv_id = %s.cnv_id", frequencyTable.TenantQualifiedName(ctx), frequencyTable.Alias, frequencyTable.Alias, alias))
 	}
-	utils.AddWhere(userQuery, tx)
+	if userQuery != nil {
+		utils.AddWhere(userQuery, tx)
+	}
 	return tx, nil
+}
+
+// joinCNVNoteAndFlag joins, as note and flag, the notes and the flag of the CNVs of a case and
+// sequencing: at most one row each per CNV.
+func joinCNVNoteAndFlag(ctx context.Context, tx *gorm.DB, alias string, caseId int, seqId int) *gorm.DB {
+	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s WHERE deleted = false) note ON note.occurrence_id = %s.cnv_id AND note.task_id = %s.task_id AND note.seq_id = ? AND note.case_id = ?", types.OccurrenceNoteTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
+	return tx.Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = %s.cnv_id AND flag.task_id = %s.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
 }
 
 // listCNVOccurrences is generic over the row type only: germline and somatic CNV select from the
@@ -49,8 +58,7 @@ func listCNVOccurrences[T any](ctx context.Context, db *gorm.DB, cnvTable types.
 		return nil, fmt.Errorf("error during query preparation %w", err)
 	}
 	alias := cnvTable.Alias
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (SELECT DISTINCT occurrence_id, case_id, seq_id, task_id FROM %s WHERE deleted = false) note ON note.occurrence_id = %s.cnv_id AND note.task_id = %s.task_id AND note.seq_id = ? AND note.case_id = ?", types.OccurrenceNoteTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN %s flag ON flag.occurrence_id = %s.cnv_id AND flag.task_id = %s.task_id AND flag.seq_id = ? AND flag.case_id = ?", types.OccurrenceFlagTable.TenantQualifiedName(ctx), alias, alias), seqId, caseId)
+	tx = joinCNVNoteAndFlag(ctx, tx, alias, caseId, seqId)
 	// The note and flag joins above are already scoped to this case/sequencing and yield at most one
 	// row per occurrence, so filtering on them beats a second scan of the federated tables.
 	if userQuery != nil {
@@ -217,7 +225,7 @@ func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 	for i, o := range overlaps {
 		symbols[i], geneIDs[i] = o.Symbol, o.GeneId
 	}
-	inheritanceCodes, err := omimInheritanceCodes(ctx, db, symbols)
+	omim, err := omimGenes(ctx, db, symbols)
 	if err != nil {
 		return nil, fmt.Errorf("error fetching gene overlap omim phenotypes: %w", err)
 	}
@@ -229,7 +237,7 @@ func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seq
 		if overlaps[i].TenantGenePanels == nil {
 			overlaps[i].TenantGenePanels = types.JsonArray[string]{}
 		}
-		overlaps[i].OmimInheritanceCode = inheritanceCodes[overlaps[i].Symbol]
+		overlaps[i].OmimInheritanceCode = omim[overlaps[i].Symbol].InheritanceCodes
 		overlaps[i].GnomadPli, overlaps[i].GnomadLoeuf = constraints[overlaps[i].GeneId].Pli, constraints[overlaps[i].GeneId].Loeuf
 	}
 	return overlaps, nil

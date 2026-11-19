@@ -18,4 +18,15 @@ describe('Case Entity - Variants - Germline - SNV - Query builder - One numerica
     CaseEntity_Variants_QueryBuilder.snv.validations.shouldHaveNumericalPill(['9']);
     CaseEntity_Variants_QueryBuilder.snv.validations.shouldHaveActivePillCount(1);
   });
+
+  it('Keeps the numerical label when the labels switch is off', () => {
+    setupTest();
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowNumericalLabel(true /*shouldShow*/);
+
+    CaseEntity_Variants_QueryBuilder.snv.actions.toggleLabels();
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowNumericalLabel(true /*shouldShow*/);
+
+    CaseEntity_Variants_QueryBuilder.snv.actions.toggleLabels();
+    CaseEntity_Variants_QueryBuilder.snv.validations.shouldShowNumericalLabel(true /*shouldShow*/);
+  });
 });

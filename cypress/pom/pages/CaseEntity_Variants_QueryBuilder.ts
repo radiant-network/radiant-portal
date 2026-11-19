@@ -316,6 +316,17 @@ const generateQueryBuilderFunctions = (
         .should(strExist);
     },
     /**
+     * Checks whether the active query's numerical pill displays its field label.
+     * Numerical pills ignore the labels switch and always show their label.
+     * @param shouldShow Whether the numerical facet label should be visible.
+     */
+    shouldShowNumericalLabel(shouldShow: boolean) {
+      const strExist = shouldShow ? 'exist' : 'not.exist';
+      cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.queryPill}`)
+        .contains(findFacetData(tableFacets, config.numericalFacet.section, config.numericalFacet.facet).name)
+        .should(strExist);
+    },
+    /**
      * Checks whether the clear-all button is displayed.
      * @param shouldExist Whether the button should exist.
      */

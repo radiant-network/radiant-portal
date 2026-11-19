@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -153,16 +152,9 @@ func ParseVariantIdentifier(input string) (VariantIdentifier, error) {
 }
 
 func normalizeChromosome(chromosome string) (string, error) {
-	upper := strings.ToUpper(chromosome)
-	switch upper {
-	case "X", "Y", "M":
-		return upper, nil
-	case "MT":
-		return "M", nil
-	}
-	n, err := strconv.Atoi(upper)
-	if err != nil || n < 1 || n > 22 || strings.HasPrefix(upper, "0") {
+	normalized, ok := NormalizeChromosome(chromosome)
+	if !ok {
 		return "", ErrUnrecognizedVariantIdentifier
 	}
-	return upper, nil
+	return normalized, nil
 }

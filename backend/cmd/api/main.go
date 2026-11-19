@@ -71,6 +71,13 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	repoVariants := starrocks.NewVariantsRepository(starrocksDB)
 	repoExomiser := starrocks.NewExomiserRepository(starrocksDB)
 	repoGenes := starrocks.NewGenesRepository(starrocksDB)
+	repoCNVProfile := starrocks.NewCNVProfileRepository(starrocksDB)
+	// S3 reader of the CNV profile files
+	s3Store, err := utils.NewS3Store()
+	if err != nil {
+		slog.Error("failed to create s3 store", slog.Any("error", err))
+		os.Exit(1)
+	}
 	repoGermlineCNVOccurrences := starrocks.NewGermlineCNVOccurrencesRepository(starrocksDB)
 	repoGermlineSNVOccurrences := starrocks.NewGermlineSNVOccurrencesRepository(starrocksDB)
 	repoSomaticCNVOccurrences := starrocks.NewSomaticCNVOccurrencesRepository(starrocksDB)
@@ -196,6 +203,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 
 	geneGroup := tenantRoutes.Group("/genes")
 	geneGroup.GET("/autocomplete", requireAction(types.ActionSearchCase), server.GetGeneAutoCompleteHandler(repoGenes))
+	geneGroup.GET("/track", requireAction(types.ActionSearchCase), server.GetGeneTrackHandler(repoGenes))
 	geneGroup.POST("/search", requireAction(types.ActionSearchCase), server.SearchGenesHandler(repoGenes))
 
 	hpoGroup := tenantRoutes.Group("/hpo")
@@ -240,6 +248,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/list", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVListHandler(repoGermlineCNVOccurrences))
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/aggregate", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVAggregateHandler(repoGermlineCNVOccurrences, repoFacets))
 	occurrencesGermlineCNVGroup.POST("/:case_id/:seq_id/:task_id/statistics", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVStatisticsHandler(repoGermlineCNVOccurrences))
+	occurrencesGermlineCNVGroup.GET("/:case_id/:seq_id/:task_id/profile", requireAction(types.ActionSearchCase), server.GetGermlineCNVProfileHandler(repoCNVProfile, s3Store))
 	occurrencesGermlineCNVGroup.GET("/:case_id/:seq_id/:task_id/:cnv_id/genes_overlap", requireAction(types.ActionSearchCase), server.OccurrencesGermlineCNVGenesOverlapHandler(repoGermlineCNVOccurrences))
 
 	occurrencesGermlineSNVGroup := occurrencesGermlineGroup.Group("/snv")

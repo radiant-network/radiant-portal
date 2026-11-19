@@ -9,6 +9,7 @@ declare namespace Cypress {
     ensureReferenceSavedFilters(token: string): Cypress.Chainable;
     getToken(): Chainable<string>;
     getUsername(): Chainable<string>;
+    getUserId(token: string): Chainable<string>;
     resetTablePreferences(): cy & CyEventEmitter;
     mockFavoritePreferences(favorites: string[] | null | number, postStatus?: number): cy & CyEventEmitter;
     validateAcceptedBatchResponse(response: any, batch_type: string): cy & CyEventEmitter;

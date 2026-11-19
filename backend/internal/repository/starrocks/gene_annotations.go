@@ -40,29 +40,40 @@ func geneConstraints(ctx context.Context, db *gorm.DB, geneIDs []string) (map[st
 	return constraints, nil
 }
 
-// omimInheritanceCodes gives the OMIM inheritance modes of each gene symbol, over all its phenotypes,
-// without duplicates and in the order of the phenotypes.
-func omimInheritanceCodes(ctx context.Context, db *gorm.DB, symbols []string) (map[string][]string, error) {
-	codes := map[string][]string{}
+type omimGene struct {
+	// InheritanceCodes are the inheritance modes over all the phenotypes, without duplicates and in
+	// the order of the phenotypes.
+	InheritanceCodes []string
+	Conditions       []types.OmimGenePanel
+}
+
+// omimGenes gives the OMIM phenotypes of each gene symbol, as conditions with their inheritance modes.
+func omimGenes(ctx context.Context, db *gorm.DB, symbols []string) (map[string]omimGene, error) {
+	genes := map[string]omimGene{}
 	if len(symbols) == 0 {
-		return codes, nil
+		return genes, nil
 	}
 	var panels []struct {
 		Symbol          string
+		Panel           string
+		OmimPhenotypeId string
 		InheritanceCode types.JsonArray[string] `gorm:"type:json"`
 	}
 	tx := db.WithContext(ctx).Table(types.OmimGenePanelTable.TenantQualifiedName(ctx))
-	tx = tx.Select("symbol, inheritance_code").Where("symbol IN ? AND omim_phenotype_id IS NOT NULL", symbols)
+	tx = tx.Select("symbol, panel, omim_phenotype_id, inheritance_code").Where("symbol IN ? AND omim_phenotype_id IS NOT NULL", symbols)
 	tx = tx.Order("symbol, omim_phenotype_id, panel")
 	if err := tx.Find(&panels).Error; err != nil {
 		return nil, fmt.Errorf("error fetching omim phenotypes: %w", err)
 	}
 	for _, p := range panels {
+		gene := genes[p.Symbol]
+		gene.Conditions = append(gene.Conditions, types.OmimGenePanel{OmimPhenotypeId: p.OmimPhenotypeId, Panel: p.Panel, InheritanceCode: p.InheritanceCode})
 		for _, code := range p.InheritanceCode {
-			if !slices.Contains(codes[p.Symbol], code) {
-				codes[p.Symbol] = append(codes[p.Symbol], code)
+			if !slices.Contains(gene.InheritanceCodes, code) {
+				gene.InheritanceCodes = append(gene.InheritanceCodes, code)
 			}
 		}
+		genes[p.Symbol] = gene
 	}
-	return codes, nil
+	return genes, nil
 }

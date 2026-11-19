@@ -240,11 +240,15 @@ def variant_row(v, pc, pn, sc, sn):
 
 
 def occurrence_rows(sr):
+    # A staged task has a CNV VCF when it is a CNV annotation or the seed gave it germline CNVs, as the ETL has.
+    cnv_tasks = {(r[1], r[2]) for r in sr["germline__cnv__occurrence"]}
+    cnv_tasks |= {(r[1], r[2]) for r in sr["staging_sequencing_experiment"] if r[3] == "radiant_germline_cnv_annotation"}
     return [
         insert(f"{SHARED_DB}.staging_sequencing_experiment",
                ["case_id", "seq_id", "task_id", "task_type", "part", "analysis_type", "aliquot", "patient_id", "experimental_strategy",
-                "histology_type", "created_at", "updated_at", "ingested_at", "tenant_code"],
-               [r + [TENANT] for r in sr["staging_sequencing_experiment"]]),
+                "histology_type", "created_at", "updated_at", "ingested_at", "cnv_vcf_filepath", "tenant_code"],
+               [r + [f"s3://radiant-fake-genomics/{r[6]}.cnv.vcf.gz" if (r[1], r[2]) in cnv_tasks else None, TENANT]
+                for r in sr["staging_sequencing_experiment"]]),
         insert(f"{TENANT_DB}.germline__snv__occurrence",
                ["part", "seq_id", "task_id", "locus_id", "ad_ratio", "gq", "dp", "ad_total", "ad_ref", "ad_alt", "zygosity", "calls",
                 "quality", "filter", "info_qd", "exomiser_moi", "exomiser_acmg_classification", "exomiser_acmg_evidence",
