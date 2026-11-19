@@ -686,13 +686,15 @@ def add_prenatal_examples(g, pg, sr, ids, org):
 
 
 def add_variants_toggle_cases(g, pg, sr, ids, org):
-    """Three dedicated germline cases that exercise the Variants-tab visibility and the SNV/CNV
+    """Four dedicated germline cases that exercise the Variants-tab visibility and the SNV/CNV
     toggle behavior (SJRA-1517):
       SNV-ONLY-TEST stages only radiant_germline_annotation (CNV toggle disabled),
       CNV-ONLY-TEST stages only radiant_germline_cnv_annotation (SNV toggle disabled),
-      NO-VARIANTS-TEST stages only alignment_germline_variant_calling (no annotation task), so
+      DRAGEN-CNV-ONLY-TEST stages only alignment_germline_variant_calling, with its DRAGEN CNVs
+        (SNV toggle disabled), as in a deployment that runs no CNV annotation,
+      NO-VARIANTS-TEST stages only alignment_germline_variant_calling, without CNVs, so
         has_variants is false and the Variants tab does not render at all.
-    The two annotated cases also get one occurrence of their kind so the enabled tab has content."""
+    The cases with variants get one occurrence of their kind so the enabled tab has content."""
     rng = random.Random(h("genomics", "variants-toggle"))
 
     def nid(kind):
@@ -736,24 +738,29 @@ def add_variants_toggle_cases(g, pg, sr, ids, org):
     sr["germline__snv__occurrence"].append(germline_snv(rng, snv_seq, snv_task, v, False, total, alt,
                                                         False, False, None, None))
 
+    def dragen_cnv(seq, task, aliquot):
+        symbol = rng.choice(BACKGROUND)
+        chrom, gs, ge, *_ = GENES[symbol]
+        start = rng.randrange(gs, ge - 20000)
+        length = rng.randrange(2000, 20000)
+        kind = rng.choice(["DEL", "DUP"])
+        sr["germline__cnv__occurrence"].append([PART, seq, task, nid("cnv"), aliquot,
+                                                chrom, start, start + length, kind, length,
+                                                f"DRAGEN:{kind}:{chrom}:{start}-{start + length}",
+                                                round(rng.uniform(40, 150), 1), [0, 1], "PASS",
+                                                1 if kind == "DEL" else 3,
+                                                [0, rng.randrange(5, 30)], round(rng.uniform(0.4, 1.6), 2),
+                                                kind, length, length, [0, 0], [0, 0], [symbol], 1, 0,
+                                                round(rng.uniform(0.01, 0.2), 4)])
+
     cnv_cid, cnv_seq, _ = make_case("CNV-ONLY-TEST", "radiant_germline_cnv_annotation", "radiant-germline-cnv")
     # Germline CNV occurrences hang off the alignment task, not the annotation task.
     cnv_align_task = nid("task")
     pg["task"].append([cnv_align_task, "alignment_germline_variant_calling", "Dragen", "4.4.4", "GRCh38", made])
     pg["task_context"].append([cnv_align_task, cnv_seq, None])
-    symbol = rng.choice(BACKGROUND)
-    chrom, gs, ge, *_ = GENES[symbol]
-    start = rng.randrange(gs, ge - 20000)
-    length = rng.randrange(2000, 20000)
-    kind = rng.choice(["DEL", "DUP"])
-    cnv_id = nid("cnv")
-    sr["germline__cnv__occurrence"].append([PART, cnv_seq, cnv_align_task, cnv_id, "CNV-ONLY-TEST-N",
-                                            chrom, start, start + length, kind, length,
-                                            f"DRAGEN:{kind}:{chrom}:{start}-{start + length}",
-                                            round(rng.uniform(40, 150), 1), [0, 1], "PASS",
-                                            1 if kind == "DEL" else 3,
-                                            [0, rng.randrange(5, 30)], round(rng.uniform(0.4, 1.6), 2),
-                                            kind, length, length, [0, 0], [0, 0], [symbol], 1, 0,
-                                            round(rng.uniform(0.01, 0.2), 4)])
+    dragen_cnv(cnv_seq, cnv_align_task, "CNV-ONLY-TEST-N")
 
     make_case("NO-VARIANTS-TEST", "alignment_germline_variant_calling", "Dragen")
+
+    _, dragen_seq, dragen_task = make_case("DRAGEN-CNV-ONLY-TEST", "alignment_germline_variant_calling", "Dragen")
+    dragen_cnv(dragen_seq, dragen_task, "DRAGEN-CNV-ONLY-TEST-N")
