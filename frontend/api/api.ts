@@ -377,7 +377,7 @@ export interface CNVGeneOverlap {
     'tenant_gene_panels': Array<string>;
 }
 /**
- * User assigned to a case, as shown in the cases list and on the case entity page. Name and email are the attributes the identity registry holds for them, and are absent for an account that never filled them in.
+ * User who is or may be assigned a case: a case\'s assignees in the cases list and on the case entity page, the assignee picker, and the users of the case list assignee filter. Name and email are the attributes the identity registry holds for them, and are absent for an account that never filled them in.
  * @export
  * @interface CaseAssignee
  */
@@ -904,10 +904,10 @@ export interface CaseFilters {
     'analysis_catalog_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<FiltersValue>}
+     * @type {Array<CaseAssignee>}
      * @memberof CaseFilters
      */
-    'assignee_id': Array<FiltersValue>;
+    'assignee_id': Array<CaseAssignee>;
     /**
      * 
      * @type {Array<FiltersValue>}

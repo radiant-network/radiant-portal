@@ -113,16 +113,16 @@ func canInterpret(tenantCode string, orgScope clause.Expr) clause.Expr {
 
 // AssigneeFilterValues lists the users the case list can be filtered on: those who may be assigned
 // a case at any organization of the tenant, plus those still assigned one after losing that right.
-func (r *CaseAssignmentsRepository) AssigneeFilterValues(ctx context.Context, tenantCode string) ([]types.FiltersValue, error) {
-	values := []types.FiltersValue{}
+func (r *CaseAssignmentsRepository) AssigneeFilterValues(ctx context.Context, tenantCode string) ([]types.CaseAssignee, error) {
+	values := []types.CaseAssignee{}
 	stillAssigned := gorm.Expr("EXISTS (SELECT 1 FROM case_assignment ca WHERE ca.user_id = u.user_id AND ca.tenant_code = ?)", tenantCode)
 	tx := r.db.WithContext(ctx).
 		Table("users u").
 		Where(personalAccount).
 		Where("(? OR ?)", canInterpret(tenantCode, gorm.Expr("ur.org_code IS NOT NULL")), stillAssigned).
-		// Blank names count as missing, so a user without one is labelled by email.
-		Select(`u.user_id AS key, COALESCE(NULLIF(CONCAT_WS(' ', NULLIF(TRIM(u.first_name), ''), NULLIF(TRIM(u.last_name), '')), ''), u.email) AS label`).
-		Order("label, u.user_id")
+		Select("u.user_id, u.first_name, u.last_name, u.email").
+		// The order of the assignee picker and of a case's assignees.
+		Order("u.last_name, u.first_name, u.user_id")
 	if err := tx.Scan(&values).Error; err != nil {
 		return nil, fmt.Errorf("error listing assignee filter values: %w", err)
 	}

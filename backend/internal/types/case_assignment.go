@@ -41,8 +41,9 @@ func (CaseAssignment) TableName() string {
 	return CaseAssignmentTable.Name
 }
 
-// CaseAssignee - User assigned to a case
-// @Description User assigned to a case, as shown in the cases list and on the case entity page.
+// CaseAssignee - User who is or may be assigned a case
+// @Description User who is or may be assigned a case: a case's assignees in the cases list and on the case entity page,
+// @Description the assignee picker, and the users of the case list assignee filter.
 // @Description Name and email are the attributes the identity registry holds for them, and are
 // @Description absent for an account that never filled them in.
 // @Name CaseAssignee
