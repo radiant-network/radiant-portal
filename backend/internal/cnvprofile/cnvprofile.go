@@ -94,6 +94,71 @@ func BAFTrack(f *bigwig.File, chromosomes []types.CNVProfileChromosome) ([]types
 	return track(f, chromosomes, 1, bafPoint)
 }
 
+// CopyRatioSample keeps one bin in every stride, in genome order, so that at most maxPoints are
+// left: the overview of a genome, whose millions of bins a browser cannot draw. A sample keeps
+// the spread of the bins, which a window mean narrows.
+func CopyRatioSample(f *bigwig.File, chromosomes []types.CNVProfileChromosome, maxPoints int) ([]types.CNVProfileTrack, int, error) {
+	tracks, stride, err := sampleRead(f, chromosomes, maxPoints, copyRatioPoint)
+	if err != nil {
+		return nil, 0, fmt.Errorf("sample copy ratio: %w", err)
+	}
+	return tracks, stride, nil
+}
+
+// BAFSample keeps one variant in every stride, in genome order, so that at most maxPoints are
+// left: the overview of a genome, whose millions of variants a browser cannot draw. A window mean
+// would not do: the variants of a region sit at 0, 0.5 and 1, and their mean is 0.5 everywhere.
+// The variants are 1-base intervals, so the bases covered count them before any is read; a file
+// without a total summary has none, and its variants are counted once read.
+func BAFSample(f *bigwig.File, chromosomes []types.CNVProfileChromosome, maxPoints int) ([]types.CNVProfileTrack, int, error) {
+	if f.BasesCovered() == 0 {
+		tracks, stride, err := sampleRead(f, chromosomes, maxPoints, bafPoint)
+		if err != nil {
+			return nil, 0, fmt.Errorf("sample baf: %w", err)
+		}
+		return tracks, stride, nil
+	}
+	stride := max(1, int((f.BasesCovered()+uint64(maxPoints)-1)/uint64(maxPoints))) //nolint:gosec // maxPoints is positive
+	tracks, err := track(f, chromosomes, stride, bafPoint)
+	if err != nil {
+		return nil, 0, fmt.Errorf("sample baf: %w", err)
+	}
+	return tracks, stride, nil
+}
+
+// CopyRatioRegion gives the copy ratio of the bins that overlap [start, end) of a chromosome.
+func CopyRatioRegion(f *bigwig.File, chromosome string, start, end int) (types.CNVProfileTrack, error) {
+	return regionTrack(f, chromosome, start, end, copyRatioPoint)
+}
+
+// BAFRegion gives the BAF of the variants in [start, end) of a chromosome.
+func BAFRegion(f *bigwig.File, chromosome string, start, end int) (types.CNVProfileTrack, error) {
+	return regionTrack(f, chromosome, start, end, bafPoint)
+}
+
+func regionTrack(f *bigwig.File, chromosome string, start, end int, point func(bigwig.Interval) (int, float64)) (types.CNVProfileTrack, error) {
+	t := types.CNVProfileTrack{Chromosome: chromosome, Positions: []int{}, Values: []float64{}}
+	idx := slices.IndexFunc(f.Chroms(), func(c bigwig.Chrom) bool {
+		name, ok := chromosomeName(c.Name)
+		return ok && name == chromosome
+	})
+	if idx < 0 {
+		return t, nil
+	}
+	c := f.Chroms()[idx]
+	// Clamped to the chromosome, which also keeps the bounds within uint32.
+	start, end = max(start, 0), min(end, int(c.Size))
+	if start >= end {
+		return t, nil
+	}
+	intervals, err := f.IntervalsIn(c.Name, uint32(start), uint32(end)) //nolint:gosec // clamped to the chromosome
+	if err != nil {
+		return t, fmt.Errorf("read chromosome %s: %w", c.Name, err)
+	}
+	appendPoints(&t, intervals, 0, 1, point)
+	return t, nil
+}
+
 func fileChromosomeNames(f *bigwig.File) map[string]string {
 	names := map[string]string{}
 	for _, c := range f.Chroms() {
@@ -102,6 +167,56 @@ func fileChromosomeNames(f *bigwig.File) map[string]string {
 		}
 	}
 	return names
+}
+
+// readChromosomes reads every interval of the chromosomes the bigwig has, by chromosome name;
+// the BAF of a female sample has no chrY.
+func readChromosomes(f *bigwig.File, chromosomes []types.CNVProfileChromosome) (map[string][]bigwig.Interval, error) {
+	names := fileChromosomeNames(f)
+	intervals := map[string][]bigwig.Interval{}
+	for _, c := range chromosomes {
+		fileName, ok := names[c.Name]
+		if !ok {
+			continue
+		}
+		ivs, err := f.Intervals(fileName)
+		if err != nil {
+			return nil, fmt.Errorf("read chromosome %s: %w", fileName, err)
+		}
+		intervals[c.Name] = ivs
+	}
+	return intervals, nil
+}
+
+// sampleRead reads every interval, then keeps one in every stride so that at most maxPoints are
+// left.
+func sampleRead(f *bigwig.File, chromosomes []types.CNVProfileChromosome, maxPoints int, point func(bigwig.Interval) (int, float64)) ([]types.CNVProfileTrack, int, error) {
+	intervals, err := readChromosomes(f, chromosomes)
+	if err != nil {
+		return nil, 0, err
+	}
+	var total int
+	for _, ivs := range intervals {
+		total += len(ivs)
+	}
+	stride := max(1, (total+maxPoints-1)/maxPoints)
+	return sampleTracks(chromosomes, intervals, stride, point), stride, nil
+}
+
+// sampleTracks keeps one interval in every stride across the chromosomes, in genome order.
+func sampleTracks(chromosomes []types.CNVProfileChromosome, intervals map[string][]bigwig.Interval, stride int, point func(bigwig.Interval) (int, float64)) []types.CNVProfileTrack {
+	tracks := []types.CNVProfileTrack{}
+	first := 0
+	for _, c := range chromosomes {
+		ivs, ok := intervals[c.Name]
+		if !ok {
+			continue
+		}
+		t := types.CNVProfileTrack{Chromosome: c.Name, Positions: make([]int, 0, len(ivs)/stride+1), Values: make([]float64, 0, len(ivs)/stride+1)}
+		first = appendPoints(&t, ivs, first, stride, point)
+		tracks = append(tracks, t)
+	}
+	return tracks
 }
 
 // track reads the chromosomes the bigwig has (the BAF of a female sample has no chrY), keeping
