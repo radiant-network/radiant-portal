@@ -5,6 +5,15 @@ const getExpose = (key: string): string => {
   return Cypress.expose(key) || '';
 };
 
+/** Decodes the payload of a JWT, or returns null when it is not one. */
+export const tokenPayload = (token: string) => {
+  try {
+    return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+  } catch {
+    return null;
+  }
+};
+
 /**
  * Makes an authenticated request to a tenant-scoped endpoint, retrying on 500 errors.
  * @param tenant The tenant segment prepended to the path.
@@ -109,6 +118,15 @@ Cypress.Commands.add('getToken', () => {
  */
 Cypress.Commands.add('getUsername', () => {
   return cy.env(['user_username']).then(({ user_username }) => user_username);
+});
+
+/**
+ * Gets the user ID of the token's account: the Keycloak sub, which case assignments store.
+ * @param token The Bearer authentication token.
+ * @returns A Cypress chain containing the user ID.
+ */
+Cypress.Commands.add('getUserId', (token: string) => {
+  return cy.wrap(tokenPayload(token)?.sub as string);
 });
 
 /**

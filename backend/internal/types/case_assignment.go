@@ -8,8 +8,26 @@ import (
 )
 
 var CaseAssignmentTable = Table{
-	Name:  "case_assignment",
-	Alias: "assignment",
+	Name:           "case_assignment",
+	Alias:          "assignment",
+	FederationName: "radiant_jdbc.public.case_assignment",
+}
+
+// NotAssignedValue is the assignee_id filter value of a case with no assignee. It must match the frontend's
+// ASSIGNATION_CONSTANTS.NOT_ASSIGNED_USER_ID, which the "Not assigned" option sends.
+const NotAssignedValue = "not-assign"
+
+var CaseAssigneeTable = Table{
+	Name:         "case_assignee",
+	Alias:        "case_assignee",
+	CaseSemiJoin: true,
+}
+
+var CaseAssigneeIdField = Field{
+	Name:          "assignee_id",
+	Alias:         "assignee_id",
+	CanBeFiltered: true,
+	Table:         CaseAssigneeTable,
 }
 
 // CaseAssignment links a case to a user made responsible for reviewing and interpreting it.

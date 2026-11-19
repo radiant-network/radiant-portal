@@ -249,7 +249,7 @@ func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository
 	tx = r.joiner.CaseWithProject(tx)
 	tx = r.joiner.CaseWithProbandSample(tx)
 	if userQuery != nil {
-		utils.AddWhereWithCaseSemiJoins(userQuery, tx, types.CaseSemiJoinRows{types.CaseMemberRunTable.Alias: r.joiner.CaseMemberRuns(tx)})
+		utils.AddWhereWithCaseSemiJoins(userQuery, tx, types.CaseSemiJoinRows{types.CaseMemberRunTable.Alias: r.joiner.CaseMemberRuns(tx), types.CaseAssigneeTable.Alias: r.joiner.CaseAssignees(tx)})
 
 		if userQuery.HasFieldFromTables(types.PanelTable) {
 			tx = r.joiner.AnalysisCatalogWithPanel(tx)

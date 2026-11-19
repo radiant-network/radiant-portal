@@ -1533,7 +1533,7 @@ func Test_RetrieveCasePatients_PcxPatientKeysOnWithoutPcxViews_NoPatientKeyAndNo
 	})
 }
 
-func searchCasesByRunName(t *testing.T, repo *CasesRepository, criteria ...types.SearchCriterion) ([]int, int64) {
+func searchCaseIDs(t *testing.T, repo *CasesRepository, criteria ...types.SearchCriterion) ([]int, int64) {
 	t.Helper()
 	query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, criteria, nil, nil)
 	require.NoError(t, err)
@@ -1554,7 +1554,7 @@ func Test_SearchCases_RunName_ProbandRun_FindsCase(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		// Run 1617 is the proband's of trio cases 1 and 70, which share the same sequencings.
-		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("1617"))
+		caseIDs, count := searchCaseIDs(t, repo, runNameIn("1617"))
 		assert.Equal(t, int64(2), count)
 		assert.ElementsMatch(t, []int{1, 70}, caseIDs)
 	})
@@ -1564,7 +1564,7 @@ func Test_SearchCases_RunName_FatherRun_FindsCase(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		// Run 1619 holds only the father's sample of cases 1 and 70.
-		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("1619"))
+		caseIDs, count := searchCaseIDs(t, repo, runNameIn("1619"))
 		assert.Equal(t, int64(2), count)
 		assert.ElementsMatch(t, []int{1, 70}, caseIDs)
 	})
@@ -1574,7 +1574,7 @@ func Test_SearchCases_RunName_SomaticNormalRun_FindsCase(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		// Run 1678 holds the normal sample of somatic case 71; its Run column shows the tumoral run 1679.
-		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("1678"))
+		caseIDs, count := searchCaseIDs(t, repo, runNameIn("1678"))
 		assert.Equal(t, int64(1), count)
 		assert.Equal(t, []int{71}, caseIDs)
 	})
@@ -1584,7 +1584,7 @@ func Test_SearchCases_RunName_FetusRun_FindsPrenatalCase(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		// Run 1701 holds the fetus's sample of prenatal case 72; the mother's is on run 1704.
-		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("1701"))
+		caseIDs, count := searchCaseIDs(t, repo, runNameIn("1701"))
 		assert.Equal(t, int64(1), count)
 		assert.Equal(t, []int{72}, caseIDs)
 	})
@@ -1593,7 +1593,7 @@ func Test_SearchCases_RunName_FetusRun_FindsPrenatalCase(t *testing.T) {
 func Test_SearchCases_RunName_Unknown_NoCase(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
-		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("UNKNOWN-RUN"))
+		caseIDs, count := searchCaseIDs(t, repo, runNameIn("UNKNOWN-RUN"))
 		assert.Equal(t, int64(0), count)
 		assert.Empty(t, caseIDs)
 	})
@@ -1603,7 +1603,7 @@ func Test_SearchCases_RunName_SeveralRuns_EachCaseOnce(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		// Cases 1 and 70 have a sequencing on each of the three runs, case 71 on run 1678.
-		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("1617", "1618", "1619", "1678"))
+		caseIDs, count := searchCaseIDs(t, repo, runNameIn("1617", "1618", "1619", "1678"))
 		assert.Equal(t, int64(3), count)
 		assert.ElementsMatch(t, []int{1, 70, 71}, caseIDs)
 	})
@@ -1612,7 +1612,7 @@ func Test_SearchCases_RunName_SeveralRuns_EachCaseOnce(t *testing.T) {
 func Test_SearchCases_RunName_Contains_FindsCase(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
-		caseIDs, count := searchCasesByRunName(t, repo, types.SearchCriterion{FieldName: types.CaseMemberRunNameField.GetAlias(), Operator: "contains", Value: []interface{}{"678"}})
+		caseIDs, count := searchCaseIDs(t, repo, types.SearchCriterion{FieldName: types.CaseMemberRunNameField.GetAlias(), Operator: "contains", Value: []interface{}{"678"}})
 		assert.Equal(t, int64(1), count)
 		assert.Equal(t, []int{71}, caseIDs)
 	})
@@ -1628,7 +1628,7 @@ func Test_SearchCases_RunName_NotIn_ExcludesCaseWithRunAndKeepsCaseWithoutRun(t 
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 
 		// Case 1 has runs 1617, 1618 and 1619: not-in 1619 excludes it, though its other runs do not match.
-		caseIDs, count := searchCasesByRunName(t, repo,
+		caseIDs, count := searchCaseIDs(t, repo,
 			types.SearchCriterion{FieldName: types.CaseMemberRunNameField.GetAlias(), Operator: "not-in", Value: []interface{}{"1619"}},
 			types.SearchCriterion{FieldName: types.CaseIdField.GetAlias(), Value: []interface{}{1, 71, 1120}},
 		)
@@ -1640,7 +1640,7 @@ func Test_SearchCases_RunName_NotIn_ExcludesCaseWithRunAndKeepsCaseWithoutRun(t 
 func Test_SearchCases_RunName_CountMatchesList(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
-		caseIDs, count := searchCasesByRunName(t, repo, runNameIn("1617", "1701", "1702"))
+		caseIDs, count := searchCaseIDs(t, repo, runNameIn("1617", "1701", "1702"))
 		assert.Equal(t, int64(len(caseIDs)), count)
 		assert.ElementsMatch(t, []int{1, 70, 72, 73}, caseIDs)
 	})
@@ -1749,5 +1749,123 @@ func Test_SearchById_SequencingId_StillSuggested(t *testing.T) {
 		autocompleteResult, err := repo.SearchById(t.Context(), "78", 10)
 		require.NoError(t, err)
 		assert.Contains(t, *autocompleteResult, AutocompleteResult{Type: "sequencing_experiment_id", Value: "78"})
+	})
+}
+
+const (
+	wendyID = "79a8855e-3782-4dc8-be2a-8afdb34d6359"
+	aliceID = "25286548-fbef-4e93-b3c4-c659e6169396"
+)
+
+func assignCase(t *testing.T, env *testutils.Env, caseID int, userIDs ...string) {
+	t.Helper()
+	for _, userID := range userIDs {
+		require.NoError(t, env.Postgres.Exec("INSERT INTO case_assignment (case_id, user_id, tenant_code) VALUES (?, ?, 'radiant')", caseID, userID).Error)
+	}
+	t.Cleanup(func() { env.Postgres.Exec("DELETE FROM case_assignment WHERE case_id = ?", caseID) })
+}
+
+func assigneeIn(userIDs ...interface{}) types.SearchCriterion {
+	return types.SearchCriterion{FieldName: types.CaseAssigneeIdField.GetAlias(), Value: userIDs}
+}
+
+// Cases 7 (routine) and 71 (stat) bound the searches, so other fixture cases do not count.
+func caseIdIn7And71() types.SearchCriterion {
+	return types.SearchCriterion{FieldName: types.CaseIdField.GetAlias(), Value: []interface{}{7, 71}}
+}
+
+func Test_SearchCases_Assignee_FindsCasesAssignedToTheUser(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		assignCase(t, env, 7, wendyID)
+		assignCase(t, env, 71, aliceID)
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		caseIDs, count := searchCaseIDs(t, repo, assigneeIn(wendyID))
+
+		assert.Equal(t, int64(1), count)
+		assert.Equal(t, []int{7}, caseIDs)
+	})
+}
+
+func Test_SearchCases_Assignee_SeveralUsers_EachCaseOnce(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		assignCase(t, env, 7, wendyID, aliceID)
+		assignCase(t, env, 71, aliceID)
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		caseIDs, count := searchCaseIDs(t, repo, assigneeIn(wendyID, aliceID))
+
+		assert.Equal(t, int64(2), count)
+		assert.ElementsMatch(t, []int{7, 71}, caseIDs)
+	})
+}
+
+func Test_SearchCases_Assignee_NotAssigned_FindsUnassignedCasesOnly(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		assignCase(t, env, 7, wendyID)
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		caseIDs, count := searchCaseIDs(t, repo, assigneeIn(types.NotAssignedValue), caseIdIn7And71())
+
+		assert.Equal(t, int64(1), count)
+		assert.Equal(t, []int{71}, caseIDs)
+	})
+}
+
+func Test_SearchCases_Assignee_NotAssignedOrUser_FindsBoth(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		assignCase(t, env, 7, wendyID)
+		assignCase(t, env, 1, aliceID)
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		caseIDs, count := searchCaseIDs(t, repo, assigneeIn(types.NotAssignedValue, wendyID),
+			types.SearchCriterion{FieldName: types.CaseIdField.GetAlias(), Value: []interface{}{1, 7, 71}})
+
+		assert.Equal(t, int64(2), count)
+		assert.ElementsMatch(t, []int{7, 71}, caseIDs)
+	})
+}
+
+func Test_SearchCases_Assignee_AndOtherFilters(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		assignCase(t, env, 7, wendyID)
+		assignCase(t, env, 71, wendyID)
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		caseIDs, count := searchCaseIDs(t, repo, assigneeIn(wendyID),
+			types.SearchCriterion{FieldName: types.CasePriorityCodeField.GetAlias(), Value: []interface{}{"stat"}})
+
+		assert.Equal(t, int64(1), count)
+		assert.Equal(t, []int{71}, caseIDs)
+	})
+}
+
+func Test_SearchCases_Assignee_NotIn_ExcludesCaseSharedWithAnotherUser(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		assignCase(t, env, 7, wendyID, aliceID)
+		assignCase(t, env, 71, aliceID)
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		// Case 7 is excluded through Wendy even though Alice, also on it, does not match.
+		caseIDs, count := searchCaseIDs(t, repo,
+			types.SearchCriterion{FieldName: types.CaseAssigneeIdField.GetAlias(), Operator: "not-in", Value: []interface{}{wendyID}},
+			caseIdIn7And71())
+
+		assert.Equal(t, int64(1), count)
+		assert.Equal(t, []int{71}, caseIDs)
+	})
+}
+
+func Test_SearchCases_Assignee_NotInNotAssigned_KeepsAssignedCasesOnly(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		assignCase(t, env, 7, wendyID)
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		caseIDs, count := searchCaseIDs(t, repo,
+			types.SearchCriterion{FieldName: types.CaseAssigneeIdField.GetAlias(), Operator: "not-in", Value: []interface{}{types.NotAssignedValue}},
+			caseIdIn7And71())
+
+		assert.Equal(t, int64(1), count)
+		assert.Equal(t, []int{7}, caseIDs)
 	})
 }

@@ -620,3 +620,22 @@ func Test_CaseIdsAutoComplete_SuggestsRuns(t *testing.T) {
 	expected := `[{"type":"run_name", "value":"1701"}, {"type":"run_name", "value":"1702"}, {"type":"run_name", "value":"1703"}, {"type":"run_name", "value":"1704"}]`
 	assertCaseIdsAutoComplete(t, "simple", "170", 10, expected)
 }
+
+func Test_SearchCasesHandler_WithAssigneeId_FindsCasesAssignedToTheUser(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		require.NoError(t, env.Postgres.Exec("INSERT INTO case_assignment (case_id, user_id, tenant_code) VALUES (71, ?, 'radiant')", wendyID).Error)
+		t.Cleanup(func() { env.Postgres.Exec("DELETE FROM case_assignment WHERE case_id = 71") })
+		caseRepo := starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		caseAssignmentsRepo := postgres.NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
+		router := tenantRouter()
+		router.POST("/:tenant/cases/search", server.SearchCasesHandler(caseRepo, caseAssignmentsRepo))
+
+		body := `{"search_criteria":[{"field": "assignee_id", "value": ["` + wendyID + `"]}]}`
+		req, _ := http.NewRequest("POST", "/radiant/cases/search", bytes.NewBuffer([]byte(body)))
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `{"list": [{"analysis_catalog_code":"WGA", "analysis_catalog_name":"Whole Genome Analysis", "assignees":[{"user_id":"`+wendyID+`", "first_name":"Wendy", "last_name":"Walsh", "email":"wendy@test.authz"}], "case_id":71, "case_type":"somatic", "created_on":"2026-03-09T13:08:00Z", "diagnosis_lab_code":"CQGC", "has_variants":true, "ordering_organization_code":"CHUSJ", "ordering_organization_name":"Centre hospitalier universitaire Sainte-Justine", "priority_code":"stat", "proband_id":62, "proband_submitter_sample_ids":["SRX1091647"], "project_code":"N1", "project_name":"NeuroDev Phase I", "status_code":"in_progress", "submitter_proband_id":"MRN-283834", "updated_on":"2026-03-09T13:08:00Z"}], "count": 1}`, w.Body.String())
+	})
+}
