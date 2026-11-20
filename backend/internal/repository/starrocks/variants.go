@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"sort"
 
 	"github.com/Goldziher/go-utils/sliceutils"
@@ -409,11 +410,21 @@ func (r *VariantsRepository) GetVariantExternalFrequencies(ctx context.Context, 
 	return &result, nil
 }
 
-func (r *VariantsRepository) GetGermlineVariantGlobalInternalFrequencies(ctx context.Context, locusId int) (*types.InternalFrequencies, error) {
+func (r *VariantsRepository) GetGermlineVariantGlobalInternalFrequencies(ctx context.Context, locusId int, seqType types.SequencingType) (*types.InternalFrequencies, error) {
 	var globalFrequencies types.InternalFrequencies
+	var columns string
+
+	switch seqType {
+	case types.SequencingTypeWGS:
+		columns = "v.germline_pc_wgs as pc_all, v.germline_pn_wgs as pn_all, v.germline_pf_wgs as pf_all, v.germline_pc_wgs_affected as pc_affected, v.germline_pn_wgs_affected as pn_affected, v.germline_pf_wgs_affected as pf_affected, v.germline_pc_wgs_not_affected as pc_non_affected, v.germline_pn_wgs_not_affected as pn_non_affected, v.germline_pf_wgs_not_affected as pf_non_affected"
+	case types.SequencingTypeWXS:
+		columns = "v.germline_pc_wxs as pc_all, v.germline_pn_wxs as pn_all, v.germline_pf_wxs as pf_all, v.germline_pc_wxs_affected as pc_affected, v.germline_pn_wxs_affected as pn_affected, v.germline_pf_wxs_affected as pf_affected, v.germline_pc_wxs_not_affected as pc_non_affected, v.germline_pn_wxs_not_affected as pn_non_affected, v.germline_pf_wxs_not_affected as pf_non_affected"
+	default:
+		return nil, fmt.Errorf("unsupported sequencing type %q", seqType)
+	}
 
 	tx := r.db.WithContext(ctx).Table(fmt.Sprintf("%s v", types.VariantTable.TenantQualifiedName(ctx)))
-	tx = tx.Select("v.germline_pc_wgs as pc_all, v.germline_pn_wgs as pn_all, v.germline_pf_wgs as pf_all, v.germline_pc_wgs_affected as pc_affected, v.germline_pn_wgs_affected as pn_affected, v.germline_pf_wgs_affected as pf_affected, v.germline_pc_wgs_not_affected as pc_non_affected, v.germline_pn_wgs_not_affected as pn_non_affected, v.germline_pf_wgs_not_affected as pf_non_affected")
+	tx = tx.Select(columns)
 	tx = tx.Where("v.locus_id = ?", locusId)
 
 	if err := tx.Take(&globalFrequencies).Error; err != nil {
@@ -427,7 +438,7 @@ func (r *VariantsRepository) GetGermlineVariantGlobalInternalFrequencies(ctx con
 	return &globalFrequencies, nil
 }
 
-func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx context.Context, locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error) {
+func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx context.Context, locusId int, splitType types.SplitType, seqType types.SequencingType) (*[]types.InternalFrequenciesSplitBy, error) {
 	type TempFreqBySplit struct {
 		SplitCode          string
 		SplitName          string
@@ -474,6 +485,10 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 		return nil, fmt.Errorf("unsupported split type")
 	}
 
+	if !slices.Contains(types.SequencingTypes, seqType) {
+		return nil, fmt.Errorf("unsupported sequencing type %q", seqType)
+	}
+
 	tx := r.db.WithContext(ctx).Raw(fmt.Sprintf(`
 		WITH
 			base AS (
@@ -487,7 +502,7 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 				FROM %s c
 				%s
 				LEFT JOIN %s chse ON chse.case_id = c.id
-				JOIN %s seq ON seq.seq_id = chse.sequencing_experiment_id AND seq.case_id = chse.case_id AND seq.experimental_strategy = 'wgs' AND analysis_type = 'germline'
+				JOIN %s seq ON seq.seq_id = chse.sequencing_experiment_id AND seq.case_id = chse.case_id AND seq.experimental_strategy = ? AND analysis_type = 'germline'
 				LEFT JOIN %s se ON se.id = chse.sequencing_experiment_id
 				LEFT JOIN %s spl ON spl.id = se.sample_id
 				LEFT JOIN %s g_snv_o ON g_snv_o.seq_id = seq.seq_id AND g_snv_o.locus_id = ? AND g_snv_o.gq >= 20 AND g_snv_o.filter = 'PASS' AND g_snv_o.ad_alt >= 3
@@ -524,7 +539,7 @@ func (r *VariantsRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx co
 			END AS pf
 		FROM result
 		%s
-		ORDER BY split_code;`, splitCodeColumn, cases, joinToRetrieveSplitCode, caseHasSeqExp, stagingSeq, sequencingExperiment, sample, occurrence, splitNameColumn, joinToRetrieveSplitName), locusId)
+		ORDER BY split_code;`, splitCodeColumn, cases, joinToRetrieveSplitCode, caseHasSeqExp, stagingSeq, sequencingExperiment, sample, occurrence, splitNameColumn, joinToRetrieveSplitName), seqType, locusId)
 
 	if err := tx.Scan(&frequenciesByPrimaryCondition).Error; err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {

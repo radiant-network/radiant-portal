@@ -503,7 +503,7 @@ func Test_GetVariantExternalFrequencies_VariantNotFound(t *testing.T) {
 func Test_GetVariantGlobalInternalFrequencies_VariantNotFound(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
-		globalFrequencies, err := repo.GetGermlineVariantGlobalInternalFrequencies(t.Context(), 4000)
+		globalFrequencies, err := repo.GetGermlineVariantGlobalInternalFrequencies(t.Context(), 4000, types.SequencingTypeWGS)
 		assert.NoError(t, err)
 		assert.Nil(t, globalFrequencies)
 	})
@@ -512,7 +512,7 @@ func Test_GetVariantGlobalInternalFrequencies_VariantNotFound(t *testing.T) {
 func Test_GetVariantGlobalInternalFrequencies(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
-		globalFrequencies, err := repo.GetGermlineVariantGlobalInternalFrequencies(t.Context(), 1000)
+		globalFrequencies, err := repo.GetGermlineVariantGlobalInternalFrequencies(t.Context(), 1000, types.SequencingTypeWGS)
 		assert.NoError(t, err)
 		assert.NotNil(t, globalFrequencies)
 		assert.Equal(t, 3, *(globalFrequencies).PcAll)
@@ -530,10 +530,77 @@ func Test_GetVariantGlobalInternalFrequencies(t *testing.T) {
 	})
 }
 
+func Test_GetVariantGlobalInternalFrequencies_Wxs(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
+		globalFrequencies, err := repo.GetGermlineVariantGlobalInternalFrequencies(t.Context(), 1000, types.SequencingTypeWXS)
+		assert.NoError(t, err)
+		require.NotNil(t, globalFrequencies)
+		assert.Equal(t, 4, *globalFrequencies.PcAll)
+		assert.Equal(t, 10, *globalFrequencies.PnAll)
+		assert.Equal(t, 0.4, *globalFrequencies.PfAll)
+		assert.Equal(t, 3, *globalFrequencies.PcAffected)
+		assert.Equal(t, 5, *globalFrequencies.PnAffected)
+		assert.Equal(t, 0.6, *globalFrequencies.PfAffected)
+		assert.Equal(t, 1, *globalFrequencies.PcNonAffected)
+		assert.Equal(t, 5, *globalFrequencies.PnNonAffected)
+		assert.Equal(t, 0.2, *globalFrequencies.PfNonAffected)
+	})
+}
+
+func Test_GetVariantGlobalInternalFrequencies_WxsNoCarrier(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
+		globalFrequencies, err := repo.GetGermlineVariantGlobalInternalFrequencies(t.Context(), 3000, types.SequencingTypeWXS)
+		assert.NoError(t, err)
+		require.NotNil(t, globalFrequencies)
+		assert.Equal(t, types.InternalFrequencies{}, *globalFrequencies)
+	})
+}
+
+func Test_GetVariantGlobalInternalFrequencies_IncorrectSequencingType(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
+		globalFrequencies, err := repo.GetGermlineVariantGlobalInternalFrequencies(t.Context(), 1000, "wes")
+		assert.Nil(t, globalFrequencies)
+		assert.Error(t, err)
+	})
+}
+
+func Test_GetVariantInternalFrequenciesSplitBy_WxsCountsWxsSequencingsOnly(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
+		// The WXS sequencings are the fetal ones of cases 73 and 74 (project N1, affected status unknown);
+		// only case 73's is a HOM carrier at locus 2000. The WGS carrier of case 16 is left out.
+		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 2000, types.SPLIT_BY_PROJECT, types.SequencingTypeWXS)
+		assert.NoError(t, err)
+		require.NotNil(t, splitRows)
+		require.Len(t, *splitRows, 1)
+
+		n1 := (*splitRows)[0]
+		assert.Equal(t, "N1", n1.SplitValueCode)
+		assert.Equal(t, 1, *n1.Frequencies.PcAll)
+		assert.Equal(t, 2, *n1.Frequencies.PnAll)
+		assert.Equal(t, 0.5, *n1.Frequencies.PfAll)
+		assert.Equal(t, 1, *n1.Frequencies.HomAll)
+		assert.Nil(t, n1.Frequencies.PnAffected)
+		assert.Nil(t, n1.Frequencies.PnNonAffected)
+	})
+}
+
+func Test_GetVariantInternalFrequenciesSplitBy_IncorrectSequencingType(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
+		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, types.SPLIT_BY_PROJECT, "wes")
+		assert.Nil(t, splitRows)
+		assert.Error(t, err)
+	})
+}
+
 func Test_GetVariantInternalFrequenciesSplitBy_ByProject(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
-		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, types.SPLIT_BY_PROJECT)
+		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, types.SPLIT_BY_PROJECT, types.SequencingTypeWGS)
 		assert.NoError(t, err)
 		assert.NotNil(t, splitRows)
 		assert.Len(t, *splitRows, 2)
@@ -578,7 +645,7 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByProject(t *testing.T) {
 func Test_GetVariantInternalFrequenciesSplitBy_ByPrimaryCondition(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
-		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, types.SPLIT_BY_PRIMARY_CONDITION)
+		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, types.SPLIT_BY_PRIMARY_CONDITION, types.SequencingTypeWGS)
 		assert.NoError(t, err)
 		assert.NotNil(t, splitRows)
 		assert.Len(t, *splitRows, 2)
@@ -623,7 +690,7 @@ func Test_GetVariantInternalFrequenciesSplitBy_ByPrimaryCondition(t *testing.T) 
 func Test_GetVariantInternalFrequenciesSplitBy_ByAnalysis(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
-		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, types.SPLIT_BY_ANALYSIS)
+		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, types.SPLIT_BY_ANALYSIS, types.SequencingTypeWGS)
 		assert.NoError(t, err)
 		assert.NotNil(t, splitRows)
 		assert.Len(t, *splitRows, 2)
@@ -673,7 +740,7 @@ func Test_GetVariantInternalFrequenciesSplitBy_MotherAndFetusCountAsTwoDistinctI
 		// sample.fetus_id, so they must count as 2. pn covers every sequenced individual in the
 		// project, hence baseline 7 plus these 2; only pc/hom are locus-specific. The mother's call
 		// has ad_alt = 3, the lowest value that counts (RAD-57: it used to take ad_alt > 3).
-		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 3000, types.SPLIT_BY_PROJECT)
+		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 3000, types.SPLIT_BY_PROJECT, types.SequencingTypeWGS)
 		assert.NoError(t, err)
 		require.NotNil(t, splitRows)
 
@@ -701,7 +768,7 @@ func Test_GetVariantInternalFrequenciesSplitBy_MotherAndFetusCountAsTwoDistinctI
 func Test_GetVariantInternalFrequenciesSplitBy_IncorrectSplit(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
-		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, "incorrect")
+		splitRows, err := repo.GetGermlineVariantInternalFrequenciesSplitBy(t.Context(), 1000, "incorrect", types.SequencingTypeWGS)
 		assert.Nil(t, splitRows)
 		assert.Error(t, err)
 	})

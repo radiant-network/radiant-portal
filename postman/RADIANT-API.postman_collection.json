@@ -1405,7 +1405,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies/global",
+              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies/global?sequencing_type=wgs",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -1416,6 +1416,12 @@
                 "-8934226361296355323",
                 "internal_frequencies",
                 "global"
+              ],
+              "query": [
+                {
+                  "key": "sequencing_type",
+                  "value": "wgs"
+                }
               ]
             }
           },
@@ -1437,7 +1443,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies?split=primary_condition",
+              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies?split=primary_condition&sequencing_type=wgs",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -1452,6 +1458,10 @@
                 {
                   "key": "split",
                   "value": "primary_condition"
+                },
+                {
+                  "key": "sequencing_type",
+                  "value": "wgs"
                 }
               ]
             }
@@ -1474,7 +1484,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies?split=project",
+              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies?split=project&sequencing_type=wgs",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -1489,6 +1499,10 @@
                 {
                   "key": "split",
                   "value": "project"
+                },
+                {
+                  "key": "sequencing_type",
+                  "value": "wgs"
                 }
               ]
             }
@@ -1511,7 +1525,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies?split=analysis",
+              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies?split=analysis&sequencing_type=wgs",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -1526,6 +1540,10 @@
                 {
                   "key": "split",
                   "value": "analysis"
+                },
+                {
+                  "key": "sequencing_type",
+                  "value": "wgs"
                 }
               ]
             }
