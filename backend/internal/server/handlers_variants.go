@@ -28,8 +28,8 @@ type variantsReader interface {
 	GetVariantCasesCount(ctx context.Context, locusId int) (*types.VariantCasesCount, error)
 	GetVariantCasesFilters(ctx context.Context) (*types.VariantCasesFilters, error)
 	GetVariantExternalFrequencies(ctx context.Context, locusId int) (*types.VariantExternalFrequencies, error)
-	GetGermlineVariantGlobalInternalFrequencies(ctx context.Context, locusId int) (*types.InternalFrequencies, error)
-	GetGermlineVariantInternalFrequenciesSplitBy(ctx context.Context, locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error)
+	GetGermlineVariantGlobalInternalFrequencies(ctx context.Context, locusId int, seqType types.SequencingType) (*types.InternalFrequencies, error)
+	GetGermlineVariantInternalFrequenciesSplitBy(ctx context.Context, locusId int, splitType types.SplitType, seqType types.SequencingType) (*[]types.InternalFrequenciesSplitBy, error)
 }
 
 // GetGermlineVariantHeader handles retrieving a germline variant header by its locus
@@ -455,6 +455,7 @@ func GetGermlineVariantExternalFrequenciesHandler(repo variantsReader) gin.Handl
 // @Param tenant path string true "Tenant code"
 // @Param locus_id path string true "Locus ID"
 // @Param split query string true "split type" Enums(project, primary_condition, analysis)
+// @Param sequencing_type query string false "sequencing type" Enums(wgs, wxs) default(wgs)
 // @Produce json
 // @Success 200 {object} types.VariantInternalFrequencies
 // @Failure 400 {object} types.ApiError
@@ -481,7 +482,12 @@ func GetGermlineVariantInternalFrequenciesHandler(repo variantsReader) gin.Handl
 			HandleValidationError(c, fmt.Errorf("incorrect split"))
 			return
 		}
-		splitRows, err = repo.GetGermlineVariantInternalFrequenciesSplitBy(c.Request.Context(), locusID, split)
+		seqType, err := sequencingTypeParam(c)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+		splitRows, err = repo.GetGermlineVariantInternalFrequenciesSplitBy(c.Request.Context(), locusID, split, seqType)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -503,8 +509,10 @@ func GetGermlineVariantInternalFrequenciesHandler(repo variantsReader) gin.Handl
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
 // @Param locus_id path string true "Locus ID"
+// @Param sequencing_type query string false "sequencing type" Enums(wgs, wxs) default(wgs)
 // @Produce json
 // @Success 200 {object} types.InternalFrequencies
+// @Failure 400 {object} types.ApiError
 // @Failure 401 {object} types.ApiError
 // @Failure 403 {object} types.ApiError
 // @Failure 404 {object} types.ApiError
@@ -521,7 +529,13 @@ func GetGermlineVariantGlobalInternalFrequenciesHandler(repo variantsReader) gin
 			return
 		}
 
-		globalFrequencies, err = repo.GetGermlineVariantGlobalInternalFrequencies(c.Request.Context(), locusID)
+		seqType, err := sequencingTypeParam(c)
+		if err != nil {
+			HandleValidationError(c, err)
+			return
+		}
+
+		globalFrequencies, err = repo.GetGermlineVariantGlobalInternalFrequencies(c.Request.Context(), locusID, seqType)
 		if err != nil {
 			HandleError(c, err)
 			return
@@ -533,4 +547,12 @@ func GetGermlineVariantGlobalInternalFrequenciesHandler(repo variantsReader) gin
 
 		c.JSON(http.StatusOK, globalFrequencies)
 	}
+}
+
+func sequencingTypeParam(c *gin.Context) (types.SequencingType, error) {
+	seqType := c.DefaultQuery("sequencing_type", types.SequencingTypeWGS)
+	if !slices.Contains(types.SequencingTypes, seqType) {
+		return "", fmt.Errorf("incorrect sequencing_type")
+	}
+	return seqType, nil
 }

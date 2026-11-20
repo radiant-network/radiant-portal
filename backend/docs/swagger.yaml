@@ -13861,6 +13861,15 @@ paths:
           - primary_condition
           - analysis
           type: string
+      - description: sequencing type
+        in: query
+        name: sequencing_type
+        schema:
+          default: wgs
+          enum:
+          - wgs
+          - wxs
+          type: string
       responses:
         "200":
           content:
@@ -13926,6 +13935,15 @@ paths:
         required: true
         schema:
           type: string
+      - description: sequencing type
+        in: query
+        name: sequencing_type
+        schema:
+          default: wgs
+          enum:
+          - wgs
+          - wxs
+          type: string
       responses:
         "200":
           content:
@@ -13933,6 +13951,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/InternalFrequencies'
           description: OK
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+          description: Bad Request
         "401":
           content:
             application/json:

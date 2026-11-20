@@ -525,7 +525,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_germline_variant_global_internal_frequencies**
-> InternalFrequencies get_germline_variant_global_internal_frequencies(tenant, locus_id)
+> InternalFrequencies get_germline_variant_global_internal_frequencies(tenant, locus_id, sequencing_type=sequencing_type)
 
 Get global internal frequencies
 
@@ -563,10 +563,11 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.VariantApi(api_client)
     tenant = 'tenant_example' # str | Tenant code
     locus_id = 'locus_id_example' # str | Locus ID
+    sequencing_type = wgs # str | sequencing type (optional) (default to wgs)
 
     try:
         # Get global internal frequencies
-        api_response = api_instance.get_germline_variant_global_internal_frequencies(tenant, locus_id)
+        api_response = api_instance.get_germline_variant_global_internal_frequencies(tenant, locus_id, sequencing_type=sequencing_type)
         print("The response of VariantApi->get_germline_variant_global_internal_frequencies:\n")
         pprint(api_response)
     except Exception as e:
@@ -582,6 +583,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **tenant** | **str**| Tenant code | 
  **locus_id** | **str**| Locus ID | 
+ **sequencing_type** | **str**| sequencing type | [optional] [default to wgs]
 
 ### Return type
 
@@ -601,6 +603,7 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | OK |  -  |
+**400** | Bad Request |  -  |
 **401** | Unauthorized |  -  |
 **403** | Forbidden |  -  |
 **404** | Not Found |  -  |
@@ -693,7 +696,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_germline_variant_internal_frequencies**
-> VariantInternalFrequencies get_germline_variant_internal_frequencies(tenant, locus_id, split)
+> VariantInternalFrequencies get_germline_variant_internal_frequencies(tenant, locus_id, split, sequencing_type=sequencing_type)
 
 Get internal frequencies
 
@@ -732,10 +735,11 @@ with radiant_python.ApiClient(configuration) as api_client:
     tenant = 'tenant_example' # str | Tenant code
     locus_id = 'locus_id_example' # str | Locus ID
     split = 'split_example' # str | split type
+    sequencing_type = wgs # str | sequencing type (optional) (default to wgs)
 
     try:
         # Get internal frequencies
-        api_response = api_instance.get_germline_variant_internal_frequencies(tenant, locus_id, split)
+        api_response = api_instance.get_germline_variant_internal_frequencies(tenant, locus_id, split, sequencing_type=sequencing_type)
         print("The response of VariantApi->get_germline_variant_internal_frequencies:\n")
         pprint(api_response)
     except Exception as e:
@@ -752,6 +756,7 @@ Name | Type | Description  | Notes
  **tenant** | **str**| Tenant code | 
  **locus_id** | **str**| Locus ID | 
  **split** | **str**| split type | 
+ **sequencing_type** | **str**| sequencing type | [optional] [default to wgs]
 
 ### Return type
 

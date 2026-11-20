@@ -16,3 +16,5 @@ part	seq_id	task_id	case_id	patient_id	analysis_type	affected_status	ingested_at
 1	71	72	70	1	germline	affected	1969-12-31 19:00:00.0	alignment_germline_variant_calling	wgs	normal	NULL
 2	22	29	8	22	germline	affected	1969-12-31 19:00:00.0	alignment_germline_variant_calling	wgs	normal	s3://test/22.cnv.vcf.gz
 2	4	11	2	4	germline	affected	1969-12-31 19:00:00.0	alignment_germline_variant_calling	wgs	normal	NULL
+6	76	900	73	64	germline	unknown	NULL	radiant_germline_annotation	wxs	normal	NULL
+6	77	901	74	65	germline	unknown	NULL	radiant_germline_annotation	wxs	normal	NULL
