@@ -15,14 +15,14 @@ import { caseApi } from '@/utils/api';
 import { useCanEditCase } from '../permissions/use-case-permissions';
 
 // Portal layout route whose loader returns the session user.
-const PROTECTED_LAYOUT_ROUTE_ID = 'layout/protected-layout';
+export const PROTECTED_LAYOUT_ROUTE_ID = 'layout/protected-layout';
 
 type CandidatesInput = {
   key: string;
   caseId: number;
 };
 
-function toAvatarUser(assignee: CaseAssignee): AvatarUser {
+export function toAvatarUser(assignee: CaseAssignee): AvatarUser {
   const name = [assignee.first_name, assignee.last_name].filter(Boolean).join(' ');
   return { id: assignee.user_id, name: name || assignee.email || assignee.user_id, email: assignee.email };
 }

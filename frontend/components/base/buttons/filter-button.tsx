@@ -40,6 +40,7 @@ export interface IFilterButton {
   icon?: any;
   count?: number;
   optionRenderer?: (option: IFilterButtonItem) => React.ReactNode;
+  render?: (props: { selected: string[]; onSelect: (selected: string[]) => void }) => React.ReactNode;
   showKey?: boolean;
   withTooltip?: boolean;
 }
