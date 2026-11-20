@@ -142,6 +142,12 @@ function SequencingInformationsDialog({ open, seqId, onClose }: SequencingInform
 
             {/* Capture Kit */}
             <InformationField label={t('case_entity.details.capture_kit')}>{data?.capture_kit}</InformationField>
+
+            {/* Sequencer */}
+            <InformationField label={t('case_entity.details.sequencer')}>{data?.sequencer_id}</InformationField>
+
+            {/* Protocol */}
+            <InformationField label={t('case_entity.details.protocol')}>{data?.protocol}</InformationField>
           </div>
           <Separator orientation="vertical" className="hidden mx-8 md:block" />
           <Separator className="block my-8 md:hidden" />
