@@ -1,0 +1,1 @@
+import{n as e}from"./rolldown-runtime-BCiCTKAo.js";function t(e){return{id:r.NOT_ASSIGNED_USER_ID,name:e||`Not assigned`,organization:``}}function n(e){return e.id===r.NOT_ASSIGNED_USER_ID}var r;function i(){return(i=e((()=>{r={NOT_ASSIGNED_USER_ID:`not-assign`}})))()}export{n as i,t as n,i as r,r as t};
