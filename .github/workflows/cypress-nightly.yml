@@ -14,16 +14,18 @@ on:
         type: boolean
         default: false
 
-concurrency:
-  group: cypress-nightly
-  cancel-in-progress: false
-
 jobs:
   cypress-nightly:
     runs-on: ubuntu-latest
+    # On the job, not the workflow: a new nightly or a stop_only must not wait for publish-results below
+    concurrency:
+      group: cypress-nightly
+      cancel-in-progress: false
     permissions:
       id-token: write
       contents: read
+    outputs:
+      run_id: ${{ steps.run.outputs.value }}
 
     steps:
       - uses: actions/checkout@v4
@@ -296,3 +298,73 @@ jobs:
             --started-by cypress-nightly/aggregator \
             --query 'tasks[0].taskArn' \
             --output text | xargs -I{} echo "Aggregator launched: {}"
+
+  # The shards and the aggregator run on ECS after the job above has ended. This job waits for the
+  # aggregator, then attaches its JUnit report to the run, where the test dashboard
+  # (Ferlab-Ste-Justine/test-dashboard) fetches it without any access to AWS.
+  publish-results:
+    needs: cypress-nightly
+    if: ${{ !inputs.stop_only }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: arn:aws:iam::311752058468:role/qlin-ferlease-cypress
+          aws-region: ca-central-1
+
+      - name: Wait for the aggregator
+        env:
+          RUN_ID: ${{ needs.cypress-nightly.outputs.run_id }}
+        run: |
+          # The aggregator of this run, while it has not stopped. A newer nightly may have stopped it.
+          running_aggregator() {
+            local arns
+            arns=$(aws ecs list-tasks --cluster pipelines --started-by cypress-nightly/aggregator --query 'taskArns' --output text)
+            if [ -z "$arns" ] || [ "$arns" = "None" ]; then
+              return 0
+            fi
+            # shellcheck disable=SC2086
+            aws ecs describe-tasks --cluster pipelines --tasks $arns --output json \
+              | jq -r --arg run "$RUN_ID" '.tasks[] | select(any(.overrides.containerOverrides[].environment[]?; .name == "RELEASE" and .value == $run)) | .taskArn'
+          }
+          while true; do
+            AGGREGATOR=$(running_aggregator)
+            [ -z "$AGGREGATOR" ] && break
+            sleep 60
+          done
+
+      # The credentials last 1 h, and the wait above takes most of it
+      - name: Renew AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: arn:aws:iam::311752058468:role/qlin-ferlease-cypress
+          aws-region: ca-central-1
+
+      - name: Fetch the JUnit report
+        id: report
+        env:
+          RUN_ID: ${{ needs.cypress-nightly.outputs.run_id }}
+          BASE_URL: ${{ inputs.base_url || 'https://portail.dev.qlin.aws.sante.quebec/' }}
+        run: |
+          mkdir -p cypress-results
+          if aws s3 cp "s3://qlin-dev-cypress-artifacts/$RUN_ID/combined-results.xml" cypress-results/results.xml; then
+            jq -n --arg run_id "$RUN_ID" --arg sha "$GITHUB_SHA" --arg base_url "$BASE_URL" \
+              '{run_id: $run_id, sha: $sha, base_url: $base_url}' > cypress-results/run.json
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No JUnit report for $RUN_ID: the run was stopped, or no shard produced results"
+          fi
+
+      - name: Attach the report to the run
+        if: ${{ steps.report.outputs.found == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-junit
+          path: cypress-results/
+          retention-days: 30
