@@ -187,4 +187,6 @@ VALUES (1, 1, 'completed', 'NA12892', 'CQGC', 'radiant', 1617, 'A00516_0169', '2
         '2026-04-01T13:08:00-04:00', '2026-04-01T13:08:00-04:00', 'wgs', 'short_read', 'illumina')
 ON CONFLICT (id) DO NOTHING;
 
+UPDATE "sequencing_experiment" SET sequencer_id = 'A00516', protocol = 'TruSeq DNA PCR-Free' WHERE id = 1;
+
 ALTER TABLE sequencing_experiment ALTER COLUMN id RESTART WITH 1000;

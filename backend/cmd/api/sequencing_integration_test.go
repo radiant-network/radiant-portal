@@ -33,6 +33,8 @@ func Test_GetSequencingExperimentDetailByIdHandler(t *testing.T) {
 	expected := `{
 		"aliquot":"NA12892", 
 		"capture_kit":"SureSelect Custom DNA Target", 
+		"sequencer_id":"A00516",
+		"protocol":"TruSeq DNA PCR-Free",
 		"created_on":"2021-09-12T13:08:00Z", 
 		"experimental_strategy_code":"wgs", 
 		"experimental_strategy_name":"Whole Genome Sequencing", 

@@ -18,6 +18,8 @@ describe('Sequencing - Batch - Process worker - Seq004', () => {
           "platform_code": "illumina",
           "sequencing_lab_code": "CQGC",
           "capture_kit": "Cypress",
+          "sequencer_id": "Cypress",
+          "protocol": "Cypress",
           "run_alias": "Cypress",
           "run_date": "2025-01-01T00:00:00Z",
           "run_name": "Cypress",
@@ -45,7 +47,7 @@ describe('Sequencing - Batch - Process worker - Seq004', () => {
   });
 
   it('Validate report warn count', () => {
-    expect(Object.keys(response.body.report.warn)).to.have.lengthOf(7);
+    expect(Object.keys(response.body.report.warn)).to.have.lengthOf(9);
   });
 
   it('Validate report sequencing_experiment[0] status_code', () => {
@@ -70,6 +72,14 @@ describe('Sequencing - Batch - Process worker - Seq004', () => {
 
   it('Validate report sequencing_experiment[0] capture_kit', () => {
     cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'capture_kit', '', 'Cypress', 'CQGC', 'S13224', 'NA12878'), 'sequencing_experiment[0].capture_kit');
+  });
+
+  it('Validate report sequencing_experiment[0] sequencer_id', () => {
+    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'sequencer_id', '', 'Cypress', 'CQGC', 'S13224', 'NA12878'), 'sequencing_experiment[0].sequencer_id');
+  });
+
+  it('Validate report sequencing_experiment[0] protocol', () => {
+    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'protocol', '', 'Cypress', 'CQGC', 'S13224', 'NA12878'), 'sequencing_experiment[0].protocol');
   });
 
   it('Validate report sequencing_experiment[0] run_date', () => {

@@ -8,6 +8,8 @@ type SequencingExperimentBatch struct {
 	SampleOrganizationCode       string        `json:"sample_organization_code" toml:"sample_organization_code" binding:"required"`
 	SubmitterSampleId            TrimmedString `json:"submitter_sample_id" toml:"submitter_sample_id" binding:"required"`
 	CaptureKit                   TrimmedString `json:"capture_kit,omitempty" toml:"capture_kit,omitempty"`
+	SequencerID                  TrimmedString `json:"sequencer_id,omitempty" toml:"sequencer_id,omitempty"`
+	Protocol                     TrimmedString `json:"protocol,omitempty" toml:"protocol,omitempty"`
 	ExperimentalStrategyCode     string        `json:"experimental_strategy_code" toml:"experimental_strategy_code" binding:"required,oneof=wgs wxs rnaseq targeted_dna"`
 	SequencingReadTechnologyCode string        `json:"sequencing_read_technology_code" toml:"sequencing_read_technology_code" binding:"required,oneof=short_read long_read"`
 	PlatformCode                 string        `json:"platform_code" toml:"platform_code" binding:"required"`

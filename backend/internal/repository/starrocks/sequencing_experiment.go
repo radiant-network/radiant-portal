@@ -31,7 +31,7 @@ func (r *SequencingExperimentRepository) GetSequencingExperimentDetailById(ctx c
 	tx = r.joiner.SeqExpWithSequencingLab(tx)
 	tx = tx.Where("s.id = ?", seqId)
 
-	tx = tx.Select("s.status_code, s.created_on, s.updated_on, lab.code as sequencing_lab_code, lab.name as sequencing_lab_name, s.aliquot, s.run_name, s.run_alias, s.run_date, s.id as seq_id, s.experimental_strategy_code, exp_str.name_en as experimental_strategy_name, s.platform_code, s.capture_kit, s.sequencing_read_technology_code, seq_read_tech.name_en as sequencing_read_technology_name, s.sample_id, spl.type_code as sample_type_code, spl.tissue_site, spl.histology_code, spl.submitter_sample_id, spl.patient_id")
+	tx = tx.Select("s.status_code, s.created_on, s.updated_on, lab.code as sequencing_lab_code, lab.name as sequencing_lab_name, s.aliquot, s.run_name, s.run_alias, s.run_date, s.id as seq_id, s.experimental_strategy_code, exp_str.name_en as experimental_strategy_name, s.platform_code, s.capture_kit, s.sequencer_id, s.protocol, s.sequencing_read_technology_code, seq_read_tech.name_en as sequencing_read_technology_name, s.sample_id, spl.type_code as sample_type_code, spl.tissue_site, spl.histology_code, spl.submitter_sample_id, spl.patient_id")
 
 	if err := tx.Find(&sequencingExperiment).Error; err != nil {
 		return nil, fmt.Errorf("error fetching sequencing experiment: %w", err)
