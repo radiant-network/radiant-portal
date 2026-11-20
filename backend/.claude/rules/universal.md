@@ -8,9 +8,13 @@ Go style conventions (naming, error handling, interface placement, etc.) live in
 
 ## Test as you go
 
-Every function, method, or branch you add must have a passing test in the same step it was introduced. Do **not** move on to the next workflow step until the code you just wrote has been exercised by a passing test.
+Every function, method, or branch you add must be exercised by a passing test in the same step it was introduced; an existing test that already covers it counts. Do **not** move on to the next workflow step until it is.
 
-This rule applies even to small helpers that look "too trivial to test" — enum mappers, validators, conversion methods, parameter parsers. Those are exactly where silent regressions hide.
+This applies even to small helpers that look "too trivial to test" — enum mappers, validators, conversion methods, parameter parsers — but each behaviour is tested **once**, with the fewest tests:
+- A generic helper is tested where it lives. Its callers get one wiring test, shared by the callers of the same shape (two text validators, one test), asserting what tells them apart (error code, path) rather than the helper's message again.
+- A limit: one test at the max, one just past it — only if the helper's tests don't already.
+- Match the sibling code: a new field gets the tests its neighbour field has, plus those its own behaviour needs. No mock-heavy test just to prove a one-line call.
+- Before adding a test, look for an existing or integration test that already asserts it, and extend a test rather than add one — above all an `ExclusivePostgres` or container test, which slows every CI run.
 
 ## One concept per test, named for intent
 

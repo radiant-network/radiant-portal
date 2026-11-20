@@ -8683,6 +8683,12 @@ export interface SequencingExperimentBatch {
      * @type {string}
      * @memberof SequencingExperimentBatch
      */
+    'protocol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
     'run_alias'?: string;
     /**
      * 
@@ -8702,6 +8708,12 @@ export interface SequencingExperimentBatch {
      * @memberof SequencingExperimentBatch
      */
     'sample_organization_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
+    'sequencer_id'?: string;
     /**
      * 
      * @type {string}
@@ -8802,6 +8814,12 @@ export interface SequencingExperimentDetail {
      * @type {string}
      * @memberof SequencingExperimentDetail
      */
+    'protocol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
     'run_alias'?: string;
     /**
      * 
@@ -8833,6 +8851,12 @@ export interface SequencingExperimentDetail {
      * @memberof SequencingExperimentDetail
      */
     'seq_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'sequencer_id'?: string;
     /**
      * 
      * @type {string}

@@ -16,6 +16,8 @@ describe('Sequencing - Batch - Valid', () => {
           "platform_code": "Cypress",
           "sequencing_lab_code": "Cypress0001",
           "capture_kit": "Cypress",
+          "sequencer_id": "Cypress",
+          "protocol": "Cypress",
           "run_alias": "Cypress",
           "run_date": "2025-01-01T00:00:00Z",
           "run_name": "Cypress",

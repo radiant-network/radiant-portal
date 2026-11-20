@@ -18,6 +18,8 @@ describe('Sequencing - Batch - Process worker - Seq002', () => {
           "platform_code": "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!",
           "sequencing_lab_code": "CHUSJ",
           "capture_kit": "Cypress",
+          "sequencer_id": "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!",
+          "protocol": "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!",
           "run_alias": "Cypress",
           "run_date": "9999-01-01T00:00:00Z",
           "run_name": "Cypress",
@@ -45,7 +47,7 @@ describe('Sequencing - Batch - Process worker - Seq002', () => {
   });
 
   it('Validate report error count', () => {
-    expect(Object.keys(response.body.report.error)).to.have.lengthOf(7);
+    expect(Object.keys(response.body.report.error)).to.have.lengthOf(9);
   });
 
   it('Validate report sequencing_experiment[0] aliquot 1', () => {
@@ -54,6 +56,14 @@ describe('Sequencing - Batch - Process worker - Seq002', () => {
 
   it('Validate report sequencing_experiment[0] aliquot 2', () => {
     cy.validateReport(response, 'error', 'SEQ-002', apiMessages.ProcessWorkerErrorRegExpAliquot('sequencing_experiment', 'aliquot', 'CQGC', 'S13224', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sequencing_experiment[0].aliquot');
+  });
+
+  it('Validate report sequencing_experiment[0] sequencer_id', () => {
+    cy.validateReport(response, 'error', 'SEQ-002', apiMessages.ProcessWorkerErrorTooLong('sequencing_experiment', 'sequencer_id', 'CQGC', 'S13224', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sequencing_experiment[0].sequencer_id');
+  });
+
+  it('Validate report sequencing_experiment[0] protocol', () => {
+    cy.validateReport(response, 'error', 'SEQ-002', apiMessages.ProcessWorkerErrorTooLong('sequencing_experiment', 'protocol', 'CQGC', 'S13224', '1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890!'), 'sequencing_experiment[0].protocol');
   });
 
   it('Validate report sequencing_experiment[0] platform_code 1', () => {

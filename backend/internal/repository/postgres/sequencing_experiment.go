@@ -39,6 +39,8 @@ func (r *SequencingExperimentRepository) UpdateSequencingExperiment(ctx context.
 			"run_alias":                       seqExp.RunAlias,
 			"run_date":                        seqExp.RunDate,
 			"capture_kit":                     seqExp.CaptureKit,
+			"sequencer_id":                    seqExp.SequencerID,
+			"protocol":                        seqExp.Protocol,
 			"experimental_strategy_code":      seqExp.ExperimentalStrategyCode,
 			"sequencing_read_technology_code": seqExp.SequencingReadTechnologyCode,
 			"platform_code":                   seqExp.PlatformCode,

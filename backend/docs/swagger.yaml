@@ -4560,6 +4560,8 @@ components:
           type: string
         platform_code:
           type: string
+        protocol:
+          type: string
         run_alias:
           type: string
         run_date:
@@ -4569,6 +4571,8 @@ components:
         run_name:
           type: string
         sample_organization_code:
+          type: string
+        sequencer_id:
           type: string
         sequencing_lab_code:
           type: string
@@ -4609,6 +4613,8 @@ components:
           type: integer
         platform_code:
           type: string
+        protocol:
+          type: string
         run_alias:
           type: string
         run_date:
@@ -4621,6 +4627,8 @@ components:
           type: string
         seq_id:
           type: integer
+        sequencer_id:
+          type: string
         sequencing_lab_code:
           type: string
         sequencing_lab_name:
