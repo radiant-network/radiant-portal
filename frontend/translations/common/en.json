@@ -168,6 +168,18 @@
       "filters_group": "Filter timeline by type",
       "results_count_one": "Showing {{count}} result",
       "results_count_other": "Showing {{count}} results"
+    },
+    "cnv_profile": {
+      "zoom_in": "Zoom in",
+      "zoom_out": "Zoom out",
+      "zoom_level": "Zoom level",
+      "pan_left": "Move left",
+      "pan_right": "Move right",
+      "drag_mode": "Drag action",
+      "chromosome": "Chromosome",
+      "search": "Gene or locus",
+      "close_panel": "Close the gene details",
+      "close_cnv_panel": "Close the CNV details"
     }
   },
   "admin": {
@@ -2640,6 +2652,7 @@
   },
   "case_entity": {
     "not_found": "Case not found",
+    "search_error": "The gene search failed, try again.",
     "not_found.button": "Back to case list",
     "header": {
       "case": "Case",
@@ -2788,6 +2801,92 @@
       },
       "dialog": {
         "overlapping_gene": "Overlapping Genes with CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
+      },
+      "cnv_profile": {
+        "button": "CNV profile",
+        "unavailable": "Available for exome and genome sequencing only",
+        "title": "CNV profile",
+        "locus": "chr{{chromosome}}:{{start}}-{{end}}",
+        "position": "chr{{chromosome}}:{{position}}",
+        "locus_size": "{{locus}} · {{size}}",
+        "megabases": "{{value}} Mb",
+        "chromosome_name": "chr{{name}}",
+        "loading": "Loading the CNV profile…",
+        "overview": {
+          "reduced": "Overview: one copy ratio bin in {{copyRatioStride}} and one BAF variant in {{bafStride}}. Zoom below {{span}} to see every point.",
+          "detailed": "Every point of the visible region is shown."
+        },
+        "errors": {
+          "not_found": "The copy ratio and B-allele frequency files of this sequencing are missing.",
+          "copy_ratio_missing": "The copy ratio file (.tn.bw) of this sequencing is missing.",
+          "baf_missing": "The B-allele frequency file (.baf.bw) of this sequencing is missing.",
+          "unsupported": "The CNV profile of this sequencing cannot be displayed: only exomes and genomes have one.",
+          "unknown": "The CNV profile could not be loaded."
+        },
+        "tracks": {
+          "copy_ratio": "Copy ratio",
+          "baf": "BAF",
+          "roh": "ROH",
+          "genes": "Genes"
+        },
+        "hints": {
+          "zoom_for_genes": "Zoom below 20 Mb on one chromosome to show the genes"
+        },
+        "legend": {
+          "gain": "Gain PASS",
+          "loss": "Loss PASS",
+          "filtered": "Filtered",
+          "roh": "ROH",
+          "gene": "Protein-coding gene",
+          "other_gene": "Other gene",
+          "highlighted_gene": "Selected gene"
+        },
+        "hover": {
+          "gain": "Gain",
+          "loss": "Loss",
+          "click_to_zoom": "click to zoom",
+          "click_for_details": "click for details",
+          "segment_mean": "Segment mean",
+          "copy_number": "CN",
+          "quality": "Qual",
+          "roh": "ROH",
+          "homozygous": "homozygous",
+          "heterozygous": "heterozygous",
+          "score": "score",
+          "filter": "Filter"
+        },
+        "navbar": {
+          "genome": "Genome",
+          "view_genome": "Whole genome · {{size}}",
+          "view_chromosomes": "chr{{first}} → chr{{last}} · {{size}}",
+          "drag": "Drag to",
+          "drag_pan": "pan",
+          "drag_zoom": "select a region",
+          "show_filtered": "Filtered CNVs",
+          "search_placeholder": "Gene (BRCA1) or chr17:40,000,000-45,000,000",
+          "go_to_locus": "Go to {{locus}}",
+          "not_found": "Unknown gene or locus",
+          "chromosome": "Chromosome",
+          "points": "{{formatted}} points",
+          "keyboard": "Keyboard: ← → + −"
+        },
+        "panel": {
+          "strand": "strand {{strand}}",
+          "locus": "Locus",
+          "biotype": "Biotype",
+          "omim_inheritance": "OMIM inheritance",
+          "pli": "pLI",
+          "loeuf": "LOEUF",
+          "size": "Size",
+          "exons": "Exons",
+          "exon": "Exon {{index}} of {{total}}",
+          "cnvs": "Called CNVs on this gene",
+          "no_cnv": "No gain or loss called on this gene.",
+          "genes": "Overlapping genes ({{count}})",
+          "no_gene": "No gene overlaps this CNV.",
+          "no_omim_condition": "No OMIM condition for this gene.",
+          "links": "Links"
+        }
       }
     },
     "files": {

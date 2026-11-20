@@ -13,18 +13,19 @@ describe('Case Entity - Variants - Germline - CNV - Table - Hyperlinks', () => {
   it('Genes', () => {
     setupTest();
     CaseEntity_Variants_CNV_Table.actions.clickTableCellLink(data.cnvGermline, 'genes');
-    CaseEntity_Variants_CNV_Table.validations.shouldOverlappingModalOpen();
+    CaseEntity_Variants_CNV_Table.validations.shouldCNVProfileOpen();
   });
 
   it('Cytoband', () => {
     setupTest();
     CaseEntity_Variants_CNV_Table.actions.clickTableCellLink(data.cnvGermline, 'cytoband');
-    CaseEntity_Variants_CNV_Table.validations.shouldOverlappingModalOpen();
+    CaseEntity_Variants_CNV_Table.validations.shouldCNVProfileOpen();
   });
 
   it('Variant', () => {
     setupTest();
-    CaseEntity_Variants_CNV_Table.validations.shouldHaveTableCellLink(data.cnvGermline, 'cnv_variant');
+    CaseEntity_Variants_CNV_Table.actions.clickTableCellLink(data.cnvGermline, 'cnv_variant');
+    CaseEntity_Variants_CNV_Table.validations.shouldCNVProfileOpen();
   });
 
   it('ClinGen', () => {
