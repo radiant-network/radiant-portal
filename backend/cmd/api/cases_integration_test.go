@@ -212,11 +212,11 @@ func Test_GetCasesFilters(t *testing.T) {
 			{"key":"germline", "label":"Germline"},
 			{"key":"somatic", "label":"Somatic"}],
 		"assignee_id":[
-			{"key":"25286548-fbef-4e93-b3c4-c659e6169396", "label":"Alice Adams"},
-			{"key":"b6e6d0dd-7aa5-4018-ae03-1f5076801360", "label":"Carol Cohen"},
-			{"key":"e10fee0b-063b-4dcd-b086-90d1c9eb239d", "label":"Dan Doyle"},
-			{"key":"6c330322-c746-4436-bb76-efd2cd943686", "label":"Pat Patel"},
-			{"key":"79a8855e-3782-4dc8-be2a-8afdb34d6359", "label":"Wendy Walsh"}]
+			{"user_id":"25286548-fbef-4e93-b3c4-c659e6169396", "first_name":"Alice", "last_name":"Adams", "email":"alice@test.authz"},
+			{"user_id":"b6e6d0dd-7aa5-4018-ae03-1f5076801360", "first_name":"Carol", "last_name":"Cohen", "email":"carol@test.authz"},
+			{"user_id":"e10fee0b-063b-4dcd-b086-90d1c9eb239d", "first_name":"Dan", "last_name":"Doyle", "email":"dan@test.authz"},
+			{"user_id":"6c330322-c746-4436-bb76-efd2cd943686", "first_name":"Pat", "last_name":"Patel", "email":"pat@test.authz"},
+			{"user_id":"79a8855e-3782-4dc8-be2a-8afdb34d6359", "first_name":"Wendy", "last_name":"Walsh", "email":"wendy@test.authz"}]
 		}`
 	assertGetCasesFilters(t, "simple", expected)
 }

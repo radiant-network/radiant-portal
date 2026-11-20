@@ -647,5 +647,5 @@ type CaseFilters struct {
 	LifeStatus           []FiltersValue `json:"life_status_code" validate:"required"`
 	CaseCategory         []FiltersValue `json:"case_category_code" validate:"required"`
 	CaseType             []FiltersValue `json:"case_type_code" validate:"required"`
-	Assignee             []FiltersValue `json:"assignee_id" validate:"required"`
+	Assignee             []CaseAssignee `json:"assignee_id" validate:"required"`
 }

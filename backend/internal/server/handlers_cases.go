@@ -20,7 +20,7 @@ type casesReader interface {
 }
 
 type assigneeFilterReader interface {
-	AssigneeFilterValues(ctx context.Context, tenantCode string) ([]types.FiltersValue, error)
+	AssigneeFilterValues(ctx context.Context, tenantCode string) ([]types.CaseAssignee, error)
 }
 
 type caseDocumentsReader interface {

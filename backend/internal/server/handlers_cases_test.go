@@ -232,12 +232,12 @@ type mockAssigneeFilterReader struct {
 	err        error
 }
 
-func (m *mockAssigneeFilterReader) AssigneeFilterValues(_ context.Context, tenantCode string) ([]types.FiltersValue, error) {
+func (m *mockAssigneeFilterReader) AssigneeFilterValues(_ context.Context, tenantCode string) ([]types.CaseAssignee, error) {
 	m.tenantCode = tenantCode
 	if m.err != nil {
 		return nil, m.err
 	}
-	return []types.FiltersValue{{Key: "79a8855e-3782-4dc8-be2a-8afdb34d6359", Label: "Wendy Walsh"}}, nil
+	return []types.CaseAssignee{{UserID: "79a8855e-3782-4dc8-be2a-8afdb34d6359", FirstName: "Wendy", LastName: "Walsh", Email: "wendy@example.org"}}, nil
 }
 
 func Test_CasesFiltersHandler_AssigneeError(t *testing.T) {
@@ -297,7 +297,7 @@ func Test_CasesFiltersHandler(t *testing.T) {
 			{"key":"germline", "label":"Germline"},
 			{"key":"somatic", "label":"Somatic"}
 		], "assignee_id":[
-			{"key":"79a8855e-3782-4dc8-be2a-8afdb34d6359", "label":"Wendy Walsh"}
+			{"user_id":"79a8855e-3782-4dc8-be2a-8afdb34d6359", "first_name":"Wendy", "last_name":"Walsh", "email":"wendy@example.org"}
 		]
 	}`, w.Body.String())
 	assert.Equal(t, "radiant", caseAssignmentsRepo.tenantCode)
