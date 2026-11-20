@@ -15,9 +15,9 @@ describe('pliLevel', () => {
 });
 
 describe('loeufLevel', () => {
-  it('flags the genes below 0.35 only', () => {
-    expect(loeufLevel(0.34)).toBe('intolerant');
-    expect(loeufLevel(0.35)).toBeUndefined();
+  it('flags the genes below 0.45 only', () => {
+    expect(loeufLevel(0.44)).toBe('intolerant');
+    expect(loeufLevel(0.45)).toBeUndefined();
     expect(loeufLevel(undefined)).toBeUndefined();
   });
 });
