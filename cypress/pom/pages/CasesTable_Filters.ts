@@ -4,6 +4,12 @@ import { getTableResultsCount, shouldHaveTableResultsCount } from '../shared/Uti
 
 export const filters = [
   {
+    key: 'assignee_id',
+    label: 'Assignment',
+    field: 'assignee_id',
+    isVisibleByDefault: true,
+  },
+  {
     key: 'priority_code',
     label: 'Priority',
     field: 'priority_code',
@@ -236,6 +242,28 @@ export const CasesTable_Filters = {
           const actual = [...$els].map(el => el.getAttribute('data-cy')).filter(dataCy => dataCy !== 'filter-button-more'); // drop the "More" trigger
           expect(actual.slice(0, expected.length)).to.deep.equal(expected);
         });
+    },
+    /**
+     * Validates that the "My cases" switch is shown only when the run's account is an assignable user.
+     * @param alias The alias of the intercepted GET cases/filters request (set before visiting the page).
+     */
+    shouldShowMyCasesForAssignableUser(alias: `@${string}`) {
+      cy.wait(alias).then(({ response }) => {
+        const assignees: { user_id: string }[] = response?.body?.assignee_id || [];
+        cy.getToken()
+          .then(token => cy.getUserId(token))
+          .then(userId => {
+            const isAssignable = assignees.some(assignee => assignee.user_id === userId);
+            cy.get(CommonSelectors.filterSwitchMyCases).should(isAssignable ? 'exist' : 'not.exist');
+          });
+      });
+    },
+    /**
+     * Validates that the "Unassigned" option is the first option of the assignee filter.
+     */
+    shouldShowUnassignedFirst() {
+      CasesTable_Filters.actions.openFilter('assignee_id');
+      cy.get(CommonSelectors.filterOption('assignee_id')).first().should('have.attr', 'data-cy', 'filter-option-assignee_id-not-assign');
     },
   },
 };

@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useEffect, useMemo } from 'react';
+import { Fragment, type ReactNode, useCallback, useEffect, useMemo } from 'react';
 import { ListFilter, X } from 'lucide-react';
 
 import type { SearchCriterion } from '@/api/api';
@@ -297,20 +297,29 @@ function DataTableFilters({
               (criterias[b.key].weight ?? strongestWeigth + changedFilterButtons.indexOf(b.key))
             );
           })
-          .map(filter => (
-            <FilterButton
-              key={filter.key}
-              dataCy={filter.key}
-              popoverSize={filter.popoverSize as PopoverSize}
-              label={filter.label}
-              options={filter.options}
-              selected={filter.selectedItems}
-              onSelect={values => handleFilterSelect(filter.key, values)}
-              isOpen={filter.isOpen}
-              showKey={filter.showKey}
-              withTooltip={filter.withTooltip}
-            />
-          ))}
+          .map(filter =>
+            filter.render ? (
+              <Fragment key={filter.key}>
+                {filter.render({
+                  selected: filter.selectedItems,
+                  onSelect: values => handleFilterSelect(filter.key, values),
+                })}
+              </Fragment>
+            ) : (
+              <FilterButton
+                key={filter.key}
+                dataCy={filter.key}
+                popoverSize={filter.popoverSize as PopoverSize}
+                label={filter.label}
+                options={filter.options}
+                selected={filter.selectedItems}
+                onSelect={values => handleFilterSelect(filter.key, values)}
+                isOpen={filter.isOpen}
+                showKey={filter.showKey}
+                withTooltip={filter.withTooltip}
+              />
+            ),
+          )}
 
         {/* Additional filters control button - only show if there are hidden options */}
         {hiddenFilterOptions.length > 0 && (

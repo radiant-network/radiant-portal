@@ -1,6 +1,6 @@
 /* eslint-disable complexity */
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useRouteLoaderData, useSearchParams } from 'react-router';
 import useSWR from 'swr';
 
 import type { CaseFilters, SearchCriterion } from '@/api/api';
@@ -17,6 +17,10 @@ import { useTenant } from '@/components/hooks/use-tenant';
 import usePersistedFilters, { type StringArrayRecord } from '@/components/hooks/usePersistedFilters';
 import { caseApi } from '@/utils/api';
 
+import { PROTECTED_LAYOUT_ROUTE_ID } from '../../components/case-assignment';
+
+import CaseAssigneeFilter from './filters/case-assignee-filter';
+
 type FiltersGroupFormProps = {
   loading?: boolean;
   setSearchCriteria: (searchCriteria: SearchCriterion[]) => void;
@@ -25,6 +29,7 @@ type FiltersGroupFormProps = {
 };
 
 const CRITERIAS = {
+  assignee_id: { key: 'assignee_id', weight: 0, visible: true },
   priority_code: { key: 'priority_code', weight: 1, visible: true },
   status_code: { key: 'status_code', weight: 2, visible: true },
   case_type_code: { key: 'case_type_code', weight: 3, visible: true },
@@ -38,6 +43,7 @@ const CRITERIAS = {
 };
 
 export const FILTER_DEFAULTS = {
+  assignee_id: [],
   priority_code: [],
   status_code: [],
   case_type_code: [],
@@ -61,6 +67,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria, extraFilters, onC
   const { t } = useI18n();
   const { tenant } = useTenant();
   const [searchParams, setSearchParams] = useSearchParams();
+  const sessionUser = useRouteLoaderData<{ sub: string }>(PROTECTED_LAYOUT_ROUTE_ID);
   const [changedFilterButtons, setChangedFilterButtons] = useState<string[]>([]);
   const [openFilters, setOpenFilters] = useState<Record<string, boolean>>({});
   const [filters, setFilters] = usePersistedFilters<StringArrayRecord>('case-exploration-filters', {
@@ -94,7 +101,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria, extraFilters, onC
     // Order by weight defined in CRITERIAS
     const sortedKeys = getSortedCriterias(CRITERIAS).filter(key => key in apiFilters);
 
-    return sortedKeys.map(key => {
+    return sortedKeys.map((key): IFilterButton => {
       const baseOption: IFilterButton = {
         key,
         label: t(`case_exploration.case.filters.${key}`),
@@ -105,6 +112,18 @@ function FiltersGroupForm({ loading = true, setSearchCriteria, extraFilters, onC
       };
 
       switch (key) {
+        case 'assignee_id':
+          return {
+            ...baseOption,
+            render: ({ selected, onSelect }) => (
+              <CaseAssigneeFilter
+                assignees={apiFilters.assignee_id || []}
+                selected={selected}
+                currentUserId={sessionUser?.sub}
+                onSelect={onSelect}
+              />
+            ),
+          };
         case 'priority_code':
           return {
             ...baseOption,
@@ -151,7 +170,7 @@ function FiltersGroupForm({ loading = true, setSearchCriteria, extraFilters, onC
           return baseOption;
       }
     });
-  }, [apiFilters, filters, changedFilterButtons, openFilters, t]);
+  }, [apiFilters, filters, changedFilterButtons, openFilters, t, sessionUser?.sub]);
 
   return (
     <DataTableFilters

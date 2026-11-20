@@ -27,6 +27,12 @@
     "case_actions_menu": {
       "open": "Case actions"
     },
+    "case_assignee_filter": {
+      "open": "Filter by assignment",
+      "open_selected_one": "Filter by assignment, {{count}} selected",
+      "open_selected_other": "Filter by assignment, {{count}} selected",
+      "selected": "selected"
+    },
     "case_group_tag": {
       "copy_name": "Copy group name",
       "remove": "Remove the New data filter"
@@ -1753,15 +1759,20 @@
       },
       "filters": {
         "analysis_catalog_code": "Analysis",
+        "assignee_id": "Assignment",
+        "assignee_id_tooltip": "Filter by assignment",
         "case_category_code": "Pre/Postnatal",
         "case_type_code": "Type",
         "diagnosis_lab_code": "Diagnostic lab",
         "life_status_code": "Vital Status",
+        "my_cases": "My cases",
+        "my_cases_tooltip": "Cases assigned to me",
         "ordering_organization_code": "Prescribing Institution",
         "panel_code": "Panel",
         "priority_code": "Priority",
         "project_code": "Project",
-        "status_code": "Status"
+        "status_code": "Status",
+        "unassigned": "Unassigned"
       },
       "headers": {
         "assignees": "Assignment",
