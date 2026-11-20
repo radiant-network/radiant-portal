@@ -9,6 +9,7 @@ export type AnalysisTypeCode = 'somatic' | 'germline' | 'germline_family';
 type AnalysisTypeCodeProps = {
   code: AnalysisTypeCode;
   size?: number;
+  iconOnly?: boolean;
 };
 
 const icons = {
@@ -17,21 +18,33 @@ const icons = {
   germline_family: Users,
 };
 
-function AnalysisTypeCodeBadge({ code, size = 12 }: AnalysisTypeCodeProps) {
+function AnalysisTypeCodeBadge({ code, size = 12, iconOnly = false }: AnalysisTypeCodeProps) {
   const { t } = useI18n();
 
   const Icon = icons[code];
+  const label = t(`case_exploration.analysis_type_code.${code}`);
+
+  if (iconOnly) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Badge variant="secondary" iconOnly>
+            <Icon size={size} />
+            <span className="sr-only">{label}</span>
+          </Badge>
+        </TooltipTrigger>
+        <TooltipContent>{label}</TooltipContent>
+      </Tooltip>
+    );
+  }
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Badge variant="neutral" iconOnly>
-          <Icon size={size} />
-          <span className="sr-only">{t(`case_exploration.analysis_type_code.${code}`)}</span>
-        </Badge>
-      </TooltipTrigger>
-      <TooltipContent>{t(`case_exploration.analysis_type_code.${code}`)}</TooltipContent>
-    </Tooltip>
+    <Badge variant="secondary" className="max-w-full">
+      <Icon size={size} />
+      <span className="truncate" title={label}>
+        {label}
+      </span>
+    </Badge>
   );
 }
 
