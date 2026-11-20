@@ -14,5 +14,7 @@ describe('CaseEntity - Details - Sequencing - Action Buttons', () => {
     setupTest();
     CaseEntity_Details.sequencingCard.actions.clickDetailsButton(data.case.seq);
     SequencingDetailsModal.validations.shouldHaveSubtitle(data.case.seq);
+    SequencingDetailsModal.validations.shouldHaveField('Sequencer', data.case.seq.sequencer_id);
+    SequencingDetailsModal.validations.shouldHaveField('Protocol', data.case.seq.protocol);
   });
 });
