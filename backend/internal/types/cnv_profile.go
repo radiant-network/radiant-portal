@@ -9,7 +9,32 @@ type CNVProfile struct {
 	Segments    []CNVProfileSegment    `json:"segments" validate:"required"`
 	ROH         []CNVProfileROH        `json:"roh" validate:"required"`
 	Cytobands   []Cytoband             `json:"cytobands" validate:"required"`
+	// Overview is set when the copy ratio and BAF are reduced, for a genome: the points of a
+	// region come from the region endpoint.
+	Overview *CNVProfileOverview `json:"overview,omitempty"`
 }
+
+// CNVProfileOverview describes how the tracks of a genome are reduced
+// @Description CNVProfileOverview describes how the copy ratio and BAF of a genome are reduced: the copy ratio keeps one bin in copy_ratio_stride, the BAF one variant in baf_stride. The region endpoint serves every point of a region up to region_max_span bases.
+type CNVProfileOverview struct {
+	CopyRatioStride int `json:"copy_ratio_stride" validate:"required"`
+	BAFStride       int `json:"baf_stride" validate:"required"`
+	RegionMaxSpan   int `json:"region_max_span" validate:"required"`
+}
+
+// CNVProfileRegion holds every copy ratio and BAF point of a region
+// @Description CNVProfileRegion holds every copy ratio and BAF point of a region of one chromosome
+type CNVProfileRegion struct {
+	Chromosome string          `json:"chromosome" validate:"required"`
+	Start      int             `json:"start" validate:"required"`
+	End        int             `json:"end" validate:"required"`
+	CopyRatio  CNVProfileTrack `json:"copy_ratio" validate:"required"`
+	BAF        CNVProfileTrack `json:"baf" validate:"required"`
+}
+
+// CNVProfileRegionMaxSpan is the widest region served with every point, in bases: about 10,000
+// copy ratio bins and 15,000 variants of a genome.
+const CNVProfileRegionMaxSpan = 10_000_000
 
 type CNVProfileChromosome struct {
 	Name string `json:"name" validate:"required"`

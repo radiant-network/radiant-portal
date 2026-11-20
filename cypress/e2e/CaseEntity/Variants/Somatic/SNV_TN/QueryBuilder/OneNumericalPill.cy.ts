@@ -18,4 +18,15 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Query builder - One nume
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHaveNumericalPill(['9']);
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHaveActivePillCount(1);
   });
+
+  it('Keeps the numerical label when the labels switch is off', () => {
+    setupTest();
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowNumericalLabel(true /*shouldShow*/);
+
+    CaseEntity_Variants_QueryBuilder.somatic.actions.toggleLabels();
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowNumericalLabel(true /*shouldShow*/);
+
+    CaseEntity_Variants_QueryBuilder.somatic.actions.toggleLabels();
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldShowNumericalLabel(true /*shouldShow*/);
+  });
 });
