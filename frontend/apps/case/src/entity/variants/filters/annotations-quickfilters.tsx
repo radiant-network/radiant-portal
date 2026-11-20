@@ -35,10 +35,6 @@ type AnnotationsQuickfiltersProps = {
   disabled?: AnnotationFilterName[];
 };
 
-/**
- * The quick filters on the interpretation, the comments and the flags of the occurrences, controlled:
- * value holds the active items, the note and interpretation items and the flag types.
- */
 function AnnotationsQuickfilters({ value: actives, onChange, disabled = [] }: AnnotationsQuickfiltersProps) {
   const { t } = useI18n();
 

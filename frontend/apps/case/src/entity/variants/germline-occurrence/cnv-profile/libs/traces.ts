@@ -19,10 +19,6 @@ export const PLOT_MARGIN = { l: 64, r: 16, t: 30, b: 40 };
 
 export type YAxisName = 'y' | 'y2' | 'y3' | 'y4' | 'y5';
 
-/**
- * Where each track sits, in paper fraction, and the values it spans: copy ratio, BAF, ROH, genes and
- * cytobands.
- */
 export const Y_AXES: Record<YAxisName, { domain: [number, number]; range: [number, number] }> = {
   y: { domain: [0.52, 0.9], range: [-0.12, 2.8] },
   y2: { domain: [0.275, 0.48], range: [-0.07, 1.07] },
@@ -42,6 +38,7 @@ export type TraceKind = 'cloud' | 'roh' | 'cytoband' | 'decoration';
 export type Formatters = {
   number: (value: number) => string;
   size: (bases: number) => string;
+  locus: (chromosome: string, start: number, end: number) => string;
 };
 
 export type TraceLabels = {
@@ -56,10 +53,7 @@ export type TraceLabels = {
 
 type Trace = Data & { meta?: TraceKind };
 
-// WebGL projects the lines in float32: at genome coordinates, zoomed in, their ends move by up to 128
-// bases on the last chromosomes. The lines are in SVG, which keeps them exact; the clouds keep WebGL,
-// whose markers are projected in double precision. Plotly draws WebGL over the SVG traces, so the
-// CNVs, the only lines over a cloud, are layout shapes, drawn above both.
+// WebGL projects lines in float32, off by up to 128 bases zoomed in: lines stay in SVG, CNVs are shapes.
 
 const lineTrace = (yaxis: string, color: string, width: number, extra: object = {}): Trace =>
   ({
@@ -85,20 +79,11 @@ export const isChromosomeLevel = (genome: Genome, view: GenomeView) =>
 
 export type OutOfScale = { above: number; drawnAt: number };
 
-/**
- * The copy ratios above 2.6 are drawn as triangles on a line of their own, at the top of the track and
- * above the called CNVs, which stop at SEGMENT_MAX_VALUE.
- */
 export const COPY_RATIO_OUT_OF_SCALE: OutOfScale = { above: 2.6, drawnAt: 2.7 };
 
-/** How much bigger than the cloud points the out-of-scale triangles are drawn, in pixels. */
 export const OUT_OF_SCALE_SIZE_BOOST = 4;
 
-/**
- * One trace per chromosome, in the colours of its track and coloured by parity so that neighbours
- * alternate, like the DRAGEN plot.
- * Out of scale, the points go in a second trace of triangles, which keeps their value for the hover.
- */
+// One trace per chromosome so that neighbours alternate; out-of-scale points go in a triangle trace.
 export function buildCloudTraces(
   tracks: CNVProfileTrack[],
   genome: Genome,
@@ -163,10 +148,6 @@ export const segmentValue = (segment: CNVProfileSegment) =>
 
 export const isFiltered = (segment: CNVProfileSegment) => segment.filter !== undefined && segment.filter !== 'PASS';
 
-/**
- * Whether a CNV passes the annotation quick filters of the CNV table: with no filter, every CNV does;
- * otherwise a CNV with comments when the note item is on, or flagged with one of the flag types.
- */
 export function matchesAnnotations(segment: CNVProfileSegment, annotations: string[]): boolean {
   if (annotations.length === 0) return true;
   return (
@@ -187,11 +168,7 @@ export const isSegmentShown = (
 
 const SEGMENT_MARKER_RADIUS_PX = 5.5;
 
-/**
- * A line per called CNV in view over its span and a marker at its middle, as layout shapes: Plotly
- * draws them over the WebGL clouds, and in SVG, at the exact position (see Trace). The chart shows
- * their tooltip and handles their click on the whole span.
- */
+// Layout shapes: Plotly draws them over the WebGL clouds, at the exact position.
 export function buildSegmentShapes(
   segments: CNVProfileSegment[],
   genome: Genome,
@@ -260,7 +237,7 @@ export function buildRohTraces(
     markers.y.push(0.5);
     markers.text.push(
       [
-        `<b>${labels.roh} ${region.chromosome}:${format.number(region.start)}-${format.number(region.end)}</b>`,
+        `<b>${labels.roh} ${format.locus(region.chromosome, region.start, region.end)}</b>`,
         `${format.size(region.end - region.start)} · ${labels.score} ${region.score}`,
         `${region.nb_hom} ${labels.homozygous} · ${region.nb_het} ${labels.heterozygous}`,
       ].join('<br>'),
@@ -281,11 +258,7 @@ export function buildRohTraces(
   ];
 }
 
-/**
- * The ideogram of the chromosomes in view, at every zoom: an outline, one line per stain, a hover
- * marker per band (customdata: band index) and the names that fit. On the whole genome, it shows that
- * the gaps of the copy ratio and the BAF are centromeres, heterochromatin or acrocentric arms.
- */
+// On the whole genome, it shows that the gaps of the tracks are centromeres or heterochromatin.
 export function buildCytobandTraces(
   cytobands: Cytoband[],
   genome: Genome,
@@ -325,13 +298,12 @@ export function buildCytobandTraces(
     markers.x.push(middle);
     markers.y.push(0.35);
     markers.customdata.push(index);
-    // Plotly ties the markers under the cursor: each one is as wide as its band, so that the hover
-    // gets the band under the cursor on the whole genome too.
+    // Each marker is as wide as its band, so that the hover finds the band on the whole genome too.
     markers.size.push(Math.min(CYTOBAND_HOVER_SIZE, Math.max(2, widthPx)));
     markers.text.push(
       [
         `<b>${band.chromosome}${band.cytoband}</b> (${band.gie_stain ?? '-'})`,
-        `${band.chromosome}:${format.number(band.start + 1)}-${format.number(band.end)} · ${format.size(band.end - band.start)}`,
+        `${format.locus(band.chromosome, band.start + 1, band.end)} · ${format.size(band.end - band.start)}`,
         `<i>${labels.clickToZoom}</i>`,
       ].join('<br>'),
     );
@@ -388,9 +360,6 @@ export type PlacedGene = {
   labelled: boolean;
 };
 
-/**
- * Places the genes in genome coordinates and in their lane, the protein-coding ones first.
- */
 export function placeGenes(genes: GeneTrackGene[], genome: Genome, pxPerBase: number): PlacedGene[] {
   const items = genes.flatMap((gene, index) => {
     const chromosome = genome.byName.get(gene.chromosome);
@@ -419,11 +388,6 @@ export function placeGenes(genes: GeneTrackGene[], genome: Genome, pxPerBase: nu
   }));
 }
 
-/**
- * Genes packed in lanes, as a bar, or below EXON_MAX_SPAN as exon blocks on an intron line. The
- * protein-coding genes get their labels first; the other biotypes are drawn paler and the
- * highlighted gene in its own colour. The chart shows their tooltip and handles their click.
- */
 export function buildGeneTraces(
   genes: GeneTrackGene[],
   genome: Genome,
@@ -475,7 +439,6 @@ export function buildGeneTraces(
   ];
 }
 
-/** The span of the selected CNV, gene or exon, in genome coordinates, shaded over the tracks. */
 export type Highlight = { x0: number; x1: number; color: string };
 
 export type LayoutLabels = {
@@ -554,8 +517,7 @@ export function buildLayout(
         opacity: PANEL_OPACITY,
         line: { width: 0 },
       })),
-      // Under the points, like a region being selected, from the genes up to the copy ratio. The
-      // outline keeps a span narrower than a pixel visible.
+      // Drawn under the points like a selection; the outline keeps a span narrower than a pixel visible.
       ...(highlight
         ? [
             {

@@ -13,9 +13,6 @@ type ConstraintValueProps = {
   value?: number;
 };
 
-/**
- * A gnomAD constraint score of a gene, behind a dot of the colour of its level.
- */
 function CNVGeneConstraint({ kind, value }: ConstraintValueProps) {
   if (value === undefined) return <span>-</span>;
   const level = kind === 'pli' ? pliLevel(value) : loeufLevel(value);

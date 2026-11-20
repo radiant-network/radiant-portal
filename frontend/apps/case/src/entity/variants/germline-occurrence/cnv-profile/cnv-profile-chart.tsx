@@ -24,6 +24,7 @@ import {
   plotFrame,
   segmentHitAreas,
 } from './libs/hit-test';
+import { formatLocus } from './libs/locus';
 import { getCNVProfilePalette } from './libs/palette';
 import { withRegion } from './libs/region';
 import {
@@ -55,7 +56,6 @@ const PLOT_CONFIG = {
   showTips: false,
   responsive: true,
 } as const;
-const FORMAT = { number: (value: number) => thousandNumberFormat(value), size: toKiloBases };
 
 type SelectedGene = { gene: GeneTrackGene; exonIndex?: number };
 
@@ -95,7 +95,7 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
   const [selectedGene, setSelectedGene] = useState<SelectedGene | undefined>();
   const [selectedSegment, setSelectedSegment] = useState<CNVProfileSegment | undefined>();
   const { occurrenceChanged } = useCNVProfile();
-  // The comments and flag of each CNV, once they changed in the profile: the profile is not reloaded.
+  // The profile is not reloaded after a comment or flag change: the changes are kept here.
   const [occurrenceChanges, setOccurrenceChanges] = useState<
     Record<string, Partial<Pick<CNVProfileSegment, 'has_note' | 'flag_type'>>>
   >({});
@@ -145,6 +145,15 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
     [copyRatio, baf],
   );
 
+  const formatters = useMemo(
+    () => ({
+      number: (value: number) => thousandNumberFormat(value),
+      size: toKiloBases,
+      locus: (chromosome: string, start: number, end: number) => formatLocus(t, chromosome, start, end),
+    }),
+    [t],
+  );
+
   const traceLabels = useMemo(
     () => ({
       copyRatio: t('case_entity.variants.cnv_profile.tracks.copy_ratio'),
@@ -171,8 +180,8 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
     [segments, genome, view, palette, theme, showFiltered, annotations],
   );
   const rohTraces = useMemo(
-    () => buildRohTraces(profile.roh, genome, palette, theme, traceLabels, FORMAT),
-    [profile.roh, genome, palette, theme, traceLabels],
+    () => buildRohTraces(profile.roh, genome, palette, theme, traceLabels, formatters),
+    [profile.roh, genome, palette, theme, traceLabels, formatters],
   );
 
   const data = useMemo(() => {
@@ -193,7 +202,7 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
       ...sizedClouds,
       ...rohTraces,
       ...buildGeneTraces(showGenes ? genes : [], genome, view, pxPerBase, palette, theme, selectedGene?.gene.gene_id),
-      ...buildCytobandTraces(profile.cytobands, genome, view, pxPerBase, theme, traceLabels, FORMAT),
+      ...buildCytobandTraces(profile.cytobands, genome, view, pxPerBase, theme, traceLabels, formatters),
     ];
   }, [
     clouds,
@@ -208,6 +217,7 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
     traceLabels,
     selectedGene,
     profile.cytobands,
+    formatters,
   ]);
 
   const highlight = useMemo<Highlight | undefined>(() => {
@@ -234,7 +244,10 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
         zoomForGenes: t('case_entity.variants.cnv_profile.hints.zoom_for_genes'),
       },
       showGenes,
-      position => (view.x1 - view.x0 >= 6e6 ? `${position / 1e6} Mb` : thousandNumberFormat(position)),
+      position =>
+        view.x1 - view.x0 >= 6e6
+          ? t('case_entity.variants.cnv_profile.megabases', { value: position / 1e6 })
+          : thousandNumberFormat(position),
       highlight,
     );
     return {
@@ -288,7 +301,7 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
         found = (await genesApi.geneTrack(tenant, query)).data;
       } catch {
         toast.error(t('case_entity.variants.cnv_profile.navbar.search_error'));
-        // The toast tells the failure: not a gene not found.
+        // The toast already reports the failure: not a gene not found.
         return true;
       }
       const [gene] = found.filter(candidate => genome.byName.has(candidate.chromosome));
@@ -299,7 +312,6 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
     [genome, tenant, focusGene, t],
   );
 
-  // Opened on a CNV of the CNV table: zoom on it and show its panel.
   useEffect(() => {
     const segment = focus && profile.segments.find(candidate => candidate.cnv_id === focus.cnvId);
     if (segment) focusSegment(segment);
@@ -313,8 +325,7 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
     [goTo],
   );
 
-  // Clicks hit the whole span of a CNV, a gene, an exon or a cytoband: Plotly only reports the
-  // nearest point, often one of the clouds.
+  // Plotly only reports the nearest point, often a cloud point: the whole spans are hit-tested.
   const hitAreas = useMemo(
     () => [
       ...segmentHitAreas(segments, genome, showFiltered, annotations),
@@ -342,9 +353,7 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
     const graph = graphRef.current;
     if (!graph || !rendered) return;
     const targetAt = (event: MouseEvent) => hitTest(hitAreas, view, plotFrame(graph), event.clientX, event.clientY);
-    // Plotly dispatches the click on its drag layer once the mouse is released without a drag, and the
-    // browser may dispatch its own: only the first click of a press counts. The second would hit what
-    // the zoom of the first brought under the cursor, as the next exon.
+    // Plotly and the browser may both dispatch the click of a press: only the first counts.
     let pressed = false;
     const handleClick = (event: MouseEvent) => {
       if (!pressed) return;
@@ -358,7 +367,6 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
       hideGuide();
       tooltipRef.current?.hide();
     };
-    // The CNVs and genes get the portal tooltip; the cytobands keep Plotly's, as the other tracks.
     const showTooltip = (event: MouseEvent, target: ClickTarget | undefined) => {
       const container = containerRef.current;
       if (!container || !target || target.kind === 'cytoband') return tooltipRef.current?.hide();
@@ -377,7 +385,10 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
       guide.style.top = `${frame.top - bounds.top}px`;
       guide.style.height = `${frame.height}px`;
       if (guideLabelRef.current) {
-        guideLabelRef.current.textContent = `${locus.chromosome}:${thousandNumberFormat(locus.position)}`;
+        guideLabelRef.current.textContent = t('case_entity.variants.cnv_profile.position', {
+          chromosome: locus.chromosome,
+          position: thousandNumberFormat(locus.position),
+        });
       }
     };
     // Plotly gives its drag layers the cursor of the drag mode; the plot keeps an arrow until a press.
@@ -385,10 +396,7 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
       graph.querySelectorAll<HTMLElement>('.nsewdrag').forEach(layer => {
         layer.style.cursor = cursor;
       });
-    // The dialog turns off the pointer events of the page, Plotly's drag cover included: the moves of
-    // a drag reach the plot, which keeps the cursor of the press while a button is down.
-    // Captured, so that the move over a CNV or a gene stops before Plotly's drag layer: Plotly would
-    // also show the hover label of a point next to it. Its mouseout handler clears the label shown.
+    // Captured, so that a move over a CNV or a gene stops before Plotly's drag layer and hover label.
     const handleMove = (event: MouseEvent) => {
       if (event.buttons === 0) {
         const target = targetAt(event);
@@ -420,7 +428,7 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
       graph.removeEventListener('mouseleave', hideOverlays);
       graph.removeEventListener('mousedown', handlePress, true);
     };
-  }, [rendered, hitAreas, genome, view, dragMode, handleTarget]);
+  }, [rendered, hitAreas, genome, view, dragMode, handleTarget, t]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -436,7 +444,6 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
-      // Typing in a field, as the comment editor, must not move the view.
       if (
         (event.target as HTMLElement).closest(
           'input, select, textarea, [contenteditable="true"], [role="combobox"], [role="slider"]',

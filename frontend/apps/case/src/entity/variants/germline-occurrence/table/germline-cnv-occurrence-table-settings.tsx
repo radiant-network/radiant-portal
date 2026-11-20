@@ -12,7 +12,6 @@ import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-forma
 
 import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
 import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
-import { cnvFocus } from '../cnv-profile/libs/focus';
 
 import ClingenCell from './cells/clingen-cell';
 import CNVIGVCell from './cells/cnv-igv-cell';
@@ -66,13 +65,7 @@ function getGermlineCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenc
     // Genes
     columnHelper.accessor(row => row.symbol, {
       id: 'symbol',
-      cell: info => (
-        <CNVProfileLinkCell
-          occurrence={info.row.original}
-          focus={cnvFocus(info.row.original)}
-          label={info.getValue()?.join(', ')}
-        />
-      ),
+      cell: info => <CNVProfileLinkCell occurrence={info.row.original} values={info.getValue()} />,
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.symbol_tooltip')}>{t('variant.headers.symbols')}</TooltipHeader>
       ),
@@ -83,13 +76,7 @@ function getGermlineCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenc
     // Cytoband
     columnHelper.accessor(row => row.cytoband, {
       id: 'cytoband',
-      cell: info => (
-        <CNVProfileLinkCell
-          occurrence={info.row.original}
-          focus={cnvFocus(info.row.original)}
-          label={info.getValue()?.join(', ')}
-        />
-      ),
+      cell: info => <CNVProfileLinkCell occurrence={info.row.original} values={info.getValue()} />,
       header: t('variant.headers.cytoband'),
       size: 124,
       minSize: 40,

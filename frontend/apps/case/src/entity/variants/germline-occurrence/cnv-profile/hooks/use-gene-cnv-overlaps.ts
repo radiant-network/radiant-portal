@@ -8,10 +8,7 @@ import type { CNVProfileIds } from './use-profile-region';
 
 const EMPTY: Record<string, CNVGeneOverlap> = {};
 
-/**
- * How each CNV overlaps a gene, by CNV id, as the overlapping genes of the CNV table give it: the
- * API computes it per CNV, over every transcript of the gene.
- */
+// The API computes the overlaps per CNV, over every transcript of the gene.
 export function useGeneCNVOverlaps(
   { caseId, seqId, taskId }: CNVProfileIds,
   gene: GeneTrackGene,

@@ -1,4 +1,3 @@
-/** The points of a track, by chromosome parity, and the rings they get once zoomed in. */
 export type CloudColors = { even: string; odd: string; evenRing: string; oddRing: string };
 
 export type CNVProfilePalette = {
@@ -12,11 +11,7 @@ export type CNVProfilePalette = {
   highlight: string;
 };
 
-// Plotly can't read CSS variables. The point pairs, and the gene colours against the gain and
-// highlight colours, are checked for colour-blind separation against the light and dark card
-// colours of usePlotlyTheme. A protein-coding gene stands out by lightness from the other genes.
-// Each track has its own pair, in the same tone by chromosome parity: teal and green on the even
-// chromosomes, purple and orchid on the odd ones.
+// Plotly can't read CSS variables: these pairs are checked for colour-blind separation on both themes.
 const LIGHT: CNVProfilePalette = {
   copyRatio: { even: '#16a08e', odd: '#8a6bbf', evenRing: '#0b6b5e', oddRing: '#5c4291' },
   baf: { even: '#5b9b2a', odd: '#b8579f', evenRing: '#3a6619', oddRing: '#7e3a6c' },

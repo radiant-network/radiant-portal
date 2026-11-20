@@ -12,6 +12,7 @@ import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-forma
 import AnnotationsQuickfilters from '../../filters/annotations-quickfilters';
 
 import { chromosomesInView, type Genome, type GenomeView, MIN_SPAN } from './libs/genome';
+import { formatLocus } from './libs/locus';
 import CNVProfileSearch from './cnv-profile-search';
 
 export type DragMode = 'pan' | 'zoom';
@@ -64,11 +65,19 @@ function CNVProfileNavbar({
   const [first] = inView;
   const last = inView[inView.length - 1];
 
-  let viewText = `${first.name} → ${last.name} · ${toKiloBases(span)}`;
+  const size = toKiloBases(span);
+  let viewText = t('case_entity.variants.cnv_profile.navbar.view_chromosomes', {
+    first: first.name,
+    last: last.name,
+    size,
+  });
   if (span >= genome.length * 0.99) {
-    viewText = `${t('case_entity.variants.cnv_profile.navbar.whole_genome')} · ${toKiloBases(span)}`;
+    viewText = t('case_entity.variants.cnv_profile.navbar.view_genome', { size });
   } else if (first === last) {
-    viewText = `chr${first.name}:${thousandNumberFormat(Math.round(view.x0 - first.offset))}-${thousandNumberFormat(Math.round(view.x1 - first.offset))} · ${toKiloBases(span)}`;
+    viewText = t('case_entity.variants.cnv_profile.locus_size', {
+      locus: formatLocus(t, first.name, Math.round(view.x0 - first.offset), Math.round(view.x1 - first.offset)),
+      size,
+    });
   }
 
   return (
@@ -145,7 +154,7 @@ function CNVProfileNavbar({
           <SelectContent>
             {genome.chromosomes.map(chromosome => (
               <SelectItem key={chromosome.name} value={chromosome.name}>
-                chr{chromosome.name}
+                {t('case_entity.variants.cnv_profile.chromosome_name', { name: chromosome.name })}
               </SelectItem>
             ))}
           </SelectContent>

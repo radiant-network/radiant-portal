@@ -2795,6 +2795,11 @@
         "button": "CNV profile",
         "unavailable": "Available for exome and genome sequencing only",
         "title": "CNV profile",
+        "locus": "chr{{chromosome}}:{{start}}-{{end}}",
+        "position": "chr{{chromosome}}:{{position}}",
+        "locus_size": "{{locus}} · {{size}}",
+        "megabases": "{{value}} Mb",
+        "chromosome_name": "chr{{name}}",
         "loading": "Loading the CNV profile…",
         "overview": {
           "reduced": "Overview: one copy ratio bin in {{copyRatioStride}} and one BAF variant in {{bafStride}}. Zoom below {{span}} to see every point.",
@@ -2841,7 +2846,8 @@
         },
         "navbar": {
           "genome": "Genome",
-          "whole_genome": "Whole genome",
+          "view_genome": "Whole genome · {{size}}",
+          "view_chromosomes": "chr{{first}} → chr{{last}} · {{size}}",
           "drag": "Drag to",
           "drag_pan": "pan",
           "drag_zoom": "select a region",

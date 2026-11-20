@@ -9,10 +9,6 @@ import type { Locus } from '../libs/genome';
 
 const EMPTY: GeneTrackGene[] = [];
 
-/**
- * The genes of a region, fetched once the view settles. The previous genes stay shown while the
- * next region loads.
- */
 export function useGeneTrack(region?: Locus) {
   const { tenant } = useTenant();
   const settled = useDebounce(region, 200);

@@ -11,10 +11,6 @@ type CNVNameCellProps = {
   occurrence: GermlineCNVOccurrence;
 };
 
-/**
- * Opens the CNV profile on the CNV, whose panel links to Franklin. Without a profile, links to
- * Franklin directly.
- */
 function CNVNameCell({ occurrence }: CNVNameCellProps) {
   const { available, open } = useCNVProfile();
   const { start, type, end, chromosome, name } = occurrence;

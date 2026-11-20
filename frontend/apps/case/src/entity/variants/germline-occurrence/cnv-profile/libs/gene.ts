@@ -1,4 +1,4 @@
 import type { GeneTrackGene } from '@/api/api';
 
-/** The Ensembl description of a gene, without its source suffix ("[Source:HGNC Symbol;Acc:...]"). */
+// Drops the "[Source:HGNC Symbol;Acc:...]" suffix of the Ensembl descriptions.
 export const geneDescription = (gene: GeneTrackGene) => gene.description?.replace(/\s*\[Source:[^\]]*\]\s*$/, '');

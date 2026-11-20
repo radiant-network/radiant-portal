@@ -23,6 +23,7 @@ import { useCaseVariantPermissions } from '../../use-case-variant-permissions';
 
 import { useCNVGeneOverlaps } from './hooks/use-cnv-gene-overlaps';
 import type { CNVProfileIds } from './hooks/use-profile-region';
+import { formatLocus } from './libs/locus';
 import { getCNVProfilePalette } from './libs/palette';
 import { PROTEIN_CODING } from './libs/traces';
 import CNVGeneConstraint from './cnv-gene-constraint';
@@ -37,17 +38,9 @@ type CNVSegmentPanelProps = {
   onClose: () => void;
 };
 
-const locus = (chromosome: string, start: number, end: number) =>
-  `chr${chromosome}:${thousandNumberFormat(start)}-${thousandNumberFormat(end)}`;
-
 const percent = (value: number, fractionDigits: number) =>
   thousandNumberFormat(value, { minimumFractionDigits: fractionDigits, maximumFractionDigits: fractionDigits });
 
-/**
- * The details of a called CNV: its calls, its Franklin link and the genes it overlaps, with the
- * columns of the overlapping genes of the CNV table. The protein-coding genes come first, edged in
- * the colour of their track.
- */
 function CNVSegmentPanel({ ids, segment, onGeneClick, onNotesChange, onFlagChange, onClose }: CNVSegmentPanelProps) {
   const { t } = useI18n();
   const { canComment } = useCaseVariantPermissions();
@@ -96,7 +89,7 @@ function CNVSegmentPanel({ ids, segment, onGeneClick, onNotesChange, onFlagChang
             {gain ? t('case_entity.variants.cnv_profile.hover.gain') : t('case_entity.variants.cnv_profile.hover.loss')}
           </Badge>
           <span className="whitespace-nowrap tabular-nums">
-            {locus(segment.chromosome, segment.start, segment.end)}
+            {formatLocus(t, segment.chromosome, segment.start, segment.end)}
           </span>
         </CardTitle>
         <div className="flex items-center gap-1">

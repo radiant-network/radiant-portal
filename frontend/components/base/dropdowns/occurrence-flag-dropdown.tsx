@@ -37,7 +37,6 @@ export type OccurrenceFlagDropdownProps = ButtonProps & {
   seqId: number;
   flag?: OccurrenceFlagType;
   canFlag?: boolean;
-  /** Called once a flag change is saved, with the new flag or undefined when it was removed. */
   onFlagChange?: (flag: OccurrenceFlagType | undefined) => void;
 };
 

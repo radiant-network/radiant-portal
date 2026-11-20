@@ -8,9 +8,6 @@ export type ClickTarget =
   | { kind: 'cytoband'; index: number }
   | { kind: 'gene'; index: number; exonIndex?: number };
 
-/**
- * A clickable span in genome coordinates, from y0 to y1 on its axis, widened by padPx on screen.
- */
 export type HitArea = {
   target: ClickTarget;
   yaxis: YAxisName;
@@ -21,7 +18,6 @@ export type HitArea = {
   padPx: number;
 };
 
-/** The plot area in client pixels. */
 export type PlotFrame = { left: number; top: number; width: number; height: number };
 
 const SEGMENT_PAD_PX = 6;
@@ -62,9 +58,6 @@ export function segmentHitAreas(
   });
 }
 
-/**
- * The bar of each gene, from its lane to its label, and below the exon span each exon.
- */
 export function geneHitAreas(genes: GeneTrackGene[], genome: Genome, view: GenomeView, pxPerBase: number): HitArea[] {
   const detailed = isExonView(view);
   return placeGenes(genes, genome, pxPerBase).flatMap(({ gene, index, start, end, offset, y }) => [
@@ -113,9 +106,6 @@ export function cytobandHitAreas(cytobands: Cytoband[], genome: Genome, view: Ge
   });
 }
 
-/**
- * The chromosome and position under a client position, when it is inside the plot area.
- */
 export function locusAt(
   genome: Genome,
   view: GenomeView,
@@ -134,10 +124,7 @@ export function locusAt(
   return { chromosome: chromosome.name, position: Math.max(1, Math.round(x - chromosome.offset)) };
 }
 
-/**
- * The area under a client position: the narrowest one, so that an exon wins over its gene. Areas
- * narrower than MIN_HIT_WIDTH_PX are widened to it.
- */
+// The narrowest area wins, so that an exon wins over its gene.
 export function hitTest(
   areas: HitArea[],
   view: GenomeView,

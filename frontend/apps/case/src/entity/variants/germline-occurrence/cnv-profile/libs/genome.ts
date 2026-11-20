@@ -44,9 +44,6 @@ export function toGenomePosition(genome: Genome, chromosome: string, position: n
   return placed === undefined ? undefined : placed.offset + position;
 }
 
-/**
- * Keeps a view inside the genome and above MIN_SPAN, keeping its width when it fits.
- */
 export function clampView(genome: Genome, x0: number, x1: number): GenomeView {
   const span = Math.min(genome.length, Math.max(MIN_SPAN, x1 - x0));
   const start = Math.min(Math.max(0, (x0 + x1) / 2 - span / 2), genome.length - span);
@@ -65,10 +62,7 @@ export function viewAround(genome: Genome, chromosome: string, start: number, en
 
 type Ticks = { tickvals: number[]; ticktext: string[] };
 
-/**
- * Chromosome names at their middle when three or more chromosomes are in view, local positions
- * otherwise.
- */
+// Chromosome names when three or more chromosomes are in view, local positions otherwise.
 export function computeTicks(genome: Genome, view: GenomeView, formatPosition: (bases: number) => string): Ticks {
   const inView = chromosomesInView(genome, view);
   if (inView.length >= 3) {
@@ -95,9 +89,7 @@ export function computeTicks(genome: Genome, view: GenomeView, formatPosition: (
 
 export type Locus = { chromosome: string; start: number; end: number };
 
-/**
- * Reads "17", "chr17" or "chr17:40,000,000-45,000,000".
- */
+// Reads "17", "chr17" or "chr17:40,000,000-45,000,000".
 export function parseLocus(genome: Genome, input: string): Locus | undefined {
   const match = input.replace(/[,\s]/g, '').match(/^(?:chr)?([0-9]{1,2}|X|Y)(?::(\d+)-(\d+))?$/i);
   if (!match) return undefined;
@@ -109,11 +101,7 @@ export function parseLocus(genome: Genome, input: string): Locus | undefined {
   return { chromosome: chromosome.name, start, end };
 }
 
-/**
- * The region to fetch the data of a view from (genes, detailed points): the view within one
- * chromosome, widened on each side and snapped to a grid so that small moves reuse it. Undefined
- * when the view is too wide.
- */
+// Widened and snapped to a grid so that small moves reuse the region; undefined when too wide.
 export function regionWindow(genome: Genome, view: GenomeView, maxSpan: number): Locus | undefined {
   const inView = chromosomesInView(genome, view);
   const span = view.x1 - view.x0;

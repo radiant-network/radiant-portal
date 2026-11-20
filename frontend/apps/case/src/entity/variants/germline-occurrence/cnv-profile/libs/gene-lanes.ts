@@ -7,11 +7,7 @@ export type LaneItem = { start: number; end: number; label: string; primary?: bo
 
 export type LaneAssignment = { lane: number; labelled: boolean };
 
-/**
- * Packs items sorted by start into lanes so that labels do not overlap. Primary items are placed
- * first, so that they keep their labels among many others. An item gets a lane only where its
- * centred label fits; otherwise it goes, unlabelled, in the lane that ends the earliest.
- */
+// Primary items are placed first to keep their labels; an item without room goes unlabelled.
 export function assignLanes(items: LaneItem[], pxPerBase: number, lanes = GENE_LANES): LaneAssignment[] {
   const taken: [number, number][][] = Array.from({ length: lanes }, () => []);
   const laneEnds = Array<number>(lanes).fill(-Infinity);

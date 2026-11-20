@@ -47,9 +47,6 @@ function errorKey(error: unknown) {
   return 'case_entity.variants.cnv_profile.errors.unknown';
 }
 
-/**
- * Holds the CNV profile dialog of a sequencing, opened by the CNVProfileButton or by the CNV table.
- */
 export function CNVProfileProvider({
   caseId,
   seqId,
@@ -107,12 +104,11 @@ export function CNVProfileProvider({
         <DialogContent
           size="full"
           variant="stickyHeader"
-          className={cn({
-            'h-screen max-h-screen w-screen max-w-none grid-rows-[auto_1fr] border-0 sm:rounded-none': fullscreen,
+          className={cn('flex h-screen flex-col', {
+            'max-h-screen w-screen max-w-none border-0 sm:rounded-none': fullscreen,
           })}
           onOpenAutoFocus={event => {
-            // The dialog takes the focus itself: while the profile loads, the fullscreen button would
-            // be the first to take it, and show its tooltip.
+            // Focus the dialog itself, or the fullscreen button takes the focus and shows its tooltip.
             event.preventDefault();
             (event.currentTarget as HTMLElement).focus();
           }}
@@ -129,7 +125,7 @@ export function CNVProfileProvider({
               {sampleId && <span className="font-normal text-muted-foreground"> · {sampleId}</span>}
             </DialogTitle>
           </DialogHeader>
-          <DialogBody className={cn('h-[85vh] min-w-0', { 'h-full max-h-none min-h-0': fullscreen })}>
+          <DialogBody className="max-h-none min-h-0 min-w-0 flex-1">
             {error && (
               <Alert variant="error">
                 <AlertDescription>{t(errorKey(error))}</AlertDescription>

@@ -2796,6 +2796,11 @@
         "button": "Profil CNV",
         "unavailable": "Disponible pour les exomes et les génomes seulement",
         "title": "Profil CNV",
+        "locus": "chr{{chromosome}}:{{start}}-{{end}}",
+        "position": "chr{{chromosome}}:{{position}}",
+        "locus_size": "{{locus}} · {{size}}",
+        "megabases": "{{value}} Mb",
+        "chromosome_name": "chr{{name}}",
         "loading": "Chargement du profil CNV…",
         "overview": {
           "reduced": "Vue d'ensemble : un bin de copy ratio sur {{copyRatioStride}} et un variant BAF sur {{bafStride}}. Zoomez sous {{span}} pour voir tous les points.",
@@ -2842,7 +2847,8 @@
         },
         "navbar": {
           "genome": "Génome",
-          "whole_genome": "Génome entier",
+          "view_genome": "Génome entier · {{size}}",
+          "view_chromosomes": "chr{{first}} → chr{{last}} · {{size}}",
           "drag": "Glisser pour",
           "drag_pan": "déplacer",
           "drag_zoom": "sélectionner une zone",

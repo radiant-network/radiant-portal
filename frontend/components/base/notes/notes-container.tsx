@@ -35,7 +35,6 @@ export type NotesContainerProps = NoteContainerBaseProps & {
   enableSkeletonLoading?: boolean;
   withHeader?: boolean;
   canComment?: boolean;
-  /** Whether the editor takes the focus on mount, as when the comments are opened on their own. */
   focusEditor?: boolean;
 };
 

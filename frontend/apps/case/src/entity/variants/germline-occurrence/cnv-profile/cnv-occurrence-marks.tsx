@@ -11,10 +11,6 @@ type CNVOccurrenceMarksProps = {
   onNoteClick?: () => void;
 };
 
-/**
- * The flag of a CNV and whether it has comments, as the CNV table shows them, read only. With
- * onNoteClick, the comment mark is a button, as to scroll to the comments.
- */
 function CNVOccurrenceMarks({ flag, hasNote, onNoteClick }: CNVOccurrenceMarksProps) {
   const { t } = useI18n();
   const flagConfig = flag ? FLAGS[flag] : undefined;

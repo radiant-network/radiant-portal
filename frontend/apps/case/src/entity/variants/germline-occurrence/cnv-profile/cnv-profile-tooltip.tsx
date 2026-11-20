@@ -3,10 +3,11 @@ import { type ReactNode, type Ref, useImperativeHandle, useState } from 'react';
 import type { CNVProfileSegment, GeneTrackGene } from '@/api/api';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
-import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
+import { toKiloBases } from '@/components/lib/number-format';
 
 import { geneDescription } from './libs/gene';
 import type { ClickTarget } from './libs/hit-test';
+import { formatLocus } from './libs/locus';
 import CNVGeneConstraint from './cnv-gene-constraint';
 
 export type CNVProfileTooltipHandle = {
@@ -21,9 +22,6 @@ type CNVProfileTooltipProps = {
 };
 
 type Hover = { target: ClickTarget; x: number; y: number };
-
-const locus = (chromosome: string, start: number, end: number) =>
-  `chr${chromosome}:${thousandNumberFormat(start)}-${thousandNumberFormat(end)}`;
 
 function Field({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -42,7 +40,7 @@ function CNVTooltipContent({ segment }: { segment: CNVProfileSegment }) {
         {segment.type === 'GAIN'
           ? t('case_entity.variants.cnv_profile.hover.gain')
           : t('case_entity.variants.cnv_profile.hover.loss')}{' '}
-        {locus(segment.chromosome, segment.start, segment.end)}
+        {formatLocus(t, segment.chromosome, segment.start, segment.end)}
       </span>
       <dl className="grid grid-cols-[auto_auto] gap-x-3 gap-y-0.5">
         <Field
@@ -95,7 +93,7 @@ function GeneTooltipContent({ gene, exonIndex }: { gene: GeneTrackGene; exonInde
         />
         <Field
           label={t('case_entity.variants.cnv_profile.panel.locus')}
-          value={locus(gene.chromosome, (exon ?? gene).start, (exon ?? gene).end)}
+          value={formatLocus(t, gene.chromosome, (exon ?? gene).start, (exon ?? gene).end)}
         />
         <Field
           label={t('case_entity.variants.cnv_profile.panel.size')}
@@ -108,10 +106,7 @@ function GeneTooltipContent({ gene, exonIndex }: { gene: GeneTrackGene; exonInde
   );
 }
 
-/**
- * The portal tooltip of the CNV or gene under the cursor, anchored on it. The chart drives it through
- * its handle, so that a mouse move renders the tooltip alone and not the plot.
- */
+// Driven through its handle, so that a mouse move renders the tooltip alone and not the plot.
 function CNVProfileTooltip({ ref, segments, genes }: CNVProfileTooltipProps) {
   const [hover, setHover] = useState<Hover | undefined>();
 

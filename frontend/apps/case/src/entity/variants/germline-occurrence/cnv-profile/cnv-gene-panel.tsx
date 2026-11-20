@@ -13,6 +13,7 @@ import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-forma
 
 import { useGeneCNVOverlaps } from './hooks/use-gene-cnv-overlaps';
 import type { CNVProfileIds } from './hooks/use-profile-region';
+import { formatLocus } from './libs/locus';
 import { cnvsOnGene } from './libs/overlap';
 import { getCNVProfilePalette } from './libs/palette';
 import { isFiltered } from './libs/traces';
@@ -27,9 +28,6 @@ type CNVGenePanelProps = {
   onSegmentClick: (segment: CNVProfileSegment) => void;
   onClose: () => void;
 };
-
-const locus = (chromosome: string, start: number, end: number) =>
-  `chr${chromosome}:${thousandNumberFormat(start)}-${thousandNumberFormat(end)}`;
 
 function CNVGenePanel({ ids, gene, exonIndex, segments, onSegmentClick, onClose }: CNVGenePanelProps) {
   const { t } = useI18n();
@@ -52,7 +50,6 @@ function CNVGenePanel({ ids, gene, exonIndex, segments, onSegmentClick, onClose 
     { name: 'GeneCards', href: `https://www.genecards.org/cgi-bin/carddisp.pl?gene=${symbol}` },
   ];
 
-  // The overlap columns of the CNV table, under the same names.
   const overlapText = (segment: CNVProfileSegment) => {
     const overlap = overlaps[segment.cnv_id];
     const pending = overlapsLoading ? '…' : '-';
@@ -84,7 +81,7 @@ function CNVGenePanel({ ids, gene, exonIndex, segments, onSegmentClick, onClose 
       <CardContent className="flex flex-col gap-4 text-sm">
         <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
           <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.locus')}</dt>
-          <dd className="tabular-nums">{locus(gene.chromosome, gene.start, gene.end)}</dd>
+          <dd className="tabular-nums">{formatLocus(t, gene.chromosome, gene.start, gene.end)}</dd>
           {gene.biotype && (
             <>
               <dt className="text-muted-foreground">{t('case_entity.variants.cnv_profile.panel.biotype')}</dt>
@@ -154,7 +151,10 @@ function CNVGenePanel({ ids, gene, exonIndex, segments, onSegmentClick, onClose 
               {t('case_entity.variants.cnv_profile.panel.exon', { index: exonIndex + 1, total: gene.exons.length })}
             </h3>
             <span className="tabular-nums">
-              {locus(gene.chromosome, exon.start, exon.end)} · {toKiloBases(exon.end - exon.start)}
+              {t('case_entity.variants.cnv_profile.locus_size', {
+                locus: formatLocus(t, gene.chromosome, exon.start, exon.end),
+                size: toKiloBases(exon.end - exon.start),
+              })}
             </span>
           </section>
         )}
@@ -169,7 +169,6 @@ function CNVGenePanel({ ids, gene, exonIndex, segments, onSegmentClick, onClose 
           <ul className="flex flex-col gap-2">
             {cnvs.map(segment => (
               <li key={segment.cnv_id}>
-                {/* Edged as the CNV is drawn: blue for a gain, red for a loss, dashed when it fails the filters. */}
                 <Button
                   variant="outline"
                   className="h-auto w-full flex-col items-start gap-1 border-2 py-2 text-left"
@@ -190,7 +189,10 @@ function CNVGenePanel({ ids, gene, exonIndex, segments, onSegmentClick, onClose 
                     <CNVOccurrenceMarks flag={segment.flag_type} hasNote={segment.has_note} />
                   </span>
                   <span className="text-xs font-normal text-muted-foreground tabular-nums">
-                    {locus(segment.chromosome, segment.start, segment.end)} · {toKiloBases(segment.end - segment.start)}
+                    {t('case_entity.variants.cnv_profile.locus_size', {
+                      locus: formatLocus(t, segment.chromosome, segment.start, segment.end),
+                      size: toKiloBases(segment.end - segment.start),
+                    })}
                   </span>
                   <span className="text-xs font-normal whitespace-normal text-muted-foreground tabular-nums">
                     {overlapText(segment)}

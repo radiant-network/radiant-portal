@@ -26,7 +26,11 @@ const genome = createGenome([
 ]);
 const palette = getCNVProfilePalette(false);
 const theme: PlotlyThemeColors = { isDark: false, foreground: '#000', muted: '#666', border: '#ddd', card: '#fff' };
-const format = { number: (n: number) => `${n}`, size: (n: number) => `${n} bp` };
+const format = {
+  number: (n: number) => `${n}`,
+  size: (n: number) => `${n} bp`,
+  locus: (chromosome: string, start: number, end: number) => `${chromosome}:${start}-${end}`,
+};
 const labels = new Proxy({}, { get: (_, key) => String(key) }) as TraceLabels;
 
 const segment = (overrides: Partial<CNVProfileSegment>): CNVProfileSegment => ({

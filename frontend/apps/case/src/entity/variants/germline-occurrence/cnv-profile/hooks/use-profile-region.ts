@@ -9,10 +9,6 @@ import type { Locus } from '../libs/genome';
 
 export type CNVProfileIds = { caseId: number; seqId: number; taskId: number };
 
-/**
- * Every copy ratio and BAF point of a region of a genome overview, fetched once the view settles.
- * The previous region stays shown while the next one loads.
- */
 export function useProfileRegion({ caseId, seqId, taskId }: CNVProfileIds, region?: Locus) {
   const { tenant } = useTenant();
   const settled = useDebounce(region, 300);

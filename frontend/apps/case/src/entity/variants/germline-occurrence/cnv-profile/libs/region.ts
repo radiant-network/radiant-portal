@@ -1,10 +1,6 @@
 import type { CNVProfileRegion, CNVProfileTrack } from '@/api/api';
 
-/**
- * The tracks of an overview with every point of a region in place of the overview's points
- * there. Outside the region the overview stays, so a pan shows the reduced points until the next
- * region loads.
- */
+// Outside the region the overview points stay, so that a pan shows them until the region loads.
 export function withRegion(
   tracks: CNVProfileTrack[],
   region: CNVProfileRegion | undefined,
