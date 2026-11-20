@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import type * as CheckboxPrimitive from '@radix-ui/react-checkbox';
 import { tv, type VariantProps } from 'tailwind-variants';
 
@@ -76,6 +77,7 @@ function CheckboxFilter({
 }: CheckboxFilterProps) {
   const styles = checkboxFilterVariants({ size, fluid });
   const name = typeof label === 'string' ? label.toLowerCase().replaceAll(' ', '-') : undefined;
+  const labelId = useId();
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- mouse shortcut, the checkbox is keyboard accessible
@@ -88,11 +90,12 @@ function CheckboxFilter({
         }
       }}
     >
-      <Checkbox name={name} size={size} data-cy={dataCy} {...props} />
+      <Checkbox name={name} size={size} data-cy={dataCy} aria-labelledby={labelId} {...props} />
 
       {icon && <div className={styles.icon({ size })}>{icon}</div>}
 
-      <Label className={cn('flex-1', styles.label({ size }))} htmlFor={name}>
+      {/* aria-labelledby, not htmlFor: a native label click would toggle a second time on top of the row's onClick */}
+      <Label id={labelId} className={cn('flex-1', styles.label({ size }))}>
         <span>{label}</span>
         <div className={cn('text-muted-foreground', styles.label({ size }), styles.description())}>{description}</div>
       </Label>

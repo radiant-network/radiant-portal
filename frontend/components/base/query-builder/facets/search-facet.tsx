@@ -181,6 +181,7 @@ export function SearchFacet({ search }: SearchFilterProps) {
         </span>
       </div>
       <MultiSelector
+        commandProps={{ label: t(`common.facets.labels.${translation_key}`) }}
         inputProps={{ 'aria-describedby': descriptionId }}
         value={selectedValues}
         defaultOptions={selectedOptions}

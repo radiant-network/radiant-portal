@@ -25,6 +25,7 @@ export default function CommunitySearch({ value, onValueChange, placeholder, cla
         value={value}
         onChange={event => onValueChange(event.target.value)}
         placeholder={placeholder}
+        aria-label={placeholder}
         className={cn({ 'pr-8': value.length > 0 })}
         size="sm"
       />

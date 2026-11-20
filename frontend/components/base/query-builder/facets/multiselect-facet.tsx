@@ -1,5 +1,5 @@
 /* eslint-disable complexity */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import isEqual from 'lodash/isEqual';
 import { SearchIcon } from 'lucide-react';
 
@@ -96,6 +96,7 @@ function sortAggregates(qbValues: string[]) {
  */
 export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps) {
   const { t, sanitize, lazyTranslate } = useI18n();
+  const dictionarySwitchId = useId();
   const { appId, builderFetcher, searchAutoFocus = true } = useFacetConfig();
   const dispatch = useQBDispatch();
 
@@ -278,6 +279,7 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
           size="xs"
           type="text"
           placeholder={t('common.facets.search.placeholder')}
+          aria-label={t('common.facets.search.placeholder')}
           className="w-full text-xs mt-3 py-1.5 px-3 mb-4 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
           onChange={e => setSearchValue(e.target.value)}
           value={searchValue}
@@ -309,12 +311,12 @@ export function MultiSelectFacet({ field, maxVisibleItems = 5 }: MultiFacetProps
           {field.withDictionary && (
             <>
               <div className="grow" />
-              <Label htmlFor="with-dictionary-switch" className="text-xs">
+              <Label htmlFor={dictionarySwitchId} className="text-xs">
                 {t('common.facets.with_dictionary')}
               </Label>
               <Switch
                 data-cy={`facet-dictionary-button-${field.key}`}
-                id="with-dictionary-switch"
+                id={dictionarySwitchId}
                 checked={isDictionaryEnabled}
                 size="sm"
                 onCheckedChange={handleOnDictionaryChecked}

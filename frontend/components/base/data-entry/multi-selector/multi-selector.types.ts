@@ -89,6 +89,9 @@ export interface MultipleSelectorProps {
    */
   renderBadge?: (params: { option: MultiSelectorOption; onRemove: () => void }) => React.ReactNode;
 
+  /** Set by `FormControl`, forwarded to the inner input so its description and error are read. */
+  'aria-describedby'?: string;
+
   /** Set by `FormControl` when the field is in error, turns the control red. */
   'aria-invalid'?: React.AriaAttributes['aria-invalid'];
 }

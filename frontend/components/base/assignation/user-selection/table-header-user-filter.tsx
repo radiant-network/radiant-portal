@@ -88,6 +88,7 @@ export function TableHeaderUserFilter({
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
           placeholder={defaultPlaceholder}
+          aria-label={defaultPlaceholder}
           className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
         />
       </div>

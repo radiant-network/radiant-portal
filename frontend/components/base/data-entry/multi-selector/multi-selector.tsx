@@ -43,6 +43,7 @@ function MultiSelector({
   multiline = false,
   renderBadge,
   ref,
+  'aria-describedby': ariaDescribedBy,
   'aria-invalid': ariaInvalid,
 }: MultipleSelectorProps) {
   const { t } = useI18n();
@@ -403,6 +404,7 @@ function MultiSelector({
             </Badge>
           )}
           <CommandPrimitive.Input
+            aria-describedby={ariaDescribedBy}
             {...inputProps}
             ref={inputRef}
             value={inputValue}

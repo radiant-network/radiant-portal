@@ -38,6 +38,7 @@ function UsersFilters({ search, onSearchChange, roles, onRolesChange }: UsersFil
         size="sm"
         startIcon={Search}
         placeholder={t('admin.users.filters.search_placeholder')}
+        aria-label={t('admin.users.filters.search_placeholder')}
         value={search}
         onChange={e => onSearchChange(e.target.value)}
         className="w-72"
