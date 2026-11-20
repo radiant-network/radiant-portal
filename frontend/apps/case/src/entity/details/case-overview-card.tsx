@@ -27,7 +27,7 @@ function CaseOverviewCard({ data, ...props }: { data: CaseEntity } & ComponentPr
 
               {data.case_type && (
                 <InformationField label={t('case_entity.details.case_type')}>
-                  <AnalysisTypeCodeBadge code={data.case_type as AnalysisTypeCode} />
+                  <AnalysisTypeCodeBadge code={data.case_type as AnalysisTypeCode} iconOnly />
                 </InformationField>
               )}
 
