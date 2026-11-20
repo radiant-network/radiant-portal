@@ -76,7 +76,11 @@ function CaseAssigneeFilter({ assignees, selected, currentUserId, onSelect }: Ca
     onSelect(isMyCases && currentUserId ? [currentUserId] : []);
   }
 
-  const countBadge = others.length > 0 && <Badge className="size-5 items-center justify-center">{others.length}</Badge>;
+  const countBadge = others.length > 0 && (
+    <Badge data-cy="filter-badge-assignee_id" className="size-5 items-center justify-center">
+      {others.length}
+    </Badge>
+  );
 
   const dropdown = (
     <PopoverContent align="start" className="w-72 p-0">
@@ -95,6 +99,7 @@ function CaseAssigneeFilter({ assignees, selected, currentUserId, onSelect }: Ca
               return (
                 <CommandItem
                   key={option.id}
+                  data-cy={`filter-option-assignee_id-${option.id}`}
                   value={option.id}
                   keywords={[option.name, option.email ?? '']}
                   onSelect={() => handleToggle(option.id)}
@@ -127,7 +132,7 @@ function CaseAssigneeFilter({ assignees, selected, currentUserId, onSelect }: Ca
       </Command>
       {others.length > 0 && (
         <div className="border-t p-1">
-          <Button variant="ghost" size="sm" className="w-full" onClick={handleClear}>
+          <Button data-cy="filter-clear-assignee_id" variant="ghost" size="sm" className="w-full" onClick={handleClear}>
             {t('common.actions.clear')}
           </Button>
         </div>
@@ -139,7 +144,7 @@ function CaseAssigneeFilter({ assignees, selected, currentUserId, onSelect }: Ca
     return (
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="border-dashed">
+          <Button data-cy="filter-button-assignee_id" variant="outline" size="sm" className="border-dashed">
             <User />
             <span>{t('case_exploration.case.filters.assignee_id')}</span>
             {countBadge}
@@ -156,7 +161,12 @@ function CaseAssigneeFilter({ assignees, selected, currentUserId, onSelect }: Ca
         <Tooltip>
           <TooltipTrigger asChild>
             <label className="flex h-8 cursor-pointer items-center gap-2 rounded-l-lg border border-input bg-background px-2.5 text-sm leading-none font-medium shadow-xs">
-              <Switch size="sm" checked={isMyCases} onCheckedChange={handleMyCasesChange} />
+              <Switch
+                data-cy="filter-switch-my-cases"
+                size="sm"
+                checked={isMyCases}
+                onCheckedChange={handleMyCasesChange}
+              />
               {t('case_exploration.case.filters.my_cases')}
             </label>
           </TooltipTrigger>
@@ -166,7 +176,13 @@ function CaseAssigneeFilter({ assignees, selected, currentUserId, onSelect }: Ca
           <Tooltip>
             <TooltipTrigger asChild>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="px-4" aria-label={openLabel}>
+                <Button
+                  data-cy="filter-button-assignee_id"
+                  variant="outline"
+                  size="sm"
+                  className="px-4"
+                  aria-label={openLabel}
+                >
                   <User />
                   {countBadge}
                 </Button>
