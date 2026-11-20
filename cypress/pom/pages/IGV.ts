@@ -48,18 +48,19 @@ export const IGV = {
       findInIGV(CommonSelectors.igvTrack).eq(0).contains(CommonTexts.en.igvTrackRefseq).should('exist');
       findInIGV(CommonSelectors.igvTrack).eq(1).contains(CommonTexts.en.igvTrackCNVs(data.variantGermline.igv.proband, 'proband')).should('exist');
       findInIGV(CommonSelectors.igvTrack).eq(2).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.proband, 'proband')).should('exist');
-      findInIGV(CommonSelectors.igvTrack).eq(3).contains(CommonTexts.en.igvTrackCNVs(data.variantGermline.igv.mother, 'mother')).should('exist');
-      findInIGV(CommonSelectors.igvTrack).eq(4).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.mother, 'mother')).should('exist');
-      findInIGV(CommonSelectors.igvTrack).eq(5).contains(CommonTexts.en.igvTrackCNVs(data.variantGermline.igv.father, 'father')).should('exist');
-      findInIGV(CommonSelectors.igvTrack).eq(6).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.father, 'father')).should('exist');
+      findInIGV(CommonSelectors.igvTrack).eq(3).contains(CommonTexts.en.igvTrackBAF(data.variantGermline.igv.proband, 'proband')).should('exist');
+      findInIGV(CommonSelectors.igvTrack).eq(4).contains(CommonTexts.en.igvTrackCNVs(data.variantGermline.igv.mother, 'mother')).should('exist');
+      findInIGV(CommonSelectors.igvTrack).eq(5).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.mother, 'mother')).should('exist');
+      findInIGV(CommonSelectors.igvTrack).eq(6).contains(CommonTexts.en.igvTrackCNVs(data.variantGermline.igv.father, 'father')).should('exist');
+      findInIGV(CommonSelectors.igvTrack).eq(7).contains(CommonTexts.en.igvTrackReads(data.variantGermline.igv.father, 'father')).should('exist');
       publicTracks.forEach((name, index) => {
         findInIGV(CommonSelectors.igvTrack)
-          .eq(7 + index)
+          .eq(8 + index)
           .contains(name)
           .should('exist');
       });
       findInIGV(CommonSelectors.igvTrack)
-        .eq(7 + publicTracks.length)
+        .eq(8 + publicTracks.length)
         .should('not.exist');
     },
     /**
