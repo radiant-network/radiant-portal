@@ -1,0 +1,43 @@
+name: Cypress label check
+
+# Once a PR is approved, the cypress label runs the e2e tests on its Ferlease before the merge.
+# This check fails while an approved PR has no cypress label; make it a required check on main
+# to block the merge.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  pull-requests: read
+
+concurrency:
+  group: cypress-label-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  cypress-label:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require the cypress label once the PR is approved
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          # Latest review of each reviewer: the PR is approved when one approves and nobody requests changes
+          states=$(gh api "repos/$REPO/pulls/$PR/reviews" --paginate --jq '.[] | select(.state != "COMMENTED") | [.user.login, .state] | @tsv' \
+            | awk -F'\t' '{ last[$1] = $2 } END { for (u in last) print last[u] }')
+          if ! grep -qx APPROVED <<< "$states" || grep -qx CHANGES_REQUESTED <<< "$states"; then
+            echo "Not approved yet: the cypress label is required once the PR is approved."
+            exit 0
+          fi
+          # Read the labels from the API: the payload of a pull_request_review event can be stale
+          if gh api "repos/$REPO/issues/$PR/labels" --jq '.[].name' | grep -qx cypress; then
+            echo "Approved and labelled cypress."
+          else
+            echo "::error::The PR is approved: add the cypress label to run the e2e tests on the Ferlease before merging."
+            exit 1
+          fi

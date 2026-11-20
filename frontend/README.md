@@ -107,7 +107,7 @@ Read more [here](https://app.notion.com/p/ferlab/Processus-QA-Ticket-Jira-2a1b0f
 - Create a new pull request
 - Assign a frontend developer as a reviewer
 - Wait for frontend developer approval
-- Add the cypress label (make sure the branch has been rebased with the latest version of main)
+- Add the cypress label (make sure the branch has been rebased with the latest version of main). The `Cypress label check` fails while an approved PR has no `cypress` label
 - Check qlin-ferlease status in the qlin-ferlease slack
 - Move the Jira ticket to QA
 - Wait for QA to update the Cypress test and move the Jira ticket to `Ready to Merge`

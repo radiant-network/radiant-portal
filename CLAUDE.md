@@ -130,3 +130,4 @@ See `frontend/CLAUDE.md` for full details.
 - `test-and-release-cli.yml` — On `v*.*.*` tags: `radiant-client` tests, then `make -C backend build-cli-all` and the binaries attached to the GitHub release
 - `build_and_push.yml` — Docker image build and registry push (multi-portal)
 - `storybook.yml` — Storybook build and GitHub Pages deployment
+- `cypress-label-check.yml` — Fails while an approved PR has no `cypress` label (the label runs the e2e tests on the Ferlease before the merge); passes before the approval and skips drafts
