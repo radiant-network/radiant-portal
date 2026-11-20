@@ -8,10 +8,6 @@
     "value": "Mock patient_id"
   },
   {
-    "type": "sequencing_experiment_id",
-    "value": "Mock sequencing_experiment_id"
-  },
-  {
     "type": "submitter_patient_id",
     "value": "Mock submitter_patient_id"
   },
