@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Plot from 'react-plotly.js';
 import type { PlotRelayoutEvent } from 'plotly.js';
+import { toast } from 'sonner';
 
 import type { CNVProfile, CNVProfileSegment, GeneTrackGene, OccurrenceFlagType } from '@/api/api';
 import { usePlotlyTheme } from '@/components/base/charts/hooks/use-plotly-theme';
@@ -282,13 +283,20 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
         setView(viewAround(genome, locus.chromosome, locus.start, locus.end, (locus.end - locus.start) * 0.1));
         return true;
       }
-      const response = await genesApi.geneTrack(tenant, query);
-      const [gene] = response.data.filter(found => genome.byName.has(found.chromosome));
+      let found: GeneTrackGene[];
+      try {
+        found = (await genesApi.geneTrack(tenant, query)).data;
+      } catch {
+        toast.error(t('case_entity.variants.cnv_profile.navbar.search_error'));
+        // The toast tells the failure: not a gene not found.
+        return true;
+      }
+      const [gene] = found.filter(candidate => genome.byName.has(candidate.chromosome));
       if (!gene) return false;
       focusGene(gene);
       return true;
     },
-    [genome, tenant, focusGene],
+    [genome, tenant, focusGene, t],
   );
 
   // Opened on a CNV of the CNV table: zoom on it and show its panel.
@@ -428,7 +436,13 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
-      if ((event.target as HTMLElement).closest('input, select, textarea, [role="combobox"], [role="slider"]')) return;
+      // Typing in a field, as the comment editor, must not move the view.
+      if (
+        (event.target as HTMLElement).closest(
+          'input, select, textarea, [contenteditable="true"], [role="combobox"], [role="slider"]',
+        )
+      )
+        return;
       const moves: Record<string, (current: GenomeView) => GenomeView> = {
         ArrowLeft: current => panView(current, -0.25),
         ArrowRight: current => panView(current, 0.25),
@@ -520,8 +534,10 @@ function CNVProfileChart({ profile, ids, focus }: CNVProfileChartProps) {
               onClose={() => setSelectedGene(undefined)}
             />
           )}
+          {/* Keyed on the CNV: another CNV starts with an empty comment editor. */}
           {shownSegment && (
             <CNVSegmentPanel
+              key={shownSegment.cnv_id}
               ids={ids}
               segment={shownSegment}
               onGeneClick={symbol => void handleSearch(symbol)}

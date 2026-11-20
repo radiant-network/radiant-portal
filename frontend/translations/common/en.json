@@ -2641,6 +2641,7 @@
   },
   "case_entity": {
     "not_found": "Case not found",
+    "search_error": "The gene search failed, try again.",
     "not_found.button": "Back to case list",
     "header": {
       "case": "Case",

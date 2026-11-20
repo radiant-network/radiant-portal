@@ -2642,6 +2642,7 @@
   },
   "case_entity": {
     "not_found": "Cas introuvable",
+    "search_error": "La recherche de gène a échoué, réessayez.",
     "not_found.button": "Retour à la liste de cas",
     "header": {
       "case": "Cas",
