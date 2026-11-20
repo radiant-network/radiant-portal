@@ -235,6 +235,7 @@ function QueryBar({ index, sqon, swrId }: QueryBarProps) {
               size="sm"
               defaultChecked={false}
               checked={selectedQueries.includes(sqon.id)}
+              onClick={e => e.stopPropagation()}
               onCheckedChange={handleSelection}
             />
             <span className="text-xs font-medium">{t('common.query_bar.selector', { index: index + 1 })}</span>
