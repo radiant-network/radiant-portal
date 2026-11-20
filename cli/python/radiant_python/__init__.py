@@ -71,7 +71,9 @@ from radiant_python.models.batch_summary import BatchSummary
 from radiant_python.models.cnv_gene_overlap import CNVGeneOverlap
 from radiant_python.models.cnv_profile import CNVProfile
 from radiant_python.models.cnv_profile_chromosome import CNVProfileChromosome
+from radiant_python.models.cnv_profile_overview import CNVProfileOverview
 from radiant_python.models.cnv_profile_roh import CNVProfileROH
+from radiant_python.models.cnv_profile_region import CNVProfileRegion
 from radiant_python.models.cnv_profile_segment import CNVProfileSegment
 from radiant_python.models.cnv_profile_track import CNVProfileTrack
 from radiant_python.models.case_assignee import CaseAssignee
