@@ -49,6 +49,10 @@ function CaseAssigneeFilter({ assignees, selected, currentUserId, onSelect }: Ca
     { id: ASSIGNATION_CONSTANTS.NOT_ASSIGNED_USER_ID, name: t('case_exploration.case.filters.unassigned') },
     ...assignees.filter(assignee => assignee.user_id !== currentUserId).map(toAvatarUser),
   ];
+  const openLabel =
+    others.length > 0
+      ? t('a11y.case_assignee_filter.open_selected', { count: others.length })
+      : t('a11y.case_assignee_filter.open');
   const orderedOptions = [
     ...options.filter(option => pinnedIds.includes(option.id)),
     ...options.filter(option => !pinnedIds.includes(option.id)),
@@ -97,7 +101,7 @@ function CaseAssigneeFilter({ assignees, selected, currentUserId, onSelect }: Ca
                   className={cn('items-start gap-2', { 'bg-accent': isSelected })}
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-3">
-                    <Avatar size="xs" className="shrink-0 self-start">
+                    <Avatar size="xs" aria-hidden className="shrink-0 self-start">
                       <AvatarFallback color={isUnassigned ? 'neutral' : getUserColor(option.id)}>
                         {isUnassigned ? <User className="size-4 opacity-60" /> : getInitials(option)}
                       </AvatarFallback>
@@ -109,7 +113,12 @@ function CaseAssigneeFilter({ assignees, selected, currentUserId, onSelect }: Ca
                       {option.email && <p className="truncate text-xs text-muted-foreground">{option.email}</p>}
                     </div>
                   </div>
-                  {isSelected && <Check className="mt-0.5 size-4 shrink-0" />}
+                  {isSelected && (
+                    <>
+                      <Check aria-hidden className="mt-0.5 size-4 shrink-0" />
+                      <span className="sr-only">{t('a11y.case_assignee_filter.selected')}</span>
+                    </>
+                  )}
                 </CommandItem>
               );
             })}
@@ -157,12 +166,7 @@ function CaseAssigneeFilter({ assignees, selected, currentUserId, onSelect }: Ca
           <Tooltip>
             <TooltipTrigger asChild>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="px-4"
-                  aria-label={t('case_exploration.case.filters.assignee_id_tooltip')}
-                >
+                <Button variant="outline" size="sm" className="px-4" aria-label={openLabel}>
                   <User />
                   {countBadge}
                 </Button>

@@ -27,6 +27,12 @@
     "case_actions_menu": {
       "open": "Case actions"
     },
+    "case_assignee_filter": {
+      "open": "Filter by assignment",
+      "open_selected_one": "Filter by assignment, {{count}} selected",
+      "open_selected_other": "Filter by assignment, {{count}} selected",
+      "selected": "selected"
+    },
     "case_group_tag": {
       "copy_name": "Copy group name",
       "remove": "Remove the New data filter"
