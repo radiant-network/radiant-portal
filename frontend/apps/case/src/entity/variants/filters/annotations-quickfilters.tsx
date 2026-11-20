@@ -126,9 +126,11 @@ function AnnotationsQuickfilters({ value: actives, onChange, disabled = [] }: An
           {FLAGS.map(flag => {
             const Icon = flag.icon;
             return (
-              <button
+              <Button
                 key={flag.value}
                 type="button"
+                variant="ghost"
+                size="sm"
                 role="menuitemcheckbox"
                 aria-checked={actives.includes(flag.value)}
                 onClick={() =>
@@ -138,19 +140,16 @@ function AnnotationsQuickfilters({ value: actives, onChange, disabled = [] }: An
                       : [...actives, flag.value],
                   )
                 }
-                className={cn(
-                  'w-full flex items-center justify-between text-sm rounded-sm px-2 py-1.5 hover:bg-accent',
-                  {
-                    'bg-accent': actives.includes(flag.value),
-                  },
-                )}
+                className={cn('w-full justify-between rounded-sm px-2 font-normal [&_svg]:size-3.5', {
+                  'bg-accent': actives.includes(flag.value),
+                })}
               >
                 <span className="flex items-center gap-2">
                   <Icon className={cn('size-3.5', flag.className)} />
                   <span>{t(`occurrence_flag.${flag.value}`)}</span>
                 </span>
                 {actives.includes(flag.value) && <Check className="size-3.5" />}
-              </button>
+              </Button>
             );
           })}
         </PopoverContent>

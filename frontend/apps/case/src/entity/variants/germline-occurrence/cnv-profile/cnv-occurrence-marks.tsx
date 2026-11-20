@@ -2,6 +2,7 @@ import { MessageSquare } from 'lucide-react';
 
 import type { OccurrenceFlagType } from '@/api/api';
 import { FLAGS } from '@/components/base/dropdowns/occurrence-flag-dropdown';
+import { Button } from '@/components/base/shadcn/button';
 import { useI18n } from '@/components/hooks/i18n';
 
 type CNVOccurrenceMarksProps = {
@@ -26,15 +27,18 @@ function CNVOccurrenceMarks({ flag, hasNote, onNoteClick }: CNVOccurrenceMarksPr
         </span>
       )}
       {hasNote && onNoteClick && (
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="3xs"
+          iconOnly
           title={t('notes.variant.tooltip.view')}
           aria-label={t('notes.variant.tooltip.view')}
-          className="cursor-pointer rounded-sm hover:bg-accent"
+          className="[&_svg]:size-3.5"
           onClick={onNoteClick}
         >
-          <MessageSquare size={14} className="text-primary fill-primary/20" />
-        </button>
+          <MessageSquare className="text-primary fill-primary/20" />
+        </Button>
       )}
       {hasNote && !onNoteClick && (
         <span role="img" title={t('notes.variant.tooltip.view')} aria-label={t('notes.variant.tooltip.view')}>
