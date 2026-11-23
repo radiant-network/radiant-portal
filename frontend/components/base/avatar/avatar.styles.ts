@@ -23,7 +23,7 @@ export const avatarStyles = tv({
     },
     buttonVariant: {
       ghost: { container: '' },
-      secondary: { container: 'bg-secondary' },
+      secondary: { container: 'bg-secondary', text: 'text-secondary-foreground' },
     },
   },
   defaultVariants: {

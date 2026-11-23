@@ -25,7 +25,7 @@ export function AvatarAssignmentButton({
     : t('common.unassigned_avatar.cannot_assign');
 
   const enabledClass = isSecondary ? 'hover:bg-secondary/80' : 'hover:bg-accent';
-  const disabledClass = isSecondary ? 'cursor-not-allowed opacity-50' : 'cursor-default';
+  const disabledClass = 'cursor-default';
   const interactionClass = canAssign ? cn('cursor-pointer transition-colors', enabledClass) : disabledClass;
   const handleClick = canAssign && onAssignClick ? onAssignClick : undefined;
 
