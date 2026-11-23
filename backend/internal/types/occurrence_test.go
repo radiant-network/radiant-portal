@@ -44,8 +44,9 @@ func Test_OccurrenceType_TaskSelector_SomaticSNVTumorOnly_ResolvesToTumorOnlyCoh
 	assert.Equal(t, TaskSelector{TaskTypeCode: RadiantSomaticAnnotationTask, SomaticCohort: SomaticCohortTumorOnly}, selector)
 }
 
-// alignment_somatic_variant_calling, the tumor-only Dragen run, is tumor-only by definition, so unlike somatic SNV the selector
-// carries no cohort predicate — one would only let malformed clinical data hide the CNV tab.
+// alignment_somatic_variant_calling, the tumor-only Dragen run, is tumor-only by definition, so
+// unlike somatic SNV the selector carries no cohort predicate — one would only let malformed
+// clinical data hide the CNV tab.
 func Test_OccurrenceType_TaskSelector_SomaticCNV_ResolvesAlignmentSomaticVariantCallingWithNoCohort(t *testing.T) {
 	selector, err := OccurrenceTypeSomaticCNV.TaskSelector()
 

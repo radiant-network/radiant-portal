@@ -300,7 +300,7 @@ func Test_ListTasksByCaseAndSequencing_SomaticCNV_ReturnsAlignmentSomaticVariant
 
 		// Task 76 is the tumor-only Dragen run of seq 74, which also carries the somatic SNV tasks
 		// 74 and 82; only the task type tells them apart, since this selector carries no cohort
-		// predicate. Task 85 (tumor_only_variant_calling, the contract before RAD-396) is left out.
+		// predicate. Task 85 (tumor_only_variant_calling, the contract before 2026-11-10) is left out.
 		assert.NoError(t, err)
 		assert.Len(t, result, 1)
 		assert.Equal(t, 76, result[0].ID)
