@@ -63,11 +63,12 @@ func Test_CaseOccurrenceTasksEndpoint_SomaticSNV_ReturnsSomaticAnnotationTask(t 
 	})
 }
 
-func Test_CaseOccurrenceTasksEndpoint_SomaticCNV_ReturnsTumorOnlyVariantCallingTask(t *testing.T) {
+func Test_CaseOccurrenceTasksEndpoint_SomaticCNV_ReturnsAlignmentSomaticVariantCallingTask(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		// Task 85 (tumor_only_variant_calling) shares tumoral seq 74 with the somatic SNV tasks
-		// 74 and 82; the task type alone tells them apart.
-		expected := `[{"id":85,"task_type_code":"tumor_only_variant_calling","task_type_name":"Somatic Variant Calling by Tumor-Only Sample","pipeline_name":"Dragen","pipeline_version":"4.4.4","genome_build":"GRch38","created_on":"2026-03-11T13:08:00Z"}]`
+		// Task 76 (alignment_somatic_variant_calling) shares tumoral seq 74 with the somatic SNV tasks
+		// 74 and 82; the task type alone tells them apart. Task 85 (tumor_only_variant_calling) is not
+		// returned.
+		expected := `[{"id":76,"task_type_code":"alignment_somatic_variant_calling","task_type_name":"Genome Alignment and Somatic Variant Calling","pipeline_name":"Dragen","pipeline_version":"4.4.4","genome_build":"GRch38","created_on":"2026-03-09T13:08:00Z"}]`
 		code, body := getCaseOccurrenceTasks(t, env, 71, 74, "somatic_cnv")
 
 		assert.Equal(t, http.StatusOK, code)

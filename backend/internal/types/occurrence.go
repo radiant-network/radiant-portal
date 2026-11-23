@@ -66,7 +66,7 @@ func (o OccurrenceType) TaskSelector() (TaskSelector, error) {
 	case OccurrenceTypeSomaticSNVTumorOnly:
 		return TaskSelector{TaskTypeCode: RadiantSomaticAnnotationTask, SomaticCohort: SomaticCohortTumorOnly}, nil
 	case OccurrenceTypeSomaticCNV:
-		return TaskSelector{TaskTypeCode: TumorOnlyVariantCallingTaskTypeCode, SomaticCohort: SomaticCohortNone}, nil
+		return TaskSelector{TaskTypeCode: AlignmentSomaticVariantCallingTaskTypeCode, SomaticCohort: SomaticCohortNone}, nil
 	default:
 		return TaskSelector{}, fmt.Errorf("unknown occurrence type %q", string(o))
 	}
