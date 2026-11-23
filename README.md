@@ -50,10 +50,10 @@ A stopped run posts no results.
 
 ## Results
 
-The Slack results message links the reports, the screenshots and a JUnit XML of the run. Their files are kept:
+The Slack results message links the reports, the screenshots and a JUnit XML of the run. The links work as long as their files are kept:
 
 - for a Ferlease, until the PR is closed: read them before the merge. Removing the `cypress` label keeps them;
-- for the nightly, 7 days. Its Slack links expire after 24 hours: past that, ask someone with access to the artifacts bucket.
+- for the nightly, 7 days.
 
 ## Test accounts
 

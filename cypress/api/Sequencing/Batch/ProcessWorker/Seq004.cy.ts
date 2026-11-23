@@ -75,11 +75,11 @@ describe('Sequencing - Batch - Process worker - Seq004', () => {
   });
 
   it('Validate report sequencing_experiment[0] sequencer_id', () => {
-    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'sequencer_id', '', 'Cypress', 'CQGC', 'S13224', 'NA12878'), 'sequencing_experiment[0].sequencer_id');
+    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'sequencer_id', 'A00516', 'Cypress', 'CQGC', 'S13224', 'NA12878'), 'sequencing_experiment[0].sequencer_id');
   });
 
   it('Validate report sequencing_experiment[0] protocol', () => {
-    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'protocol', '', 'Cypress', 'CQGC', 'S13224', 'NA12878'), 'sequencing_experiment[0].protocol');
+    cy.validateReport(response, 'warn', 'SEQ-004', apiMessages.ProcessWorkerErrorDiffField('sequencing', 'protocol', 'TruSeq DNA PCR-Free', 'Cypress', 'CQGC', 'S13224', 'NA12878'), 'sequencing_experiment[0].protocol');
   });
 
   it('Validate report sequencing_experiment[0] run_date', () => {
