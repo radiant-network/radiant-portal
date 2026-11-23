@@ -39,6 +39,8 @@ export const data = {
       exp_strat: 'wgs',
       seq_status: 'Closed',
       last_update: '2026-09-21',
+      sequencer_id: 'A00516',
+      protocol: 'TruSeq DNA PCR-Free',
     },
     task: {
       task_id: '1175',

@@ -17,6 +17,8 @@ describe('Sequencing - Batch - Process worker - Seq001', () => {
           "sequencing_read_technology_code": "short_read",
           "platform_code": "illumina",
           "sequencing_lab_code": "CQGC",
+          "sequencer_id": "A00516",
+          "protocol": "TruSeq DNA PCR-Free",
           "run_alias": "A00516_0169",
           "run_date": "2021-08-17T00:00:00Z",
           "run_name": "1617",
