@@ -31,6 +31,7 @@ class CaseFilters(BaseModel):
     analysis_catalog_code: List[FiltersValue]
     assignee_id: List[CaseAssignee]
     case_category_code: List[FiltersValue]
+    case_type: List[FiltersValue]
     case_type_code: List[FiltersValue]
     diagnosis_lab_code: List[FiltersValue]
     life_status_code: List[FiltersValue]
@@ -39,7 +40,7 @@ class CaseFilters(BaseModel):
     priority_code: List[FiltersValue]
     project_code: List[FiltersValue]
     status_code: List[FiltersValue]
-    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "assignee_id", "case_category_code", "case_type_code", "diagnosis_lab_code", "life_status_code", "ordering_organization_code", "panel_code", "priority_code", "project_code", "status_code"]
+    __properties: ClassVar[List[str]] = ["analysis_catalog_code", "assignee_id", "case_category_code", "case_type", "case_type_code", "diagnosis_lab_code", "life_status_code", "ordering_organization_code", "panel_code", "priority_code", "project_code", "status_code"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -101,6 +102,13 @@ class CaseFilters(BaseModel):
                 if _item_case_category_code:
                     _items.append(_item_case_category_code.to_dict())
             _dict['case_category_code'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in case_type (list)
+        _items = []
+        if self.case_type:
+            for _item_case_type in self.case_type:
+                if _item_case_type:
+                    _items.append(_item_case_type.to_dict())
+            _dict['case_type'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in case_type_code (list)
         _items = []
         if self.case_type_code:
@@ -172,6 +180,7 @@ class CaseFilters(BaseModel):
             "analysis_catalog_code": [FiltersValue.from_dict(_item) for _item in obj["analysis_catalog_code"]] if obj.get("analysis_catalog_code") is not None else None,
             "assignee_id": [CaseAssignee.from_dict(_item) for _item in obj["assignee_id"]] if obj.get("assignee_id") is not None else None,
             "case_category_code": [FiltersValue.from_dict(_item) for _item in obj["case_category_code"]] if obj.get("case_category_code") is not None else None,
+            "case_type": [FiltersValue.from_dict(_item) for _item in obj["case_type"]] if obj.get("case_type") is not None else None,
             "case_type_code": [FiltersValue.from_dict(_item) for _item in obj["case_type_code"]] if obj.get("case_type_code") is not None else None,
             "diagnosis_lab_code": [FiltersValue.from_dict(_item) for _item in obj["diagnosis_lab_code"]] if obj.get("diagnosis_lab_code") is not None else None,
             "life_status_code": [FiltersValue.from_dict(_item) for _item in obj["life_status_code"]] if obj.get("life_status_code") is not None else None,

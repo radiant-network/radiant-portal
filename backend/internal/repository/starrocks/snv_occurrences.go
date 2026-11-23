@@ -147,12 +147,12 @@ func PrepareSNVListOrCountQuery(snvTable types.Table, caseId int, seqId int, tas
 				}
 				consequenceFilterTable = consequenceFilterTable.Select(selectedCols)
 
-				sqlFilters, params := userQuery.Filters().ToSQL(overrideTableAliases, nil)
+				sqlFilters, params := userQuery.Filters().ToSQL(overrideTableAliases, nil, nil)
 				joinClause := fmt.Sprintf("LEFT SEMI JOIN (?) cf ON cf.locus_id=%s.locus_id AND cf.part = %s.part AND (?)", snvTable.Alias, snvTable.Alias)
 				tx = tx.Joins(joinClause, consequenceFilterTable, gorm.Expr(sqlFilters, params...))
 
 			} else {
-				filters, params := userQuery.Filters().ToSQL(nil, nil)
+				filters, params := userQuery.Filters().ToSQL(nil, nil, nil)
 				joinClause := fmt.Sprintf("LEFT SEMI JOIN %s cf ON cf.locus_id=%s.locus_id AND cf.part = %s.part and (?)", types.ConsequenceFilterTable.TenantQualifiedName(utils.CtxOf(db)), snvTable.Alias, snvTable.Alias)
 				tx = tx.Joins(joinClause, gorm.Expr(filters, params...))
 			}

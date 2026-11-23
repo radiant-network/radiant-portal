@@ -108,7 +108,7 @@ func Test_SearchPatientsHandler_PassesCriteria(t *testing.T) {
 	postPatientsSearch(repo, `{"search_criteria": [{"field": "vital_status", "value": ["deceased"]}]}`)
 
 	require.NotNil(t, repo.query)
-	sql, params := repo.query.Filters().ToSQL(nil, nil)
+	sql, params := repo.query.Filters().ToSQL(nil, nil, nil)
 	assert.Equal(t, "(pl.vital_status = ?)", sql)
 	assert.Equal(t, []interface{}{"deceased"}, params)
 }

@@ -3,6 +3,7 @@ package starrocks
 import (
 	"fmt"
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/Goldziher/go-utils/sliceutils"
@@ -13,6 +14,8 @@ import (
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var allCasesFields = sliceutils.Map(types.CasesFields, func(value types.Field, index int, slice []types.Field) string {
@@ -325,6 +328,128 @@ func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
 	})
 }
 
+func searchCasesOnCaseType(t *testing.T, env *testutils.Env, operator string, values ...interface{}) (*[]CaseResult, int64) {
+	t.Helper()
+	repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+	criteria := []types.SearchCriterion{{FieldName: types.CaseTypeField.GetAlias(), Operator: operator, Value: values}}
+	pagination := types.Pagination{Limit: 100}
+	query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, criteria, &pagination, nil)
+	require.NoError(t, err)
+	cases, count, err := repo.SearchCases(t.Context(), query)
+	require.NoError(t, err)
+	return cases, *count
+}
+
+func caseIdsAndTypes(cases *[]CaseResult) ([]int, []string) {
+	ids := sliceutils.Map(*cases, func(c CaseResult, _ int, _ []CaseResult) int { return c.CaseID })
+	caseTypes := sliceutils.Unique(sliceutils.Map(*cases, func(c CaseResult, _ int, _ []CaseResult) string { return c.CaseType }))
+	return ids, caseTypes
+}
+
+func Test_SearchCases_OnCaseType_SoloGermline(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		cases, count := searchCasesOnCaseType(t, env, "in", "germline")
+		ids, caseTypes := caseIdsAndTypes(cases)
+		assert.Equal(t, int64(1), count)
+		assert.Equal(t, []int{8}, ids)
+		assert.Equal(t, []string{"germline"}, caseTypes)
+	})
+}
+
+func Test_SearchCases_OnCaseType_FamilyGermline(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		cases, count := searchCasesOnCaseType(t, env, "in", "germline_family")
+		ids, caseTypes := caseIdsAndTypes(cases)
+		// 72 to 74 are prenatal: the fetus counts as a member.
+		assert.Equal(t, int64(24), count)
+		assert.Len(t, ids, 24)
+		assert.Subset(t, ids, []int{1, 70, 72, 73, 74})
+		assert.Equal(t, []string{"germline_family"}, caseTypes)
+	})
+}
+
+func Test_SearchCases_OnCaseType_Somatic(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		cases, count := searchCasesOnCaseType(t, env, "in", "somatic")
+		ids, caseTypes := caseIdsAndTypes(cases)
+		assert.Equal(t, int64(1), count)
+		assert.Equal(t, []int{71}, ids)
+		assert.Equal(t, []string{"somatic"}, caseTypes)
+	})
+}
+
+func Test_SearchCases_OnCaseType_TwoValues(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		cases, count := searchCasesOnCaseType(t, env, "in", "germline", "somatic")
+		ids, _ := caseIdsAndTypes(cases)
+		assert.Equal(t, int64(2), count)
+		assert.ElementsMatch(t, []int{8, 71}, ids)
+	})
+}
+
+func Test_SearchCases_OnCaseType_NotIn(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		cases, count := searchCasesOnCaseType(t, env, "not-in", "germline_family")
+		ids, _ := caseIdsAndTypes(cases)
+		assert.Equal(t, int64(2), count)
+		assert.ElementsMatch(t, []int{8, 71}, ids)
+	})
+}
+
+// familyReads counts the reads of the family table, quoted or not: gorm quotes it in the member count subquery.
+func familyReads(t *testing.T, statement string) int {
+	return strings.Count(strings.ReplaceAll(statement, "`", ""), types.FamilyTable.TenantQualifiedName(t.Context()))
+}
+
+func Test_SearchCases_OnCaseType_ReadsFamilyOnceByStatement(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		capture := &sqlCapture{Interface: logger.Discard}
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks.Session(&gorm.Session{Logger: capture})})
+		criteria := []types.SearchCriterion{{FieldName: types.CaseTypeField.GetAlias(), Value: []interface{}{"germline"}}}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, criteria, nil, nil)
+		require.NoError(t, err)
+
+		_, _, err = repo.SearchCases(t.Context(), query)
+		require.NoError(t, err)
+
+		require.Len(t, capture.statements, 2)
+		for _, statement := range capture.statements {
+			assert.Equal(t, 1, familyReads(t, statement), statement)
+		}
+	})
+}
+
+func Test_SearchCases_NoCaseTypeFilter_ReadsFamilyInTheListOnly(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		capture := &sqlCapture{Interface: logger.Discard}
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks.Session(&gorm.Session{Logger: capture})})
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, nil, nil, nil)
+		require.NoError(t, err)
+
+		_, _, err = repo.SearchCases(t.Context(), query)
+		require.NoError(t, err)
+
+		require.Len(t, capture.statements, 2)
+		assert.Equal(t, 0, familyReads(t, capture.statements[0]), "count: %s", capture.statements[0])
+		assert.Equal(t, 1, familyReads(t, capture.statements[1]), "list: %s", capture.statements[1])
+	})
+}
+
+func Test_ComputedCaseTypes_FamilyVariantForEveryCodeButSomatic(t *testing.T) {
+	t.Parallel()
+	codes := []types.FiltersValue{{Key: "germline", Label: "Germline"}, {Key: "somatic", Label: "Somatic"}}
+
+	assert.Equal(t, []types.FiltersValue{{Key: "germline"}, {Key: "germline_family"}, {Key: "somatic"}}, computedCaseTypes(codes))
+}
+
+func Test_ComputedCaseTypes_NoCode_EmptyNotNil(t *testing.T) {
+	t.Parallel()
+	values := computedCaseTypes(nil)
+
+	assert.NotNil(t, values)
+	assert.Empty(t, values)
+}
+
 func Test_SearchCases_OnSubmitterCaseId(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
@@ -530,6 +655,7 @@ func Test_GetCasesFilters(t *testing.T) {
 		assert.Equal(t, 2, len((*filters).CaseCategory))
 		assert.Equal(t, 2, len((*filters).Panel))
 		assert.Equal(t, 2, len((*filters).CaseType))
+		assert.Equal(t, []types.FiltersValue{{Key: "germline"}, {Key: "germline_family"}, {Key: "somatic"}}, (*filters).ComputedCaseType)
 	})
 }
 

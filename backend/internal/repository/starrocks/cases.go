@@ -79,10 +79,11 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 	txStg = txStg.Where("se.ingested_at IS NOT NULL AND (se.task_type = 'radiant_germline_annotation' OR se.task_type = 'radiant_germline_cnv_annotation' OR (se.task_type = 'alignment_germline_variant_calling' AND se.cnv_vcf_filepath IS NOT NULL) OR (se.task_type = 'radiant_somatic_annotation' AND se.histology_type = 'tumoral'))")
 	txStg = txStg.Joins(fmt.Sprintf("JOIN %s se ON se.seq_id = chse.sequencing_experiment_id", types.SequencingTable.TenantQualifiedName(ctx)))
 
-	txMembersCount := caseMembersCount(ctx, db)
-
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) stg ON stg.case_id=%s.id", types.CaseTable.Alias), txStg)
-	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) members_count ON members_count.case_id = %s.id", types.CaseTable.Alias), txMembersCount)
+	// Joined before the count by prepareQuery when the case type is filtered: the column reads the same join.
+	if !userQuery.HasFieldFromTables(types.CaseMembersCountTable) {
+		tx = withCaseMembersCount(ctx, db, tx)
+	}
 	// Selected only, never filtered or sorted on: joined after the count so it does not pay it, and only when
 	// the Run column asks for it in additional_fields.
 	if userQuery.HasFieldFromTables(types.CaseRunTable) {
@@ -203,6 +204,7 @@ func (r *CasesRepository) GetCasesFilters(ctx context.Context) (*CaseFilters, er
 		OrderingOrganization: orderingOrg,
 		CaseCategory:         caseCategory,
 		CaseType:             caseType,
+		ComputedCaseType:     computedCaseTypes(caseType),
 		LifeStatus:           lifeStatus,
 		Panel:                panel,
 	}, nil
@@ -245,7 +247,7 @@ func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository
 	tx = r.joiner.CaseWithProject(tx)
 	tx = r.joiner.CaseWithProbandSample(tx)
 	if userQuery != nil {
-		utils.AddWhereWithCaseSemiJoins(userQuery, tx, types.CaseSemiJoinRows{types.CaseMemberRunTable.Alias: r.joiner.CaseMemberRuns(tx), types.CaseAssigneeTable.Alias: r.joiner.CaseAssignees(tx)})
+		utils.AddWhereWithCaseSearchSQL(userQuery, tx, types.CaseSemiJoinRows{types.CaseMemberRunTable.Alias: r.joiner.CaseMemberRuns(tx), types.CaseAssigneeTable.Alias: r.joiner.CaseAssignees(tx)}, types.CaseComputedColumns{types.CaseTypeField.GetAlias(): caseTypeExpression})
 
 		if userQuery.HasFieldFromTables(types.PanelTable) {
 			tx = r.joiner.AnalysisCatalogWithPanel(tx)
@@ -273,6 +275,10 @@ func prepareQuery(ctx context.Context, userQuery types.Query, r *CasesRepository
 
 		if userQuery.HasFieldFromTables(types.CaseGroupTable) {
 			tx = r.joiner.CaseWithCaseGroup(tx)
+		}
+
+		if userQuery.HasFieldFromTables(types.CaseMembersCountTable) {
+			tx = withCaseMembersCount(ctx, r.db.WithContext(ctx), tx)
 		}
 	}
 	return tx, nil
@@ -619,9 +625,28 @@ func calculateCaseType(caseEntity CaseEntity) string {
 	}
 }
 
-// caseTypeColumn is the case type of the case list: germline_family for a germline case with more than one
-// member. It needs the caseMembersCount subquery joined as members_count.
-const caseTypeColumn = "CASE WHEN c.case_type_code = 'somatic' OR members_count.distinct_members_count = 1 THEN c.case_type_code ELSE CONCAT(c.case_type_code, '_family') END AS case_type"
+// caseTypeExpression is the case type of the case list: germline_family for a germline case with more than one
+// member, and for a germline case with no family row too. It needs the caseMembersCount subquery joined as members_count.
+const caseTypeExpression = "CASE WHEN c.case_type_code = 'somatic' OR members_count.distinct_members_count = 1 THEN c.case_type_code ELSE CONCAT(c.case_type_code, '_family') END"
+const caseTypeColumn = caseTypeExpression + " AS case_type"
+
+// computedCaseTypes gives the values of types.CaseTypeField from the case type codes: every code but somatic
+// also has its _family variant. Never nil: the filters response sends [] for a tenant with no case type.
+func computedCaseTypes(caseTypeCodes []types.FiltersValue) []types.FiltersValue {
+	values := make([]types.FiltersValue, 0, 2*len(caseTypeCodes))
+	for _, code := range caseTypeCodes {
+		values = append(values, types.FiltersValue{Key: code.Key})
+		if code.Key != "somatic" {
+			values = append(values, types.FiltersValue{Key: code.Key + "_family"})
+		}
+	}
+	return values
+}
+
+func withCaseMembersCount(ctx context.Context, db *gorm.DB, tx *gorm.DB) *gorm.DB {
+	alias := types.CaseMembersCountTable.Alias
+	return tx.Joins(fmt.Sprintf("LEFT JOIN (?) %[1]s ON %[1]s.case_id = %[2]s.id", alias, types.CaseTable.Alias), caseMembersCount(ctx, db))
+}
 
 // caseMembersCount counts the members of each case. COUNT DISTINCT ignores NULL, so counting family_member_id
 // alone drops every fetus-only row and undercounts a prenatal case's members.

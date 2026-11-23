@@ -392,6 +392,11 @@ var CaseMemberRunTable = Table{
 	CaseSemiJoin: true,
 }
 
+var CaseMembersCountTable = Table{
+	Name:  "members_count",
+	Alias: "members_count",
+}
+
 func (Case) TableName() string {
 	return CaseTable.Name
 }
@@ -411,6 +416,7 @@ var CasesFields = []Field{
 	CasePriorityCodeField,
 	CaseStatusCodeField,
 	CaseTypeCodeField,
+	CaseTypeField,
 	AnalysisCatalogCodeField,
 	AnalysisCatalogNameField,
 	CasePrimaryConditionIdField,
@@ -570,6 +576,14 @@ var CaseTypeCodeField = Field{
 	Table:         CaseTable,
 }
 
+// CaseTypeField is computed from the case and its members count: the case search gives its SQL (CaseComputedColumns).
+var CaseTypeField = Field{
+	Name:          "case_type",
+	Alias:         "case_type",
+	CanBeFiltered: true,
+	Table:         CaseMembersCountTable,
+}
+
 var CaseOrderingPhysicianField = Field{
 	Name:          "ordering_physician",
 	Alias:         "prescriber",
@@ -647,5 +661,6 @@ type CaseFilters struct {
 	LifeStatus           []FiltersValue `json:"life_status_code" validate:"required"`
 	CaseCategory         []FiltersValue `json:"case_category_code" validate:"required"`
 	CaseType             []FiltersValue `json:"case_type_code" validate:"required"`
+	ComputedCaseType     []FiltersValue `json:"case_type" validate:"required"`
 	Assignee             []CaseAssignee `json:"assignee_id" validate:"required"`
 }

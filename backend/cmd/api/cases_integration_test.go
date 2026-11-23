@@ -211,6 +211,10 @@ func Test_GetCasesFilters(t *testing.T) {
 		"case_type_code":[
 			{"key":"germline", "label":"Germline"},
 			{"key":"somatic", "label":"Somatic"}],
+		"case_type":[
+			{"key":"germline"},
+			{"key":"germline_family"},
+			{"key":"somatic"}],
 		"assignee_id":[
 			{"user_id":"25286548-fbef-4e93-b3c4-c659e6169396", "first_name":"Alice", "last_name":"Adams", "email":"alice@test.authz"},
 			{"user_id":"b6e6d0dd-7aa5-4018-ae03-1f5076801360", "first_name":"Carol", "last_name":"Cohen", "email":"carol@test.authz"},

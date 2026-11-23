@@ -65,39 +65,55 @@ func Test_AddSort_RegularField_KeepsDefaultNullOrdering(t *testing.T) {
 	assert.NotContains(t, sql, "NULLS")
 }
 
-func whereQuery(t *testing.T, semiJoinRows types.CaseSemiJoinRows) *gorm.DB {
+func whereQuery(t *testing.T, field types.Field, semiJoinRows types.CaseSemiJoinRows, computedColumns types.CaseComputedColumns) *gorm.DB {
 	t.Helper()
 	db, err := gorm.Open(tests.DummyDialector{}, &gorm.Config{DryRun: true})
 	require.NoError(t, err)
-	criteria := []types.SearchCriterion{{FieldName: types.CaseMemberRunNameField.GetAlias(), Value: []interface{}{"1617"}}}
+	criteria := []types.SearchCriterion{{FieldName: field.GetAlias(), Value: []interface{}{"1617"}}}
 	query, err := types.NewListQueryFromCriteria(types.CasesQueryConfig, nil, criteria, nil, nil)
 	require.NoError(t, err)
 
 	var rows []map[string]any
 	tx := db.Session(&gorm.Session{DryRun: true}).Table("cases c")
-	AddWhereWithCaseSemiJoins(query, tx, semiJoinRows)
+	AddWhereWithCaseSearchSQL(query, tx, semiJoinRows, computedColumns)
 	return tx.Find(&rows)
 }
 
-func Test_AddWhereWithCaseSemiJoins_WithRows_CaseIdInSubQuery(t *testing.T) {
+func Test_AddWhereWithCaseSearchSQL_WithRows_CaseIdInSubQuery(t *testing.T) {
 	t.Parallel()
-	tx := whereQuery(t, types.CaseSemiJoinRows{types.CaseMemberRunTable.Alias: "SELECT case_id, run_name FROM runs"})
+	tx := whereQuery(t, types.CaseMemberRunNameField, types.CaseSemiJoinRows{types.CaseMemberRunTable.Alias: "SELECT case_id, run_name FROM runs"}, nil)
 
 	require.NoError(t, tx.Error)
 	assert.Contains(t, tx.Statement.SQL.String(), "WHERE (c.id IN (SELECT case_id FROM (SELECT case_id, run_name FROM runs) case_member_run WHERE case_member_run.run_name = ?))")
 }
 
-func Test_AddWhereWithCaseSemiJoins_WithoutRows_QueryFails(t *testing.T) {
+func Test_AddWhereWithCaseSearchSQL_WithoutRows_QueryFails(t *testing.T) {
 	t.Parallel()
-	tx := whereQuery(t, nil)
+	tx := whereQuery(t, types.CaseMemberRunNameField, nil, nil)
 
 	require.Error(t, tx.Error)
 	assert.Contains(t, tx.Error.Error(), "case semi-join table case_member_run is filtered but the query gives none of its rows")
 }
 
-func Test_AddWhereWithCaseSemiJoins_RowsOfAnotherTable_QueryFails(t *testing.T) {
+func Test_AddWhereWithCaseSearchSQL_RowsOfAnotherTable_QueryFails(t *testing.T) {
 	t.Parallel()
-	tx := whereQuery(t, types.CaseSemiJoinRows{"other": "SELECT case_id FROM other"})
+	tx := whereQuery(t, types.CaseMemberRunNameField, types.CaseSemiJoinRows{"other": "SELECT case_id FROM other"}, nil)
 
 	require.Error(t, tx.Error)
+}
+
+func Test_AddWhereWithCaseSearchSQL_WithComputedColumn_ColumnInPlaceOfTheField(t *testing.T) {
+	t.Parallel()
+	tx := whereQuery(t, types.CaseTypeField, nil, types.CaseComputedColumns{types.CaseTypeField.GetAlias(): "CONCAT(c.a, c.b)"})
+
+	require.NoError(t, tx.Error)
+	assert.Contains(t, tx.Statement.SQL.String(), "CONCAT(c.a, c.b) = ?")
+}
+
+func Test_AddWhereWithCaseSearchSQL_WithoutComputedColumn_QueryFails(t *testing.T) {
+	t.Parallel()
+	tx := whereQuery(t, types.CaseTypeField, nil, nil)
+
+	require.Error(t, tx.Error)
+	assert.Contains(t, tx.Error.Error(), "computed field case_type is filtered but the query gives none of its SQL")
 }
