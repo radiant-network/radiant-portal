@@ -131,8 +131,8 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>, onCaseChange
           {t('case_exploration.case.headers.case_type')}
         </TooltipHeader>
       ),
-      size: 48,
-      minSize: 40,
+      size: 138,
+      minSize: 48,
       enableSorting: false,
     }),
     // Analysis
@@ -142,7 +142,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>, onCaseChange
         <TextTooltipCell tooltipText={info.row.original.analysis_catalog_name}>{info.getValue()}</TextTooltipCell>
       ),
       header: t('case_exploration.case.headers.analysis_catalog_code'),
-      size: 48,
+      size: 124,
       minSize: 40,
     }),
     // Primary Condition
@@ -175,7 +175,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>, onCaseChange
           {t('case_exploration.case.headers.ordering_organization_code')}
         </TooltipHeader>
       ),
-      size: 48,
+      size: 124,
       minSize: 40,
     }),
     // Sample
@@ -209,7 +209,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>, onCaseChange
       id: 'project_code',
       cell: info => <TextTooltipCell tooltipText={info.row.original.project_name}>{info.getValue()}</TextTooltipCell>,
       header: t('case_exploration.case.headers.project_code'),
-      size: 48,
+      size: 124,
       minSize: 40,
     }),
     // Created on
@@ -233,7 +233,7 @@ function getCaseExplorationColumns(t: TFunction<string, undefined>, onCaseChange
           {t('case_exploration.case.headers.updated_on')}
         </TooltipHeader>
       ),
-      size: 96,
+      size: 124,
       minSize: 40,
     }),
     // Prescriber
