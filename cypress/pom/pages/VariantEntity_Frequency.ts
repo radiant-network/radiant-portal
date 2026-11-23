@@ -11,7 +11,17 @@ const selectors = {
   myNetwork: {
     tableId: '[id="primary_condition_tab"]',
     tableHeadRow: 'tr:eq(1)',
+    tableGroupHeadRow: 'tr:eq(0)',
+    sequencingType: (type: string) => `[data-cy="my-network-sequencing-type-${type}"]`,
   },
+};
+
+const myNetworkTexts = {
+  groupHeaders: ['All Patients', 'Affected Patients', 'Non-Affected Patients'],
+  disabledSequencingTypeTooltip: {
+    wgs: 'No whole genome sequencing for this variant in the network.',
+    wxs: 'No whole exome sequencing for this variant in the network.',
+  } as Record<string, string>,
 };
 
 const tableColumns = {
@@ -72,6 +82,7 @@ const tableColumns = {
       tooltip: 'Allele Frequency',
     },
   ],
+  // Tooltips of the WGS type, the one selected on the test variant.
   myNetwork: [
     {
       id: 'primary_condition',
@@ -93,7 +104,7 @@ const tableColumns = {
       isSortable: true,
       isPinnable: true,
       position: 1,
-      tooltip: null,
+      tooltip: 'Number of patients with whole genome sequencing (WGS) carrying this variant',
     },
     {
       id: 'homo_all',
@@ -104,7 +115,7 @@ const tableColumns = {
       isSortable: true,
       isPinnable: true,
       position: 2,
-      tooltip: null,
+      tooltip: 'Number of WGS patients in this category who are homozygous',
     },
     {
       id: 'freq_affected',
@@ -115,7 +126,7 @@ const tableColumns = {
       isSortable: true,
       isPinnable: true,
       position: 3,
-      tooltip: null,
+      tooltip: 'Number of patients with whole genome sequencing (WGS) carrying this variant',
     },
     {
       id: 'homo_affected',
@@ -126,7 +137,7 @@ const tableColumns = {
       isSortable: true,
       isPinnable: true,
       position: 4,
-      tooltip: null,
+      tooltip: 'Number of WGS patients in this category who are homozygous',
     },
     {
       id: 'freq_non_affected',
@@ -137,7 +148,7 @@ const tableColumns = {
       isSortable: true,
       isPinnable: true,
       position: 5,
-      tooltip: null,
+      tooltip: 'Number of patients with whole genome sequencing (WGS) carrying this variant',
     },
     {
       id: 'homo_non_affected',
@@ -148,7 +159,7 @@ const tableColumns = {
       isSortable: true,
       isPinnable: true,
       position: 6,
-      tooltip: null,
+      tooltip: 'Number of WGS patients in this category who are homozygous',
     },
   ],
 };
@@ -303,11 +314,12 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
    * Validates the tooltips on columns.
    */
   shouldShowColumnTooltips() {
+    const baseSelector = headRowSelector ? `${CommonSelectors.tableHead(tableId)} ${headRowSelector} ${CommonSelectors.tableCellHead}` : CommonSelectors.tableHeadCell(tableId);
     columns.forEach(column => {
       cy.then(() =>
-        getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id).then(position => {
+        getColumnPosition(CommonSelectors.tableHead(tableId), columns, column.id, headRowSelector).then(position => {
           if (position !== -1) {
-            cy.get(CommonSelectors.tableHeadCell(tableId)).eq(position).shouldHaveTooltip(column);
+            cy.get(baseSelector).eq(position).shouldHaveTooltip(column);
           } else {
             cy.handleColumnNotFound(column.id);
           }
@@ -484,6 +496,35 @@ export const VariantEntity_Frequency = {
         },
         shouldSortColumn(columnID: string, hasUniqueValues: boolean, isReverseSorting: boolean) {
           baseValidations.shouldSortColumn(columnID, hasUniqueValues, isReverseSorting, () => actions.sortColumn(columnID));
+        },
+        /**
+         * Validates that a sequencing type is the selected one in the toggle.
+         * @param type The sequencing type (wgs or wxs).
+         */
+        shouldHaveSelectedSequencingType(type: string) {
+          cy.get(selectors.myNetwork.sequencingType(type)).should('have.attr', 'data-state', 'active');
+        },
+        /**
+         * Validates that a sequencing type is disabled in the toggle, with its dedicated tooltip.
+         * @param type The sequencing type (wgs or wxs).
+         */
+        shouldHaveDisabledSequencingType(type: string) {
+          cy.get(selectors.myNetwork.sequencingType(type)).should('be.disabled');
+          cy.get(selectors.myNetwork.sequencingType(type)).parent().realHover();
+          cy.get(CommonSelectors.tooltipPopper).contains(myNetworkTexts.disabledSequencingTypeTooltip[type]).should('exist');
+          cy.get(CommonSelectors.logo).click(); // Close the popper
+          cy.get(CommonSelectors.tooltipPopper).should('not.exist');
+        },
+        /**
+         * Validates that the group headers name the selected sequencing type.
+         * @param type The sequencing type (wgs or wxs).
+         */
+        shouldShowGroupHeaders(type: string) {
+          myNetworkTexts.groupHeaders.forEach(header => {
+            cy.get(`${CommonSelectors.tableHead(selectors.myNetwork.tableId)} ${selectors.myNetwork.tableGroupHeadRow}`)
+              .contains(`${header} (${type.toUpperCase()})`)
+              .should('exist');
+          });
         },
       };
     })(),
