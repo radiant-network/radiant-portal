@@ -27,8 +27,8 @@ type PatientListInput = {
 };
 
 const TAB_ORDER: { value: PatientExplorationTabs; i18nKey: string }[] = [
-  { value: PatientExplorationTabs.CohortAnalytics, i18nKey: 'patient_exploration.tabs.cohort_analytics' },
   { value: PatientExplorationTabs.PatientList, i18nKey: 'patient_exploration.tabs.patient_list' },
+  { value: PatientExplorationTabs.CohortAnalytics, i18nKey: 'patient_exploration.tabs.cohort_analytics' },
 ];
 
 const PATIENTS_DEFAULT_SORTING: SortBody[] = [
@@ -46,7 +46,7 @@ function PatientExploration() {
   const { tenant } = useTenant();
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<PatientExplorationTabs>(
-    (searchParams.get('tab') as PatientExplorationTabs) ?? PatientExplorationTabs.CohortAnalytics,
+    (searchParams.get('tab') as PatientExplorationTabs) ?? PatientExplorationTabs.PatientList,
   );
   const [sorting, setSorting] = useState<SortBody[]>(PATIENTS_DEFAULT_SORTING);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -90,8 +90,8 @@ function PatientExploration() {
       setActiveTab(searchParams.get('tab') as PatientExplorationTabs);
       return;
     }
-    setActiveTab(PatientExplorationTabs.CohortAnalytics);
-    setSearchParams({ tab: PatientExplorationTabs.CohortAnalytics });
+    setActiveTab(PatientExplorationTabs.PatientList);
+    setSearchParams({ tab: PatientExplorationTabs.PatientList });
   }, []);
 
   useEffect(() => {
