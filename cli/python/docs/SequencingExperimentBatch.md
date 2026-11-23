@@ -9,10 +9,12 @@ Name | Type | Description | Notes
 **capture_kit** | **str** |  | [optional] 
 **experimental_strategy_code** | **str** |  | 
 **platform_code** | **str** |  | 
+**protocol** | **str** |  | [optional] 
 **run_alias** | **str** |  | [optional] 
 **run_date** | **datetime** |  | [optional] 
 **run_name** | **str** |  | [optional] 
 **sample_organization_code** | **str** |  | 
+**sequencer_id** | **str** |  | [optional] 
 **sequencing_lab_code** | **str** |  | 
 **sequencing_read_technology_code** | **str** |  | 
 **status_code** | **str** |  | 

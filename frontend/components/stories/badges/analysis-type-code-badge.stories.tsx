@@ -5,7 +5,9 @@ import { SavedFilterType } from '@/api/api';
 import AnalysisTypeCodeBadge, { type AnalysisTypeCode } from '@/components/base/badges/analysis-type-code-badge';
 import { ApplicationId, ConfigProvider, type PortalConfig } from '@/components/cores/applications-config';
 
-import { StorySection } from '../story-section';
+import { StoryLabel, StorySection } from '../story-section';
+
+const CODES: AnalysisTypeCode[] = ['somatic', 'germline_family', 'germline'];
 
 const config: PortalConfig = {
   variant_entity: {
@@ -69,10 +71,22 @@ export const Default: Story = {
   args: { code: 'somatic' as AnalysisTypeCode },
   render: _args => (
     <StorySection title="Default">
-      <div className="flex gap-2">
-        {['somatic', 'germline', 'germline_family'].map((code, index) => (
-          <AnalysisTypeCodeBadge key={index} code={code as AnalysisTypeCode} />
-        ))}
+      <div className="space-y-2">
+        <StoryLabel>iconOnly: true</StoryLabel>
+        <div className="flex gap-2">
+          {CODES.map(code => (
+            <AnalysisTypeCodeBadge key={code} code={code} iconOnly />
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <StoryLabel>iconOnly: false</StoryLabel>
+        <div className="flex gap-2">
+          {CODES.map(code => (
+            <AnalysisTypeCodeBadge key={code} code={code} />
+          ))}
+        </div>
       </div>
     </StorySection>
   ),

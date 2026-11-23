@@ -27,6 +27,12 @@
     "case_actions_menu": {
       "open": "Actions du cas"
     },
+    "case_assignee_filter": {
+      "open": "Filtrer par assignation",
+      "open_selected_one": "Filtrer par assignation, {{count}} sélectionné",
+      "open_selected_other": "Filtrer par assignation, {{count}} sélectionnés",
+      "selected": "sélectionné"
+    },
     "case_group_tag": {
       "copy_name": "Copier le nom du groupe",
       "remove": "Retirer le filtre Nouvelles données"
@@ -162,6 +168,18 @@
       "filters_group": "Filtrer la chronologie par type",
       "results_count_one": "{{count}} résultat affiché",
       "results_count_other": "{{count}} résultats affichés"
+    },
+    "cnv_profile": {
+      "zoom_in": "Zoomer",
+      "zoom_out": "Dézoomer",
+      "zoom_level": "Niveau de zoom",
+      "pan_left": "Vers la gauche",
+      "pan_right": "Vers la droite",
+      "drag_mode": "Action du glisser",
+      "chromosome": "Chromosome",
+      "search": "Gène ou locus",
+      "close_panel": "Fermer le détail du gène",
+      "close_cnv_panel": "Fermer le détail du CNV"
     }
   },
   "admin": {
@@ -1719,7 +1737,7 @@
     "analysis_type_code": {
       "somatic": "Somatique",
       "germline": "Germinal seul",
-      "germline_family": "Lignée Germinale Familiale"
+      "germline_family": "Lignée germinale familiale"
     },
     "status": {
       "completed": "Complété",
@@ -1753,15 +1771,20 @@
       },
       "filters": {
         "analysis_catalog_code": "Analyse",
+        "assignee_id": "Assignation",
+        "assignee_id_tooltip": "Filtrer par assignation",
         "case_category_code": "Pré/Postnatal",
         "case_type_code": "Type",
         "diagnosis_lab_code": "Laboratoire de diagnostic",
         "life_status_code": "Statut vital",
+        "my_cases": "Mes cas",
+        "my_cases_tooltip": "Cas qui me sont assignés",
         "ordering_organization_code": "Établissement prescripteur",
         "panel_code": "Panel",
         "priority_code": "Priorité",
         "project_code": "Projet",
-        "status_code": "Statut"
+        "status_code": "Statut",
+        "unassigned": "Non assigné"
       },
       "headers": {
         "assignees": "Assignation",
@@ -2629,6 +2652,7 @@
   },
   "case_entity": {
     "not_found": "Cas introuvable",
+    "search_error": "La recherche de gène a échoué, réessayez.",
     "not_found.button": "Retour à la liste de cas",
     "header": {
       "case": "Cas",
@@ -2710,6 +2734,7 @@
       "primary_condition": "Condition principale",
       "priority": "Priorité",
       "project_code": "Projet",
+      "protocol": "Protocole",
       "read_technology": "Technologie de lecture",
       "requested_analysis": "Analyse demandée",
       "run_alias": "Alias du lot",
@@ -2718,6 +2743,7 @@
       "sample_id": "ID Échantillon",
       "sample_submitter_id": "ID échantillon {{sampleId}}",
       "sample_type_code": "Type d’échantillon",
+      "sequencer": "Séquenceur",
       "sequencing": "ID séquençage {{seqId}}",
       "sequencing_details": "Détails",
       "sequencing_details_dialog": "Détails du séquençage",
@@ -2777,6 +2803,92 @@
       },
       "dialog": {
         "overlapping_gene": "Liste des gènes chevauchants le CNV {{type}}:chr{{chromosome}}:{{start}}-{{end}} ({{length}})"
+      },
+      "cnv_profile": {
+        "button": "Profil CNV",
+        "unavailable": "Disponible pour les exomes et les génomes seulement",
+        "title": "Profil CNV",
+        "locus": "chr{{chromosome}}:{{start}}-{{end}}",
+        "position": "chr{{chromosome}}:{{position}}",
+        "locus_size": "{{locus}} · {{size}}",
+        "megabases": "{{value}} Mb",
+        "chromosome_name": "chr{{name}}",
+        "loading": "Chargement du profil CNV…",
+        "overview": {
+          "reduced": "Vue d'ensemble : un bin de copy ratio sur {{copyRatioStride}} et un variant BAF sur {{bafStride}}. Zoomez sous {{span}} pour voir tous les points.",
+          "detailed": "Tous les points de la région visible sont affichés."
+        },
+        "errors": {
+          "not_found": "Les fichiers de copy ratio et de fréquence de l'allèle B de ce séquençage sont absents.",
+          "copy_ratio_missing": "Le fichier de copy ratio (.tn.bw) de ce séquençage est absent.",
+          "baf_missing": "Le fichier de fréquence de l'allèle B (.baf.bw) de ce séquençage est absent.",
+          "unsupported": "Le profil CNV de ce séquençage ne peut pas être affiché : seuls les exomes et les génomes en ont un.",
+          "unknown": "Le profil CNV n'a pas pu être chargé."
+        },
+        "tracks": {
+          "copy_ratio": "Copy ratio",
+          "baf": "BAF",
+          "roh": "ROH",
+          "genes": "Gènes"
+        },
+        "hints": {
+          "zoom_for_genes": "Zoomer sous 20 Mb sur un chromosome pour afficher les gènes"
+        },
+        "legend": {
+          "gain": "Gain PASS",
+          "loss": "Perte PASS",
+          "filtered": "Filtré",
+          "roh": "ROH",
+          "gene": "Gène codant",
+          "other_gene": "Autre gène",
+          "highlighted_gene": "Gène sélectionné"
+        },
+        "hover": {
+          "gain": "Gain",
+          "loss": "Perte",
+          "click_to_zoom": "cliquer pour zoomer",
+          "click_for_details": "cliquer pour le détail",
+          "segment_mean": "Segment mean",
+          "copy_number": "CN",
+          "quality": "Qual",
+          "roh": "ROH",
+          "homozygous": "homozygotes",
+          "heterozygous": "hétérozygotes",
+          "score": "score",
+          "filter": "Filtre"
+        },
+        "navbar": {
+          "genome": "Génome",
+          "view_genome": "Génome entier · {{size}}",
+          "view_chromosomes": "chr{{first}} → chr{{last}} · {{size}}",
+          "drag": "Glisser pour",
+          "drag_pan": "déplacer",
+          "drag_zoom": "sélectionner une zone",
+          "show_filtered": "CNV filtrés",
+          "search_placeholder": "Gène (BRCA1) ou chr17:40 000 000-45 000 000",
+          "go_to_locus": "Aller à {{locus}}",
+          "not_found": "Gène ou locus inconnu",
+          "chromosome": "Chromosome",
+          "points": "{{formatted}} points",
+          "keyboard": "Clavier : ← → + −"
+        },
+        "panel": {
+          "strand": "brin {{strand}}",
+          "locus": "Locus",
+          "biotype": "Biotype",
+          "omim_inheritance": "Transmission OMIM",
+          "pli": "pLI",
+          "loeuf": "LOEUF",
+          "size": "Taille",
+          "exons": "Exons",
+          "exon": "Exon {{index}} sur {{total}}",
+          "cnvs": "CNV appelés sur ce gène",
+          "no_cnv": "Aucun gain ni perte appelé sur ce gène.",
+          "genes": "Gènes chevauchés ({{count}})",
+          "no_gene": "Aucun gène ne chevauche ce CNV.",
+          "no_omim_condition": "Aucune condition OMIM pour ce gène.",
+          "links": "Liens"
+        }
       }
     },
     "files": {
@@ -2786,7 +2898,7 @@
   "file_entity": {
     "count_one": "{{total}} Fichier",
     "count_other": "{{total}} Fichiers",
-    "search_by_id_placeholder": "Fichier, échantillon, patient, cas, lot ou séquençage",
+    "search_by_id_placeholder": "Fichier, échantillon, patient, cas ou séquençage",
     "name": "Nom du fichier",
     "format_code": "Format",
     "data_type_code": "Type de fichier",

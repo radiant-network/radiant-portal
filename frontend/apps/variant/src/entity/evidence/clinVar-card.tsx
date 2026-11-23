@@ -77,6 +77,7 @@ function ClinVarCard() {
         <Input
           startIcon={Search}
           placeholder={t('variant_entity.evidence.clin_var.filters.search_placeholder')}
+          aria-label={t('variant_entity.evidence.clin_var.filters.search_placeholder')}
           wrapperClassName="max-w-[320px]"
           value={search}
           onChange={e => setSearch(e.target.value)}

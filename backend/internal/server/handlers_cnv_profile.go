@@ -32,9 +32,6 @@ const (
 	// cnvProfileOverviewCacheSize bounds the overviews kept, the least recently used going first:
 	// one is about 380,000 points, 6 to 8 MB.
 	cnvProfileOverviewCacheSize = 20
-
-	strategyExome  = "wxs"
-	strategyGenome = "wgs"
 )
 
 type cnvProfileReader interface {
@@ -205,7 +202,7 @@ func cnvProfileStrategy(ctx context.Context, repo cnvProfileReader, caseID int, 
 	switch strategy {
 	case "":
 		return "", errCNVProfileSequencingNotFound
-	case strategyExome, strategyGenome:
+	case types.SequencingTypeWXS, types.SequencingTypeWGS:
 		return strategy, nil
 	default:
 		return "", errCNVProfileStrategyUnsupported
@@ -223,7 +220,7 @@ func buildCNVProfile(ctx context.Context, repo cnvProfileReader, store objectRea
 	}
 
 	profile := types.CNVProfile{ROH: []types.CNVProfileROH{}}
-	if strategy == strategyGenome {
+	if strategy == types.SequencingTypeWGS {
 		tracks, err := genomeOverview(ctx, store, overviews, files)
 		if err != nil {
 			return nil, fmt.Errorf("genome overview: %w", err)

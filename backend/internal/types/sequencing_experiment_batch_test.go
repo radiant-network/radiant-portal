@@ -19,6 +19,8 @@ func Test_SequencingExperimentBatch_ToJSON(t *testing.T) {
 		SampleOrganizationCode:       "ORG-123",
 		SubmitterSampleId:            "SAMPLE-123",
 		CaptureKit:                   "CPT-123",
+		SequencerID:                  "A00516",
+		Protocol:                     "TruSeq DNA PCR-Free",
 		ExperimentalStrategyCode:     "wgs",
 		SequencingReadTechnologyCode: "short_read",
 		PlatformCode:                 "illumina",
@@ -29,7 +31,7 @@ func Test_SequencingExperimentBatch_ToJSON(t *testing.T) {
 		StatusCode:                   "in_progress",
 	}
 
-	var expected = []byte(`{"aliquot":"ALIQUOT-123","sample_organization_code":"ORG-123","submitter_sample_id":"SAMPLE-123","capture_kit":"CPT-123","experimental_strategy_code":"wgs","sequencing_read_technology_code":"short_read","platform_code":"illumina","sequencing_lab_code":"CHUSJ","run_alias":"RUN-ALIAS-1","run_date":"2025-12-15T12:00:00Z","run_name":"RUN-1","status_code":"in_progress"}`)
+	var expected = []byte(`{"aliquot":"ALIQUOT-123","sample_organization_code":"ORG-123","submitter_sample_id":"SAMPLE-123","capture_kit":"CPT-123","sequencer_id":"A00516","protocol":"TruSeq DNA PCR-Free","experimental_strategy_code":"wgs","sequencing_read_technology_code":"short_read","platform_code":"illumina","sequencing_lab_code":"CHUSJ","run_alias":"RUN-ALIAS-1","run_date":"2025-12-15T12:00:00Z","run_name":"RUN-1","status_code":"in_progress"}`)
 	jsonData, err := json.Marshal(seqBatch)
 	assert.Nil(t, err, "Failed to marshal Sequencing Experiment Batch to JSON")
 
@@ -38,7 +40,7 @@ func Test_SequencingExperimentBatch_ToJSON(t *testing.T) {
 }
 
 func Test_SequencingExperimentBatch_FromJSON(t *testing.T) {
-	var jsonData = []byte(`{"aliquot":"ALIQUOT-123","sample_organization_code":"ORG-123","submitter_sample_id":"SAMPLE-123","capture_kit":"CPT-123","experimental_strategy_code":"wgs","sequencing_read_technology_code":"short_read","platform_code":"illumina","sequencing_lab_code":"CHUSJ","run_alias":"RUN-ALIAS-1","run_date":"2025-12-15T12:00:00Z","run_name":"RUN-1","status_code":"in_progress"}`)
+	var jsonData = []byte(`{"aliquot":"ALIQUOT-123","sample_organization_code":"ORG-123","submitter_sample_id":"SAMPLE-123","capture_kit":"CPT-123","sequencer_id":"A00516","protocol":"TruSeq DNA PCR-Free","experimental_strategy_code":"wgs","sequencing_read_technology_code":"short_read","platform_code":"illumina","sequencing_lab_code":"CHUSJ","run_alias":"RUN-ALIAS-1","run_date":"2025-12-15T12:00:00Z","run_name":"RUN-1","status_code":"in_progress"}`)
 
 	rfc3339 := "2025-12-15T12:00:00Z"
 	runDate, _ := time.Parse(time.RFC3339, rfc3339)
@@ -48,6 +50,8 @@ func Test_SequencingExperimentBatch_FromJSON(t *testing.T) {
 		SampleOrganizationCode:       "ORG-123",
 		SubmitterSampleId:            "SAMPLE-123",
 		CaptureKit:                   "CPT-123",
+		SequencerID:                  "A00516",
+		Protocol:                     "TruSeq DNA PCR-Free",
 		ExperimentalStrategyCode:     "wgs",
 		SequencingReadTechnologyCode: "short_read",
 		PlatformCode:                 "illumina",

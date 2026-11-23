@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -292,6 +293,20 @@ func Test_ValidateRunDateField_FutureDateAddsError(t *testing.T) {
 	assert.Equal(t, "sequencing_experiment[0].run_date", r.Errors[0].Path)
 }
 
+func Test_ValidateSequencerIDAndProtocolFields_TooLong_AddErrors(t *testing.T) {
+	r := newBaseRecord()
+	tooLong := types.TrimmedString(strings.Repeat("a", TextMaxLength+1))
+	r.SequencingExperiment.SequencerID = tooLong
+	r.SequencingExperiment.Protocol = tooLong
+	r.validateSequencerIDField()
+	r.validateProtocolField()
+	require.Len(t, r.Errors, 2)
+	assert.Equal(t, "SEQ-002", r.Errors[0].Code)
+	assert.Equal(t, "sequencing_experiment[0].sequencer_id", r.Errors[0].Path)
+	assert.Equal(t, "SEQ-002", r.Errors[1].Code)
+	assert.Equal(t, "sequencing_experiment[0].protocol", r.Errors[1].Path)
+}
+
 func Test_ValidateIdenticalSequencingExperiment_Found_AddsInfo(t *testing.T) {
 	r := newBaseRecord()
 	seqLab := "LAB"
@@ -368,6 +383,8 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 	now := time.Now().Add(-time.Hour)
 	r.SequencingExperiment.RunDate = (*types.DateRFC3339)(&now)
 	r.SequencingExperiment.CaptureKit = "CK1"
+	r.SequencingExperiment.SequencerID = "SEQ1"
+	r.SequencingExperiment.Protocol = "PROTO1"
 	r.SequencingLabCode = &seqLab
 	r.SampleID = &sampleId
 
@@ -405,13 +422,15 @@ func Test_ValidateExistingAliquotForSequencingLabCode_DifferentFields_AddWarning
 	assert.NoError(t, err)
 	assert.NotEmpty(t, r.Warnings)
 	assert.Empty(t, r.Errors)
-	assert.Len(t, r.Warnings, 9)
+	assert.Len(t, r.Warnings, 11)
 	assert.Equal(t, "SEQ-004", r.Warnings[0].Code)
 	assert.Equal(t, "A sequencing with same ids (ORG / S2 / A1) has been found but with a different submitter_sample_id (S1 <> S2).", r.Warnings[0].Message)
 	assert.Equal(t, "sequencing_experiment[0].submitter_sample_id", r.Warnings[0].Path)
 	assert.Equal(t, "SEQ-004", r.Warnings[7].Code)
 	assert.Equal(t, "A sequencing with same ids (ORG / S2 / A1) has been found but with a different capture_kit (OTHER <> CK1).", r.Warnings[7].Message)
 	assert.Equal(t, "sequencing_experiment[0].capture_kit", r.Warnings[7].Path)
+	assert.Equal(t, "sequencing_experiment[0].sequencer_id", r.Warnings[8].Path)
+	assert.Equal(t, "sequencing_experiment[0].protocol", r.Warnings[9].Path)
 }
 
 func Test_ValidateUnknownSampleForOrganizationCode_Nil_AddsError(t *testing.T) {
@@ -833,8 +852,8 @@ func Test_Persist_Batch_And_Update_SequencingExperiment_Records(t *testing.T) {
 			VALUES (1001, 'blood', NULL, 'normal', 'S-SEQ-WORKER-UPDATE-1', 1, 'CQGC', 'radiant')
 		`).Error)
 		require.NoError(t, db.Exec(`
-			INSERT INTO sequencing_experiment (id, sample_id, status_code, aliquot, sequencing_lab_code, tenant_code, experimental_strategy_code, sequencing_read_technology_code, platform_code, created_on, updated_on)
-			VALUES (1001, 1001, 'submitted', 'ALIQUOT-WORKER-UPDATE-1', 'CQGC', 'radiant', 'wgs', 'short_read', 'illumina', now(), now())
+			INSERT INTO sequencing_experiment (id, sample_id, status_code, aliquot, sequencing_lab_code, tenant_code, experimental_strategy_code, sequencing_read_technology_code, platform_code, sequencer_id, protocol, created_on, updated_on)
+			VALUES (1001, 1001, 'submitted', 'ALIQUOT-WORKER-UPDATE-1', 'CQGC', 'radiant', 'wgs', 'short_read', 'illumina', 'OLD-SEQ', 'OLD-PROTO', now(), now())
 		`).Error)
 
 		var id string
@@ -862,6 +881,8 @@ func Test_Persist_Batch_And_Update_SequencingExperiment_Records(t *testing.T) {
 				ExperimentalStrategyCode:     "wxs",
 				SequencingReadTechnologyCode: "long_read",
 				PlatformCode:                 "pacbio",
+				SequencerID:                  "NEW-SEQ",
+				Protocol:                     "NEW-PROTO",
 			},
 			SampleID: &sampleID,
 		}}
@@ -877,5 +898,7 @@ func Test_Persist_Batch_And_Update_SequencingExperiment_Records(t *testing.T) {
 		assert.Equal(t, "wxs", seqExp.ExperimentalStrategyCode)
 		assert.Equal(t, "long_read", seqExp.SequencingReadTechnologyCode)
 		assert.Equal(t, "pacbio", seqExp.PlatformCode)
+		assert.Equal(t, "NEW-SEQ", seqExp.SequencerID)
+		assert.Equal(t, "NEW-PROTO", seqExp.Protocol)
 	})
 }

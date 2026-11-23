@@ -16,6 +16,8 @@ describe('Sequencing - Batch - Null fields - Optional fields', () => {
           "platform_code": "Cypress",
           "sequencing_lab_code": "Cypress0001",
           "capture_kit": null,
+          "sequencer_id": null,
+          "protocol": null,
           "run_alias": null,
           "run_date": null,
           "run_name": "Cypress",

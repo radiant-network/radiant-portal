@@ -34,12 +34,14 @@ class SequencingExperimentDetail(BaseModel):
     histology_code: Optional[StrictStr] = None
     patient_id: StrictInt
     platform_code: Optional[StrictStr] = None
+    protocol: Optional[StrictStr] = None
     run_alias: Optional[StrictStr] = None
     run_date: Optional[StrictStr] = None
     run_name: Optional[StrictStr] = None
     sample_id: Optional[StrictInt] = None
     sample_type_code: Optional[StrictStr] = None
     seq_id: Optional[StrictInt] = None
+    sequencer_id: Optional[StrictStr] = None
     sequencing_lab_code: Optional[StrictStr] = None
     sequencing_lab_name: Optional[StrictStr] = None
     sequencing_read_technology_code: Optional[StrictStr] = None
@@ -48,7 +50,7 @@ class SequencingExperimentDetail(BaseModel):
     submitter_sample_id: Optional[StrictStr] = None
     tissue_site: Optional[StrictStr] = None
     updated_on: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["aliquot", "capture_kit", "created_on", "experimental_strategy_code", "experimental_strategy_name", "histology_code", "patient_id", "platform_code", "run_alias", "run_date", "run_name", "sample_id", "sample_type_code", "seq_id", "sequencing_lab_code", "sequencing_lab_name", "sequencing_read_technology_code", "sequencing_read_technology_name", "status_code", "submitter_sample_id", "tissue_site", "updated_on"]
+    __properties: ClassVar[List[str]] = ["aliquot", "capture_kit", "created_on", "experimental_strategy_code", "experimental_strategy_name", "histology_code", "patient_id", "platform_code", "protocol", "run_alias", "run_date", "run_name", "sample_id", "sample_type_code", "seq_id", "sequencer_id", "sequencing_lab_code", "sequencing_lab_name", "sequencing_read_technology_code", "sequencing_read_technology_name", "status_code", "submitter_sample_id", "tissue_site", "updated_on"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -109,12 +111,14 @@ class SequencingExperimentDetail(BaseModel):
             "histology_code": obj.get("histology_code"),
             "patient_id": obj.get("patient_id"),
             "platform_code": obj.get("platform_code"),
+            "protocol": obj.get("protocol"),
             "run_alias": obj.get("run_alias"),
             "run_date": obj.get("run_date"),
             "run_name": obj.get("run_name"),
             "sample_id": obj.get("sample_id"),
             "sample_type_code": obj.get("sample_type_code"),
             "seq_id": obj.get("seq_id"),
+            "sequencer_id": obj.get("sequencer_id"),
             "sequencing_lab_code": obj.get("sequencing_lab_code"),
             "sequencing_lab_name": obj.get("sequencing_lab_name"),
             "sequencing_read_technology_code": obj.get("sequencing_read_technology_code"),

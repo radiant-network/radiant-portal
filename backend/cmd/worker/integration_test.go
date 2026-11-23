@@ -1085,6 +1085,8 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 				"platform_code": "illumina",
 				"sequencing_lab_code": "CHUSJ",
 				"capture_kit": "Agilent V6",
+				"sequencer_id": "A00516",
+				"protocol": "TruSeq DNA PCR-Free",
 				"run_alias": "RUN-001",
 				"run_date": "2020-01-01T00:00:00Z",
 				"run_name": "Run Name 1",
@@ -1140,6 +1142,8 @@ func Test_ProcessBatch_SequencingExperiment_Success_Not_Dry_Run(t *testing.T) {
 		assert.Equal(t, "illumina", seqExp.PlatformCode)
 		assert.Equal(t, "CHUSJ", seqExp.SequencingLabCode)
 		assert.Equal(t, "Agilent V6", seqExp.CaptureKit)
+		assert.Equal(t, "A00516", seqExp.SequencerID)
+		assert.Equal(t, "TruSeq DNA PCR-Free", seqExp.Protocol)
 		assert.Equal(t, "RUN-001", seqExp.RunAlias)
 		expectedRunDate, _ := time.Parse(time.RFC3339, "2020-01-01T00:00:00Z")
 		assert.True(t, seqExp.RunDate.Equal(expectedRunDate))

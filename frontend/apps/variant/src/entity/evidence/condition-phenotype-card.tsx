@@ -109,6 +109,7 @@ function ConditionPhenotypeCard() {
           <Input
             startIcon={Search}
             placeholder={t('variant_entity.evidence.gene.filters.search_placeholder')}
+            aria-label={t('variant_entity.evidence.gene.filters.search_placeholder')}
             wrapperClassName="max-w-[320px] w-full"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}

@@ -35,6 +35,7 @@ export type NotesContainerProps = NoteContainerBaseProps & {
   enableSkeletonLoading?: boolean;
   withHeader?: boolean;
   canComment?: boolean;
+  focusEditor?: boolean;
 };
 
 export type GetOccurrenceNoteInput = Omit<NotesContainerProps, 'enableEmptyIcon'>;
@@ -65,6 +66,7 @@ function NotesContainer({
   enableSkeletonLoading = true,
   withHeader = false,
   canComment = true,
+  focusEditor = true,
   ...props
 }: NotesContainerProps) {
   const { t } = useI18n();
@@ -128,7 +130,7 @@ function NotesContainer({
             onChange={setContent}
             clearContent={clearContent}
             editable={!save.isMutating}
-            autofocus
+            autofocus={focusEditor}
             resisizable={false}
             actions={[
               <Button

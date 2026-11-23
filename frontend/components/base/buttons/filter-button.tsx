@@ -40,6 +40,7 @@ export interface IFilterButton {
   icon?: any;
   count?: number;
   optionRenderer?: (option: IFilterButtonItem) => React.ReactNode;
+  render?: (props: { selected: string[]; onSelect: (selected: string[]) => void }) => React.ReactNode;
   showKey?: boolean;
   withTooltip?: boolean;
 }
@@ -193,6 +194,7 @@ export default function FilterButton({
   const [open, setOpen] = useState(openOnAppear);
   const [firstOpen, setFirstOpen] = useState(true);
   const selectedCount = selected.length;
+  const searchLabel = placeholder || label || t('common.facets.select_placeholder');
 
   // Store a snapshot of selected/unselected options when popover opens
   const [optionSnapshot, setOptionSnapshot] = useState<{
@@ -267,9 +269,13 @@ export default function FilterButton({
         onMouseLeave={() => setOpen(false)}
       >
         {/* value prevent the default selection/hover style of the first element in the command list */}
-        <Command className="flex flex-col border-border border-0 border-b-none rounded-b-none" value="">
+        <Command
+          className="flex flex-col border-border border-0 border-b-none rounded-b-none"
+          value=""
+          label={searchLabel}
+        >
           <CommandInput
-            placeholder={placeholder || label || t('common.facets.select_placeholder')}
+            placeholder={searchLabel}
             leftAddon={<Search size={16} className="text-muted-foreground mr-1" />}
             wrapperClassName="shrink-0 h-10 border-t-0 border-l-0 border-b-1 border-r-0 border-color-border rounded-none"
           />

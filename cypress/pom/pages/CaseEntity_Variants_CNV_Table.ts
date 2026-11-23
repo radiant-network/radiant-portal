@@ -298,6 +298,7 @@ export const CaseEntity_Variants_CNV_Table = {
             switch (columnID) {
               case 'genes':
               case 'cytoband':
+              case 'cnv_variant':
               case 'nb_genes':
                 cy.get(selectors.tableCell(dataCNV)).eq(position).find(CommonSelectors.linkButton).clickAndWait({ force: true });
                 break;
@@ -533,6 +534,12 @@ export const CaseEntity_Variants_CNV_Table = {
      */
     shouldNotDisplayColumn(columnID: string) {
       cy.get(CommonSelectors.tableHead()).should($head => expect(hasVisibleText($head, getColumnName(tableColumns, columnID))).to.be.false);
+    },
+    /**
+     * Checks that the CNV profile dialog is displayed, without waiting for the profile to load.
+     */
+    shouldCNVProfileOpen() {
+      cy.get(CommonSelectors.animateIn).contains(`CNV profile`).should('exist');
     },
     /**
      * Checks that the overlapping modal is displayed.

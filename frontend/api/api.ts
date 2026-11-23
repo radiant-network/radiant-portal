@@ -668,7 +668,7 @@ export interface CNVProfileTrack {
     'values': Array<number>;
 }
 /**
- * User assigned to a case, as shown in the cases list and on the case entity page. Name and email are the attributes the identity registry holds for them, and are absent for an account that never filled them in.
+ * User who is or may be assigned a case: a case\'s assignees in the cases list and on the case entity page, the assignee picker, and the users of the case list assignee filter. Name and email are the attributes the identity registry holds for them, and are absent for an account that never filled them in.
  * @export
  * @interface CaseAssignee
  */
@@ -1195,10 +1195,10 @@ export interface CaseFilters {
     'analysis_catalog_code': Array<FiltersValue>;
     /**
      * 
-     * @type {Array<FiltersValue>}
+     * @type {Array<CaseAssignee>}
      * @memberof CaseFilters
      */
-    'assignee_id': Array<FiltersValue>;
+    'assignee_id': Array<CaseAssignee>;
     /**
      * 
      * @type {Array<FiltersValue>}
@@ -8683,6 +8683,12 @@ export interface SequencingExperimentBatch {
      * @type {string}
      * @memberof SequencingExperimentBatch
      */
+    'protocol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
     'run_alias'?: string;
     /**
      * 
@@ -8702,6 +8708,12 @@ export interface SequencingExperimentBatch {
      * @memberof SequencingExperimentBatch
      */
     'sample_organization_code': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentBatch
+     */
+    'sequencer_id'?: string;
     /**
      * 
      * @type {string}
@@ -8802,6 +8814,12 @@ export interface SequencingExperimentDetail {
      * @type {string}
      * @memberof SequencingExperimentDetail
      */
+    'protocol'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
     'run_alias'?: string;
     /**
      * 
@@ -8833,6 +8851,12 @@ export interface SequencingExperimentDetail {
      * @memberof SequencingExperimentDetail
      */
     'seq_id'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof SequencingExperimentDetail
+     */
+    'sequencer_id'?: string;
     /**
      * 
      * @type {string}
@@ -22994,10 +23018,11 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
          * @summary Get global internal frequencies
          * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
+         * @param {GetGermlineVariantGlobalInternalFrequenciesSequencingTypeEnum} [sequencingType] sequencing type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantGlobalInternalFrequencies: async (tenant: string, locusId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantGlobalInternalFrequencies: async (tenant: string, locusId: string, sequencingType?: GetGermlineVariantGlobalInternalFrequenciesSequencingTypeEnum, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'tenant' is not null or undefined
             assertParamExists('getGermlineVariantGlobalInternalFrequencies', 'tenant', tenant)
             // verify required parameter 'locusId' is not null or undefined
@@ -23019,6 +23044,10 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
             // authentication bearerauth required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (sequencingType !== undefined) {
+                localVarQueryParameter['sequencing_type'] = sequencingType;
+            }
 
 
     
@@ -23079,10 +23108,11 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
          * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {GetGermlineVariantInternalFrequenciesSplitEnum} split split type
+         * @param {GetGermlineVariantInternalFrequenciesSequencingTypeEnum} [sequencingType] sequencing type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantInternalFrequencies: async (tenant: string, locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getGermlineVariantInternalFrequencies: async (tenant: string, locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, sequencingType?: GetGermlineVariantInternalFrequenciesSequencingTypeEnum, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'tenant' is not null or undefined
             assertParamExists('getGermlineVariantInternalFrequencies', 'tenant', tenant)
             // verify required parameter 'locusId' is not null or undefined
@@ -23109,6 +23139,10 @@ export const VariantApiAxiosParamCreator = function (configuration?: Configurati
 
             if (split !== undefined) {
                 localVarQueryParameter['split'] = split;
+            }
+
+            if (sequencingType !== undefined) {
+                localVarQueryParameter['sequencing_type'] = sequencingType;
             }
 
 
@@ -23360,11 +23394,12 @@ export const VariantApiFp = function(configuration?: Configuration) {
          * @summary Get global internal frequencies
          * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
+         * @param {GetGermlineVariantGlobalInternalFrequenciesSequencingTypeEnum} [sequencingType] sequencing type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantGlobalInternalFrequencies(tenant: string, locusId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InternalFrequencies>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantGlobalInternalFrequencies(tenant, locusId, options);
+        async getGermlineVariantGlobalInternalFrequencies(tenant: string, locusId: string, sequencingType?: GetGermlineVariantGlobalInternalFrequenciesSequencingTypeEnum, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InternalFrequencies>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantGlobalInternalFrequencies(tenant, locusId, sequencingType, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantGlobalInternalFrequencies']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -23389,11 +23424,12 @@ export const VariantApiFp = function(configuration?: Configuration) {
          * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {GetGermlineVariantInternalFrequenciesSplitEnum} split split type
+         * @param {GetGermlineVariantInternalFrequenciesSequencingTypeEnum} [sequencingType] sequencing type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getGermlineVariantInternalFrequencies(tenant: string, locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantInternalFrequencies>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantInternalFrequencies(tenant, locusId, split, options);
+        async getGermlineVariantInternalFrequencies(tenant: string, locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, sequencingType?: GetGermlineVariantInternalFrequenciesSequencingTypeEnum, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VariantInternalFrequencies>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getGermlineVariantInternalFrequencies(tenant, locusId, split, sequencingType, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['VariantApi.getGermlineVariantInternalFrequencies']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -23524,11 +23560,12 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          * @summary Get global internal frequencies
          * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
+         * @param {GetGermlineVariantGlobalInternalFrequenciesSequencingTypeEnum} [sequencingType] sequencing type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantGlobalInternalFrequencies(tenant: string, locusId: string, options?: RawAxiosRequestConfig): AxiosPromise<InternalFrequencies> {
-            return localVarFp.getGermlineVariantGlobalInternalFrequencies(tenant, locusId, options).then((request) => request(axios, basePath));
+        getGermlineVariantGlobalInternalFrequencies(tenant: string, locusId: string, sequencingType?: GetGermlineVariantGlobalInternalFrequenciesSequencingTypeEnum, options?: RawAxiosRequestConfig): AxiosPromise<InternalFrequencies> {
+            return localVarFp.getGermlineVariantGlobalInternalFrequencies(tenant, locusId, sequencingType, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve germline Variant Header data for a given locus
@@ -23547,11 +23584,12 @@ export const VariantApiFactory = function (configuration?: Configuration, basePa
          * @param {string} tenant Tenant code
          * @param {string} locusId Locus ID
          * @param {GetGermlineVariantInternalFrequenciesSplitEnum} split split type
+         * @param {GetGermlineVariantInternalFrequenciesSequencingTypeEnum} [sequencingType] sequencing type
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getGermlineVariantInternalFrequencies(tenant: string, locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options?: RawAxiosRequestConfig): AxiosPromise<VariantInternalFrequencies> {
-            return localVarFp.getGermlineVariantInternalFrequencies(tenant, locusId, split, options).then((request) => request(axios, basePath));
+        getGermlineVariantInternalFrequencies(tenant: string, locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, sequencingType?: GetGermlineVariantInternalFrequenciesSequencingTypeEnum, options?: RawAxiosRequestConfig): AxiosPromise<VariantInternalFrequencies> {
+            return localVarFp.getGermlineVariantInternalFrequencies(tenant, locusId, split, sequencingType, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve Germline Variant interpreted cases for a given locus
@@ -23682,12 +23720,13 @@ export class VariantApi extends BaseAPI {
      * @summary Get global internal frequencies
      * @param {string} tenant Tenant code
      * @param {string} locusId Locus ID
+     * @param {GetGermlineVariantGlobalInternalFrequenciesSequencingTypeEnum} [sequencingType] sequencing type
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantGlobalInternalFrequencies(tenant: string, locusId: string, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantGlobalInternalFrequencies(tenant, locusId, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantGlobalInternalFrequencies(tenant: string, locusId: string, sequencingType?: GetGermlineVariantGlobalInternalFrequenciesSequencingTypeEnum, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantGlobalInternalFrequencies(tenant, locusId, sequencingType, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -23709,12 +23748,13 @@ export class VariantApi extends BaseAPI {
      * @param {string} tenant Tenant code
      * @param {string} locusId Locus ID
      * @param {GetGermlineVariantInternalFrequenciesSplitEnum} split split type
+     * @param {GetGermlineVariantInternalFrequenciesSequencingTypeEnum} [sequencingType] sequencing type
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof VariantApi
      */
-    public getGermlineVariantInternalFrequencies(tenant: string, locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, options?: RawAxiosRequestConfig) {
-        return VariantApiFp(this.configuration).getGermlineVariantInternalFrequencies(tenant, locusId, split, options).then((request) => request(this.axios, this.basePath));
+    public getGermlineVariantInternalFrequencies(tenant: string, locusId: string, split: GetGermlineVariantInternalFrequenciesSplitEnum, sequencingType?: GetGermlineVariantInternalFrequenciesSequencingTypeEnum, options?: RawAxiosRequestConfig) {
+        return VariantApiFp(this.configuration).getGermlineVariantInternalFrequencies(tenant, locusId, split, sequencingType, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -23771,11 +23811,27 @@ export type GetGermlineVariantConditionsPanelTypeEnum = typeof GetGermlineVarian
 /**
  * @export
  */
+export const GetGermlineVariantGlobalInternalFrequenciesSequencingTypeEnum = {
+    Wgs: 'wgs',
+    Wxs: 'wxs'
+} as const;
+export type GetGermlineVariantGlobalInternalFrequenciesSequencingTypeEnum = typeof GetGermlineVariantGlobalInternalFrequenciesSequencingTypeEnum[keyof typeof GetGermlineVariantGlobalInternalFrequenciesSequencingTypeEnum];
+/**
+ * @export
+ */
 export const GetGermlineVariantInternalFrequenciesSplitEnum = {
     Project: 'project',
     PrimaryCondition: 'primary_condition',
     Analysis: 'analysis'
 } as const;
 export type GetGermlineVariantInternalFrequenciesSplitEnum = typeof GetGermlineVariantInternalFrequenciesSplitEnum[keyof typeof GetGermlineVariantInternalFrequenciesSplitEnum];
+/**
+ * @export
+ */
+export const GetGermlineVariantInternalFrequenciesSequencingTypeEnum = {
+    Wgs: 'wgs',
+    Wxs: 'wxs'
+} as const;
+export type GetGermlineVariantInternalFrequenciesSequencingTypeEnum = typeof GetGermlineVariantInternalFrequenciesSequencingTypeEnum[keyof typeof GetGermlineVariantInternalFrequenciesSequencingTypeEnum];
 
 

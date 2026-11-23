@@ -35,6 +35,7 @@ function OrganizationsFilters({ search, onSearchChange, categories, onCategories
         size="sm"
         startIcon={Search}
         placeholder={t('admin.organizations.filters.search_placeholder')}
+        aria-label={t('admin.organizations.filters.search_placeholder')}
         value={search}
         onChange={e => onSearchChange(e.target.value)}
         className="w-72"

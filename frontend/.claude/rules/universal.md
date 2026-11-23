@@ -83,6 +83,27 @@ For common cases:
 
 Any user-visible string goes through `useI18n()` — no hardcoded strings in JSX. Keys live in `frontend/translations/`.
 
+### Casing convention (Ferlab Notation / Casing)
+
+Apply these rules to every user-visible string added or edited in `frontend/translations/`. Source: [Ferlab Notation / Casing (Notion)](https://app.notion.com/p/ferlab/Notation-Casing-336b0fcecb3d80db8f7dde0018003252).
+
+**French (`fr.json`): always sentence case.** Capitalize the first word only. Keep proper nouns, acronyms (CRAM, OMIM, ClinGen…), and tool names capitalized as usual. No Title Case anywhere — not even for page titles, column headers, tabs, or facets.
+
+Examples: `"Lignée germinale familiale"`, `"Germinal familial"`, `"En cours"`, `"Non concluant"`, `"Dès que possible"`, `"Cas génomiques"`.
+
+**English (`en.json`): sentence case by default, Title Case only for these UI roles:**
+
+| Role | Casing | Example |
+| --- | --- | --- |
+| Page title | Title Case | `"Variant Entity"` |
+| Tab title | Title Case | `"Clinical History"` |
+| Section / frame title | Title Case | `"Patient Information"` |
+| Table column header | Title Case | `"Primary Condition"` |
+| Facet (filter) title | Title Case | `"Diagnosis Lab"` |
+| Everything else — buttons, labels, tooltips, placeholders, modal titles, messages, subtitles | Sentence case | `"Save filter"`, `"Open in new tab"`, `"No results found"` |
+
+When adding a new key, locate the equivalent role above and apply the matching casing to both languages. When touching an existing key whose casing violates these rules, fix it in the same change unless the user has asked you to stay strictly in scope.
+
 ## Accessibility
 
 Every change keeps `plugin:jsx-a11y/strict` green and follows `frontend/docs/accessibility.md`:

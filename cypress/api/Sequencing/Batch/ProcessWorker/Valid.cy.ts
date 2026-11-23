@@ -17,6 +17,8 @@ describe('Sequencing - Batch - Process worker - Valid', () => {
           "platform_code": "illumina",
           "sequencing_lab_code": "CHUSJ",
           "capture_kit": "Cypress",
+          "sequencer_id": "Cypress",
+          "protocol": "Cypress",
           "run_alias": "Cypress",
           "run_date": "2025-01-01T00:00:00Z",
           "run_name": "Cypress",

@@ -240,10 +240,10 @@ func (m *MockRepository) GetVariantExternalFrequencies(ctx context.Context, locu
 	}, nil
 }
 
-func (m *MockRepository) GetGermlineVariantGlobalInternalFrequencies(ctx context.Context, locusId int) (*types.InternalFrequencies, error) {
+func (m *MockRepository) GetGermlineVariantGlobalInternalFrequencies(ctx context.Context, locusId int, seqType types.SequencingType) (*types.InternalFrequencies, error) {
 	af := 0.01
 	ac := 1
-	an := 100
+	an := mockPnBySequencingType(seqType)
 	hom := 0
 
 	return &types.InternalFrequencies{
@@ -262,10 +262,17 @@ func (m *MockRepository) GetGermlineVariantGlobalInternalFrequencies(ctx context
 	}, nil
 }
 
-func (m *MockRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx context.Context, locusId int, splitType types.SplitType) (*[]types.InternalFrequenciesSplitBy, error) {
+func mockPnBySequencingType(seqType types.SequencingType) int {
+	if seqType == types.SequencingTypeWXS {
+		return 200
+	}
+	return 100
+}
+
+func (m *MockRepository) GetGermlineVariantInternalFrequenciesSplitBy(ctx context.Context, locusId int, splitType types.SplitType, seqType types.SequencingType) (*[]types.InternalFrequenciesSplitBy, error) {
 	af := 0.01
 	ac := 1
-	an := 100
+	an := mockPnBySequencingType(seqType)
 	hom := 0
 	return &[]types.InternalFrequenciesSplitBy{
 		{
@@ -762,6 +769,82 @@ func Test_GetGermlineVariantInternalFrequenciesHandler_BadSplit(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func getInternalFrequencies(path string) *httptest.ResponseRecorder {
+	repo := &MockRepository{}
+	router := gin.Default()
+	router.GET("/:tenant/variants/germline/:locus_id/internal_frequencies", GetGermlineVariantInternalFrequenciesHandler(repo))
+	router.GET("/:tenant/variants/germline/:locus_id/internal_frequencies/global", GetGermlineVariantGlobalInternalFrequenciesHandler(repo))
+
+	req, _ := http.NewRequest("GET", path, bytes.NewBuffer([]byte("{}")))
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+	return w
+}
+
+func Test_GetGermlineVariantGlobalInternalFrequenciesHandler_Wxs(t *testing.T) {
+	w := getInternalFrequencies("/radiant/variants/germline/1000/internal_frequencies/global?sequencing_type=wxs")
+
+	expected := `{
+		"pc_all": 1, "pn_all": 200, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 200, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 200, "pf_non_affected": 0.01, "hom_non_affected": 0
+	}`
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_GetGermlineVariantGlobalInternalFrequenciesHandler_Wgs(t *testing.T) {
+	w := getInternalFrequencies("/radiant/variants/germline/1000/internal_frequencies/global?sequencing_type=wgs")
+
+	expected := `{
+		"pc_all": 1, "pn_all": 100, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 100, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 100, "pf_non_affected": 0.01, "hom_non_affected": 0
+	}`
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_GetGermlineVariantGlobalInternalFrequenciesHandler_BadSequencingType(t *testing.T) {
+	w := getInternalFrequencies("/radiant/variants/germline/1000/internal_frequencies/global?sequencing_type=wes")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status": 400, "message": "incorrect sequencing_type"}`, w.Body.String())
+}
+
+func Test_GetGermlineVariantGlobalInternalFrequenciesHandler_EmptySequencingType(t *testing.T) {
+	w := getInternalFrequencies("/radiant/variants/germline/1000/internal_frequencies/global?sequencing_type=")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status": 400, "message": "incorrect sequencing_type"}`, w.Body.String())
+}
+
+func Test_GetGermlineVariantInternalFrequenciesHandler_Wxs(t *testing.T) {
+	w := getInternalFrequencies("/radiant/variants/germline/1000/internal_frequencies?split=project&sequencing_type=wxs")
+
+	expected := `{
+		"split_rows":[
+			{"split_value_code":"N1", "split_value_name": "NeuroDev Phase I", "frequencies":{"pc_all": 1, "pn_all": 200, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 200, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 200, "pf_non_affected": 0.01, "hom_non_affected": 0}},
+			{"split_value_code":"N2", "split_value_name": "NeuroDev Phase II", "frequencies":{"pc_all": 1, "pn_all": 200, "pf_all": 0.01, "hom_all": 0, "pc_affected": 1, "pn_affected": 200, "pf_affected": 0.01, "hom_affected": 0, "pc_non_affected": 1, "pn_non_affected": 200, "pf_non_affected": 0.01, "hom_non_affected": 0}}
+		]
+	}`
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.JSONEq(t, expected, w.Body.String())
+}
+
+func Test_GetGermlineVariantInternalFrequenciesHandler_BadSequencingType(t *testing.T) {
+	w := getInternalFrequencies("/radiant/variants/germline/1000/internal_frequencies?split=project&sequencing_type=wes")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status": 400, "message": "incorrect sequencing_type"}`, w.Body.String())
+}
+
+func Test_GetGermlineVariantInternalFrequenciesHandler_EmptySequencingType(t *testing.T) {
+	w := getInternalFrequencies("/radiant/variants/germline/1000/internal_frequencies?split=project&sequencing_type=")
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.JSONEq(t, `{"status": 400, "message": "incorrect sequencing_type"}`, w.Body.String())
 }
 
 func Test_GetGermlineVariantInterpretedCasesHandler_RunName_BadRequest(t *testing.T) {

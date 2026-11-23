@@ -19,6 +19,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 from typing import Any, ClassVar, Dict, List
+from radiant_python.models.case_assignee import CaseAssignee
 from radiant_python.models.filters_value import FiltersValue
 from typing import Optional, Set
 from typing_extensions import Self
@@ -28,7 +29,7 @@ class CaseFilters(BaseModel):
     CaseFilters
     """ # noqa: E501
     analysis_catalog_code: List[FiltersValue]
-    assignee_id: List[FiltersValue]
+    assignee_id: List[CaseAssignee]
     case_category_code: List[FiltersValue]
     case_type_code: List[FiltersValue]
     diagnosis_lab_code: List[FiltersValue]
@@ -169,7 +170,7 @@ class CaseFilters(BaseModel):
 
         _obj = cls.model_validate({
             "analysis_catalog_code": [FiltersValue.from_dict(_item) for _item in obj["analysis_catalog_code"]] if obj.get("analysis_catalog_code") is not None else None,
-            "assignee_id": [FiltersValue.from_dict(_item) for _item in obj["assignee_id"]] if obj.get("assignee_id") is not None else None,
+            "assignee_id": [CaseAssignee.from_dict(_item) for _item in obj["assignee_id"]] if obj.get("assignee_id") is not None else None,
             "case_category_code": [FiltersValue.from_dict(_item) for _item in obj["case_category_code"]] if obj.get("case_category_code") is not None else None,
             "case_type_code": [FiltersValue.from_dict(_item) for _item in obj["case_type_code"]] if obj.get("case_type_code") is not None else None,
             "diagnosis_lab_code": [FiltersValue.from_dict(_item) for _item in obj["diagnosis_lab_code"]] if obj.get("diagnosis_lab_code") is not None else None,

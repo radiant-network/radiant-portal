@@ -141,6 +141,14 @@ func (r *SequencingExperimentValidationRecord) validateCaptureKitField() {
 	r.ValidateStringField(r.SequencingExperiment.CaptureKit.String(), "capture_kit", r.getPath("capture_kit"), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getUniqueIds(), false)
 }
 
+func (r *SequencingExperimentValidationRecord) validateSequencerIDField() {
+	r.ValidateStringField(r.SequencingExperiment.SequencerID.String(), "sequencer_id", r.getPath("sequencer_id"), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getUniqueIds(), false)
+}
+
+func (r *SequencingExperimentValidationRecord) validateProtocolField() {
+	r.ValidateStringField(r.SequencingExperiment.Protocol.String(), "protocol", r.getPath("protocol"), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, nil, r.getUniqueIds(), false)
+}
+
 func (r *SequencingExperimentValidationRecord) validateRunAliasField() {
 	r.ValidateStringField(r.SequencingExperiment.RunAlias.String(), "run_alias", r.getPath("run_alias"), InvalidFieldValueCode, r.GetResourceType(), TextMaxLength, AlphanumericIdentifierRegExpCompiled, r.getUniqueIds(), false)
 }
@@ -220,6 +228,8 @@ func (r *SequencingExperimentValidationRecord) validateExistingAliquotForSequenc
 			different = verifyIsDifferentField(s.RunName, r.SequencingExperiment.RunName.String(), r, key, "run_name") || different
 			different = verifyIsDifferentField(s.RunAlias, r.SequencingExperiment.RunAlias.String(), r, key, "run_alias") || different
 			different = verifyIsDifferentField(s.CaptureKit, r.SequencingExperiment.CaptureKit.String(), r, key, "capture_kit") || different
+			different = verifyIsDifferentField(s.SequencerID, r.SequencingExperiment.SequencerID.String(), r, key, "sequencer_id") || different
+			different = verifyIsDifferentField(s.Protocol, r.SequencingExperiment.Protocol.String(), r, key, "protocol") || different
 
 			t := time.Time{}
 			if r.SequencingExperiment.RunDate != nil {
@@ -362,6 +372,12 @@ func insertSequencingExperimentRecords(ctx context.Context, records []*Sequencin
 			if record.SequencingExperiment.CaptureKit != "" {
 				seqExp.CaptureKit = record.SequencingExperiment.CaptureKit.String()
 			}
+			if record.SequencingExperiment.SequencerID != "" {
+				seqExp.SequencerID = record.SequencingExperiment.SequencerID.String()
+			}
+			if record.SequencingExperiment.Protocol != "" {
+				seqExp.Protocol = record.SequencingExperiment.Protocol.String()
+			}
 
 			err := repo.CreateSequencingExperiment(ctx, &seqExp)
 			if err != nil {
@@ -427,6 +443,8 @@ func validateSequencingExperimentRecord(ctx context.Context, bv *batchval.BatchV
 		return nil, fmt.Errorf("validate platform code: %w", err)
 	}
 	record.validateCaptureKitField()
+	record.validateSequencerIDField()
+	record.validateProtocolField()
 	record.validateRunAliasField()
 	record.validateRunDateField()
 	record.validateRunNameField()
@@ -516,6 +534,8 @@ func updateSequencingExperimentRecords(ctx context.Context, records []*Sequencin
 				RunName:                      record.SequencingExperiment.RunName.String(),
 				RunAlias:                     record.SequencingExperiment.RunAlias.String(),
 				CaptureKit:                   record.SequencingExperiment.CaptureKit.String(),
+				SequencerID:                  record.SequencingExperiment.SequencerID.String(),
+				Protocol:                     record.SequencingExperiment.Protocol.String(),
 			}
 			if record.SequencingExperiment.RunDate != nil {
 				seqExp.RunDate = time.Time(*record.SequencingExperiment.RunDate)
@@ -587,6 +607,8 @@ func validateUpdateSequencingExperimentRecord(ctx context.Context, bv *batchval.
 		return nil, fmt.Errorf("validate platform code: %w", err)
 	}
 	record.validateCaptureKitField()
+	record.validateSequencerIDField()
+	record.validateProtocolField()
 	record.validateRunAliasField()
 	record.validateRunDateField()
 	record.validateRunNameField()

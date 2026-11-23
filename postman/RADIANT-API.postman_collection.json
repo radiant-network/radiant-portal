@@ -1405,7 +1405,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies/global",
+              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies/global?sequencing_type=wgs",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -1416,6 +1416,12 @@
                 "-8934226361296355323",
                 "internal_frequencies",
                 "global"
+              ],
+              "query": [
+                {
+                  "key": "sequencing_type",
+                  "value": "wgs"
+                }
               ]
             }
           },
@@ -1437,7 +1443,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies?split=primary_condition",
+              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies?split=primary_condition&sequencing_type=wgs",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -1452,6 +1458,10 @@
                 {
                   "key": "split",
                   "value": "primary_condition"
+                },
+                {
+                  "key": "sequencing_type",
+                  "value": "wgs"
                 }
               ]
             }
@@ -1474,7 +1484,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies?split=project",
+              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies?split=project&sequencing_type=wgs",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -1489,6 +1499,10 @@
                 {
                   "key": "split",
                   "value": "project"
+                },
+                {
+                  "key": "sequencing_type",
+                  "value": "wgs"
                 }
               ]
             }
@@ -1511,7 +1525,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies?split=analysis",
+              "raw": "{{radiant-api-url}}/{{tenant}}/variants/germline/-8934226361296355323/internal_frequencies?split=analysis&sequencing_type=wgs",
               "host": [
                 "{{radiant-api-url}}"
               ],
@@ -1526,6 +1540,10 @@
                 {
                   "key": "split",
                   "value": "analysis"
+                },
+                {
+                  "key": "sequencing_type",
+                  "value": "wgs"
                 }
               ]
             }
@@ -3276,7 +3294,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n      \"sequencing_experiments\": [\n        {\n          \"aliquot\": \"NA12878_NA12878\",\n          \"sample_organization_code\": \"CQGC\",\n          \"submitter_sample_id\": \"S13224\",\n          \"experimental_strategy_code\": \"wgs\",\n          \"sequencing_read_technology_code\": \"short_read\",\n          \"platform_code\": \"pacbio\",\n          \"sequencing_lab_code\": \"CQGC\",\n          \"capture_kit\": \"Cypress\",\n          \"run_alias\": \"Cypress\",\n          \"run_date\": \"2025-01-01T00:00:00Z\",\n          \"run_name\": \"Cypress\",\n          \"status_code\": \"completed\"\n        }\n      ]\n    }",
+              "raw": "{\n      \"sequencing_experiments\": [\n        {\n          \"aliquot\": \"NA12878_NA12878\",\n          \"sample_organization_code\": \"CQGC\",\n          \"submitter_sample_id\": \"S13224\",\n          \"experimental_strategy_code\": \"wgs\",\n          \"sequencing_read_technology_code\": \"short_read\",\n          \"platform_code\": \"pacbio\",\n          \"sequencing_lab_code\": \"CQGC\",\n          \"capture_kit\": \"Cypress\",\n          \"sequencer_id\": \"Cypress\",\n          \"protocol\": \"Cypress\",\n          \"run_alias\": \"Cypress\",\n          \"run_date\": \"2025-01-01T00:00:00Z\",\n          \"run_name\": \"Cypress\",\n          \"status_code\": \"completed\"\n        }\n      ]\n    }",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3335,7 +3353,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n      \"sequencing_experiments\": [\n        {\n          \"aliquot\": \"NA12878_NA12878\",\n          \"sample_organization_code\": \"CQGC\",\n          \"submitter_sample_id\": \"S13224\",\n          \"experimental_strategy_code\": \"wgs\",\n          \"sequencing_read_technology_code\": \"short_read\",\n          \"platform_code\": \"pacbio\",\n          \"sequencing_lab_code\": \"CQGC\",\n          \"capture_kit\": \"Cypress\",\n          \"run_alias\": \"Cypress\",\n          \"run_date\": \"2025-01-01T00:00:00Z\",\n          \"run_name\": \"Cypress\",\n          \"status_code\": \"completed\"\n        }\n      ]\n    }",
+              "raw": "{\n      \"sequencing_experiments\": [\n        {\n          \"aliquot\": \"NA12878_NA12878\",\n          \"sample_organization_code\": \"CQGC\",\n          \"submitter_sample_id\": \"S13224\",\n          \"experimental_strategy_code\": \"wgs\",\n          \"sequencing_read_technology_code\": \"short_read\",\n          \"platform_code\": \"pacbio\",\n          \"sequencing_lab_code\": \"CQGC\",\n          \"capture_kit\": \"Cypress\",\n          \"sequencer_id\": \"Cypress\",\n          \"protocol\": \"Cypress\",\n          \"run_alias\": \"Cypress\",\n          \"run_date\": \"2025-01-01T00:00:00Z\",\n          \"run_name\": \"Cypress\",\n          \"status_code\": \"completed\"\n        }\n      ]\n    }",
               "options": {
                 "raw": {
                   "language": "json"

@@ -18,6 +18,8 @@ type SequencingExperiment struct {
 	RunAlias                     string
 	RunDate                      time.Time `gorm:"type:timestamptz;default:null"`
 	CaptureKit                   string
+	SequencerID                  string
+	Protocol                     string
 	CreatedOn                    time.Time `gorm:"autoCreateTime"`
 	UpdatedOn                    time.Time `gorm:"autoUpdateTime:milli"`
 	ExperimentalStrategyCode     string
@@ -43,6 +45,8 @@ type SequencingExperimentDetail = struct {
 	ExperimentalStrategyName     string    `json:"experimental_strategy_name,omitempty"`
 	PlatformCode                 string    `json:"platform_code,omitempty"`
 	CaptureKit                   string    `json:"capture_kit,omitempty"`
+	SequencerID                  string    `json:"sequencer_id,omitempty"`
+	Protocol                     string    `json:"protocol,omitempty"`
 	SequencingReadTechnologyCode string    `json:"sequencing_read_technology_code,omitempty"`
 	SequencingReadTechnologyName string    `json:"sequencing_read_technology_name,omitempty"`
 	SampleID                     int       `json:"sample_id,omitempty"`

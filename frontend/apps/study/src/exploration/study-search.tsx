@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useId } from 'react';
 
 import { SqonOpEnum } from '@/api/api';
 import InputSearch from '@/components/base/data-entry/input-search';
@@ -14,6 +14,7 @@ import { STUDY_SEARCH_FIELD } from './mocks/study-fetcher-mock';
 export default function StudySearch() {
   const { t } = useI18n();
   const dispatch = useQBDispatch();
+  const inputId = useId();
 
   const handleSearch = useCallback(
     (value: string) => {
@@ -35,8 +36,15 @@ export default function StudySearch() {
 
   return (
     <div className="space-y-1">
-      <label className="text-muted-foreground text-sm">{t('study.search.label')}</label>
-      <InputSearch placeholder={t('study.search.placeholder')} onSearch={handleSearch} wrapperClassName="w-full" />
+      <label htmlFor={inputId} className="text-muted-foreground text-sm">
+        {t('study.search.label')}
+      </label>
+      <InputSearch
+        id={inputId}
+        placeholder={t('study.search.placeholder')}
+        onSearch={handleSearch}
+        wrapperClassName="w-full"
+      />
     </div>
   );
 }

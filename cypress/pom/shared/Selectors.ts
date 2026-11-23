@@ -48,6 +48,7 @@ export const CommonSelectors = {
   filterClear: (key: string) => `[data-cy="filter-clear-${key}"]`,
   filterMoreButton: '[data-cy="filter-button-more"]',
   filterOption: (key: string, value?: string) => (value ? `[data-cy="filter-option-${key}-${value}"]` : `[data-cy^="filter-option-${key}-"]`),
+  filterSwitchMyCases: '[data-cy="filter-switch-my-cases"]',
   gnomadRedIcon: '[class*="text-red-500 bg-red-500"]',
   hotspotOffIcon: '[class*="lucide-flame"][class*="text-muted-foreground/40"]',
   hotspotOnIcon: '[class*="lucide-flame"][class*="fill-indicator-red"]',

@@ -28,6 +28,8 @@ func Test_GetSequencingExperimentDetailById(t *testing.T) {
 		assert.Equal(t, "Whole Genome Sequencing", sequencingExperiment.ExperimentalStrategyName)
 		assert.Equal(t, "illumina", sequencingExperiment.PlatformCode)
 		assert.Equal(t, "SureSelect Custom DNA Target", sequencingExperiment.CaptureKit)
+		assert.Equal(t, "A00516", sequencingExperiment.SequencerID)
+		assert.Equal(t, "TruSeq DNA PCR-Free", sequencingExperiment.Protocol)
 		assert.Equal(t, "short_read", sequencingExperiment.SequencingReadTechnologyCode)
 		assert.Equal(t, "Short Read", sequencingExperiment.SequencingReadTechnologyName)
 		assert.Equal(t, 1, sequencingExperiment.SampleID)

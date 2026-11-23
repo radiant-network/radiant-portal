@@ -472,14 +472,6 @@ func Test_EligibleAssignees_CallerNotSurfacedPastTheSearch(t *testing.T) {
 	})
 }
 
-func filterKeys(values []types.FiltersValue) []string {
-	keys := make([]string, len(values))
-	for i, value := range values {
-		keys[i] = value.Key
-	}
-	return keys
-}
-
 func Test_AssigneeFilterValues_IncludesInterpretGrantsAtAnyOrg(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
@@ -487,7 +479,7 @@ func Test_AssigneeFilterValues_IncludesInterpretGrantsAtAnyOrg(t *testing.T) {
 		values, err := repo.AssigneeFilterValues(t.Context(), types.DefaultTenantCode)
 
 		assert.NoError(t, err)
-		keys := filterKeys(values)
+		keys := candidateIDs(values)
 		assert.Contains(t, keys, aliceID, "geneticist granted at CHOP")
 		assert.Contains(t, keys, danID, "geneticist granted at CHUSJ")
 		assert.Contains(t, keys, wendyID, "geneticist granted at the '*' wildcard")
@@ -502,7 +494,7 @@ func Test_AssigneeFilterValues_ExcludesUsersNeitherEligibleNorAssigned(t *testin
 		values, err := repo.AssigneeFilterValues(t.Context(), types.DefaultTenantCode)
 
 		assert.NoError(t, err)
-		keys := filterKeys(values)
+		keys := candidateIDs(values)
 		assert.NotContains(t, keys, twID, "practitioner granted with org_code NULL")
 		assert.NotContains(t, keys, mikeID, "member holds no can_interpret_variant")
 		assert.NotContains(t, keys, gabeID, "data_manager holds no can_interpret_variant")
@@ -519,7 +511,7 @@ func Test_AssigneeFilterValues_IncludesAssignedUserWithoutInterpretGrant(t *test
 		values, err := repo.AssigneeFilterValues(t.Context(), types.DefaultTenantCode)
 
 		assert.NoError(t, err)
-		assert.Contains(t, filterKeys(values), mikeID)
+		assert.Contains(t, candidateIDs(values), mikeID)
 	})
 }
 
@@ -531,43 +523,42 @@ func Test_AssigneeFilterValues_ScopedToTenant(t *testing.T) {
 		values, err := repo.AssigneeFilterValues(t.Context(), "tenant_b")
 
 		assert.NoError(t, err)
-		keys := filterKeys(values)
+		keys := candidateIDs(values)
 		assert.Contains(t, keys, carolID, "wildcard geneticist in tenant_b")
 		assert.NotContains(t, keys, aliceID, "alice's grants are all in radiant")
 		assert.NotContains(t, keys, mikeID, "mike's assignment is in radiant")
 	})
 }
 
-func Test_AssigneeFilterValues_LabelIsFullName(t *testing.T) {
+func Test_AssigneeFilterValues_ReturnsTheUserDetails(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 
 		values, err := repo.AssigneeFilterValues(t.Context(), types.DefaultTenantCode)
 
 		assert.NoError(t, err)
-		assert.Contains(t, values, types.FiltersValue{Key: wendyID, Label: "Wendy Walsh"})
+		assert.Contains(t, values, types.CaseAssignee{UserID: wendyID, FirstName: "Wendy", LastName: "Walsh", Email: "wendy@test.authz"})
 	})
 }
 
-// Zoe has a blank last name: sorted on last name she would come before Wendy Walsh, sorted on
-// the label she comes after.
-func Test_AssigneeFilterValues_OrderedByLabel(t *testing.T) {
+// Zed Able comes before Alice Adams on last name, and would come last on first name.
+func Test_AssigneeFilterValues_OrderedByLastNameThenFirstName(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
-		const zoeID = "7e57a551-0000-4000-8000-00000000a004"
-		seedAssignedUser(t, env.Postgres, zoeID, "zoe@test.authz", "Zoe", "")
+		const zedID = "7e57a551-0000-4000-8000-00000000a004"
+		seedAssignedUser(t, env.Postgres, zedID, "zed@test.authz", "Zed", "Able")
 
 		values, err := repo.AssigneeFilterValues(t.Context(), types.DefaultTenantCode)
 
 		assert.NoError(t, err)
-		keys := filterKeys(values)
-		assert.Less(t, slices.Index(keys, aliceID), slices.Index(keys, carolID))
-		assert.Less(t, slices.Index(keys, carolID), slices.Index(keys, wendyID))
-		assert.Less(t, slices.Index(keys, wendyID), slices.Index(keys, zoeID))
+		ids := candidateIDs(values)
+		assert.Less(t, slices.Index(ids, zedID), slices.Index(ids, aliceID))
+		assert.Less(t, slices.Index(ids, aliceID), slices.Index(ids, carolID))
+		assert.Less(t, slices.Index(ids, carolID), slices.Index(ids, wendyID))
 	})
 }
 
-func Test_AssigneeFilterValues_LabelFallsBackToEmail(t *testing.T) {
+func Test_AssigneeFilterValues_NamelessUserHasOnlyAnEmail(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 		const namelessID = "7e57a551-0000-4000-8000-00000000a001"
@@ -581,7 +572,7 @@ func Test_AssigneeFilterValues_LabelFallsBackToEmail(t *testing.T) {
 		values, err := repo.AssigneeFilterValues(t.Context(), types.DefaultTenantCode)
 
 		assert.NoError(t, err)
-		assert.Contains(t, values, types.FiltersValue{Key: namelessID, Label: "nameless@test.authz"})
+		assert.Contains(t, values, types.CaseAssignee{UserID: namelessID, Email: "nameless@test.authz"})
 	})
 }
 
@@ -595,32 +586,6 @@ func seedAssignedUser(t *testing.T, db *gorm.DB, userID, email, firstName, lastN
 	assign(t, db, types.DefaultTenantCode, 1, userID)
 }
 
-func Test_AssigneeFilterValues_LabelFallsBackToEmailWhenNamesBlank(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
-		const blankID = "7e57a551-0000-4000-8000-00000000a002"
-		seedAssignedUser(t, env.Postgres, blankID, "blank@test.authz", "", " ")
-
-		values, err := repo.AssigneeFilterValues(t.Context(), types.DefaultTenantCode)
-
-		assert.NoError(t, err)
-		assert.Contains(t, values, types.FiltersValue{Key: blankID, Label: "blank@test.authz"})
-	})
-}
-
-func Test_AssigneeFilterValues_LabelSkipsBlankLastName(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
-		const firstOnlyID = "7e57a551-0000-4000-8000-00000000a003"
-		seedAssignedUser(t, env.Postgres, firstOnlyID, "firstonly@test.authz", "Zoe", "")
-
-		values, err := repo.AssigneeFilterValues(t.Context(), types.DefaultTenantCode)
-
-		assert.NoError(t, err)
-		assert.Contains(t, values, types.FiltersValue{Key: firstOnlyID, Label: "Zoe"})
-	})
-}
-
 // The batch client has no email: assigning it a case must not make it a filter value.
 func Test_AssigneeFilterValues_ExcludesAssignedSystemAccount(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
@@ -631,6 +596,6 @@ func Test_AssigneeFilterValues_ExcludesAssignedSystemAccount(t *testing.T) {
 		values, err := repo.AssigneeFilterValues(t.Context(), types.DefaultTenantCode)
 
 		assert.NoError(t, err)
-		assert.NotContains(t, filterKeys(values), batchClientID)
+		assert.NotContains(t, candidateIDs(values), batchClientID)
 	})
 }

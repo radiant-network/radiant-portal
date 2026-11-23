@@ -1801,6 +1801,7 @@ class VariantApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
+        sequencing_type: Annotated[Optional[StrictStr], Field(description="sequencing type")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1822,6 +1823,8 @@ class VariantApi:
         :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
+        :param sequencing_type: sequencing type
+        :type sequencing_type: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1847,6 +1850,7 @@ class VariantApi:
         _param = self._get_germline_variant_global_internal_frequencies_serialize(
             tenant=tenant,
             locus_id=locus_id,
+            sequencing_type=sequencing_type,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1855,6 +1859,7 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InternalFrequencies",
+            '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
             '404': "ApiError",
@@ -1876,6 +1881,7 @@ class VariantApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
+        sequencing_type: Annotated[Optional[StrictStr], Field(description="sequencing type")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1897,6 +1903,8 @@ class VariantApi:
         :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
+        :param sequencing_type: sequencing type
+        :type sequencing_type: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1922,6 +1930,7 @@ class VariantApi:
         _param = self._get_germline_variant_global_internal_frequencies_serialize(
             tenant=tenant,
             locus_id=locus_id,
+            sequencing_type=sequencing_type,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1930,6 +1939,7 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InternalFrequencies",
+            '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
             '404': "ApiError",
@@ -1951,6 +1961,7 @@ class VariantApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
+        sequencing_type: Annotated[Optional[StrictStr], Field(description="sequencing type")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1972,6 +1983,8 @@ class VariantApi:
         :type tenant: str
         :param locus_id: Locus ID (required)
         :type locus_id: str
+        :param sequencing_type: sequencing type
+        :type sequencing_type: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1997,6 +2010,7 @@ class VariantApi:
         _param = self._get_germline_variant_global_internal_frequencies_serialize(
             tenant=tenant,
             locus_id=locus_id,
+            sequencing_type=sequencing_type,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2005,6 +2019,7 @@ class VariantApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "InternalFrequencies",
+            '400': "ApiError",
             '401': "ApiError",
             '403': "ApiError",
             '404': "ApiError",
@@ -2021,6 +2036,7 @@ class VariantApi:
         self,
         tenant,
         locus_id,
+        sequencing_type,
         _request_auth,
         _content_type,
         _headers,
@@ -2047,6 +2063,10 @@ class VariantApi:
         if locus_id is not None:
             _path_params['locus_id'] = locus_id
         # process the query parameters
+        if sequencing_type is not None:
+            
+            _query_params.append(('sequencing_type', sequencing_type))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -2378,6 +2398,7 @@ class VariantApi:
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         split: Annotated[StrictStr, Field(description="split type")],
+        sequencing_type: Annotated[Optional[StrictStr], Field(description="sequencing type")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2401,6 +2422,8 @@ class VariantApi:
         :type locus_id: str
         :param split: split type (required)
         :type split: str
+        :param sequencing_type: sequencing type
+        :type sequencing_type: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2427,6 +2450,7 @@ class VariantApi:
             tenant=tenant,
             locus_id=locus_id,
             split=split,
+            sequencing_type=sequencing_type,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2458,6 +2482,7 @@ class VariantApi:
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         split: Annotated[StrictStr, Field(description="split type")],
+        sequencing_type: Annotated[Optional[StrictStr], Field(description="sequencing type")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2481,6 +2506,8 @@ class VariantApi:
         :type locus_id: str
         :param split: split type (required)
         :type split: str
+        :param sequencing_type: sequencing type
+        :type sequencing_type: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2507,6 +2534,7 @@ class VariantApi:
             tenant=tenant,
             locus_id=locus_id,
             split=split,
+            sequencing_type=sequencing_type,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2538,6 +2566,7 @@ class VariantApi:
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         locus_id: Annotated[StrictStr, Field(description="Locus ID")],
         split: Annotated[StrictStr, Field(description="split type")],
+        sequencing_type: Annotated[Optional[StrictStr], Field(description="sequencing type")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2561,6 +2590,8 @@ class VariantApi:
         :type locus_id: str
         :param split: split type (required)
         :type split: str
+        :param sequencing_type: sequencing type
+        :type sequencing_type: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2587,6 +2618,7 @@ class VariantApi:
             tenant=tenant,
             locus_id=locus_id,
             split=split,
+            sequencing_type=sequencing_type,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2613,6 +2645,7 @@ class VariantApi:
         tenant,
         locus_id,
         split,
+        sequencing_type,
         _request_auth,
         _content_type,
         _headers,
@@ -2642,6 +2675,10 @@ class VariantApi:
         if split is not None:
             
             _query_params.append(('split', split))
+            
+        if sequencing_type is not None:
+            
+            _query_params.append(('sequencing_type', sequencing_type))
             
         # process the header parameters
         # process the form parameters

@@ -426,13 +426,13 @@ func Test_GetGermlineVariantExternalFrequenciesHandler(t *testing.T) {
 	assertGetGermlineVariantExternalFrequencies(t, "simple", 1000, expected)
 }
 
-func assertGetGermlineVariantGlobalInternalFrequencies(t *testing.T, data string, locusId int, status int, expected string) {
+func assertGetGermlineVariantGlobalInternalFrequencies(t *testing.T, data string, locusId int, query string, status int, expected string) {
 	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/internal_frequencies/global", server.GetGermlineVariantGlobalInternalFrequenciesHandler(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/internal_frequencies/global", locusId), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/internal_frequencies/global?%s", locusId, query), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -445,7 +445,7 @@ func Test_GetGermlineVariantGlobalInternalFrequenciesHandler(t *testing.T) {
 	expected := `{
 		"pc_all": 3, "pf_all": 0.99, "pc_affected": 3, "pn_affected": 3, "pf_affected": 1.0, "pc_non_affected": 0, "pn_non_affected": 0, "pf_non_affected": 0.0
 	}`
-	assertGetGermlineVariantGlobalInternalFrequencies(t, "simple", 1000, http.StatusOK, expected)
+	assertGetGermlineVariantGlobalInternalFrequencies(t, "simple", 1000, "", http.StatusOK, expected)
 }
 
 func Test_GetGermlineVariantGlobalInternalFrequenciesHandler_NotFound(t *testing.T) {
@@ -453,16 +453,28 @@ func Test_GetGermlineVariantGlobalInternalFrequenciesHandler_NotFound(t *testing
 		"status": 404,
 		"message": "variant not found"
 	}`
-	assertGetGermlineVariantGlobalInternalFrequencies(t, "simple", 4242, http.StatusNotFound, expected)
+	assertGetGermlineVariantGlobalInternalFrequencies(t, "simple", 4242, "", http.StatusNotFound, expected)
 }
 
-func assertGetGermlineVariantInternalFrequencies(t *testing.T, data string, locusId int, split string, status int, expected string) {
+func Test_GetGermlineVariantGlobalInternalFrequenciesHandler_Wxs(t *testing.T) {
+	expected := `{
+		"pc_all": 4, "pn_all": 10, "pf_all": 0.4, "pc_affected": 3, "pn_affected": 5, "pf_affected": 0.6, "pc_non_affected": 1, "pn_non_affected": 5, "pf_non_affected": 0.2
+	}`
+	assertGetGermlineVariantGlobalInternalFrequencies(t, "simple", 1000, "sequencing_type=wxs", http.StatusOK, expected)
+}
+
+func Test_GetGermlineVariantGlobalInternalFrequenciesHandler_BadSequencingType(t *testing.T) {
+	expected := `{"status": 400, "message": "incorrect sequencing_type"}`
+	assertGetGermlineVariantGlobalInternalFrequencies(t, "simple", 1000, "sequencing_type=wes", http.StatusBadRequest, expected)
+}
+
+func assertGetGermlineVariantInternalFrequencies(t *testing.T, data string, locusId int, query string, status int, expected string) {
 	testutils.RunTest(t, testutils.Need{Starrocks: data}, func(t *testing.T, env *testutils.Env) {
 		repo := starrocks.NewVariantsRepository(database.StarrocksDB{DB: env.Starrocks})
 		router := tenantRouter()
 		router.GET("/:tenant/variants/germline/:locus_id/internal_frequencies", server.GetGermlineVariantInternalFrequenciesHandler(repo))
 
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/internal_frequencies?split=%s", locusId, split), bytes.NewBuffer([]byte("{}")))
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/radiant/variants/germline/%d/internal_frequencies?%s", locusId, query), bytes.NewBuffer([]byte("{}")))
 		w := httptest.NewRecorder()
 		router.ServeHTTP(w, req)
 
@@ -478,7 +490,16 @@ func Test_GetGermlineVariantInternalFrequenciesHandler_SplitByProject(t *testing
 			{"split_value_code":"N2", "split_value_name": "NeuroDev Phase II", "frequencies":{"pc_all": 1, "pn_all": 2, "pf_all": 0.5, "hom_all": 0, "pc_affected": 1, "pn_affected": 1, "pf_affected": 1.0, "hom_affected": 0, "pc_non_affected": 0, "pn_non_affected": 1, "pf_non_affected": 0.0, "hom_non_affected": 0}}
 		] 
 	}`
-	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, types.SPLIT_BY_PROJECT, http.StatusOK, expected)
+	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, "split="+types.SPLIT_BY_PROJECT, http.StatusOK, expected)
+}
+
+func Test_GetGermlineVariantInternalFrequenciesHandler_SplitByProjectWxs(t *testing.T) {
+	expected := `{
+		"split_rows":[
+			{"split_value_code":"N1", "split_value_name": "NeuroDev Phase I", "frequencies":{"pc_all": 1, "pn_all": 2, "pf_all": 0.5, "hom_all": 1}}
+		]
+	}`
+	assertGetGermlineVariantInternalFrequencies(t, "simple", 2000, "split="+types.SPLIT_BY_PROJECT+"&sequencing_type=wxs", http.StatusOK, expected)
 }
 
 func Test_GetGermlineVariantInternalFrequenciesHandler_SplitByPrimaryCondition(t *testing.T) {
@@ -488,7 +509,7 @@ func Test_GetGermlineVariantInternalFrequenciesHandler_SplitByPrimaryCondition(t
 			{"split_value_code":"MONDO:0700092", "split_value_name": "neurodevelopmental disorder", "frequencies":{"pc_all": 5, "pn_all": 10, "pf_all": 0.5, "hom_all": 2, "pc_affected": 4, "pn_affected": 8, "pf_affected": 0.5, "hom_affected": 1, "pc_non_affected": 1, "pn_non_affected": 2, "pf_non_affected": 0.5, "hom_non_affected": 1}}
 		] 
 	}`
-	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, types.SPLIT_BY_PRIMARY_CONDITION, http.StatusOK, expected)
+	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, "split="+types.SPLIT_BY_PRIMARY_CONDITION, http.StatusOK, expected)
 }
 
 func Test_GetGermlineVariantInternalFrequenciesHandler_SplitByAnalysis(t *testing.T) {
@@ -498,7 +519,7 @@ func Test_GetGermlineVariantInternalFrequenciesHandler_SplitByAnalysis(t *testin
 			{"split_value_code":"WGA", "split_value_name": "Whole Genome Analysis", "frequencies":{"pc_all": 5, "pn_all": 10, "pf_all": 0.5, "hom_all": 2, "pc_affected": 4, "pn_affected": 8, "pf_affected": 0.5, "hom_affected": 1, "pc_non_affected": 1, "pn_non_affected": 2, "pf_non_affected": 0.5, "hom_non_affected": 1}}
 		] 
 	}`
-	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, types.SPLIT_BY_ANALYSIS, http.StatusOK, expected)
+	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, "split="+types.SPLIT_BY_ANALYSIS, http.StatusOK, expected)
 }
 
 func Test_GetGermlineVariantInternalFrequenciesHandler_BadSplit(t *testing.T) {
@@ -506,5 +527,5 @@ func Test_GetGermlineVariantInternalFrequenciesHandler_BadSplit(t *testing.T) {
 		"status": 400,
 		"message": "incorrect split"
 	}`
-	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, "incorrect", http.StatusBadRequest, expected)
+	assertGetGermlineVariantInternalFrequencies(t, "simple", 1000, "split=incorrect", http.StatusBadRequest, expected)
 }

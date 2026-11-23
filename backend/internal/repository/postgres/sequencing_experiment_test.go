@@ -136,6 +136,8 @@ func Test_UpdateSequencingExperiment_ExistingRow(t *testing.T) {
 			RunName:                      "RUN-1",
 			RunAlias:                     "RUN-ALIAS-1",
 			CaptureKit:                   "CPT-1",
+			SequencerID:                  "SEQ-1",
+			Protocol:                     "PROTO-1",
 		}
 		require.NoError(t, repo.UpdateSequencingExperiment(t.Context(), updated))
 
@@ -150,6 +152,8 @@ func Test_UpdateSequencingExperiment_ExistingRow(t *testing.T) {
 		assert.Equal(t, "RUN-1", seqExp.RunName)
 		assert.Equal(t, "RUN-ALIAS-1", seqExp.RunAlias)
 		assert.Equal(t, "CPT-1", seqExp.CaptureKit)
+		assert.Equal(t, "SEQ-1", seqExp.SequencerID)
+		assert.Equal(t, "PROTO-1", seqExp.Protocol)
 	})
 }
 

@@ -47,6 +47,15 @@ var SequencingTable = Table{
 	Alias: "s",
 }
 
+type SequencingType = string
+
+const (
+	SequencingTypeWGS SequencingType = "wgs"
+	SequencingTypeWXS SequencingType = "wxs"
+)
+
+var SequencingTypes = []SequencingType{SequencingTypeWGS, SequencingTypeWXS}
+
 var ExperimentTypeField = Field{
 	Name:          "experimental_strategy",
 	CanBeSelected: true,
