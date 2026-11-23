@@ -389,12 +389,14 @@ func Test_Cases_SearchById(t *testing.T) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
 		autocompleteResult, err := repo.SearchById(t.Context(), "1", 5)
 		assert.NoError(t, err)
-		require.Len(t, *autocompleteResult, 5)
-		// The exact matches (case, patient and sequencing 1) first, then the first value of each other type.
-		assert.Equal(t, "1", (*autocompleteResult)[0].Value)
-		assert.Equal(t, "1", (*autocompleteResult)[1].Value)
-		assert.Equal(t, "1", (*autocompleteResult)[2].Value)
-		assert.Equal(t, AutocompleteResult{Type: "run_name", Value: "1617"}, (*autocompleteResult)[3])
+		// The exact matches (case and patient 1) first, then the first value of each other type, then the second ones.
+		assert.Equal(t, []AutocompleteResult{
+			{Type: "case_id", Value: "1"},
+			{Type: "patient_id", Value: "1"},
+			{Type: "run_name", Value: "1617"},
+			{Type: "case_id", Value: "10"},
+			{Type: "patient_id", Value: "10"},
+		}, *autocompleteResult)
 	})
 }
 
@@ -1767,7 +1769,7 @@ func Test_SearchById_EmptyRunName_NotSuggested(t *testing.T) {
 func Test_SearchById_PrefixSharedWithIds_StillSuggestsRun(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
-		// Prefix 1 matches case, patient and sequencing ids 1, 10, 11... before runs 16xx and 17xx in text order.
+		// Prefix 1 matches case and patient ids 1, 10, 11... before runs 16xx and 17xx in text order.
 		autocompleteResult, err := repo.SearchById(t.Context(), "1", 10)
 		require.NoError(t, err)
 		require.Len(t, *autocompleteResult, 10)
@@ -1794,13 +1796,16 @@ func Test_SearchById_ExactRun_ComesFirst(t *testing.T) {
 	})
 }
 
-func Test_SearchById_SequencingId_StillSuggested(t *testing.T) {
+func Test_SearchById_SequencingIdPrefix_NoSequencingSuggestion(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
-		// Removed only in task 5, once the MCP routes run_name.
-		autocompleteResult, err := repo.SearchById(t.Context(), "78", 10)
+		// Sequencing 1 exists: the prefix matched it before the sequencing ids left the suggestions.
+		autocompleteResult, err := repo.SearchById(t.Context(), "1", 500)
 		require.NoError(t, err)
-		assert.Contains(t, *autocompleteResult, AutocompleteResult{Type: "sequencing_experiment_id", Value: "78"})
+		require.NotEmpty(t, *autocompleteResult)
+		for _, r := range *autocompleteResult {
+			assert.NotEqual(t, "sequencing_experiment_id", r.Type)
+		}
 	})
 }
 

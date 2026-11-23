@@ -39,7 +39,6 @@ function getTypeIcon(type: string) {
     patient_id: User,
     patient_name: User,
     submitter_patient_id: Barcode,
-    sequencing_experiment_id: TestTubeDiagonal,
     proband_submitter_sample_ids: FlaskRound,
     run_name: TestTubeDiagonal,
   };

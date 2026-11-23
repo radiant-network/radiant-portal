@@ -11976,7 +11976,7 @@ export class CaseGroupsApi extends BaseAPI {
 export const CasesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), sequencing_experiment_id, proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
+         * Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
          * @summary Get AutocompleteResult list of matching prefix
          * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
@@ -12652,7 +12652,7 @@ export const CasesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = CasesApiAxiosParamCreator(configuration)
     return {
         /**
-         * Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), sequencing_experiment_id, proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
+         * Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
          * @summary Get AutocompleteResult list of matching prefix
          * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
@@ -12870,7 +12870,7 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
     const localVarFp = CasesApiFp(configuration)
     return {
         /**
-         * Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), sequencing_experiment_id, proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
+         * Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
          * @summary Get AutocompleteResult list of matching prefix
          * @param {string} tenant Tenant code
          * @param {string} prefix Prefix
@@ -13046,7 +13046,7 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
  */
 export class CasesApi extends BaseAPI {
     /**
-     * Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), sequencing_experiment_id, proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
+     * Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
      * @summary Get AutocompleteResult list of matching prefix
      * @param {string} tenant Tenant code
      * @param {string} prefix Prefix

@@ -848,7 +848,6 @@
           "run_name": "Run",
           "sample_id": "Sample ID",
           "task_id": "Task",
-          "sequencing_experiment_id": "Sequencing",
           "proband_submitter_sample_ids": "Sample",
           "placeholder": "Search..."
         },

@@ -137,7 +137,7 @@ func assertCaseIdsAutoComplete(t *testing.T, data string, prefix string, limit i
 
 func Test_CaseIdsAutoComplete(t *testing.T) {
 	// The exact matches first, then the types interleaved: run 1617 is the first run, ahead of case 10.
-	expected := `[{"type":"case_id", "value":"1"}, {"type":"patient_id", "value":"1"}, {"type":"sequencing_experiment_id", "value":"1"}, {"type":"run_name", "value":"1617"}, {"type":"case_id", "value":"10"}]`
+	expected := `[{"type":"case_id", "value":"1"}, {"type":"patient_id", "value":"1"}, {"type":"run_name", "value":"1617"}, {"type":"case_id", "value":"10"}, {"type":"patient_id", "value":"10"}]`
 	assertCaseIdsAutoComplete(t, "simple", "1", 5, expected)
 }
 

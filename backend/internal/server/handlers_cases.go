@@ -120,7 +120,7 @@ func SearchCasesHandler(repo casesReader, assignmentsRepo caseAssignmentsReader)
 // @Summary Get types.AutocompleteResult list of matching prefix
 // @Id autocompleteCases
 // @Description Retrieve types.AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on:
-// @Description case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), sequencing_experiment_id,
+// @Description case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN),
 // @Description proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
 // @Tags cases
 // @Security bearerauth
