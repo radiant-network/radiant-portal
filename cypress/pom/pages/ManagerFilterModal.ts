@@ -42,7 +42,7 @@ export const ManagerFilterModal = {
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.inputValue(newName)}`).should('exist');
 
       cy.intercept('**/saved_filters{,/**}').as('postSavedFilters');
-      cy.get(CommonSelectors.submitTypeButton).click({ force: true });
+      cy.get(`${CommonSelectors.modal} ${CommonSelectors.submitTypeButton}`).click({ force: true });
       cy.wait('@postSavedFilters');
     },
   },

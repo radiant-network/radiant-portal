@@ -87,6 +87,10 @@ function SomaticSNVTab({ cohort, seqId, patientSelected, caseEntity }: SomaticOc
               .countSomaticSNVOccurrences(tenant, caseId, seqId, taskId, params.countBody)
               .then(response => response.data);
           },
+          searchVariant: async (input: string) =>
+            occurrencesApi
+              .searchSomaticSNVOccurrences(tenant, caseId, seqId, taskId!, { input })
+              .then(response => response.data),
         }}
       >
         <QueryBuilderDataTable

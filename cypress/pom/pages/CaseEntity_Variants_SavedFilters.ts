@@ -66,7 +66,7 @@ const generateSavedFiltersFunctions = (facetsActions: typeof CaseEntity_Variants
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.inputValue(name)}`).should('exist');
 
       cy.intercept('**/saved_filters{,/**}').as('postSavedFilters');
-      cy.get(CommonSelectors.submitTypeButton).click({ force: true });
+      cy.get(`${CommonSelectors.modal} ${CommonSelectors.submitTypeButton}`).click({ force: true });
       cy.wait('@postSavedFilters');
 
       validations.shouldDisplayFilterName(name);
@@ -109,7 +109,7 @@ const generateSavedFiltersFunctions = (facetsActions: typeof CaseEntity_Variants
       cy.get(`${CommonSelectors.modal} ${CommonSelectors.inputValue(newName)}`).should('exist');
 
       cy.intercept('**/saved_filters{,/**}').as('postSavedFilters');
-      cy.get(CommonSelectors.submitTypeButton).click({ force: true });
+      cy.get(`${CommonSelectors.modal} ${CommonSelectors.submitTypeButton}`).click({ force: true });
       cy.wait('@postSavedFilters');
     },
     /**
@@ -126,13 +126,14 @@ const generateSavedFiltersFunctions = (facetsActions: typeof CaseEntity_Variants
       cy.get('body').contains(CommonTexts.en.manageFilters).clickAndWait({ force: true });
     },
     /**
-     * Opens the My Filters dropdown.
+     * Opens the My Filters dropdown, clicking again when a query builder re-render closed it.
+     * @param attemptsLeft The clicks still allowed before the final assertion (default: 3).
      */
-    openMyFiltersDropdown() {
+    openMyFiltersDropdown(attemptsLeft: number = 3) {
       cy.get(CommonSelectors.myFiltersButton).then($button => {
-        if ($button.attr('aria-expanded') !== 'true') {
-          cy.wrap($button).clickAndWait({ force: true });
-        }
+        if ($button.attr('aria-expanded') === 'true' || attemptsLeft === 0) return;
+        cy.wrap($button).clickAndWait({ force: true });
+        actions.openMyFiltersDropdown(attemptsLeft - 1);
       });
       cy.get(CommonSelectors.myFiltersButton).should('have.attr', 'aria-expanded', 'true');
     },

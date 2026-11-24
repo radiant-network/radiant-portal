@@ -60,6 +60,7 @@ export enum FilterTypes {
   NUMERICAL = 'numerical',
   DIVIDER = 'divider',
   SEARCH_BY = 'search_by',
+  SEARCH_BY_VARIANT = 'search_by_variant',
   UPLOAD_LIST = 'upload_list',
 }
 

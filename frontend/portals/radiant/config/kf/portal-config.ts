@@ -20,6 +20,7 @@ export const kfConfig = {
       },
       variant: {
         items: [
+          { key: 'search_by_hgvsg', translation_key: 'search_by_hgvsg', type: FilterTypes.SEARCH_BY_VARIANT },
           { key: 'variant_class', translation_key: 'variant_class', type: FilterTypes.MULTIPLE },
           { key: 'consequence', translation_key: 'consequence', type: FilterTypes.MULTIPLE },
           { key: 'chromosome', translation_key: 'chromosome', type: FilterTypes.MULTIPLE },

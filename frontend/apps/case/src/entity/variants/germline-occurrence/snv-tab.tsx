@@ -78,6 +78,10 @@ function SNVTab({ seqId, patientSelected, caseEntity }: SNVTabProps) {
               .countGermlineSNVOccurrences(tenant, caseId, seqId, taskId, params.countBody)
               .then(response => response.data);
           },
+          searchVariant: async (input: string) =>
+            occurrencesApi
+              .searchGermlineSNVOccurrences(tenant, caseId, seqId, taskId!, { input })
+              .then(response => response.data),
         }}
       >
         <QueryBuilderDataTable

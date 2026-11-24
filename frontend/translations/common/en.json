@@ -144,6 +144,9 @@
       "new": "New filter",
       "save": "Save filter"
     },
+    "search_by_variant_facet": {
+      "submit": "Search variant"
+    },
     "slider": {
       "next": "Next result",
       "previous": "Previous result"
@@ -985,6 +988,7 @@
         "comphet_of": "Compound Het of",
         "has_comphet": "Compound Het",
         "has_comphet_tooltip": "Compound heterozygous (slivar): only PASS, impactful variants (LoF, Missense, Inframe, Splice Region) heterozygous in the proband with GQ ≥ 20, depth ≥ 6 and allele balance between 0.2 and 0.8 are considered. In trios, exactly one parent must carry the variant and neither may be homozygous.",
+        "hgvsg": "Variant ID",
         "hotspot": "Hotspot",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
@@ -1020,6 +1024,18 @@
         "search_by_symbol": "Search by gene",
         "search_by_symbol_placeholder": "e.g. BRAF, ENSG00000157764",
         "search_by_symbol_tooltip": "Enter a Gene Symbol or Ensembl ID",
+        "search_by_hgvsg": "Search by Variant",
+        "search_by_hgvsg_placeholder": "e.g. 10-100063679-C-T, rs341",
+        "search_by_hgvsg_tooltip": "Enter a locus, HGVSg, dbSNP ID or ClinVar ID",
+        "search_by_hgvsg_message_found_single_full": "{{normalized_input}} → {{hgvsg}} · {{symbol}} {{aa_change}}",
+        "search_by_hgvsg_message_found_single_symbol_only": "{{normalized_input}} → {{hgvsg}} · {{symbol}}",
+        "search_by_hgvsg_message_found_single_bare": "{{normalized_input}} → {{hgvsg}}",
+        "search_by_hgvsg_message_found_multi": "{{count}} variants added: {{hgvsg_list}}",
+        "search_by_hgvsg_not_found_title": "Variant not found",
+        "search_by_hgvsg_not_found_description": "This variant doesn't exist for this sequencing event.",
+        "search_by_hgvsg_invalid_title": "Invalid format",
+        "search_by_hgvsg_invalid_description": "Please revise your input. Accepted formats: locus (e.g. 10-100063679-C-T), HGVSg (e.g. chr7:g.140753336A>T), dbSNP ID (e.g. rs341), ClinVar ID (e.g. 13961).",
+        "search_by_hgvsg_toast_error": "Unable to search for this variant. Please try again.",
         "select_unit": "Select unit",
         "sift_pred": "SIFT",
         "sift_pred_tooltip": "Sorting Intolerant From Tolerant",

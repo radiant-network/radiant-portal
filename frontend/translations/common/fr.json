@@ -144,6 +144,9 @@
       "new": "Nouveau filtre",
       "save": "Enregistrer le filtre"
     },
+    "search_by_variant_facet": {
+      "submit": "Rechercher le variant"
+    },
     "slider": {
       "next": "Résultat suivant",
       "previous": "Résultat précédent"
@@ -986,6 +989,7 @@
         "comphet_of": "Hét. composé de",
         "has_comphet": "Hét. composé",
         "has_comphet_tooltip": "Hétérozygotie composite (slivar) : seuls les variants PASS à impact (LoF, Missense, Inframe, Splice Region) hétérozygotes chez le Proband, avec GQ ≥ 20, profondeur ≥ 6 et équilibre allélique entre 0,2 et 0,8, sont pris en compte. Dans les trios, exactement un parent doit porter le variant et aucun ne doit être homozygote.",
+        "hgvsg": "ID du variant",
         "hotspot": "Hotspot",
         "hpo_gene_panel": "HPO",
         "hpo_gene_panel_tooltip": "Human Phenotype Ontology",
@@ -1021,6 +1025,18 @@
         "search_by_symbol": "Recherche par gène",
         "search_by_symbol_placeholder": "ex. BRAF, ENSG00000157764",
         "search_by_symbol_tooltip": "Recherche par symbole et Ensembl ID",
+        "search_by_hgvsg": "Recherche par variant",
+        "search_by_hgvsg_placeholder": "ex. 10-100063679-C-T, rs341",
+        "search_by_hgvsg_tooltip": "Recherche par locus, HGVSg, ID dbSNP ou ID ClinVar",
+        "search_by_hgvsg_message_found_single_full": "{{normalized_input}} → {{hgvsg}} · {{symbol}} {{aa_change}}",
+        "search_by_hgvsg_message_found_single_symbol_only": "{{normalized_input}} → {{hgvsg}} · {{symbol}}",
+        "search_by_hgvsg_message_found_single_bare": "{{normalized_input}} → {{hgvsg}}",
+        "search_by_hgvsg_message_found_multi": "{{count}} variants ajoutés : {{hgvsg_list}}",
+        "search_by_hgvsg_not_found_title": "Variant introuvable",
+        "search_by_hgvsg_not_found_description": "Ce variant n'existe pas pour cet événement de séquençage.",
+        "search_by_hgvsg_invalid_title": "Format invalide",
+        "search_by_hgvsg_invalid_description": "Veuillez corriger votre saisie. Formats acceptés : locus (ex. 10-100063679-C-T), HGVSg (ex. chr7:g.140753336A>T), ID dbSNP (ex. rs341), ID ClinVar (ex. 13961).",
+        "search_by_hgvsg_toast_error": "Impossible de rechercher ce variant. Veuillez réessayer.",
         "select_unit": "Sélectionner une unité",
         "sift_pred": "SIFT",
         "sift_pred_tooltip": "Sorting Intolerant From Tolerant",
