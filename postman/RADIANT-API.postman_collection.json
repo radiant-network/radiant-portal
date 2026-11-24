@@ -3263,6 +3263,432 @@
           "response": []
         },
         {
+          "name": "Cases - lab check",
+          "description": "Checks that a case batch needs can_ingest_data at the lab each record states. A PUT or PATCH record must also name an existing case, whose current lab is checked too; a POST record is checked at its stated lab only, since the worker skips a case that already exists.\n\nLog in as a user holding can_ingest_data at `own-lab-code` only. Set `other-lab-submitter-case-id` to a case of project `project-code` whose diagnosis lab is another one. The tests assert that setup; once the user is also granted the other lab, the move requests pass the check.\n\n403 means the lab check refused the batch. POST and PUT send incomplete records on purpose: a 400 there means the check let the batch through. Every request uses dry_run=true.",
+          "item": [
+            {
+              "name": "Move another lab's case (PATCH)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"status is 403\", function () {",
+                      "    pm.response.to.have.status(403);",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"cases\": [\n        {\n            \"project_code\": \"{{project-code}}\",\n            \"submitter_case_id\": \"{{other-lab-submitter-case-id}}\",\n            \"diagnostic_lab_code\": \"{{own-lab-code}}\"\n        }\n    ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{radiant-api-url}}/{{tenant}}/cases/batch?dry_run=true",
+                  "host": [
+                    "{{radiant-api-url}}"
+                  ],
+                  "path": [
+                    "{{tenant}}",
+                    "cases",
+                    "batch"
+                  ],
+                  "query": [
+                    {
+                      "key": "dry_run",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Names the caller's lab on an existing case of another lab."
+              },
+              "response": []
+            },
+            {
+              "name": "Another lab's case without lab (PATCH)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"status is 403\", function () {",
+                      "    pm.response.to.have.status(403);",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"cases\": [\n        {\n            \"project_code\": \"{{project-code}}\",\n            \"submitter_case_id\": \"{{other-lab-submitter-case-id}}\"\n        }\n    ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{radiant-api-url}}/{{tenant}}/cases/batch?dry_run=true",
+                  "host": [
+                    "{{radiant-api-url}}"
+                  ],
+                  "path": [
+                    "{{tenant}}",
+                    "cases",
+                    "batch"
+                  ],
+                  "query": [
+                    {
+                      "key": "dry_run",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "States no lab: checked against the existing case's lab."
+              },
+              "response": []
+            },
+            {
+              "name": "New case and another lab's case (PATCH)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"status is 403\", function () {",
+                      "    pm.response.to.have.status(403);",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"cases\": [\n        {\n            \"project_code\": \"{{project-code}}\",\n            \"submitter_case_id\": \"lab-check-new-case\",\n            \"diagnostic_lab_code\": \"{{own-lab-code}}\"\n        },\n        {\n            \"project_code\": \"{{project-code}}\",\n            \"submitter_case_id\": \"{{other-lab-submitter-case-id}}\",\n            \"diagnostic_lab_code\": \"{{own-lab-code}}\"\n        }\n    ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{radiant-api-url}}/{{tenant}}/cases/batch?dry_run=true",
+                  "host": [
+                    "{{radiant-api-url}}"
+                  ],
+                  "path": [
+                    "{{tenant}}",
+                    "cases",
+                    "batch"
+                  ],
+                  "query": [
+                    {
+                      "key": "dry_run",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "One record outside the caller's labs refuses the whole batch."
+              },
+              "response": []
+            },
+            {
+              "name": "New case at own lab (PATCH)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"status is 403\", function () {",
+                      "    pm.response.to.have.status(403);",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"cases\": [\n        {\n            \"project_code\": \"{{project-code}}\",\n            \"submitter_case_id\": \"lab-check-new-case\",\n            \"diagnostic_lab_code\": \"{{own-lab-code}}\"\n        }\n    ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{radiant-api-url}}/{{tenant}}/cases/batch?dry_run=true",
+                  "host": [
+                    "{{radiant-api-url}}"
+                  ],
+                  "path": [
+                    "{{tenant}}",
+                    "cases",
+                    "batch"
+                  ],
+                  "query": [
+                    {
+                      "key": "dry_run",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "A PATCH must name an existing case, even with a stated lab."
+              },
+              "response": []
+            },
+            {
+              "name": "Move another lab's case (PUT)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"status is 403\", function () {",
+                      "    pm.response.to.have.status(403);",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"cases\": [\n        {\n            \"project_code\": \"{{project-code}}\",\n            \"submitter_case_id\": \"{{other-lab-submitter-case-id}}\",\n            \"diagnostic_lab_code\": \"{{own-lab-code}}\"\n        }\n    ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{radiant-api-url}}/{{tenant}}/cases/batch?dry_run=true",
+                  "host": [
+                    "{{radiant-api-url}}"
+                  ],
+                  "path": [
+                    "{{tenant}}",
+                    "cases",
+                    "batch"
+                  ],
+                  "query": [
+                    {
+                      "key": "dry_run",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Same move as the PATCH, through the PUT route."
+              },
+              "response": []
+            },
+            {
+              "name": "New case at own lab (POST)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"the lab check lets the batch through\", function () {",
+                      "    pm.expect(pm.response.code).to.not.equal(403);",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"cases\": [\n        {\n            \"project_code\": \"{{project-code}}\",\n            \"submitter_case_id\": \"lab-check-new-case\",\n            \"diagnostic_lab_code\": \"{{own-lab-code}}\"\n        }\n    ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{radiant-api-url}}/{{tenant}}/cases/batch?dry_run=true",
+                  "host": [
+                    "{{radiant-api-url}}"
+                  ],
+                  "path": [
+                    "{{tenant}}",
+                    "cases",
+                    "batch"
+                  ],
+                  "query": [
+                    {
+                      "key": "dry_run",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "A POST record is checked against the lab it states only."
+              },
+              "response": []
+            },
+            {
+              "name": "Another lab's case at own lab (POST)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"the lab check lets the batch through\", function () {",
+                      "    pm.expect(pm.response.code).to.not.equal(403);",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"cases\": [\n        {\n            \"project_code\": \"{{project-code}}\",\n            \"submitter_case_id\": \"{{other-lab-submitter-case-id}}\",\n            \"diagnostic_lab_code\": \"{{own-lab-code}}\"\n        }\n    ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{radiant-api-url}}/{{tenant}}/cases/batch?dry_run=true",
+                  "host": [
+                    "{{radiant-api-url}}"
+                  ],
+                  "path": [
+                    "{{tenant}}",
+                    "cases",
+                    "batch"
+                  ],
+                  "query": [
+                    {
+                      "key": "dry_run",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "A POST never writes an existing case: the worker skips it, so only the stated lab is checked."
+              },
+              "response": []
+            }
+          ]
+        },
+        {
           "name": "Create Sequencing",
           "event": [
             {

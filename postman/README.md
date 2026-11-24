@@ -27,6 +27,9 @@ The following variables must be configured:
 | `password`                   | Your password              | `xxxxxx`                |
 | `data-manager-client-id`     | Data manager client ID     | `xxxxxx`                |
 | `data-manager-client-secret` | Data manager client secret | `xxxxxx`                |
+| `project-code`                | Project of the case-batch lab-check requests | `CBTN`  |
+| `own-lab-code`                | Lab where the user holds `can_ingest_data` (lab check) | `CHOP` |
+| `other-lab-submitter-case-id` | Submitter id of an existing case of another lab (lab check) | `xxxxxx` |
 
 The others `token` and `batch-id` will be filled by post response scripts.
 
