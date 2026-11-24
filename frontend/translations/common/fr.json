@@ -1288,7 +1288,8 @@
     },
     "unassigned_avatar": {
       "can_assign": "Assigner ce cas",
-      "cannot_assign": "Aucune assignation"
+      "cannot_assign": "Aucune assignation",
+      "unassigned": "Non assigné"
     }
   },
   "onboarding": {
