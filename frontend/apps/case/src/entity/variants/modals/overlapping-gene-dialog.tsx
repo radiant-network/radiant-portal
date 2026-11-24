@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 
-import type { CNVGeneOverlap, GermlineCNVOccurrence } from '@/api/api';
+import type { CNVGeneOverlap, GermlineCNVOccurrence, SomaticCNVOccurrence } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import {
   Dialog,
@@ -14,57 +14,39 @@ import {
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
 import { toKiloBases } from '@/components/lib/number-format';
-import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
 import {
   defaultCNVOverlappingGenesSettings,
   getCNVOverlappingGenesColumns,
-} from './table/germline-cnv-overlapping-gene-table-settings';
+} from '../germline-occurrence/table/germline-cnv-overlapping-gene-table-settings';
 
-type OverlappingGenesInput = {
+export type CNVGenesOverlapInput = {
+  tenant: string;
   caseId: number;
   seqId: number;
   taskId: number;
   cnvId: string;
 };
 
+export type FetchCNVGenesOverlap = (input: CNVGenesOverlapInput) => Promise<CNVGeneOverlap[]>;
+
 type OverlappingGeneDialogProps = {
-  occurrence: GermlineCNVOccurrence;
+  occurrence: GermlineCNVOccurrence | SomaticCNVOccurrence;
+  fetchGenesOverlap: FetchCNVGenesOverlap;
   children: React.ReactElement;
 };
 
-export function useCNVOverlappingGenesListHelper(input: OverlappingGenesInput) {
-  const { tenant } = useTenant();
-  const fetch = useCallback(
-    async () =>
-      occurrencesApi
-        .listGermlineCNVGenesOverlap(tenant, input.caseId, input.seqId, input.taskId, input.cnvId)
-        .then(response => response.data),
-    [input, tenant],
-  );
-
-  return {
-    fetch,
-  };
-}
-
-function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogProps) {
+function OverlappingGeneDialog({ occurrence, fetchGenesOverlap, children }: OverlappingGeneDialogProps) {
   const { t } = useI18n();
+  const { tenant } = useTenant();
   const [open, setOpen] = useState<boolean>(false);
   const caseId = useCaseIdFromParam();
   const seqId = useSeqIdFromSearchParam();
 
-  const { fetch: fetchCNVOverlappingListHelper } = useCNVOverlappingGenesListHelper({
-    caseId,
-    seqId,
-    taskId: occurrence.task_id,
-    cnvId: occurrence.cnv_id,
-  });
-
   const fetchList = useSWR<CNVGeneOverlap[]>(
     `fetch-overlapping-genes-list-${seqId}-${occurrence.cnv_id}`,
-    fetchCNVOverlappingListHelper,
+    () => fetchGenesOverlap({ tenant, caseId, seqId, taskId: occurrence.task_id, cnvId: occurrence.cnv_id }),
     {
       revalidateOnFocus: false,
       revalidateOnMount: false,

@@ -9,10 +9,10 @@ import CNVIGVCell from '@/apps/case/src/entity/variants/germline-occurrence/tabl
 import CNVNameCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/cnv-name-cell';
 import ComphetGenesCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/comphet-genes-cell';
 import OverlapTypeGeneCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/overlap-type-gene-cell';
-import OverlappingGeneLinkCell from '@/apps/case/src/entity/variants/germline-occurrence/table/cells/overlapping-gene-link-cell';
 import InterpretationCell from '@/apps/case/src/entity/variants/interpretation/interpretation-cell';
 import HgvsgCell from '@/apps/case/src/entity/variants/table/cells/hgvsg-cell';
 import OccurrenceActionsMenu from '@/apps/case/src/entity/variants/table/cells/occurrence-actions-cell';
+import OverlappingGeneLinkCell from '@/apps/case/src/entity/variants/table/cells/overlapping-gene-link-cell';
 import CaseActionsMenuCell from '@/apps/case/src/exploration/table/cells/case-actions-menu-cell';
 import UninterpretedCasePreviewCell from '@/apps/variant/src/entity/cases/table/cells/uninterpreted-case-preview-cell';
 import AssignmentPicker from '@/components/base/assignation/assignment-picker';
@@ -1111,7 +1111,7 @@ export const applicationFirstSetCellColumns = [
   baseCellColumnHelper.accessor(row => row, {
     id: 'overlap_type_link_cell',
     cell: info => (
-      <OverlappingGeneLinkCell occurrence={info.getValue() as any}>
+      <OverlappingGeneLinkCell occurrence={info.getValue() as any} fetchGenesOverlap={() => Promise.resolve([])}>
         <>{info.getValue().symbol}</>
       </OverlappingGeneLinkCell>
     ),

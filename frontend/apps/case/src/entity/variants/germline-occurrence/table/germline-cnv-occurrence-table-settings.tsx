@@ -9,17 +9,22 @@ import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
+import { occurrencesApi } from '@/utils/api';
 
+import type { FetchCNVGenesOverlap } from '../../modals/overlapping-gene-dialog';
+import CNVProfileLinkCell from '../../table/cells/cnv-profile-link-cell';
 import OccurrenceFlagCell from '../../table/cells/occurrence-flag-cell';
 import OccurrenceNoteCell from '../../table/cells/occurrence-note-cell';
+import OverlappingGeneLinkCell from '../../table/cells/overlapping-gene-link-cell';
 
 import ClingenCell from './cells/clingen-cell';
 import CNVIGVCell from './cells/cnv-igv-cell';
 import CNVNameCell from './cells/cnv-name-cell';
-import CNVProfileLinkCell from './cells/cnv-profile-link-cell';
-import OverlappingGeneLinkCell from './cells/overlapping-gene-link-cell';
 
 const columnHelper = createAppColumnHelper<GermlineCNVOccurrence>();
+
+const fetchGermlineCNVGenesOverlap: FetchCNVGenesOverlap = ({ tenant, caseId, seqId, taskId, cnvId }) =>
+  occurrencesApi.listGermlineCNVGenesOverlap(tenant, caseId, seqId, taskId, cnvId).then(response => response.data);
 
 type GermlineCNVOccurrenceTableSettingsProps = {
   caseEntity?: CaseEntity;
@@ -65,7 +70,13 @@ function getGermlineCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenc
     // Genes
     columnHelper.accessor(row => row.symbol, {
       id: 'symbol',
-      cell: info => <CNVProfileLinkCell occurrence={info.row.original} values={info.getValue()} />,
+      cell: info => (
+        <CNVProfileLinkCell
+          occurrence={info.row.original}
+          fetchGenesOverlap={fetchGermlineCNVGenesOverlap}
+          values={info.getValue()}
+        />
+      ),
       header: () => (
         <TooltipHeader tooltip={t('variant.headers.symbol_tooltip')}>{t('variant.headers.symbols')}</TooltipHeader>
       ),
@@ -76,7 +87,13 @@ function getGermlineCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenc
     // Cytoband
     columnHelper.accessor(row => row.cytoband, {
       id: 'cytoband',
-      cell: info => <CNVProfileLinkCell occurrence={info.row.original} values={info.getValue()} />,
+      cell: info => (
+        <CNVProfileLinkCell
+          occurrence={info.row.original}
+          fetchGenesOverlap={fetchGermlineCNVGenesOverlap}
+          values={info.getValue()}
+        />
+      ),
       header: t('variant.headers.cytoband'),
       size: 124,
       minSize: 40,
@@ -224,7 +241,7 @@ function getGermlineCNVOccurrenceColumns({ t, caseEntity }: GermlineCNVOccurrenc
     columnHelper.accessor(row => row.nb_genes, {
       id: 'nb_genes',
       cell: info => (
-        <OverlappingGeneLinkCell occurrence={info.row.original}>
+        <OverlappingGeneLinkCell occurrence={info.row.original} fetchGenesOverlap={fetchGermlineCNVGenesOverlap}>
           {info.getValue() ? <>{thousandNumberFormat(info.getValue())}</> : undefined}
         </OverlappingGeneLinkCell>
       ),

@@ -17,6 +17,7 @@ import {
   useVariantSearchParamsEffect,
   VARIANT_SECTION_PARAM,
 } from './hooks/use-variant-search-params';
+import SomaticCNVTab from './somatic-occurrence/somatic-cnv-tab';
 import SomaticSNVTab from './somatic-occurrence/somatic-snv-tab';
 import { SomaticVariantInterface } from './constants';
 
@@ -58,7 +59,12 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
     seqId,
     CaseTasksWithOccurrencesDataTypeEnum.SomaticSnvTn,
   );
-  const isTasksLoading = isTumorOnlyTasksLoading || isTumorNormalTasksLoading;
+  const { tasks: cnvTumorOnlyTasks, isLoading: isCnvTumorOnlyTasksLoading } = useOccurrenceTasks(
+    caseId,
+    seqId,
+    CaseTasksWithOccurrencesDataTypeEnum.SomaticCnv,
+  );
+  const isTasksLoading = isTumorOnlyTasksLoading || isTumorNormalTasksLoading || isCnvTumorOnlyTasksLoading;
   const selectedTaskId = useTaskIdFromSearchParam();
 
   // A sub-tab is offered only when the sequencing experiment has tasks producing its occurrences.
@@ -70,8 +76,11 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
     if (tumorNormalTasks.length > 0) {
       interfaces.push(SomaticVariantInterface.SNV_TN);
     }
+    if (cnvTumorOnlyTasks.length > 0) {
+      interfaces.push(SomaticVariantInterface.CNV_TO);
+    }
     return interfaces;
-  }, [tumorOnlyTasks, tumorNormalTasks]);
+  }, [tumorOnlyTasks, tumorNormalTasks, cnvTumorOnlyTasks]);
 
   const options = useMemo(
     () =>
@@ -85,6 +94,7 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
   const tasksByInterface: Partial<Record<SomaticVariantInterface, TaskOccurrenceType[]>> = {
     [SomaticVariantInterface.SNV_TO]: tumorOnlyTasks,
     [SomaticVariantInterface.SNV_TN]: tumorNormalTasks,
+    [SomaticVariantInterface.CNV_TO]: cnvTumorOnlyTasks,
   };
   const tasks = (activeInterface && tasksByInterface[activeInterface]) || [];
 
@@ -148,6 +158,7 @@ function SomaticVariantsTab({ caseEntity, isLoading }: VariantTabProps) {
           caseEntity={caseEntity}
         />
       )}
+      {activeInterface === SomaticVariantInterface.CNV_TO && <SomaticCNVTab seqId={seqId} caseEntity={caseEntity} />}
     </div>
   );
 }
