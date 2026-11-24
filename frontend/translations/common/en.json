@@ -2682,6 +2682,7 @@
       "submitter_patient_id": "Org. patient ID",
       "submitter_patient_id_tooltip": "Organisation patient ID",
       "title": "Patient Information",
+      "title_family": "Patient Information",
       "view_patient": "View Patient"
     },
     "details": {
@@ -2762,9 +2763,9 @@
         "submitted": "Submitted",
         "unknown": "Unknown"
       },
-      "task_id": "Task ID",
+      "task_id": "Task",
       "tissue_site": "Tissue Site",
-      "title": "Case Details",
+      "title": "Details",
       "type": "Type",
       "updated_on": "Last Update",
       "view_variants": "View Variants"

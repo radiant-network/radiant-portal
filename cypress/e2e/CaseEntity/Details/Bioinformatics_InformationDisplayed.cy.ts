@@ -11,7 +11,7 @@ describe('CaseEntity - Details - Bioinformatics - Information displayed', { test
     cy.visitCaseDetailsPage(data.case.case);
   });
 
-  it('Task ID', () => {
+  it('Task', () => {
     CaseEntity_Details.bioinformaticsCard.validations.shouldShowColumnContent('task_id', data.case.task);
   });
 

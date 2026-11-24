@@ -2444,7 +2444,7 @@
   "preview_sheet": {
     "header": {
       "germline": "Germinal",
-      "germline_family": "Germline",
+      "germline_family": "Germinal",
       "somatic": "Somatique"
     },
     "actions": {
@@ -2682,7 +2682,8 @@
       "sex": "Sexe",
       "submitter_patient_id": "ID patient org.",
       "submitter_patient_id_tooltip": "ID patient de l’organisation",
-      "title": "Information du patient",
+      "title": "Patient",
+      "title_family": "Patients",
       "view_patient": "Voir patient"
     },
     "details": {
@@ -2692,7 +2693,7 @@
       "capture_kit": "Kit de capture",
       "case_id": "ID du cas",
       "case_note": "Note",
-      "case_overview": "Sommaire du cas",
+      "case_overview": "Sommaire",
       "case_type": "Type",
       "clinical_note": "Note Clinique",
       "clinical_overview": "Clinique",
@@ -2763,9 +2764,9 @@
         "submitted": "Soumis",
         "unknown": "Inconnu"
       },
-      "task_id": "Analyse",
+      "task_id": "Tâche",
       "tissue_site": "Site tissulaire",
-      "title": "Détails de Cas",
+      "title": "Détails",
       "type": "Type",
       "updated_on": "Dernière modification",
       "view_variants": "Voir variants"
