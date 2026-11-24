@@ -1737,8 +1737,12 @@
     },
     "analysis_type_code": {
       "somatic": "Somatique",
-      "germline": "Germinal seul",
-      "germline_family": "Lignée germinale familiale"
+      "germline": "Germinal solo",
+      "germline_family": "Germinal familial"
+    },
+    "case_type_code": {
+      "germline": "Germinal",
+      "somatic": "Somatique"
     },
     "status": {
       "completed": "Complété",
