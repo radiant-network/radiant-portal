@@ -84,6 +84,20 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Query builder - Two quer
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHavePillCountAt(1 /*combined query*/, 1);
   });
 
+  it('Delete every query referenced in a combination', () => {
+    setupTest();
+    CaseEntity_Variants_QueryBuilder.somatic.actions.selectQuery(0);
+    CaseEntity_Variants_QueryBuilder.somatic.actions.selectQuery(1);
+    CaseEntity_Variants_QueryBuilder.somatic.actions.combineQueries('default');
+    CaseEntity_Variants_QueryBuilder.somatic.actions.clickNewQuery();
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHaveQueryCountTotal(4);
+
+    CaseEntity_Variants_QueryBuilder.somatic.actions.deleteQuery(0, true /*confirm*/);
+    CaseEntity_Variants_QueryBuilder.somatic.actions.deleteQuery(0, true /*confirm*/);
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHaveQueryCountTotal(1);
+    CaseEntity_Variants_QueryBuilder.somatic.validations.shouldBeEmptyQuery();
+  });
+
   it('Clear all queries and cancel', () => {
     setupTest();
     CaseEntity_Variants_QueryBuilder.somatic.validations.shouldHaveQueryCountTotal(2);
