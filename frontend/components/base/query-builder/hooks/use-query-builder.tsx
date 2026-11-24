@@ -315,8 +315,14 @@ function reduceQB(context: IQBContext, action: ActionType) {
         content: sqon.content.filter(content => (content as IValueFacet).id !== action.payload.id),
       }));
 
-      // filter sqons for combined queries
-      index = index < sqons.length ? index : index - 1;
+      // a combined query left without any reference is removed
+      const emptiedCombinedIds = sqons
+        .filter(sqon => combinedQueries[sqon.id] && isSqonEmpty(sqon))
+        .map(sqon => sqon.id);
+      emptiedCombinedIds.forEach(id => delete combinedQueries[id]);
+      sqons = sqons.filter(sqon => !emptiedCombinedIds.includes(sqon.id));
+
+      index = Math.min(index, sqons.length - 1);
 
       // queries are now empty
       if (sqons.length === 0) {
@@ -341,7 +347,7 @@ function reduceQB(context: IQBContext, action: ActionType) {
       // select next query
       return {
         ...context,
-        activeQueryId: action.payload.id === activeQueryId ? sqons[index].id : activeQueryId,
+        activeQueryId: sqons.some(sqon => sqon.id === activeQueryId) ? activeQueryId : sqons[index].id,
         sqons,
         settings: {
           ...context.settings,

@@ -84,6 +84,20 @@ describe('Case Entity - Variants - Germline - CNV - Query builder - Two queries'
     CaseEntity_Variants_QueryBuilder.cnv.validations.shouldHavePillCountAt(1 /*combined query*/, 1);
   });
 
+  it('Delete every query referenced in a combination', () => {
+    setupTest();
+    CaseEntity_Variants_QueryBuilder.cnv.actions.selectQuery(0);
+    CaseEntity_Variants_QueryBuilder.cnv.actions.selectQuery(1);
+    CaseEntity_Variants_QueryBuilder.cnv.actions.combineQueries('default');
+    CaseEntity_Variants_QueryBuilder.cnv.actions.clickNewQuery();
+    CaseEntity_Variants_QueryBuilder.cnv.validations.shouldHaveQueryCountTotal(4);
+
+    CaseEntity_Variants_QueryBuilder.cnv.actions.deleteQuery(0, true /*confirm*/);
+    CaseEntity_Variants_QueryBuilder.cnv.actions.deleteQuery(0, true /*confirm*/);
+    CaseEntity_Variants_QueryBuilder.cnv.validations.shouldHaveQueryCountTotal(1);
+    CaseEntity_Variants_QueryBuilder.cnv.validations.shouldBeEmptyQuery();
+  });
+
   it('Clear all queries and cancel', () => {
     setupTest();
     CaseEntity_Variants_QueryBuilder.cnv.validations.shouldHaveQueryCountTotal(2);

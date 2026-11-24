@@ -119,3 +119,46 @@ describe('qBReducer REMOVE_FACET_PILL', () => {
     expect(next.activeQueryId).toBe('q1');
   });
 });
+
+describe('qBReducer REMOVE_QUERY with a combined query', () => {
+  const q1 = query('q1', 'chromosome');
+  const q2 = query('q2', 'variant_type');
+  const q3: ISyntheticSqon = { id: 'q3', op: BooleanOperators.And, content: [q1, q2] };
+  const q4: ISyntheticSqon = { id: 'q4', op: BooleanOperators.And, content: [] };
+
+  function contextWithCombinedQuery(activeQueryId = 'q4'): IQBContext {
+    const defaultContext = getDefaultQBContext();
+    return {
+      ...defaultContext,
+      activeQueryId,
+      sqons: [q1, q2, q3, q4],
+      settings: { ...defaultContext.settings, combinedQueries: { q3: ['q1', 'q2'] } },
+    } as IQBContext;
+  }
+
+  it('keeps the combined query while it still references a query', () => {
+    const next = qBReducer(contextWithCombinedQuery(), { type: QBActionType.REMOVE_QUERY, payload: { id: 'q1' } });
+
+    expect(next.sqons).toEqual([q2, { ...q3, content: [q2] }, q4]);
+    expect(next.settings.combinedQueries).toEqual({ q3: ['q2'] });
+  });
+
+  it('removes the combined query left without any reference, keeping a single empty query', () => {
+    const afterQ1 = qBReducer(contextWithCombinedQuery(), { type: QBActionType.REMOVE_QUERY, payload: { id: 'q1' } });
+    const next = qBReducer(afterQ1, { type: QBActionType.REMOVE_QUERY, payload: { id: 'q2' } });
+
+    expect(next.sqons).toEqual([q4]);
+    expect(next.settings.combinedQueries).toEqual({});
+    expect(next.activeQueryId).toBe('q4');
+  });
+
+  it('activates the next query when the active combined query is removed', () => {
+    const afterQ1 = qBReducer(contextWithCombinedQuery('q3'), {
+      type: QBActionType.REMOVE_QUERY,
+      payload: { id: 'q1' },
+    });
+    const next = qBReducer(afterQ1, { type: QBActionType.REMOVE_QUERY, payload: { id: 'q2' } });
+
+    expect(next.activeQueryId).toBe('q4');
+  });
+});
