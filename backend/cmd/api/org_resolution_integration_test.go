@@ -212,10 +212,12 @@ const (
 	caseBatchAtCQGC         = `{"cases":[{"project_code":"N1","submitter_case_id":"1:1","diagnostic_lab_code":"CQGC"}]}`
 	caseBatchAtCQGCAndCHUSJ = `{"cases":[{"project_code":"N1","submitter_case_id":"1:1","diagnostic_lab_code":"CQGC"},` +
 		`{"project_code":"N1","submitter_case_id":"1:2","diagnostic_lab_code":"CHUSJ"}]}`
-	casePatchWithoutLab  = `{"cases":[{"project_code":"N1","submitter_case_id":"1:1"}]}`
-	casePatchUnknownCase = `{"cases":[{"project_code":"N1","submitter_case_id":"no-such-case"}]}`
-	casePatchUnknownProj = `{"cases":[{"project_code":"NOPE","submitter_case_id":"1:1"}]}`
-	caseBatchEmpty       = `{"cases":[]}`
+	caseBatchMovesCQGCCaseToCHOP = `{"cases":[{"project_code":"N1","submitter_case_id":"1:1","diagnostic_lab_code":"CHOP"}]}`
+	caseBatchNewCaseAtCHOP       = `{"cases":[{"project_code":"N1","submitter_case_id":"not-yet-a-case","diagnostic_lab_code":"CHOP"}]}`
+	casePatchWithoutLab          = `{"cases":[{"project_code":"N1","submitter_case_id":"1:1"}]}`
+	casePatchUnknownCase         = `{"cases":[{"project_code":"N1","submitter_case_id":"no-such-case"}]}`
+	casePatchUnknownProj         = `{"cases":[{"project_code":"NOPE","submitter_case_id":"1:1"}]}`
+	caseBatchEmpty               = `{"cases":[]}`
 )
 
 // serveCaseBatchProbe mirrors the production wiring of the case-batch routes: the all-of gate
@@ -287,10 +289,10 @@ func Test_CaseBatch_IngestorAtOneLab(t *testing.T) {
 	})
 }
 
-// Test_CaseBatch_IngestorAtAnotherLab_Denied is the negative twin: every fixture case is at
-// CQGC, so an ingestor granted at CHOP may submit none of them. gabe would not do — his
-// can_ingest_data is at '*' — hence a seeded single-org grantee.
-func Test_CaseBatch_IngestorAtAnotherLab_Denied(t *testing.T) {
+// Test_CaseBatch_IngestorAtAnotherLab is the negative twin: every fixture case is at CQGC, so
+// an ingestor granted at CHOP may submit none of them. gabe would not do — his can_ingest_data
+// is at '*' — hence a seeded single-org grantee.
+func Test_CaseBatch_IngestorAtAnotherLab(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.WritePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 		userID := seedIngestorAt(t, env.Postgres, "CHOP")
@@ -298,6 +300,16 @@ func Test_CaseBatch_IngestorAtAnotherLab_Denied(t *testing.T) {
 		assert.Equal(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, caseBatchAtCQGC).Code)
 		assert.Equal(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, casePatchWithoutLab).Code,
 			"omitting diagnostic_lab_code falls back to the target case's lab (CQGC), it does not skip the check")
+		assert.Equal(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, caseBatchMovesCQGCCaseToCHOP).Code,
+			"stating its own lab must not let the caller take over a CQGC case")
+		assert.Equal(t, http.StatusOK, serveCaseBatchProbe(repo, userID, caseBatchNewCaseAtCHOP).Code,
+			"a new case is checked against the lab it states only")
+
+		require.NoError(t, env.Postgres.Exec(`
+			INSERT INTO user_role (user_id, tenant_code, org_code, role_code, granted_by)
+			VALUES (?, 'radiant', 'CQGC', 'data_manager', 'seed')`, userID).Error)
+		assert.Equal(t, http.StatusOK, serveCaseBatchProbe(repo, userID, caseBatchMovesCQGCCaseToCHOP).Code,
+			"granted at both labs, the caller may move the case")
 	})
 }
 

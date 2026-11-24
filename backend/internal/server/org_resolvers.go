@@ -123,10 +123,10 @@ type caseBatchRecord struct {
 	SubmitterCaseID   string `json:"submitter_case_id"`
 }
 
-// OrgsFromCaseBatchBody resolves the diagnosis lab of every case in a case-batch payload, for
-// the all-of gate: each record is authorized against its own lab. A record stating no lab (a
-// PATCH may) is resolved through the case it names, so omitting the field cannot dodge the
-// check; a record naming neither a lab nor an existing case resolves to nothing, which denies.
+// OrgsFromCaseBatchBody resolves the labs a case-batch payload touches, for the all-of gate:
+// the lab each record states, plus the current lab of the existing case it names, since the
+// worker moves that case to the stated lab. A record naming neither a lab nor an existing case
+// resolves to nothing, which denies.
 func OrgsFromCaseBatchBody(repo caseOrgLookup) OrgResolver {
 	return func(c *gin.Context) ([]string, error) {
 		tenant, err := GetTenant(c)
@@ -146,20 +146,22 @@ func OrgsFromCaseBatchBody(repo caseOrgLookup) OrgResolver {
 
 		orgs := map[string]bool{}
 		pairs := [][2]string{}
-		seen := map[[2]string]bool{}
+		mustExist := map[[2]string]bool{}
 		for _, record := range body.Cases {
 			if record.DiagnosticLabCode != "" {
 				orgs[record.DiagnosticLabCode] = true
-				continue
 			}
 			if record.ProjectCode == "" || record.SubmitterCaseID == "" {
-				return nil, nil
+				if record.DiagnosticLabCode == "" {
+					return nil, nil
+				}
+				continue
 			}
 			pair := [2]string{record.ProjectCode, record.SubmitterCaseID}
-			if !seen[pair] {
-				seen[pair] = true
+			if _, seen := mustExist[pair]; !seen {
 				pairs = append(pairs, pair)
 			}
+			mustExist[pair] = mustExist[pair] || record.DiagnosticLabCode == ""
 		}
 
 		if len(pairs) > 0 {
@@ -170,9 +172,12 @@ func OrgsFromCaseBatchBody(repo caseOrgLookup) OrgResolver {
 			for _, pair := range pairs {
 				lab, found := resolved[pair]
 				if !found {
-					// The case does not exist in this tenant: nothing attributes the record to
-					// an org, so the batch is refused rather than queued for the worker to reject.
-					return nil, nil
+					if mustExist[pair] {
+						// Nothing attributes a record with no lab to an org, so the batch is
+						// refused rather than queued for the worker to reject.
+						return nil, nil
+					}
+					continue
 				}
 				orgs[lab] = true
 			}
