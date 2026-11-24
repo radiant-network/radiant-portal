@@ -120,6 +120,11 @@ func (m *MockRepository) GetCasesFilters(ctx context.Context) (*types.CaseFilter
 			{Key: "germline", Label: "Germline"},
 			{Key: "somatic", Label: "Somatic"},
 		},
+		ComputedCaseType: []types.FiltersValue{
+			{Key: "germline"},
+			{Key: "germline_family"},
+			{Key: "somatic"},
+		},
 	}
 	return &result, nil
 }
@@ -296,6 +301,10 @@ func Test_CasesFiltersHandler(t *testing.T) {
 		], "case_type_code":[
 			{"key":"germline", "label":"Germline"},
 			{"key":"somatic", "label":"Somatic"}
+		], "case_type":[
+			{"key":"germline"},
+			{"key":"germline_family"},
+			{"key":"somatic"}
 		], "assignee_id":[
 			{"user_id":"79a8855e-3782-4dc8-be2a-8afdb34d6359", "first_name":"Wendy", "last_name":"Walsh", "email":"wendy@example.org"}
 		]

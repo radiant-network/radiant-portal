@@ -1061,8 +1061,8 @@ func (r *PcxPatientsRepository) patientCases(ctx context.Context, radiantPatient
 		Joins(fmt.Sprintf("LEFT JOIN %s ca ON ca.id = c.analysis_catalog_id", types.AnalysisCatalogTable.TenantQualifiedName(ctx))).
 		Joins("LEFT JOIN (?) mondo ON mondo.id = c.primary_condition", mondo).
 		Joins(fmt.Sprintf("LEFT JOIN %s org ON org.code = c.ordering_organization_code AND org.tenant_code = c.tenant_code",
-			types.OrganizationTable.TenantQualifiedName(ctx))).
-		Joins("LEFT JOIN (?) members_count ON members_count.case_id = c.id", caseMembersCount(ctx, db)).
+			types.OrganizationTable.TenantQualifiedName(ctx)))
+	tx = withCaseMembersCount(ctx, db, tx).
 		Select("pc.case_id, pc.relationship, c.status_code, c.priority_code, c.case_type_code, " + caseTypeColumn + ", " +
 			"ca.code AS analysis_catalog_code, ca.name AS analysis_catalog_name, c.primary_condition AS primary_condition_id, " +
 			"mondo.name AS primary_condition_name, c.ordering_organization_code, org.name AS ordering_organization_name, " +

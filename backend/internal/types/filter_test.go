@@ -311,7 +311,7 @@ func Test_ToSQL_Return_Expected_Sql_Filter_When_In(t *testing.T) {
 	t.Parallel()
 	node := ComparisonNode{Operator: "in", Value: []interface{}{10, 20}, Field: ageField}
 
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `e.age IN (?, ?)`
 	expectedParams := []interface{}{10, 20}
@@ -323,7 +323,7 @@ func Test_ToSQL_Return_Expected_Sql_Filter_When_In_With_Single_Array(t *testing.
 	t.Parallel()
 	node := ComparisonNode{Operator: "in", Value: []interface{}{10}, Field: ageField}
 
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `e.age = ?`
 	expectedParams := []interface{}{10}
@@ -335,7 +335,7 @@ func Test_ToSQL_Return_Expected_Sql_Filter_When_In_With_Single_Value(t *testing.
 	t.Parallel()
 	node := ComparisonNode{Operator: "in", Value: 10, Field: ageField}
 
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `e.age = ?`
 	expectedParams := []interface{}{10}
@@ -347,7 +347,7 @@ func Test_ToSQL_Return_Expected_Sql_Filter_With_Alias(t *testing.T) {
 	t.Parallel()
 	node := ComparisonNode{Operator: "in", Value: []interface{}{10, 20}, Field: Field{Name: "age", CanBeFiltered: true, Table: Table{Alias: "e"}}}
 
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `e.age IN (?, ?)`
 	expectedParams := []interface{}{10, 20}
@@ -359,7 +359,7 @@ func Test_ToSQL_Return_Expected_Sql_Filter_When_Between(t *testing.T) {
 	t.Parallel()
 	node := ComparisonNode{Operator: "between", Value: []interface{}{30, 40}, Field: ageField}
 
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `e.age BETWEEN ? AND ?`
 	expectedParams := []interface{}{30, 40}
@@ -385,7 +385,7 @@ func Test_ToSQL_Return_Expected_Sql_Filter_When_Complex_Filter(t *testing.T) {
 		},
 	}
 
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `(e.age IN (?, ?) OR (e.age IN (?, ?) AND e.salary >= ?) OR arrays_overlap(e.hobbies, [?, ?]) OR NOT (e.city NOT IN (?, ?)))`
 	expectedParams := []interface{}{30, 40, 10, 20, 50000, "soccer", "hiking", "New York", "Los Angeles"}
@@ -398,7 +398,7 @@ func Test_ToSQL_Return_Array_Contains_Sql_Filter_When_Array_Field_And_In_Single_
 	t.Parallel()
 	node := ComparisonNode{Operator: "in", Value: []interface{}{"Soccer"}, Field: hobbiesField}
 
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `array_contains(e.hobbies, ?)`
 	expectedParams := []interface{}{"Soccer"}
@@ -411,7 +411,7 @@ func Test_ToSQL_Return_Array_Contains_Sql_Filter_When_Array_Field_And_In_Single_
 	t.Parallel()
 	node := ComparisonNode{Operator: "in", Value: "Soccer", Field: hobbiesField}
 
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `array_contains(e.hobbies, ?)`
 	expectedParams := []interface{}{"Soccer"}
@@ -424,7 +424,7 @@ func Test_ToSQL_Return_Array_Contains_Sql_Filter_When_Array_Field_And_In_Multipl
 	t.Parallel()
 	expectedParams := []interface{}{"Beats", "Bear", "Battle Star Galactica"}
 	node := ComparisonNode{Operator: "in", Value: expectedParams, Field: hobbiesField}
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `arrays_overlap(e.hobbies, [?, ?, ?])`
 
@@ -436,7 +436,7 @@ func Test_ToSQL_Return_Not_Array_Contains_Sql_Filter_When_Array_Field_And_Not_In
 	t.Parallel()
 	node := ComparisonNode{Operator: "not-in", Value: "Soccer", Field: hobbiesField}
 
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedParams := []interface{}{"Soccer"}
 	expectedSQL := `NOT(array_contains(e.hobbies, ?))`
@@ -449,7 +449,7 @@ func Test_ToSQL_Return_Not_Array_Contains_Sql_Filter_When_Array_Field_And_Not_In
 	t.Parallel()
 	expectedParams := []interface{}{"Beats", "Bear", "Battle Star Galactica"}
 	node := ComparisonNode{Operator: "not-in", Value: expectedParams, Field: hobbiesField}
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `NOT(arrays_overlap(e.hobbies, [?, ?, ?]))`
 
@@ -460,7 +460,7 @@ func Test_ToSQL_Return_Not_Array_Contains_Sql_Filter_When_Array_Field_And_Not_In
 func Test_ToSQL_Return_Any_Match_Sql_Filter_When_Array_Field_And_Single_Operator(t *testing.T) {
 	t.Parallel()
 	node := ComparisonNode{Operator: "<", Value: "Soccer", Field: hobbiesField}
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `any_match(x -> x < ?, e.hobbies)`
 	expectedParams := []interface{}{"Soccer"}
@@ -473,7 +473,7 @@ func Test_ToSQL_Return_Any_Match_Sql_Filter_When_Array_Field_And_Between_Operato
 	t.Parallel()
 	expectedParams := []interface{}{"Soccer", "Hockey"}
 	node := ComparisonNode{Operator: "between", Value: expectedParams, Field: hobbiesField}
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `any_match(x -> x BETWEEN ? AND ?, e.hobbies)`
 
@@ -484,7 +484,7 @@ func Test_ToSQL_Return_Any_Match_Sql_Filter_When_Array_Field_And_Between_Operato
 func Test_ToSQL_Return_Array_Contains_Sql_Filter_When_Array_Field_And_All_Operator_Single_value(t *testing.T) {
 	t.Parallel()
 	node := ComparisonNode{Operator: "all", Value: "Soccer", Field: hobbiesField}
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `array_contains(e.hobbies, ?)`
 	expectedParams := []interface{}{"Soccer"}
@@ -497,7 +497,7 @@ func Test_ToSQL_Return_Array_Contains_All_Sql_Filter_When_Array_Field_And_All_Op
 	t.Parallel()
 	expectedParams := []interface{}{"Beats", "Bear", "Battle Star Galactica"}
 	node := ComparisonNode{Operator: "all", Value: expectedParams, Field: hobbiesField}
-	sqlQuery, params := node.ToSQL(nil, nil)
+	sqlQuery, params := node.ToSQL(nil, nil, nil)
 
 	expectedSQL := `array_contains_all(e.hobbies, [?, ?, ?])`
 
@@ -511,7 +511,7 @@ func Test_ToSQL_Return_Array_Contains_On_Comphet_Join_When_Filter_On_Comphet_Of(
 
 	// Same rendering inside the consequence semi-join: its alias overrides do not touch the comphet join.
 	for _, overrides := range []map[string]string{nil, {"cf": "cf"}} {
-		sqlQuery, params := node.ToSQL(overrides, nil)
+		sqlQuery, params := node.ToSQL(overrides, nil, nil)
 
 		assert.Equal(t, `array_contains(ch.comphet_of, ?)`, sqlQuery)
 		assert.Equal(t, []interface{}{"1000"}, params)
@@ -526,7 +526,7 @@ func Test_ToSQL_SemiJoinField_InSingleValue_CaseIdInSubQuery(t *testing.T) {
 	t.Parallel()
 	node := ComparisonNode{Operator: "in", Value: []interface{}{"1617"}, Field: CaseMemberRunNameField}
 
-	sqlQuery, params := node.ToSQL(nil, memberRunRows)
+	sqlQuery, params := node.ToSQL(nil, memberRunRows, nil)
 
 	assert.Equal(t, "c.id IN ("+memberRunSubQuery+"case_member_run.run_name = ?)", sqlQuery)
 	assert.Equal(t, []interface{}{"1617"}, params)
@@ -536,7 +536,7 @@ func Test_ToSQL_SemiJoinField_InSeveralValues_CaseIdInSubQuery(t *testing.T) {
 	t.Parallel()
 	node := ComparisonNode{Operator: "in", Value: []interface{}{"1617", "1619"}, Field: CaseMemberRunNameField}
 
-	sqlQuery, params := node.ToSQL(nil, memberRunRows)
+	sqlQuery, params := node.ToSQL(nil, memberRunRows, nil)
 
 	assert.Equal(t, "c.id IN ("+memberRunSubQuery+"case_member_run.run_name IN (?, ?))", sqlQuery)
 	assert.Equal(t, []interface{}{"1617", "1619"}, params)
@@ -546,7 +546,7 @@ func Test_ToSQL_SemiJoinField_NotIn_CaseIdNotInSubQuery(t *testing.T) {
 	t.Parallel()
 	node := ComparisonNode{Operator: "not-in", Value: []interface{}{"1617", "1619"}, Field: CaseMemberRunNameField}
 
-	sqlQuery, params := node.ToSQL(nil, memberRunRows)
+	sqlQuery, params := node.ToSQL(nil, memberRunRows, nil)
 
 	assert.Equal(t, "c.id NOT IN ("+memberRunSubQuery+"case_member_run.run_name IN (?, ?))", sqlQuery)
 	assert.Equal(t, []interface{}{"1617", "1619"}, params)
@@ -556,7 +556,7 @@ func Test_ToSQL_SemiJoinField_NotInSingleValue_CaseIdNotInSubQuery(t *testing.T)
 	t.Parallel()
 	node := ComparisonNode{Operator: "not-in", Value: []interface{}{"1617"}, Field: CaseMemberRunNameField}
 
-	sqlQuery, params := node.ToSQL(nil, memberRunRows)
+	sqlQuery, params := node.ToSQL(nil, memberRunRows, nil)
 
 	assert.Equal(t, "c.id NOT IN ("+memberRunSubQuery+"case_member_run.run_name = ?)", sqlQuery)
 	assert.Equal(t, []interface{}{"1617"}, params)
@@ -566,7 +566,7 @@ func Test_ToSQL_SemiJoinField_Contains_LowerLikeInSubQuery(t *testing.T) {
 	t.Parallel()
 	node := ComparisonNode{Operator: "contains", Value: []interface{}{"A00516"}, Field: CaseMemberRunNameField}
 
-	sqlQuery, params := node.ToSQL(nil, memberRunRows)
+	sqlQuery, params := node.ToSQL(nil, memberRunRows, nil)
 
 	assert.Equal(t, "c.id IN ("+memberRunSubQuery+"LOWER(case_member_run.run_name) like ?)", sqlQuery)
 	assert.Equal(t, []interface{}{"%a00516%"}, params)
@@ -579,7 +579,7 @@ func Test_ToSQL_SemiJoinField_InsideAndNode_RowsPassedDown(t *testing.T) {
 		&NotNode{Child: &ComparisonNode{Operator: "in", Value: []interface{}{"1619"}, Field: CaseMemberRunNameField}},
 	}}
 
-	sqlQuery, params := node.ToSQL(nil, memberRunRows)
+	sqlQuery, params := node.ToSQL(nil, memberRunRows, nil)
 
 	assert.Equal(t, "(c.id IN ("+memberRunSubQuery+"case_member_run.run_name = ?) AND NOT (c.id IN ("+memberRunSubQuery+"case_member_run.run_name = ?)))", sqlQuery)
 	assert.Equal(t, []interface{}{"1617", "1619"}, params)
@@ -589,7 +589,7 @@ func Test_ToSQL_SemiJoinField_OverrideAliasIgnored(t *testing.T) {
 	t.Parallel()
 	node := ComparisonNode{Operator: "in", Value: []interface{}{"1617"}, Field: CaseMemberRunNameField}
 
-	sqlQuery, _ := node.ToSQL(map[string]string{CaseMemberRunTable.Alias: "other"}, memberRunRows)
+	sqlQuery, _ := node.ToSQL(map[string]string{CaseMemberRunTable.Alias: "other"}, memberRunRows, nil)
 
 	assert.Equal(t, "c.id IN ("+memberRunSubQuery+"case_member_run.run_name = ?)", sqlQuery)
 }
@@ -702,15 +702,34 @@ func Test_CasesFields_RunName_FilterOnly(t *testing.T) {
 	assert.False(t, CaseMemberRunNameField.CanBeSorted)
 }
 
-func Test_VariantInterpretedCasesFields_LeavesSemiJoinFieldsOut(t *testing.T) {
+func Test_ComparisonNode_ToSQL_ComputedColumn_InPlaceOfTheColumn(t *testing.T) {
+	t.Parallel()
+	node := &ComparisonNode{Operator: "not-in", Value: []interface{}{"germline", "somatic"}, Field: CaseTypeField}
+
+	sqlQuery, params := node.ToSQL(nil, nil, CaseComputedColumns{CaseTypeField.GetAlias(): "CONCAT(c.a, c.b)"})
+
+	assert.Equal(t, "CONCAT(c.a, c.b) NOT IN (?, ?)", sqlQuery)
+	assert.Equal(t, []interface{}{"germline", "somatic"}, params)
+}
+
+func Test_CasesFields_CaseType_FilterOnly(t *testing.T) {
+	t.Parallel()
+	assert.Contains(t, CasesFields, CaseTypeField)
+	assert.True(t, CaseTypeField.CanBeFiltered)
+	assert.False(t, CaseTypeField.CanBeSelected)
+	assert.False(t, CaseTypeField.CanBeSorted)
+}
+
+func Test_VariantInterpretedCasesFields_LeavesCaseSearchOnlyFieldsOut(t *testing.T) {
 	t.Parallel()
 	assert.NotContains(t, VariantInterpretedCasesFields, CaseMemberRunNameField)
+	assert.NotContains(t, VariantInterpretedCasesFields, CaseTypeField)
 }
 
 func Test_VariantInterpretedCasesFields_KeepsEveryOtherCaseField(t *testing.T) {
 	t.Parallel()
 	for _, field := range CasesFields {
-		if !field.Table.CaseSemiJoin {
+		if !field.Table.CaseSemiJoin && field.Table != CaseMembersCountTable {
 			assert.Contains(t, VariantInterpretedCasesFields, field, field.GetAlias())
 		}
 	}
@@ -750,9 +769,30 @@ func Test_CaseSemiJoinTables_NilFilter_Empty(t *testing.T) {
 	assert.Empty(t, CaseSemiJoinTables(nil))
 }
 
-// Only the case search gives the semi-join rows (CasesRepository.prepareQuery). A case semi-join field in any other
-// field list would be accepted as a filter and then fail the query: leave it out, as VariantInterpretedCasesFields does.
-func Test_QueryConfigs_OnlyCasesHaveCaseSemiJoinFields(t *testing.T) {
+func Test_CaseComputedFieldAliases_NestedFilters_EachAliasOnce(t *testing.T) {
+	t.Parallel()
+	node := &AndNode{Children: []FilterNode{
+		&ComparisonNode{Operator: "in", Value: []interface{}{"1"}, Field: CaseIdField},
+		&OrNode{Children: []FilterNode{
+			&ComparisonNode{Operator: "in", Value: []interface{}{"germline"}, Field: CaseTypeField},
+			&NotNode{Child: &ComparisonNode{Operator: "in", Value: []interface{}{"somatic"}, Field: CaseTypeField}},
+		}},
+	}}
+
+	assert.Equal(t, []string{CaseTypeField.GetAlias()}, CaseComputedFieldAliases(node))
+}
+
+func Test_CaseComputedFieldAliases_NoComputedField_Empty(t *testing.T) {
+	t.Parallel()
+	node := &AndNode{Children: []FilterNode{&ComparisonNode{Operator: "in", Value: []interface{}{"1"}, Field: CaseIdField}}}
+
+	assert.Empty(t, CaseComputedFieldAliases(node))
+}
+
+// Only the case search gives the semi-join rows, the members count join and the computed columns (CasesRepository.prepareQuery).
+// Such a field in any other field list would be accepted as a filter and then fail the query: leave it out, as
+// VariantInterpretedCasesFields does.
+func Test_QueryConfigs_OnlyCasesHaveCaseSearchOnlyFields(t *testing.T) {
 	t.Parallel()
 	others := map[string]QueryConfig{
 		"GermlineSNVOccurrences":    GermlineSNVOccurrencesQueryConfig,
@@ -767,7 +807,9 @@ func Test_QueryConfigs_OnlyCasesHaveCaseSemiJoinFields(t *testing.T) {
 	for name, config := range others {
 		for _, field := range config.AllFields {
 			assert.False(t, field.Table.CaseSemiJoin, "%s exposes the case semi-join field %s", name, field.GetAlias())
+			assert.NotEqual(t, CaseMembersCountTable, field.Table, "%s exposes the computed field %s", name, field.GetAlias())
 		}
 	}
 	assert.Contains(t, CasesQueryConfig.AllFields, CaseMemberRunNameField)
+	assert.Contains(t, CasesQueryConfig.AllFields, CaseTypeField)
 }

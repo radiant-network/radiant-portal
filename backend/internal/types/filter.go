@@ -11,11 +11,15 @@ import (
 
 type CaseSemiJoinRows map[string]string
 
+// CaseComputedColumns gives, by field alias, the SQL a filter writes for a case search field computed from several
+// columns, in place of <table alias>.<name>.
+type CaseComputedColumns map[string]string
+
 type FilterNode interface {
-	ToSQL(overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows) (string, []interface{})
+	ToSQL(overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows, computedColumns CaseComputedColumns) (string, []interface{})
 }
 type FilterNodeWithChildren interface {
-	ToSQL(overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows) (string, []interface{})
+	ToSQL(overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows, computedColumns CaseComputedColumns) (string, []interface{})
 	GetChildren() []FilterNode
 }
 
@@ -45,20 +49,20 @@ type ComparisonNode struct {
 	Field    Field
 }
 
-func (n *AndNode) ToSQL(overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows) (string, []interface{}) {
-	return childrenToSQL(n, "AND", overrideTableAliases, semiJoinRows)
+func (n *AndNode) ToSQL(overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows, computedColumns CaseComputedColumns) (string, []interface{}) {
+	return childrenToSQL(n, "AND", overrideTableAliases, semiJoinRows, computedColumns)
 }
 
-func (n *OrNode) ToSQL(overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows) (string, []interface{}) {
-	return childrenToSQL(n, "OR", overrideTableAliases, semiJoinRows)
+func (n *OrNode) ToSQL(overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows, computedColumns CaseComputedColumns) (string, []interface{}) {
+	return childrenToSQL(n, "OR", overrideTableAliases, semiJoinRows, computedColumns)
 }
 
-func childrenToSQL(n FilterNodeWithChildren, op string, overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows) (string, []interface{}) {
+func childrenToSQL(n FilterNodeWithChildren, op string, overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows, computedColumns CaseComputedColumns) (string, []interface{}) {
 	children := n.GetChildren()
 	parts := make([]string, len(children))
 	var newParams []interface{}
 	for i, child := range children {
-		part, params := child.ToSQL(overrideTableAliases, semiJoinRows)
+		part, params := child.ToSQL(overrideTableAliases, semiJoinRows, computedColumns)
 		newParams = append(newParams, params...)
 		parts[i] = part
 	}
@@ -66,12 +70,12 @@ func childrenToSQL(n FilterNodeWithChildren, op string, overrideTableAliases map
 	return fmt.Sprintf("(%s)", join), newParams
 }
 
-func (n *NotNode) ToSQL(overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows) (string, []interface{}) {
-	part, params := n.Child.ToSQL(overrideTableAliases, semiJoinRows)
+func (n *NotNode) ToSQL(overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows, computedColumns CaseComputedColumns) (string, []interface{}) {
+	part, params := n.Child.ToSQL(overrideTableAliases, semiJoinRows, computedColumns)
 	return fmt.Sprintf("NOT (%s)", part), params
 }
 
-func (n *ComparisonNode) ToSQL(overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows) (string, []interface{}) {
+func (n *ComparisonNode) ToSQL(overrideTableAliases map[string]string, semiJoinRows CaseSemiJoinRows, computedColumns CaseComputedColumns) (string, []interface{}) {
 	if n.Field.Table.CaseSemiJoin {
 		return n.semiJoinToSQL(semiJoinRows)
 	}
@@ -80,7 +84,9 @@ func (n *ComparisonNode) ToSQL(overrideTableAliases map[string]string, semiJoinR
 		params []interface{}
 	)
 
-	if n.Field.Table.Alias != "" {
+	if column := computedColumns[n.Field.GetAlias()]; column != "" {
+		field = column
+	} else if n.Field.Table.Alias != "" {
 		if overrideTableAliases != nil && overrideTableAliases[n.Field.Table.Alias] != "" {
 			field = fmt.Sprintf("%s.%s", overrideTableAliases[n.Field.Table.Alias], n.Field.GetAlias())
 		} else {
@@ -170,7 +176,7 @@ func (n *ComparisonNode) semiJoinToSQL(semiJoinRows CaseSemiJoinRows) (string, [
 		membership = "NOT IN"
 		inner.Operator = "in"
 	}
-	condition, params := inner.ToSQL(nil, nil)
+	condition, params := inner.ToSQL(nil, nil, nil)
 	if condition == "" {
 		return "", nil
 	}
@@ -202,6 +208,27 @@ func validateCaseSemiJoinCriterion(field Field, operator string, values []interf
 // CaseSemiJoinTables returns the case semi-join tables the filter tree reads, once each.
 func CaseSemiJoinTables(node FilterNode) []Table {
 	var tables []Table
+	for _, c := range comparisons(node) {
+		if c.Field.Table.CaseSemiJoin && !slices.Contains(tables, c.Field.Table) {
+			tables = append(tables, c.Field.Table)
+		}
+	}
+	return tables
+}
+
+// CaseComputedFieldAliases returns the aliases of the computed case search fields the filter tree reads, once each.
+func CaseComputedFieldAliases(node FilterNode) []string {
+	var aliases []string
+	for _, c := range comparisons(node) {
+		if c.Field.Table == CaseMembersCountTable && !slices.Contains(aliases, c.Field.GetAlias()) {
+			aliases = append(aliases, c.Field.GetAlias())
+		}
+	}
+	return aliases
+}
+
+func comparisons(node FilterNode) []*ComparisonNode {
+	var found []*ComparisonNode
 	var walk func(FilterNode)
 	walk = func(n FilterNode) {
 		switch v := n.(type) {
@@ -216,15 +243,13 @@ func CaseSemiJoinTables(node FilterNode) []Table {
 		case *NotNode:
 			walk(v.Child)
 		case *ComparisonNode:
-			if v.Field.Table.CaseSemiJoin && !slices.Contains(tables, v.Field.Table) {
-				tables = append(tables, v.Field.Table)
-			}
+			found = append(found, v)
 		}
 	}
 	if node != nil {
 		walk(node)
 	}
-	return tables
+	return found
 }
 
 func placeholders(count int) string {

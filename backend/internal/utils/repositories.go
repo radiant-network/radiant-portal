@@ -34,12 +34,12 @@ func AddSort(tx *gorm.DB, userQuery types.ListQuery) {
 }
 
 func AddWhere(userQuery types.Query, tx *gorm.DB) {
-	AddWhereWithCaseSemiJoins(userQuery, tx, nil)
+	AddWhereWithCaseSearchSQL(userQuery, tx, nil, nil)
 }
 
-// A case semi-join field filtered without its rows would write no SQL and leave a broken WHERE: the query fails
-// with an explicit error instead.
-func AddWhereWithCaseSemiJoins(userQuery types.Query, tx *gorm.DB, semiJoinRows types.CaseSemiJoinRows) {
+// A case semi-join field filtered without its rows, or a computed field without its SQL, would leave a broken WHERE:
+// the query fails with an explicit error instead.
+func AddWhereWithCaseSearchSQL(userQuery types.Query, tx *gorm.DB, semiJoinRows types.CaseSemiJoinRows, computedColumns types.CaseComputedColumns) {
 	if userQuery.Filters() == nil {
 		return
 	}
@@ -49,7 +49,13 @@ func AddWhereWithCaseSemiJoins(userQuery types.Query, tx *gorm.DB, semiJoinRows 
 			return
 		}
 	}
-	filters, params := userQuery.Filters().ToSQL(nil, semiJoinRows)
+	for _, alias := range types.CaseComputedFieldAliases(userQuery.Filters()) {
+		if computedColumns[alias] == "" {
+			_ = tx.AddError(fmt.Errorf("computed field %s is filtered but the query gives none of its SQL", alias))
+			return
+		}
+	}
+	filters, params := userQuery.Filters().ToSQL(nil, semiJoinRows, computedColumns)
 	tx.Where(filters, params...)
 }
 

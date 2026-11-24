@@ -147,7 +147,7 @@ var VariantPartitionedTable = Table{
 }
 
 // GetVariantInterpretedCases gives no semi-join rows, so its semi-join fields are refused (400) rather than broken.
-var VariantInterpretedCasesFields = append(withoutCaseSemiJoinFields(CasesFields), GermlineInterpretationClassificationField, GermlineInterpretationUpdatedOnField, ConditionIdField, ConditionNameField, ConditionTermField, AggregatedPhenotypeTermField)
+var VariantInterpretedCasesFields = append(withoutCaseSearchOnlyFields(CasesFields), GermlineInterpretationClassificationField, GermlineInterpretationUpdatedOnField, ConditionIdField, ConditionNameField, ConditionTermField, AggregatedPhenotypeTermField)
 var VariantInterpretedCasesDefaultSort = []SortField{{Field: GermlineInterpretationUpdatedOnField, Order: "desc"}}
 
 var VariantUninterpretedCasesDefaultFields = []Field{

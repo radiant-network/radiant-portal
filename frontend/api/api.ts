@@ -1210,6 +1210,12 @@ export interface CaseFilters {
      * @type {Array<FiltersValue>}
      * @memberof CaseFilters
      */
+    'case_type': Array<FiltersValue>;
+    /**
+     * 
+     * @type {Array<FiltersValue>}
+     * @memberof CaseFilters
+     */
     'case_type_code': Array<FiltersValue>;
     /**
      * 

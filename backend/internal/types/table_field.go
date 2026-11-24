@@ -130,10 +130,11 @@ func findNumericByAlias(fields []Field, alias string) *Field {
 	})
 }
 
-func withoutCaseSemiJoinFields(fields []Field) []Field {
+// withoutCaseSearchOnlyFields drops the fields whose rows, joins or SQL only CasesRepository.prepareQuery gives.
+func withoutCaseSearchOnlyFields(fields []Field) []Field {
 	var kept []Field
 	for _, f := range fields {
-		if !f.Table.CaseSemiJoin {
+		if !f.Table.CaseSemiJoin && f.Table != CaseMembersCountTable {
 			kept = append(kept, f)
 		}
 	}
