@@ -3,7 +3,9 @@ package mysqlproxy
 import (
 	"bytes"
 	"encoding/binary"
+	"net"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -261,4 +263,35 @@ func Test_isSSLRequest_RejectsThirtyTwoBytesWithoutSSLBit(t *testing.T) {
 	pkt := buildSSLRequest(clientProtocol41, 0x21)
 	binary.LittleEndian.PutUint32(pkt[0:4], clientProtocol41) // clear CLIENT_SSL
 	assert.False(t, isSSLRequest(pkt))
+}
+
+func Test_packetConn_read_RejectsPacketOverLoginLimitWithoutReadingIt(t *testing.T) {
+	server, peer := net.Pipe()
+	defer func() { _ = server.Close() }()
+	defer func() { _ = peer.Close() }()
+	_ = server.SetDeadline(time.Now().Add(2 * time.Second))
+
+	// Header only: 0xffffff announces 16 MB that never come.
+	go func() { _, _ = peer.Write([]byte{0xff, 0xff, 0xff, 0x01}) }()
+
+	_, payload, err := (&packetConn{conn: server}).read()
+
+	require.ErrorIs(t, err, errPacketTooLarge)
+	assert.Nil(t, payload)
+}
+
+func Test_packetConn_read_AcceptsPacketAtLoginLimit(t *testing.T) {
+	server, peer := net.Pipe()
+	defer func() { _ = server.Close() }()
+	defer func() { _ = peer.Close() }()
+	_ = server.SetDeadline(time.Now().Add(2 * time.Second))
+
+	sent := bytes.Repeat([]byte{'a'}, maxLoginPacket)
+	go func() { _ = (&packetConn{conn: peer}).write(7, sent) }()
+
+	seq, payload, err := (&packetConn{conn: server}).read()
+
+	require.NoError(t, err)
+	assert.Equal(t, byte(7), seq)
+	assert.Equal(t, sent, payload)
 }
