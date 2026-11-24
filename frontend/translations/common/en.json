@@ -1742,6 +1742,10 @@
       "germline": "Solo germline",
       "germline_family": "Family germline"
     },
+    "case_type_code": {
+      "germline": "Germline",
+      "somatic": "Somatic"
+    },
     "status": {
       "completed": "Closed",
       "draft": "Draft",

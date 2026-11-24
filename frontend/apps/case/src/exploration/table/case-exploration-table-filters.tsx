@@ -137,7 +137,12 @@ function FiltersGroupForm({ loading = true, setSearchCriteria, extraFilters, onC
         case 'case_type_code':
           return {
             ...baseOption,
-            options: sortOptions(apiFilters[key] || []),
+            options: sortOptions(
+              (apiFilters[key] || []).map(option => ({
+                ...option,
+                label: t(`case_exploration.case_type_code.${option.key}`, option.label || ''),
+              })),
+            ),
           };
         case 'diagnosis_lab_code':
           return {
