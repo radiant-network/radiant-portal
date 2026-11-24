@@ -1,13 +1,13 @@
-import type { GermlineCNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 
+import type { CNVOccurrence } from '../../../constants';
 import { useCNVProfile } from '../../cnv-profile/cnv-profile-context';
 import { cnvFocus } from '../../cnv-profile/libs/focus';
 
 import OverlappingGeneLinkCell from './overlapping-gene-link-cell';
 
 type CNVProfileLinkCellProps = {
-  occurrence: GermlineCNVOccurrence;
+  occurrence: CNVOccurrence;
   values?: string[];
 };
 

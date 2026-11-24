@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 
-import type { CNVGeneOverlap, GermlineCNVOccurrence } from '@/api/api';
+import type { CNVGeneOverlap } from '@/api/api';
 import DataTable from '@/components/base/data-table/data-table';
 import {
   Dialog,
@@ -17,6 +17,8 @@ import { toKiloBases } from '@/components/lib/number-format';
 import { occurrencesApi } from '@/utils/api';
 import { useCaseIdFromParam, useSeqIdFromSearchParam } from '@/utils/helper';
 
+import type { CNVOccurrence } from '../constants';
+
 import {
   defaultCNVOverlappingGenesSettings,
   getCNVOverlappingGenesColumns,
@@ -27,10 +29,12 @@ type OverlappingGenesInput = {
   seqId: number;
   taskId: number;
   cnvId: string;
+  somatic?: boolean;
 };
 
 type OverlappingGeneDialogProps = {
-  occurrence: GermlineCNVOccurrence;
+  occurrence: CNVOccurrence;
+  somatic?: boolean;
   children: React.ReactElement;
 };
 
@@ -38,9 +42,10 @@ export function useCNVOverlappingGenesListHelper(input: OverlappingGenesInput) {
   const { tenant } = useTenant();
   const fetch = useCallback(
     async () =>
-      occurrencesApi
-        .listGermlineCNVGenesOverlap(tenant, input.caseId, input.seqId, input.taskId, input.cnvId)
-        .then(response => response.data),
+      (input.somatic
+        ? occurrencesApi.listSomaticCNVGenesOverlap(tenant, input.caseId, input.seqId, input.taskId, input.cnvId)
+        : occurrencesApi.listGermlineCNVGenesOverlap(tenant, input.caseId, input.seqId, input.taskId, input.cnvId)
+      ).then(response => response.data),
     [input, tenant],
   );
 
@@ -49,7 +54,7 @@ export function useCNVOverlappingGenesListHelper(input: OverlappingGenesInput) {
   };
 }
 
-function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogProps) {
+function OverlappingGeneDialog({ occurrence, somatic, children }: OverlappingGeneDialogProps) {
   const { t } = useI18n();
   const [open, setOpen] = useState<boolean>(false);
   const caseId = useCaseIdFromParam();
@@ -60,10 +65,11 @@ function OverlappingGeneDialog({ occurrence, children }: OverlappingGeneDialogPr
     seqId,
     taskId: occurrence.task_id,
     cnvId: occurrence.cnv_id,
+    somatic,
   });
 
   const fetchList = useSWR<CNVGeneOverlap[]>(
-    `fetch-overlapping-genes-list-${seqId}-${occurrence.cnv_id}`,
+    `fetch-overlapping-genes-list-${somatic ? 'somatic' : 'germline'}-${seqId}-${occurrence.cnv_id}`,
     fetchCNVOverlappingListHelper,
     {
       revalidateOnFocus: false,

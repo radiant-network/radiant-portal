@@ -1,4 +1,8 @@
+import type { GermlineCNVOccurrence, SomaticCNVOccurrence } from '@/api/api';
+
 export const SELECTED_VARIANT_PARAM = 'selectedVariant';
+
+export type CNVOccurrence = GermlineCNVOccurrence | SomaticCNVOccurrence;
 
 /** Sub-tabs of the variants tab of a somatic case. */
 export enum SomaticVariantInterface {

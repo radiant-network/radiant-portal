@@ -1,0 +1,298 @@
+import type { TFunction } from 'i18next';
+
+import type { CaseEntity, SomaticCNVOccurrence } from '@/api/api';
+import GnomadCell from '@/components/base/data-table/cells/gnomad-cell';
+import NumberCell from '@/components/base/data-table/cells/number-cell';
+import NumberListCell from '@/components/base/data-table/cells/number-list-cell';
+import TextCell from '@/components/base/data-table/cells/text-cell';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
+import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
+import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
+import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
+
+import ClingenCell from '../../germline-occurrence/table/cells/clingen-cell';
+import CNVIGVCell from '../../germline-occurrence/table/cells/cnv-igv-cell';
+import CNVNameCell from '../../germline-occurrence/table/cells/cnv-name-cell';
+
+import SomaticCNVOverlappingGenesCell from './cells/somatic-cnv-overlapping-genes-cell';
+import SomaticCNVRowInfoCell from './cells/somatic-cnv-row-info-cell';
+
+const columnHelper = createAppColumnHelper<SomaticCNVOccurrence>();
+
+type SomaticCNVTableSettingsProps = {
+  caseEntity?: CaseEntity;
+  t: TFunction<string, undefined>;
+};
+
+function getSomaticCNVColumns({ t, caseEntity }: SomaticCNVTableSettingsProps) {
+  return [
+    columnHelper.accessor(row => row, {
+      id: 'row-info',
+      cell: info => <SomaticCNVRowInfoCell occurrence={info.getValue()} caseId={caseEntity?.case_id} />,
+      header: () => null,
+      size: 64,
+      enablePinning: false,
+      enableResizing: false,
+      enableSorting: false,
+    }),
+    columnHelper.accessor(row => row, {
+      id: 'igv',
+      cell: info => <CNVIGVCell occurrence={info.getValue()} hasIGVFiles={caseEntity?.has_igv_files === true} />,
+      header: () => null,
+      size: 48,
+      enablePinning: false,
+      enableResizing: false,
+      enableSorting: false,
+    }),
+    // Genes
+    columnHelper.accessor(row => row.symbol, {
+      id: 'symbol',
+      cell: info => (
+        <SomaticCNVOverlappingGenesCell occurrence={info.row.original} label={info.getValue()?.join(', ')} />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.symbol_tooltip')}>{t('variant.headers.symbols')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // Cytoband
+    columnHelper.accessor(row => row.cytoband, {
+      id: 'cytoband',
+      cell: info => (
+        <SomaticCNVOverlappingGenesCell occurrence={info.row.original} label={info.getValue()?.join(', ')} />
+      ),
+      header: t('variant.headers.cytoband'),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // # SNVs
+    columnHelper.accessor(row => row.nb_snv, {
+      id: 'nb_snv',
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.nb_snv_tooltip')}>{t('variant.headers.nb_snv')}</TooltipHeader>
+      ),
+      size: 96,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    // Variant
+    columnHelper.accessor(row => row, {
+      id: 'name',
+      cell: info => <CNVNameCell occurrence={info.getValue()} />,
+      header: t('variant.headers.name'),
+      size: 148,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // ClinGen
+    columnHelper.accessor(row => row, {
+      id: 'clingen',
+      cell: info => <ClingenCell occurrence={info.getValue()} />,
+      header: t('variant.headers.clingen'),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // Chr
+    columnHelper.accessor(row => row.chromosome, {
+      id: 'chromosome',
+      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.chromosome_tooltip')}>
+          {t('variant.headers.chromosome')}
+        </TooltipHeader>
+      ),
+      size: 96,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // Start
+    columnHelper.accessor(row => row.start, {
+      id: 'start',
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
+      header: t('variant.headers.start'),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    // End
+    columnHelper.accessor(row => row.end, {
+      id: 'end',
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
+      header: t('variant.headers.end'),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    // Type
+    columnHelper.accessor(row => row.type, {
+      id: 'type',
+      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      header: t('variant.headers.type'),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    // Length
+    columnHelper.accessor(row => row.length, {
+      id: 'length',
+      cell: info => toKiloBases(info.getValue()),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.length_tooltip')}>{t('variant.headers.length')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    // CN
+    columnHelper.accessor(row => row.cn, {
+      id: 'cn',
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
+      header: () => <TooltipHeader tooltip={t('variant.headers.cn_tooltip')}>{t('variant.headers.cn')}</TooltipHeader>,
+      size: 96,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    // SM
+    columnHelper.accessor(row => row.sm, {
+      id: 'sm',
+      cell: info => <NumberCell value={info.getValue()} />,
+      header: () => <TooltipHeader tooltip={t('variant.headers.sm_tooltip')}>{t('variant.headers.sm')}</TooltipHeader>,
+      size: 96,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    // gnomAD
+    columnHelper.accessor(row => row.gnomad_sf, {
+      id: 'gnomad_sf',
+      cell: info => <GnomadCell value={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.gnomad_sf_tooltip')}>{t('variant.headers.gnomad_sf')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    columnHelper.accessor(row => row.gnomad_af, {
+      id: 'gnomad_af',
+      cell: info => <GnomadCell value={info.getValue()} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.gnomad_sv_af_tooltip')}>
+          {t('variant.headers.gnomad_sv_af')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    columnHelper.accessor(row => row.gnomad_ac, {
+      id: 'gnomad_ac',
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.gnomad_sv_ac_tooltip')}>
+          {t('variant.headers.gnomad_sv_ac')}
+        </TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    // # Genes
+    columnHelper.accessor(row => row.nb_genes, {
+      id: 'nb_genes',
+      cell: info => (
+        <SomaticCNVOverlappingGenesCell
+          occurrence={info.row.original}
+          label={info.getValue() ? thousandNumberFormat(info.getValue()) : undefined}
+        />
+      ),
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.nb_genes_tooltip')}>{t('variant.headers.nb_genes')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    // GT
+    columnHelper.accessor(row => row.calls, {
+      id: 'calls',
+      cell: info => <NumberListCell values={info.getValue()} fractionDigits={0} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.calls_tooltip')}>{t('variant.headers.calls')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // Filter
+    columnHelper.accessor(row => row.filter, {
+      id: 'filter',
+      cell: info => <TextCell>{info.getValue()}</TextCell>,
+      header: t('variant.headers.filter'),
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+    // Qual.
+    columnHelper.accessor(row => row.quality, {
+      id: 'quality',
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
+      header: () => (
+        <TooltipHeader tooltip={t('variant.headers.quality_tooltip')}>{t('variant.headers.quality')}</TooltipHeader>
+      ),
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    // BC
+    columnHelper.accessor(row => row.bc, {
+      id: 'bc',
+      cell: info => <NumberCell value={info.getValue()} fractionDigits={0} />,
+      header: () => <TooltipHeader tooltip={t('variant.headers.bc_tooltip')}>{t('variant.headers.bc')}</TooltipHeader>,
+      size: 124,
+      minSize: 40,
+      enableSorting: true,
+    }),
+    // PE
+    columnHelper.accessor(row => row.pe, {
+      id: 'pe',
+      cell: info => <NumberListCell values={info.getValue()} fractionDigits={0} />,
+      header: () => <TooltipHeader tooltip={t('variant.headers.pe_tooltip')}>{t('variant.headers.pe')}</TooltipHeader>,
+      size: 124,
+      minSize: 40,
+      enableSorting: false,
+    }),
+  ] as TableColumnDef<SomaticCNVOccurrence, any>[];
+}
+
+const defaultSomaticCNVSettings = createColumnSettings([
+  { id: 'row-info', visible: true, fixed: true, pinningPosition: 'start' },
+  { id: 'igv', visible: true, fixed: true, pinningPosition: 'start' },
+  { id: 'symbol', visible: true, label: 'variant.headers.symbol' },
+  { id: 'cytoband', visible: true, label: 'variant.headers.cytoband' },
+  { id: 'nb_snv', visible: true, label: 'variant.headers.nb_snv' },
+  { id: 'name', visible: true, label: 'variant.headers.name' },
+  { id: 'clingen', visible: true, label: 'variant.headers.clingen' },
+  { id: 'chromosome', visible: true, label: 'variant.headers.chromosome' },
+  { id: 'start', visible: true, label: 'variant.headers.start' },
+  { id: 'end', visible: true, label: 'variant.headers.end' },
+  { id: 'type', visible: true, label: 'variant.headers.type' },
+  { id: 'length', visible: true, label: 'variant.headers.length' },
+  { id: 'cn', visible: true, label: 'variant.headers.cn', additionalFields: ['cn'] },
+  { id: 'sm', visible: true, label: 'variant.headers.sm', additionalFields: ['sm'] },
+  { id: 'gnomad_sf', visible: true, label: 'variant.headers.gnomad_sf' },
+  { id: 'gnomad_af', visible: false, label: 'variant.headers.gnomad_sv_af', additionalFields: ['gnomad_af'] },
+  { id: 'gnomad_ac', visible: false, label: 'variant.headers.gnomad_sv_ac', additionalFields: ['gnomad_ac'] },
+  { id: 'nb_genes', visible: true, label: 'variant.headers.nb_genes' },
+  { id: 'calls', visible: false, label: 'variant.headers.calls', additionalFields: ['calls'] },
+  { id: 'filter', visible: false, label: 'variant.headers.filter', additionalFields: ['filter'] },
+  { id: 'quality', visible: false, label: 'variant.headers.quality', additionalFields: ['quality'] },
+  { id: 'bc', visible: false, label: 'variant.headers.bc', additionalFields: ['bc'] },
+  { id: 'pe', visible: false, label: 'variant.headers.pe', additionalFields: ['pe'] },
+]);
+
+export { defaultSomaticCNVSettings, getSomaticCNVColumns };

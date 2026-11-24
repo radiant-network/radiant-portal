@@ -1,14 +1,14 @@
-import type { GermlineCNVOccurrence } from '@/api/api';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { getFranklinCnvUrl } from '@/components/base/variant/utils';
 
+import type { CNVOccurrence } from '../../../constants';
 import { useCNVProfile } from '../../cnv-profile/cnv-profile-context';
 import { cnvFocus } from '../../cnv-profile/libs/focus';
 
 type CNVNameCellProps = {
-  occurrence: GermlineCNVOccurrence;
+  occurrence: CNVOccurrence;
 };
 
 function CNVNameCell({ occurrence }: CNVNameCellProps) {

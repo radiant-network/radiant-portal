@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { FlipHorizontal2Icon } from 'lucide-react';
 
-import type { GermlineCNVOccurrence } from '@/api/api';
 import IGVDialog from '@/components/base/igv/igv-dialog';
 import { Button } from '@/components/base/shadcn/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
 import { useCaseIdFromParam } from '@/utils/helper';
 
+import type { CNVOccurrence } from '../../../constants';
+
 type CNVIGVCellProps = {
-  occurrence: GermlineCNVOccurrence;
+  occurrence: CNVOccurrence;
   hasIGVFiles: boolean;
 };
 

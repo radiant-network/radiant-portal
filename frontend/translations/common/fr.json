@@ -2785,6 +2785,7 @@
         },
         "cnv": "CNV",
         "cnv_to": "CNV (TO)",
+        "cnv_to_tooltip": "CNV (tumeur seule)",
         "latest": "Récente",
         "no_cnv_tooltip": "Aucun CNV pour cet échantillon",
         "no_snv_tooltip": "Aucun SNV pour cet échantillon",
