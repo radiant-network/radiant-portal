@@ -80,7 +80,8 @@ VALUES (1, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2
        (83, 'alignment_germline_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-04-01 13:08:00', 'radiant'),
        -- Covers both the fetus's and the mother's own sequencing for case 72 (Fix 7 test).
        (84, 'radiant_germline_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-01 13:08:00', 'radiant'),
-       -- Somatic CNV: tumor-only by definition, on the same tumoral seq 74 as tasks 74 and 82.
+       -- Somatic CNV in the contract before 2026-11-10, on the same tumoral seq 74 as tasks 74 and 82. Since
+       -- RAD-396 the somatic CNV is read on task 76 (alignment_somatic_variant_calling): 85 is never selected.
        (85, 'tumor_only_variant_calling', 'Dragen', '4.4.4', 'GRch38', '2026-03-11 13:08:00', 'radiant'),
        -- Family-level germline CNV annotation of case 70: its gcnv VCF is never an IGV track.
        (86, 'radiant_germline_cnv_annotation', 'Dragen', '4.4.4', 'GRch38', '2026-04-01 13:08:00', 'radiant')

@@ -291,20 +291,21 @@ func Test_ListTasksByCaseAndSequencing_SomaticTumorNormal_ExcludesTumorOnlyTaskO
 	})
 }
 
-func Test_ListTasksByCaseAndSequencing_SomaticCNV_ReturnsTumorOnlyVariantCallingTask(t *testing.T) {
+func Test_ListTasksByCaseAndSequencing_SomaticCNV_ReturnsAlignmentSomaticVariantCallingTask(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewTaskRepository(database.PostgresDB{DB: env.Postgres})
 
 		selector, _ := types.OccurrenceTypeSomaticCNV.TaskSelector()
 		result, err := repo.ListTasksByCaseAndSequencing(t.Context(), 71, 74, selector)
 
-		// Task 85 hangs off the same tumoral seq 74 as the somatic SNV tasks 74 and 82; only
-		// the task type tells them apart, since this selector carries no cohort predicate.
+		// Task 76 is the tumor-only Dragen run of seq 74, which also carries the somatic SNV tasks
+		// 74 and 82; only the task type tells them apart, since this selector carries no cohort
+		// predicate. Task 85 (tumor_only_variant_calling, the contract before 2026-11-10) is left out.
 		assert.NoError(t, err)
 		assert.Len(t, result, 1)
-		assert.Equal(t, 85, result[0].ID)
-		assert.Equal(t, types.TumorOnlyVariantCallingTaskTypeCode, result[0].TaskTypeCode)
-		assert.Equal(t, "Somatic Variant Calling by Tumor-Only Sample", result[0].TaskTypeName)
+		assert.Equal(t, 76, result[0].ID)
+		assert.Equal(t, types.AlignmentSomaticVariantCallingTaskTypeCode, result[0].TaskTypeCode)
+		assert.Equal(t, "Genome Alignment and Somatic Variant Calling", result[0].TaskTypeName)
 	})
 }
 
