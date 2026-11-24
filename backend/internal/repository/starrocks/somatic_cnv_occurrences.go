@@ -39,3 +39,10 @@ func (r *SomaticCNVOccurrencesRepository) GetStatisticsOccurrences(ctx context.C
 func (r *SomaticCNVOccurrencesRepository) GetGenesOverlap(ctx context.Context, _ int, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error) {
 	return cnvGenesOverlap(ctx, r.db.WithContext(ctx), types.SomaticCNVOccurrenceTable, seqId, taskId, cnvId)
 }
+
+// ListTasks returns the tumor-only calling tasks of the case and sequencing that have somatic CNV
+// rows for the sequencing, newest first. The calling task exists on somatic cases with no CNV, so
+// its type alone would list a task with nothing to show.
+func (r *SomaticCNVOccurrencesRepository) ListTasks(ctx context.Context, caseId int, seqId int) ([]types.TaskOccurrenceType, error) {
+	return listCNVTasks(ctx, r.db.WithContext(ctx), types.SomaticCNVOccurrenceTable, caseId, seqId, types.AlignmentSomaticVariantCallingTaskTypeCode)
+}
