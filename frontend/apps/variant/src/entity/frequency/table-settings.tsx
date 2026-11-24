@@ -1,8 +1,8 @@
-import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import type { TFunction } from 'i18next';
 
 import {
   type ExternalFrequencies,
+  type GetGermlineVariantInternalFrequenciesSequencingTypeEnum,
   GetGermlineVariantInternalFrequenciesSplitEnum,
   type InternalFrequenciesSplitBy,
 } from '@/api/api';
@@ -10,6 +10,7 @@ import CohortCell from '@/components/base/data-table/cells/cohort-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
 import NumberCell from '@/components/base/data-table/cells/number-cell';
 import PhenotypeConditionLinkCell from '@/components/base/data-table/cells/phenotype-condition-link-cell';
+import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
@@ -71,7 +72,25 @@ function getPublicCohortsColumns(t: TFunction<string, undefined>, locusId?: stri
   ] as TableColumnDef<ExternalFrequencies, any>[];
 }
 
-function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string) {
+function getMyNetworkColumns(
+  t: TFunction<string, undefined>,
+  activeTab: string,
+  sequencingType: GetGermlineVariantInternalFrequenciesSequencingTypeEnum,
+) {
+  const sequencingTypeLabel = t(`variant_entity.frequency.my_network.sequencing_type.${sequencingType}`);
+  const frequencyHeader = () => (
+    <TooltipHeader tooltip={t(`variant_entity.frequency.my_network.frequency_tooltip_${sequencingType}`)}>
+      {t('variant_entity.frequency.my_network.frequency')}
+    </TooltipHeader>
+  );
+  const homozygotesHeader = () => (
+    <TooltipHeader
+      tooltip={t('variant_entity.frequency.my_network.homozygotes_tooltip', { sequencingType: sequencingTypeLabel })}
+    >
+      {t('variant_entity.frequency.my_network.homozygotes')}
+    </TooltipHeader>
+  );
+
   return [
     myNetworkColumnHelper.group({
       id: 'split_name',
@@ -104,7 +123,7 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
     }),
     myNetworkColumnHelper.group({
       id: 'all_patients',
-      header: t('variant_entity.frequency.my_network.all_patients'),
+      header: t('variant_entity.frequency.my_network.all_patients', { sequencingType: sequencingTypeLabel }),
       size: 300,
       minSize: 100,
       columns: myNetworkColumnHelper.columns([
@@ -120,7 +139,7 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
               pf={info.row.original.frequencies.pf_all}
             />
           ),
-          header: t(`variant_entity.frequency.my_network.frequency`),
+          header: frequencyHeader,
         }),
         // Homozygotes
         myNetworkColumnHelper.accessor(row => row.frequencies.hom_all, {
@@ -128,13 +147,13 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
           size: 150,
           minSize: 50,
           cell: info => (info.getValue() != null ? info.getValue() : <EmptyCell />),
-          header: t(`variant_entity.frequency.my_network.homozygotes`),
+          header: homozygotesHeader,
         }),
       ]),
     }),
     myNetworkColumnHelper.group({
       id: 'affected_patients',
-      header: t('variant_entity.frequency.my_network.affected_patients'),
+      header: t('variant_entity.frequency.my_network.affected_patients', { sequencingType: sequencingTypeLabel }),
       size: 300,
       minSize: 100,
       columns: myNetworkColumnHelper.columns([
@@ -150,7 +169,7 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
               pf={info.row.original.frequencies.pf_affected}
             />
           ),
-          header: t(`variant_entity.frequency.my_network.frequency`),
+          header: frequencyHeader,
         }),
         // Homozygotes
         myNetworkColumnHelper.accessor(row => row.frequencies.hom_affected, {
@@ -158,13 +177,13 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
           size: 150,
           minSize: 50,
           cell: info => (info.getValue() != null ? info.getValue() : <EmptyCell />),
-          header: t(`variant_entity.frequency.my_network.homozygotes`),
+          header: homozygotesHeader,
         }),
       ]),
     }),
     myNetworkColumnHelper.group({
       id: 'non_affected_patients',
-      header: t('variant_entity.frequency.my_network.non_affected_patients'),
+      header: t('variant_entity.frequency.my_network.non_affected_patients', { sequencingType: sequencingTypeLabel }),
       size: 300,
       minSize: 100,
       columns: myNetworkColumnHelper.columns([
@@ -180,7 +199,7 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
               pf={info.row.original.frequencies.pf_non_affected}
             />
           ),
-          header: t(`variant_entity.frequency.my_network.frequency`),
+          header: frequencyHeader,
         }),
         // Homozygotes
         myNetworkColumnHelper.accessor(row => row.frequencies.hom_non_affected, {
@@ -188,7 +207,7 @@ function getMyNetworkColumns(t: TFunction<string, undefined>, activeTab: string)
           size: 150,
           minSize: 50,
           cell: info => (info.getValue() != null ? info.getValue() : <EmptyCell />),
-          header: t(`variant_entity.frequency.my_network.homozygotes`),
+          header: homozygotesHeader,
         }),
       ]),
     }),

@@ -106,6 +106,9 @@
     "multi_selector": {
       "clear_all": "Tout effacer"
     },
+    "my_network": {
+      "sequencing_type": "Type de séquençage"
+    },
     "note": {
       "actions": "Actions du commentaire"
     },
@@ -3028,17 +3031,29 @@
         "analysis": "Analyse",
         "global_frequencies": {
           "all_patients": "Globale",
-          "all_patients_tooltip": "Nombre et proportion de patients porteurs du variant sur l’ensemble du réseau. La fraction représente le nombre de tous les patients porteurs du variant / le nombre total de patients dans le réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
+          "all_patients_tooltip_wgs": "Nombre et proportion de patients séquencés par génome entier (WGS) porteurs du variant sur l’ensemble du réseau. La fraction représente le nombre de patients WGS porteurs du variant / le nombre total de patients WGS dans le réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
+          "all_patients_tooltip_wxs": "Nombre et proportion de patients séquencés par exome (WXS) porteurs du variant sur l’ensemble du réseau. La fraction représente le nombre de patients WXS porteurs du variant / le nombre total de patients WXS dans le réseau. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
           "affected": "Atteint",
-          "affected_tooltip": "Nombre et proportion de patients atteints par la condition principale et porteurs du variant dans le réseau. La fraction représente le nombre de patients atteints qui sont porteurs du variant / le nombre total de patients atteints. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
+          "affected_tooltip": "Nombre et proportion de patients {{sequencingType}} atteints par la condition principale et porteurs du variant dans le réseau. La fraction représente le nombre de patients {{sequencingType}} atteints porteurs du variant / le nombre total de patients {{sequencingType}} atteints. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences.",
           "non_affected": "Non atteint",
-          "non_affected_tooltip": "Nombre et proportion de patients non atteints par la condition principale et porteurs du variant dans le réseau. La fraction représente le nombre de patients non atteints qui sont porteurs du variant / le nombre total de patients non atteints. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences."
+          "non_affected_tooltip": "Nombre et proportion de patients {{sequencingType}} non atteints par la condition principale et porteurs du variant dans le réseau. La fraction représente le nombre de patients {{sequencingType}} non atteints porteurs du variant / le nombre total de patients {{sequencingType}} non atteints. Seules les occurrences rencontrant les critères Filtre = PASS et QG ≥ 20 sont considérées pour le calcul des fréquences."
         },
-        "all_patients": "Tous les patients",
-        "affected_patients": "Patients atteints",
-        "non_affected_patients": "Patients non atteints",
+        "sequencing_type": {
+          "wgs": "WGS",
+          "wgs_disabled_tooltip": "Aucun séquençage du génome entier pour ce variant dans le réseau.",
+          "wgs_tooltip": "Afficher les fréquences calculées à partir du séquençage du génome entier (WGS)",
+          "wxs": "WXS",
+          "wxs_disabled_tooltip": "Aucun séquençage de l'exome entier pour ce variant dans le réseau.",
+          "wxs_tooltip": "Afficher les fréquences calculées à partir du séquençage de l’exome (WXS)"
+        },
+        "all_patients": "Tous les patients ({{sequencingType}})",
+        "affected_patients": "Patients atteints ({{sequencingType}})",
+        "non_affected_patients": "Patients non atteints ({{sequencingType}})",
         "frequency": "Fréquence",
-        "homozygotes": "Homozygotes"
+        "frequency_tooltip_wgs": "Nombre de patients séquencés par génome entier (WGS) porteurs du variant / nombre total de patients WGS dans cette catégorie.",
+        "frequency_tooltip_wxs": "Nombre de patients séquencés par exome (WXS) porteurs du variant / nombre total de patients WXS dans cette catégorie.",
+        "homozygotes": "Homozygotes",
+        "homozygotes_tooltip": "Nombre de patients {{sequencingType}} de cette catégorie homozygotes pour l’allèle alternatif."
       },
       "public_cohorts": {
         "title": "Cohortes publiques",

@@ -168,6 +168,8 @@ export const data = {
       spliceai: 'AG',
     },
     myNetwork: {
+      sequencing_type: 'wgs',
+      disabled_sequencing_type: 'wxs',
       primary_condition_name: 'neurodevelopmental disorder',
       primary_condition_id: 'MONDO:0700092',
       freq_all: '2/3',

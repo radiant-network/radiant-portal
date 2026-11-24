@@ -106,6 +106,9 @@
     "multi_selector": {
       "clear_all": "Clear all"
     },
+    "my_network": {
+      "sequencing_type": "Sequencing type"
+    },
     "note": {
       "actions": "Comment actions"
     },
@@ -3027,17 +3030,29 @@
         "analysis": "Analysis",
         "global_frequencies": {
           "all_patients": "Global",
-          "all_patients_tooltip": "Number and proportion of patients who carry this variant across the network. The fraction represents all patients with the variant / total patients in the network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
+          "all_patients_tooltip_wgs": "Number and proportion of patients with whole genome sequencing (WGS) who carry this variant across the network. The fraction represents WGS patients with the variant / total WGS patients in the network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
+          "all_patients_tooltip_wxs": "Number and proportion of patients with whole exome sequencing (WXS) who carry this variant across the network. The fraction represents WXS patients with the variant / total WXS patients in the network. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
           "affected": "Affected",
-          "affected_tooltip": "Number and proportion of patients affected by the primary condition who carry this variant in the network. The fraction represents affected patients with the variant / total affected patients. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
+          "affected_tooltip": "Number and proportion of {{sequencingType}} patients affected by the primary condition who carry this variant in the network. The fraction represents affected {{sequencingType}} patients with the variant / total affected {{sequencingType}} patients. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation.",
           "non_affected": "Non-Affected",
-          "non_affected_tooltip": "Number and proportion of patients not affected by the primary condition who carry this variant in the network. The fraction represents non-affected patients with the variant / total non-affected patients. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation."
+          "non_affected_tooltip": "Number and proportion of {{sequencingType}} patients not affected by the primary condition who carry this variant in the network. The fraction represents non-affected {{sequencingType}} patients with the variant / total non-affected {{sequencingType}} patients. Only occurrences with Filter = PASS and GQ ≥ 20 are taken into account for frequency calculation."
         },
-        "all_patients": "All Patients",
-        "affected_patients": "Affected Patients",
-        "non_affected_patients": "Non-Affected Patients",
+        "sequencing_type": {
+          "wgs": "WGS",
+          "wgs_disabled_tooltip": "No whole genome sequencing for this variant in the network.",
+          "wgs_tooltip": "Show frequencies calculated from whole genome sequencing (WGS)",
+          "wxs": "WXS",
+          "wxs_disabled_tooltip": "No whole exome sequencing for this variant in the network.",
+          "wxs_tooltip": "Show frequencies calculated from whole exome sequencing (WXS)"
+        },
+        "all_patients": "All Patients ({{sequencingType}})",
+        "affected_patients": "Affected Patients ({{sequencingType}})",
+        "non_affected_patients": "Non-Affected Patients ({{sequencingType}})",
         "frequency": "Frequency",
-        "homozygotes": "Homozygotes"
+        "frequency_tooltip_wgs": "Number of patients with whole genome sequencing (WGS) carrying this variant / total number of WGS patients in this category.",
+        "frequency_tooltip_wxs": "Number of patients with whole exome sequencing (WXS) carrying this variant / total number of WXS patients in this category.",
+        "homozygotes": "Homozygotes",
+        "homozygotes_tooltip": "Number of {{sequencingType}} patients in this category who are homozygous for the alternate allele."
       },
       "public_cohorts": {
         "title": "Public Cohorts",
