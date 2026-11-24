@@ -68,15 +68,18 @@ type keycloakGroup struct {
 	Name string `json:"name"`
 }
 
-// UpsertUser creates or updates the user and returns the Keycloak user id — which
-// is exactly the `sub` claim of any token it later mints. Idempotent: an existing
-// user is updated in place.
+// UpsertUser creates the user if no account has this email and returns the Keycloak
+// user id — which is exactly the `sub` claim of any token it later mints. Idempotent.
 //
-// password is optional: a non-empty value is (re)set as a temporary password —
-// Keycloak adds the UPDATE_PASSWORD required action so the user must choose their
-// own password at first login. An empty value skips the password step entirely,
-// for realms that delegate authentication to an external IdP and therefore have no
-// local credential.
+// An existing account is never written to, default group aside: the realm is shared
+// by every tenant, so an update would let any caller re-enable a disabled account,
+// clear its required actions or reset its password.
+//
+// password is optional: a non-empty value is set on a new account as a temporary
+// password — Keycloak adds the UPDATE_PASSWORD required action so the user must
+// choose their own password at first login. An empty value skips the password step
+// entirely, for realms that delegate authentication to an external IdP and therefore
+// have no local credential.
 //
 // firstName/lastName are sent non-empty by callers because the Keycloak
 // user-profile feature otherwise injects a VERIFY_PROFILE required action that
@@ -87,16 +90,6 @@ func (c *KeycloakAdminClient) UpsertUser(ctx context.Context, username, email, f
 		return "", err
 	}
 
-	user := keycloakUser{
-		Username:        username,
-		Email:           email,
-		FirstName:       firstName,
-		LastName:        lastName,
-		Enabled:         true,
-		EmailVerified:   true,
-		RequiredActions: []string{},
-	}
-
 	// Match on email, not username: a pre-existing user may have been provisioned
 	// with a username that differs from its email (the realm need not enforce
 	// email-as-username), so email is the reliable identity key.
@@ -105,25 +98,7 @@ func (c *KeycloakAdminClient) UpsertUser(ctx context.Context, username, email, f
 		return "", err
 	}
 	if id == "" {
-		if err := c.createUser(ctx, token, user); err != nil {
-			return "", err
-		}
-		if id, err = c.findUserIDByEmail(ctx, token, email); err != nil {
-			return "", err
-		}
-		if id == "" {
-			return "", fmt.Errorf("user not found after create")
-		}
-	} else {
-		if err := c.updateUser(ctx, token, id, user); err != nil {
-			return "", err
-		}
-	}
-
-	// An empty password means the realm authenticates via an external IdP, so there
-	// is no local credential to set.
-	if password != "" {
-		if err := c.resetPassword(ctx, token, id, password); err != nil {
+		if id, err = c.createUserWithPassword(ctx, token, username, email, firstName, lastName, password); err != nil {
 			return "", err
 		}
 	}
@@ -200,28 +175,48 @@ func (c *KeycloakAdminClient) findUserIDByEmail(ctx context.Context, token, emai
 	return users[0].ID, nil
 }
 
-func (c *KeycloakAdminClient) createUser(ctx context.Context, token string, user keycloakUser) error {
+// createUser reports false when the account already existed (409), e.g. a concurrent create.
+func (c *KeycloakAdminClient) createUser(ctx context.Context, token string, user keycloakUser) (bool, error) {
 	endpoint := fmt.Sprintf("%s/admin/realms/%s/users", c.cfg.BaseURL, c.cfg.Realm)
 	status, body, err := c.adminRequest(ctx, http.MethodPost, endpoint, token, user)
 	if err != nil {
-		return err
+		return false, err
 	}
 	if status != http.StatusCreated && status != http.StatusConflict {
-		return fmt.Errorf("create user failed: HTTP %d: %s", status, string(body))
+		return false, fmt.Errorf("create user failed: HTTP %d: %s", status, string(body))
 	}
-	return nil
+	return status == http.StatusCreated, nil
 }
 
-func (c *KeycloakAdminClient) updateUser(ctx context.Context, token, id string, user keycloakUser) error {
-	endpoint := fmt.Sprintf("%s/admin/realms/%s/users/%s", c.cfg.BaseURL, c.cfg.Realm, id)
-	status, body, err := c.adminRequest(ctx, http.MethodPut, endpoint, token, user)
+func (c *KeycloakAdminClient) createUserWithPassword(ctx context.Context, token, username, email, firstName, lastName, password string) (string, error) {
+	user := keycloakUser{
+		Username:        username,
+		Email:           email,
+		FirstName:       firstName,
+		LastName:        lastName,
+		Enabled:         true,
+		EmailVerified:   true,
+		RequiredActions: []string{},
+	}
+	created, err := c.createUser(ctx, token, user)
 	if err != nil {
-		return err
+		return "", err
 	}
-	if status != http.StatusNoContent && status != http.StatusOK {
-		return fmt.Errorf("update user %q failed: HTTP %d: %s", id, status, string(body))
+	id, err := c.findUserIDByEmail(ctx, token, email)
+	if err != nil {
+		return "", err
 	}
-	return nil
+	if id == "" {
+		return "", fmt.Errorf("user not found after create")
+	}
+	// An empty password means the realm authenticates via an external IdP, so there
+	// is no local credential to set. A conflict means the account is someone else's.
+	if created && password != "" {
+		if err := c.resetPassword(ctx, token, id, password); err != nil {
+			return "", err
+		}
+	}
+	return id, nil
 }
 
 func (c *KeycloakAdminClient) resetPassword(ctx context.Context, token, id, password string) error {
