@@ -140,7 +140,7 @@ function PatientInformationCard({ data, ...props }: { data: CaseEntity } & Compo
     return (
       <Card data-cy="patient-information-card" {...props}>
         <CardHeader bordered>
-          <CardTitle size="xl">{t('case_entity.patient_information.title')}</CardTitle>
+          <CardTitle size="xl">{t('case_entity.patient_information.title_family')}</CardTitle>
           {headerAction}
         </CardHeader>
         <CardContent className="space-y-6">

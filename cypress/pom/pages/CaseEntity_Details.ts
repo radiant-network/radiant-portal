@@ -19,7 +19,7 @@ const tableColumns = {
   bioinformaticsCard: [
     {
       id: 'task_id',
-      name: 'Task ID',
+      name: 'Task',
       apiField: 'task_id',
       isVisibleByDefault: true,
       pinByDefault: null,
