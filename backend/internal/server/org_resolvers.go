@@ -144,14 +144,13 @@ func OrgsFromCaseBatchBody(repo caseOrgLookup) OrgResolver {
 			return nil, nil
 		}
 
-		creates := c.Request.Method == http.MethodPost
 		orgs := map[string]bool{}
 		pairs := [][2]string{}
 		seen := map[[2]string]bool{}
 		for _, record := range body.Cases {
 			if record.DiagnosticLabCode != "" {
 				orgs[record.DiagnosticLabCode] = true
-				if creates {
+				if c.Request.Method == http.MethodPost {
 					continue
 				}
 			}
