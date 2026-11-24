@@ -1721,7 +1721,7 @@
       "priority_code": "Priority",
       "project_code": "Project",
       "search_by_id": "Search by ID",
-      "search_placeholder": "Case, run, patient, or MRN",
+      "search_placeholder": "Case, patient, MRN, sample or run",
       "status_code": "Status"
     },
     "priority": {
