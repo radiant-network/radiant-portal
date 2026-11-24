@@ -222,28 +222,28 @@ const (
 
 // serveCaseBatchProbe mirrors the production wiring of the case-batch routes: the all-of gate
 // with the case-batch resolver.
-func serveCaseBatchProbe(repo *postgres.AuthRepository, userID, body string) *httptest.ResponseRecorder {
+func serveCaseBatchProbe(repo *postgres.AuthRepository, userID, method, body string) *httptest.ResponseRecorder {
 	auth := &testutils.MockAuth{Id: userID}
 
 	router := gin.New()
 	tenantRoutes := router.Group("/:tenant")
 	tenantRoutes.Use(server.RequireTenantAccess(auth, repo))
-	tenantRoutes.POST("/cases/batch",
+	tenantRoutes.Handle(method, "/cases/batch",
 		server.RequireActionAtEvery(auth, repo, types.ActionIngestData, server.OrgsFromCaseBatchBody(repo)),
 		func(c *gin.Context) { c.Status(http.StatusOK) })
 
-	req, _ := http.NewRequest("POST", "/radiant/cases/batch", strings.NewReader(body))
+	req, _ := http.NewRequest(method, "/radiant/cases/batch", strings.NewReader(body))
 	req.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	return w
 }
 
-func assertCaseBatch(t *testing.T, userID, body string, expected int) {
+func assertCaseBatch(t *testing.T, userID, method, body string, expected int) {
 	t.Helper()
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
-		assert.Equal(t, expected, serveCaseBatchProbe(repo, userID, body).Code)
+		assert.Equal(t, expected, serveCaseBatchProbe(repo, userID, method, body).Code)
 	})
 }
 
@@ -274,16 +274,16 @@ func Test_CaseBatch_IngestorAtOneLab(t *testing.T) {
 		userID := seedIngestorAt(t, env.Postgres, "CQGC")
 
 		t.Run("every record at its own lab is admitted", func(t *testing.T) {
-			assert.Equal(t, http.StatusOK, serveCaseBatchProbe(repo, userID, caseBatchAtCQGC).Code)
+			assert.Equal(t, http.StatusOK, serveCaseBatchProbe(repo, userID, http.MethodPost, caseBatchAtCQGC).Code)
 		})
 
 		t.Run("one record at another lab refuses the whole batch", func(t *testing.T) {
-			assert.Equal(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, caseBatchAtCQGCAndCHUSJ).Code,
+			assert.Equal(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, http.MethodPost, caseBatchAtCQGCAndCHUSJ).Code,
 				"the gate requires the action at EVERY lab the payload names, not any one of them")
 		})
 
 		t.Run("a record with no lab is checked against its target case's lab", func(t *testing.T) {
-			assert.Equal(t, http.StatusOK, serveCaseBatchProbe(repo, userID, casePatchWithoutLab).Code,
+			assert.Equal(t, http.StatusOK, serveCaseBatchProbe(repo, userID, http.MethodPatch, casePatchWithoutLab).Code,
 				"N1/1:1 is case 1, whose lab is CQGC")
 		})
 	})
@@ -297,39 +297,46 @@ func Test_CaseBatch_IngestorAtAnotherLab(t *testing.T) {
 		repo := postgres.NewAuthRepository(database.PostgresDB{DB: env.Postgres})
 		userID := seedIngestorAt(t, env.Postgres, "CHOP")
 
-		assert.Equal(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, caseBatchAtCQGC).Code)
-		assert.Equal(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, casePatchWithoutLab).Code,
+		assert.Equal(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, http.MethodPost, caseBatchAtCQGC).Code)
+		assert.Equal(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, http.MethodPatch, casePatchWithoutLab).Code,
 			"omitting diagnostic_lab_code falls back to the target case's lab (CQGC), it does not skip the check")
-		assert.Equal(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, caseBatchMovesCQGCCaseToCHOP).Code,
-			"stating its own lab must not let the caller take over a CQGC case")
-		assert.Equal(t, http.StatusOK, serveCaseBatchProbe(repo, userID, caseBatchNewCaseAtCHOP).Code,
+		for _, method := range []string{http.MethodPatch, http.MethodPut} {
+			assert.Equalf(t, http.StatusForbidden, serveCaseBatchProbe(repo, userID, method, caseBatchMovesCQGCCaseToCHOP).Code,
+				"%s: stating its own lab must not let the caller take over a CQGC case", method)
+		}
+		assert.Equal(t, http.StatusOK, serveCaseBatchProbe(repo, userID, http.MethodPost, caseBatchNewCaseAtCHOP).Code,
 			"a new case is checked against the lab it states only")
+		assert.Equal(t, http.StatusOK, serveCaseBatchProbe(repo, userID, http.MethodPost, caseBatchMovesCQGCCaseToCHOP).Code,
+			"a POST never writes an existing case: the worker skips it")
 
 		require.NoError(t, env.Postgres.Exec(`
 			INSERT INTO user_role (user_id, tenant_code, org_code, role_code, granted_by)
 			VALUES (?, 'radiant', 'CQGC', 'data_manager', 'seed')`, userID).Error)
-		assert.Equal(t, http.StatusOK, serveCaseBatchProbe(repo, userID, caseBatchMovesCQGCCaseToCHOP).Code,
-			"granted at both labs, the caller may move the case")
+		for _, method := range []string{http.MethodPatch, http.MethodPut} {
+			assert.Equalf(t, http.StatusOK, serveCaseBatchProbe(repo, userID, method, caseBatchMovesCQGCCaseToCHOP).Code,
+				"%s: granted at both labs, the caller may move the case", method)
+		}
 	})
 }
 
 func Test_CaseBatch_WildcardIngestorAllowed(t *testing.T) {
-	assertCaseBatch(t, gabeID, caseBatchAtCQGCAndCHUSJ, http.StatusOK)
+	assertCaseBatch(t, gabeID, http.MethodPost, caseBatchAtCQGCAndCHUSJ, http.StatusOK)
 }
 
 func Test_CaseBatch_WithoutIngestActionDenied(t *testing.T) {
-	assertCaseBatch(t, wendyID, caseBatchAtCQGC, http.StatusForbidden)
+	assertCaseBatch(t, wendyID, http.MethodPost, caseBatchAtCQGC, http.StatusForbidden)
 }
 
 func Test_CaseBatch_UnresolvableRecordsDenied(t *testing.T) {
 	for name, body := range map[string]string{
-		"unknown submitter case": casePatchUnknownCase,
-		"unknown project":        casePatchUnknownProj,
-		"no cases":               caseBatchEmpty,
-		"malformed body":         "not json",
+		"unknown submitter case":         casePatchUnknownCase,
+		"unknown project":                casePatchUnknownProj,
+		"unknown case with a stated lab": caseBatchNewCaseAtCHOP,
+		"no cases":                       caseBatchEmpty,
+		"malformed body":                 "not json",
 	} {
 		t.Run(name, func(t *testing.T) {
-			assertCaseBatch(t, gabeID, body, http.StatusForbidden)
+			assertCaseBatch(t, gabeID, http.MethodPatch, body, http.StatusForbidden)
 		})
 	}
 }
