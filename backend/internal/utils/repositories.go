@@ -61,6 +61,10 @@ func AddPagination(tx *gorm.DB, pagination *types.Pagination) {
 		return
 	}
 	l := min(pagination.Limit, MaxLimit)
+	// GORM writes no LIMIT clause for a negative value: the query would return every row.
+	if l <= 0 {
+		l = MinLimit
+	}
 	if pagination.PageIndex != 0 {
 		tx.Limit(l).Offset(pagination.PageIndex * l)
 	} else {
