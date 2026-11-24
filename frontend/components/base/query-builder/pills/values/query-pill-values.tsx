@@ -15,6 +15,7 @@ const ALL_OPERATOR = '&';
 
 export type QueryPillValuesProps = Exclude<QueryPillValuesContainerProps, 'canExpand'> & {
   sqon: IValueFacet;
+  preserveCase?: boolean;
 };
 
 /**
@@ -29,7 +30,7 @@ export type QueryPillValuesProps = Exclude<QueryPillValuesContainerProps, 'canEx
  *                         └──────────┘
  *
  */
-function QueryPillValues({ sqon, ...props }: QueryPillValuesProps) {
+function QueryPillValues({ sqon, preserveCase = false, ...props }: QueryPillValuesProps) {
   const [expanded, setExpanded] = useState(false);
   const { t, sanitize, lazyTranslate } = useI18n();
 
@@ -47,9 +48,11 @@ function QueryPillValues({ sqon, ...props }: QueryPillValuesProps) {
         values.map((val, index) => (
           <div key={`${val}-${index}`}>
             <span>
-              {t(`common.facets.values.${sqon.content.field}.${sanitize(val)}`, {
-                defaultValue: lazyTranslate(val),
-              })}
+              {preserveCase
+                ? val
+                : t(`common.facets.values.${sqon.content.field}.${sanitize(val)}`, {
+                    defaultValue: lazyTranslate(val),
+                  })}
             </span>
             {values.length - 1 > index && (
               <span className="px-1">{sqon.op === SqonOpEnum.All ? ALL_OPERATOR : UNION_OPERATOR}</span>

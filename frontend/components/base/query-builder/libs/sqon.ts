@@ -11,6 +11,8 @@ import {
 } from '@/components/base/query-builder/type';
 import { type AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 
+const SEARCH_FILTER_TYPES: FilterTypes[] = [FilterTypes.SEARCH_BY, FilterTypes.SEARCH_BY_VARIANT];
+
 export const isSet = (value: IValueFacet): boolean =>
   value.content.value && value.content.value.some(value => value?.toString().startsWith(SET_ID_PREFIX));
 
@@ -49,7 +51,7 @@ export function isSearchField(valueFacet: IValueFacet, aggregations: Aggregation
 
   // Search in all aggregation groups and items
   const allAggregations = Object.values(aggregations).flatMap(group => group.items);
-  return allAggregations.some(agg => agg.key === searchKey && agg.type === FilterTypes.SEARCH_BY);
+  return allAggregations.some(agg => agg.key === searchKey && SEARCH_FILTER_TYPES.includes(agg.type));
 }
 
 /**

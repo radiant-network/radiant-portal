@@ -1,6 +1,9 @@
 import { useCallback } from 'react';
 
-import { QBActionType, useQBDispatch } from '../hooks/use-query-builder';
+import { FilterTypes } from '@/components/cores/applications-config';
+
+import { QBActionType, useQBAggregations, useQBDispatch } from '../hooks/use-query-builder';
+import { findAggregationByField } from '../libs/aggregations';
 import type { IValueFacet } from '../type';
 
 import QueryPillContainer from './containers/query-pill-container';
@@ -22,6 +25,10 @@ type SearchPillProps = {
  */
 function SearchQueryPill({ queryId, sqon }: SearchPillProps) {
   const dispatch = useQBDispatch();
+  const aggregations = useQBAggregations();
+  const isVariantSearch =
+    findAggregationByField(aggregations, `${FilterTypes.SEARCH_BY}_${sqon.content.field}`)?.type ===
+    FilterTypes.SEARCH_BY_VARIANT;
 
   const onRemovePill = useCallback(() => {
     dispatch({
@@ -35,7 +42,7 @@ function SearchQueryPill({ queryId, sqon }: SearchPillProps) {
     <QueryPillContainer onRemovePill={onRemovePill}>
       <div className="flex gap-2">
         <LabelOperator field={sqon.content.field} operator={<Operator size={14} type={sqon.op} />} />
-        <QueryPillValues sqon={sqon} />
+        <QueryPillValues sqon={sqon} preserveCase={isVariantSearch} />
       </div>
     </QueryPillContainer>
   );

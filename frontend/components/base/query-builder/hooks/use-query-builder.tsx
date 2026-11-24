@@ -3,7 +3,7 @@ import { createContext, type Dispatch, useContext, useMemo, useReducer } from 'r
 import cloneDeep from 'lodash/cloneDeep';
 import { v4 } from 'uuid';
 
-import type { Count, CountBodyWithSqon, SortBody, Sqon, SqonContent, SqonOpEnum } from '@/api/api';
+import type { Count, CountBodyWithSqon, SortBody, Sqon, SqonContent, SqonOpEnum, VariantSearchResult } from '@/api/api';
 import type { TableProps } from '@/components/base/data-table/data-table';
 import type { AggregationConfig, IFilterRangeConfig } from '@/components/cores/applications-config';
 
@@ -80,6 +80,7 @@ export interface ICountInput {
 export interface IQBFetcher {
   list: (params: IListInput) => Promise<any[]>;
   count: (params: ICountInput) => Promise<Count>;
+  searchVariant?: (input: string) => Promise<VariantSearchResult>;
 }
 
 export interface ICombinedSqon {

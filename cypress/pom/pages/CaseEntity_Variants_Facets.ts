@@ -1159,6 +1159,26 @@ const generateFacetsActionsFunctions = (tableFacets: any[] = []) => ({
     cy.get(`${CommonSelectors.searchFacet} ${CommonSelectors.commandItem}`).contains(gene).clickAndWait({ force: true });
     cy.wait('@postListSearchBy');
   },
+  /**
+   * Submits a value in the search-by-variant input and waits for the search request.
+   * @param input The identifier to search (locus, HGVSg, dbSNP ID or ClinVar ID).
+   * @param waitForList Whether the table is re-fetched (a new variant was added to the pill).
+   */
+  searchVariant(input: string, waitForList: boolean = true) {
+    cy.intercept('POST', '**/search').as('postSearchVariant');
+    cy.intercept('POST', '**/list').as('postListSearchByVariant');
+    cy.get(`${CommonSelectors.searchByVariantFacet} ${CommonSelectors.input}`).type(`${input}{enter}`, { force: true });
+    cy.wait('@postSearchVariant');
+    if (waitForList) {
+      cy.wait('@postListSearchByVariant');
+    }
+  },
+  /**
+   * Closes the dialog opened by a search-by-variant submit (not found or invalid format).
+   */
+  closeSearchByVariantDialog() {
+    cy.get(CommonSelectors.searchByVariantDialogClose).click({ force: true });
+  },
 });
 
 const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSectionAction: (section: string) => void) => ({
@@ -1267,6 +1287,55 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
       'Gene Symbol',
       genes.map(gene => gene.toLowerCase())
     );
+  },
+  /**
+   * Validates that the active query holds one `hgvsg` (Variant ID) pill with each variant exactly once.
+   * @param variants The HGVSg expected in the pill, with their exact case.
+   */
+  shouldHaveVariantIdPill(variants: string[]) {
+    cy.validatePillSelectedQuery(buildBilingualRegExp('variantIdPill'), variants);
+    cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.queryPill}`)
+      .eq(0)
+      .invoke('text')
+      .then(text => {
+        variants.forEach(variant => {
+          expect(text.split(variant).length - 1).to.eq(1);
+        });
+      });
+  },
+  /**
+   * Validates that the active query holds no pill.
+   */
+  shouldNotHaveAnyPill() {
+    cy.validatePillSelectedQuery('', []);
+  },
+  /**
+   * Validates that clicking the Variant ID pill opens no editor dropdown.
+   */
+  shouldNotOpenVariantIdPillDropdown() {
+    cy.get(`${CommonSelectors.queryActive} ${CommonSelectors.queryPill}`).eq(0).click({ force: true });
+    cy.get(CommonSelectors.queryPillEditor).should('not.exist');
+  },
+  /**
+   * Validates the dialog opened by a search-by-variant submit.
+   * @param kind 'notFound' for a value absent from the run, 'invalid' for an unrecognized format.
+   */
+  shouldShowSearchByVariantDialog(kind: 'notFound' | 'invalid') {
+    const titleKey = kind === 'notFound' ? 'searchByVariantNotFoundTitle' : 'searchByVariantInvalidTitle';
+    cy.get(CommonSelectors.alert).contains(buildBilingualRegExp(titleKey)).should('exist');
+  },
+  /**
+   * Validates the screen-reader-only confirmation announced after a search-by-variant submit.
+   * @param text A text expected in the announcement (e.g., the HGVSg added to the pill).
+   */
+  shouldAnnounceSearchByVariantMessage(text: string) {
+    cy.get(CommonSelectors.searchByVariantMessage).should('contain', text).and('have.class', 'sr-only');
+  },
+  /**
+   * Validates that the search-by-variant input is empty and focused after a submit.
+   */
+  shouldSearchByVariantInputBeClearedAndFocused() {
+    cy.get(`${CommonSelectors.searchByVariantFacet} ${CommonSelectors.input}`).should('have.value', '').and('have.focus');
   },
   /**
    * Validates that facets display tooltips when expected.
@@ -1441,10 +1510,11 @@ const generateFacetsValidationsFunctions = (tableFacets: any[], clickSidebarSect
   /**
    * SEARCH_BY facet: validates that the search facet displays its tooltip on hover.
    * @param field The search facet field key (default: 'symbol' for `search_by_symbol`).
+   * @param textKey The CommonTexts key of the expected tooltip (default: the gene search tooltip).
    */
-  shouldSearchByHaveTooltip(field: string = 'symbol') {
+  shouldSearchByHaveTooltip(field: string = 'symbol', textKey: string = 'searchByGeneTooltip') {
     cy.get(CommonSelectors.searchFacetTooltip(field)).realHover();
-    cy.get(CommonSelectors.searchFacetTooltipContent(field)).contains(buildBilingualRegExp('searchByGeneTooltip')).should('exist');
+    cy.get(CommonSelectors.searchFacetTooltipContent(field)).contains(buildBilingualRegExp(textKey)).should('exist');
   },
   /**
    * Validates that all facets in a section are displayed in the correct order.

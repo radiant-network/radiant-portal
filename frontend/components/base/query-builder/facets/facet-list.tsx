@@ -7,7 +7,14 @@ import { Button } from '@/components/base/shadcn/button';
 import { type AggregationConfig, FilterTypes } from '@/components/cores/applications-config';
 import { useI18n } from '@/components/hooks/i18n';
 
+import SearchByVariantFacet from './search-by-variant-facet';
 import UploadIdModal from './upload-id-facet';
+
+const NON_FACET_FILTER_TYPES: FilterTypes[] = [
+  FilterTypes.SEARCH_BY,
+  FilterTypes.SEARCH_BY_VARIANT,
+  FilterTypes.UPLOAD_LIST,
+];
 
 /**
  * Create facets
@@ -28,8 +35,9 @@ export function FacetList({ groupKey, aggregations, defaultExpanded = false }: F
 
   // Separate search by filters from other filters
   const searchByFilters = allFields.filter(item => item.type === FilterTypes.SEARCH_BY);
+  const searchByVariantFilters = allFields.filter(item => item.type === FilterTypes.SEARCH_BY_VARIANT);
   const uploadListFilters = allFields.filter(item => item.type === FilterTypes.UPLOAD_LIST);
-  const fields = allFields.filter(item => item.type !== FilterTypes.SEARCH_BY && item.type !== FilterTypes.UPLOAD_LIST);
+  const fields = allFields.filter(item => !NON_FACET_FILTER_TYPES.includes(item.type));
 
   const [toggleExpandAll, setToggleExpandAll] = useState<boolean>(defaultExpanded);
   const [expandedFacets, setExpandedFacets] = useState<string[]>(defaultExpanded ? fields.map(field => field.key) : []);
@@ -48,10 +56,13 @@ export function FacetList({ groupKey, aggregations, defaultExpanded = false }: F
 
   return (
     <div>
-      {(searchByFilters.length > 0 || uploadListFilters.length > 0) && (
+      {(searchByFilters.length > 0 || searchByVariantFilters.length > 0 || uploadListFilters.length > 0) && (
         <div className="flex flex-col gap-3 mb-3">
           {searchByFilters.map((search, index) => (
             <SearchFacet key={`${search.key}-${index}`} search={search} />
+          ))}
+          {searchByVariantFilters.map((search, index) => (
+            <SearchByVariantFacet key={`${search.key}-${index}`} search={search} />
           ))}
           {uploadListFilters.map((uploadList, index) => (
             <UploadIdModal key={`${uploadList.key}-${index}`} variant={uploadList.key.replace(/upload_list_/g, '')} />
