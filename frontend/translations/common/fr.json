@@ -1725,7 +1725,7 @@
       "priority_code": "Priorité",
       "project_code": "Projet",
       "search_by_id": "Recherche par ID",
-      "search_placeholder": "Cas, lot, patient ou MRN",
+      "search_placeholder": "Cas, patient, MRN, échantillon, ou lot",
       "status_code": "Statut"
     },
     "priority": {
