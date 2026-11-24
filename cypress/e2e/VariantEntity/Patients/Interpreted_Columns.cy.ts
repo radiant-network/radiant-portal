@@ -6,11 +6,6 @@ import { VariantEntity_Patients } from 'pom/pages/VariantEntity_Patients';
 
 // The tests share one page: each one restores what it changes.
 describe('VariantEntity - Patients - Interpreted - Columns', { testIsolation: false }, () => {
-  // Cypress drops the intercepts before each test: keep the default table preferences on every test.
-  beforeEach(() => {
-    cy.resetTablePreferences();
-  });
-
   setupOnce(() => {
     cy.login();
     cy.visitVariantPatientsPage(data.variantGermline.locus_id);

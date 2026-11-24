@@ -8,7 +8,6 @@ import { VariantEntity_Patients } from 'pom/pages/VariantEntity_Patients';
 describe('VariantEntity - Patients - Interpreted - Information displayed', { testIsolation: false }, () => {
   setupOnce(() => {
     cy.login();
-    cy.resetTablePreferences();
     cy.visitVariantPatientsPage(data.variantGermline.locus_id);
     VariantEntity_Patients.interpreted.actions.showAllColumns();
   });

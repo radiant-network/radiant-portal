@@ -9,7 +9,6 @@ import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_
 describe('Case Entity - Variants - Germline - CNV - Table - Information displayed', { testIsolation: false }, () => {
   setupOnce(() => {
     cy.login();
-    cy.resetTablePreferences();
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'CNV', data.cnvGermline.sqon);
     CaseEntity_Variants_SavedFilters.cnv.actions.selectFilterInDropdown('Cypress_All_Variants'); // Clean Query Builder
     CaseEntity_Variants_CNV_Table.actions.showAllColumns();

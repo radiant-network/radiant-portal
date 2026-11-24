@@ -6,11 +6,6 @@ import { data } from 'pom/shared/Data';
 
 // The tests share one page: each one restores what it changes.
 describe('CaseEntity - Details - Bioinformatics - Columns', { testIsolation: false }, () => {
-  // Cypress drops the intercepts before each test: keep the default table preferences on every test.
-  beforeEach(() => {
-    cy.resetTablePreferences();
-  });
-
   setupOnce(() => {
     cy.login();
     cy.visitCaseDetailsPage(data.case.case);
