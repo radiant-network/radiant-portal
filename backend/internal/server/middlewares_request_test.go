@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/radiant-network/radiant-api/internal/observability"
+	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -144,4 +145,30 @@ func Test_RequestLogger_StillLogsFailingProbePath(t *testing.T) {
 	require.NoError(t, json.Unmarshal(buf.Bytes(), &line))
 	assert.Equal(t, "/status", line["path"])
 	assert.Equal(t, float64(http.StatusServiceUnavailable), line["status"], "failing /status must stay visible")
+}
+
+func serveLocale(acceptLanguage string) (types.Locale, *httptest.ResponseRecorder) {
+	var bound types.Locale
+	r := gin.New()
+	r.Use(func(c *gin.Context) { c.Header("Vary", "Accept-Encoding") }, Locale())
+	r.GET("/", func(c *gin.Context) {
+		bound = types.LocaleFromContext(c.Request.Context())
+		c.Status(http.StatusOK)
+	})
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("Accept-Language", acceptLanguage)
+	r.ServeHTTP(w, req)
+	return bound, w
+}
+
+func Test_Locale_French_BindsFr(t *testing.T) {
+	bound, _ := serveLocale("fr")
+	assert.Equal(t, types.LocaleFr, bound)
+}
+
+func Test_Locale_AddsVaryAfterEarlierOnes(t *testing.T) {
+	_, w := serveLocale("fr")
+	assert.Equal(t, []string{"Accept-Encoding", "Accept-Language"}, w.Header().Values("Vary"))
 }

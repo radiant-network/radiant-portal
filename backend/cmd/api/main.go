@@ -139,7 +139,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	// Private routes, alphabetically ordered
 	// Use privateRoutes instead of `r` for all private routes to automatically apply the auth middleware
 	privateRoutes := r.Group("/")
-	privateRoutes.Use(authMiddleware)
+	privateRoutes.Use(authMiddleware, server.Locale())
 
 	// Global routes (not tenant-scoped) stay on privateRoutes: /auth/*, /users/*,
 	// /value_sets/:type (instance-wide reference value sets, e.g. organization_category).
