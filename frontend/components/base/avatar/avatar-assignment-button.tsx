@@ -20,10 +20,9 @@ export function AvatarAssignmentButton({
   const isSecondary = buttonVariant === 'secondary';
   const iconSize = getIconSize(size);
 
-  const cannotAssignKey = isSecondary
-    ? 'common.unassigned_avatar.unassigned'
-    : 'common.unassigned_avatar.cannot_assign';
-  const tooltipContent = canAssign ? t('common.unassigned_avatar.can_assign') : t(cannotAssignKey);
+  const tooltipContent = canAssign
+    ? t('common.unassigned_avatar.can_assign')
+    : t('common.unassigned_avatar.unassigned');
 
   const enabledClass = isSecondary ? 'hover:bg-secondary/80' : 'hover:bg-accent';
   const disabledClass = 'cursor-default';
