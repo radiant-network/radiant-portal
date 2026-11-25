@@ -311,6 +311,10 @@ function reduceQB(context: IQBContext, action: ActionType) {
         combinedQueries[key] = combinedQueries[key].filter(id => id != action.payload.id);
       });
 
+      const referencingIds = sqons
+        .filter(sqon => sqon.content.some(content => (content as IValueFacet).id === action.payload.id))
+        .map(sqon => sqon.id);
+
       sqons = sqons.map(sqon => ({
         ...sqon,
         content: sqon.content.filter(content => (content as IValueFacet).id !== action.payload.id),
@@ -318,7 +322,7 @@ function reduceQB(context: IQBContext, action: ActionType) {
 
       // a combined query left without any reference is removed
       const emptiedCombinedIds = sqons
-        .filter(sqon => combinedQueries[sqon.id] && isSqonEmpty(sqon))
+        .filter(sqon => referencingIds.includes(sqon.id) && isSqonEmpty(sqon))
         .map(sqon => sqon.id);
       emptiedCombinedIds.forEach(id => delete combinedQueries[id]);
       sqons = sqons.filter(sqon => !emptiedCombinedIds.includes(sqon.id));
