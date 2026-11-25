@@ -87,9 +87,7 @@ Everytime the backend API model changes, the API clients need to be regenerated.
 
 ## 1. Install the OpenAPI Generator CLI
 
-To install the CLI: https://github.com/OpenAPITools/openapi-generator?tab=readme-ov-file#1---installation
-
-(If the `openapi-generator-cli version` doesn't match the current version used by the repo, you can set it manually using `openapi-generator-cli version-manager set <version>`.)
+Run `npm ci` at the root of the repo. The CLI is a dev dependency, and `openapitools.json` pins the generator version. It needs Java.
 
 ## 2. Generating clients
 

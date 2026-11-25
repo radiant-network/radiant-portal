@@ -14,6 +14,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.43.0",
     "@types/dotenv": "^6.1.1",
     "@types/node": "^26.6.5",
     "cypress-real-events": "^1.15.0",

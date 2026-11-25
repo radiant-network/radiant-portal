@@ -115,7 +115,7 @@ make generate-client-typescript   # regenerates frontend/api/
 make generate-client-python       # regenerates cli/python/
 ```
 
-Requires `openapi-generator-cli` installed globally (see root `Makefile`).
+Requires Java and `npm ci` at the repo root (see root `Makefile`).
 
 Verify the diff in `frontend/api/api.ts` includes the new method and response type. Do not edit these files by hand.
 

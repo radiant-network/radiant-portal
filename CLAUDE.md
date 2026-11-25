@@ -39,7 +39,7 @@ make generate-client-python       # Regenerates cli/python/
 make generate-client-all          # Both
 ```
 
-Requires `openapi-generator-cli` installed globally.
+Requires Java and `npm ci` at the repo root: the generator is a dev dependency, its version pinned in `openapitools.json`.
 
 ### Code Formatting
 

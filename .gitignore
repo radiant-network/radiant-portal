@@ -54,6 +54,7 @@ bin/
 test.http
 /http-client.private.env.json
 openapitools.json
+!/openapitools.json
 
 **/api/git_push.sh
 
