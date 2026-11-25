@@ -845,12 +845,6 @@ func Test_SomaticCNV_DefaultFields_Exclude_GnomadAF_And_AC(t *testing.T) {
 	assert.NotContains(t, names, "gnomad_ac")
 }
 
-func somaticCNVTaskIDs(tasks []types.TaskOccurrenceType) []int {
-	return sliceutils.Map(tasks, func(task types.TaskOccurrenceType, index int, slice []types.TaskOccurrenceType) int {
-		return task.ID
-	})
-}
-
 func Test_SomaticCNV_ListTasks_CallingTaskWithRows_Listed(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
@@ -874,6 +868,6 @@ func Test_SomaticCNV_ListTasks_CallingTaskWithNoRows_ReturnsEmpty(t *testing.T) 
 		tasks, err := repo.ListTasks(t.Context(), 71, 73)
 
 		require.NoError(t, err)
-		assert.Empty(t, somaticCNVTaskIDs(tasks))
+		assert.Empty(t, tasks)
 	})
 }
