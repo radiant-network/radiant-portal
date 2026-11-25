@@ -86,13 +86,13 @@
               ]
             },
             "url": {
-              "raw": "{{keycloak-url}}/realms/qlin/protocol/openid-connect/token",
+              "raw": "{{keycloak-url}}/realms/{{keycloak-realm}}/protocol/openid-connect/token",
               "host": [
                 "{{keycloak-url}}"
               ],
               "path": [
                 "realms",
-                "qlin",
+                "{{keycloak-realm}}",
                 "protocol",
                 "openid-connect",
                 "token"
@@ -143,13 +143,13 @@
               ]
             },
             "url": {
-              "raw": "{{keycloak-url}}/realms/qlin/protocol/openid-connect/token",
+              "raw": "{{keycloak-url}}/realms/{{keycloak-realm}}/protocol/openid-connect/token",
               "host": [
                 "{{keycloak-url}}"
               ],
               "path": [
                 "realms",
-                "qlin",
+                "{{keycloak-realm}}",
                 "protocol",
                 "openid-connect",
                 "token"
@@ -2017,7 +2017,12 @@
               ]
             },
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Accept-Language",
+                "value": "{{accept-language}}"
+              }
+            ],
             "url": {
               "raw": "{{radiant-api-url}}/{{tenant}}/cases/1",
               "host": [
