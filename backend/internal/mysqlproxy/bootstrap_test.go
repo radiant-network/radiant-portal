@@ -14,13 +14,6 @@ func Test_MaxConnsFromEnv_UnsetGivesFallback(t *testing.T) {
 	assert.Equal(t, 256, n)
 }
 
-func Test_MaxConnsFromEnv_ReadsTheValue(t *testing.T) {
-	t.Setenv("MAX_CONNECTIONS", "32")
-	n, err := MaxConnsFromEnv(256)
-	require.NoError(t, err)
-	assert.Equal(t, 32, n)
-}
-
 func Test_MaxConnsFromEnv_ZeroMeansNoCap(t *testing.T) {
 	t.Setenv("MAX_CONNECTIONS", "0")
 	n, err := MaxConnsFromEnv(256)

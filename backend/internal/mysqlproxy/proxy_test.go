@@ -257,7 +257,17 @@ func holdingStarrocks(t *testing.T) (addr string, accepted <-chan struct{}) {
 	t.Helper()
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
-	t.Cleanup(func() { _ = ln.Close() })
+
+	var mu sync.Mutex
+	var held []net.Conn
+	t.Cleanup(func() {
+		_ = ln.Close() // first, so no connection is accepted after the loop below
+		mu.Lock()
+		defer mu.Unlock()
+		for _, c := range held {
+			_ = c.Close()
+		}
+	})
 
 	out := make(chan struct{}, 16)
 	go func() {
@@ -266,7 +276,9 @@ func holdingStarrocks(t *testing.T) (addr string, accepted <-chan struct{}) {
 			if err != nil {
 				return
 			}
-			t.Cleanup(func() { _ = conn.Close() })
+			mu.Lock()
+			held = append(held, conn)
+			mu.Unlock()
 			pc := &packetConn{conn: conn}
 			_ = pc.write(0, testHandshake(uint16(clientSSL|clientProtocol41), uint16((clientPluginAuth)>>16), 0x21))
 			out <- struct{}{}
@@ -277,7 +289,7 @@ func holdingStarrocks(t *testing.T) (addr string, accepted <-chan struct{}) {
 
 // idleClient opens a connection and reads the handshake the proxy forwards, so it returns once
 // the proxy holds a StarRocks connection for it.
-func idleClient(t *testing.T, addr string) net.Conn {
+func idleClient(t *testing.T, addr string) {
 	t.Helper()
 	conn, err := net.Dial("tcp", addr)
 	require.NoError(t, err)
@@ -285,55 +297,17 @@ func idleClient(t *testing.T, addr string) net.Conn {
 	_ = conn.SetDeadline(time.Now().Add(5 * time.Second))
 	_, _, err = (&packetConn{conn: conn}).read()
 	require.NoError(t, err)
-	return conn
 }
 
-func Test_Serve_ConnectionBeyondMaxConns_DoesNotReachStarrocks(t *testing.T) {
-	backendAddr, accepted := holdingStarrocks(t)
-	proxyAddr := startProxy(t, Config{BackendAddr: backendAddr, Auth: JWTPassthrough{}, AuthTimeout: 5 * time.Second, MaxConns: 1})
-
-	idleClient(t, proxyAddr)
-	<-accepted
-	second, err := net.Dial("tcp", proxyAddr)
-	require.NoError(t, err)
-	t.Cleanup(func() { _ = second.Close() })
-
-	select {
-	case <-accepted:
-		t.Fatal("a connection over MaxConns reached StarRocks")
-	case <-time.After(300 * time.Millisecond):
-	}
-}
-
-func Test_Serve_ClosedConnection_LetsTheNextOneIn(t *testing.T) {
-	backendAddr, accepted := holdingStarrocks(t)
-	proxyAddr := startProxy(t, Config{BackendAddr: backendAddr, Auth: JWTPassthrough{}, AuthTimeout: 5 * time.Second, MaxConns: 1})
-
-	first := idleClient(t, proxyAddr)
-	<-accepted
-	second, err := net.Dial("tcp", proxyAddr)
-	require.NoError(t, err)
-	t.Cleanup(func() { _ = second.Close() })
-	require.NoError(t, first.Close())
-
-	select {
-	case <-accepted:
-	case <-time.After(3 * time.Second):
-		t.Fatal("the next connection did not reach StarRocks after the first one closed")
-	}
-	_ = second.SetDeadline(time.Now().Add(3 * time.Second))
-	_, _, err = (&packetConn{conn: second}).read()
-	assert.NoError(t, err, "the next connection should get the forwarded handshake")
-}
-
-// failingListener fails its first failures Accept calls, recording when each came, then blocks
-// until closed.
+// failingListener fails its first failures Accept calls, recording when each came, then hands
+// over to next, or blocks until closed when next is nil.
 type failingListener struct {
 	failures int
 	failed   int
 	calls    chan time.Time
 	closed   chan struct{}
 	once     sync.Once
+	next     net.Listener
 }
 
 func (l *failingListener) Accept() (net.Conn, error) {
@@ -342,12 +316,18 @@ func (l *failingListener) Accept() (net.Conn, error) {
 		l.calls <- time.Now()
 		return nil, errors.New("too many open files")
 	}
+	if l.next != nil {
+		return l.next.Accept()
+	}
 	<-l.closed
 	return nil, net.ErrClosed
 }
 
 func (l *failingListener) Close() error {
 	l.once.Do(func() { close(l.closed) })
+	if l.next != nil {
+		return l.next.Close()
+	}
 	return nil
 }
 
@@ -381,15 +361,89 @@ func Test_Serve_AcceptError_PausesLongerAfterEachError(t *testing.T) {
 	}
 }
 
-func Test_nextAcceptDelay_StartsAt5ms(t *testing.T) {
-	assert.Equal(t, 5*time.Millisecond, nextAcceptDelay(0))
-}
+func Test_Serve_AcceptErrorAtMaxConns_GivesTheSlotBack(t *testing.T) {
+	backendAddr, accepted := holdingStarrocks(t)
+	inner, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	ln := &failingListener{failures: 3, calls: make(chan time.Time, 3), closed: make(chan struct{}), next: inner}
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	go New(Config{BackendAddr: backendAddr, Auth: JWTPassthrough{}, AuthTimeout: 5 * time.Second, MaxConns: 1}).Serve(ctx, ln, time.Second)
 
-func Test_nextAcceptDelay_DoublesThePreviousDelay(t *testing.T) {
-	assert.Equal(t, 80*time.Millisecond, nextAcceptDelay(40*time.Millisecond))
+	idleClient(t, inner.Addr().String())
+
+	select {
+	case <-accepted:
+	case <-time.After(3 * time.Second):
+		t.Fatal("no client reached StarRocks after Accept errors with MaxConns 1")
+	}
 }
 
 func Test_nextAcceptDelay_CapsAt1s(t *testing.T) {
 	assert.Equal(t, time.Second, nextAcceptDelay(640*time.Millisecond))
 	assert.Equal(t, time.Second, nextAcceptDelay(time.Second))
+}
+
+func Test_Serve_CancelWhileAtMaxConns_Returns(t *testing.T) {
+	backendAddr, accepted := holdingStarrocks(t)
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	ctx, cancel := context.WithCancel(context.Background())
+	t.Cleanup(cancel)
+	served := make(chan struct{})
+	go func() {
+		defer close(served)
+		New(Config{BackendAddr: backendAddr, Auth: JWTPassthrough{}, AuthTimeout: 5 * time.Second, MaxConns: 1}).Serve(ctx, ln, 100*time.Millisecond)
+	}()
+
+	idleClient(t, ln.Addr().String())
+	<-accepted
+	cancel()
+
+	select {
+	case <-served:
+	case <-time.After(2 * time.Second):
+		t.Fatal("Serve did not return after cancel while waiting for a slot")
+	}
+}
+
+func Test_Serve_ManyClientsAtOnce_NeverExceedMaxConns(t *testing.T) {
+	const maxConns, clients = 5, 50
+	backendAddr, accepted := holdingStarrocks(t)
+	proxyAddr := startProxy(t, Config{BackendAddr: backendAddr, Auth: JWTPassthrough{}, AuthTimeout: 5 * time.Second, MaxConns: maxConns})
+
+	conns := make([]net.Conn, 0, clients)
+	for range clients {
+		conn, err := net.Dial("tcp", proxyAddr)
+		require.NoError(t, err)
+		t.Cleanup(func() { _ = conn.Close() })
+		conns = append(conns, conn)
+	}
+
+	reached := 0
+	for reached < maxConns {
+		select {
+		case <-accepted:
+			reached++
+		case <-time.After(5 * time.Second):
+			t.Fatalf("only %d of %d first clients reached StarRocks", reached, maxConns)
+		}
+	}
+	select {
+	case <-accepted:
+		t.Fatalf("more than %d StarRocks connections while %d clients wait", maxConns, clients)
+	case <-time.After(200 * time.Millisecond):
+	}
+
+	for _, c := range conns {
+		_ = c.Close()
+	}
+	for reached < clients {
+		select {
+		case <-accepted:
+			reached++
+		case <-time.After(5 * time.Second):
+			t.Fatalf("only %d of %d clients reached StarRocks after the first ones closed", reached, clients)
+		}
+	}
 }

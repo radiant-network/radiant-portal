@@ -291,8 +291,9 @@ func (p *Proxy) Serve(ctx context.Context, ln net.Listener, drain time.Duration)
 	}
 }
 
-// nextAcceptDelay is the pause after an Accept error, as net/http does: an error such as
-// running out of file descriptors would otherwise spin the loop on one core.
+// nextAcceptDelay is the pause after an Accept error, doubled each time up to maxAcceptDelay as
+// net/http does: a brief error is retried almost at once, while a lasting one, such as running
+// out of file descriptors, is retried once a second instead of spinning the loop on one core.
 func nextAcceptDelay(previous time.Duration) time.Duration {
 	if previous == 0 {
 		return minAcceptDelay
