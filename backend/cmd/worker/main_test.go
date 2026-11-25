@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 	"time"
@@ -78,9 +79,20 @@ func Test_StartHealthProbe_ShutsDownOnContextCancel(t *testing.T) {
 	waitWithTimeout(t, &wg, 5*time.Second, "health probe")
 }
 
-// Test_processBatch_RequeuesInflightBatchOnCancel verifies the JIRA acceptance criterion: when the
-// shutdown context is cancelled while a batch is in flight, the claimed batch is released back to
-// PENDING (started_on cleared) and nothing is persisted, so it can be reprocessed cleanly.
+// cancellingValueSets simulates a shutdown in the middle of validation: it cancels the worker's
+// context and fails with a driver-like error that does not wrap context.Canceled.
+type cancellingValueSets struct {
+	cancel context.CancelFunc
+}
+
+func (f cancellingValueSets) GetCodes(context.Context, postgres.ValueSetType) ([]string, error) {
+	f.cancel()
+	return nil, errors.New("driver: bad connection")
+}
+func (cancellingValueSets) GetExamCodes(context.Context, string) ([]string, error) {
+	return nil, nil
+}
+
 func Test_processBatch_RequeuesInflightBatchOnCancel(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		db := env.Postgres
@@ -97,18 +109,21 @@ func Test_processBatch_RequeuesInflightBatchOnCancel(t *testing.T) {
 			t.Fatal("failed to insert batch:", insertErr)
 		}
 
-		// Context already cancelled: the batch is claimed (→ RUNNING) then the processor aborts at
-		// the first validation checkpoint and returns context.Canceled, triggering the requeue.
 		ctx, cancel := context.WithCancel(context.Background())
-		cancel()
+		defer cancel()
 
-		bv := &batchval.BatchValidationContext{BatchRepo: postgres.NewBatchRepository(database.PostgresDB{DB: db})}
+		bv := &batchval.BatchValidationContext{
+			BatchRepo:     postgres.NewBatchRepository(database.PostgresDB{DB: db}),
+			ValueSetsRepo: cancellingValueSets{cancel: cancel},
+		}
 		processBatch(ctx, db, bv)
+		assert.Error(t, ctx.Err(), "the context must be cancelled during processing, after the claim")
 
 		result := types.Batch{}
 		db.Table("batch").Where("id = ?", id).Scan(&result)
 		assert.Equal(t, types.BatchStatusPending, result.Status)
 		assert.Nil(t, result.StartedOn)
+		assert.Nil(t, result.FinishedOn)
 
 		var patientCount int64
 		db.Table("patient").Where("submitter_patient_id = ?", "REQUEUE-1").Count(&patientCount)

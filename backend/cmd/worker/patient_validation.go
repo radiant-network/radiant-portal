@@ -152,7 +152,7 @@ func (r *PatientValidationRecord) validateExistingPatientForUpdate(existingPatie
 func (r *PatientValidationRecord) validateLifeStatusCode(ctx context.Context) error {
 	codes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetLifeStatus)
 	if err != nil {
-		return fmt.Errorf("error getting life status codes: %v", err)
+		return fmt.Errorf("error getting life status codes: %w", err)
 	}
 	r.ValidateCode(r.GetResourceType(), r.getFormattedPath("life_status_code"), "life_status_code", PatientInvalidValueCode, r.Patient.LifeStatusCode, codes, r.getUniqueIds(), true)
 	return nil
@@ -193,7 +193,7 @@ func processCreatePatientBatch(ctx context.Context, bv *batchval.BatchValidation
 	var patients []types.PatientBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &patients); unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling patient batch: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling patient batch: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -202,7 +202,7 @@ func processCreatePatientBatch(ctx context.Context, bv *batchval.BatchValidation
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error patient batch validation: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error patient batch validation: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -212,7 +212,7 @@ func processCreatePatientBatch(ctx context.Context, bv *batchval.BatchValidation
 		if errors.Is(err, context.Canceled) {
 			return err
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing patient batch records: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing patient batch records: %w", err), bv.BatchRepo)
 		return nil
 	}
 	return nil
@@ -233,7 +233,7 @@ func persistBatchAndPatientRecords(ctx context.Context, db *gorm.DB, batch *type
 		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
 			err := insertPatientRecords(ctx, records, txRepoPatient, batch.TenantCode)
 			if err != nil {
-				return fmt.Errorf("error during patient insertion %v", err)
+				return fmt.Errorf("error during patient insertion %w", err)
 			}
 		}
 		return nil
@@ -280,7 +280,7 @@ func validatePatientsBatch(ctx context.Context, bv *batchval.BatchValidationCont
 		}
 		record, err := validatePatientRecord(ctx, bv, cache, patient, index, seenPatients, tenantCode)
 		if err != nil {
-			return nil, fmt.Errorf("error during patient validation: %v", err)
+			return nil, fmt.Errorf("error during patient validation: %w", err)
 		}
 		records = append(records, record)
 	}
@@ -305,10 +305,10 @@ func validatePatientRecord(ctx context.Context, bv *batchval.BatchValidationCont
 	record.validateDateOfBirth()
 
 	if err := record.validateLifeStatusCode(ctx); err != nil {
-		return nil, fmt.Errorf("error validating life status code: %v", err)
+		return nil, fmt.Errorf("error validating life status code: %w", err)
 	}
 	if err := record.validateSexCode(ctx); err != nil {
-		return nil, fmt.Errorf("error validating sex code: %v", err)
+		return nil, fmt.Errorf("error validating sex code: %w", err)
 	}
 
 	batchval.ValidateUniquenessInBatch(record,
@@ -324,14 +324,14 @@ func validatePatientRecord(ctx context.Context, bv *batchval.BatchValidationCont
 
 	organization, orgErr := bv.OrgRepo.GetOrganizationByCode(ctx, patient.PatientOrganizationCode, tenantCode)
 	if orgErr != nil {
-		return nil, fmt.Errorf("error getting existing organization: %v", orgErr)
+		return nil, fmt.Errorf("error getting existing organization: %w", orgErr)
 	} else {
 		record.validateOrganization(organization)
 	}
 	if organization != nil {
 		existingPatient, patientErr := bv.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(ctx, organization.Code, patient.SubmitterPatientId.String(), tenantCode)
 		if patientErr != nil {
-			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
+			return nil, fmt.Errorf("error getting existing patient: %w", patientErr)
 		} else {
 			record.validateExistingPatient(existingPatient)
 		}
@@ -344,7 +344,7 @@ func processUpdatePatientBatch(ctx context.Context, bv *batchval.BatchValidation
 	var patients []types.PatientBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &patients); unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling update patient batch: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling update patient batch: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -353,7 +353,7 @@ func processUpdatePatientBatch(ctx context.Context, bv *batchval.BatchValidation
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error update patient batch validation: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error update patient batch validation: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -363,7 +363,7 @@ func processUpdatePatientBatch(ctx context.Context, bv *batchval.BatchValidation
 		if errors.Is(err, context.Canceled) {
 			return err
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing update patient batch records: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing update patient batch records: %w", err), bv.BatchRepo)
 		return nil
 	}
 	return nil
@@ -383,7 +383,7 @@ func persistBatchAndUpdatePatientRecords(ctx context.Context, db *gorm.DB, batch
 		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
 			err := updatePatientRecords(ctx, records, txRepoPatient, batch.TenantCode)
 			if err != nil {
-				return fmt.Errorf("error during patient update %v", err)
+				return fmt.Errorf("error during patient update %w", err)
 			}
 		}
 		return nil
@@ -430,7 +430,7 @@ func validateUpdatePatientsBatch(ctx context.Context, bv *batchval.BatchValidati
 		}
 		record, err := validateUpdatePatientRecord(ctx, bv, cache, patient, index, seenPatients, tenantCode)
 		if err != nil {
-			return nil, fmt.Errorf("error during update patient validation: %v", err)
+			return nil, fmt.Errorf("error during update patient validation: %w", err)
 		}
 		records = append(records, record)
 	}
@@ -455,10 +455,10 @@ func validateUpdatePatientRecord(ctx context.Context, bv *batchval.BatchValidati
 	record.validateDateOfBirth()
 
 	if err := record.validateLifeStatusCode(ctx); err != nil {
-		return nil, fmt.Errorf("error validating life status code: %v", err)
+		return nil, fmt.Errorf("error validating life status code: %w", err)
 	}
 	if err := record.validateSexCode(ctx); err != nil {
-		return nil, fmt.Errorf("error validating sex code: %v", err)
+		return nil, fmt.Errorf("error validating sex code: %w", err)
 	}
 
 	batchval.ValidateUniquenessInBatch(record,
@@ -474,14 +474,14 @@ func validateUpdatePatientRecord(ctx context.Context, bv *batchval.BatchValidati
 
 	organization, orgErr := bv.OrgRepo.GetOrganizationByCode(ctx, patient.PatientOrganizationCode, tenantCode)
 	if orgErr != nil {
-		return nil, fmt.Errorf("error getting existing organization: %v", orgErr)
+		return nil, fmt.Errorf("error getting existing organization: %w", orgErr)
 	} else {
 		record.validateOrganization(organization)
 	}
 	if organization != nil {
 		existingPatient, patientErr := bv.PatientRepo.GetPatientByOrgCodeAndSubmitterPatientId(ctx, organization.Code, patient.SubmitterPatientId.String(), tenantCode)
 		if patientErr != nil {
-			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
+			return nil, fmt.Errorf("error getting existing patient: %w", patientErr)
 		}
 		record.validateExistingPatientForUpdate(existingPatient)
 	}

@@ -22,6 +22,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const releaseTimeout = 5 * time.Second
+
 var supportedProcessors = map[string]func(context.Context, *batchval.BatchValidationContext, *types.Batch, *gorm.DB) error{
 	types.CreatePatientBatchType:              processCreatePatientBatch,
 	types.CreateSampleBatchType:               processCreateSampleBatch,
@@ -108,13 +110,17 @@ func processBatch(ctx context.Context, db *gorm.DB, bv *batchval.BatchValidation
 		return
 	}
 
-	// On a graceful shutdown the processor aborts before committing and returns context.Canceled;
-	// release the claim back to PENDING so the batch is reprocessed cleanly instead of left RUNNING.
-	if procErr := processFn(ctx, bv, nextBatch, db); errors.Is(procErr, context.Canceled) {
-		slog.InfoContext(ctx, "shutdown during batch; releasing back to PENDING", slog.String("batch_id", nextBatch.ID))
-		if _, relErr := bv.BatchRepo.ReleaseBatch(ctx, nextBatch.ID); relErr != nil {
-			slog.ErrorContext(ctx, "failed to release batch", slog.String("batch_id", nextBatch.ID), slog.Any("error", relErr))
-		}
+	procErr := processFn(ctx, bv, nextBatch, db)
+	if ctx.Err() == nil {
+		return
+	}
+	// Checked on ctx, not procErr: a driver error on a cancelled query need not wrap context.Canceled.
+	// The release needs its own context, and its status = RUNNING guard leaves a committed batch alone.
+	slog.InfoContext(ctx, "shutdown during batch; releasing back to PENDING", slog.String("batch_id", nextBatch.ID), slog.Any("error", procErr))
+	relCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), releaseTimeout)
+	defer cancel()
+	if _, relErr := bv.BatchRepo.ReleaseBatch(relCtx, nextBatch.ID); relErr != nil {
+		slog.ErrorContext(ctx, "failed to release batch", slog.String("batch_id", nextBatch.ID), slog.Any("error", relErr))
 	}
 }
 

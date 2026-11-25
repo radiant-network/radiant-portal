@@ -100,8 +100,8 @@ func (r *BatchRepository) ClaimNextBatch(ctx context.Context) (*Batch, error) {
 
 // ReleaseBatch resets an in-flight (RUNNING) batch back to PENDING and clears started_on, so a
 // graceful shutdown can requeue the batch instead of abandoning it. The status = 'RUNNING' guard
-// makes it a no-op once a batch has committed to SUCCESS or ERROR. It runs on the repository's
-// default (background) context so it isn't aborted by the cancelled shutdown context.
+// makes it a no-op once a batch has committed to SUCCESS or ERROR. On shutdown, pass a context
+// that is not the cancelled one, or the update fails at once.
 func (r *BatchRepository) ReleaseBatch(ctx context.Context, batchId string) (int64, error) {
 	result := r.db.WithContext(ctx).Table(types.BatchTable.Name).
 		Where("id = ? AND status = ?", batchId, types.BatchStatusRunning).

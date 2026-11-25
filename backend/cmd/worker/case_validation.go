@@ -262,7 +262,7 @@ func (r *CaseValidationRecord) getProbandFromPatients() (*types.Patient, error) 
 func (r *CaseValidationRecord) fetchStatusCodes(ctx context.Context) error {
 	statusCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetStatus)
 	if err != nil {
-		return fmt.Errorf("error retrieving status codes: %v", err)
+		return fmt.Errorf("error retrieving status codes: %w", err)
 	}
 	r.StatusCodes = statusCodes
 	return nil
@@ -271,7 +271,7 @@ func (r *CaseValidationRecord) fetchStatusCodes(ctx context.Context) error {
 func (r *CaseValidationRecord) fetchObservationCodes(ctx context.Context) error {
 	observationCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetObservation)
 	if err != nil {
-		return fmt.Errorf("error retrieving observation codes: %v", err)
+		return fmt.Errorf("error retrieving observation codes: %w", err)
 	}
 	r.ObservationCodes = observationCodes
 	return nil
@@ -280,7 +280,7 @@ func (r *CaseValidationRecord) fetchObservationCodes(ctx context.Context) error 
 func (r *CaseValidationRecord) fetchExamCodes(ctx context.Context) error {
 	examCodes, err := r.Cache.GetExamCodes(ctx, r.TenantCode)
 	if err != nil {
-		return fmt.Errorf("error retrieving exam codes: %v", err)
+		return fmt.Errorf("error retrieving exam codes: %w", err)
 	}
 	r.ExamCodes = examCodes
 	return nil
@@ -289,7 +289,7 @@ func (r *CaseValidationRecord) fetchExamCodes(ctx context.Context) error {
 func (r *CaseValidationRecord) fetchOnsetCodes(ctx context.Context) error {
 	onsetCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetOnset)
 	if err != nil {
-		return fmt.Errorf("error retrieving onset codes: %v", err)
+		return fmt.Errorf("error retrieving onset codes: %w", err)
 	}
 	r.OnsetCodes = onsetCodes
 	return nil
@@ -298,7 +298,7 @@ func (r *CaseValidationRecord) fetchOnsetCodes(ctx context.Context) error {
 func (r *CaseValidationRecord) fetchInterpretationCodes(ctx context.Context) error {
 	interpretationCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetObservationInterpretation)
 	if err != nil {
-		return fmt.Errorf("error retrieving interpretation codes: %v", err)
+		return fmt.Errorf("error retrieving interpretation codes: %w", err)
 	}
 	r.InterpretationCodes = interpretationCodes
 	return nil
@@ -307,7 +307,7 @@ func (r *CaseValidationRecord) fetchInterpretationCodes(ctx context.Context) err
 func (r *CaseValidationRecord) fetchAncestryCodes(ctx context.Context) error {
 	ancestryCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetAncestry)
 	if err != nil {
-		return fmt.Errorf("error retrieving ancestry codes: %v", err)
+		return fmt.Errorf("error retrieving ancestry codes: %w", err)
 	}
 	r.AncestryCodes = ancestryCodes
 	return nil
@@ -316,7 +316,7 @@ func (r *CaseValidationRecord) fetchAncestryCodes(ctx context.Context) error {
 func (r *CaseValidationRecord) fetchConsanguinityCodes(ctx context.Context) error {
 	consanguinityCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetConsanguinity)
 	if err != nil {
-		return fmt.Errorf("error retrieving consanguinity codes: %v", err)
+		return fmt.Errorf("error retrieving consanguinity codes: %w", err)
 	}
 	r.ConsanguinityCodes = consanguinityCodes
 	return nil
@@ -325,7 +325,7 @@ func (r *CaseValidationRecord) fetchConsanguinityCodes(ctx context.Context) erro
 func (r *CaseValidationRecord) fetchPriorityCodes(ctx context.Context) error {
 	priorityCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetPriority)
 	if err != nil {
-		return fmt.Errorf("error retrieving priority codes: %v", err)
+		return fmt.Errorf("error retrieving priority codes: %w", err)
 	}
 	r.PriorityCodes = priorityCodes
 	return nil
@@ -334,7 +334,7 @@ func (r *CaseValidationRecord) fetchPriorityCodes(ctx context.Context) error {
 func (r *CaseValidationRecord) fetchCategoryCodes(ctx context.Context) error {
 	categoryCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetCaseCategory)
 	if err != nil {
-		return fmt.Errorf("error retrieving category codes: %v", err)
+		return fmt.Errorf("error retrieving category codes: %w", err)
 	}
 	r.CategoryCodes = categoryCodes
 	return nil
@@ -343,13 +343,13 @@ func (r *CaseValidationRecord) fetchCategoryCodes(ctx context.Context) error {
 func (r *CaseValidationRecord) fetchPatientCodes(ctx context.Context) error {
 	affectedStatusCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetAffectedStatus)
 	if err != nil {
-		return fmt.Errorf("error retrieving patient affected status codes: %v", err)
+		return fmt.Errorf("error retrieving patient affected status codes: %w", err)
 	}
 	r.PatientAffectedStatusCodes = affectedStatusCodes
 
 	relationshipToProbandCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetFamilyRelationship)
 	if err != nil {
-		return fmt.Errorf("error retrieving patient relationship to proband codes: %v", err)
+		return fmt.Errorf("error retrieving patient relationship to proband codes: %w", err)
 	}
 	// "fetus" is set by persistFetuses, never submitted — a patient's relation_to_proband can't
 	// take it, so drop it from the codes accepted here.
@@ -362,19 +362,19 @@ func (r *CaseValidationRecord) fetchPatientCodes(ctx context.Context) error {
 func (r *CaseValidationRecord) fetchDocumentCodes(ctx context.Context) error {
 	dataCategoryCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetDataCategory)
 	if err != nil {
-		return fmt.Errorf("error retrieving document data category codes: %v", err)
+		return fmt.Errorf("error retrieving document data category codes: %w", err)
 	}
 	r.DocumentDataCategoryCodes = dataCategoryCodes
 
 	dataTypeCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetDataType)
 	if err != nil {
-		return fmt.Errorf("error retrieving document data type codes: %v", err)
+		return fmt.Errorf("error retrieving document data type codes: %w", err)
 	}
 	r.DocumentDataTypeCodes = dataTypeCodes
 
 	formatCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetFileFormat)
 	if err != nil {
-		return fmt.Errorf("error retrieving document format codes: %v", err)
+		return fmt.Errorf("error retrieving document format codes: %w", err)
 	}
 	r.DocumentFormatCodes = formatCodes
 
@@ -427,7 +427,7 @@ func (r *CaseValidationRecord) fetchCodeInfos(ctx context.Context) error {
 func (r *CaseValidationRecord) fetchTaskTypeCodes(ctx context.Context) error {
 	taskTypeCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetTaskType)
 	if err != nil {
-		return fmt.Errorf("error retrieving task type codes: %v", err)
+		return fmt.Errorf("error retrieving task type codes: %w", err)
 	}
 	r.TaskTypeCodes = taskTypeCodes
 	return nil
@@ -896,7 +896,7 @@ func (cr *CaseValidationRecord) validateSeqExpExists(ctx context.Context, seqExp
 	se := cr.Case.SequencingExperiments[seqExpIndex]
 	seqExp, err := cr.Cache.GetSequencingExperimentByAliquotAndSubmitterSample(ctx, se.Aliquot, se.SubmitterSampleId, se.SampleOrganizationCode, cr.TenantCode)
 	if err != nil {
-		return fmt.Errorf("error getting existing sequencing experiment: %v", err), false
+		return fmt.Errorf("error getting existing sequencing experiment: %w", err), false
 	}
 	if seqExp == nil {
 		path := cr.formatSeqExpFieldPath(&seqExpIndex)
@@ -915,7 +915,7 @@ func (cr *CaseValidationRecord) validateSeqExpSample(ctx context.Context, seqExp
 	se := cr.Case.SequencingExperiments[seqExpIndex]
 	sample, err := cr.Cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, se.SampleOrganizationCode, se.SubmitterSampleId, cr.TenantCode)
 	if err != nil {
-		return nil, fmt.Errorf("error getting existing sample: %v", err)
+		return nil, fmt.Errorf("error getting existing sample: %w", err)
 	}
 	return sample, nil
 }
@@ -1501,16 +1501,16 @@ func validateCaseRecord(
 
 	// TODO: optimize by fetching all codes at once outside of the record
 	if err := cr.fetchCodeInfos(ctx); err != nil {
-		return nil, fmt.Errorf("error during pre-fetching code infos: %v", err)
+		return nil, fmt.Errorf("error during pre-fetching code infos: %w", err)
 	}
 
 	if err := cr.fetchValidationInfos(ctx); err != nil {
-		return nil, fmt.Errorf("error during pre-fetching case validation info: %v", err)
+		return nil, fmt.Errorf("error during pre-fetching case validation info: %w", err)
 	}
 
 	// 1. Validate Case fields
 	if err := cr.validateCase(ctx); err != nil {
-		return nil, fmt.Errorf("error during case validation: %v", err)
+		return nil, fmt.Errorf("error during case validation: %w", err)
 	}
 	if cr.Skipped {
 		return cr, nil
@@ -1518,22 +1518,22 @@ func validateCaseRecord(
 
 	// 2. Validate Case Patients
 	if err := cr.validateCasePatients(); err != nil {
-		return nil, fmt.Errorf("error during case patients validation: %v", err)
+		return nil, fmt.Errorf("error during case patients validation: %w", err)
 	}
 
 	// 2b. Validate Case Fetuses
 	if err := cr.validateCaseFetuses(ctx, seenFetuses, nil); err != nil {
-		return nil, fmt.Errorf("error during case fetuses validation: %v", err)
+		return nil, fmt.Errorf("error during case fetuses validation: %w", err)
 	}
 
 	// 3. Validate Case Sequencing Experiments
 	if err := cr.validateCaseSequencingExperiments(ctx); err != nil {
-		return nil, fmt.Errorf("error during case sequencing experiments validation: %v", err)
+		return nil, fmt.Errorf("error during case sequencing experiments validation: %w", err)
 	}
 
 	// 4. Validate Case Tasks
 	if err := cr.validateTasks(); err != nil {
-		return nil, fmt.Errorf("error during case tasks validation: %v", err)
+		return nil, fmt.Errorf("error during case tasks validation: %w", err)
 	}
 
 	// 5. Validate Case Documents
@@ -1549,7 +1549,7 @@ func processCreateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCon
 	var caseBatches []types.CaseBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &caseBatches); unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling case batch: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling case batch: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -1558,7 +1558,7 @@ func processCreateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCon
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error case batch validation: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error case batch validation: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -1568,7 +1568,7 @@ func processCreateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCon
 		if errors.Is(err, context.Canceled) {
 			return err
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing case batch records: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing case batch records: %w", err), bv.BatchRepo)
 		return nil
 	}
 	return nil
@@ -1917,7 +1917,7 @@ func validateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext,
 
 		record, err := validateCaseRecord(ctx, bv, cache, c, idx, seenFetuses, tenantCode)
 		if err != nil {
-			return nil, fmt.Errorf("error during case validation: %v", err)
+			return nil, fmt.Errorf("error during case validation: %w", err)
 		}
 
 		if c.ProjectCode != "" && c.SubmitterCaseId != "" {

@@ -295,7 +295,7 @@ func processCreateSequencingExperimentBatch(ctx context.Context, bv *batchval.Ba
 	var experimentsBatch []types.SequencingExperimentBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &experimentsBatch); unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling sequencing experiment batch: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -304,7 +304,7 @@ func processCreateSequencingExperimentBatch(ctx context.Context, bv *batchval.Ba
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error sequencing experiment batch validation: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error sequencing experiment batch validation: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -314,7 +314,7 @@ func processCreateSequencingExperimentBatch(ctx context.Context, bv *batchval.Ba
 		if errors.Is(err, context.Canceled) {
 			return err
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing sequencing experiment batch records: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing sequencing experiment batch records: %w", err), bv.BatchRepo)
 		return nil
 	}
 	return nil
@@ -405,7 +405,7 @@ func validateSequencingExperimentBatch(ctx context.Context, bv *batchval.BatchVa
 		}
 		record, err := validateSequencingExperimentRecord(ctx, bv, cache, seqExp, index, tenantCode)
 		if err != nil {
-			return nil, fmt.Errorf("error during sequencing experiment validation: %v", err)
+			return nil, fmt.Errorf("error during sequencing experiment validation: %w", err)
 		}
 		batchval.ValidateUniquenessInBatch(record, key, visited, IdenticalSequencingExperimentInBatchCode, []string{seqExp.SampleOrganizationCode, seqExp.SubmitterSampleId.String(), seqExp.Aliquot.String()})
 		records = append(records, record)
@@ -469,7 +469,7 @@ func processUpdateSequencingExperimentBatch(ctx context.Context, bv *batchval.Ba
 	var experimentsBatch []types.SequencingExperimentBatch
 
 	if unexpectedErr := json.Unmarshal(payload, &experimentsBatch); unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling update sequencing experiment batch: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling update sequencing experiment batch: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -478,7 +478,7 @@ func processUpdateSequencingExperimentBatch(ctx context.Context, bv *batchval.Ba
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error update sequencing experiment batch validation: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error update sequencing experiment batch validation: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -488,7 +488,7 @@ func processUpdateSequencingExperimentBatch(ctx context.Context, bv *batchval.Ba
 		if errors.Is(err, context.Canceled) {
 			return err
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing update sequencing experiment batch records: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing update sequencing experiment batch records: %w", err), bv.BatchRepo)
 		return nil
 	}
 	return nil
@@ -570,7 +570,7 @@ func validateUpdateSequencingExperimentBatch(ctx context.Context, bv *batchval.B
 		}
 		record, err := validateUpdateSequencingExperimentRecord(ctx, bv, cache, seqExp, index, tenantCode)
 		if err != nil {
-			return nil, fmt.Errorf("error during update sequencing experiment validation: %v", err)
+			return nil, fmt.Errorf("error during update sequencing experiment validation: %w", err)
 		}
 		batchval.ValidateUniquenessInBatch(record, key, visited, IdenticalSequencingExperimentInBatchCode, []string{seqExp.SampleOrganizationCode, seqExp.SubmitterSampleId.String(), seqExp.Aliquot.String()})
 		records = append(records, record)

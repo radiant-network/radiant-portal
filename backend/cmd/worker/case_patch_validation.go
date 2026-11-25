@@ -218,7 +218,7 @@ func validateCaseTaskAttachments(ctx context.Context, bv *batchval.BatchValidati
 func processPatchCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
 	var patches []types.CaseBatchPatch
 	if err := json.Unmarshal([]byte(batch.Payload), &patches); err != nil {
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling patch_case batch: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling patch_case batch: %w", err), bv.BatchRepo)
 		return nil
 	}
 
@@ -230,7 +230,7 @@ func processPatchCaseBatch(ctx context.Context, bv *batchval.BatchValidationCont
 		}
 		rec, err := validatePatchCaseRecord(ctx, bv, cache, p, i, batch.TenantCode)
 		if err != nil {
-			batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error validating patch_case batch: %v", err), bv.BatchRepo)
+			batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error validating patch_case batch: %w", err), bv.BatchRepo)
 			return nil
 		}
 		records = append(records, rec)
@@ -242,7 +242,7 @@ func processPatchCaseBatch(ctx context.Context, bv *batchval.BatchValidationCont
 		if errors.Is(err, context.Canceled) {
 			return err
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing patch_case batch records: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing patch_case batch records: %w", err), bv.BatchRepo)
 		return nil
 	}
 	return nil
