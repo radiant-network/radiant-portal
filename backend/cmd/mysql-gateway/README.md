@@ -51,6 +51,7 @@ password grant needs it. What follows from that:
 | `KEYCLOAK_CLIENT_ID` | client for the password grant; needs direct access grants, and its tokens must carry the audience the StarRocks users require | **required** |
 | `KEYCLOAK_CLIENT_SECRET` | only for a confidential client | — |
 | `PROBE_PORT` | HTTP health-probe port (`GET /status`) | `9997` |
+| `MAX_CONNECTIONS` | concurrent client connections; `0` = no cap. Each one holds a StarRocks connection from the moment it opens, before its login, so the cap keeps idle clients from filling the FE's connection limit | `256` |
 
 ## Run locally
 

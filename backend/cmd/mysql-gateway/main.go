@@ -36,6 +36,8 @@
 //	KEYCLOAK_CLIENT_SECRET  only for a confidential client; prefer a public one so no secret
 //	                        is deployed                               (optional)
 //	PROBE_PORT              HTTP health-probe port                    (default 9997)
+//	MAX_CONNECTIONS         concurrent client connections, each holding a StarRocks one from
+//	                        before its login; 0 = no cap              (default 256)
 package main
 
 import (
@@ -51,7 +53,10 @@ import (
 	"github.com/radiant-network/radiant-api/internal/mysqlproxy"
 )
 
-const drainTimeout = 10 * time.Second
+const (
+	drainTimeout    = 10 * time.Second
+	defaultMaxConns = 256
+)
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
@@ -59,6 +64,12 @@ func main() {
 	listenAddr := mysqlproxy.Getenv("LISTEN_ADDR", ":9032")
 	backendAddr := mysqlproxy.Getenv("STARROCKS_ADDR", "starrocks:9030")
 	probePort := mysqlproxy.Getenv("PROBE_PORT", "9997")
+
+	maxConns, err := mysqlproxy.MaxConnsFromEnv(defaultMaxConns)
+	if err != nil {
+		slog.Error("read MAX_CONNECTIONS", "error", err)
+		os.Exit(1)
+	}
 
 	// Fail closed: without TLS the listener would carry end-user passwords in the clear.
 	listenerTLS, err := mysqlproxy.ListenerTLSConfig(os.Getenv("TLS_CERT_FILE"), os.Getenv("TLS_KEY_FILE"))
@@ -84,6 +95,7 @@ func main() {
 		BackendTLS:  backendTLS,
 		ClientTLS:   listenerTLS,
 		Auth:        mysqlproxy.PasswordExchange{Tokens: client.NewKeycloakPasswordClient(kcConfig)},
+		MaxConns:    maxConns,
 	})
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -97,7 +109,7 @@ func main() {
 		os.Exit(1)
 	}
 	slog.Info("mysql-gateway listening",
-		"listen", listenAddr, "backend", backendAddr,
+		"listen", listenAddr, "backend", backendAddr, "max_connections", maxConns,
 		"keycloak", kcConfig.BaseURL, "realm", kcConfig.Realm, "client_id", kcConfig.ClientID)
 
 	p.Serve(ctx, ln, drainTimeout)

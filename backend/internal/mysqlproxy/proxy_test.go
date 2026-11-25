@@ -9,8 +9,10 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/binary"
+	"errors"
 	"math/big"
 	"net"
+	"sync"
 	"testing"
 	"time"
 
@@ -247,4 +249,147 @@ func Test_Proxy_PasswordExchange_ReturnsErrPacketOnBadCredentials(t *testing.T) 
 	code := binary.LittleEndian.Uint16(final[1:3])
 	assert.Equal(t, uint16(1045), code)
 	assert.Contains(t, string(final), "invalid username or password")
+}
+
+// holdingStarrocks sends its handshake to every connection and then holds it, like a StarRocks
+// waiting for a login that never comes. Each accepted connection is signalled on the channel.
+func holdingStarrocks(t *testing.T) (addr string, accepted <-chan struct{}) {
+	t.Helper()
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = ln.Close() })
+
+	out := make(chan struct{}, 16)
+	go func() {
+		for {
+			conn, err := ln.Accept()
+			if err != nil {
+				return
+			}
+			t.Cleanup(func() { _ = conn.Close() })
+			pc := &packetConn{conn: conn}
+			_ = pc.write(0, testHandshake(uint16(clientSSL|clientProtocol41), uint16((clientPluginAuth)>>16), 0x21))
+			out <- struct{}{}
+		}
+	}()
+	return ln.Addr().String(), out
+}
+
+// idleClient opens a connection and reads the handshake the proxy forwards, so it returns once
+// the proxy holds a StarRocks connection for it.
+func idleClient(t *testing.T, addr string) net.Conn {
+	t.Helper()
+	conn, err := net.Dial("tcp", addr)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = conn.Close() })
+	_ = conn.SetDeadline(time.Now().Add(5 * time.Second))
+	_, _, err = (&packetConn{conn: conn}).read()
+	require.NoError(t, err)
+	return conn
+}
+
+func Test_Serve_ConnectionBeyondMaxConns_DoesNotReachStarrocks(t *testing.T) {
+	backendAddr, accepted := holdingStarrocks(t)
+	proxyAddr := startProxy(t, Config{BackendAddr: backendAddr, Auth: JWTPassthrough{}, AuthTimeout: 5 * time.Second, MaxConns: 1})
+
+	idleClient(t, proxyAddr)
+	<-accepted
+	second, err := net.Dial("tcp", proxyAddr)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = second.Close() })
+
+	select {
+	case <-accepted:
+		t.Fatal("a connection over MaxConns reached StarRocks")
+	case <-time.After(300 * time.Millisecond):
+	}
+}
+
+func Test_Serve_ClosedConnection_LetsTheNextOneIn(t *testing.T) {
+	backendAddr, accepted := holdingStarrocks(t)
+	proxyAddr := startProxy(t, Config{BackendAddr: backendAddr, Auth: JWTPassthrough{}, AuthTimeout: 5 * time.Second, MaxConns: 1})
+
+	first := idleClient(t, proxyAddr)
+	<-accepted
+	second, err := net.Dial("tcp", proxyAddr)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = second.Close() })
+	require.NoError(t, first.Close())
+
+	select {
+	case <-accepted:
+	case <-time.After(3 * time.Second):
+		t.Fatal("the next connection did not reach StarRocks after the first one closed")
+	}
+	_ = second.SetDeadline(time.Now().Add(3 * time.Second))
+	_, _, err = (&packetConn{conn: second}).read()
+	assert.NoError(t, err, "the next connection should get the forwarded handshake")
+}
+
+// failingListener fails its first failures Accept calls, recording when each came, then blocks
+// until closed.
+type failingListener struct {
+	failures int
+	failed   int
+	calls    chan time.Time
+	closed   chan struct{}
+	once     sync.Once
+}
+
+func (l *failingListener) Accept() (net.Conn, error) {
+	if l.failed < l.failures {
+		l.failed++
+		l.calls <- time.Now()
+		return nil, errors.New("too many open files")
+	}
+	<-l.closed
+	return nil, net.ErrClosed
+}
+
+func (l *failingListener) Close() error {
+	l.once.Do(func() { close(l.closed) })
+	return nil
+}
+
+func (l *failingListener) Addr() net.Addr { return &net.TCPAddr{} }
+
+func Test_Serve_AcceptError_PausesLongerAfterEachError(t *testing.T) {
+	ln := &failingListener{failures: 4, calls: make(chan time.Time, 4), closed: make(chan struct{})}
+	ctx, cancel := context.WithCancel(context.Background())
+	served := make(chan struct{})
+	go func() {
+		defer close(served)
+		New(Config{}).Serve(ctx, ln, time.Second)
+	}()
+
+	var calls []time.Time
+	for range ln.failures {
+		select {
+		case c := <-ln.calls:
+			calls = append(calls, c)
+		case <-time.After(2 * time.Second):
+			t.Fatal("Serve stopped calling Accept")
+		}
+	}
+	cancel()
+	<-served
+
+	want := []time.Duration{5 * time.Millisecond, 10 * time.Millisecond, 20 * time.Millisecond}
+	for i, w := range want {
+		got := calls[i+1].Sub(calls[i])
+		assert.GreaterOrEqual(t, got, w, "pause after Accept error %d = %s; want at least %s", i+1, got, w)
+	}
+}
+
+func Test_nextAcceptDelay_StartsAt5ms(t *testing.T) {
+	assert.Equal(t, 5*time.Millisecond, nextAcceptDelay(0))
+}
+
+func Test_nextAcceptDelay_DoublesThePreviousDelay(t *testing.T) {
+	assert.Equal(t, 80*time.Millisecond, nextAcceptDelay(40*time.Millisecond))
+}
+
+func Test_nextAcceptDelay_CapsAt1s(t *testing.T) {
+	assert.Equal(t, time.Second, nextAcceptDelay(640*time.Millisecond))
+	assert.Equal(t, time.Second, nextAcceptDelay(time.Second))
 }

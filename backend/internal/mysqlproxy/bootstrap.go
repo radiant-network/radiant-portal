@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -66,6 +67,23 @@ func ServeHealthProbe(ctx context.Context, port string) {
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error("health probe server failed", "error", err)
 	}
+}
+
+// MaxConnsFromEnv reads MAX_CONNECTIONS, the Config.MaxConns of a binary; unset or empty
+// gives fallback.
+func MaxConnsFromEnv(fallback int) (int, error) {
+	v := os.Getenv("MAX_CONNECTIONS")
+	if v == "" {
+		return fallback, nil
+	}
+	n, err := strconv.Atoi(v)
+	if err != nil {
+		return 0, fmt.Errorf("parse MAX_CONNECTIONS %q: %w", v, err)
+	}
+	if n < 0 {
+		return 0, fmt.Errorf("MAX_CONNECTIONS must be 0 (no cap) or more, got %d", n)
+	}
+	return n, nil
 }
 
 func Getenv(key, fallback string) string {

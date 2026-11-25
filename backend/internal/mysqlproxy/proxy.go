@@ -26,6 +26,9 @@ type Config struct {
 	// AuthTimeout bounds the login phase so a stalled peer can't pin a goroutine forever; it
 	// is cleared once the transparent pipe starts (piped sessions are long-lived).
 	AuthTimeout time.Duration
+	// MaxConns caps the concurrent client connections, each holding one StarRocks connection
+	// from Accept on, before its login. 0 means no cap.
+	MaxConns int
 }
 
 type Proxy struct {
@@ -223,8 +226,13 @@ func (p *Proxy) Handle(ctx context.Context, clientConn net.Conn) {
 	log.Info("connection closed")
 }
 
-// Serve accepts connections until ctx is cancelled, then drains in-flight handlers for up to
-// drain before returning.
+const (
+	minAcceptDelay = 5 * time.Millisecond
+	maxAcceptDelay = time.Second
+)
+
+// Serve accepts connections until ctx is cancelled or ln is closed, then drains in-flight
+// handlers for up to drain before returning.
 func (p *Proxy) Serve(ctx context.Context, ln net.Listener, drain time.Duration) {
 	go func() {
 		<-ctx.Done()
@@ -232,23 +240,64 @@ func (p *Proxy) Serve(ctx context.Context, ln net.Listener, drain time.Duration)
 	}()
 
 	var handlers sync.WaitGroup
+	defer func() {
+		slog.Info("shutting down, draining connections", "timeout", drain)
+		waitWithTimeout(&handlers, drain)
+	}()
+
+	// The slot is taken before Accept, so a connection over the cap stays in the kernel's
+	// backlog and never reaches StarRocks.
+	var slots chan struct{}
+	if p.cfg.MaxConns > 0 {
+		slots = make(chan struct{}, p.cfg.MaxConns)
+	}
+	release := func() {
+		if slots != nil {
+			<-slots
+		}
+	}
+
+	var delay time.Duration
 	for {
-		conn, err := ln.Accept()
-		if err != nil {
-			if ctx.Err() != nil {
-				slog.Info("shutting down, draining connections", "timeout", drain)
-				waitWithTimeout(&handlers, drain)
+		if slots != nil {
+			select {
+			case slots <- struct{}{}:
+			case <-ctx.Done():
 				return
 			}
-			slog.Error("accept error", "error", err)
+		}
+		conn, err := ln.Accept()
+		if err != nil {
+			release()
+			if ctx.Err() != nil || errors.Is(err, net.ErrClosed) {
+				return
+			}
+			delay = nextAcceptDelay(delay)
+			slog.Error("accept error, retrying", "error", err, "delay", delay)
+			select {
+			case <-time.After(delay):
+			case <-ctx.Done():
+				return
+			}
 			continue
 		}
+		delay = 0
 		handlers.Add(1)
 		go func() {
 			defer handlers.Done()
+			defer release()
 			p.Handle(ctx, conn)
 		}()
 	}
+}
+
+// nextAcceptDelay is the pause after an Accept error, as net/http does: an error such as
+// running out of file descriptors would otherwise spin the loop on one core.
+func nextAcceptDelay(previous time.Duration) time.Duration {
+	if previous == 0 {
+		return minAcceptDelay
+	}
+	return min(2*previous, maxAcceptDelay)
 }
 
 // waitWithTimeout waits for wg up to d, then gives up (long-lived piped sessions would
