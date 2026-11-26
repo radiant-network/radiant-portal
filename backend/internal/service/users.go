@@ -47,8 +47,8 @@ func NewUserAdmin(users TenantUserStore, orgs OrganizationChecker, deps AdminDep
 //
 // actor is the acting administrator's user_id, recorded as granted_by on every row written.
 func (a *UserAdmin) CreateTenantUser(ctx context.Context, tenant string, req types.CreateUserRequest, actor string) error {
-	// Checked before provisioning: the Keycloak step is an upsert, so going ahead would silently
-	// overwrite the existing person's name instead of reporting the conflict.
+	// Checked before provisioning: the users registry write is an upsert, so going ahead would
+	// silently overwrite the existing person's name instead of reporting the conflict.
 	taken, err := a.users.EmailHasTenantGrant(ctx, tenant, req.Email)
 	if err != nil {
 		return err

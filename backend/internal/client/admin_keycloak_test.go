@@ -15,17 +15,18 @@ import (
 
 // fakeKeycloak is a minimal stateful stand-in for the Keycloak admin REST API.
 type fakeKeycloak struct {
-	realm           string
-	usersByEmail    map[string]string // email -> id (the sub)
-	nextID          string
-	tokenStatus     int  // override token endpoint status (0 => 200)
-	createStatus    int  // override create status (0 => 201)
-	duplicateSearch bool // return two rows for the searched email
-	created         int
-	updated         int
-	passwordSets    int
-	groupsByName    map[string]string // name -> id
-	groupAdds       [][2]string       // {userID, groupID}
+	realm            string
+	usersByEmail     map[string]string // email -> id (the sub)
+	nextID           string
+	tokenStatus      int    // override token endpoint status (0 => 200)
+	createStatus     int    // override create status (0 => 201)
+	duplicateSearch  bool   // return two rows for the searched email
+	conflictOnCreate string // answer 409 to the create and register the email under this id
+	created          int
+	updated          int
+	passwordSets     int
+	groupsByName     map[string]string // name -> id
+	groupAdds        [][2]string       // {userID, groupID}
 
 	lastPasswordTemporary bool       // "temporary" field of the last reset-password credential
 	lastTokenForm         url.Values // form of the last token request
@@ -74,6 +75,11 @@ func (f *fakeKeycloak) server() *httptest.Server {
 			}
 			var u map[string]any
 			_ = json.NewDecoder(r.Body).Decode(&u)
+			if f.conflictOnCreate != "" {
+				f.usersByEmail[u["email"].(string)] = f.conflictOnCreate
+				w.WriteHeader(http.StatusConflict)
+				return
+			}
 			f.usersByEmail[u["email"].(string)] = f.nextID
 			f.created++
 			w.WriteHeader(http.StatusCreated)
@@ -167,7 +173,7 @@ func Test_KeycloakAdminClient_UpsertUser_SkipsPasswordWhenEmpty(t *testing.T) {
 	assert.Equal(t, 0, fake.passwordSets, "no password is set when none is provided")
 }
 
-func Test_KeycloakAdminClient_UpsertUser_UpdatesExistingUser(t *testing.T) {
+func Test_KeycloakAdminClient_UpsertUser_LeavesExistingUserUntouched(t *testing.T) {
 	fake := newFakeKeycloak("CQDG")
 	fake.usersByEmail["alice@demo.org"] = "existing-1111-2222-3333-444444444444"
 	srv := fake.server()
@@ -178,8 +184,36 @@ func Test_KeycloakAdminClient_UpsertUser_UpdatesExistingUser(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "existing-1111-2222-3333-444444444444", sub)
 	assert.Equal(t, 0, fake.created)
-	assert.Equal(t, 1, fake.updated)
-	assert.Equal(t, 1, fake.passwordSets)
+	assert.Equal(t, 0, fake.updated, "an existing account is not re-enabled or rewritten")
+	assert.Equal(t, 0, fake.passwordSets, "an existing account keeps its password")
+}
+
+func Test_KeycloakAdminClient_UpsertUser_CreateConflictKeepsExistingPassword(t *testing.T) {
+	fake := newFakeKeycloak("CQDG")
+	fake.conflictOnCreate = "raced-1111-2222-3333-444444444444"
+	srv := fake.server()
+	defer srv.Close()
+
+	sub, err := fake.client(srv.URL).UpsertUser(context.Background(), "alice", "alice@demo.org", "Alice", "Demo", "pw")
+
+	require.NoError(t, err)
+	assert.Equal(t, "raced-1111-2222-3333-444444444444", sub)
+	assert.Equal(t, 0, fake.updated)
+	assert.Equal(t, 0, fake.passwordSets, "an account created by someone else keeps its password")
+}
+
+func Test_KeycloakAdminClient_UpsertUser_AddsExistingUserToDefaultGroup(t *testing.T) {
+	fake := newFakeKeycloak("CQDG")
+	fake.usersByEmail["alice@demo.org"] = "existing-1111-2222-3333-444444444444"
+	fake.groupsByName["portal-users"] = "group-1111"
+	srv := fake.server()
+	defer srv.Close()
+
+	sub, err := fake.clientWithGroup(srv.URL, "portal-users").UpsertUser(context.Background(), "alice", "alice@demo.org", "Alice", "Demo", "")
+
+	require.NoError(t, err)
+	assert.Equal(t, [][2]string{{sub, "group-1111"}}, fake.groupAdds)
+	assert.Equal(t, 0, fake.updated)
 }
 
 func Test_KeycloakAdminClient_UpsertUser_IsIdempotent(t *testing.T) {
@@ -195,7 +229,8 @@ func Test_KeycloakAdminClient_UpsertUser_IsIdempotent(t *testing.T) {
 
 	assert.Equal(t, sub1, sub2, "re-run converges to the same sub")
 	assert.Equal(t, 1, fake.created)
-	assert.Equal(t, 1, fake.updated, "second run updates rather than re-creates")
+	assert.Equal(t, 0, fake.updated, "second run leaves the account as it is")
+	assert.Equal(t, 1, fake.passwordSets, "the password is set at creation only")
 }
 
 func Test_KeycloakAdminClient_UpsertUser_UsesClientCredentialsGrant(t *testing.T) {
