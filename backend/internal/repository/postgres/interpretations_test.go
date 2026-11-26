@@ -2,12 +2,14 @@ package postgres
 
 import (
 	"testing"
+	"time"
 
 	"github.com/radiant-network/radiant-api/internal/client"
 	"github.com/radiant-network/radiant-api/internal/database"
 	"github.com/radiant-network/radiant-api/internal/types"
 	"github.com/radiant-network/radiant-api/test/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 )
 
@@ -251,7 +253,14 @@ func Test_Interpretations_CreateOrUpdateSomatic_Update(t *testing.T) {
 		}
 		err := repo.CreateOrUpdateSomatic(t.Context(), interpretation)
 		assert.NoError(t, err)
+		created, err := repo.FirstSomatic(t.Context(), "96", "96", "9996", "T096")
+		require.NoError(t, err)
+		require.NotNil(t, created)
+		require.False(t, created.CreatedAt.IsZero())
 
+		// The handler's body carries no dates.
+		interpretation.CreatedAt = time.Time{}
+		interpretation.UpdatedAt = time.Time{}
 		interpretation.Oncogenicity = "Oncogenic"
 		err = repo.CreateOrUpdateSomatic(t.Context(), interpretation)
 		assert.NoError(t, err)
@@ -260,6 +269,8 @@ func Test_Interpretations_CreateOrUpdateSomatic_Update(t *testing.T) {
 		assert.NoError(t, err)
 		if assert.NotNil(t, updated) {
 			assert.Equal(t, "Oncogenic", updated.Oncogenicity)
+			assert.True(t, updated.CreatedAt.Equal(created.CreatedAt), "created_at = %v; want %v", updated.CreatedAt, created.CreatedAt)
+			assert.True(t, updated.UpdatedAt.After(created.UpdatedAt), "updated_at = %v; want after %v", updated.UpdatedAt, created.UpdatedAt)
 		}
 	})
 }
