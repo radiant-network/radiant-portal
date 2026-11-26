@@ -22,7 +22,8 @@ import (
 	"gorm.io/gorm"
 )
 
-const releaseTimeout = 5 * time.Second
+// Bounds the claim and the release, which run on a context that a shutdown does not cancel.
+const shutdownSafeTimeout = 5 * time.Second
 
 var supportedProcessors = map[string]func(context.Context, *batchval.BatchValidationContext, *types.Batch, *gorm.DB) error{
 	types.CreatePatientBatchType:              processCreatePatientBatch,
@@ -93,12 +94,19 @@ func runPollLoop(ctx context.Context, db *gorm.DB, bv *batchval.BatchValidationC
 }
 
 func processBatch(ctx context.Context, db *gorm.DB, bv *batchval.BatchValidationContext) {
-	nextBatch, err := bv.BatchRepo.ClaimNextBatch(ctx)
+	// A cancelled claim can commit in Postgres yet lose its row, leaving a RUNNING batch that no one releases.
+	claimCtx, cancelClaim := context.WithTimeout(context.WithoutCancel(ctx), shutdownSafeTimeout)
+	nextBatch, err := bv.BatchRepo.ClaimNextBatch(claimCtx)
+	cancelClaim()
 	if err != nil {
 		slog.ErrorContext(ctx, "error claiming next batch", slog.Any("error", err))
 		return
 	}
 	if nextBatch == nil {
+		return
+	}
+	if ctx.Err() != nil {
+		releaseBatch(ctx, bv, nextBatch.ID, "shutdown during claim; releasing back to PENDING", nil)
 		return
 	}
 
@@ -115,12 +123,17 @@ func processBatch(ctx context.Context, db *gorm.DB, bv *batchval.BatchValidation
 		return
 	}
 	// Checked on ctx, not procErr: a driver error on a cancelled query need not wrap context.Canceled.
-	// The release needs its own context, and its status = RUNNING guard leaves a committed batch alone.
-	slog.InfoContext(ctx, "shutdown during batch; releasing back to PENDING", slog.String("batch_id", nextBatch.ID), slog.Any("error", procErr))
-	relCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), releaseTimeout)
+	releaseBatch(ctx, bv, nextBatch.ID, "shutdown during batch; releasing back to PENDING", procErr)
+}
+
+// releaseBatch puts the batch back to PENDING on a context the shutdown does not cancel.
+// Its status = RUNNING guard leaves a batch that already committed SUCCESS or ERROR alone.
+func releaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, batchID, msg string, cause error) {
+	slog.InfoContext(ctx, msg, slog.String("batch_id", batchID), slog.Any("error", cause))
+	relCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), shutdownSafeTimeout)
 	defer cancel()
-	if _, relErr := bv.BatchRepo.ReleaseBatch(relCtx, nextBatch.ID); relErr != nil {
-		slog.ErrorContext(ctx, "failed to release batch", slog.String("batch_id", nextBatch.ID), slog.Any("error", relErr))
+	if _, err := bv.BatchRepo.ReleaseBatch(relCtx, batchID); err != nil {
+		slog.ErrorContext(ctx, "failed to release batch", slog.String("batch_id", batchID), slog.Any("error", err))
 	}
 }
 

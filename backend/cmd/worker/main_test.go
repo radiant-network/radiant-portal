@@ -130,3 +130,56 @@ func Test_processBatch_RequeuesInflightBatchOnCancel(t *testing.T) {
 		assert.Equal(t, int64(0), patientCount)
 	})
 }
+
+// lostClaimRepo simulates a shutdown during the claim: the UPDATE commits in Postgres, then the
+// call fails if its own context was cancelled, as a driver would, and the claimed row is lost.
+type lostClaimRepo struct {
+	*postgres.BatchRepository
+	cancel context.CancelFunc
+}
+
+func (r lostClaimRepo) ClaimNextBatch(ctx context.Context) (*types.Batch, error) {
+	batch, err := r.BatchRepository.ClaimNextBatch(ctx)
+	r.cancel()
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
+	}
+	return batch, err
+}
+
+func Test_processBatch_ReleasesBatchClaimedDuringShutdown(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+
+		payload := `[{"submitter_patient_id":"CLAIM-1","submitter_patient_id_type":"mrn","patient_organization_code":"CHUSJ","sex_code":"female","life_status_code":"alive","date_of_birth":"2010-05-15"}]`
+		var id string
+		insertErr := db.Raw(`
+			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, tenant_code)
+			VALUES (?, 'PENDING', ?, true, 'user-claim', '2000-01-01', 'radiant')
+			RETURNING id;
+		`, payload, types.CreatePatientBatchType).Scan(&id).Error
+		if insertErr != nil {
+			t.Fatal("failed to insert batch:", insertErr)
+		}
+
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+
+		// ValueSetsRepo is left nil: processing the batch would panic instead of passing silently.
+		bv := &batchval.BatchValidationContext{
+			BatchRepo: lostClaimRepo{BatchRepository: postgres.NewBatchRepository(database.PostgresDB{DB: db}), cancel: cancel},
+		}
+		processBatch(ctx, db, bv)
+		assert.Error(t, ctx.Err(), "the context must be cancelled during the claim")
+
+		result := types.Batch{}
+		db.Table("batch").Where("id = ?", id).Scan(&result)
+		assert.Equal(t, types.BatchStatusPending, result.Status)
+		assert.Nil(t, result.StartedOn)
+		assert.Nil(t, result.FinishedOn)
+
+		var patientCount int64
+		db.Table("patient").Where("submitter_patient_id = ?", "CLAIM-1").Count(&patientCount)
+		assert.Equal(t, int64(0), patientCount)
+	})
+}
