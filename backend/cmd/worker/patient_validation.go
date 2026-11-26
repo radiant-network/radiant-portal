@@ -233,7 +233,7 @@ func persistBatchAndPatientRecords(ctx context.Context, db *gorm.DB, batch *type
 		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
 			err := insertPatientRecords(ctx, records, txRepoPatient, batch.TenantCode)
 			if err != nil {
-				return fmt.Errorf("error during patient insertion %w", err)
+				return fmt.Errorf("error during patient insertion: %w", err)
 			}
 		}
 		return nil
@@ -383,7 +383,7 @@ func persistBatchAndUpdatePatientRecords(ctx context.Context, db *gorm.DB, batch
 		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
 			err := updatePatientRecords(ctx, records, txRepoPatient, batch.TenantCode)
 			if err != nil {
-				return fmt.Errorf("error during patient update %w", err)
+				return fmt.Errorf("error during patient update: %w", err)
 			}
 		}
 		return nil

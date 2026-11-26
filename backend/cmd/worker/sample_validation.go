@@ -215,7 +215,7 @@ func persistBatchAndSampleRecords(ctx context.Context, db *gorm.DB, batch *types
 		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
 			err := insertSampleRecords(ctx, records, txRepoSample, batch.TenantCode)
 			if err != nil {
-				return fmt.Errorf("error during sample insertion %w", err)
+				return fmt.Errorf("error during sample insertion: %w", err)
 			}
 		}
 		return nil
@@ -512,7 +512,7 @@ func persistBatchAndUpdateSampleRecords(ctx context.Context, db *gorm.DB, batch 
 		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
 			err := updateSampleRecords(ctx, records, txRepoSample, batch.TenantCode)
 			if err != nil {
-				return fmt.Errorf("error during sample update %w", err)
+				return fmt.Errorf("error during sample update: %w", err)
 			}
 		}
 		return nil

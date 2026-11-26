@@ -872,13 +872,13 @@ func (cr *CaseValidationRecord) validateCasePatients() error {
 		// Validate observations categorical
 		err := cr.validateObservationsCategorical(patientIndex)
 		if err != nil {
-			return fmt.Errorf("error validating observations categorical for patient index %d: %v", patientIndex, err)
+			return fmt.Errorf("error validating observations categorical for patient index %d: %w", patientIndex, err)
 		}
 
 		// Validate observations text
 		err = cr.validateObservationsText(patientIndex)
 		if err != nil {
-			return fmt.Errorf("error validating observations text for patient index %d: %v", patientIndex, err)
+			return fmt.Errorf("error validating observations text for patient index %d: %w", patientIndex, err)
 		}
 	}
 
@@ -971,22 +971,22 @@ func (cr *CaseValidationRecord) validateCaseSequencingExperiments(ctx context.Co
 	for seqExpIndex := range cr.Case.SequencingExperiments {
 		err, exists := cr.validateSeqExpExists(ctx, seqExpIndex)
 		if err != nil {
-			return fmt.Errorf("error validating sequencing experiment in organization for sequencing experiment index %d: %v", seqExpIndex, err)
+			return fmt.Errorf("error validating sequencing experiment in organization for sequencing experiment index %d: %w", seqExpIndex, err)
 		}
 		if !exists {
 			continue
 		}
 		sample, err := cr.validateSeqExpSample(ctx, seqExpIndex)
 		if err != nil {
-			return fmt.Errorf("error validating sequencing experiment sample for sequencing experiment index %d: %v", seqExpIndex, err)
+			return fmt.Errorf("error validating sequencing experiment sample for sequencing experiment index %d: %w", seqExpIndex, err)
 		}
 		err = cr.validateSeqExpCaseType(seqExpIndex, sample)
 		if err != nil {
-			return fmt.Errorf("error validating sequencing experiment for wrong case type for sequencing experiment index %d: %v", seqExpIndex, err)
+			return fmt.Errorf("error validating sequencing experiment for wrong case type for sequencing experiment index %d: %w", seqExpIndex, err)
 		}
 		err = cr.validateSeqExpPatientInCase(seqExpIndex, sample)
 		if err != nil {
-			return fmt.Errorf("error validating sequencing experiment patient in case for sequencing experiment index %d: %v", seqExpIndex, err)
+			return fmt.Errorf("error validating sequencing experiment patient in case for sequencing experiment index %d: %w", seqExpIndex, err)
 		}
 	}
 	return nil
@@ -1012,7 +1012,7 @@ func (cr *CaseValidationRecord) validateCase(ctx context.Context) error {
 	if cr.ProjectID != nil && cr.Case.SubmitterCaseId != "" {
 		c, err := cr.Cache.GetCaseBySubmitterCaseIdAndProjectId(ctx, cr.Case.SubmitterCaseId, *cr.ProjectID, cr.TenantCode)
 		if err != nil {
-			return fmt.Errorf("error checking for existing case with submitter_case_id %q and project_id %d: %v", cr.Case.SubmitterCaseId, *cr.ProjectID, err)
+			return fmt.Errorf("error checking for existing case with submitter_case_id %q and project_id %d: %w", cr.Case.SubmitterCaseId, *cr.ProjectID, err)
 		}
 		if c != nil {
 			cr.Skipped = true
@@ -1480,7 +1480,7 @@ func (cr *CaseValidationRecord) validateDocuments() error {
 			}
 
 			if err := cr.validateDocumentMetadata(doc, path, tid, did); err != nil {
-				return fmt.Errorf("error validating file metadata for case %d - document %d: %v", cr.Index, tid, err)
+				return fmt.Errorf("error validating file metadata for case %d - document %d: %w", cr.Index, tid, err)
 			}
 			cr.validateDocumentDuplicate(doc, path)
 		}
