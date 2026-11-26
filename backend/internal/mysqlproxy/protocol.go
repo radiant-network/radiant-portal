@@ -40,7 +40,11 @@ const (
 )
 
 const (
-	maxPacket    = 16 * 1024 * 1024        // max packet size we advertise (standard)
+	maxPacket = 16 * 1024 * 1024 // max packet size we advertise (standard)
+	// Largest packet read during login, the only phase that buffers one: enough for a JWT,
+	// far below the 16 MB an unauthenticated peer could otherwise make us allocate.
+	maxLoginPacket = 64 * 1024
+
 	nativePlugin = "mysql_native_password" // classic password plugin
 	clearPlugin  = "mysql_clear_password"  // send-password-in-clear (what we ask the Go client for)
 	oidcPlugin   = "authentication_openid_connect_client"
@@ -67,6 +71,8 @@ type packetConn struct {
 	conn net.Conn
 }
 
+var errPacketTooLarge = errors.New("packet exceeds the login packet limit")
+
 // read returns one packet's sequence number and payload. The 3-byte little-endian length
 // tells us exactly how many payload bytes follow the header.
 func (p *packetConn) read() (seq byte, payload []byte, err error) {
@@ -76,6 +82,9 @@ func (p *packetConn) read() (seq byte, payload []byte, err error) {
 	}
 	length := int(uint32(hdr[0]) | uint32(hdr[1])<<8 | uint32(hdr[2])<<16)
 	seq = hdr[3]
+	if length > maxLoginPacket {
+		return 0, nil, errPacketTooLarge
+	}
 	payload = make([]byte, length)
 	if _, err := io.ReadFull(p.conn, payload); err != nil {
 		return 0, nil, err

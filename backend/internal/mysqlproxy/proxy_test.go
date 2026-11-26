@@ -9,6 +9,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/binary"
+	"io"
 	"math/big"
 	"net"
 	"testing"
@@ -247,4 +248,29 @@ func Test_Proxy_PasswordExchange_ReturnsErrPacketOnBadCredentials(t *testing.T) 
 	code := binary.LittleEndian.Uint16(final[1:3])
 	assert.Equal(t, uint16(1045), code)
 	assert.Contains(t, string(final), "invalid username or password")
+}
+
+func Test_Proxy_OversizedLoginPacket_ClosesTheConnectionAtOnce(t *testing.T) {
+	srvTLS, clientTLS := selfSignedTLS(t)
+	backendAddr, _ := fakeStarrocks(t, srvTLS)
+	proxyAddr := startProxy(t, Config{
+		BackendAddr: backendAddr,
+		BackendTLS:  clientTLS,
+		Auth:        JWTPassthrough{},
+		AuthTimeout: 30 * time.Second,
+	})
+
+	conn, err := net.Dial("tcp", proxyAddr)
+	require.NoError(t, err)
+	defer func() { _ = conn.Close() }()
+	// Far below AuthTimeout: a proxy that waits for the announced payload fails the read below.
+	_ = conn.SetDeadline(time.Now().Add(2 * time.Second))
+	_, _, err = (&packetConn{conn: conn}).read() // server handshake
+	require.NoError(t, err)
+
+	_, err = conn.Write([]byte{0xff, 0xff, 0xff, 0x01})
+	require.NoError(t, err)
+
+	_, err = conn.Read(make([]byte, 1))
+	assert.ErrorIs(t, err, io.EOF)
 }
