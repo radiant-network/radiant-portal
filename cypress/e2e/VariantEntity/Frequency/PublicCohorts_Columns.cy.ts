@@ -6,11 +6,6 @@ import { VariantEntity_Frequency } from 'pom/pages/VariantEntity_Frequency';
 
 // The tests share one page: each one restores what it changes.
 describe('VariantEntity - Frequency - PublicCohorts - Columns', { testIsolation: false }, () => {
-  // Cypress drops the intercepts before each test: keep the default table preferences on every test.
-  beforeEach(() => {
-    cy.resetTablePreferences();
-  });
-
   setupOnce(() => {
     cy.login();
     cy.visitVariantFrequencyPage(data.variantGermline.locus_id);

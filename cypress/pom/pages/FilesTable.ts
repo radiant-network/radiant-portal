@@ -183,7 +183,7 @@ export const FilesTable = {
      */
     clickPaginationButton(buttonName: string) {
       cy.waitWhileLoad(60 * 1000);
-      cy.get(CommonSelectors.paginationButton(buttonName)).clickAndWait({ force: true });
+      cy.get(CommonSelectors.paginationButton(buttonName)).should('be.enabled').clickAndWait({ force: true });
     },
     /**
      * Clicks the link in a specific table cell for a given file and column.

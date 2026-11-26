@@ -6,7 +6,6 @@ import { VariantEntity_Frequency } from 'pom/pages/VariantEntity_Frequency';
 describe('VariantEntity - Frequency - MyNetwork - Sort', () => {
   const setupTest = () => {
     cy.login();
-    cy.resetTablePreferences();
     cy.visitVariantFrequencyPage(data.variantGermline.locus_id);
   };
 

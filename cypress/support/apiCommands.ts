@@ -129,12 +129,27 @@ Cypress.Commands.add('getUserId', (token: string) => {
   return cy.wrap(tokenPayload(token)?.sub as string);
 });
 
+const UI_PREFERENCE_URL = /\/users\/preferences\/((?:query-builder|saved-filters|data-table)-[^/?]+)/;
+
 /**
- * Forces every data-table user-preference read to return 404 so each table loads with
- * its default configuration (column pinning, order, sizing, visibility, pagination).
+ * Keeps the query builder, saved filter and data table preferences in memory, for one test: the shards of a run share one account.
+ * A page reads only what the test saved before it loaded: the app retries a 404, and reading a later save resets the table to page 1.
  */
-Cypress.Commands.add('resetTablePreferences', () => {
-  cy.intercept('GET', '**/users/preferences/data-table-*', { statusCode: 404 });
+Cypress.Commands.add('mockUiPreferences', () => {
+  const saved = new Map<string, unknown>();
+  let readable = new Map<string, unknown>();
+  const keyOf = (url: string) => url.match(UI_PREFERENCE_URL)?.[1] ?? '';
+  cy.on('window:before:load', () => {
+    readable = new Map(saved);
+  });
+  cy.intercept('GET', UI_PREFERENCE_URL, req => {
+    const key = keyOf(req.url);
+    req.reply(readable.has(key) ? { statusCode: 200, body: readable.get(key) } : { statusCode: 404 });
+  });
+  cy.intercept('POST', UI_PREFERENCE_URL, req => {
+    saved.set(keyOf(req.url), req.body);
+    req.reply({ statusCode: 200, body: req.body });
+  });
 });
 
 /**
