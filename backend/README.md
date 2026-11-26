@@ -87,7 +87,7 @@ Everytime the backend API model changes, the API clients need to be regenerated.
 
 ## 1. Install the OpenAPI Generator CLI
 
-Run `npm ci` at the root of the repo. The CLI is a dev dependency, and `openapitools.json` pins the generator version. It needs Java.
+Run `npm ci` at the root of the repo, with Node 22 or later (`.nvmrc` pins the version). The CLI is a dev dependency, and `openapitools.json` pins the generator version. The generator itself is a Java program, downloaded and run by the CLI: it needs Java 11 or later.
 
 ## 2. Generating clients
 

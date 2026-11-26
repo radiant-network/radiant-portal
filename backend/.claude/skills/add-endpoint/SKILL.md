@@ -115,7 +115,7 @@ make generate-client-typescript   # regenerates frontend/api/
 make generate-client-python       # regenerates cli/python/
 ```
 
-Requires Java and `npm ci` at the repo root (see root `Makefile`).
+Requires Java 11+ and `npm ci` at the repo root with Node 22+ (see root `Makefile`).
 
 Verify the diff in `frontend/api/api.ts` includes the new method and response type. Do not edit these files by hand.
 
