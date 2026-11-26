@@ -26,7 +26,7 @@ Method | HTTP request | Description
 Get AutocompleteResult list of matching prefix
 
 Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on:
-case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), sequencing_experiment_id,
+case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN),
 proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
 
 ### Example
@@ -108,7 +108,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **case_entity**
-> CaseEntity case_entity(tenant, case_id)
+> CaseEntity case_entity(tenant, case_id, accept_language=accept_language)
 
 Get CaseEntity case entity
 
@@ -146,10 +146,11 @@ with radiant_python.ApiClient(configuration) as api_client:
     api_instance = radiant_python.CasesApi(api_client)
     tenant = 'tenant_example' # str | Tenant code
     case_id = 56 # int | Case ID
+    accept_language = 'accept_language_example' # str | Language of the ancestry and exam names: fr, otherwise en (optional)
 
     try:
         # Get CaseEntity case entity
-        api_response = api_instance.case_entity(tenant, case_id)
+        api_response = api_instance.case_entity(tenant, case_id, accept_language=accept_language)
         print("The response of CasesApi->case_entity:\n")
         pprint(api_response)
     except Exception as e:
@@ -165,6 +166,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **tenant** | **str**| Tenant code | 
  **case_id** | **int**| Case ID | 
+ **accept_language** | **str**| Language of the ancestry and exam names: fr, otherwise en | [optional] 
 
 ### Return type
 

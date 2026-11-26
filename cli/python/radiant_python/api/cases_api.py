@@ -76,7 +76,7 @@ class CasesApi:
     ) -> List[AutocompleteResult]:
         """Get AutocompleteResult list of matching prefix
 
-        Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), sequencing_experiment_id, proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
+        Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -154,7 +154,7 @@ class CasesApi:
     ) -> ApiResponse[List[AutocompleteResult]]:
         """Get AutocompleteResult list of matching prefix
 
-        Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), sequencing_experiment_id, proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
+        Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -232,7 +232,7 @@ class CasesApi:
     ) -> RESTResponseType:
         """Get AutocompleteResult list of matching prefix
 
-        Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), sequencing_experiment_id, proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
+        Retrieve AutocompleteResult list of ids matching prefix. The type of each result is the case search field to filter on: case_id, patient_id, submitter_patient_id (an organization patient id such as an MRN), proband_submitter_sample_ids or run_name. Exact matches come first, then the types interleaved.
 
         :param tenant: Tenant code (required)
         :type tenant: str
@@ -364,6 +364,7 @@ class CasesApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
+        accept_language: Annotated[Optional[StrictStr], Field(description="Language of the ancestry and exam names: fr, otherwise en")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -385,6 +386,8 @@ class CasesApi:
         :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
+        :param accept_language: Language of the ancestry and exam names: fr, otherwise en
+        :type accept_language: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -410,6 +413,7 @@ class CasesApi:
         _param = self._case_entity_serialize(
             tenant=tenant,
             case_id=case_id,
+            accept_language=accept_language,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -439,6 +443,7 @@ class CasesApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
+        accept_language: Annotated[Optional[StrictStr], Field(description="Language of the ancestry and exam names: fr, otherwise en")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -460,6 +465,8 @@ class CasesApi:
         :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
+        :param accept_language: Language of the ancestry and exam names: fr, otherwise en
+        :type accept_language: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -485,6 +492,7 @@ class CasesApi:
         _param = self._case_entity_serialize(
             tenant=tenant,
             case_id=case_id,
+            accept_language=accept_language,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -514,6 +522,7 @@ class CasesApi:
         self,
         tenant: Annotated[StrictStr, Field(description="Tenant code")],
         case_id: Annotated[StrictInt, Field(description="Case ID")],
+        accept_language: Annotated[Optional[StrictStr], Field(description="Language of the ancestry and exam names: fr, otherwise en")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -535,6 +544,8 @@ class CasesApi:
         :type tenant: str
         :param case_id: Case ID (required)
         :type case_id: int
+        :param accept_language: Language of the ancestry and exam names: fr, otherwise en
+        :type accept_language: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -560,6 +571,7 @@ class CasesApi:
         _param = self._case_entity_serialize(
             tenant=tenant,
             case_id=case_id,
+            accept_language=accept_language,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -584,6 +596,7 @@ class CasesApi:
         self,
         tenant,
         case_id,
+        accept_language,
         _request_auth,
         _content_type,
         _headers,
@@ -611,6 +624,8 @@ class CasesApi:
             _path_params['case_id'] = case_id
         # process the query parameters
         # process the header parameters
+        if accept_language is not None:
+            _header_params['Accept-Language'] = accept_language
         # process the form parameters
         # process the body parameter
 

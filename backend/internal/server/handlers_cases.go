@@ -193,6 +193,7 @@ func CasesFiltersHandler(repo casesReader, caseAssignmentsRepo assigneeFilterRea
 // @Security bearerauth
 // @Param tenant path string true "Tenant code"
 // @Param case_id path int true "Case ID"
+// @Param Accept-Language header string false "Language of the ancestry and exam names: fr, otherwise en"
 // @Produce json
 // @Success 200 {object} types.CaseEntity
 // @Failure 401 {object} types.ApiError

@@ -100,6 +100,17 @@ func RequestLogger(skipPaths ...string) gin.HandlerFunc {
 	}
 }
 
+// Locale binds the request's language to its context for types.LocalizedName.
+func Locale() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Add, not Set: gzip already set Vary: Accept-Encoding.
+		c.Writer.Header().Add("Vary", "Accept-Language")
+		locale := types.NegotiateLocale(c.GetHeader("Accept-Language"))
+		c.Request = c.Request.WithContext(types.ContextWithLocale(c.Request.Context(), locale))
+		c.Next()
+	}
+}
+
 // TenantContextKey is the gin context key under which RequireTenantAccess stores the
 // resolved tenant code for downstream handlers.
 const TenantContextKey = "tenant"

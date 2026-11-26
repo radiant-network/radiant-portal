@@ -503,7 +503,7 @@ func (r *CasesRepository) retrieveCaseValueSetObservations(ctx context.Context, 
 	tx = tx.Order("obs.observation_code asc, obs.code_value asc")
 	tx = tx.Select("obs.patient_id, obs.fetus_id, obs.observation_code, " +
 		"obs.code_value as code, " +
-		"COALESCE(anc.name_en, cons.name_en) as name")
+		fmt.Sprintf("COALESCE(%s, cons.name_en) as name", types.LocalizedName(ctx, types.AncestryTable.Alias)))
 	if err := tx.Find(&observations).Error; err != nil {
 		return nil, fmt.Errorf("error retrieving case value set observations: %w", err)
 	}
@@ -544,6 +544,7 @@ func (r *CasesRepository) retrieveCaseExams(ctx context.Context, caseId int) (*[
 
 	db := r.db.WithContext(ctx)
 	examTable := types.ExamTable.TenantQualifiedName(ctx)
+	examName := types.LocalizedName(ctx, types.ExamTable.Alias)
 	examJoin := fmt.Sprintf("LEFT JOIN %s %s ON %s.code = %%s.exam_code AND %s.tenant_code = %%s.tenant_code",
 		examTable, types.ExamTable.Alias, types.ExamTable.Alias, types.ExamTable.Alias)
 
@@ -554,14 +555,14 @@ func (r *CasesRepository) retrieveCaseExams(ctx context.Context, caseId int) (*[
 	subQueryCategorical = subQueryCategorical.Joins(fmt.Sprintf("LEFT JOIN %s hpo ON hpo.id = obs.code_value", types.HPOTable.TenantQualifiedName(ctx)))
 	subQueryCategorical = subQueryCategorical.Where("obs.observation_code = ? AND obs.case_id = ?", types.ObsCodeExam, caseId)
 	subQueryCategorical = subQueryCategorical.Select("obs.patient_id, obs.fetus_id, obs.exam_code, " +
-		"exam.name_en as name, obs.interpretation_code, " +
+		examName + " as name, obs.interpretation_code, " +
 		"obs.code_value as value, hpo.name as value_name, obs.coding_system")
 
 	subQueryText := db.Table(fmt.Sprintf("%s %s", types.ObsStringTable.TenantQualifiedName(ctx), types.ObsStringTable.Alias))
 	subQueryText = subQueryText.Joins(fmt.Sprintf(examJoin, "obs_string", "obs_string"))
 	subQueryText = subQueryText.Where("obs_string.observation_code = ? AND obs_string.case_id = ?", types.ObsCodeExam, caseId)
 	subQueryText = subQueryText.Select("obs_string.patient_id, obs_string.fetus_id, obs_string.exam_code, " +
-		"exam.name_en as name, obs_string.interpretation_code, " +
+		examName + " as name, obs_string.interpretation_code, " +
 		"obs_string.value as value, CAST(NULL AS STRING) as value_name, CAST(NULL AS STRING) as coding_system")
 
 	tx := db.Table("(? UNION ALL ?) exams", subQueryCategorical, subQueryText)

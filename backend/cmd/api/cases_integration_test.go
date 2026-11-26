@@ -225,15 +225,19 @@ func Test_GetCasesFilters(t *testing.T) {
 	assertGetCasesFilters(t, "simple", expected)
 }
 
-func getCaseEntityIntegration(t *testing.T, env *testutils.Env, patientViewEnabled bool, caseId string) *httptest.ResponseRecorder {
+func getCaseEntityIntegration(t *testing.T, env *testutils.Env, patientViewEnabled bool, caseId string, acceptLanguage string) *httptest.ResponseRecorder {
 	t.Helper()
 	repo := starrocks.NewCasesRepository(database.StarrocksDB{DB: env.Starrocks}).WithPcxPatientKeys(patientViewEnabled)
 	igvRepo := starrocks.NewIGVRepository(database.StarrocksDB{DB: env.Starrocks})
 	assignmentsRepo := postgres.NewCaseAssignmentsRepository(database.PostgresDB{DB: env.Postgres})
 	router := tenantRouter()
+	router.Use(server.Locale())
 	router.GET("/:tenant/cases/:case_id", server.CaseEntityHandler(repo, igvRepo, assignmentsRepo))
 
 	req, _ := http.NewRequest("GET", "/radiant/cases/"+caseId, bytes.NewBuffer([]byte("{}")))
+	if acceptLanguage != "" {
+		req.Header.Set("Accept-Language", acceptLanguage)
+	}
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 	return w
@@ -241,7 +245,7 @@ func getCaseEntityIntegration(t *testing.T, env *testutils.Env, patientViewEnabl
 
 func assertCaseEntityHandler(t *testing.T, data string, caseId int, expected string) {
 	testutils.RunTest(t, testutils.Need{Starrocks: data, Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		w := getCaseEntityIntegration(t, env, false, fmt.Sprint(caseId))
+		w := getCaseEntityIntegration(t, env, false, fmt.Sprint(caseId), "")
 
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.JSONEq(t, expected, w.Body.String())
@@ -265,7 +269,7 @@ func caseMemberPatientKeys(t *testing.T, body []byte) string {
 
 func Test_CaseEntityHandler_PatientViewEnabled_MembersInPcxCarryTheirPatientKey(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		w := getCaseEntityIntegration(t, env, true, "1")
+		w := getCaseEntityIntegration(t, env, true, "1", "")
 
 		require.Equal(t, http.StatusOK, w.Code)
 		assert.JSONEq(t, `[
@@ -278,7 +282,7 @@ func Test_CaseEntityHandler_PatientViewEnabled_MembersInPcxCarryTheirPatientKey(
 
 func Test_CaseEntityHandler_PatientViewDisabled_NoPatientKeyEvenWithPcxViews(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		w := getCaseEntityIntegration(t, env, false, "1")
+		w := getCaseEntityIntegration(t, env, false, "1", "")
 
 		require.Equal(t, http.StatusOK, w.Code)
 		assert.JSONEq(t, `[{"patient_id": 3}, {"patient_id": 1}, {"patient_id": 2}]`, caseMemberPatientKeys(t, w.Body.Bytes()))
@@ -287,10 +291,60 @@ func Test_CaseEntityHandler_PatientViewDisabled_NoPatientKeyEvenWithPcxViews(t *
 
 func Test_CaseEntityHandler_PatientViewEnabledWithoutPcxViews_CaseServedWithoutPatientKey(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		w := getCaseEntityIntegration(t, env, true, "1")
+		w := getCaseEntityIntegration(t, env, true, "1", "")
 
 		require.Equal(t, http.StatusOK, w.Code)
 		assert.JSONEq(t, `[{"patient_id": 3}, {"patient_id": 1}, {"patient_id": 2}]`, caseMemberPatientKeys(t, w.Body.Bytes()))
+	})
+}
+
+// caseMemberLabels keeps only the labels the locale translates, so the assertions stay on them.
+func caseMemberLabels(t *testing.T, body []byte) string {
+	t.Helper()
+	var entity struct {
+		Members []struct {
+			Ethnicities   json.RawMessage `json:"ethnicities,omitempty"`
+			Consanguinity json.RawMessage `json:"consanguinity,omitempty"`
+			Exams         []struct {
+				ExamCode string `json:"exam_code"`
+				Name     string `json:"name"`
+			} `json:"exams,omitempty"`
+		} `json:"members"`
+	}
+	require.NoError(t, json.Unmarshal(body, &entity))
+	members, err := json.Marshal(entity.Members)
+	require.NoError(t, err)
+	return string(members)
+}
+
+func Test_CaseEntityHandler_French_LabelsInFrenchWithEnglishFallback(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		w := getCaseEntityIntegration(t, env, false, "74", "fr")
+
+		require.Equal(t, http.StatusOK, w.Code)
+		assert.JSONEq(t, `[
+			{
+				"ethnicities":[
+					{"code":"BLK", "name":"Noir"},
+					{"code":"MIX", "name":"Origine mixte"},
+					{"code":"NO-FR", "name":"Ancestry without French label"}
+				],
+				"consanguinity":{"code":"consanguinity", "name":"Consanguinity in family"},
+				"exams":[
+					{"exam_code":"eeg", "name":"Électroencéphalogramme (EEG)"},
+					{"exam_code":"emg", "name":"Électromyographie (EMG)"},
+					{"exam_code":"emg", "name":"Électromyographie (EMG)"},
+					{"exam_code":"other", "name":"Autre"}
+				]
+			},
+			{},
+			{
+				"exams":[
+					{"exam_code":"eeg", "name":"Électroencéphalogramme (EEG)"},
+					{"exam_code":"other", "name":"Autre"}
+				]
+			}
+		]`, caseMemberLabels(t, w.Body.Bytes()))
 	})
 }
 
@@ -339,7 +393,8 @@ func Test_CaseEntityHandler_PrenatalCaseWithExams(t *testing.T) {
 				"observed_phenotypes":[{"id":"HP:0000822", "onset_code":"unknown"}],
 				"ethnicities":[
 					{"code":"BLK", "name":"Black"},
-					{"code":"MIX", "name":"Mixed"}
+					{"code":"MIX", "name":"Mixed"},
+					{"code":"NO-FR", "name":"Ancestry without French label"}
 				],
 				"consanguinity":{"code":"consanguinity", "name":"Consanguinity in family"},
 				"notes":["High-risk pregnancy follow-up"],

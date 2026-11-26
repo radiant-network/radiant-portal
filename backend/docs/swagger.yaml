@@ -6188,6 +6188,11 @@ paths:
         required: true
         schema:
           type: integer
+      - description: 'Language of the ancestry and exam names: fr, otherwise en'
+        in: header
+        name: Accept-Language
+        schema:
+          type: string
       responses:
         "200":
           content:
