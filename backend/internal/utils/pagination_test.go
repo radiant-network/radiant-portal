@@ -37,6 +37,19 @@ func Test_AddPagination_CapsLimitAtMaxLimit(t *testing.T) {
 	assert.Equal(t, []any{MaxLimit}, vars, "an oversized limit is clamped, offset 0 adds no clause")
 }
 
+func Test_AddPagination_NegativeLimitFallsBackToMinLimit(t *testing.T) {
+	t.Parallel()
+	sql, vars := paginatedQuery(t, &types.Pagination{Limit: -1})
+	assert.Contains(t, sql, "LIMIT ?", "a negative limit must not drop the LIMIT clause")
+	assert.Equal(t, []any{MinLimit}, vars)
+}
+
+func Test_AddPagination_ZeroLimitFallsBackToMinLimit(t *testing.T) {
+	t.Parallel()
+	_, vars := paginatedQuery(t, &types.Pagination{Limit: 0})
+	assert.Equal(t, []any{MinLimit}, vars)
+}
+
 func Test_AddPagination_PageIndexReplacesOffset(t *testing.T) {
 	t.Parallel()
 	_, vars := paginatedQuery(t, &types.Pagination{Limit: 20, PageIndex: 3})
