@@ -227,7 +227,6 @@ type CaseResult struct {
 	RunNames                  JsonArray[string]       `json:"run_names,omitempty"`
 	PriorityCode              string                  `json:"priority_code,omitempty"`
 	StatusCode                CaseStatus              `json:"status_code" validate:"required" enums:"draft,submitted,processing,in_progress,in_review,completed,resolved,unresolved,inconclusive,reopened,revoked"`
-	CaseTypeCode              string                  `json:"-"`
 	AnalysisCatalogCode       string                  `json:"analysis_catalog_code,omitempty"`
 	AnalysisCatalogName       string                  `json:"analysis_catalog_name,omitempty"`
 	CaseType                  string                  `json:"case_type,omitempty"`
@@ -415,7 +414,6 @@ var CasesFields = []Field{
 	PatientMrnField,
 	CasePriorityCodeField,
 	CaseStatusCodeField,
-	CaseTypeCodeField,
 	CaseTypeField,
 	AnalysisCatalogCodeField,
 	AnalysisCatalogNameField,
@@ -453,7 +451,6 @@ var CasesDefaultFields = []Field{
 	SubmitterProbandIdField,
 	CasePriorityCodeField,
 	CaseStatusCodeField,
-	CaseTypeCodeField,
 	AnalysisCatalogCodeField,
 	AnalysisCatalogNameField,
 	CaseOrderingOrganizationCodeField,
@@ -567,19 +564,12 @@ var CasePrimaryConditionNameField = Field{
 	Table:         MondoTable,
 }
 
-var CaseTypeCodeField = Field{
-	Name:          "case_type_code",
-	Alias:         "case_type_code",
-	CanBeSelected: true,
-	CanBeSorted:   true,
-	Table:         CaseTable,
-}
-
 // CaseTypeField is computed from the case and its members count: the case search gives its SQL (CaseComputedColumns).
 var CaseTypeField = Field{
 	Name:          "case_type",
 	Alias:         "case_type",
 	CanBeFiltered: true,
+	CanBeSorted:   true,
 	Table:         CaseMembersCountTable,
 }
 

@@ -24,8 +24,21 @@ func CtxOf(tx *gorm.DB) context.Context {
 }
 
 func AddSort(tx *gorm.DB, userQuery types.ListQuery) {
+	AddSortWithCaseSearchSQL(tx, userQuery, nil)
+}
+
+// AddSortWithCaseSearchSQL sorts a computed field on its SQL; a computed field sorted without it fails the query.
+func AddSortWithCaseSearchSQL(tx *gorm.DB, userQuery types.ListQuery, computedColumns types.CaseComputedColumns) {
 	for _, sort := range userQuery.SortedFields() {
-		s := fmt.Sprintf("%s.%s %s", sort.Field.Table.Alias, sort.Field.GetName(), sort.Order)
+		column := fmt.Sprintf("%s.%s", sort.Field.Table.Alias, sort.Field.GetName())
+		if sort.Field.Table == types.CaseMembersCountTable {
+			column = computedColumns[sort.Field.GetAlias()]
+			if column == "" {
+				_ = tx.AddError(fmt.Errorf("computed field %s is sorted but the query gives none of its SQL", sort.Field.GetAlias()))
+				return
+			}
+		}
+		s := fmt.Sprintf("%s %s", column, sort.Order)
 		if sort.Field.SortNullsLast {
 			s += " NULLS LAST"
 		}

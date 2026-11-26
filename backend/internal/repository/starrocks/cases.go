@@ -80,7 +80,7 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 	txStg = txStg.Joins(fmt.Sprintf("JOIN %s se ON se.seq_id = chse.sequencing_experiment_id", types.SequencingTable.TenantQualifiedName(ctx)))
 
 	tx = tx.Joins(fmt.Sprintf("LEFT JOIN (?) stg ON stg.case_id=%s.id", types.CaseTable.Alias), txStg)
-	// Joined before the count by prepareQuery when the case type is filtered: the column reads the same join.
+	// Joined before the count by prepareQuery when the case type is filtered or sorted: the column reads the same join.
 	if !userQuery.HasFieldFromTables(types.CaseMembersCountTable) {
 		tx = withCaseMembersCount(ctx, db, tx)
 	}
@@ -90,7 +90,9 @@ func (r *CasesRepository) SearchCases(ctx context.Context, userQuery types.ListQ
 		tx = r.joiner.CaseWithRuns(tx)
 	}
 	tx = tx.Select(columns)
-	utils.AddPaginationAndSort(tx, userQuery)
+	utils.AddPagination(tx, userQuery.Pagination())
+	// Sorted on the select alias: under the DISTINCT of a case group filter, ORDER BY must name a selected column.
+	utils.AddSortWithCaseSearchSQL(tx, userQuery, types.CaseComputedColumns{types.CaseTypeField.GetAlias(): types.CaseTypeField.GetAlias()})
 
 	if err = tx.Find(&cases).Error; err != nil {
 		return nil, nil, fmt.Errorf("error fetching cases: %w", err)

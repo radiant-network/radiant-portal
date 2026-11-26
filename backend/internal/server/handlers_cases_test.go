@@ -28,7 +28,6 @@ func (m *MockRepository) SearchCases(ctx context.Context, userQuery types.ListQu
 			RunNames:                  types.JsonArray[string]{"1617"},
 			PriorityCode:              "routine",
 			StatusCode:                "in_progress",
-			CaseTypeCode:              "germline",
 			CaseType:                  "germline_family",
 			AnalysisCatalogCode:       "WGA",
 			AnalysisCatalogName:       "Whole Genome Analysis",

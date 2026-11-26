@@ -65,6 +65,35 @@ func Test_AddSort_RegularField_KeepsDefaultNullOrdering(t *testing.T) {
 	assert.NotContains(t, sql, "NULLS")
 }
 
+func caseTypeSortedQuery(t *testing.T, computedColumns types.CaseComputedColumns) *gorm.DB {
+	t.Helper()
+	db, err := gorm.Open(tests.DummyDialector{}, &gorm.Config{DryRun: true})
+	require.NoError(t, err)
+	query, err := types.NewListQueryFromCriteria(types.CasesQueryConfig, nil, nil, nil, []types.SortBody{{Field: types.CaseTypeField.GetAlias(), Order: "desc"}})
+	require.NoError(t, err)
+
+	var rows []map[string]any
+	tx := db.Session(&gorm.Session{DryRun: true}).Table("cases c")
+	AddSortWithCaseSearchSQL(tx, query, computedColumns)
+	return tx.Find(&rows)
+}
+
+func Test_AddSortWithCaseSearchSQL_WithComputedColumn_SortsOnTheColumn(t *testing.T) {
+	t.Parallel()
+	tx := caseTypeSortedQuery(t, types.CaseComputedColumns{types.CaseTypeField.GetAlias(): "CONCAT(c.a, c.b)"})
+
+	require.NoError(t, tx.Error)
+	assert.Contains(t, tx.Statement.SQL.String(), "ORDER BY CONCAT(c.a, c.b) desc,c.id asc")
+}
+
+func Test_AddSortWithCaseSearchSQL_WithoutComputedColumn_QueryFails(t *testing.T) {
+	t.Parallel()
+	tx := caseTypeSortedQuery(t, nil)
+
+	require.Error(t, tx.Error)
+	assert.Contains(t, tx.Error.Error(), "computed field case_type is sorted but the query gives none of its SQL")
+}
+
 func whereQuery(t *testing.T, field types.Field, semiJoinRows types.CaseSemiJoinRows, computedColumns types.CaseComputedColumns) *gorm.DB {
 	t.Helper()
 	db, err := gorm.Open(tests.DummyDialector{}, &gorm.Config{DryRun: true})
