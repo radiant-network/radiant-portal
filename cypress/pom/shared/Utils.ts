@@ -21,8 +21,8 @@ export const buildBilingualRegExp = (commonTextsId: string): RegExp => {
   const enValue = CommonTexts.en[keyOfCommonTextsId];
   const frValue = CommonTexts.fr[keyOfCommonTextsId];
 
-  if (typeof enValue === 'function' || typeof frValue === 'function') {
-    throw new Error(`buildBilingualRegExp does not support function values. Key: ${commonTextsId}`);
+  if (typeof enValue !== 'string' || typeof frValue !== 'string') {
+    throw new Error(`buildBilingualRegExp supports only string values. Key: ${commonTextsId}`);
   }
 
   return new RegExp(`^(${escapeRegExp(enValue)}|${escapeRegExp(frValue)})$`);

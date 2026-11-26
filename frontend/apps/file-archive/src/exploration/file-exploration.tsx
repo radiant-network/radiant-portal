@@ -19,6 +19,7 @@ type DocumentInput = {
 };
 
 const FILES_ARCHIVE_DEFAULT_SORTING: SortBody[] = [
+  { field: 'relationship_to_proband_code', order: 'asc' },
   { field: 'document_id', order: 'desc' },
   { field: 'seq_id', order: 'desc' },
 ];

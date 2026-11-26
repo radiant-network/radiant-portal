@@ -9,7 +9,6 @@ import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_
 describe('Case Entity - Variants - Somatic - SNV (TO) - Table - Information displayed', { testIsolation: false }, () => {
   setupOnce(() => {
     cy.login();
-    cy.resetTablePreferences();
     cy.visitCaseVariantsPage(data.caseSomatic.case, data.caseSomatic.seq.seq_id, 'SNV', {
       cohort: 'TO',
       sqon: data.variantSomaticTO.sqon,

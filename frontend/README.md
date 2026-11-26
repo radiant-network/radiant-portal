@@ -43,10 +43,10 @@ You can replace `radiant` with a specific portal name.
 
 ### Generate the API client
 
-Go to the root of the repo in the backend folder and run the following command:
+From the root of the repo, after `npm ci`:
 
 ```bash
-openapi-generator-cli generate -i ./backend/docs/swagger.yaml -g typescript-axios -o ./frontend/api
+make generate-client-typescript
 ```
 
 # Documentation

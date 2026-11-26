@@ -293,6 +293,18 @@ export const CaseEntity_Files = {
       );
     },
     /**
+     * Validates that the first row does not hold a value for a given column.
+     * @param value The value that must not be there.
+     * @param columnID The ID of the column to check.
+     */
+    shouldNotHaveFirstRowValue(value: string, columnID: string) {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
+          cy.get(CommonSelectors.tableRow()).eq(0).find(CommonSelectors.tableCellData).eq(position).should('not.contain', value);
+        })
+      );
+    },
+    /**
      * Validates the link in a specific table cell for a given file and column.
      * @param dataFile The file object.
      * @param columnID The ID of the column.

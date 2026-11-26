@@ -35,7 +35,7 @@ func sortedQuery(t *testing.T, field string, order string) string {
 	require.NoError(t, err)
 
 	config := types.QueryConfig{
-		AllFields:     []types.Field{types.CmcSampleRatioField, types.GnomadV3AfField},
+		AllFields:     []types.Field{types.CmcSampleRatioField, types.GnomadV3AfField, types.FamilyRelationshipToProbandCodeField},
 		DefaultFields: []types.Field{types.GnomadV3AfField},
 		IdField:       types.GnomadV3AfField,
 	}
@@ -63,6 +63,17 @@ func Test_AddSort_RegularField_KeepsDefaultNullOrdering(t *testing.T) {
 	sql := sortedQuery(t, "gnomad_v3_af", "asc")
 	assert.Contains(t, sql, "ORDER BY v.gnomad_v3_af asc")
 	assert.NotContains(t, sql, "NULLS")
+	assert.NotContains(t, sql, "DESC")
+}
+
+func Test_AddSort_SortFirstValueField_Asc_PutsValueFirst(t *testing.T) {
+	t.Parallel()
+	assert.Contains(t, sortedQuery(t, "relationship_to_proband_code", "asc"), "ORDER BY f.relationship_to_proband_code = 'proband' DESC NULLS LAST,f.relationship_to_proband_code asc NULLS LAST")
+}
+
+func Test_AddSort_SortFirstValueField_Desc_PutsValueLast(t *testing.T) {
+	t.Parallel()
+	assert.Contains(t, sortedQuery(t, "relationship_to_proband_code", "desc"), "ORDER BY f.relationship_to_proband_code = 'proband' ASC NULLS LAST,f.relationship_to_proband_code desc NULLS LAST")
 }
 
 func caseTypeSortedQuery(t *testing.T, computedColumns types.CaseComputedColumns) *gorm.DB {

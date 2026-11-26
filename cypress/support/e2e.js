@@ -77,5 +77,9 @@ before(() => {
     });
 });
 
+beforeEach(() => {
+  cy.mockUiPreferences();
+});
+
 // Ignore uncaught exception so tests doesn't stop mid run
 Cypress.on('uncaught:exception', () => false);

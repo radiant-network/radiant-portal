@@ -38,11 +38,18 @@ func AddSortWithCaseSearchSQL(tx *gorm.DB, userQuery types.ListQuery, computedCo
 				return
 			}
 		}
-		s := fmt.Sprintf("%s %s", column, sort.Order)
+		nulls := ""
 		if sort.Field.SortNullsLast {
-			s += " NULLS LAST"
+			nulls = " NULLS LAST"
 		}
-		tx = tx.Order(s)
+		if sort.Field.SortFirstValue != "" {
+			firstValueOrder := "DESC"
+			if sort.Order == "desc" {
+				firstValueOrder = "ASC"
+			}
+			tx = tx.Order(fmt.Sprintf("%s = '%s' %s%s", column, sort.Field.SortFirstValue, firstValueOrder, nulls))
+		}
+		tx = tx.Order(fmt.Sprintf("%s %s%s", column, sort.Order, nulls))
 	}
 }
 
@@ -80,6 +87,10 @@ func AddPagination(tx *gorm.DB, pagination *types.Pagination) {
 		return
 	}
 	l := min(pagination.Limit, MaxLimit)
+	// GORM writes no LIMIT clause for a negative value: the query would return every row.
+	if l <= 0 {
+		l = MinLimit
+	}
 	if pagination.PageIndex != 0 {
 		tx.Limit(l).Offset(pagination.PageIndex * l)
 	} else {

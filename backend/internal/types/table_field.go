@@ -60,6 +60,7 @@ type Field struct {
 	Type            string // Type of the field
 	IsArray         bool   // Whether the field is an array
 	SortNullsLast   bool   // Whether NULL values sort last in both directions (StarRocks puts them first on ASC)
+	SortFirstValue  string // Value that sorts first on ASC and last on DESC, written into the SQL: a code constant only
 }
 
 // GetAlias returns the alias of the field if it is set, otherwise returns the name

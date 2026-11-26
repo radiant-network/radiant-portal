@@ -246,8 +246,8 @@ func Test_GetVariantUninterpretedCases_NoCriteria_WithPagination_CustomSort(t *t
 		assert.NoError(t, err)
 		assert.Equal(t, int64(5), *count)
 		assert.Equal(t, 2, len(*uninterpretedCases))
-		assert.Equal(t, 5, (*uninterpretedCases)[0].CaseId)
-		assert.Equal(t, 3, (*uninterpretedCases)[1].CaseId)
+		assert.Equal(t, 3, (*uninterpretedCases)[0].CaseId)
+		assert.Equal(t, 4, (*uninterpretedCases)[1].CaseId)
 	})
 }
 

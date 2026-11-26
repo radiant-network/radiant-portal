@@ -7,11 +7,6 @@ import { CaseEntity_Variants_SavedFilters } from 'pom/pages/CaseEntity_Variants_
 
 // The tests share one page: each one restores what it changes.
 describe('Case Entity - Variants - Somatic - SNV (TO) - Table - Columns', { testIsolation: false }, () => {
-  // Cypress drops the intercepts before each test: keep the default table preferences on every test.
-  beforeEach(() => {
-    cy.resetTablePreferences();
-  });
-
   setupOnce(() => {
     cy.login();
     cy.visitCaseVariantsPage(data.caseSomatic.case, data.caseSomatic.seq.seq_id, 'SNV', { cohort: 'TO' });

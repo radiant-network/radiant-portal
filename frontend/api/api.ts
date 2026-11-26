@@ -12030,10 +12030,11 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
          * @summary Get CaseEntity case entity
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
+         * @param {string} [acceptLanguage] Language of the ancestry and exam names: fr, otherwise en
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntity: async (tenant: string, caseId: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        caseEntity: async (tenant: string, caseId: number, acceptLanguage?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'tenant' is not null or undefined
             assertParamExists('caseEntity', 'tenant', tenant)
             // verify required parameter 'caseId' is not null or undefined
@@ -12058,6 +12059,9 @@ export const CasesApiAxiosParamCreator = function (configuration?: Configuration
 
 
     
+            if (acceptLanguage != null) {
+                localVarHeaderParameter['Accept-Language'] = String(acceptLanguage);
+            }
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
@@ -12671,11 +12675,12 @@ export const CasesApiFp = function(configuration?: Configuration) {
          * @summary Get CaseEntity case entity
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
+         * @param {string} [acceptLanguage] Language of the ancestry and exam names: fr, otherwise en
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async caseEntity(tenant: string, caseId: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseEntity>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntity(tenant, caseId, options);
+        async caseEntity(tenant: string, caseId: number, acceptLanguage?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CaseEntity>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.caseEntity(tenant, caseId, acceptLanguage, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['CasesApi.caseEntity']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -12886,11 +12891,12 @@ export const CasesApiFactory = function (configuration?: Configuration, basePath
          * @summary Get CaseEntity case entity
          * @param {string} tenant Tenant code
          * @param {number} caseId Case ID
+         * @param {string} [acceptLanguage] Language of the ancestry and exam names: fr, otherwise en
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        caseEntity(tenant: string, caseId: number, options?: RawAxiosRequestConfig): AxiosPromise<CaseEntity> {
-            return localVarFp.caseEntity(tenant, caseId, options).then((request) => request(axios, basePath));
+        caseEntity(tenant: string, caseId: number, acceptLanguage?: string, options?: RawAxiosRequestConfig): AxiosPromise<CaseEntity> {
+            return localVarFp.caseEntity(tenant, caseId, acceptLanguage, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve DocumentFilters documents filters for a specific case
@@ -13064,12 +13070,13 @@ export class CasesApi extends BaseAPI {
      * @summary Get CaseEntity case entity
      * @param {string} tenant Tenant code
      * @param {number} caseId Case ID
+     * @param {string} [acceptLanguage] Language of the ancestry and exam names: fr, otherwise en
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof CasesApi
      */
-    public caseEntity(tenant: string, caseId: number, options?: RawAxiosRequestConfig) {
-        return CasesApiFp(this.configuration).caseEntity(tenant, caseId, options).then((request) => request(this.axios, this.basePath));
+    public caseEntity(tenant: string, caseId: number, acceptLanguage?: string, options?: RawAxiosRequestConfig) {
+        return CasesApiFp(this.configuration).caseEntity(tenant, caseId, acceptLanguage, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

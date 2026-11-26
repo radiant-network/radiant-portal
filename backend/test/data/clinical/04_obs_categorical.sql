@@ -494,7 +494,8 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO "obs_categorical" (id, case_id, patient_id, fetus_id, observation_code, coding_system, code_value, onset_code, interpretation_code, exam_code, note, tenant_code)
 VALUES (471, 74, 65, NULL, 'ancestry',      'radiant', 'BLK',           NULL, NULL, NULL, '', 'radiant'),
        (472, 74, 65, NULL, 'ancestry',      'radiant', 'MIX',           NULL, NULL, NULL, '', 'radiant'),
-       (473, 74, 65, NULL, 'consanguinity', 'radiant', 'consanguinity', NULL, NULL, NULL, '', 'radiant')
+       (473, 74, 65, NULL, 'consanguinity', 'radiant', 'consanguinity', NULL, NULL, NULL, '', 'radiant'),
+       (474, 74, 65, NULL, 'ancestry',      'radiant', 'NO-FR',         NULL, NULL, NULL, '', 'radiant')
 ON CONFLICT (id) DO NOTHING;
 
 ALTER TABLE obs_categorical ALTER COLUMN id RESTART WITH 1000;

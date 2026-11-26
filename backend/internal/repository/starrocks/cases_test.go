@@ -1098,11 +1098,12 @@ func Test_RetrieveCasePatients_ValueSetObservationsNotesAndFamilyHistory(t *test
 		mother := findMemberByRelationship(*members, "proband")
 		require.NotNil(t, mother)
 
-		require.Len(t, mother.Ethnicities, 2)
+		require.Len(t, mother.Ethnicities, 3)
 		assert.Equal(t, "BLK", mother.Ethnicities[0].Code)
 		assert.Equal(t, "Black", mother.Ethnicities[0].Name)
 		assert.Equal(t, "MIX", mother.Ethnicities[1].Code)
 		assert.Equal(t, "Mixed", mother.Ethnicities[1].Name)
+		assert.Equal(t, "NO-FR", mother.Ethnicities[2].Code)
 
 		require.NotNil(t, mother.Consanguinity)
 		assert.Equal(t, "consanguinity", mother.Consanguinity.Code)

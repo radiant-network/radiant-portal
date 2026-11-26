@@ -183,7 +183,7 @@ export const FilesTable = {
      */
     clickPaginationButton(buttonName: string) {
       cy.waitWhileLoad(60 * 1000);
-      cy.get(CommonSelectors.paginationButton(buttonName)).clickAndWait({ force: true });
+      cy.get(CommonSelectors.paginationButton(buttonName)).should('be.enabled').clickAndWait({ force: true });
     },
     /**
      * Clicks the link in a specific table cell for a given file and column.
@@ -303,6 +303,18 @@ export const FilesTable = {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           cy.validateTableFirstRowContent(value, position);
+        })
+      );
+    },
+    /**
+     * Validates that the first row does not hold a value for a given column.
+     * @param value The value that must not be there.
+     * @param columnID The ID of the column to check.
+     */
+    shouldNotHaveFirstRowValue(value: string, columnID: string) {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
+          cy.get(CommonSelectors.tableRow()).eq(0).find(CommonSelectors.tableCellData).eq(position).should('not.contain', value);
         })
       );
     },

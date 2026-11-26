@@ -105,6 +105,7 @@ Shared POM utilities in `pom/shared/`:
 | `cy.validateSuccessBatchProcessed(resp)` | Assert completed batch (status=SUCCESS) |
 | `cy.validateReport(resp, level, code, msg, path)` | Assert error/warning/info in report |
 | `cy.validateSummary(resp, created, updated, ...)` | Assert batch summary counts |
+| `cy.mockUiPreferences()` | Runs before every test (`support/e2e.js`): the query builder, saved filter selection and data table preferences stay in memory for the test and never reach the shared account, so no spec resets or cleans them up. A page reads only what the test saved before it loaded (`cy.reload()` to read it back) |
 
 ## Authentication
 

@@ -35,7 +35,7 @@ func Test_SearchDocumentsNoFilters(t *testing.T) {
 		assert.Len(t, *documents, 10)
 		assert.Equal(t, int64(172), *count)
 
-		// Default sort is document_id DESC.
+		assert.Equal(t, "proband", (*documents)[0].RelationshipToProbandCode)
 		assert.Equal(t, 296, (*documents)[0].DocumentID)
 	})
 }
@@ -52,10 +52,9 @@ func Test_SearchDocumentsPrenatalDocumentFields(t *testing.T) {
 		query, err := types.NewListQueryFromCriteria(DocumentsQueryConfigForTest, allDocumentsFields, searchCriteria, nil, nil)
 		documents, _, err := repo.SearchDocuments(t.Context(), query)
 		assert.NoError(t, err)
-		require.NotEmpty(t, *documents)
+		require.Len(t, *documents, 1)
 
-		// CLIN-6117 prenatal fixture: document 272 (case 72's fetus alignment) is the highest id of
-		// case 72, so it sorts first under the default document_id DESC.
+		// Prenatal fixture: document 272 is case 72's fetus alignment.
 		document272 := (*documents)[0]
 		assert.Equal(t, 272, document272.DocumentID)
 		assert.Equal(t, "S-PRENAT-72.recal.cram", document272.Name)
