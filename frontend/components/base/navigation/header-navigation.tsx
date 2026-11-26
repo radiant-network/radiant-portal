@@ -36,6 +36,7 @@ type HeaderNavigationBackLink = { label: string; to: string };
 
 interface EntityHeaderProps extends VariantProps<typeof headerNavigationVariants> {
   isLoading?: boolean;
+  metadata?: ReactNode;
   badges?: HeaderNavigationBadge[];
   buttons?: ButtonProps[];
   statuses?: ReactNode[];
@@ -46,6 +47,7 @@ interface EntityHeaderProps extends VariantProps<typeof headerNavigationVariants
 
 function HeaderNavigation({
   title,
+  metadata,
   badges,
   buttons,
   backLink,
@@ -78,6 +80,7 @@ function HeaderNavigation({
                 {backLink && <BackLink to={backLink.to}>{backLink.label}</BackLink>}
                 <h1 className="text-2xl font-bold max-w-md text-ellipsis overflow-hidden whitespace-nowrap">{title}</h1>
                 <div className="flex self-stretch items-center gap-2">
+                  {metadata}
                   {(badges ?? []).map((badgeProps, index) => {
                     const { tooltipText, ...restBadgeProps } = badgeProps;
                     if (tooltipText) {

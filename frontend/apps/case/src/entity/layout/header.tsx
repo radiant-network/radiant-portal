@@ -1,6 +1,7 @@
-import { Biohazard, Users } from 'lucide-react';
+import { Biohazard, FlaskRound, Users } from 'lucide-react';
 
 import type { CaseEntity } from '@/api/api';
+import { PROBAND } from '@/components/base/constants';
 import CasePriorityDropdown, { isCasePriority } from '@/components/base/dropdowns/case-priority-dropdown';
 import CaseStatusDropdown from '@/components/base/dropdowns/case-status-dropdown';
 import PriorityIndicator, { type PriorityIndicatorCode } from '@/components/base/indicators/priority-indicator';
@@ -25,11 +26,29 @@ export default function Header({ data, isLoading, onStatusChange, onPriorityChan
   const { t } = useI18n();
   const canEditCase = useCanEditCase(data?.diagnosis_lab_code);
 
+  const probandSampleId = data?.sequencing_experiments.find(
+    seqExp => seqExp.relationship_to_proband === PROBAND,
+  )?.sample_submitter_id;
+
   return (
     <HeaderNavigation
       isLoading={isLoading}
       backLink={{ label: t('main_navbar.links.cases'), to: '/case' }}
       title={`${t('case_entity.header.case')} ${data?.case_id}`}
+      metadata={
+        probandSampleId ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="flex items-center gap-1 pr-2 text-base font-medium">
+                <FlaskRound className="size-4" aria-hidden="true" />
+                <span className="sr-only">{t('case_entity.details.sample_id')}</span>
+                {probandSampleId}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{t('case_entity.details.sample_id')}</TooltipContent>
+          </Tooltip>
+        ) : undefined
+      }
       badges={[
         {
           variant: 'secondary',
