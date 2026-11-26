@@ -1,15 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import DistributionBar, { type DistributionBarItem } from '@/components/base/distribution-bar/distribution-bar';
+import DistributionBar, {
+  DISTRIBUTION_BAR_COLORS,
+  type DistributionBarItem,
+} from '@/components/base/distribution-bar/distribution-bar';
 import DistributionLegend from '@/components/base/distribution-bar/distribution-legend';
 
 import { StorySection, StoryShowcase } from '../story-section';
 
 const statusItems: DistributionBarItem[] = [
-  { key: 'pass', label: 'Pass', value: 147, color: 'green' },
+  { key: 'pass', label: 'Pass', value: 147, color: 'emerald' },
   { key: 'warning', label: 'Warning', value: 26, color: 'amber' },
   { key: 'fail', label: 'Fail', value: 23, color: 'red' },
-  { key: 'unmappable', label: 'Unmappable', value: 17, color: 'neutral' },
+  { key: 'unmappable', label: 'Unmappable', value: 17, color: 'grey' },
 ];
 
 const meta = {
@@ -43,6 +46,26 @@ function BarWithLegend({ items, colorblindMode }: { items: DistributionBarItem[]
 
 export const Default: Story = {
   render: args => <BarWithLegend items={args.items} colorblindMode={args.colorblindMode} />,
+};
+
+export const AllColors: Story = {
+  args: {
+    items: DISTRIBUTION_BAR_COLORS.map(color => ({ key: color, label: color, value: 10, color })),
+  },
+  render: args => (
+    <StoryShowcase>
+      <StorySection
+        title="All colors"
+        description={`Available colors for the items, editable in the controls: ${DISTRIBUTION_BAR_COLORS.join(', ')}.`}
+      >
+        <BarWithLegend items={args.items} />
+      </StorySection>
+
+      <StorySection title="All colors, colorblind mode">
+        <BarWithLegend items={args.items} colorblindMode />
+      </StorySection>
+    </StoryShowcase>
+  ),
 };
 
 export const AllVariants: Story = {
