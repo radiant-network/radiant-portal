@@ -2,18 +2,9 @@ import type { CSSProperties } from 'react';
 
 import { cn } from '@/components/lib/utils';
 
-export type DistributionBarColor =
-  | 'green'
-  | 'lime'
-  | 'yellow'
-  | 'amber'
-  | 'orange'
-  | 'red'
-  | 'cyan'
-  | 'blue'
-  | 'violet'
-  | 'fuchsia'
-  | 'neutral';
+export const DISTRIBUTION_BAR_COLORS = ['red', 'amber', 'emerald', 'blue', 'fuchsia', 'grey'] as const;
+
+export type DistributionBarColor = (typeof DISTRIBUTION_BAR_COLORS)[number];
 
 export type DistributionBarItem = {
   key: string;
@@ -23,17 +14,12 @@ export type DistributionBarItem = {
 };
 
 export const distributionBarColorClasses: Record<DistributionBarColor, string> = {
-  green: 'bg-green text-green',
-  lime: 'bg-lime text-lime',
-  yellow: 'bg-yellow text-yellow',
-  amber: 'bg-amber text-amber',
-  orange: 'bg-orange text-orange',
-  red: 'bg-red text-red',
-  cyan: 'bg-cyan text-cyan',
-  blue: 'bg-blue text-blue',
-  violet: 'bg-violet text-violet',
-  fuchsia: 'bg-fuchsia text-fuchsia',
-  neutral: 'bg-neutral text-neutral',
+  red: 'bg-distribution-red text-distribution-red',
+  amber: 'bg-distribution-amber text-distribution-amber',
+  emerald: 'bg-distribution-emerald text-distribution-emerald',
+  blue: 'bg-distribution-blue text-distribution-blue',
+  fuchsia: 'bg-distribution-fuchsia text-distribution-fuchsia',
+  grey: 'bg-distribution-grey text-distribution-grey',
 };
 
 const PATTERN_COUNT = 3;

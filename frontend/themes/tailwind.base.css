@@ -349,6 +349,14 @@
   --color-indicator-fuchsia: var(--radiant-fuchsia-600);
   --color-indicator-grey: var(--radiant-slate-300);
 
+  /* Distribution Bar Colors */
+  --color-distribution-red: var(--radiant-red-500);
+  --color-distribution-amber: var(--radiant-amber-500);
+  --color-distribution-emerald: var(--radiant-emerald-600);
+  --color-distribution-blue: var(--radiant-blue-500);
+  --color-distribution-fuchsia: var(--radiant-fuchsia-600);
+  --color-distribution-grey: var(--radiant-slate-300);
+
   /* Table Colors */
   --color-table-accent: var(--table-accent);
   --color-table-active: var(--table-active);
