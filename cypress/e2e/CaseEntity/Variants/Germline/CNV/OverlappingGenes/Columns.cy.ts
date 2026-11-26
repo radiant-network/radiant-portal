@@ -7,11 +7,6 @@ import { OverlappingGenesModal } from 'pom/pages/OverlappingGenesModal';
 
 // The tests share one page: each one restores what it changes.
 describe('Case Entity - Variants - Germline - CNV - Overlapping Genes - Columns', { testIsolation: false }, () => {
-  // Cypress drops the intercepts before each test: keep the default table preferences on every test.
-  beforeEach(() => {
-    cy.resetTablePreferences();
-  });
-
   setupOnce(() => {
     cy.login();
     cy.visitCaseVariantsPage(data.case.case, data.case.seq.seq_id, 'CNV', data.cnvGermline.sqon);

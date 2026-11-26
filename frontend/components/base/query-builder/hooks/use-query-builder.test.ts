@@ -123,7 +123,11 @@ describe('qBReducer REMOVE_FACET_PILL', () => {
 describe('qBReducer REMOVE_QUERY with a combined query', () => {
   const q1 = query('q1', 'chromosome');
   const q2 = query('q2', 'variant_type');
-  const q3: ISyntheticSqon = { id: 'q3', op: BooleanOperators.And, content: [q1, q2] };
+  const q3: ISyntheticSqon = {
+    id: 'q3',
+    op: BooleanOperators.And,
+    content: [q1, q2] as unknown as ISyntheticSqon['content'],
+  };
   const q4: ISyntheticSqon = { id: 'q4', op: BooleanOperators.And, content: [] };
 
   function contextWithCombinedQuery(activeQueryId = 'q4'): IQBContext {
@@ -160,5 +164,14 @@ describe('qBReducer REMOVE_QUERY with a combined query', () => {
     const next = qBReducer(afterQ1, { type: QBActionType.REMOVE_QUERY, payload: { id: 'q2' } });
 
     expect(next.activeQueryId).toBe('q4');
+  });
+
+  it('removes an emptied combined query missing from the combined queries settings', () => {
+    const context = contextWithCombinedQuery();
+    const loadedFromSavedFilter = { ...context, settings: { ...context.settings, combinedQueries: {} } };
+    const afterQ1 = qBReducer(loadedFromSavedFilter, { type: QBActionType.REMOVE_QUERY, payload: { id: 'q1' } });
+    const next = qBReducer(afterQ1, { type: QBActionType.REMOVE_QUERY, payload: { id: 'q2' } });
+
+    expect(next.sqons).toEqual([q4]);
   });
 });

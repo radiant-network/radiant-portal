@@ -1306,7 +1306,6 @@
     },
     "unassigned_avatar": {
       "can_assign": "Assign case",
-      "cannot_assign": "No assignment",
       "unassigned": "Unassigned"
     }
   },
@@ -1758,10 +1757,6 @@
       "germline": "Solo germline",
       "germline_family": "Family germline"
     },
-    "case_type_code": {
-      "germline": "Germline",
-      "somatic": "Somatic"
-    },
     "status": {
       "completed": "Closed",
       "draft": "Draft",
@@ -1797,7 +1792,7 @@
         "assignee_id": "Assignment",
         "assignee_id_tooltip": "Filter by assignment",
         "case_category_code": "Pre/Postnatal",
-        "case_type_code": "Type",
+        "case_type": "Type",
         "diagnosis_lab_code": "Diagnostic lab",
         "life_status_code": "Vital Status",
         "my_cases": "My cases",

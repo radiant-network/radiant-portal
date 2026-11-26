@@ -54,19 +54,17 @@ type TaskSelector struct {
 
 // TaskSelector returns the criteria selecting the tasks that produce occurrences of this type.
 // Returns a zero selector and an error when the occurrence type is not recognized, or is
-// germline_cnv: its tasks are the ones with CNV rows for the sequencing, not a task type.
+// germline_cnv or somatic_cnv: their tasks are the ones with CNV rows for the sequencing.
 func (o OccurrenceType) TaskSelector() (TaskSelector, error) {
 	switch o {
 	case OccurrenceTypeGermlineSNV:
 		return TaskSelector{TaskTypeCode: RadiantGermlineAnnotationTask, SomaticCohort: SomaticCohortNone}, nil
-	case OccurrenceTypeGermlineCNV:
+	case OccurrenceTypeGermlineCNV, OccurrenceTypeSomaticCNV:
 		return TaskSelector{}, fmt.Errorf("occurrence type %q has no task selector", string(o))
 	case OccurrenceTypeSomaticSNV, OccurrenceTypeSomaticSNVTumorNormal:
 		return TaskSelector{TaskTypeCode: RadiantSomaticAnnotationTask, SomaticCohort: SomaticCohortTumorNormal}, nil
 	case OccurrenceTypeSomaticSNVTumorOnly:
 		return TaskSelector{TaskTypeCode: RadiantSomaticAnnotationTask, SomaticCohort: SomaticCohortTumorOnly}, nil
-	case OccurrenceTypeSomaticCNV:
-		return TaskSelector{TaskTypeCode: AlignmentSomaticVariantCallingTaskTypeCode, SomaticCohort: SomaticCohortNone}, nil
 	default:
 		return TaskSelector{}, fmt.Errorf("unknown occurrence type %q", string(o))
 	}

@@ -8,7 +8,6 @@ import { VariantEntity_Patients } from 'pom/pages/VariantEntity_Patients';
 describe('VariantEntity - Patients - Uninterpreted - Information displayed', { testIsolation: false }, () => {
   setupOnce(() => {
     cy.login();
-    cy.resetTablePreferences();
     cy.visitVariantPatientsPage(data.variantGermline.locus_id);
     VariantEntity_Patients.uninterpreted.actions.selectTab();
     VariantEntity_Patients.uninterpreted.actions.sortColumn('case');

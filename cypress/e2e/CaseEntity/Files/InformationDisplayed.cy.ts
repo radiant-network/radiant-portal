@@ -8,7 +8,6 @@ import { CaseEntity_Files } from 'pom/pages/CaseEntity_Files';
 describe('CaseEntity - Files - Information displayed', { testIsolation: false }, () => {
   setupOnce(() => {
     cy.login();
-    cy.resetTablePreferences();
     cy.visitCaseFilesPage(data.file.case, data.file.search_criteria);
     CaseEntity_Files.actions.sortColumn('name');
     CaseEntity_Files.actions.sortColumn('name');

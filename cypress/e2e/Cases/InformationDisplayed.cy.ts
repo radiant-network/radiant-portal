@@ -8,7 +8,6 @@ import { CasesTable } from 'pom/pages/CasesTable';
 describe('Cases - Information displayed', { testIsolation: false }, () => {
   setupOnce(() => {
     cy.login();
-    cy.resetTablePreferences();
     cy.visitCasesPage(data.case.search_criteria);
     CasesTable.actions.showAllColumns();
   });

@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"maps"
+	"net/http"
 	"slices"
 	"strconv"
 
@@ -123,10 +124,9 @@ type caseBatchRecord struct {
 	SubmitterCaseID   string `json:"submitter_case_id"`
 }
 
-// OrgsFromCaseBatchBody resolves the diagnosis lab of every case in a case-batch payload, for
-// the all-of gate: each record is authorized against its own lab. A record stating no lab (a
-// PATCH may) is resolved through the case it names, so omitting the field cannot dodge the
-// check; a record naming neither a lab nor an existing case resolves to nothing, which denies.
+// OrgsFromCaseBatchBody resolves the labs a case-batch payload touches, for the all-of gate.
+// A POST record is checked at its stated lab: the worker skips an existing case. A PUT or PATCH
+// record can move the case it names, so that case must exist and its current lab is checked too.
 func OrgsFromCaseBatchBody(repo caseOrgLookup) OrgResolver {
 	return func(c *gin.Context) ([]string, error) {
 		tenant, err := GetTenant(c)
@@ -150,7 +150,9 @@ func OrgsFromCaseBatchBody(repo caseOrgLookup) OrgResolver {
 		for _, record := range body.Cases {
 			if record.DiagnosticLabCode != "" {
 				orgs[record.DiagnosticLabCode] = true
-				continue
+				if c.Request.Method == http.MethodPost {
+					continue
+				}
 			}
 			if record.ProjectCode == "" || record.SubmitterCaseID == "" {
 				return nil, nil
@@ -170,8 +172,6 @@ func OrgsFromCaseBatchBody(repo caseOrgLookup) OrgResolver {
 			for _, pair := range pairs {
 				lab, found := resolved[pair]
 				if !found {
-					// The case does not exist in this tenant: nothing attributes the record to
-					// an org, so the batch is refused rather than queued for the worker to reject.
 					return nil, nil
 				}
 				orgs[lab] = true

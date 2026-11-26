@@ -8,7 +8,6 @@ import { FilesTable } from 'pom/pages/FilesTable';
 describe('Files - Information displayed', { testIsolation: false }, () => {
   setupOnce(() => {
     cy.login();
-    cy.resetTablePreferences();
     cy.visitFilesPage(data.file.search_criteria);
     FilesTable.actions.sortColumn('case');
     FilesTable.actions.sortColumn('case');

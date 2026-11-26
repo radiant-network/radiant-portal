@@ -228,7 +228,7 @@ export const CasesTable = {
      */
     clickPaginationButton(buttonName: string) {
       cy.waitWhileLoad(60 * 1000);
-      cy.get(CommonSelectors.paginationButton(buttonName)).clickAndWait({ force: true });
+      cy.get(CommonSelectors.paginationButton(buttonName)).should('be.enabled').clickAndWait({ force: true });
     },
     /**
      * Clicks the link in a specific table cell for a given case and column.
@@ -370,6 +370,22 @@ export const CasesTable = {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
           cy.validateTableFirstRowContent(value, position);
+        })
+      );
+    },
+    /**
+     * Validates the value of every row for a given column.
+     * @param value The expected value (string or RegExp).
+     * @param columnID The ID of the column to check.
+     */
+    shouldHaveValueOnEveryRow(value: string | RegExp, columnID: string) {
+      cy.then(() =>
+        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
+          cy.get(CommonSelectors.tableRow())
+            .should('have.length.gte', 1)
+            .each($row => {
+              cy.wrap($row).find(CommonSelectors.tableCellData).eq(position).contains(value).should('exist');
+            });
         })
       );
     },

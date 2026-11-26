@@ -844,3 +844,30 @@ func Test_SomaticCNV_DefaultFields_Exclude_GnomadAF_And_AC(t *testing.T) {
 	assert.NotContains(t, names, "gnomad_af")
 	assert.NotContains(t, names, "gnomad_ac")
 }
+
+func Test_SomaticCNV_ListTasks_CallingTaskWithRows_Listed(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		tasks, err := repo.ListTasks(t.Context(), 71, 74)
+
+		// Task 85 also has rows on seq 74 but the type in use before RAD-396, so it stays out.
+		require.NoError(t, err)
+		require.Len(t, tasks, 1)
+		assert.Equal(t, 76, tasks[0].ID)
+		assert.Equal(t, types.AlignmentSomaticVariantCallingTaskTypeCode, tasks[0].TaskTypeCode)
+		assert.Equal(t, "Genome Alignment and Somatic Variant Calling", tasks[0].TaskTypeName)
+	})
+}
+
+func Test_SomaticCNV_ListTasks_CallingTaskWithNoRows_ReturnsEmpty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
+		repo := NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+
+		// Task 75 is the calling task of seq 73 and has no CNV row.
+		tasks, err := repo.ListTasks(t.Context(), 71, 73)
+
+		require.NoError(t, err)
+		assert.Empty(t, tasks)
+	})
+}
