@@ -4,7 +4,7 @@
 declare namespace Cypress {
   interface Chainable {
     // apiCommands
-    apiCall(method: string, query: string, body: string, token: string, retries?: number, headers?: Record<string, string>): Cypress.Chainable;
+    apiCall(method: string, query: string, body: string, token: string, retries?: number): Cypress.Chainable;
     apiCallInTenant(tenant: string, method: string, query: string, body: string, token: string, retries?: number): Cypress.Chainable;
     ensureReferenceSavedFilters(token: string): Cypress.Chainable;
     getToken(): Chainable<string>;

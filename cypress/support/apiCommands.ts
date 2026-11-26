@@ -22,9 +22,8 @@ export const tokenPayload = (token: string) => {
  * @param body The request body as a JSON string.
  * @param token The Bearer authentication token.
  * @param retries The number of retry attempts on 500 errors.
- * @param headers Headers sent along with Authorization.
  */
-const requestInTenant = (tenant: string, method: string, query: string, body: string, token: string, retries: number, headers: Record<string, string> = {}): Cypress.Chainable => {
+const requestInTenant = (tenant: string, method: string, query: string, body: string, token: string, retries: number): Cypress.Chainable => {
   const apiUrl = Cypress.expose('api_base_url');
 
   if (Cypress.expose('debug')) {
@@ -36,7 +35,7 @@ const requestInTenant = (tenant: string, method: string, query: string, body: st
       .request({
         method: method,
         url: `${apiUrl}${tenant}/${query}`,
-        headers: { ...headers, Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}` },
         body: body,
         failOnStatusCode: false,
         timeout: 60000,
@@ -64,10 +63,9 @@ const requestInTenant = (tenant: string, method: string, query: string, body: st
  * @param body The request body as a JSON string.
  * @param token The Bearer authentication token.
  * @param retries The number of retry attempts on 500 errors (default: 3).
- * @param headers Headers sent along with Authorization (e.g., { 'Accept-Language': 'fr' }).
  */
-Cypress.Commands.add('apiCall', (method: string, query: string, body: string, token: string, retries: number = 3, headers: Record<string, string> = {}) => {
-  return requestInTenant(Cypress.expose('api_tenant'), method, query, body, token, retries, headers);
+Cypress.Commands.add('apiCall', (method: string, query: string, body: string, token: string, retries: number = 3) => {
+  return requestInTenant(Cypress.expose('api_tenant'), method, query, body, token, retries);
 });
 
 /**
