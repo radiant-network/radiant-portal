@@ -1,4 +1,6 @@
 import axios, { AxiosError, HttpStatusCode } from 'axios';
+import i18next from 'i18next';
+import { mutate } from 'swr';
 
 import {
   isEdgeSessionExpired,
@@ -12,6 +14,17 @@ export const axiosClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+// The app's language, not the browser's: the API serves its labels in it.
+axiosClient.interceptors.request.use(config => {
+  if (i18next.language) config.headers.set('Accept-Language', i18next.language);
+  return config;
+});
+
+// SWR keys do not hold the language: refetch every cached request in the new one.
+i18next.on('languageChanged', () => {
+  void mutate(() => true);
 });
 
 let refreshTokenPromise: Promise<any> | null = null;
