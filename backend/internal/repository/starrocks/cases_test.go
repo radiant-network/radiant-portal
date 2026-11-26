@@ -301,33 +301,6 @@ func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
 	})
 }
 
-func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
-		searchCriteria := []types.SearchCriterion{
-			{
-				FieldName: types.CaseTypeCodeField.GetAlias(),
-				Value:     []interface{}{"germline"},
-			},
-		}
-		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err := repo.SearchCases(t.Context(), query)
-		assert.NoError(t, err)
-		assert.Equal(t, int64(25), *count)
-
-		searchCriteria = []types.SearchCriterion{
-			{
-				FieldName: types.CaseTypeCodeField.GetAlias(),
-				Value:     []interface{}{"somatic"},
-			},
-		}
-		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err = repo.SearchCases(t.Context(), query)
-		assert.NoError(t, err)
-		assert.Equal(t, int64(1), *count)
-	})
-}
-
 func searchCasesOnCaseType(t *testing.T, env *testutils.Env, operator string, values ...interface{}) (*[]CaseResult, int64) {
 	t.Helper()
 	repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
@@ -654,8 +627,7 @@ func Test_GetCasesFilters(t *testing.T) {
 		assert.Equal(t, 3, len((*filters).LifeStatus))
 		assert.Equal(t, 2, len((*filters).CaseCategory))
 		assert.Equal(t, 2, len((*filters).Panel))
-		assert.Equal(t, 2, len((*filters).CaseType))
-		assert.Equal(t, []types.FiltersValue{{Key: "germline"}, {Key: "germline_family"}, {Key: "somatic"}}, (*filters).ComputedCaseType)
+		assert.Equal(t, []types.FiltersValue{{Key: "germline"}, {Key: "germline_family"}, {Key: "somatic"}}, (*filters).CaseType)
 	})
 }
 

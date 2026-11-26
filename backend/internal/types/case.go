@@ -571,7 +571,6 @@ var CaseTypeCodeField = Field{
 	Name:          "case_type_code",
 	Alias:         "case_type_code",
 	CanBeSelected: true,
-	CanBeFiltered: true,
 	CanBeSorted:   true,
 	Table:         CaseTable,
 }
@@ -660,7 +659,6 @@ type CaseFilters struct {
 	Panel                []FiltersValue `json:"panel_code" validate:"required"`
 	LifeStatus           []FiltersValue `json:"life_status_code" validate:"required"`
 	CaseCategory         []FiltersValue `json:"case_category_code" validate:"required"`
-	CaseType             []FiltersValue `json:"case_type_code" validate:"required"`
-	ComputedCaseType     []FiltersValue `json:"case_type" validate:"required"`
+	CaseType             []FiltersValue `json:"case_type" validate:"required"`
 	Assignee             []CaseAssignee `json:"assignee_id" validate:"required"`
 }

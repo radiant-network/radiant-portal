@@ -720,6 +720,14 @@ func Test_CasesFields_CaseType_FilterOnly(t *testing.T) {
 	assert.False(t, CaseTypeField.CanBeSorted)
 }
 
+func Test_CasesFields_CaseTypeCode_NotFilterable(t *testing.T) {
+	t.Parallel()
+	assert.Contains(t, CasesFields, CaseTypeCodeField)
+	assert.False(t, CaseTypeCodeField.CanBeFiltered)
+	assert.True(t, CaseTypeCodeField.CanBeSelected)
+	assert.True(t, CaseTypeCodeField.CanBeSorted)
+}
+
 func Test_VariantInterpretedCasesFields_LeavesCaseSearchOnlyFieldsOut(t *testing.T) {
 	t.Parallel()
 	assert.NotContains(t, VariantInterpretedCasesFields, CaseMemberRunNameField)

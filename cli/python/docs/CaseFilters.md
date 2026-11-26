@@ -9,7 +9,6 @@ Name | Type | Description | Notes
 **assignee_id** | [**List[CaseAssignee]**](CaseAssignee.md) |  | 
 **case_category_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 **case_type** | [**List[FiltersValue]**](FiltersValue.md) |  | 
-**case_type_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 **diagnosis_lab_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 **life_status_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
 **ordering_organization_code** | [**List[FiltersValue]**](FiltersValue.md) |  | 
