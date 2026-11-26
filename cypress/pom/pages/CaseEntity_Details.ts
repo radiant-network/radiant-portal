@@ -9,6 +9,7 @@ const selectors = {
     tableCell: (bioinfoSeq: any) => `${CommonSelectors.tableRow(selectors.bioinformaticsCard.tableId)}:contains("${bioinfoSeq.type}") ${CommonSelectors.tableCellData}`,
     tableId: '[data-cy="bioinformatics-table"]',
   },
+  clinicalCard: '[data-cy="clinical-card"]',
   sequencingCard: {
     tableCell: (dataSeq: any) => `${CommonSelectors.tableRow(selectors.sequencingCard.tableId)}:contains("${dataSeq.relationship.slice(1)}") ${CommonSelectors.tableCellData}`,
     tableId: '[id="sequencing-experiments"]',
@@ -491,6 +492,18 @@ export const CaseEntity_Details = {
         },
       };
     })(),
+  },
+  clinicalCard: {
+    validations: {
+      /**
+       * Validates that a member of the clinical card shows the text in a field.
+       * @param fieldId The field id, e.g. 'ethnicity' or 'exam_name'.
+       * @param text The expected text.
+       */
+      shouldShowField(fieldId: string, text: string) {
+        cy.get(`${selectors.clinicalCard} ${CommonSelectors.datacy(fieldId)}`).should('contain', text);
+      },
+    },
   },
   sequencingCard: {
     actions: (() => {

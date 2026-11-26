@@ -81,7 +81,9 @@ function ObservationsCard({ exams }: { exams?: CaseExam[] }) {
         {groupedExams.map(exam => (
           <div key={exam.code} className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">{exam.name}</span>
+              <span data-cy="exam-name" className="text-sm font-medium">
+                {exam.name}
+              </span>
               {exam.interpretationCode && (
                 <Badge variant={exam.interpretationCode === 'abnormal' ? 'red' : 'secondary'}>
                   {t(`case_entity.details.exam_interpretation.${exam.interpretationCode}`)}
@@ -145,7 +147,9 @@ function MemberDetails({ member }: { member?: CasePatientClinicalInformation }) 
       {!!member.ethnicities?.length && (
         <div>
           <CardTitle>{t('case_entity.details.ethnicity')}</CardTitle>
-          <p className="text-sm">{member.ethnicities.map(ethnicity => ethnicity.name || ethnicity.code).join(', ')}</p>
+          <p data-cy="ethnicity" className="text-sm">
+            {member.ethnicities.map(ethnicity => ethnicity.name || ethnicity.code).join(', ')}
+          </p>
         </div>
       )}
 
