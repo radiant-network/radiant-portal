@@ -195,6 +195,34 @@ func cnvOccurrencesStatistics(ctx context.Context, db *gorm.DB, cnvTable types.T
 	return &statistics, nil
 }
 
+// listCNVTasks returns the tasks of the case and sequencing that have rows in cnvTable for the
+// sequencing, newest first. taskTypeCodes, when given, also restricts the task type.
+func listCNVTasks(ctx context.Context, db *gorm.DB, cnvTable types.Table, caseId int, seqId int, taskTypeCodes ...string) ([]types.TaskOccurrenceType, error) {
+	part, err := utils.GetSequencingPart(seqId, db)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching part of seq %d: %w", seqId, err)
+	}
+	withRows := db.Table(cnvTable.TenantQualifiedName(ctx)).
+		Select("DISTINCT task_id").
+		Where("part = ? AND seq_id = ?", part, seqId)
+
+	tx := db.Table(fmt.Sprintf("%s tctx", types.TaskContextTable.TenantQualifiedName(ctx))).
+		Select("t.id, t.task_type_code, tt.name_en AS task_type_name, t.pipeline_name, t.pipeline_version, t.genome_build, t.created_on").
+		Joins(fmt.Sprintf("JOIN %s t ON t.id = tctx.task_id", types.TaskTable.TenantQualifiedName(ctx))).
+		Joins(fmt.Sprintf("JOIN %s tt ON tt.code = t.task_type_code", types.TaskTypeTable.TenantQualifiedName(ctx))).
+		Where("tctx.sequencing_experiment_id = ? AND (tctx.case_id = ? OR tctx.case_id IS NULL)", seqId, caseId).
+		Where("t.id IN (?)", withRows)
+	if len(taskTypeCodes) > 0 {
+		tx = tx.Where("t.task_type_code IN ?", taskTypeCodes)
+	}
+
+	var tasks []types.TaskOccurrenceType
+	if err = tx.Order("t.created_on DESC, t.id DESC").Find(&tasks).Error; err != nil {
+		return nil, fmt.Errorf("error listing CNV tasks of case %d / seq %d: %w", caseId, seqId, err)
+	}
+	return tasks, nil
+}
+
 // cnvGenesOverlap lists the genes overlapping one CNV segment of cnvTable. It reads only the
 // segment's chromosome/start/end/length, so it is identical for germline and somatic CNV.
 func cnvGenesOverlap(ctx context.Context, db *gorm.DB, cnvTable types.Table, seqId int, taskId int, cnvId int) ([]types.CNVGeneOverlap, error) {
