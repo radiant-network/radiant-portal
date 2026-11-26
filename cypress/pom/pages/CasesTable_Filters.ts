@@ -22,9 +22,9 @@ export const filters = [
     isVisibleByDefault: true,
   },
   {
-    key: 'case_type_code',
+    key: 'case_type',
     label: 'Type',
-    field: 'case_type_code',
+    field: 'case_type',
     isVisibleByDefault: true,
   },
   {
@@ -119,6 +119,14 @@ export const CasesTable_Filters = {
      */
     selectFirstOption(filterKey: string) {
       cy.get(CommonSelectors.filterOption(filterKey)).first().clickAndWait({ force: true });
+    },
+    /**
+     * Selects an option by its key.
+     * @param filterKey The filter key (e.g. 'case_type').
+     * @param optionKey The option key (e.g. 'germline_family').
+     */
+    selectOption(filterKey: string, optionKey: string) {
+      cy.get(CommonSelectors.filterOption(filterKey, optionKey)).clickAndWait({ force: true });
     },
   },
 
