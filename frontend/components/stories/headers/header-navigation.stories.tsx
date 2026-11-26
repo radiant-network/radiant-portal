@@ -1,6 +1,6 @@
 import { BrowserRouter } from 'react-router';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { Users } from 'lucide-react';
+import { FlaskRound, Users } from 'lucide-react';
 
 import HeaderNavigation from '@/components/base/navigation/header-navigation';
 
@@ -31,6 +31,12 @@ export const Default: Story = {
   args: {
     isLoading: false,
     title: 'Title',
+    metadata: (
+      <span className="flex items-center gap-1 pr-2 text-base font-medium">
+        <FlaskRound className="size-4" />
+        S111216
+      </span>
+    ),
     badges: [
       {
         variant: 'secondary',

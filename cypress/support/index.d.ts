@@ -10,8 +10,8 @@ declare namespace Cypress {
     getToken(): Chainable<string>;
     getUsername(): Chainable<string>;
     getUserId(token: string): Chainable<string>;
-    resetTablePreferences(): cy & CyEventEmitter;
     mockFavoritePreferences(favorites: string[] | null | number, postStatus?: number): cy & CyEventEmitter;
+    mockUiPreferences(): cy & CyEventEmitter;
     validateAcceptedBatchResponse(response: any, batch_type: string): cy & CyEventEmitter;
     validateItemCount(response: any, count: number, field?: string): cy & CyEventEmitter;
     validateMessage(response: any, message: string): cy & CyEventEmitter;

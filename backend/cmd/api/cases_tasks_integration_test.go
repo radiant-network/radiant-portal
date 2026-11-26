@@ -18,9 +18,10 @@ import (
 func getCaseOccurrenceTasks(t *testing.T, env *testutils.Env, caseId int, seqId int, dataType string) (int, string) {
 	t.Helper()
 	repo := postgres.NewTaskRepository(database.PostgresDB{DB: env.Postgres})
-	cnvRepo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+	germlineCNVRepo := starrocks.NewGermlineCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
+	somaticCNVRepo := starrocks.NewSomaticCNVOccurrencesRepository(database.StarrocksDB{DB: env.Starrocks})
 	router := tenantRouter()
-	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", server.CaseOccurrenceTasksHandler(repo, cnvRepo))
+	router.GET("/:tenant/cases/:case_id/:seq_id/tasks_with_occurrences", server.CaseOccurrenceTasksHandler(repo, germlineCNVRepo, somaticCNVRepo))
 
 	url := fmt.Sprintf("/radiant/cases/%d/%d/tasks_with_occurrences?data_type=%s", caseId, seqId, dataType)
 	req, _ := http.NewRequest("GET", url, nil)
@@ -63,16 +64,25 @@ func Test_CaseOccurrenceTasksEndpoint_SomaticSNV_ReturnsSomaticAnnotationTask(t 
 	})
 }
 
-func Test_CaseOccurrenceTasksEndpoint_SomaticCNV_ReturnsAlignmentSomaticVariantCallingTask(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres}, func(t *testing.T, env *testutils.Env) {
-		// Task 76 (alignment_somatic_variant_calling) shares tumoral seq 74 with the somatic SNV tasks
-		// 74 and 82; the task type alone tells them apart. Task 85 (tumor_only_variant_calling) is not
-		// returned.
+func Test_CaseOccurrenceTasksEndpoint_SomaticCNV_ReturnsCallingTaskWithCNVRows(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres, Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		// Task 76 (alignment_somatic_variant_calling) has a CNV row on seq 74. Task 85 has rows too but the
+		// tumor_only_variant_calling type, and is not returned.
 		expected := `[{"id":76,"task_type_code":"alignment_somatic_variant_calling","task_type_name":"Genome Alignment and Somatic Variant Calling","pipeline_name":"Dragen","pipeline_version":"4.4.4","genome_build":"GRch38","created_on":"2026-03-09T13:08:00Z"}]`
 		code, body := getCaseOccurrenceTasks(t, env, 71, 74, "somatic_cnv")
 
 		assert.Equal(t, http.StatusOK, code)
 		assert.JSONEq(t, expected, body)
+	})
+}
+
+func Test_CaseOccurrenceTasksEndpoint_SomaticCNV_CallingTaskWithNoCNV_ReturnsEmpty(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ReadPostgres, Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		// Task 75 (alignment_somatic_variant_calling) is attached to seq 73 and has no CNV row.
+		code, body := getCaseOccurrenceTasks(t, env, 71, 73, "somatic_cnv")
+
+		assert.Equal(t, http.StatusOK, code)
+		assert.Equal(t, "[]", body)
 	})
 }
 

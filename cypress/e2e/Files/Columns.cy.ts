@@ -5,11 +5,6 @@ import { FilesTable } from 'pom/pages/FilesTable';
 
 // The tests share one page: each one restores what it changes.
 describe('Files - Columns', { testIsolation: false }, () => {
-  // Cypress drops the intercepts before each test: keep the default table preferences on every test.
-  beforeEach(() => {
-    cy.resetTablePreferences();
-  });
-
   setupOnce(() => {
     cy.login();
     cy.visitFilesPage();

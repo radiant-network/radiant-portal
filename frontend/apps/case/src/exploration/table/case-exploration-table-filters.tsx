@@ -32,7 +32,7 @@ const CRITERIAS = {
   assignee_id: { key: 'assignee_id', weight: 0, visible: true },
   priority_code: { key: 'priority_code', weight: 1, visible: true },
   status_code: { key: 'status_code', weight: 2, visible: true },
-  case_type_code: { key: 'case_type_code', weight: 3, visible: true },
+  case_type: { key: 'case_type', weight: 3, visible: true },
   diagnosis_lab_code: { key: 'diagnosis_lab_code', weight: 4, visible: true },
   project_code: { key: 'project_code', visible: false },
   analysis_catalog_code: { key: 'analysis_catalog_code', visible: false },
@@ -46,7 +46,7 @@ export const FILTER_DEFAULTS = {
   assignee_id: [],
   priority_code: [],
   status_code: [],
-  case_type_code: [],
+  case_type: [],
   project_code: [],
   analysis_catalog_code: [],
   diagnosis_lab_code: [],
@@ -57,6 +57,8 @@ export const FILTER_DEFAULTS = {
 };
 
 const PRIORITY_PARAM = 'priority';
+
+const CASE_TYPE_ORDER = ['germline_family', 'germline', 'somatic'];
 
 async function fetchFilters(tenant: string) {
   const response = await caseApi.casesFilters(tenant);
@@ -134,15 +136,15 @@ function FiltersGroupForm({ loading = true, setSearchCriteria, extraFilters, onC
             ...baseOption,
             options: sortOptions(getItemStatus(apiFilters[key] || [], t)),
           };
-        case 'case_type_code':
+        case 'case_type':
           return {
             ...baseOption,
-            options: sortOptions(
-              (apiFilters[key] || []).map(option => ({
-                ...option,
-                label: t(`case_exploration.case_type_code.${option.key}`, option.label || ''),
-              })),
-            ),
+            options: CASE_TYPE_ORDER.filter(caseType =>
+              (apiFilters[key] || []).some(option => option.key === caseType),
+            ).map(caseType => ({
+              key: caseType,
+              label: t(`case_exploration.analysis_type_code.${caseType}`),
+            })),
           };
         case 'diagnosis_lab_code':
           return {
