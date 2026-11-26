@@ -25,11 +25,19 @@ func CtxOf(tx *gorm.DB) context.Context {
 
 func AddSort(tx *gorm.DB, userQuery types.ListQuery) {
 	for _, sort := range userQuery.SortedFields() {
-		s := fmt.Sprintf("%s.%s %s", sort.Field.Table.Alias, sort.Field.GetName(), sort.Order)
+		column := fmt.Sprintf("%s.%s", sort.Field.Table.Alias, sort.Field.GetName())
+		nulls := ""
 		if sort.Field.SortNullsLast {
-			s += " NULLS LAST"
+			nulls = " NULLS LAST"
 		}
-		tx = tx.Order(s)
+		if sort.Field.SortFirstValue != "" {
+			firstValueOrder := "DESC"
+			if sort.Order == "desc" {
+				firstValueOrder = "ASC"
+			}
+			tx = tx.Order(fmt.Sprintf("%s = '%s' %s%s", column, sort.Field.SortFirstValue, firstValueOrder, nulls))
+		}
+		tx = tx.Order(fmt.Sprintf("%s %s%s", column, sort.Order, nulls))
 	}
 }
 

@@ -8,6 +8,19 @@ describe('Files - Sort', () => {
     cy.visitFilesPage();
   };
 
+  it('Default', () => {
+    setupTest();
+    FilesTable.validations.shouldHaveFirstRowValue(data.file.relationship, 'relationship');
+  });
+
+  it('Relationship', () => {
+    setupTest();
+    FilesTable.actions.showAllColumns();
+    FilesTable.actions.sortColumn('relationship');
+    FilesTable.actions.sortColumn('relationship');
+    FilesTable.validations.shouldNotHaveFirstRowValue(data.file.relationship, 'relationship');
+  });
+
   it('Alphanumeric', () => {
     setupTest();
     FilesTable.validations.shouldSortColumn('sample');

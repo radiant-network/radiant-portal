@@ -22,11 +22,13 @@ var FamilyTable = Table{
 }
 
 var FamilyRelationshipToProbandCodeField = Field{
-	Name:          "relationship_to_proband_code",
-	CanBeSelected: true,
-	CanBeFiltered: true,
-	CanBeSorted:   true,
-	Table:         FamilyTable,
+	Name:           "relationship_to_proband_code",
+	CanBeSelected:  true,
+	CanBeFiltered:  true,
+	CanBeSorted:    true,
+	SortNullsLast:  true,
+	SortFirstValue: "proband",
+	Table:          FamilyTable,
 }
 
 var FamilyAffectedStatusCodeField = Field{

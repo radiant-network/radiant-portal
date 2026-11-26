@@ -9,6 +9,19 @@ describe('CaseEntity - Files - Sort', () => {
     cy.visitCaseFilesPage(data.case.case);
   };
 
+  it('Default', () => {
+    setupTest();
+    CaseEntity_Files.validations.shouldHaveFirstRowValue(data.file.relationship, 'relationship');
+  });
+
+  it('Relationship', () => {
+    setupTest();
+    CaseEntity_Files.actions.showAllColumns();
+    CaseEntity_Files.actions.sortColumn('relationship');
+    CaseEntity_Files.actions.sortColumn('relationship');
+    CaseEntity_Files.validations.shouldNotHaveFirstRowValue(data.file.relationship, 'relationship');
+  });
+
   it('Alphanumeric', () => {
     setupTest();
     CaseEntity_Files.validations.shouldSortColumn('sample', false /*hasUniqueValues*/, true /*isReverseSorting*/);

@@ -81,7 +81,7 @@ var DocumentDefaultFields = []Field{
 	TaskTypeNameField,
 }
 
-var DocumentsDefaultSort = []SortField{{Field: DocumentIdField, Order: "desc"}, {Field: SequencingExperimentIdField, Order: "desc"}}
+var DocumentsDefaultSort = []SortField{{Field: FamilyRelationshipToProbandCodeField, Order: "asc"}, {Field: DocumentIdField, Order: "desc"}, {Field: SequencingExperimentIdField, Order: "desc"}}
 
 var DocumentsQueryConfig = QueryConfig{
 	AllFields:     DocumentFields,
