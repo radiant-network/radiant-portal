@@ -60,6 +60,7 @@ native OIDC connection, proving the translation is transparent. From Go, connect
 | `STARROCKS_ADDR` | StarRocks FE MySQL address | `starrocks:9030` |
 | `STARROCKS_SSL_CA` | CA bundle to verify StarRocks' cert; unset = skip verification (dev only) | — |
 | `PROBE_PORT` | HTTP health-probe port (`GET /status`) | `9998` |
+| `MAX_CONNECTIONS` | concurrent client connections; `0` = no cap. Every StarRocks read of the API goes through the sidecar, 4 connections per request | `0` |
 
 ## Scope
 

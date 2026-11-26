@@ -14,6 +14,7 @@
 //	STARROCKS_ADDR   StarRocks FE MySQL address               (default starrocks:9030)
 //	STARROCKS_SSL_CA path to a CA bundle to verify StarRocks' cert; unset = skip verification (dev)
 //	PROBE_PORT       HTTP health-probe port                   (default 9998)
+//	MAX_CONNECTIONS  concurrent client connections; 0 = no cap (default 0: the API opens 4 per request)
 package main
 
 import (
@@ -40,6 +41,12 @@ func main() {
 	backendAddr := mysqlproxy.Getenv("STARROCKS_ADDR", "starrocks:9030")
 	probePort := mysqlproxy.Getenv("PROBE_PORT", "9998")
 
+	maxConns, err := mysqlproxy.MaxConnsFromEnv(0)
+	if err != nil {
+		slog.Error("read MAX_CONNECTIONS", "error", err)
+		os.Exit(1)
+	}
+
 	backendTLS, err := mysqlproxy.BackendTLSConfig(os.Getenv("STARROCKS_SSL_CA"), backendAddr)
 	if err != nil {
 		slog.Error("build backend TLS config", "error", err)
@@ -50,6 +57,7 @@ func main() {
 		BackendAddr: backendAddr,
 		BackendTLS:  backendTLS,
 		Auth:        mysqlproxy.JWTPassthrough{},
+		MaxConns:    maxConns,
 	})
 
 	// Cancel the root context on SIGINT/SIGTERM so the accept loop and health server stop.
@@ -63,7 +71,7 @@ func main() {
 		slog.Error("listen failed", "addr", listenAddr, "error", err)
 		os.Exit(1)
 	}
-	slog.Info("mysql-proxy listening", "listen", listenAddr, "backend", backendAddr)
+	slog.Info("mysql-proxy listening", "listen", listenAddr, "backend", backendAddr, "max_connections", maxConns)
 
 	p.Serve(ctx, ln, drainTimeout)
 }
