@@ -17,6 +17,7 @@ const meta = {
   component: DistributionBar,
   args: {
     items: statusItems,
+    colorblindMode: false,
   },
   decorators: [
     Story => (
@@ -31,17 +32,17 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-function BarWithLegend({ items }: { items: DistributionBarItem[] }) {
+function BarWithLegend({ items, colorblindMode }: { items: DistributionBarItem[]; colorblindMode?: boolean }) {
   return (
     <div className="flex w-full flex-col gap-2.5">
-      <DistributionBar items={items} />
-      <DistributionLegend items={items} />
+      <DistributionBar items={items} colorblindMode={colorblindMode} />
+      <DistributionLegend items={items} colorblindMode={colorblindMode} />
     </div>
   );
 }
 
 export const Default: Story = {
-  render: args => <BarWithLegend items={args.items} />,
+  render: args => <BarWithLegend items={args.items} colorblindMode={args.colorblindMode} />,
 };
 
 export const AllVariants: Story = {
@@ -49,6 +50,10 @@ export const AllVariants: Story = {
     <StoryShowcase>
       <StorySection title="Bar with legend">
         <BarWithLegend items={statusItems} />
+      </StorySection>
+
+      <StorySection title="Colorblind mode" description="A pattern per item position, as in the charts.">
+        <BarWithLegend items={statusItems} colorblindMode />
       </StorySection>
 
       <StorySection title="Bar only">
