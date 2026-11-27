@@ -1,6 +1,7 @@
 package batchval
 
 import (
+	"context"
 	"errors"
 	"os"
 	"testing"
@@ -44,6 +45,27 @@ func Test_Process_Unexpected_Errors(t *testing.T) {
 		}
 
 	})
+}
+
+type countingBatchUpdater struct {
+	calls int
+}
+
+func (u *countingBatchUpdater) UpdateBatch(context.Context, types.Batch) (int64, error) {
+	u.calls++
+	return 1, nil
+}
+
+func Test_ProcessUnexpectedError_CancelledContext_DoesNotMarkError(t *testing.T) {
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	updater := &countingBatchUpdater{}
+	batch := &types.Batch{ID: "batch-1", Status: types.BatchStatusRunning}
+
+	ProcessUnexpectedError(ctx, batch, errors.New("driver: bad connection"), updater)
+
+	assert.Equal(t, 0, updater.calls)
+	assert.Equal(t, types.BatchStatusRunning, batch.Status)
 }
 
 type mockValidationRecord struct {

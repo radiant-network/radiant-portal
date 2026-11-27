@@ -49,6 +49,11 @@ type batchUpdater interface {
 }
 
 func ProcessUnexpectedError(ctx context.Context, batch *types.Batch, unexpectedErr error, repoBatch batchUpdater) {
+	// A shutdown is not a batch failure: the batch stays RUNNING so that the worker can release it to PENDING.
+	if ctx.Err() != nil {
+		slog.InfoContext(ctx, "shutdown during batch; not marking it ERROR", slog.String("batch_id", batch.ID), slog.Any("error", unexpectedErr))
+		return
+	}
 	slog.Error("unexpected error processing batch", slog.String("batch_id", batch.ID), slog.Any("error", unexpectedErr))
 	now := time.Now()
 	batch.FinishedOn = &now

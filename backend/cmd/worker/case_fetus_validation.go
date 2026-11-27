@@ -34,13 +34,13 @@ const LifeStatusDeceased = "deceased"
 func (r *CaseValidationRecord) fetchFetusCodes(ctx context.Context) error {
 	sexCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetSex)
 	if err != nil {
-		return fmt.Errorf("error retrieving sex codes: %v", err)
+		return fmt.Errorf("error retrieving sex codes: %w", err)
 	}
 	r.SexCodes = sexCodes
 
 	lifeStatusCodes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetLifeStatus)
 	if err != nil {
-		return fmt.Errorf("error retrieving life status codes: %v", err)
+		return fmt.Errorf("error retrieving life status codes: %w", err)
 	}
 	r.LifeStatusCodes = lifeStatusCodes
 	return nil

@@ -206,7 +206,7 @@ func validateUpdateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCo
 
 		record, err := validateUpdateCaseRecord(ctx, bv, cache, u, idx, seenFetuses, tenantCode)
 		if err != nil {
-			return nil, fmt.Errorf("error during update case validation: %v", err)
+			return nil, fmt.Errorf("error during update case validation: %w", err)
 		}
 
 		key := CaseKey{ProjectCode: u.ProjectCode, SubmitterCaseID: u.SubmitterCaseId}
@@ -222,7 +222,7 @@ func validateUpdateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCo
 func processUpdateCaseBatch(ctx context.Context, bv *batchval.BatchValidationContext, batch *types.Batch, db *gorm.DB) error {
 	var updates []types.UpdateCaseBatch
 	if err := json.Unmarshal([]byte(batch.Payload), &updates); err != nil {
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling update_case batch: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling update_case batch: %w", err), bv.BatchRepo)
 		return nil
 	}
 
@@ -231,7 +231,7 @@ func processUpdateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCon
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error update_case batch validation: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error update_case batch validation: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -241,7 +241,7 @@ func processUpdateCaseBatch(ctx context.Context, bv *batchval.BatchValidationCon
 		if errors.Is(err, context.Canceled) {
 			return err
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing update_case batch records: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing update_case batch records: %w", err), bv.BatchRepo)
 		return nil
 	}
 	return nil

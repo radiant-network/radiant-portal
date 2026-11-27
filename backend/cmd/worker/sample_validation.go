@@ -175,7 +175,7 @@ func processCreateSampleBatch(ctx context.Context, bv *batchval.BatchValidationC
 	cache := batchval.NewBatchValidationCache(bv)
 
 	if unexpectedErr := json.Unmarshal(payload, &samplesbatch); unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling sample batch: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling sample batch: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -184,7 +184,7 @@ func processCreateSampleBatch(ctx context.Context, bv *batchval.BatchValidationC
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error sample batch validation: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error sample batch validation: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -194,7 +194,7 @@ func processCreateSampleBatch(ctx context.Context, bv *batchval.BatchValidationC
 		if errors.Is(err, context.Canceled) {
 			return err
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing sample batch records: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing sample batch records: %w", err), bv.BatchRepo)
 		return nil
 	}
 	return nil
@@ -215,7 +215,7 @@ func persistBatchAndSampleRecords(ctx context.Context, db *gorm.DB, batch *types
 		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
 			err := insertSampleRecords(ctx, records, txRepoSample, batch.TenantCode)
 			if err != nil {
-				return fmt.Errorf("error during sample insertion %v", err)
+				return fmt.Errorf("error during sample insertion: %w", err)
 			}
 		}
 		return nil
@@ -345,7 +345,7 @@ func (r *SampleValidationRecord) validateTissueSite() {
 func (r *SampleValidationRecord) validateTypeCode(ctx context.Context) error {
 	codes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetSampleType)
 	if err != nil {
-		return fmt.Errorf("error retrieving sample type codes: %v", err)
+		return fmt.Errorf("error retrieving sample type codes: %w", err)
 	}
 	r.ValidateCode(r.GetResourceType(), r.getFormattedPath("type_code"), "type_code", SampleInvalidValueCode, r.Sample.TypeCode, codes, r.getUniqueIds(), true)
 	return nil
@@ -354,7 +354,7 @@ func (r *SampleValidationRecord) validateTypeCode(ctx context.Context) error {
 func (r *SampleValidationRecord) validateHistologyCode(ctx context.Context) error {
 	codes, err := r.Cache.GetValueSetCodes(ctx, postgres.ValueSetHistologyType)
 	if err != nil {
-		return fmt.Errorf("error retrieving sample histology codes: %v", err)
+		return fmt.Errorf("error retrieving sample histology codes: %w", err)
 	}
 	r.ValidateCode(r.GetResourceType(), r.getFormattedPath("histology_code"), "histology_code", SampleInvalidValueCode, r.Sample.HistologyCode, codes, r.getUniqueIds(), true)
 	return nil
@@ -407,7 +407,7 @@ func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationConte
 		// 3. Validate patient
 		patient, patientErr := cache.GetPatientByOrgCodeAndSubmitterPatientId(ctx, sample.PatientOrganizationCode, sample.SubmitterPatientId.String(), tenantCode)
 		if patientErr != nil {
-			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
+			return nil, fmt.Errorf("error getting existing patient: %w", patientErr)
 		}
 		record.validatePatient(patient)
 
@@ -418,7 +418,7 @@ func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationConte
 			var fetusErr error
 			fetus, fetusErr = cache.GetFetusByMotherAndSubmitterId(ctx, patient.ID, sample.SubmitterFetusId.String())
 			if fetusErr != nil {
-				return nil, fmt.Errorf("error getting existing fetus: %v", fetusErr)
+				return nil, fmt.Errorf("error getting existing fetus: %w", fetusErr)
 			}
 			record.validateFetus(fetus)
 		}
@@ -426,7 +426,7 @@ func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationConte
 		// 4. Validate organization
 		organization, orgErr := cache.GetOrganizationByCode(ctx, sample.SampleOrganizationCode, tenantCode)
 		if orgErr != nil {
-			return nil, fmt.Errorf("error getting existing sample organization: %v", orgErr)
+			return nil, fmt.Errorf("error getting existing sample organization: %w", orgErr)
 		}
 		record.validateOrganization(organization)
 
@@ -434,7 +434,7 @@ func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationConte
 		if organization != nil {
 			existingSample, sampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterSampleId.String(), tenantCode)
 			if sampleErr != nil {
-				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
+				return nil, fmt.Errorf("error getting existing sample: %w", sampleErr)
 			}
 			// 6. If exists, check if all fields are identical, and add error messages
 			record.validateExistingSampleInDb(existingSample)
@@ -443,7 +443,7 @@ func validateSamplesBatch(ctx context.Context, bv *batchval.BatchValidationConte
 			if sample.SubmitterParentSampleId != "" {
 				existingParentSample, parentSampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterParentSampleId.String(), tenantCode)
 				if parentSampleErr != nil {
-					return nil, fmt.Errorf("error getting existing parent sample: %v", parentSampleErr)
+					return nil, fmt.Errorf("error getting existing parent sample: %w", parentSampleErr)
 				}
 				record.validateExistingParentSampleInDb(existingParentSample)
 
@@ -473,7 +473,7 @@ func processUpdateSampleBatch(ctx context.Context, bv *batchval.BatchValidationC
 	cache := batchval.NewBatchValidationCache(bv)
 
 	if unexpectedErr := json.Unmarshal(payload, &samplesBatch); unexpectedErr != nil {
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling update sample batch: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error unmarshalling update sample batch: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -482,7 +482,7 @@ func processUpdateSampleBatch(ctx context.Context, bv *batchval.BatchValidationC
 		if errors.Is(unexpectedErr, context.Canceled) {
 			return unexpectedErr
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error update sample batch validation: %v", unexpectedErr), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error update sample batch validation: %w", unexpectedErr), bv.BatchRepo)
 		return nil
 	}
 
@@ -492,7 +492,7 @@ func processUpdateSampleBatch(ctx context.Context, bv *batchval.BatchValidationC
 		if errors.Is(err, context.Canceled) {
 			return err
 		}
-		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing update sample batch records: %v", err), bv.BatchRepo)
+		batchval.ProcessUnexpectedError(ctx, batch, fmt.Errorf("error processing update sample batch records: %w", err), bv.BatchRepo)
 		return nil
 	}
 	return nil
@@ -512,7 +512,7 @@ func persistBatchAndUpdateSampleRecords(ctx context.Context, db *gorm.DB, batch 
 		if !batch.DryRun && batch.Status == types.BatchStatusSuccess {
 			err := updateSampleRecords(ctx, records, txRepoSample, batch.TenantCode)
 			if err != nil {
-				return fmt.Errorf("error during sample update %v", err)
+				return fmt.Errorf("error during sample update: %w", err)
 			}
 		}
 		return nil
@@ -591,7 +591,7 @@ func validateUpdateSamplesBatch(ctx context.Context, bv *batchval.BatchValidatio
 
 		patient, patientErr := cache.GetPatientByOrgCodeAndSubmitterPatientId(ctx, sample.PatientOrganizationCode, sample.SubmitterPatientId.String(), tenantCode)
 		if patientErr != nil {
-			return nil, fmt.Errorf("error getting existing patient: %v", patientErr)
+			return nil, fmt.Errorf("error getting existing patient: %w", patientErr)
 		}
 		record.validatePatient(patient)
 
@@ -601,28 +601,28 @@ func validateUpdateSamplesBatch(ctx context.Context, bv *batchval.BatchValidatio
 			var fetusErr error
 			fetus, fetusErr = cache.GetFetusByMotherAndSubmitterId(ctx, patient.ID, sample.SubmitterFetusId.String())
 			if fetusErr != nil {
-				return nil, fmt.Errorf("error getting existing fetus: %v", fetusErr)
+				return nil, fmt.Errorf("error getting existing fetus: %w", fetusErr)
 			}
 			record.validateFetus(fetus)
 		}
 
 		organization, orgErr := cache.GetOrganizationByCode(ctx, sample.SampleOrganizationCode, tenantCode)
 		if orgErr != nil {
-			return nil, fmt.Errorf("error getting existing sample organization: %v", orgErr)
+			return nil, fmt.Errorf("error getting existing sample organization: %w", orgErr)
 		}
 		record.validateOrganization(organization)
 
 		if organization != nil {
 			existingSample, sampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterSampleId.String(), tenantCode)
 			if sampleErr != nil {
-				return nil, fmt.Errorf("error getting existing sample: %v", sampleErr)
+				return nil, fmt.Errorf("error getting existing sample: %w", sampleErr)
 			}
 			record.validateExistingSampleForUpdate(existingSample)
 
 			if sample.SubmitterParentSampleId != "" {
 				existingParentSample, parentSampleErr := cache.GetSampleByOrgCodeAndSubmitterSampleId(ctx, organization.Code, sample.SubmitterParentSampleId.String(), tenantCode)
 				if parentSampleErr != nil {
-					return nil, fmt.Errorf("error getting existing parent sample: %v", parentSampleErr)
+					return nil, fmt.Errorf("error getting existing parent sample: %w", parentSampleErr)
 				}
 				if existingParentSample == nil {
 					record.validateExistingParentSampleInBatch(false)
