@@ -1,6 +1,7 @@
 import { cn } from '@/components/lib/utils';
 
-import { distributionBarColorClasses, type DistributionBarItem, getDistributionPatternStyle } from './distribution-bar';
+import type { DistributionBarItem } from './distribution-bar';
+import DistributionSwatch from './distribution-swatch';
 
 type DistributionLegendProps = {
   items: DistributionBarItem[];
@@ -13,15 +14,7 @@ function DistributionLegend({ items, colorblindMode = false, className }: Distri
     <ul className={cn('flex flex-wrap items-center gap-x-6 gap-y-2 text-sm', className)}>
       {items.map((item, index) => (
         <li key={item.key} className="flex items-center gap-2">
-          <span
-            aria-hidden
-            className={cn(
-              'h-3 shrink-0 rounded-xl',
-              colorblindMode ? 'w-6' : 'w-3',
-              distributionBarColorClasses[item.color],
-            )}
-            style={colorblindMode ? getDistributionPatternStyle(index) : undefined}
-          />
+          <DistributionSwatch color={item.color} index={index} colorblindMode={colorblindMode} />
           <span className="font-semibold">{item.value}</span>
           <span>{item.label}</span>
         </li>

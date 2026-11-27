@@ -11,7 +11,7 @@ import DistributionBar, {
   type DistributionBarColor,
   type DistributionBarItem,
 } from '@/components/base/distribution-bar/distribution-bar';
-import DistributionLegend from '@/components/base/distribution-bar/distribution-legend';
+import DistributionFilter from '@/components/base/distribution-bar/distribution-filter';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
@@ -143,10 +143,17 @@ function GeneCoveragePrototype() {
   const [depth, setDepth] = useState<number>(DEFAULT_DEPTH);
   const [cutoff, setCutoff] = useState<number>(DEFAULT_CUTOFF);
   const [showAllDepths, setShowAllDepths] = useState(false);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
 
   const criteria = useMemo(() => ({ depth, cutoff }), [depth, cutoff]);
   const columns = useMemo(() => getColumns(criteria, showAllDepths), [criteria, showAllDepths]);
-  const data = useMemo(() => sortWorstFirst(geneCoverageMock, criteria), [criteria]);
+  const data = useMemo(
+    () =>
+      sortWorstFirst(geneCoverageMock, criteria).filter(
+        gene => selectedStatuses.length === 0 || selectedStatuses.includes(getStatus(gene, criteria)),
+      ),
+    [criteria, selectedStatuses],
+  );
   const distributionItems = useMemo(() => getDistributionItems(geneCoverageMock, criteria), [criteria]);
   const cutoffLabel = cutoff === 100 ? '100%' : `≥ ${cutoff}%`;
 
@@ -203,20 +210,25 @@ function GeneCoveragePrototype() {
         </CardHeader>
         <CardContent className="flex flex-col gap-2.5">
           <DistributionBar items={distributionItems} />
-          <DistributionLegend items={distributionItems} />
+          <DistributionFilter
+            items={distributionItems}
+            value={selectedStatuses}
+            onValueChange={setSelectedStatuses}
+            allLabel="All"
+          />
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Genes · {data.length} · worst first</CardTitle>
+          <CardTitle>{`${data.length} Genes`}</CardTitle>
           <Button variant="outline" onClick={() => setShowAllDepths(!showAllDepths)}>
             {showAllDepths ? 'Hide other depths' : 'Show all depths'}
           </Button>
         </CardHeader>
         <CardContent>
           <DataTable
-            key={`${depth}-${showAllDepths}`}
+            key={`${depth}-${cutoff}-${showAllDepths}-${selectedStatuses.join()}`}
             id="qc-gene-coverage-prototype"
             columns={columns}
             defaultColumnSettings={defaultColumnSettings}
