@@ -17,36 +17,6 @@ type savedFiltersStore interface {
 	DeleteSavedFilter(ctx context.Context, savedFilterId string, userId string) error
 }
 
-// GetSavedFilterByIDHandler
-// @Summary Get saved filter by id
-// @Id getSavedFilterById
-// @Description Get saved filter by id
-// @Tags saved_filters
-// @Security bearerauth
-// @Param saved_filter_id path string true "Saved Filter ID"
-// @Produce json
-// @Success 200 {object} types.SavedFilter
-// @Failure 401 {object} types.ApiError
-// @Failure 404 {object} types.ApiError
-// @Failure 500 {object} types.ApiError
-// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
-// @Router /users/saved_filters/{saved_filter_id} [get]
-func GetSavedFilterByIDHandler(repo savedFiltersStore) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		savedFilterId := c.Param("saved_filter_id")
-		savedFilter, err := repo.GetSavedFilterByID(c.Request.Context(), savedFilterId)
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-		if savedFilter == nil {
-			HandleNotFoundError(c, "saved filter")
-			return
-		}
-		c.JSON(http.StatusOK, savedFilter)
-	}
-}
-
 // GetSavedFiltersHandler
 // @Summary Get user saved filters
 // @Id getSavedFilters

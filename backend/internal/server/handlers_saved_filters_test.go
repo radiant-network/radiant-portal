@@ -113,34 +113,6 @@ func (m *MockRepository) DeleteSavedFilter(ctx context.Context, savedFilterId st
 	return nil
 }
 
-func Test_GetSavedFilterByIDHandler(t *testing.T) {
-	repo := &MockRepository{}
-	router := gin.Default()
-	router.GET("/users/saved_filters/:saved_filter_id", GetSavedFilterByIDHandler(repo))
-
-	req, _ := http.NewRequest("GET", "/users/saved_filters/1", bytes.NewBuffer([]byte("{}")))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{
-		"created_on":"2021-09-12T13:08:00Z", 
-		"favorite":false, 
-		"id":"1", 
-		"name":"saved_filter_snv_1", 
-		"queries":[
-			{
-				"id": "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5",
-				"content":[{"content":{"field":"chromosome", "value":["1"]}, "op":"in"}], 
-				"op":"and"
-			}
-		], 
-		"type":"germline_snv_occurrence", 
-		"updated_on":"2021-09-12T13:08:00Z", 
-		"user_id":"1"
-	}`, w.Body.String())
-}
-
 func Test_GetSavedFiltersHandler(t *testing.T) {
 	repo := &MockRepository{}
 	auth := &testutils.MockAuth{}

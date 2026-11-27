@@ -5403,26 +5403,6 @@ components:
       - role_code
       - scope
       type: object
-    UserSet:
-      properties:
-        active:
-          type: boolean
-        id:
-          type: string
-        ids:
-          items:
-            type: string
-          type: array
-          uniqueItems: false
-        name:
-          type: string
-        type:
-          type: string
-        updated_at:
-          type: string
-        user_id:
-          type: string
-      type: object
     UsersSearchResponse:
       properties:
         count:
@@ -14479,52 +14459,6 @@ paths:
       summary: Delete a saved filter
       tags:
       - saved_filters
-    get:
-      description: Get saved filter by id
-      operationId: getSavedFilterById
-      parameters:
-      - description: Saved Filter ID
-        in: path
-        name: saved_filter_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SavedFilter'
-          description: OK
-        "401":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Unauthorized
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-          headers:
-            X-Correlation-ID:
-              description: Unique id correlating this error with the server-side log
-                entry
-              schema:
-                type: string
-      security:
-      - bearerauth: []
-      summary: Get saved filter by id
-      tags:
-      - saved_filters
     put:
       description: Update a saved filter
       operationId: putSavedFilter
@@ -14584,47 +14518,6 @@ paths:
       summary: Update a saved filter
       tags:
       - saved_filters
-  /users/sets/{user_set_id}:
-    get:
-      description: Get user set
-      operationId: GetUserSet
-      parameters:
-      - description: UserSet ID
-        in: path
-        name: user_set_id
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserSet'
-          description: OK
-        "404":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Not Found
-        "500":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiError'
-          description: Internal Server Error
-          headers:
-            X-Correlation-ID:
-              description: Unique id correlating this error with the server-side log
-                entry
-              schema:
-                type: string
-      security:
-      - bearerauth: []
-      summary: Get user set by id
-      tags:
-      - user_sets
   /value_sets/{type}:
     get:
       description: |-

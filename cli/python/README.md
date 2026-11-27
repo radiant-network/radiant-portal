@@ -193,7 +193,6 @@ Class | Method | HTTP request | Description
 *SamplesApi* | [**post_sample_batch**](docs/SamplesApi.md#post_sample_batch) | **POST** /{tenant}/samples/batch | Create a new sample batch
 *SamplesApi* | [**put_sample_batch**](docs/SamplesApi.md#put_sample_batch) | **PUT** /{tenant}/samples/batch | Update existing samples (batch)
 *SavedFiltersApi* | [**delete_saved_filter**](docs/SavedFiltersApi.md#delete_saved_filter) | **DELETE** /users/saved_filters/{saved_filter_id} | Delete a saved filter
-*SavedFiltersApi* | [**get_saved_filter_by_id**](docs/SavedFiltersApi.md#get_saved_filter_by_id) | **GET** /users/saved_filters/{saved_filter_id} | Get saved filter by id
 *SavedFiltersApi* | [**get_saved_filters**](docs/SavedFiltersApi.md#get_saved_filters) | **GET** /users/saved_filters | Get user saved filters
 *SavedFiltersApi* | [**post_saved_filter**](docs/SavedFiltersApi.md#post_saved_filter) | **POST** /users/saved_filters | Create a new saved filter
 *SavedFiltersApi* | [**put_saved_filter**](docs/SavedFiltersApi.md#put_saved_filter) | **PUT** /users/saved_filters/{saved_filter_id} | Update a saved filter
@@ -203,7 +202,6 @@ Class | Method | HTTP request | Description
 *StatusApi* | [**status_get**](docs/StatusApi.md#status_get) | **GET** /status | Get API status
 *UserPreferencesApi* | [**get_user_preferences**](docs/UserPreferencesApi.md#get_user_preferences) | **GET** /users/preferences/{key} | Get user preferences
 *UserPreferencesApi* | [**post_user_preferences**](docs/UserPreferencesApi.md#post_user_preferences) | **POST** /users/preferences/{key} | Create or update user preference
-*UserSetsApi* | [**get_user_set**](docs/UserSetsApi.md#get_user_set) | **GET** /users/sets/{user_set_id} | Get user set by id
 *UsersApi* | [**create_user**](docs/UsersApi.md#create_user) | **POST** /{tenant}/users | Add a user to the tenant
 *UsersApi* | [**delete_user**](docs/UsersApi.md#delete_user) | **DELETE** /{tenant}/users/{user_id} | Remove a user from the tenant
 *UsersApi* | [**list_users**](docs/UsersApi.md#list_users) | **GET** /{tenant}/users | List the tenant&#39;s users
@@ -399,7 +397,6 @@ Class | Method | HTTP request | Description
  - [UserPreference](docs/UserPreference.md)
  - [UserResult](docs/UserResult.md)
  - [UserRoleResult](docs/UserRoleResult.md)
- - [UserSet](docs/UserSet.md)
  - [UsersSearchResponse](docs/UsersSearchResponse.md)
  - [UtilsPreSignedURL](docs/UtilsPreSignedURL.md)
  - [ValueSetItem](docs/ValueSetItem.md)

@@ -16,48 +16,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func assertGetSavedFilterByIDHandler(t *testing.T, repo *postgres.SavedFiltersRepository, savedFilterId string, status int, expected string) {
-	router := tenantRouter()
-	router.GET("/users/saved_filters/:saved_filter_id", server.GetSavedFilterByIDHandler(repo))
-
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/saved_filters/%s", savedFilterId), bytes.NewBuffer([]byte("{}")))
-	w := httptest.NewRecorder()
-	router.ServeHTTP(w, req)
-
-	assert.Equal(t, status, w.Code)
-	assert.JSONEq(t, expected, w.Body.String())
-}
-
-func Test_GetSavedFilterByIDHandler_NotFound(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: env.Postgres})
-		assertGetSavedFilterByIDHandler(t, repo, "ac2df672-9702-4dcf-8cfd-457494384762", http.StatusNotFound, `{"status": 404, "message":"saved filter not found"}`)
-	})
-}
-
-func Test_GetSavedFilterByIDHandler(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		repo := postgres.NewSavedFiltersRepository(database.PostgresDB{DB: env.Postgres})
-		expected := `{
-			"created_on":"2021-09-12T13:08:00Z", 
-			"favorite":false, 
-			"id":"1e1c5bc3-4f65-496a-ad61-cab239bf72d5", 
-			"name":"saved_filter_snv_1", 
-			"queries":[
-				{
-					"id": "193de905-b6f2-4fd8-ac51-c92d9f3f4bb5",
-					"content":[{"content":{"field":"chromosome", "value":["X"]}, "op":"in"}], 
-					"op":"and"
-				}
-			], 
-			"type":"germline_snv_occurrence", 
-			"updated_on":"2021-09-12T13:08:00Z", 
-			"user_id":"1"
-		}`
-		assertGetSavedFilterByIDHandler(t, repo, "1e1c5bc3-4f65-496a-ad61-cab239bf72d5", http.StatusOK, expected)
-	})
-}
-
 func assertGetSavedFiltersHandler(t *testing.T, repo *postgres.SavedFiltersRepository, auth utils.Auth, savedFilterType *types.SavedFilterType, status int, expected string) {
 	router := tenantRouter()
 	router.GET("/users/saved_filters", server.GetSavedFiltersHandler(repo, auth))

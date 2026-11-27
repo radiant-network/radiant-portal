@@ -2624,42 +2624,6 @@
           "response": []
         },
         {
-          "name": "Get by ID",
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"search_criteria\": [\n        { \"field\": \"project_code\", \"value\": [\"N1\"]}\n    ]\n}"
-            },
-            "url": {
-              "raw": "{{radiant-api-url}}/users/saved_filters/395b31b8-5f16-4934-a0c5-9d8a16aec6cb",
-              "host": [
-                "{{radiant-api-url}}"
-              ],
-              "path": [
-                "users",
-                "saved_filters",
-                "395b31b8-5f16-4934-a0c5-9d8a16aec6cb"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
           "name": "Get by type",
           "protocolProfileBehavior": {
             "disableBodyPruning": true

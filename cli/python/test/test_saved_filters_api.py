@@ -33,13 +33,6 @@ class TestSavedFiltersApi(unittest.TestCase):
         """
         pass
 
-    def test_get_saved_filter_by_id(self) -> None:
-        """Test case for get_saved_filter_by_id
-
-        Get saved filter by id
-        """
-        pass
-
     def test_get_saved_filters(self) -> None:
         """Test case for get_saved_filters
 
