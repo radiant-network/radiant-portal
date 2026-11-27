@@ -118,6 +118,7 @@ const unnestedAgentsSQL = "unnest(CASE WHEN array_length(pl.chemotherapy_agents)
 
 type pcxPatientFilterArrays struct {
 	VitalStatus            *string
+	CnsDiagnosisCategory   *string
 	CnsIntegratedDiagnosis *string
 	DiagnosisTypeCohort    *string
 	GotRadiationEver       *string
@@ -131,6 +132,7 @@ func (r *PcxPatientsRepository) GetPatientsFilters(ctx context.Context) (*types.
 	db := r.db.WithContext(ctx)
 	var arrays pcxPatientFilterArrays
 	tx := db.Table(fmt.Sprintf("%s pl, %s AS u(agent)", types.PcxPatientListTable.TenantQualifiedName(ctx), unnestedAgentsSQL)).Select(fmt.Sprintf(`array_agg(DISTINCT vital_status) AS vital_status,
+		array_agg(DISTINCT cns_diagnosis_category) AS cns_diagnosis_category,
 		array_agg(DISTINCT cns_integrated_diagnosis) AS cns_integrated_diagnosis,
 		array_agg(DISTINCT diagnosis_type_cohort) AS diagnosis_type_cohort,
 		array_agg(DISTINCT %s) AS got_radiation_ever,
@@ -147,6 +149,9 @@ func (r *PcxPatientsRepository) GetPatientsFilters(ctx context.Context) (*types.
 	var err error
 	if filters.VitalStatus, err = filterValues(arrays.VitalStatus); err != nil {
 		return nil, fmt.Errorf("error reading patient filter vital_status: %w", err)
+	}
+	if filters.CnsDiagnosisCategory, err = filterValues(arrays.CnsDiagnosisCategory); err != nil {
+		return nil, fmt.Errorf("error reading patient filter cns_diagnosis_category: %w", err)
 	}
 	if filters.CnsIntegratedDiagnosis, err = filterValues(arrays.CnsIntegratedDiagnosis); err != nil {
 		return nil, fmt.Errorf("error reading patient filter cns_integrated_diagnosis: %w", err)
@@ -660,7 +665,7 @@ func pcxVitalStatus(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) (
 }
 
 // pcxInitialEvent picks the diagnosis the list view shows: the earliest initial CNS tumor event, an unknown day last,
-// then by diagnosis.
+// then by diagnosis, category and source, in the list view's order.
 func pcxInitialEvent(events []types.PatientEvent) *types.PatientEvent {
 	var initial *types.PatientEvent
 	for i := range events {
@@ -682,15 +687,26 @@ func pcxEventBefore(a, b *types.PatientEvent) bool {
 	if a.Day != nil && *a.Day != *b.Day {
 		return *a.Day < *b.Day
 	}
-	return pcxDiagnosisBefore(a.CnsIntegratedDiagnosis, b.CnsIntegratedDiagnosis)
+	if c := pcxCompareNullFirst(a.CnsIntegratedDiagnosis, b.CnsIntegratedDiagnosis); c != 0 {
+		return c < 0
+	}
+	if c := pcxCompareNullFirst(a.CnsDiagnosisCategory, b.CnsDiagnosisCategory); c != 0 {
+		return c < 0
+	}
+	return pcxCompareNullFirst(a.CnsIntegratedDiagnosisSource, b.CnsIntegratedDiagnosisSource) < 0
 }
 
-// pcxDiagnosisBefore sorts a NULL diagnosis first, as StarRocks sorts NULL first in ascending order.
-func pcxDiagnosisBefore(a, b *string) bool {
-	if a == nil || b == nil {
-		return a == nil && b != nil
+// pcxCompareNullFirst sorts NULL first, as StarRocks sorts NULL first in ascending order.
+func pcxCompareNullFirst(a, b *string) int {
+	switch {
+	case a == nil && b == nil:
+		return 0
+	case a == nil:
+		return -1
+	case b == nil:
+		return 1
 	}
-	return *a < *b
+	return strings.Compare(*a, *b)
 }
 
 // pcxOrderByDay sorts on a day column of mixed INT/VARCHAR values: known days first, in order.
@@ -717,7 +733,9 @@ func pcxEvents(ctx context.Context, db *gorm.DB, id pcxPatientIdentifier) ([]typ
 		Select("event_type, " + pcxDayDate("age_at_event_days", "event_date", "event") + ", cns_diagnosis_category, " +
 			"cns_integrated_diagnosis, cns_integrated_diagnosis_source, tumor_locations, tumor_location_other, metastasis, " +
 			"metastasis_location, metastasis_location_other").
-		Order(pcxOrderByDay("age_at_event_days") + ", event_type")
+		// Careful: the patient page shows the first initial CNS tumor event of this list as the initial diagnosis, so this
+		// order must elect the event pcxInitialEvent and the list view elect. Change all three together.
+		Order(pcxOrderByDay("age_at_event_days") + ", event_type, cns_integrated_diagnosis, cns_diagnosis_category, cns_integrated_diagnosis_source")
 	if err := tx.Find(&rows).Error; err != nil {
 		return nil, fmt.Errorf("error fetching patient events: %w", err)
 	}

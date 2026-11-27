@@ -100,6 +100,7 @@ func Test_SearchPatients_NameCriterionReturnsTheIdentifiablePatient(t *testing.T
 				"birth_year": 2015,
 				"gender": "female",
 				"diagnosis_type_cohort": "Atypical teratoid/rhabdoid tumor",
+				"cns_diagnosis_category": "Atypical teratoid/rhabdoid tumor",
 				"cns_integrated_diagnosis": "ATRT",
 				"cns_integrated_diagnosis_source": "CBTN",
 				"vital_status": "alive",
@@ -185,6 +186,7 @@ func Test_PatientsFilters_ValuesOfTheList(t *testing.T) {
 				{"key": "CHOP", "label": "Children's Hospital of Philadelphia"},
 				{"key": "SCH", "label": "Seattle Children's Hospital"}
 			],
+			"cns_diagnosis_category": [{"key": "Atypical teratoid/rhabdoid tumor"}, {"key": "Embryonal tumor"}, {"key": "Ependymoma"}],
 			"cns_integrated_diagnosis": [{"key": "ATRT"}, {"key": "Ependymoma"}, {"key": "Medulloblastoma"}],
 			"diagnosis_type_cohort": [{"key": "Atypical teratoid/rhabdoid tumor"}, {"key": "Ependymoma"}, {"key": "Medulloblastoma"}],
 			"age_at_initial_dx_group": [

@@ -7333,6 +7333,12 @@ export interface PatientFilters {
      * @type {Array<FiltersValue>}
      * @memberof PatientFilters
      */
+    'cns_diagnosis_category': Array<FiltersValue>;
+    /**
+     * 
+     * @type {Array<FiltersValue>}
+     * @memberof PatientFilters
+     */
     'cns_integrated_diagnosis': Array<FiltersValue>;
     /**
      * 
@@ -7659,6 +7665,12 @@ export interface PatientListItem {
      * @memberof PatientListItem
      */
     'case_count': number;
+    /**
+     * From the initial event
+     * @type {string}
+     * @memberof PatientListItem
+     */
+    'cns_diagnosis_category'?: string;
     /**
      * From the initial event
      * @type {string}
@@ -19765,7 +19777,7 @@ export const PatientsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
+         * Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_diagnosis_category, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
          * @summary Search PCX patients
          * @param {string} tenant Tenant code
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
@@ -20032,7 +20044,7 @@ export const PatientsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
+         * Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_diagnosis_category, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
          * @summary Search PCX patients
          * @param {string} tenant Tenant code
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
@@ -20224,7 +20236,7 @@ export const PatientsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.putPatientBatch(tenant, createPatientBatchBody, dryRun, options).then((request) => request(axios, basePath));
         },
         /**
-         * Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
+         * Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_diagnosis_category, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
          * @summary Search PCX patients
          * @param {string} tenant Tenant code
          * @param {ListBodyWithCriteria} listBodyWithCriteria List Body
@@ -20443,7 +20455,7 @@ export class PatientsApi extends BaseAPI {
     }
 
     /**
-     * Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
+     * Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_diagnosis_category, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
      * @summary Search PCX patients
      * @param {string} tenant Tenant code
      * @param {ListBodyWithCriteria} listBodyWithCriteria List Body

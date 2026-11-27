@@ -51,10 +51,11 @@ func Test_PcxPatientsQuery_FilterOnlyFieldsAreNotSelected(t *testing.T) {
 	assert.NotContains(t, query.SelectedFields(), PcxPatientChemotherapyAgentsField)
 }
 
-func Test_PcxPatientsQuery_DiagnosisTypeCohortIsSelectedByDefault(t *testing.T) {
+func Test_PcxPatientsQuery_CohortAndDiagnosisCategoryAreSelectedByDefault(t *testing.T) {
 	query, err := NewListQueryFromCriteria(PcxPatientsQueryConfig, nil, nil, &Pagination{Limit: 10}, nil)
 	require.NoError(t, err)
 	assert.Contains(t, query.SelectedFields(), PcxPatientDiagnosisTypeCohortField)
+	assert.Contains(t, query.SelectedFields(), PcxPatientCnsDiagnosisCategoryField)
 }
 
 func Test_PcxDemographicsTable_TenantBound_ReadsTenantDatabase(t *testing.T) {
