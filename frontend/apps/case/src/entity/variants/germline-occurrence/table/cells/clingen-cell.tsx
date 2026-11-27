@@ -1,10 +1,10 @@
-import type { GermlineCNVOccurrence } from '@/api/api';
+import type { GermlineCNVOccurrence, SomaticCNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { getClingenCnvUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 
 type ClingenCellProps = {
-  occurrence: GermlineCNVOccurrence;
+  occurrence: GermlineCNVOccurrence | SomaticCNVOccurrence;
 };
 
 function ClingenCell({ occurrence }: ClingenCellProps) {

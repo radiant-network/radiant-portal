@@ -54,6 +54,11 @@ export function getAggregationsFetcher(appId: ApplicationId) {
         builderFetcher: useSomaticSNVAggregationBuilder,
         statisticFetcher: useSomaticSNVAggregationStatistics,
       };
+    case ApplicationId.somatic_cnv_to_occurrence:
+      return {
+        builderFetcher: useSomaticCNVAggregationBuilder,
+        statisticFetcher: useSomaticCNVAggregationStatistics,
+      };
     default:
       return {
         builderFetcher: useGermlineSNVAggregationBuilder,
@@ -280,6 +285,79 @@ export function useSomaticSNVAggregationStatistics({ field }: CNVAggregationBuil
     async () =>
       occurrencesApi
         .statisticsSomaticSNVOccurrences(tenant, caseId, seqId, taskId!, data!.statisticsBody)
+        .then(response => response.data),
+    {
+      revalidateOnFocus: false,
+    },
+  );
+}
+
+/**
+ * Somatic CNV
+ */
+export function useSomaticCNVAggregationBuilder({
+  field,
+  size = 30,
+  withDictionary = false,
+}: CNVAggregationBuilderProps) {
+  const { tenant } = useTenant();
+  const activeSqon = useQBActiveSqon();
+  const caseId = useCaseIdFromParam();
+  const seqId = useSeqIdFromSearchParam();
+  const taskId = useTaskIdFromSearchParam();
+
+  const data: OccurrenceAggregationInput | null =
+    taskId === undefined
+      ? null
+      : {
+          caseId,
+          seqId,
+          taskId,
+          aggregationBody: {
+            field: field,
+            size: size,
+            sqon: activeSqon,
+          },
+          withDictionary,
+        };
+
+  return useSWR<Aggregation[], any, OccurrenceAggregationInput | null>(
+    data,
+    async () =>
+      occurrencesApi
+        .aggregateSomaticCNVOccurrences(tenant, caseId, seqId, taskId!, data!.aggregationBody, data!.withDictionary)
+        .then(response => response.data),
+    {
+      revalidateOnFocus: false,
+    },
+  );
+}
+
+export function useSomaticCNVAggregationStatistics({ field }: CNVAggregationBuilderProps) {
+  const { tenant } = useTenant();
+  const activeSqon = useQBActiveSqon();
+  const caseId = useCaseIdFromParam();
+  const seqId = useSeqIdFromSearchParam();
+  const taskId = useTaskIdFromSearchParam();
+
+  const data: OccurrenceStatisticsInput | null =
+    taskId === undefined
+      ? null
+      : {
+          caseId,
+          seqId,
+          taskId,
+          statisticsBody: {
+            field: field,
+            sqon: activeSqon,
+          },
+        };
+
+  return useSWR<Statistics, any, OccurrenceStatisticsInput | null>(
+    data,
+    async () =>
+      occurrencesApi
+        .statisticsSomaticCNVOccurrences(tenant, caseId, seqId, taskId!, data!.statisticsBody)
         .then(response => response.data),
     {
       revalidateOnFocus: false,
