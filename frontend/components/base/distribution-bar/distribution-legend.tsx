@@ -16,7 +16,7 @@ function DistributionLegend({ items, colorblindMode = false, className }: Distri
           <span
             aria-hidden
             className={cn(
-              'h-3 shrink-0 rounded-sm',
+              'h-3 shrink-0 rounded-xl',
               colorblindMode ? 'w-6' : 'w-3',
               distributionBarColorClasses[item.color],
             )}

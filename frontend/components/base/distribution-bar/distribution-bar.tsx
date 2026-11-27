@@ -55,7 +55,7 @@ function DistributionBar({ items, colorblindMode = false, className }: Distribut
     <div
       role="img"
       aria-label={ariaLabel}
-      className={cn('flex h-3.5 w-full gap-0.5 overflow-hidden rounded-sm', isEmpty && 'bg-muted', className)}
+      className={cn('flex h-3 w-full gap-0.5 overflow-hidden rounded-xl', isEmpty && 'bg-muted', className)}
     >
       {items.map((item, index) =>
         item.value > 0 ? (
