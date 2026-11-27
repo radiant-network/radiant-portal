@@ -66,6 +66,7 @@ func (m *MockRepository) ListForCases(ctx context.Context, caseIDs []int) (map[i
 }
 
 func (m *MockRepository) SearchById(ctx context.Context, prefix string, limit int) (*[]types.AutocompleteResult, error) {
+	m.autocompleteLimit = limit
 	var result = []types.AutocompleteResult{
 		{Type: "case_id", Value: "1"},
 		{Type: "patient_id", Value: "10"},

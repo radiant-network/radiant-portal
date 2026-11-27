@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/radiant-network/radiant-api/internal/types"
+	"github.com/radiant-network/radiant-api/internal/utils"
 )
 
 type dbHealthChecker interface {
@@ -75,6 +76,17 @@ func GetUserSet(repo userSetReader) gin.HandlerFunc {
 	}
 }
 
+const defaultAutocompleteLimit = 25
+
+// autocompleteLimit bounds the limit query parameter: GORM writes no LIMIT clause for a negative value.
+func autocompleteLimit(c *gin.Context) int {
+	limit, err := strconv.Atoi(c.Query("limit"))
+	if err != nil || limit <= 0 {
+		return defaultAutocompleteLimit
+	}
+	return min(limit, utils.MaxLimit)
+}
+
 type termAutoCompleter interface {
 	GetTermAutoComplete(ctx context.Context, termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error)
 }
@@ -98,10 +110,7 @@ type termAutoCompleter interface {
 func GetMondoTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
-		limit, err := strconv.Atoi(c.Query("limit"))
-		if err != nil {
-			limit = 25
-		}
+		limit := autocompleteLimit(c)
 		mondoTerms, err := repo.GetTermAutoComplete(c.Request.Context(), types.MondoTable.TenantQualifiedName(c.Request.Context()), prefix, limit)
 		if err != nil {
 			HandleError(c, err)
@@ -130,10 +139,7 @@ func GetMondoTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
 func GetHPOTermAutoComplete(repo termAutoCompleter) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
-		limit, err := strconv.Atoi(c.Query("limit"))
-		if err != nil {
-			limit = 25
-		}
+		limit := autocompleteLimit(c)
 		hpoTerms, err := repo.GetTermAutoComplete(c.Request.Context(), types.HPOTable.TenantQualifiedName(c.Request.Context()), prefix, limit)
 		if err != nil {
 			HandleError(c, err)

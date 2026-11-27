@@ -137,10 +137,7 @@ func SearchCasesHandler(repo casesReader, assignmentsRepo caseAssignmentsReader)
 func CasesAutocompleteHandler(repo casesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
-		limit, err := strconv.Atoi(c.Query("limit"))
-		if err != nil {
-			limit = 25
-		}
+		limit := autocompleteLimit(c)
 		ids, err := repo.SearchById(c.Request.Context(), prefix, limit)
 		if err != nil {
 			HandleError(c, err)

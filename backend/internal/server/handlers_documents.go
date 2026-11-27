@@ -82,10 +82,7 @@ func SearchDocumentsHandler(repo documentsReader) gin.HandlerFunc {
 func DocumentsAutocompleteHandler(repo documentsReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
-		limit, err := strconv.Atoi(c.Query("limit"))
-		if err != nil {
-			limit = 25
-		}
+		limit := autocompleteLimit(c)
 		ids, err := repo.SearchById(c.Request.Context(), prefix, limit)
 		if err != nil {
 			HandleError(c, err)

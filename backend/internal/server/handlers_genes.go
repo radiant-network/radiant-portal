@@ -35,10 +35,7 @@ type genesReader interface {
 func GetGeneAutoCompleteHandler(repo genesReader) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		prefix := c.Query("prefix")
-		limit, err := strconv.Atoi(c.Query("limit"))
-		if err != nil {
-			limit = 25
-		}
+		limit := autocompleteLimit(c)
 		genes, err := repo.GetGeneAutoComplete(c.Request.Context(), prefix, limit)
 		if err != nil {
 			HandleError(c, err)
