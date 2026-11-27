@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import DistributionBar, {
   DISTRIBUTION_BAR_COLORS,
   type DistributionBarItem,
 } from '@/components/base/distribution-bar/distribution-bar';
+import DistributionFilter from '@/components/base/distribution-bar/distribution-filter';
 import DistributionLegend from '@/components/base/distribution-bar/distribution-legend';
 
 import { StorySection, StoryShowcase } from '../story-section';
@@ -63,6 +65,50 @@ export const AllColors: Story = {
 
       <StorySection title="All colors, colorblind mode">
         <BarWithLegend items={args.items} colorblindMode />
+      </StorySection>
+    </StoryShowcase>
+  ),
+};
+
+function BarWithFilter({ items, colorblindMode }: { items: DistributionBarItem[]; colorblindMode?: boolean }) {
+  const [value, setValue] = useState<string[]>([]);
+
+  return (
+    <div className="flex w-full flex-col gap-2.5">
+      <DistributionBar items={items} colorblindMode={colorblindMode} />
+      <DistributionFilter
+        items={items}
+        value={value}
+        onValueChange={setValue}
+        allLabel="All"
+        colorblindMode={colorblindMode}
+      />
+      <p className="text-sm text-muted-foreground">
+        Selected: {value.length === 0 ? 'all' : value.join(', ')} · Count:{' '}
+        {items
+          .filter(item => value.length === 0 || value.includes(item.key))
+          .reduce((sum, item) => sum + item.value, 0)}
+      </p>
+    </div>
+  );
+}
+
+export const Filter: Story = {
+  render: args => (
+    <StoryShowcase>
+      <StorySection
+        title="Bar with filter"
+        description="Several items can be selected. All clears the selection, and selecting every item comes back to All. An item with a zero value stays clickable."
+      >
+        <BarWithFilter items={args.items} colorblindMode={args.colorblindMode} />
+      </StorySection>
+
+      <StorySection title="Colorblind mode">
+        <BarWithFilter items={args.items} colorblindMode />
+      </StorySection>
+
+      <StorySection title="Item with a zero value">
+        <BarWithFilter items={statusItems.map(item => (item.key === 'warning' ? { ...item, value: 0 } : item))} />
       </StorySection>
     </StoryShowcase>
   ),

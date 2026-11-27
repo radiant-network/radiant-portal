@@ -69,6 +69,9 @@
       "sorted_desc": "Sorted descending",
       "unpin_row": "Unpin row"
     },
+    "distribution_filter": {
+      "label": "Filter by category"
+    },
     "date_picker": {
       "open_calendar": "Open calendar"
     },
