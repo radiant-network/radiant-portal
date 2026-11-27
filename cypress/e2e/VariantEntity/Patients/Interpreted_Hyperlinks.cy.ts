@@ -14,9 +14,4 @@ describe('VariantEntity - Patients - Interpreted - Hyperlinks', () => {
     VariantEntity_Patients.interpreted.actions.clickTableCellLink('case');
     VariantEntity_Patients.interpreted.validations.shouldDrawerOpen(data.variantGermline);
   });
-
-  it('Condition (Mondo)', () => {
-    setupTest();
-    VariantEntity_Patients.interpreted.validations.shouldHaveTableCellLink(data.variantGermline.interpreted, 'condition_mondo');
-  });
 });

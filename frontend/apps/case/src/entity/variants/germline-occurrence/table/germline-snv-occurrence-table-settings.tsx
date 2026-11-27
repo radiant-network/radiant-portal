@@ -20,7 +20,7 @@ import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
-import { getFranklinSnvUrl } from '@/components/base/variant/utils';
+import { getDbSnpUrl, getFranklinSnvUrl } from '@/components/lib/external-links';
 
 import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
@@ -158,11 +158,7 @@ function getGermlineSNVOccurrenceColumns({
     columnHelper.accessor(row => row.rsnumber, {
       id: 'dbSNP',
       cell: info => (
-        <AnchorLinkCell
-          href={info.getValue() ? `https://www.ncbi.nlm.nih.gov/snp/${info.getValue()}` : undefined}
-          target="_blank"
-          external
-        >
+        <AnchorLinkCell href={info.getValue() ? getDbSnpUrl(info.getValue()) : undefined} target="_blank" external>
           {info.getValue() && <span className="overflow-hidden text-ellipsis">{info.getValue()}</span>}
         </AnchorLinkCell>
       ),

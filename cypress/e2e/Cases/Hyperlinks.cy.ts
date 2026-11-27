@@ -16,9 +16,4 @@ describe('Cases - Hyperlinks', () => {
     CasesTable.actions.clickTableCellLink(data.case, 'case');
     CaseEntity_Details.validations.shouldHaveTitle(data.case);
   });
-
-  it('Primary Condition', () => {
-    setupTest();
-    CasesTable.validations.shouldHaveTableCellLink(data.case, 'primary_condition');
-  });
 });

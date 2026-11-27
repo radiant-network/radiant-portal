@@ -1,7 +1,7 @@
 import type { GermlineCNVOccurrence } from '@/api/api';
 import AnchorLink from '@/components/base/navigation/anchor-link';
-import { getClingenCnvUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
+import { getClingenCnvUrl } from '@/components/lib/external-links';
 
 type ClingenCellProps = {
   occurrence: GermlineCNVOccurrence;

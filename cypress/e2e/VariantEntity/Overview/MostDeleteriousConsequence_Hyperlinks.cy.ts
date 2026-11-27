@@ -11,31 +11,11 @@ describe('VariantEntity - Overview - MostDeleteriousConsequence - Hyperlinks', (
     cy.visitVariantOverviewPage(data.variantGermline.locus_id);
   };
 
-  it('Gene', () => {
-    setupTest();
-    VariantEntity_Overview.mostDeleterious.validations.shouldHaveLink('gene', data.variantGermline);
-  });
-
   it('Patients', () => {
     setupTest();
     VariantEntity_Overview.mostDeleterious.actions.clickLink('patients', data.variantGermline);
     VariantEntity_Patients.validations.shouldHaveActiveTab();
     VariantEntity_Patients.validations.shouldHaveTitle(data.variantGermline);
-  });
-
-  it('gnomAD', () => {
-    setupTest();
-    VariantEntity_Overview.mostDeleterious.validations.shouldHaveLink('gnomad', data.variantGermline);
-  });
-
-  it('Transcript ID', () => {
-    setupTest();
-    VariantEntity_Overview.mostDeleterious.validations.shouldHaveLink('transcript_id', data.variantGermline);
-  });
-
-  it('dbSNP', () => {
-    setupTest();
-    VariantEntity_Overview.mostDeleterious.validations.shouldHaveLink('dbsnp', data.variantGermline);
   });
 
   it('ClinVar', () => {

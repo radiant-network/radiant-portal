@@ -339,49 +339,20 @@ export const getTextOperator = (operator: string) => {
 
 /**
  * Returns the URL for a given columnID and data object.
- * @param columnID The column identifier (e.g., 'dbsnp', 'gene', 'omim', etc.).
+ * @param columnID The column identifier (e.g., 'clinvar', 'cmc', 'dbsnp', 'gnomad').
  * @param data The data object containing the necessary fields.
  * @returns The constructed URL as a string, or undefined if not applicable.
  */
 export const getUrlLink = (columnID: string, data: any): string | undefined => {
-  const strStart = data.start ? data.start.replace(/,/g, '') : '';
-  const strEnd = data.end ? data.end.replace(/,/g, '') : '';
   switch (columnID) {
-    case 'clingen':
-      if (data.cnv_variant) return `https://search.clinicalgenome.org/kb/regions?page=1&type=GRCh38&region=chr${data.chromosome}%3A${strStart}-${strEnd}&size=25&search=`;
-      if (data.gene) return `https://search.clinicalgenome.org/kb/genes?search=${data.gene}`;
-      return undefined;
     case 'clinvar':
       return data.clinvar_name ? `https://www.ncbi.nlm.nih.gov/clinvar/variation/${data.clinvar_name}` : undefined;
     case 'cmc':
       return data.cmc_id ? `https://cancer.sanger.ac.uk/cosmic/mutation/overview?genome=37&id=${data.cmc_id}` : undefined;
-    case 'cnv_variant':
-      const DupDel = data.type == 'GAIN' ? 'DUP' : 'DEL';
-      return data.cnv_variant ? `https://franklin.genoox.com/clinical-db/variant/sv/chr${data.chromosome}-${strStart}-${strEnd}-${DupDel}-HG38` : undefined;
-    case 'cohort':
-      return data.locus ? `https://bravo.sph.umich.edu/freeze8/hg38/variant/snv/${data.locus}` : undefined;
-    case 'condition_mondo':
-    case 'primary_condition':
-      return data.primary_condition_id ? `http://purl.obolibrary.org/obo/${data.primary_condition_id.replace(/:/g, '_')}` : undefined;
     case 'dbsnp':
       return data.dbsnp ? `https://www.ncbi.nlm.nih.gov/snp/${data.dbsnp}` : undefined;
-    case 'gene':
-      return data.gene ? `https://www.omim.org/search?index=entry&start=1&limit=10&sort=score+desc%2C+prefix_sort+desc&search=${data.gene}` : undefined;
     case 'gnomad':
       return data.locus ? `https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r4` : undefined;
-    case 'link':
-      if (data.omim_id) return `https://omim.org/entry/${data.omim_id}`;
-      if (data.orphanet_id) return `https://www.orpha.net/en/disease/detail/${data.orphanet_id}`;
-      if (data.hpo_id) return `https://hpo.jax.org/app/browse/term/${data.hpo_id}`;
-      return undefined;
-    case 'omim_phenotype':
-      return data.omim_id ? `https://www.omim.org/entry/${data.omim_id}` : undefined;
-    case 'tier':
-      return data.locus ? `https://franklin.genoox.com/clinical-db/variant/snpTumor/chr${data.locus}-hg38` : undefined;
-    case 'rcv_link':
-      return data.rcv_link ? `https://www.ncbi.nlm.nih.gov/clinvar/${data.rcv_link}.${data.version}` : undefined;
-    case 'transcript_id':
-      return data.transcript_id ? `https://www.ensembl.org/id/${data.transcript_id}` : undefined;
     default:
       return undefined;
   }

@@ -38,6 +38,6 @@
       "@/apps/*": ["../apps/*"]
     }
   },
-  "include": ["base/**/*", "hooks/**/*", "utils/**/*", "lib/**/*", "types/**/*", "stories/**/*"],
+  "include": ["base/**/*", "hooks/**/*", "utils/**/*", "lib/**/*", "types/**/*", "stories/**/*", "tests/**/*"],
   "exclude": ["node_modules", "dist"]
 }

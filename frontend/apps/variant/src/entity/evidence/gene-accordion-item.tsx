@@ -7,8 +7,8 @@ import DataTable from '@/components/base/data-table/data-table';
 import Empty from '@/components/base/empties/empty';
 import { AccordionContent, AccordionItem, AccordionTrigger } from '@/components/base/shadcn/accordion';
 import { Button } from '@/components/base/shadcn/button';
-import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
+import { getOmimOrgUrl } from '@/components/lib/external-links';
 
 import { conditionPhenotypeDefaultSettings, getConditionPhenotypeColumns } from './table-settings';
 

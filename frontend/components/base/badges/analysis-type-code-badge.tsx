@@ -8,7 +8,6 @@ export type AnalysisTypeCode = 'somatic' | 'germline' | 'germline_family';
 
 type AnalysisTypeCodeProps = {
   code: AnalysisTypeCode;
-  size?: number;
   iconOnly?: boolean;
 };
 
@@ -18,7 +17,7 @@ const icons = {
   germline_family: Users,
 };
 
-function AnalysisTypeCodeBadge({ code, size = 12, iconOnly = false }: AnalysisTypeCodeProps) {
+function AnalysisTypeCodeBadge({ code, iconOnly = false }: AnalysisTypeCodeProps) {
   const { t } = useI18n();
 
   const Icon = icons[code];
@@ -29,7 +28,7 @@ function AnalysisTypeCodeBadge({ code, size = 12, iconOnly = false }: AnalysisTy
       <Tooltip>
         <TooltipTrigger asChild>
           <Badge variant="secondary" iconOnly>
-            <Icon size={size} />
+            <Icon />
             <span className="sr-only">{label}</span>
           </Badge>
         </TooltipTrigger>
@@ -40,7 +39,7 @@ function AnalysisTypeCodeBadge({ code, size = 12, iconOnly = false }: AnalysisTy
 
   return (
     <Badge variant="secondary" className="max-w-full">
-      <Icon size={size} />
+      <Icon />
       <span className="truncate" title={label}>
         {label}
       </span>

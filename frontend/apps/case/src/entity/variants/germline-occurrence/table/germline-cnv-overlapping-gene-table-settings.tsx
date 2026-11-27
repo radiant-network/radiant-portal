@@ -7,6 +7,7 @@ import NumberCell from '@/components/base/data-table/cells/number-cell';
 import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
+import { getClingenGeneUrl, getOmimOrgUrl } from '@/components/lib/external-links';
 import { toKiloBases } from '@/components/lib/number-format';
 
 import OverlapTypeGeneCell from './cells/overlap-type-gene-cell';
@@ -22,11 +23,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
         columnHelper.accessor(row => row.symbol, {
           id: 'symbol',
           cell: info => (
-            <AnchorLinkCell
-              href={`https://www.omim.org/search?index=entry&start=1&limit=10&sort=score+desc%2C+prefix_sort+desc&search=${info.getValue()}`}
-              external
-              target="_blank"
-            >
+            <AnchorLinkCell href={getOmimOrgUrl({ symbol: info.getValue() })} external target="_blank">
               {info.getValue()}
             </AnchorLinkCell>
           ),
@@ -60,13 +57,7 @@ function getCNVOverlappingGenesColumns(t: TFunction<string, undefined>) {
         // ClinGen
         columnHelper.accessor(row => row.symbol, {
           id: 'clingen',
-          cell: info => (
-            <AnchorLinkCell
-              href={`https://search.clinicalgenome.org/kb/genes?search=${info.getValue()}`}
-              target="_blank"
-              external
-            />
-          ),
+          cell: info => <AnchorLinkCell href={getClingenGeneUrl(info.getValue())} target="_blank" external />,
           header: t('variant.headers.clingen'),
           size: 124,
           minSize: 40,

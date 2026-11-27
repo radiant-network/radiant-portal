@@ -2,7 +2,8 @@ import '@styles/theme.css';
 import '@styles/tailwind.css';
 
 import { Suspense, useEffect } from 'react';
-import { initialize, mswLoader } from 'msw-storybook-addon';
+import { setupWorker } from 'msw/browser';
+import { mswLoader } from 'msw-storybook-addon/csf3';
 import type { Preview } from '@storybook/react-vite';
 import { withThemeByClassName } from '@storybook/addon-themes';
 import { TooltipProvider } from '../base/shadcn/tooltip';
@@ -25,16 +26,17 @@ const STORYBOOK_TENANT = 'radiant';
 // mock
 sb.mock(import('../../utils/helper.ts'), { spy: true });
 
-let options = {};
-if (location.hostname === 'radiant-network.github.io') {
+const isGithubPages = location.hostname === 'radiant-network.github.io';
+if (isGithubPages) {
   console.log(`Configure MSW service worker for radiant-network.github.io`);
   axiosClient.defaults.baseURL = '/radiant-portal/storybook/api';
-  options = {
-    serviceWorker: {
-      url: './mockServiceWorker.js',
-    },
-  };
 }
+
+const startGithubPagesWorker = async () => {
+  const worker = setupWorker();
+  await worker.start({ quiet: true, serviceWorker: { url: './mockServiceWorker.js' } });
+  return worker;
+};
 
 // Locale switcher
 export const globalTypes = {
@@ -80,9 +82,10 @@ const withI18next = (Story, context) => {
   );
 };
 
-initialize(options);
-
 const preview: Preview = {
+  initialGlobals: {
+    locale: 'en',
+  },
   parameters: {
     a11y: {
       test: 'todo',
@@ -100,7 +103,7 @@ const preview: Preview = {
       },
     },
   },
-  loaders: [mswLoader],
+  loaders: [mswLoader(isGithubPages ? startGithubPagesWorker : undefined)],
   decorators: [
     withI18next,
     withThemeByClassName({

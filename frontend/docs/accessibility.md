@@ -39,7 +39,7 @@ Accepted reasons so far:
 
 `@storybook/addon-a11y` runs axe on every story. Open the **Accessibility** tab of the bottom panel to see the violations, passes and incomplete checks.
 
-The addon runs in `todo` mode (`parameters.a11y.test` in `.storybook/preview.tsx`): violations are reported but don't fail. Once a component is fixed, switch its stories to error mode so it can't regress:
+The addon runs in `todo` mode (`parameters.a11y.test` in `.storybook/preview.tsx`): violations are reported but don't fail. Stories tagged `vitest` are the exception: the test run (`npm run test:storybook:docker`) puts them in `error` mode (`.storybook/vitest.setup.ts`), so any violation fails the test. The `color-contrast` rule is off in that run: the colours come from the imposed theme palette and can't be fixed per component. Contrast issues still show in the Accessibility tab. Once a component is fixed, switch its stories to error mode so it can't regress:
 
 ```tsx
 const meta = {

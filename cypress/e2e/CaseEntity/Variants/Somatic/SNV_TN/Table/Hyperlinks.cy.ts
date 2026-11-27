@@ -22,11 +22,6 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Hyperlinks', () 
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldDrawerOpen(data.variantSomatic);
   });
 
-  it('Gene', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldHaveTableCellLink(data.variantSomatic, 'gene');
-  });
-
   it('Gene Plus', () => {
     setupTest();
     CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder
@@ -34,11 +29,6 @@ describe('Case Entity - Variants - Somatic - SNV (TN) - Table - Hyperlinks', () 
     CaseEntity_Variants_SNV_Table.somatic.actions.clickTableCellLink(data.variantSomatic, 'gene', true /*onPlusIcon*/);
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldHaveSelectedQueryPill(data.variantSomatic, 'gene');
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldShowResultsCount(resultCount, false /*beEqual*/);
-  });
-
-  it('Tier', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldHaveTableCellLink(data.variantSomatic, 'tier');
   });
 
   it('CMC', () => {

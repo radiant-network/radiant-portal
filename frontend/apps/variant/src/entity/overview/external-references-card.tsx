@@ -2,8 +2,8 @@ import type { VariantOverview } from '@/api/api';
 import Empty from '@/components/base/empties/empty';
 import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Card, CardContent, CardHeader, type CardProps } from '@/components/base/shadcn/card';
-import { getDbSnpUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
+import { getClinvarVariationUrl, getDbSnpUrl, getGnomadVariantUrl } from '@/components/lib/external-links';
 
 function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & CardProps) {
   const { t } = useI18n();
@@ -23,7 +23,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
           <AnchorLink
             data-cy="clinvar"
             size="sm"
-            href={`https://www.ncbi.nlm.nih.gov/clinvar/variation/${data?.clinvar_name}`}
+            href={getClinvarVariationUrl(data.clinvar_name)}
             variant="secondary"
             target="_blank"
             rel="noreferrer"
@@ -37,7 +37,7 @@ function ExternalReferencesCard({ data, ...props }: { data: VariantOverview } & 
           <AnchorLink
             data-cy="gnomad"
             size="sm"
-            href={`https://gnomad.broadinstitute.org/variant/${data?.locus}?dataset=gnomad_r4`}
+            href={getGnomadVariantUrl(data.locus)}
             variant="secondary"
             target="_blank"
             rel="noreferrer"

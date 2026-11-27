@@ -19,7 +19,7 @@ import { createAppColumnHelper } from '@/components/base/data-table/data-table';
 import { createColumnSettings, type TableColumnDef } from '@/components/base/data-table/data-table';
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
-import { getFranklinSnvUrl } from '@/components/base/variant/utils';
+import { formatLocus, getDbSnpUrl, getFranklinSnvUrl } from '@/components/lib/external-links';
 
 import InterpretationCell from '../../interpretation/interpretation-cell';
 import HgvsgCell from '../../table/cells/hgvsg-cell';
@@ -152,11 +152,7 @@ function getSomaticSNVColumns({ t, caseEntity, patientId, canDownloadReport }: S
     columnHelper.accessor(row => row.rsnumber, {
       id: 'dbSNP',
       cell: info => (
-        <AnchorLinkCell
-          href={info.getValue() ? `https://www.ncbi.nlm.nih.gov/snp/${info.getValue()}` : undefined}
-          target="_blank"
-          external
-        >
+        <AnchorLinkCell href={info.getValue() ? getDbSnpUrl(info.getValue()) : undefined} target="_blank" external>
           {info.getValue() && <span className="overflow-hidden text-ellipsis">{info.getValue()}</span>}
         </AnchorLinkCell>
       ),
@@ -196,7 +192,12 @@ function getSomaticSNVColumns({ t, caseEntity, patientId, canDownloadReport }: S
         <CmcTierBadge
           value={info.getValue().cmc_tier}
           href={getFranklinSnvUrl(
-            `${info.getValue().chromosome}-${info.getValue().start}-${info.getValue().reference}-${info.getValue().alternate}`,
+            formatLocus(
+              info.getValue().chromosome,
+              info.getValue().start,
+              info.getValue().reference,
+              info.getValue().alternate,
+            ),
           )}
         />
       ),

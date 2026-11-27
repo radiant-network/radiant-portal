@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
-import { getColumnPosition, getUrlLink, hasVisibleText } from 'pom/shared/Utils';
+import { getColumnPosition, hasVisibleText } from 'pom/shared/Utils';
 
 const selectors = {
   tab: '[data-cy="frequency-tab"]',
@@ -227,22 +227,6 @@ const generateTableValidationsFunctions = (tableId: string, columns: any[], cust
     cy.then(() =>
       getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
         cy.validateTableFirstRowContent(value, position);
-      })
-    );
-  },
-  /**
-   * Validates the link in a specific table cell for a given cohort and column.
-   * @param dataVariant The variant object.
-   * @param columnID The ID of the column.
-   */
-  shouldHaveTableCellLink(dataVariant: any, columnID: string) {
-    cy.then(() =>
-      getColumnPosition(CommonSelectors.tableHead(tableId), columns, columnID, headRowSelector).then(position => {
-        if (position !== -1) {
-          cy.get(CommonSelectors.tableRow(tableId)).eq(0).find(CommonSelectors.tableCellData).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataVariant));
-        } else {
-          cy.handleColumnNotFound(columnID);
-        }
       })
     );
   },

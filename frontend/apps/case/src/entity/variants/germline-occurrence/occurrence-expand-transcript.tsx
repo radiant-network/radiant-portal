@@ -4,7 +4,7 @@ import AnchorLink from '@/components/base/navigation/anchor-link';
 import { Separator } from '@/components/base/shadcn/separator';
 import AminoAcidChange from '@/components/base/variant/amino-acid-change';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
-import { getDbSnpUrl, getEnsemblGeneUrl, getOmimOrgUrl } from '@/components/base/variant/utils';
+import { getDbSnpUrl, getEnsemblGeneUrl, getOmimOrgUrl } from '@/components/lib/external-links';
 
 type OccurrenceExpandTranscriptProps = {
   occurrence: GermlineSNVOccurrence;

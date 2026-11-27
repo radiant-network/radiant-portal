@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 import CmcTierBadge from '@/components/base/badges/cmc-tier-badge';
-import { getFranklinSnvUrl } from '@/components/base/variant/utils';
+import { getFranklinSnvUrl } from '@/components/lib/external-links';
 
 import { StoryLabel, StorySection } from '../story-section';
 

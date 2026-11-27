@@ -93,23 +93,6 @@ export const VariantEntity_Overview = {
           }
         }
       },
-      /**
-       * Validates the link of a specific fiel.
-       * @param fieldId The ID of the field to validate.
-       * @param dataVariant The variant object.
-       */
-      shouldHaveLink(fieldId: string, dataVariant: any) {
-        switch (fieldId) {
-          case 'transcript_id':
-            cy.get(`${selectors.mostDeleterious.card} ${CommonSelectors.datacy(fieldId)}`)
-              .find(CommonSelectors.link)
-              .should('have.attr', 'href', getUrlLink(fieldId, dataVariant));
-            break;
-          default:
-            cy.get(`${selectors.mostDeleterious.card} ${CommonSelectors.datacy(fieldId)}`).should('have.attr', 'href', getUrlLink(fieldId, dataVariant));
-            break;
-        }
-      },
     },
   },
 
@@ -232,23 +215,6 @@ export const VariantEntity_Overview = {
           }
         }
       },
-      /**
-       * Validates the link of a specific field.
-       * @param fieldId The ID of the field to validate.
-       * @param dataVariant The variant object.
-       */
-      shouldHaveLink(fieldId: string, dataVariant: any) {
-        switch (fieldId) {
-          case 'omim': {
-            const omim = dataVariant.omim;
-            cy.get(`${selectors.associatedConditions.card} ${CommonSelectors.datacy(`${omim.omim_id}-link`)}`).should('have.attr', 'href', getUrlLink('omim_phenotype', omim));
-            break;
-          }
-          default:
-            cy.get(`${selectors.associatedConditions.card} ${CommonSelectors.datacy(fieldId)}`).should('have.attr', 'href', getUrlLink(fieldId, dataVariant));
-            break;
-        }
-      },
     },
   },
 
@@ -274,20 +240,6 @@ export const VariantEntity_Overview = {
               cy.get(`${card} ${CommonSelectors.datacy(fieldId)}`).contains(dataVariant[fieldId]);
               break;
           }
-        }
-      },
-      /**
-       * Validates the link of a specific field.
-       * @param fieldId The ID of the field to validate.
-       * @param dataVariant The variant object.
-       */
-      shouldHaveLink(fieldId: string, dataVariant: any) {
-        const card = selectors.externalReferences.card;
-        const href = getUrlLink(fieldId, dataVariant);
-        if (isEmpty(href)) {
-          cy.get(`${card} ${CommonSelectors.datacy(fieldId)}`).should('not.exist');
-        } else {
-          cy.get(`${card} ${CommonSelectors.datacy(fieldId)}`).should('have.attr', 'href', href);
         }
       },
     },
