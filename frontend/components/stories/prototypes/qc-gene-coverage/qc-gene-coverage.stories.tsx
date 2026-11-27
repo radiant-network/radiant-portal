@@ -7,6 +7,11 @@ import DataTable, {
   createColumnSettings,
   type TableColumnDef,
 } from '@/components/base/data-table/data-table';
+import DistributionBar, {
+  type DistributionBarColor,
+  type DistributionBarItem,
+} from '@/components/base/distribution-bar/distribution-bar';
+import DistributionLegend from '@/components/base/distribution-bar/distribution-legend';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
@@ -117,6 +122,23 @@ const defaultColumnSettings = createColumnSettings([
   ...DEPTHS.map(depth => ({ id: `pct_${depth}`, visible: true, label: `% ≥ ${depth}x` })),
 ]);
 
+// Bar and legend order: best to worst, unmappable last.
+const DISTRIBUTION_STATUSES: { status: CoverageStatus; color: DistributionBarColor }[] = [
+  { status: 'pass', color: 'emerald' },
+  { status: 'warning', color: 'amber' },
+  { status: 'fail', color: 'red' },
+  { status: 'unmappable', color: 'grey' },
+];
+
+function getDistributionItems(genes: GeneCoverage[], criteria: CoverageCriteria): DistributionBarItem[] {
+  return DISTRIBUTION_STATUSES.map(({ status, color }) => ({
+    key: status,
+    label: STATUS_BADGES[status].label,
+    value: genes.filter(gene => getStatus(gene, criteria) === status).length,
+    color,
+  }));
+}
+
 function GeneCoveragePrototype() {
   const [depth, setDepth] = useState<number>(DEFAULT_DEPTH);
   const [cutoff, setCutoff] = useState<number>(DEFAULT_CUTOFF);
@@ -125,6 +147,8 @@ function GeneCoveragePrototype() {
   const criteria = useMemo(() => ({ depth, cutoff }), [depth, cutoff]);
   const columns = useMemo(() => getColumns(criteria, showAllDepths), [criteria, showAllDepths]);
   const data = useMemo(() => sortWorstFirst(geneCoverageMock, criteria), [criteria]);
+  const distributionItems = useMemo(() => getDistributionItems(geneCoverageMock, criteria), [criteria]);
+  const cutoffLabel = cutoff === 100 ? '100%' : `≥ ${cutoff}%`;
 
   return (
     <div className="flex flex-col gap-4">
@@ -170,6 +194,16 @@ function GeneCoveragePrototype() {
           >
             Reset to lab default (15x on 100%)
           </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{`${geneCoverageMock.length} genes · ${depth}x on ${cutoffLabel} of bases`}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2.5">
+          <DistributionBar items={distributionItems} />
+          <DistributionLegend items={distributionItems} />
         </CardContent>
       </Card>
 
