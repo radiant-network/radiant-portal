@@ -12,6 +12,7 @@ create table v_pcx_30_patient_list
     gender                          varchar(50)  NULL,
     diagnosis_type_cohort           varchar(256) NULL,
     data_type_cohort                varchar(256) NULL,
+    cns_diagnosis_category          varchar(256) NULL,
     cns_integrated_diagnosis        varchar(512) NULL,
     cns_integrated_diagnosis_source varchar(64)  NULL,
     vital_status                    varchar(20)  NULL,

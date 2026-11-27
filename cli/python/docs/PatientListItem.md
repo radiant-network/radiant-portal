@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **birth_year** | **int** |  | [optional] 
 **can_read_phi** | **bool** |  | 
 **case_count** | **int** | Portal cases, 0 outside the portal | 
+**cns_diagnosis_category** | **str** | From the initial event | [optional] 
 **cns_integrated_diagnosis** | **str** | From the initial event | [optional] 
 **cns_integrated_diagnosis_source** | **str** | Dataset of the diagnosis, e.g. CBTN or OpenPedCan | [optional] 
 **diagnosis_type_cohort** | **str** |  | [optional] 

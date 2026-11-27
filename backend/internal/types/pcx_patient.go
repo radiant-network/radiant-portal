@@ -29,6 +29,7 @@ type PatientListItem struct {
 	BirthYear                    *int    `json:"birth_year"`
 	Gender                       string  `json:"gender" validate:"required" enums:"female,male,not_reported,not_available"`
 	DiagnosisTypeCohort          *string `json:"diagnosis_type_cohort"`
+	CnsDiagnosisCategory         *string `json:"cns_diagnosis_category"`          // From the initial event
 	CnsIntegratedDiagnosis       *string `json:"cns_integrated_diagnosis"`        // From the initial event
 	CnsIntegratedDiagnosisSource *string `json:"cns_integrated_diagnosis_source"` // Dataset of the diagnosis, e.g. CBTN or OpenPedCan
 	VitalStatus                  string  `json:"vital_status" validate:"required" enums:"alive,deceased"`
@@ -47,6 +48,7 @@ type PatientsSearchResponse = SearchResponse[PatientListItem]
 type PatientFilters struct {
 	VitalStatus            []FiltersValue `json:"vital_status" validate:"required"`
 	OrganizationCode       []FiltersValue `json:"organization_code" validate:"required"` // label = organization name
+	CnsDiagnosisCategory   []FiltersValue `json:"cns_diagnosis_category" validate:"required"`
 	CnsIntegratedDiagnosis []FiltersValue `json:"cns_integrated_diagnosis" validate:"required"`
 	DiagnosisTypeCohort    []FiltersValue `json:"diagnosis_type_cohort" validate:"required"`
 	AgeAtInitialDxGroup    []FiltersValue `json:"age_at_initial_dx_group" validate:"required"` // Always every key: congenital, neonatal, infantile, childhood, juvenile, young_adult, middle_age, senior, unknown

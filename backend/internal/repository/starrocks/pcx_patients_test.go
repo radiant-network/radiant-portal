@@ -3,6 +3,7 @@ package starrocks
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 	"testing"
 
@@ -53,6 +54,7 @@ func Test_SearchPcxPatients_MapsEveryColumn(t *testing.T) {
 
 		require.Len(t, patients, 1)
 		radiantID, birthYear, cohort, dx, source := 3, 2015, "Atypical teratoid/rhabdoid tumor", "ATRT", "CBTN"
+		category := "Atypical teratoid/rhabdoid tumor"
 		vitalDays, dxDays, survival := 4000, 1000, 3000
 		assert.Equal(t, types.PatientListItem{
 			PatientIdentity: types.PatientIdentity{
@@ -60,7 +62,8 @@ func Test_SearchPcxPatients_MapsEveryColumn(t *testing.T) {
 				RadiantPatientID: &radiantID, OrganizationCode: "CHOP", OrganizationName: "Children's Hospital of Philadelphia",
 				GivenName: "Ada", FamilyName: "Lovelace",
 			},
-			BirthYear: &birthYear, Gender: "female", DiagnosisTypeCohort: &cohort, CnsIntegratedDiagnosis: &dx, CnsIntegratedDiagnosisSource: &source,
+			BirthYear: &birthYear, Gender: "female", DiagnosisTypeCohort: &cohort, CnsDiagnosisCategory: &category,
+			CnsIntegratedDiagnosis: &dx, CnsIntegratedDiagnosisSource: &source,
 			VitalStatus: "alive", AgeAtVitalStatusDays: &vitalDays, AgeAtInitialDxDays: &dxDays, SurvivalDays: &survival,
 			HasImaging: true, CaseCount: 2,
 		}, patients[0])
@@ -75,6 +78,7 @@ func Test_SearchPcxPatients_NullColumnsStayNil(t *testing.T) {
 		p := patients[0]
 		assert.Nil(t, p.RadiantPatientID)
 		assert.Nil(t, p.DiagnosisTypeCohort)
+		assert.Nil(t, p.CnsDiagnosisCategory)
 		assert.Nil(t, p.CnsIntegratedDiagnosis)
 		assert.Nil(t, p.SurvivalDays)
 		assert.False(t, p.CanReadPhi)
@@ -93,6 +97,15 @@ func Test_SearchPcxPatients_FilterOnVitalStatus(t *testing.T) {
 func Test_SearchPcxPatients_FilterOnDiagnosisTypeCohort(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
 		patients, count := searchPcxPatients(t, env, []types.SearchCriterion{{FieldName: "diagnosis_type_cohort", Value: []interface{}{"Medulloblastoma", "Ependymoma"}}}, nil, nil)
+
+		assert.Equal(t, int64(2), count)
+		assert.Equal(t, []string{pcxPatientKey("2"), pcxPatientKey("3")}, pcxPatientKeys(patients))
+	})
+}
+
+func Test_SearchPcxPatients_FilterOnCnsDiagnosisCategory(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "pcx_patients"}, func(t *testing.T, env *testutils.Env) {
+		patients, count := searchPcxPatients(t, env, []types.SearchCriterion{{FieldName: "cns_diagnosis_category", Value: []interface{}{"Embryonal tumor", "Ependymoma"}}}, nil, nil)
 
 		assert.Equal(t, int64(2), count)
 		assert.Equal(t, []string{pcxPatientKey("2"), pcxPatientKey("3")}, pcxPatientKeys(patients))
@@ -331,6 +344,7 @@ func Test_GetPcxPatientsFilters_DistinctValuesWithoutNulls(t *testing.T) {
 				{Key: "CHOP", Label: "Children's Hospital of Philadelphia"},
 				{Key: "SCH", Label: "Seattle Children's Hospital"},
 			},
+			CnsDiagnosisCategory:   []types.FiltersValue{{Key: "Atypical teratoid/rhabdoid tumor"}, {Key: "Embryonal tumor"}, {Key: "Ependymoma"}},
 			CnsIntegratedDiagnosis: []types.FiltersValue{{Key: "ATRT"}, {Key: "Ependymoma"}, {Key: "Medulloblastoma"}},
 			DiagnosisTypeCohort:    []types.FiltersValue{{Key: "Atypical teratoid/rhabdoid tumor"}, {Key: "Ependymoma"}, {Key: "Medulloblastoma"}},
 			AgeAtInitialDxGroup: []types.FiltersValue{
@@ -740,6 +754,10 @@ func Test_GetPcxPatient_HeaderMatchesTheList(t *testing.T) {
 			assert.Equal(t, item.CnsIntegratedDiagnosis, patient.CnsIntegratedDiagnosis, item.PatientKey)
 			assert.Equal(t, item.CnsIntegratedDiagnosisSource, patient.CnsIntegratedDiagnosisSource, item.PatientKey)
 			assert.Equal(t, item.VitalStatus, patient.VitalStatus, item.PatientKey)
+			firstInitial := slices.IndexFunc(patient.Events, func(e types.PatientEvent) bool { return e.EventType == "initial_cns_tumor" })
+			require.GreaterOrEqual(t, firstInitial, 0, item.PatientKey)
+			assert.Equal(t, pcxInitialEvent(patient.Events), &patient.Events[firstInitial], item.PatientKey)
+			assert.Equal(t, item.CnsDiagnosisCategory, patient.Events[firstInitial].CnsDiagnosisCategory, item.PatientKey)
 		}
 	})
 }
@@ -794,6 +812,20 @@ func Test_PcxInitialEvent_SameDaySortsOnDiagnosisNullFirst(t *testing.T) {
 
 	assert.Nil(t, pcxInitialEvent(events).CnsIntegratedDiagnosis)
 	assert.Equal(t, ptr("ATRT"), pcxInitialEvent(events[:2]).CnsIntegratedDiagnosis)
+}
+
+func Test_PcxInitialEvent_SameDiagnosisSortsOnCategoryThenSource(t *testing.T) {
+	event := func(category, source string) types.PatientEvent {
+		e := pcxInitialEventFixture(ptr(100), ptr("Medulloblastoma"))
+		e.CnsDiagnosisCategory, e.CnsIntegratedDiagnosisSource = ptr(category), ptr(source)
+		return e
+	}
+	events := []types.PatientEvent{event("Medulloblastoma", "CBTN"), event("Embryonal tumor", "OpenPedCan"), event("Embryonal tumor", "CBTN")}
+
+	initial := pcxInitialEvent(events)
+
+	assert.Equal(t, ptr("Embryonal tumor"), initial.CnsDiagnosisCategory)
+	assert.Equal(t, ptr("CBTN"), initial.CnsIntegratedDiagnosisSource)
 }
 
 func Test_GetPcxPatient_RestrictedPatientHasNoDates(t *testing.T) {

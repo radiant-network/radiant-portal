@@ -64,6 +64,7 @@ func Test_SearchPatientsHandler_ReturnsListAndCount(t *testing.T) {
 			"birth_year": 2015,
 			"gender": "female",
 			"diagnosis_type_cohort": null,
+			"cns_diagnosis_category": null,
 			"cns_integrated_diagnosis": null,
 			"cns_integrated_diagnosis_source": null,
 			"vital_status": "deceased",
@@ -233,6 +234,7 @@ func Test_PatientsFiltersHandler_ReturnsFilters(t *testing.T) {
 	w := getPatientsFilters(&pcxPatientsFiltersReaderMock{filters: &types.PatientFilters{
 		VitalStatus:            []types.FiltersValue{{Key: "alive"}, {Key: "deceased"}},
 		OrganizationCode:       []types.FiltersValue{{Key: "CHOP", Label: "Children's Hospital of Philadelphia"}},
+		CnsDiagnosisCategory:   []types.FiltersValue{{Key: "Medulloblastoma"}},
 		CnsIntegratedDiagnosis: []types.FiltersValue{{Key: "ATRT"}},
 		DiagnosisTypeCohort:    []types.FiltersValue{{Key: "Medulloblastoma"}},
 		AgeAtInitialDxGroup:    []types.FiltersValue{{Key: "childhood"}},
@@ -244,6 +246,7 @@ func Test_PatientsFiltersHandler_ReturnsFilters(t *testing.T) {
 	assert.JSONEq(t, `{
 		"vital_status": [{"key": "alive"}, {"key": "deceased"}],
 		"organization_code": [{"key": "CHOP", "label": "Children's Hospital of Philadelphia"}],
+		"cns_diagnosis_category": [{"key": "Medulloblastoma"}],
 		"cns_integrated_diagnosis": [{"key": "ATRT"}],
 		"diagnosis_type_cohort": [{"key": "Medulloblastoma"}],
 		"age_at_initial_dx_group": [{"key": "childhood"}],
@@ -254,14 +257,14 @@ func Test_PatientsFiltersHandler_ReturnsFilters(t *testing.T) {
 
 func Test_PatientsFiltersHandler_EmptyFiltersAreEmptyArrays(t *testing.T) {
 	w := getPatientsFilters(&pcxPatientsFiltersReaderMock{filters: &types.PatientFilters{
-		VitalStatus: []types.FiltersValue{}, OrganizationCode: []types.FiltersValue{}, CnsIntegratedDiagnosis: []types.FiltersValue{},
-		DiagnosisTypeCohort: []types.FiltersValue{}, AgeAtInitialDxGroup: []types.FiltersValue{},
+		VitalStatus: []types.FiltersValue{}, OrganizationCode: []types.FiltersValue{}, CnsDiagnosisCategory: []types.FiltersValue{},
+		CnsIntegratedDiagnosis: []types.FiltersValue{}, DiagnosisTypeCohort: []types.FiltersValue{}, AgeAtInitialDxGroup: []types.FiltersValue{},
 		ChemotherapyAgents: []types.FiltersValue{}, GotRadiationEver: []types.FiltersValue{},
 	}})
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `{
-		"vital_status": [], "organization_code": [], "cns_integrated_diagnosis": [],
+		"vital_status": [], "organization_code": [], "cns_diagnosis_category": [], "cns_integrated_diagnosis": [],
 		"diagnosis_type_cohort": [], "age_at_initial_dx_group": [], "chemotherapy_agents": [], "got_radiation_ever": []
 	}`, w.Body.String())
 }

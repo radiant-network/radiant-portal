@@ -29,12 +29,13 @@ class PatientFilters(BaseModel):
     """ # noqa: E501
     age_at_initial_dx_group: List[FiltersValue] = Field(description="Always every key: congenital, neonatal, infantile, childhood, juvenile, young_adult, middle_age, senior, unknown")
     chemotherapy_agents: List[FiltersValue] = Field(description="Lowercase, as recorded")
+    cns_diagnosis_category: List[FiltersValue]
     cns_integrated_diagnosis: List[FiltersValue]
     diagnosis_type_cohort: List[FiltersValue]
     got_radiation_ever: List[FiltersValue] = Field(description="Keys true, false; labels Yes, No")
     organization_code: List[FiltersValue] = Field(description="label = organization name")
     vital_status: List[FiltersValue]
-    __properties: ClassVar[List[str]] = ["age_at_initial_dx_group", "chemotherapy_agents", "cns_integrated_diagnosis", "diagnosis_type_cohort", "got_radiation_ever", "organization_code", "vital_status"]
+    __properties: ClassVar[List[str]] = ["age_at_initial_dx_group", "chemotherapy_agents", "cns_diagnosis_category", "cns_integrated_diagnosis", "diagnosis_type_cohort", "got_radiation_ever", "organization_code", "vital_status"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -89,6 +90,13 @@ class PatientFilters(BaseModel):
                 if _item_chemotherapy_agents:
                     _items.append(_item_chemotherapy_agents.to_dict())
             _dict['chemotherapy_agents'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in cns_diagnosis_category (list)
+        _items = []
+        if self.cns_diagnosis_category:
+            for _item_cns_diagnosis_category in self.cns_diagnosis_category:
+                if _item_cns_diagnosis_category:
+                    _items.append(_item_cns_diagnosis_category.to_dict())
+            _dict['cns_diagnosis_category'] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in cns_integrated_diagnosis (list)
         _items = []
         if self.cns_integrated_diagnosis:
@@ -138,6 +146,7 @@ class PatientFilters(BaseModel):
         _obj = cls.model_validate({
             "age_at_initial_dx_group": [FiltersValue.from_dict(_item) for _item in obj["age_at_initial_dx_group"]] if obj.get("age_at_initial_dx_group") is not None else None,
             "chemotherapy_agents": [FiltersValue.from_dict(_item) for _item in obj["chemotherapy_agents"]] if obj.get("chemotherapy_agents") is not None else None,
+            "cns_diagnosis_category": [FiltersValue.from_dict(_item) for _item in obj["cns_diagnosis_category"]] if obj.get("cns_diagnosis_category") is not None else None,
             "cns_integrated_diagnosis": [FiltersValue.from_dict(_item) for _item in obj["cns_integrated_diagnosis"]] if obj.get("cns_integrated_diagnosis") is not None else None,
             "diagnosis_type_cohort": [FiltersValue.from_dict(_item) for _item in obj["diagnosis_type_cohort"]] if obj.get("diagnosis_type_cohort") is not None else None,
             "got_radiation_ever": [FiltersValue.from_dict(_item) for _item in obj["got_radiation_ever"]] if obj.get("got_radiation_ever") is not None else None,

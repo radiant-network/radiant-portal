@@ -14,8 +14,9 @@
 
    Unknown ages (-1 sentinel) become NULL; survival_days needs both a vital-status age and a known
    initial-diagnosis age. vital_status and gender become the API codes (lowercase, "not reported" ->
-   "not_reported"). The diagnosis and its source come from ONE initial event, the earliest with a known
-   age: a -1 (unknown date) sorts last instead of winning the minimum. Its age backs up the treatment
+   "not_reported"). The diagnosis category, the diagnosis and its source come from ONE initial event, the earliest with a known
+   age: a -1 (unknown date) sorts last instead of winning the minimum, and a tie sorts on the diagnosis, category and
+   source, as pcxInitialEvent does for the patient page. Its age backs up the treatment
    summary's age at initial diagnosis.
 
    Each secured view re-runs its grant lookups on every read, so each one is read once.
@@ -37,6 +38,7 @@ SELECT pk.patient_key,
        replace(lower(d.gender), ' ', '_') AS gender,
        d.diagnosis_type_cohort,
        d.data_type_cohort,
+       e.cns_diagnosis_category,
        e.cns_integrated_diagnosis,
        e.cns_integrated_diagnosis_source,
        lower(pl.vital_status) AS vital_status,
@@ -57,12 +59,13 @@ LEFT JOIN {{.TenantCode}}_tenant.v_pcx_30_patient_level_combined pl
   ON pl.organization_code = d.organization_code
  AND pl.patient_id_type = d.patient_id_type
  AND pl.patient_id = d.patient_id
-LEFT JOIN (SELECT organization_code, patient_id_type, patient_id, cns_integrated_diagnosis, cns_integrated_diagnosis_source,
+LEFT JOIN (SELECT organization_code, patient_id_type, patient_id, cns_diagnosis_category, cns_integrated_diagnosis, cns_integrated_diagnosis_source,
                   CASE WHEN age_at_event_days >= 0 THEN age_at_event_days END AS age_at_initial_event_days
-           FROM (SELECT organization_code, patient_id_type, patient_id, cns_integrated_diagnosis, cns_integrated_diagnosis_source,
+           FROM (SELECT organization_code, patient_id_type, patient_id, cns_diagnosis_category, cns_integrated_diagnosis, cns_integrated_diagnosis_source,
                         age_at_event_days,
                         row_number() OVER (PARTITION BY organization_code, patient_id_type, patient_id
-                                           ORDER BY age_at_event_days < 0, age_at_event_days, cns_integrated_diagnosis) AS rn
+                                           ORDER BY age_at_event_days < 0, age_at_event_days, cns_integrated_diagnosis,
+                                                    cns_diagnosis_category, cns_integrated_diagnosis_source) AS rn
                  FROM {{.TenantCode}}_tenant.v_pcx_30_event_level_combined
                  WHERE event_type = 'Initial CNS Tumor') ranked
            WHERE rn = 1) e

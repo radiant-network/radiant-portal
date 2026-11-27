@@ -26,6 +26,7 @@ var PcxPatientFamilyNameField = Field{Name: "family_name", CanBeSelected: true, 
 var PcxPatientBirthYearField = Field{Name: "birth_year", CanBeSelected: true, CanBeSorted: true, SortNullsLast: true, Table: PcxPatientListTable}
 var PcxPatientGenderField = Field{Name: "gender", CanBeSelected: true, CanBeSorted: true, Table: PcxPatientListTable}
 var PcxPatientDiagnosisTypeCohortField = Field{Name: "diagnosis_type_cohort", CanBeSelected: true, CanBeFiltered: true, CanBeSorted: true, SortNullsLast: true, Table: PcxPatientListTable}
+var PcxPatientCnsDiagnosisCategoryField = Field{Name: "cns_diagnosis_category", CanBeSelected: true, CanBeFiltered: true, CanBeSorted: true, SortNullsLast: true, Table: PcxPatientListTable}
 var PcxPatientCnsIntegratedDiagnosisField = Field{Name: "cns_integrated_diagnosis", CanBeSelected: true, CanBeFiltered: true, CanBeSorted: true, SortNullsLast: true, Table: PcxPatientListTable}
 var PcxPatientCnsIntegratedDiagnosisSourceField = Field{Name: "cns_integrated_diagnosis_source", CanBeSelected: true, Table: PcxPatientListTable}
 var PcxPatientVitalStatusField = Field{Name: "vital_status", CanBeSelected: true, CanBeFiltered: true, CanBeSorted: true, Table: PcxPatientListTable}
@@ -47,9 +48,9 @@ var PcxPatientAgeAtInitialDxGroupField = Field{Name: "age_at_initial_dx_group", 
 var PcxPatientListFields = []Field{
 	PcxPatientKeyField, PcxPatientIDField, PcxPatientIDTypeField, PcxPatientCanReadPhiField, PcxPatientRadiantPatientIDField,
 	PcxPatientOrganizationCodeField, PcxPatientOrganizationNameField, PcxPatientGivenNameField, PcxPatientFamilyNameField,
-	PcxPatientBirthYearField, PcxPatientGenderField, PcxPatientDiagnosisTypeCohortField, PcxPatientCnsIntegratedDiagnosisField,
-	PcxPatientCnsIntegratedDiagnosisSourceField, PcxPatientVitalStatusField, PcxPatientAgeAtVitalStatusDaysField,
-	PcxPatientAgeAtInitialDxDaysField, PcxPatientSurvivalDaysField, PcxPatientHasImagingField, PcxPatientCaseCountField,
+	PcxPatientBirthYearField, PcxPatientGenderField, PcxPatientDiagnosisTypeCohortField, PcxPatientCnsDiagnosisCategoryField,
+	PcxPatientCnsIntegratedDiagnosisField, PcxPatientCnsIntegratedDiagnosisSourceField, PcxPatientVitalStatusField,
+	PcxPatientAgeAtVitalStatusDaysField, PcxPatientAgeAtInitialDxDaysField, PcxPatientSurvivalDaysField, PcxPatientHasImagingField, PcxPatientCaseCountField,
 	PcxPatientGotRadiationEverField, PcxPatientChemotherapyAgentsField, PcxPatientNameField, PcxPatientAgeAtInitialDxGroupField,
 }
 
@@ -58,8 +59,8 @@ var PcxPatientsQueryConfig = QueryConfig{
 	DefaultFields: []Field{
 		PcxPatientKeyField, PcxPatientIDField, PcxPatientIDTypeField, PcxPatientCanReadPhiField, PcxPatientRadiantPatientIDField,
 		PcxPatientOrganizationCodeField, PcxPatientOrganizationNameField, PcxPatientGivenNameField, PcxPatientFamilyNameField,
-		PcxPatientBirthYearField, PcxPatientGenderField, PcxPatientDiagnosisTypeCohortField, PcxPatientCnsIntegratedDiagnosisField,
-		PcxPatientCnsIntegratedDiagnosisSourceField, PcxPatientVitalStatusField, PcxPatientAgeAtVitalStatusDaysField, PcxPatientAgeAtInitialDxDaysField, PcxPatientSurvivalDaysField,
+		PcxPatientBirthYearField, PcxPatientGenderField, PcxPatientDiagnosisTypeCohortField, PcxPatientCnsDiagnosisCategoryField,
+		PcxPatientCnsIntegratedDiagnosisField, PcxPatientCnsIntegratedDiagnosisSourceField, PcxPatientVitalStatusField, PcxPatientAgeAtVitalStatusDaysField, PcxPatientAgeAtInitialDxDaysField, PcxPatientSurvivalDaysField,
 		PcxPatientHasImagingField, PcxPatientCaseCountField,
 	},
 	DefaultSort: []SortField{

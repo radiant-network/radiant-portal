@@ -1294,7 +1294,7 @@ Name | Type | Description  | Notes
 
 Search PCX patients
 
-Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
+Search PCX patients. Default sort: can_read_phi desc, organization_code asc, patient_id asc. Filterable fields: vital_status, organization_code, cns_diagnosis_category, cns_integrated_diagnosis, patient_id and patient_name (the latter only matches rows where can_read_phi is true).
 
 ### Example
 
