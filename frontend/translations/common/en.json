@@ -125,6 +125,17 @@
     "omim_link": {
       "open": "Open {{symbol}} in OMIM (new tab)"
     },
+    "pedigree": {
+      "affected": "affected",
+      "failed": "failed check",
+      "female": "female",
+      "male": "male",
+      "members": "Family members",
+      "not_affected": "not affected",
+      "not_sequenced": "not sequenced",
+      "proband": "proband",
+      "unknown_sex": "unknown sex"
+    },
     "pubmed_form_field": {
       "remove_citation": "Remove citation"
     },
