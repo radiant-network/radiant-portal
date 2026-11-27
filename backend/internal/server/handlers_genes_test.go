@@ -12,7 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func (m *MockRepository) GetGeneAutoComplete(context.Context, string, int) (*[]types.AutoCompleteGene, error) {
+func (m *MockRepository) GetGeneAutoComplete(_ context.Context, _ string, limit int) (*[]types.AutoCompleteGene, error) {
+	m.autocompleteLimit = limit
 	return &[]types.AutoCompleteGene{
 			{Source: types.Term{
 				ID:   "ENSG00000000938",

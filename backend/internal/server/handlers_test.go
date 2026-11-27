@@ -14,7 +14,8 @@ import (
 )
 
 type MockRepository struct {
-	caseType string
+	caseType          string
+	autocompleteLimit int
 }
 
 type MockIGVRepository struct {
@@ -43,6 +44,7 @@ func (m *MockRepository) CheckDatabaseConnection() string {
 }
 
 func (m *MockRepository) GetTermAutoComplete(ctx context.Context, termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error) {
+	m.autocompleteLimit = limit
 	return &[]types.AutoCompleteTerm{
 			{Source: types.Term{
 				ID:   "MONDO:0000001",
@@ -153,6 +155,53 @@ func Test_MondoTermAutoCompleteHandlerWithInvalidLimit(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.JSONEq(t, `[{"source":{"id":"MONDO:0000001", "name":"blood group incompatibility"}, "highlight":{"id":"MONDO:0000001", "name":"<strong>blood</strong> group incompatibility"}}]`, w.Body.String())
+}
+
+func autocompleteLimitOf(rawQuery string) int {
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request, _ = http.NewRequest("GET", "/autocomplete?"+rawQuery, nil)
+	return autocompleteLimit(c)
+}
+
+func Test_autocompleteLimit_KeepsALimitWithinBounds(t *testing.T) {
+	assert.Equal(t, 1, autocompleteLimitOf("limit=1"))
+	assert.Equal(t, 200, autocompleteLimitOf("limit=200"))
+}
+
+func Test_autocompleteLimit_CapsAnOversizedLimit(t *testing.T) {
+	assert.Equal(t, 200, autocompleteLimitOf("limit=201"))
+}
+
+func Test_autocompleteLimit_DefaultsANonPositiveLimit(t *testing.T) {
+	assert.Equal(t, defaultAutocompleteLimit, autocompleteLimitOf("limit=0"))
+	assert.Equal(t, defaultAutocompleteLimit, autocompleteLimitOf("limit=-1"))
+}
+
+func Test_autocompleteLimit_DefaultsAMissingOrMalformedLimit(t *testing.T) {
+	assert.Equal(t, defaultAutocompleteLimit, autocompleteLimitOf("prefix=a"))
+	assert.Equal(t, defaultAutocompleteLimit, autocompleteLimitOf("limit=a"))
+}
+
+func Test_AutocompleteHandlers_BoundANegativeLimit(t *testing.T) {
+	handlers := map[string]func(*MockRepository) gin.HandlerFunc{
+		"cases":     func(r *MockRepository) gin.HandlerFunc { return CasesAutocompleteHandler(r) },
+		"documents": func(r *MockRepository) gin.HandlerFunc { return DocumentsAutocompleteHandler(r) },
+		"genes":     func(r *MockRepository) gin.HandlerFunc { return GetGeneAutoCompleteHandler(r) },
+		"hpo":       func(r *MockRepository) gin.HandlerFunc { return GetHPOTermAutoComplete(r) },
+		"mondo":     func(r *MockRepository) gin.HandlerFunc { return GetMondoTermAutoComplete(r) },
+	}
+	for name, handler := range handlers {
+		repo := &MockRepository{}
+		router := gin.New()
+		router.GET("/:tenant/autocomplete", handler(repo))
+
+		req, _ := http.NewRequest("GET", "/radiant/autocomplete?prefix=a&limit=-1", nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+
+		assert.Equalf(t, http.StatusOK, w.Code, "%s autocomplete", name)
+		assert.Equalf(t, defaultAutocompleteLimit, repo.autocompleteLimit, "%s autocomplete with limit=-1", name)
+	}
 }
 
 type MockGeneTrackRepository struct {
