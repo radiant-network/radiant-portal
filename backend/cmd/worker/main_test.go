@@ -61,12 +61,32 @@ func Test_runPollLoop_StopsOnContextCancel(t *testing.T) {
 	}
 }
 
-func Test_StartCleanUpWorker_StopsOnContextCancel(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	var wg sync.WaitGroup
-	StartCleanUpWorker(ctx, &wg, nil) // db is only touched on a tick, which never fires here
-	cancel()
-	waitWithTimeout(t, &wg, 2*time.Second, "clean-up worker")
+func Test_StartCleanUpWorker_CleansUpAtStartupAndStopsOnContextCancel(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
+		db := env.Postgres
+		var id string
+		insertErr := db.Raw(`
+			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on, tenant_code)
+			VALUES ('{}', ?, ?, true, 'user-stuck', now() - interval '2 days', now() - interval '25 hours', 'radiant')
+			RETURNING id;
+		`, types.BatchStatusRunning, types.CreatePatientBatchType).Scan(&id).Error
+		if insertErr != nil {
+			t.Fatal("failed to insert batch:", insertErr)
+		}
+
+		ctx, cancel := context.WithCancel(context.Background())
+		var wg sync.WaitGroup
+		StartCleanUpWorker(ctx, &wg, db) // default interval of 24h: only the startup run can update the batch
+
+		assert.Eventually(t, func() bool {
+			result := types.Batch{}
+			db.Table("batch").Where("id = ?", id).Scan(&result)
+			return result.Status == types.BatchStatusError
+		}, 5*time.Second, 50*time.Millisecond)
+
+		cancel()
+		waitWithTimeout(t, &wg, 2*time.Second, "clean-up worker")
+	})
 }
 
 func Test_StartHealthProbe_ShutsDownOnContextCancel(t *testing.T) {

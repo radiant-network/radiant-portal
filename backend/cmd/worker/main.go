@@ -183,6 +183,9 @@ func StartCleanUpWorker(ctx context.Context, wg *sync.WaitGroup, db *gorm.DB) {
 
 		slog.Info("starting clean-up worker", slog.Duration("interval", duration))
 
+		batchRepo := postgres.NewBatchRepository(database.PostgresDB{DB: db})
+		cleanUpStuckBatches(ctx, batchRepo)
+
 		ticker := time.NewTicker(duration)
 		defer ticker.Stop()
 
@@ -191,15 +194,17 @@ func StartCleanUpWorker(ctx context.Context, wg *sync.WaitGroup, db *gorm.DB) {
 			case <-ctx.Done():
 				return
 			case <-ticker.C:
-				slog.Info("clean-up worker started")
-				batchRepo := postgres.NewBatchRepository(database.PostgresDB{DB: db})
-				rowUpdated, err := batchRepo.UpdateStuckBatch(ctx)
-				if err != nil {
-					slog.Error("error executing batch clean up", slog.Any("error", err))
-					continue
-				}
-				slog.Info("stuck batches updated", slog.Int64("rows_updated", rowUpdated))
+				cleanUpStuckBatches(ctx, batchRepo)
 			}
 		}
 	}()
+}
+
+func cleanUpStuckBatches(ctx context.Context, repo *postgres.BatchRepository) {
+	rowsUpdated, err := repo.UpdateStuckBatch(ctx)
+	if err != nil {
+		slog.ErrorContext(ctx, "error executing batch clean up", slog.Any("error", err))
+		return
+	}
+	slog.InfoContext(ctx, "stuck batches updated", slog.Int64("rows_updated", rowsUpdated))
 }
