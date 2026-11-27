@@ -11,7 +11,6 @@ type DistributionFilterProps = {
   /** Keys of the selected items; empty means all */
   value: string[];
   onValueChange: (value: string[]) => void;
-  /** Already translated label of the "all" button */
   allLabel: string;
   colorblindMode?: boolean;
   className?: string;
