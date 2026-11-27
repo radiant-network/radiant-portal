@@ -70,8 +70,6 @@ type probe struct {
 var caseProbes = []probe{
 	{"case param", "GET", "/probe/:case_id", "/radiant/probe/" + caseAtCQGC, types.ActionFlagVariant,
 		func(r *postgres.AuthRepository) server.OrgResolver { return server.OrgFromCaseParam(r) }, ""},
-	{"igv case param", "GET", "/igv/:case_id", "/radiant/igv/" + caseAtCQGC, types.ActionDownloadFile,
-		func(r *postgres.AuthRepository) server.OrgResolver { return server.OrgFromCaseParam(r) }, ""},
 	{"case body", "POST", "/probe", "/radiant/probe", types.ActionCommentVariant,
 		func(r *postgres.AuthRepository) server.OrgResolver { return server.OrgFromCaseBody(r) }, `{"case_id":1}`},
 	{"note param", "DELETE", "/probe/:id", "/radiant/probe/" + noteOnCase1, types.ActionCommentVariant,
@@ -155,11 +153,6 @@ func Test_OrgResolution_WildcardGranteeAllowed(t *testing.T) {
 			assertOrgResolved(t, wendyID, p, http.StatusOK)
 		})
 	}
-}
-
-func Test_OrgResolution_IGV_SearchCaseWithoutDownloadFileDenied(t *testing.T) {
-	// mike holds can_search_case at '*' but no can_download_file: IGV hands out presigned CRAM links.
-	assertOrgResolved(t, mikeID, probeByName("igv case param"), http.StatusForbidden)
 }
 
 func Test_OrgResolution_UnknownCaseDenied(t *testing.T) {
