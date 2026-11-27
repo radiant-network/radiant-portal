@@ -228,19 +228,14 @@ func Test_UpdateStuckBatch(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		repo := NewBatchRepository(database.PostgresDB{DB: env.Postgres})
 
-		timeMoreThan24hAgo := time.Now().Add(-48 * time.Hour).Format("2006-01-02")
-		timeLessThan24hAgo := time.Now().Add(-22 * time.Hour).Format("2006-01-02")
-
 		var ids []string
 		initErr := env.Postgres.Raw(`
     		INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on, tenant_code)
-    		VALUES ('{}', ?, 'create_patient', true, 'user999', '2025-10-09', ?, 'radiant'),
-				('{}', ?, 'create_sample', false, 'user999', '2025-10-09', ?, 'radiant'),
-				('{}', ?, 'create_case', true, 'user999', '2025-10-09', ?, 'radiant')
+    		VALUES ('{}', ?, 'create_patient', true, 'user999', '2025-10-09', now() - interval '25 hours', 'radiant'),
+				('{}', ?, 'create_sample', false, 'user999', '2025-10-09', now() - interval '25 hours', 'radiant'),
+				('{}', ?, 'create_case', true, 'user999', '2025-10-09', now() - interval '23 hours', 'radiant')
     		RETURNING id;
-		`, types.BatchStatusRunning, timeMoreThan24hAgo,
-			types.BatchStatusPending, timeMoreThan24hAgo,
-			types.BatchStatusRunning, timeLessThan24hAgo).Scan(&ids).Error
+		`, types.BatchStatusRunning, types.BatchStatusPending, types.BatchStatusRunning).Scan(&ids).Error
 		if initErr != nil {
 			t.Fatal("failed to insert data:", initErr)
 		}
@@ -251,5 +246,15 @@ func Test_UpdateStuckBatch(t *testing.T) {
 		resultBatch := Batch{}
 		env.Postgres.Table("batch").Where("id = ?", ids[0]).Scan(&resultBatch)
 		assert.Equal(t, types.BatchStatusError, resultBatch.Status)
+		assert.NotNil(t, resultBatch.FinishedOn)
+		assert.Equal(t, types.BatchReport{Errors: []types.BatchMessage{{
+			Code:    "GLOBAL-000",
+			Message: "batch stuck in RUNNING for more than 24 hours",
+		}}}, resultBatch.Report)
+
+		notStuckBatch := Batch{}
+		env.Postgres.Table("batch").Where("id = ?", ids[2]).Scan(&notStuckBatch)
+		assert.Equal(t, types.BatchStatusRunning, notStuckBatch.Status)
+		assert.Nil(t, notStuckBatch.FinishedOn)
 	})
 }

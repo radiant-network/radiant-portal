@@ -113,10 +113,19 @@ func (r *BatchRepository) ReleaseBatch(ctx context.Context, batchId string) (int
 }
 
 func (r *BatchRepository) UpdateStuckBatch(ctx context.Context) (int64, error) {
+	report := types.BatchReport{Errors: []types.BatchMessage{{
+		Code:    "GLOBAL-000",
+		Message: "batch stuck in RUNNING for more than 24 hours",
+	}}}
+	// started_on is written with the database's now() into a column without time zone: compare on the same clock.
 	result := r.db.WithContext(ctx).Table(types.BatchTable.Name)
 	result = result.Where("status = ?", types.BatchStatusRunning)
-	result = result.Where("started_on < ?", time.Now().Add(-24*time.Hour).Format("2006-01-02"))
-	result = result.Update("status", types.BatchStatusError)
+	result = result.Where("started_on < now() - interval '24 hours'")
+	result = result.Updates(map[string]any{
+		"status":      types.BatchStatusError,
+		"finished_on": gorm.Expr("now()"),
+		"report":      report,
+	})
 
 	if result.Error != nil {
 		return 0, fmt.Errorf("error updating batch: %w", result.Error)

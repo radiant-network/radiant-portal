@@ -61,10 +61,34 @@ func Test_runPollLoop_StopsOnContextCancel(t *testing.T) {
 	}
 }
 
+type fakeStuckBatchUpdater struct {
+	calls chan struct{}
+}
+
+func (f fakeStuckBatchUpdater) UpdateStuckBatch(context.Context) (int64, error) {
+	f.calls <- struct{}{}
+	return 0, nil
+}
+
+func Test_StartCleanUpWorker_CleansUpAtStartup(t *testing.T) {
+	repo := fakeStuckBatchUpdater{calls: make(chan struct{}, 1)}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var wg sync.WaitGroup
+	StartCleanUpWorker(ctx, &wg, repo) // default interval of 24h: only the startup run can call the repository
+
+	select {
+	case <-repo.calls:
+	case <-time.After(2 * time.Second):
+		t.Fatal("clean-up worker did not clean up stuck batches at startup")
+	}
+}
+
 func Test_StartCleanUpWorker_StopsOnContextCancel(t *testing.T) {
+	repo := fakeStuckBatchUpdater{calls: make(chan struct{}, 1)}
 	ctx, cancel := context.WithCancel(context.Background())
 	var wg sync.WaitGroup
-	StartCleanUpWorker(ctx, &wg, nil) // db is only touched on a tick, which never fires here
+	StartCleanUpWorker(ctx, &wg, repo)
 	cancel()
 	waitWithTimeout(t, &wg, 2*time.Second, "clean-up worker")
 }
