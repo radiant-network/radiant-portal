@@ -55,11 +55,9 @@ func Test_SearchCasesNoFilters(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Len(t, *cases, 10)
 		assert.Equal(t, int64(26), *count)
-		assert.Equal(t, "somatic", (*cases)[0].CaseTypeCode)
 		assert.Equal(t, "somatic", (*cases)[0].CaseType)
 		assert.Equal(t, true, (*cases)[0].HasVariants)
 
-		assert.Equal(t, "germline", (*cases)[1].CaseTypeCode)
 		assert.Equal(t, "MONDO:0700092", (*cases)[1].PrimaryConditionID)
 		assert.Equal(t, "neurodevelopmental disorder", (*cases)[1].PrimaryConditionName)
 		assert.Equal(t, "germline_family", (*cases)[1].CaseType)
@@ -301,33 +299,6 @@ func Test_SearchCases_OnCaseCategoryCode(t *testing.T) {
 	})
 }
 
-func Test_SearchCases_OnCaseTypeCode(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
-		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
-		searchCriteria := []types.SearchCriterion{
-			{
-				FieldName: types.CaseTypeCodeField.GetAlias(),
-				Value:     []interface{}{"germline"},
-			},
-		}
-		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err := repo.SearchCases(t.Context(), query)
-		assert.NoError(t, err)
-		assert.Equal(t, int64(25), *count)
-
-		searchCriteria = []types.SearchCriterion{
-			{
-				FieldName: types.CaseTypeCodeField.GetAlias(),
-				Value:     []interface{}{"somatic"},
-			},
-		}
-		query, err = types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, searchCriteria, nil, nil)
-		_, count, err = repo.SearchCases(t.Context(), query)
-		assert.NoError(t, err)
-		assert.Equal(t, int64(1), *count)
-	})
-}
-
 func searchCasesOnCaseType(t *testing.T, env *testutils.Env, operator string, values ...interface{}) (*[]CaseResult, int64) {
 	t.Helper()
 	repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
@@ -393,6 +364,24 @@ func Test_SearchCases_OnCaseType_NotIn(t *testing.T) {
 		ids, _ := caseIdsAndTypes(cases)
 		assert.Equal(t, int64(2), count)
 		assert.ElementsMatch(t, []int{8, 71}, ids)
+	})
+}
+
+func Test_SearchCases_SortedOnCaseType(t *testing.T) {
+	testutils.RunTest(t, testutils.Need{Starrocks: "simple"}, func(t *testing.T, env *testutils.Env) {
+		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
+		sort := []types.SortBody{{Field: types.CaseTypeField.GetAlias(), Order: "asc"}}
+		query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, nil, &types.Pagination{Limit: 100}, sort)
+		require.NoError(t, err)
+
+		cases, count, err := repo.SearchCases(t.Context(), query)
+		require.NoError(t, err)
+
+		ids, _ := caseIdsAndTypes(cases)
+		assert.Equal(t, int64(26), *count)
+		require.Len(t, ids, 26)
+		assert.Equal(t, 8, ids[0])
+		assert.Equal(t, 71, ids[25])
 	})
 }
 
@@ -654,8 +643,7 @@ func Test_GetCasesFilters(t *testing.T) {
 		assert.Equal(t, 3, len((*filters).LifeStatus))
 		assert.Equal(t, 2, len((*filters).CaseCategory))
 		assert.Equal(t, 2, len((*filters).Panel))
-		assert.Equal(t, 2, len((*filters).CaseType))
-		assert.Equal(t, []types.FiltersValue{{Key: "germline"}, {Key: "germline_family"}, {Key: "somatic"}}, (*filters).ComputedCaseType)
+		assert.Equal(t, []types.FiltersValue{{Key: "germline"}, {Key: "germline_family"}, {Key: "somatic"}}, (*filters).CaseType)
 	})
 }
 
@@ -1291,10 +1279,11 @@ func Test_SearchCases_OnCaseGroup(t *testing.T) {
 	testutils.RunTest(t, testutils.Need{Starrocks: "simple", Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
 		insertCaseGroup(t, env, "it_repo_cg_a", 1, 2)
 		insertCaseGroup(t, env, "it_repo_cg_b", 1)
+		insertCaseGroup(t, env, "it_repo_cg_c", 1, 8, 71)
 		repo := NewCasesRepository(database.StarrocksDB{DB: env.Starrocks})
-		search := func(names ...interface{}) ([]int, int64) {
+		searchSorted := func(sortField string, sortOrder string, names ...interface{}) ([]int, int64) {
 			criteria := []types.SearchCriterion{{FieldName: types.CaseGroupField.GetAlias(), Value: names}}
-			sort := []types.SortBody{{Field: types.CaseIdField.GetAlias(), Order: "asc"}}
+			sort := []types.SortBody{{Field: sortField, Order: sortOrder}}
 			query, err := types.NewListQueryFromCriteria(CasesQueryConfigForTest, allCasesFields, criteria, nil, sort)
 			require.NoError(t, err)
 			cases, count, err := repo.SearchCases(t.Context(), query)
@@ -1304,6 +1293,9 @@ func Test_SearchCases_OnCaseGroup(t *testing.T) {
 				ids[i] = c.CaseID
 			}
 			return ids, *count
+		}
+		search := func(names ...interface{}) ([]int, int64) {
+			return searchSorted(types.CaseIdField.GetAlias(), "asc", names...)
 		}
 
 		ids, count := search("it_repo_cg_a")
@@ -1318,6 +1310,11 @@ func Test_SearchCases_OnCaseGroup(t *testing.T) {
 		ids, count = search("it_repo_cg_missing")
 		assert.Empty(t, ids)
 		assert.Equal(t, int64(0), count)
+
+		// The case type sort under the DISTINCT that two groups sharing case 1 need.
+		ids, count = searchSorted(types.CaseTypeField.GetAlias(), "desc", "it_repo_cg_b", "it_repo_cg_c")
+		assert.Equal(t, []int{71, 1, 8}, ids)
+		assert.Equal(t, int64(3), count)
 	})
 }
 

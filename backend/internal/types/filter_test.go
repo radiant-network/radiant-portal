@@ -712,12 +712,12 @@ func Test_ComparisonNode_ToSQL_ComputedColumn_InPlaceOfTheColumn(t *testing.T) {
 	assert.Equal(t, []interface{}{"germline", "somatic"}, params)
 }
 
-func Test_CasesFields_CaseType_FilterOnly(t *testing.T) {
+func Test_CasesFields_CaseType_FilteredAndSortedNotSelected(t *testing.T) {
 	t.Parallel()
 	assert.Contains(t, CasesFields, CaseTypeField)
 	assert.True(t, CaseTypeField.CanBeFiltered)
 	assert.False(t, CaseTypeField.CanBeSelected)
-	assert.False(t, CaseTypeField.CanBeSorted)
+	assert.True(t, CaseTypeField.CanBeSorted)
 }
 
 func Test_VariantInterpretedCasesFields_LeavesCaseSearchOnlyFieldsOut(t *testing.T) {

@@ -28,7 +28,6 @@ func (m *MockRepository) SearchCases(ctx context.Context, userQuery types.ListQu
 			RunNames:                  types.JsonArray[string]{"1617"},
 			PriorityCode:              "routine",
 			StatusCode:                "in_progress",
-			CaseTypeCode:              "germline",
 			CaseType:                  "germline_family",
 			AnalysisCatalogCode:       "WGA",
 			AnalysisCatalogName:       "Whole Genome Analysis",
@@ -117,10 +116,6 @@ func (m *MockRepository) GetCasesFilters(ctx context.Context) (*types.CaseFilter
 			{Key: "postnatal", Label: "Postnatal"},
 		},
 		CaseType: []types.FiltersValue{
-			{Key: "germline", Label: "Germline"},
-			{Key: "somatic", Label: "Somatic"},
-		},
-		ComputedCaseType: []types.FiltersValue{
 			{Key: "germline"},
 			{Key: "germline_family"},
 			{Key: "somatic"},
@@ -298,9 +293,6 @@ func Test_CasesFiltersHandler(t *testing.T) {
 		], "panel_code":[
 			{"key":"EPILEP", "label":"Epilepsy"},
 			{"key":"HEART", "label":"Heart diseases"}
-		], "case_type_code":[
-			{"key":"germline", "label":"Germline"},
-			{"key":"somatic", "label":"Somatic"}
 		], "case_type":[
 			{"key":"germline"},
 			{"key":"germline_family"},
