@@ -41,7 +41,6 @@ from radiant_python.api.saved_filters_api import SavedFiltersApi
 from radiant_python.api.sequencing_api import SequencingApi
 from radiant_python.api.status_api import StatusApi
 from radiant_python.api.user_preferences_api import UserPreferencesApi
-from radiant_python.api.user_sets_api import UserSetsApi
 from radiant_python.api.users_api import UsersApi
 from radiant_python.api.value_sets_api import ValueSetsApi
 from radiant_python.api.variant_api import VariantApi
@@ -232,7 +231,6 @@ from radiant_python.models.update_user_request import UpdateUserRequest
 from radiant_python.models.user_preference import UserPreference
 from radiant_python.models.user_result import UserResult
 from radiant_python.models.user_role_result import UserRoleResult
-from radiant_python.models.user_set import UserSet
 from radiant_python.models.users_search_response import UsersSearchResponse
 from radiant_python.models.utils_pre_signed_url import UtilsPreSignedURL
 from radiant_python.models.value_set_item import ValueSetItem

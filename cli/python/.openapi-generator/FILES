@@ -198,8 +198,6 @@ docs/UserPreference.md
 docs/UserPreferencesApi.md
 docs/UserResult.md
 docs/UserRoleResult.md
-docs/UserSet.md
-docs/UserSetsApi.md
 docs/UsersApi.md
 docs/UsersSearchResponse.md
 docs/UtilsPreSignedURL.md
@@ -247,7 +245,6 @@ radiant_python/api/saved_filters_api.py
 radiant_python/api/sequencing_api.py
 radiant_python/api/status_api.py
 radiant_python/api/user_preferences_api.py
-radiant_python/api/user_sets_api.py
 radiant_python/api/users_api.py
 radiant_python/api/value_sets_api.py
 radiant_python/api/variant_api.py
@@ -430,7 +427,6 @@ radiant_python/models/update_user_request.py
 radiant_python/models/user_preference.py
 radiant_python/models/user_result.py
 radiant_python/models/user_role_result.py
-radiant_python/models/user_set.py
 radiant_python/models/users_search_response.py
 radiant_python/models/utils_pre_signed_url.py
 radiant_python/models/value_set_item.py

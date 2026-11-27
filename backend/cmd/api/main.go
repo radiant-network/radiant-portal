@@ -91,7 +91,6 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	repoInterpretations := postgres.NewInterpretationsRepository(postgresDB, pubmedClient)
 	repoTranscriptReport := starrocks.NewTranscriptReportRepository(starrocksDB)
 	reportBuilder := report.NewBuilder(repoTranscriptReport, repoInterpretations)
-	repoUserSets := postgres.NewUserSetsRepository(postgresDB)
 	repoClinvarRCV := starrocks.NewClinvarRCVRepository(starrocksDB)
 	repoIGV := starrocks.NewIGVRepository(starrocksDB)
 	repoDocuments := starrocks.NewDocumentsRepository(starrocksDB)
@@ -309,9 +308,7 @@ func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled b
 	usersGroup.POST("/saved_filters", server.PostSavedFilterHandler(repoSavedFilters, auth))
 	usersGroup.PUT("/saved_filters/:saved_filter_id", server.PutSavedFilterHandler(repoSavedFilters, auth))
 	usersGroup.DELETE("/saved_filters/:saved_filter_id", server.DeleteSavedFilterHandler(repoSavedFilters, auth))
-	usersGroup.GET("/saved_filters/:saved_filter_id", server.GetSavedFilterByIDHandler(repoSavedFilters))
 	usersGroup.GET("/saved_filters", server.GetSavedFiltersHandler(repoSavedFilters, auth))
-	usersGroup.GET("/sets/:user_set_id", server.GetUserSet(repoUserSets))
 	usersGroup.GET("/preferences/:key", server.GetUserPreferencesHandler(repoUserPreferences, auth))
 	usersGroup.POST("/preferences/:key", server.UpdateUserPreferencesHandler(repoUserPreferences, auth))
 

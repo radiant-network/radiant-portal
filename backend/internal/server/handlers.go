@@ -37,44 +37,6 @@ func StatusHandler(repoStarrocks dbHealthChecker, repoPostgres dbHealthChecker, 
 	}
 }
 
-func extractUserSetParams(c *gin.Context) string {
-	userSetId := c.Param("user_set_id")
-	return userSetId
-}
-
-type userSetReader interface {
-	GetUserSet(ctx context.Context, userSetId string) (*types.UserSet, error)
-}
-
-// GetUserSet
-// @Summary Get user set by id
-// @Id GetUserSet
-// @Description Get user set
-// @Tags user_sets
-// @Security bearerauth
-// @Param user_set_id path string true "UserSet ID"
-// @Produce json
-// @Success 200 {object} types.UserSet
-// @Failure 404 {object} types.ApiError
-// @Failure 500 {object} types.ApiError
-// @Header 500 {string} X-Correlation-ID "Unique id correlating this error with the server-side log entry"
-// @Router /users/sets/{user_set_id} [get]
-func GetUserSet(repo userSetReader) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		userSetId := extractUserSetParams(c)
-		userSet, err := repo.GetUserSet(c.Request.Context(), userSetId)
-		if err != nil {
-			HandleError(c, err)
-			return
-		}
-		if userSet == nil {
-			HandleNotFoundError(c, "user")
-			return
-		}
-		c.JSON(http.StatusOK, userSet)
-	}
-}
-
 type termAutoCompleter interface {
 	GetTermAutoComplete(ctx context.Context, termsTable string, input string, limit int) (*[]types.AutoCompleteTerm, error)
 }

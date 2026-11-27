@@ -10431,55 +10431,6 @@ export type UserRoleResultScopeEnum = typeof UserRoleResultScopeEnum[keyof typeo
 /**
  * 
  * @export
- * @interface UserSet
- */
-export interface UserSet {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof UserSet
-     */
-    'active'?: boolean;
-    /**
-     * 
-     * @type {string}
-     * @memberof UserSet
-     */
-    'id'?: string;
-    /**
-     * 
-     * @type {Array<string>}
-     * @memberof UserSet
-     */
-    'ids'?: Array<string>;
-    /**
-     * 
-     * @type {string}
-     * @memberof UserSet
-     */
-    'name'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof UserSet
-     */
-    'type'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof UserSet
-     */
-    'updated_at'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof UserSet
-     */
-    'user_id'?: string;
-}
-/**
- * 
- * @export
  * @interface UsersSearchResponse
  */
 export interface UsersSearchResponse {
@@ -21165,44 +21116,6 @@ export const SavedFiltersApiAxiosParamCreator = function (configuration?: Config
             };
         },
         /**
-         * Get saved filter by id
-         * @summary Get saved filter by id
-         * @param {string} savedFilterId Saved Filter ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getSavedFilterById: async (savedFilterId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'savedFilterId' is not null or undefined
-            assertParamExists('getSavedFilterById', 'savedFilterId', savedFilterId)
-            const localVarPath = `/users/saved_filters/{saved_filter_id}`
-                .replace(`{${"saved_filter_id"}}`, encodeURIComponent(String(savedFilterId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerauth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Get user saved filters
          * @summary Get user saved filters
          * @param {string} [type] Saved Filter Type
@@ -21349,19 +21262,6 @@ export const SavedFiltersApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get saved filter by id
-         * @summary Get saved filter by id
-         * @param {string} savedFilterId Saved Filter ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getSavedFilterById(savedFilterId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SavedFilter>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getSavedFilterById(savedFilterId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['SavedFiltersApi.getSavedFilterById']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
          * Get user saved filters
          * @summary Get user saved filters
          * @param {string} [type] Saved Filter Type
@@ -21422,16 +21322,6 @@ export const SavedFiltersApiFactory = function (configuration?: Configuration, b
             return localVarFp.deleteSavedFilter(savedFilterId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get saved filter by id
-         * @summary Get saved filter by id
-         * @param {string} savedFilterId Saved Filter ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getSavedFilterById(savedFilterId: string, options?: RawAxiosRequestConfig): AxiosPromise<SavedFilter> {
-            return localVarFp.getSavedFilterById(savedFilterId, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Get user saved filters
          * @summary Get user saved filters
          * @param {string} [type] Saved Filter Type
@@ -21482,18 +21372,6 @@ export class SavedFiltersApi extends BaseAPI {
      */
     public deleteSavedFilter(savedFilterId: string, options?: RawAxiosRequestConfig) {
         return SavedFiltersApiFp(this.configuration).deleteSavedFilter(savedFilterId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Get saved filter by id
-     * @summary Get saved filter by id
-     * @param {string} savedFilterId Saved Filter ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof SavedFiltersApi
-     */
-    public getSavedFilterById(savedFilterId: string, options?: RawAxiosRequestConfig) {
-        return SavedFiltersApiFp(this.configuration).getSavedFilterById(savedFilterId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -22125,118 +22003,6 @@ export class UserPreferencesApi extends BaseAPI {
      */
     public postUserPreferences(key: string, userPreference: UserPreference, options?: RawAxiosRequestConfig) {
         return UserPreferencesApiFp(this.configuration).postUserPreferences(key, userPreference, options).then((request) => request(this.axios, this.basePath));
-    }
-}
-
-
-
-/**
- * UserSetsApi - axios parameter creator
- * @export
- */
-export const UserSetsApiAxiosParamCreator = function (configuration?: Configuration) {
-    return {
-        /**
-         * Get user set
-         * @summary Get user set by id
-         * @param {string} userSetId UserSet ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getUserSet: async (userSetId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'userSetId' is not null or undefined
-            assertParamExists('getUserSet', 'userSetId', userSetId)
-            const localVarPath = `/users/sets/{user_set_id}`
-                .replace(`{${"user_set_id"}}`, encodeURIComponent(String(userSetId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerauth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-    }
-};
-
-/**
- * UserSetsApi - functional programming interface
- * @export
- */
-export const UserSetsApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = UserSetsApiAxiosParamCreator(configuration)
-    return {
-        /**
-         * Get user set
-         * @summary Get user set by id
-         * @param {string} userSetId UserSet ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getUserSet(userSetId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<UserSet>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserSet(userSetId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['UserSetsApi.getUserSet']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-    }
-};
-
-/**
- * UserSetsApi - factory interface
- * @export
- */
-export const UserSetsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = UserSetsApiFp(configuration)
-    return {
-        /**
-         * Get user set
-         * @summary Get user set by id
-         * @param {string} userSetId UserSet ID
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getUserSet(userSetId: string, options?: RawAxiosRequestConfig): AxiosPromise<UserSet> {
-            return localVarFp.getUserSet(userSetId, options).then((request) => request(axios, basePath));
-        },
-    };
-};
-
-/**
- * UserSetsApi - object-oriented interface
- * @export
- * @class UserSetsApi
- * @extends {BaseAPI}
- */
-export class UserSetsApi extends BaseAPI {
-    /**
-     * Get user set
-     * @summary Get user set by id
-     * @param {string} userSetId UserSet ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof UserSetsApi
-     */
-    public getUserSet(userSetId: string, options?: RawAxiosRequestConfig) {
-        return UserSetsApiFp(this.configuration).getUserSet(userSetId, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

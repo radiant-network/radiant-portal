@@ -80,7 +80,6 @@ func Test_SecureRoutes(t *testing.T) {
 			"radiant/occurrences/somatic/snv/1/1/1/reports/transcripts?locus_ids=1",
 			"radiant/occurrences/somatic/snv/1/1/1/1/expanded",
 			"users/preferences/table_1",
-			"users/sets/1",
 			"value_sets/organization_category",
 			"actions",
 			"radiant/variants/germline/1/header",
