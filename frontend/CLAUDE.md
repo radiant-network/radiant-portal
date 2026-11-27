@@ -114,6 +114,8 @@ make generate-client-typescript
 ```
 Never edit files in `frontend/api/` manually.
 
+`axiosClient` (`utils/axios.ts`) sends the app language as `Accept-Language`, which the `/api` proxy forwards, and a language switch revalidates every SWR key. A request outside `axiosClient` or a custom SWR cache does not follow the language.
+
 ### Translations (i18n)
 
 Uses i18next. Layered: `translations/common/{lang}.json` → `translations/portals/{portal}/{lang}.json` (portal overrides common). Selected by `THEME` at build time.

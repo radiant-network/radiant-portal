@@ -18,11 +18,11 @@ const refreshedToken = 'refreshed-token';
 const refreshedCookie = 'session.token=new; Path=/';
 
 let api: Server;
-let received: { authorization?: string } = {};
+let received: { authorization?: string; acceptLanguage?: string } = {};
 
 beforeAll(async () => {
   api = createServer((req, res) => {
-    received = { authorization: req.headers.authorization };
+    received = { authorization: req.headers.authorization, acceptLanguage: req.headers['accept-language'] };
     if (req.url === '/cases/1') {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end('{"case_id":1}');
@@ -49,7 +49,7 @@ beforeEach(() => {
   ensureFreshAccessToken.mockResolvedValue({ accessToken: sessionToken, cookies: [] });
 });
 
-const portal = (path: string) => new Request(`http://localhost:3000${path}`);
+const portal = (path: string, init?: RequestInit) => new Request(`http://localhost:3000${path}`, init);
 
 describe('api proxy', () => {
   it('relays a JSON response as JSON', async () => {
@@ -91,6 +91,11 @@ describe('api proxy', () => {
   it('forwards the session Bearer token to the backend', async () => {
     await proxyApi(portal('/api/cases/1'));
     expect(received.authorization).toBe(`Bearer ${sessionToken}`);
+  });
+
+  it('forwards the page language to the backend', async () => {
+    await proxyApi(portal('/api/cases/1', { headers: { 'Accept-Language': 'fr' } }));
+    expect(received.acceptLanguage).toBe('fr');
   });
 
   it('does not set Set-Cookie when the token did not need refreshing', async () => {

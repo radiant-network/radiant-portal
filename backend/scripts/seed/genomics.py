@@ -99,6 +99,8 @@ PRENATAL_HPO = [("HP:0009800", "Maternal diabetes"), ("HP:0100622", "Maternal se
                 ("HP:0002011", "Morphological central nervous system abnormality")]
 # The exams of the prenatal examples, with the codes and labels of the QLIN catalog (scripts/init-sql/qlin/exam.sql).
 EXAMS = [("irmc", "Cerebral MRI", "IRM cérébrale"), ("opht", "Ophthalmological Examination", "Examen ophtalmologique")]
+# The codes of the ancestry value set (migration 000015).
+ANCESTRIES = ["BLK", "EAS", "IND", "LAT-AM", "MENA", "SO-AS", "SE-AS", "WHT", "NH-PI", "MIX", "OTH"]
 OMIM = [("SMARCB1", "Rhabdoid tumor predisposition syndrome 1", "601607", "609322", ["AD"], ["Autosomal dominant"]),
         ("TP53", "Li-Fraumeni syndrome", "191170", "151623", ["AD"], ["Autosomal dominant"]),
         ("SUFU", "Medulloblastoma, desmoplastic", "607035", "155255", ["AD"], ["Autosomal dominant"]),
@@ -332,6 +334,13 @@ def build(patients, pcx_data, id_base=0, loci=None):
         for code, _ in rng.sample(HPO, 3):
             pg["obs_categorical"].append([nid("obs"), germ, pid, "phenotype", "HPO", code, rng.choice(["childhood", "infantile", "unknown"]),
                                           "positive", None, None, None])
+        # Drawn from a hash, not rng: one more rng draw would move every variant drawn below.
+        pg["obs_categorical"].append([nid("obs"), germ, pid, "ancestry", "radiant", ANCESTRIES[h("ancestry", p.rid) % len(ANCESTRIES)],
+                                      None, None, None, None, None])
+        # The first germline case also carries exams, the postnatal counterpart of PRENATAL-2.
+        if n == 0:
+            pg["obs_categorical"].append([nid("obs"), germ, pid, "exam", "HPO", "HP:0002664", None, "abnormal", None, None, "irmc"])
+            pg["obs_string"].append([nid("obs_string"), germ, pid, "exam", "normal", "normal", None, "opht"])
 
         # Germline SNVs.
         carried = rng.sample(g.common, 26)
@@ -662,6 +671,8 @@ def add_prenatal_examples(g, pg, sr, ids, org):
     coded(cid, fetus, "exam", "exam", "Bilateral ventriculomegaly", interpretation="abnormal", exam="irmc")
     text(cid, mother, "exam", "normal", "normal", "opht")
     coded(cid, mother, "ancestry", "radiant", "LAT-AM")
+    coded(cid, fetus, "ancestry", "radiant", "LAT-AM")
+    coded(cid, fetus, "ancestry", "radiant", "WHT")
     coded(cid, mother, "consanguinity", "radiant", "consanguinity")
     text(cid, mother, "note", "High-risk pregnancy, ultrasound every two weeks.")
     text(cid, fetus, "note", "Anomalies seen on the second-trimester ultrasound.")

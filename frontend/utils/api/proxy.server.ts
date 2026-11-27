@@ -66,12 +66,15 @@ export const proxyApi = async (request: Request) => {
       data = text ? JSON.parse(text) : undefined;
     }
 
+    // The API serves its labels in this language: axiosClient sets the app's.
+    const acceptLanguage = request.headers.get('Accept-Language');
     const response = await axios({
       method: request.method,
       url: transformedUrl,
       headers: {
         Authorization: `Bearer ${accessToken}`,
         'Content-Type': JSON_CONTENT_TYPE,
+        ...(acceptLanguage && { 'Accept-Language': acceptLanguage }),
       },
       data,
       responseType: 'arraybuffer',

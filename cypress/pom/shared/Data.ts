@@ -7,10 +7,6 @@ const PATIENT_GERMLINE_VALUE = '1558';
 const CASE_SOMATIC_VALUE = '1226';
 const REL_PROBAND_VALUE = 'proband';
 const UPDATED_DATE_VALUE = '2026-';
-const ANCESTRY_IND_VALUE = { code: 'IND', name_en: 'Indigenous people', name_fr: 'Peuples autochtones' };
-const ANCESTRY_WHT_VALUE = { code: 'WHT', name_en: 'White', name_fr: 'Blanc' };
-const EXAM_EEG_VALUE = { exam_code: 'eeg', name_en: 'Electroencephalogram (EEG)', name_fr: 'Électroencéphalogramme (EEG)' };
-const EXAM_IRMC_VALUE = { exam_code: 'irmc', name_en: 'Cerebral MRI', name_fr: 'IRM cérébrale' };
 
 export const data = {
   case: {
@@ -34,13 +30,9 @@ export const data = {
     managing_org: 'CHUSJ',
     has_variants: true,
     search_criteria: `[{"field": "case_id","value": ["${CASE_GERMLINE_VALUE}"]}]`,
-    ethnicities: {
-      proband: [ANCESTRY_WHT_VALUE, ANCESTRY_IND_VALUE],
-      mother: [ANCESTRY_WHT_VALUE],
-      father: [ANCESTRY_IND_VALUE],
-    },
-    exams: {
-      proband: [EXAM_EEG_VALUE, EXAM_IRMC_VALUE],
+    labels: {
+      ethnicity: { en: 'White', fr: 'Blanc' },
+      exam_name: { en: 'Cerebral MRI', fr: 'IRM cérébrale' },
     },
     seq: {
       seq_id: '1044',
