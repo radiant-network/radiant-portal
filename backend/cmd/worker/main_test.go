@@ -61,32 +61,36 @@ func Test_runPollLoop_StopsOnContextCancel(t *testing.T) {
 	}
 }
 
-func Test_StartCleanUpWorker_CleansUpAtStartupAndStopsOnContextCancel(t *testing.T) {
-	testutils.RunTest(t, testutils.Need{Postgres: testutils.ExclusivePostgres}, func(t *testing.T, env *testutils.Env) {
-		db := env.Postgres
-		var id string
-		insertErr := db.Raw(`
-			INSERT INTO batch (payload, status, batch_type, dry_run, username, created_on, started_on, tenant_code)
-			VALUES ('{}', ?, ?, true, 'user-stuck', now() - interval '2 days', now() - interval '25 hours', 'radiant')
-			RETURNING id;
-		`, types.BatchStatusRunning, types.CreatePatientBatchType).Scan(&id).Error
-		if insertErr != nil {
-			t.Fatal("failed to insert batch:", insertErr)
-		}
+type fakeStuckBatchUpdater struct {
+	calls chan struct{}
+}
 
-		ctx, cancel := context.WithCancel(context.Background())
-		var wg sync.WaitGroup
-		StartCleanUpWorker(ctx, &wg, db) // default interval of 24h: only the startup run can update the batch
+func (f fakeStuckBatchUpdater) UpdateStuckBatch(context.Context) (int64, error) {
+	f.calls <- struct{}{}
+	return 0, nil
+}
 
-		assert.Eventually(t, func() bool {
-			result := types.Batch{}
-			db.Table("batch").Where("id = ?", id).Scan(&result)
-			return result.Status == types.BatchStatusError
-		}, 5*time.Second, 50*time.Millisecond)
+func Test_StartCleanUpWorker_CleansUpAtStartup(t *testing.T) {
+	repo := fakeStuckBatchUpdater{calls: make(chan struct{}, 1)}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	var wg sync.WaitGroup
+	StartCleanUpWorker(ctx, &wg, repo) // default interval of 24h: only the startup run can call the repository
 
-		cancel()
-		waitWithTimeout(t, &wg, 2*time.Second, "clean-up worker")
-	})
+	select {
+	case <-repo.calls:
+	case <-time.After(2 * time.Second):
+		t.Fatal("clean-up worker did not clean up stuck batches at startup")
+	}
+}
+
+func Test_StartCleanUpWorker_StopsOnContextCancel(t *testing.T) {
+	repo := fakeStuckBatchUpdater{calls: make(chan struct{}, 1)}
+	ctx, cancel := context.WithCancel(context.Background())
+	var wg sync.WaitGroup
+	StartCleanUpWorker(ctx, &wg, repo)
+	cancel()
+	waitWithTimeout(t, &wg, 2*time.Second, "clean-up worker")
 }
 
 func Test_StartHealthProbe_ShutsDownOnContextCancel(t *testing.T) {
