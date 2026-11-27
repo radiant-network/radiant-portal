@@ -208,9 +208,6 @@ func Test_GetCasesFilters(t *testing.T) {
 		"panel_code":[
 			{"key":"EPILEP", "label":"Epilepsy"},
 			{"key":"HEART", "label":"Heart diseases"}],
-		"case_type_code":[
-			{"key":"germline", "label":"Germline"},
-			{"key":"somatic", "label":"Somatic"}],
 		"case_type":[
 			{"key":"germline"},
 			{"key":"germline_family"},
