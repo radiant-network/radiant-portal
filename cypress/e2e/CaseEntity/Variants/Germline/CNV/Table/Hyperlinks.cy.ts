@@ -28,11 +28,6 @@ describe('Case Entity - Variants - Germline - CNV - Table - Hyperlinks', () => {
     CaseEntity_Variants_CNV_Table.validations.shouldCNVProfileOpen();
   });
 
-  it('ClinGen', () => {
-    setupTest();
-    CaseEntity_Variants_CNV_Table.validations.shouldHaveTableCellLink(data.cnvGermline, 'clingen');
-  });
-
   it('# Genes', () => {
     setupTest();
     CaseEntity_Variants_CNV_Table.actions.clickTableCellLink(data.cnvGermline, 'nb_genes');

@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from '../shared/Selectors';
-import { getUrlLink, hasVisibleText } from '../shared/Utils';
+import { hasVisibleText } from '../shared/Utils';
 import { getColumnName, getColumnPosition, getTableResultsCount, shouldHaveTableResultsCount } from '../shared/Utils';
 
 const selectors = {
@@ -473,22 +473,6 @@ export const CaseEntity_Variants_CNV_Table = {
           cy.validatePillSelectedQuery(getColumnName(tableColumns, columnID), [dataCNV[columnID]]);
           break;
       }
-    },
-    /**
-     * Validates the link in a specific table cell for a given cnv and column.
-     * @param dataCNV The cnv object.
-     * @param columnID The ID of the column.
-     */
-    shouldHaveTableCellLink(dataCNV: any, columnID: string) {
-      cy.then(() =>
-        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
-          if (position !== -1) {
-            cy.get(selectors.tableCell(dataCNV)).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataCNV));
-          } else {
-            cy.handleColumnNotFound(columnID);
-          }
-        })
-      );
     },
     /**
      * Validates the title of the page.

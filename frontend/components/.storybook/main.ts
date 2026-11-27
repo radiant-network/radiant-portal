@@ -21,11 +21,11 @@ const config: StorybookConfig = {
   ],
   staticDirs: ['../stories/public'],
   addons: [
-    getAbsolutePath("@chromatic-com/storybook"),
     getAbsolutePath("@storybook/addon-onboarding"),
     getAbsolutePath("@storybook/addon-themes"),
     getAbsolutePath("@storybook/addon-vitest"),
-    getAbsolutePath("@storybook/addon-a11y")
+    getAbsolutePath("@storybook/addon-a11y"),
+    getAbsolutePath("@storybook/addon-designs")
   ],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),

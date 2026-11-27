@@ -120,7 +120,8 @@ Stories live under `frontend/components/stories/` and are the source of truth fo
 
 - **Edit an existing story when you change the primitive's API.** If you add a prop, change a default, rename an export, or alter the rendered output of a component that already has a story, update that story in the same PR. A story that no longer matches the component is worse than no story.
 - **Add a story only when you introduce a new reusable primitive in `frontend/components/base/` (not `shadcn/`).** The story documents the public surface and makes the primitive discoverable to the next consumer. Keep it minimal: one `default` export + representative `args` or `render`, no fetch calls, no router, no auth, no app-level state.
-- **Do not add a story for app-level or page-level compositions in `frontend/apps/` or `frontend/portals/`.** Those are one-off assemblies, not reusable primitives — they belong in Cypress, not Storybook.
+- **Do not add a story for app-level or page-level compositions in `frontend/apps/` or `frontend/portals/`.** Those are one-off assemblies, not reusable primitives. Test their behaviour with a co-located `*.browser.test.tsx` (MSW, no backend); Cypress is only for user journeys. The `frontend-tests` skill decides where a test goes.
+- **A story of a `components/base/` primitive can carry the `vitest` tag and a `play` function** to become a test (assertions + screenshot), as in `stories/badges/badge.stories.tsx`.
 - If the pattern you need already has a story but the story is missing a variant you depend on (empty state, loading, long content), add that variant to the existing story rather than creating a new one.
 
 ## No narrative comments

@@ -18,11 +18,17 @@ import { DescriptionRow, DescriptionSection } from '@/components/base/slider/des
 import SliderCard from '@/components/base/slider/slider-card';
 import AminoAcidChange from '@/components/base/variant/amino-acid-change';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
-import { getDbSnpUrl, getEnsemblUrl, getFranklinSnvUrl, getOmimOrgUrl } from '@/components/base/variant/utils';
 import { CaseEntityCasesTabs } from '@/components/cores/types/case-tabs';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { useLocalPath } from '@/components/hooks/use-local-path';
+import {
+  getDbSnpUrl,
+  getEnsemblUrl,
+  getFranklinSnvUrl,
+  getGnomadVariantUrl,
+  getOmimOrgUrl,
+} from '@/components/lib/external-links';
 import { toExponentialNotation, toExponentialNotationAtThreshold } from '@/components/lib/number-format';
 import { cn } from '@/components/lib/utils';
 
@@ -526,12 +532,7 @@ export const PredictionCard = ({
     frequencies.push(
       <DescriptionRow key="gnomad" label={t('preview_sheet.variant_details.sections.frequencies.gnomad')}>
         {gnomad_v3_af ? (
-          <AnchorLink
-            size="sm"
-            href={`https://gnomad.broadinstitute.org/variant/${locus}?dataset=gnomad_r4`}
-            target="_blank"
-            mono
-          >
+          <AnchorLink size="sm" href={locus ? getGnomadVariantUrl(locus) : undefined} target="_blank" mono>
             {toExponentialNotation(gnomad_v3_af)}
           </AnchorLink>
         ) : (

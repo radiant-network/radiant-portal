@@ -1,7 +1,7 @@
 /// <reference types="cypress"/>
 import { data } from 'pom/shared/Data';
 import { CommonSelectors } from '../shared/Selectors';
-import { getPriorityColor, getStatusColor, getUrlLink, hasVisibleText } from '../shared/Utils';
+import { getPriorityColor, getStatusColor, hasVisibleText } from '../shared/Utils';
 import { getColumnName, getColumnPosition } from '../shared/Utils';
 
 const selectors = {
@@ -390,22 +390,6 @@ export const CasesTable = {
       );
     },
     /**
-     * Validates the link in a specific table cell for a given case and column.
-     * @param dataCase The case object.
-     * @param columnID The ID of the column.
-     */
-    shouldHaveTableCellLink(dataCase: any, columnID: string) {
-      cy.then(() =>
-        getColumnPosition(CommonSelectors.tableHead(), tableColumns, columnID).then(position => {
-          if (position !== -1) {
-            cy.get(selectors.tableCell(dataCase)).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataCase));
-          } else {
-            cy.handleColumnNotFound(columnID);
-          }
-        })
-      );
-    },
-    /**
      * Validates the default visibility of each column.
      */
     shouldMatchDefaultColumnVisibility() {
@@ -522,15 +506,6 @@ export const CasesTable = {
       }).as('searchRequest');
       CasesTable.actions.selectSuggestion(caseField, caseValue);
       cy.wait('@searchRequest');
-    },
-    /**
-     * Validates the sent request to api on search typing functionality.
-     */
-    shouldRequestOnSearchTyping() {
-      const caseValue = data.case.case;
-      cy.intercept('GET', `**/cases/autocomplete?prefix=${caseValue}**`).as('autocompleteRequest');
-      CasesTable.actions.typeSearch(caseValue, false /*needIntercept*/);
-      cy.wait('@autocompleteRequest');
     },
     /**
      * Validates the sent request to api on sorting functionality of a column.

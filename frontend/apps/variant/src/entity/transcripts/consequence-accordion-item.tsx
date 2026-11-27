@@ -10,8 +10,8 @@ import { Button } from '@/components/base/shadcn/button';
 import { Card, CardContent, CardHeader } from '@/components/base/shadcn/card';
 import { Separator } from '@/components/base/shadcn/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
-import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
+import { getOmimOrgUrl } from '@/components/lib/external-links';
 import { replaceUnderscore } from '@/components/lib/string-format';
 
 import TranscriptDetails from './transcript-details';

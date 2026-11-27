@@ -1,4 +1,5 @@
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
+import { getObolibraryUrl } from '@/components/lib/external-links';
 
 interface ConditionCellProps {
   conditionId?: string;
@@ -15,22 +16,12 @@ function ConditionCell({ conditionId, conditionName }: ConditionCellProps) {
 
   return (
     <div className="font-medium">
-      <a
-        href={`http://purl.obolibrary.org/obo/${conditionId?.replace(':', '_')}`}
-        target="_blank"
-        className="hover:underline"
-        rel="noreferrer"
-      >
+      <a href={getObolibraryUrl(conditionId)} target="_blank" className="hover:underline" rel="noreferrer">
         {conditionName}
       </a>{' '}
       <span className="font-mono text-xs text-muted-foreground">
         (
-        <a
-          href={`http://purl.obolibrary.org/obo/${conditionId?.replace(':', '_')}`}
-          target="_blank"
-          className="hover:underline"
-          rel="noreferrer"
-        >
+        <a href={getObolibraryUrl(conditionId)} target="_blank" className="hover:underline" rel="noreferrer">
           {conditionId}
         </a>
         )

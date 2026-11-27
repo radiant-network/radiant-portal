@@ -22,11 +22,6 @@ describe('Case Entity - Variants - Somatic - SNV (TO) - Table - Hyperlinks', () 
     CaseEntity_Variants_SNV_Table.somatic.validations.shouldDrawerOpen(data.variantSomaticTO);
   });
 
-  it('Gene', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.somatic.validations.shouldHaveTableCellLink(data.variantSomaticTO, 'gene');
-  });
-
   it('Gene Plus', () => {
     setupTest();
     CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder

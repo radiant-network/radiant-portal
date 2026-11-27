@@ -12,9 +12,9 @@ import { Badge } from '@/components/base/shadcn/badge';
 import { Button } from '@/components/base/shadcn/button';
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/base/shadcn/card';
 import { Spinner } from '@/components/base/spinner';
-import { getClingenCnvUrl, getFranklinCnvUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
+import { getClingenCnvUrl, getFranklinCnvUrl } from '@/components/lib/external-links';
 import { thousandNumberFormat, toKiloBases } from '@/components/lib/number-format';
 import { occurencesNotesApi } from '@/utils/api';
 

@@ -1,6 +1,6 @@
 import AnchorLinkCell from '@/components/base/data-table/cells/anchor-link-cell';
 import EmptyCell from '@/components/base/data-table/cells/empty-cell';
-import { getOmimOrgUrl } from '@/components/base/variant/utils';
+import { getOmimOrgUrl } from '@/components/lib/external-links';
 
 type GeneOmimLinkCellProps = {
   symbol?: string;

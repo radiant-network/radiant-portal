@@ -1,10 +1,10 @@
 import AnchorLink from '@/components/base/navigation/anchor-link';
+import { getEnsemblUrl } from '@/components/lib/external-links';
 import { cn } from '@/components/lib/utils';
 
 import CanonicalBadge from './canonical-badge';
 import ManePlusBadge from './mane-plus-badge';
 import ManeSelectBadge from './mane-select-badge';
-import { getEnsemblUrl } from './utils';
 
 interface TranscriptIdLinkProps extends React.HTMLAttributes<HTMLDivElement> {
   transcriptId: string;

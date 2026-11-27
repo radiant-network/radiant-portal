@@ -9,6 +9,7 @@ import { createColumnSettings, type TableColumnDef } from '@/components/base/dat
 import TooltipHeader from '@/components/base/data-table/headers/table-tooltip-header';
 import { Badge } from '@/components/base/shadcn/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
+import { getClinvarRcvUrl, getHpoJaxUrl, getOmimEntryUrl, getOrphanetUrl } from '@/components/lib/external-links';
 import AnchorLinkCell from 'components/base/data-table/cells/anchor-link-cell';
 import ClassificationCell from 'components/base/data-table/cells/classification-cell';
 import RatingCell from 'components/base/data-table/cells/rating-cell';
@@ -82,7 +83,7 @@ function getPathogenicEvidenceColumns(t: TFunction<string, undefined>) {
         <div className="flex justify-end items-center">
           <AnchorLinkCell
             variant="primary"
-            href={`https://www.ncbi.nlm.nih.gov/clinvar/${info.getValue()}.${info.row.original.version}`}
+            href={getClinvarRcvUrl(info.getValue(), info.row.original.version)}
             size="xs"
             target="_blank"
             rel="noopener noreferrer"
@@ -144,11 +145,11 @@ function getConditionPhenotypeColumns(
         let href: string = '';
 
         if (panelType === GetGermlineVariantConditionsPanelTypeEnum.Omim) {
-          href = `https://omim.org/entry/${info.getValue()}`;
+          href = getOmimEntryUrl(info.getValue());
         } else if (panelType === GetGermlineVariantConditionsPanelTypeEnum.Orphanet) {
-          href = `https://www.orpha.net/en/disease/detail/${info.getValue()}`;
+          href = getOrphanetUrl(info.getValue());
         } else if (panelType === GetGermlineVariantConditionsPanelTypeEnum.Hpo) {
-          href = `https://hpo.jax.org/app/browse/term/${info.getValue()}`;
+          href = getHpoJaxUrl(info.getValue());
         }
 
         return (

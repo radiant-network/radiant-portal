@@ -10,6 +10,7 @@ import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle }
 import { Input } from '@/components/base/shadcn/input';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
+import { getClinvarVariationUrl } from '@/components/lib/external-links';
 import { variantsApi } from '@/utils/api';
 
 import { getPathogenicEvidenceColumns, pathogenicEvidenceDefaultSettings } from './table-settings';
@@ -61,11 +62,7 @@ function ClinVarCard() {
             <Button
               variant="outline"
               onClick={() => {
-                window.open(
-                  `https://www.ncbi.nlm.nih.gov/clinvar/variation/${data?.clinvar_id}`,
-                  '_blank',
-                  'noopener,noreferrer',
-                );
+                window.open(getClinvarVariationUrl(String(data.clinvar_id)), '_blank', 'noopener,noreferrer');
               }}
             >
               {t('variant_entity.overview.clin_var')} <ExternalLink />

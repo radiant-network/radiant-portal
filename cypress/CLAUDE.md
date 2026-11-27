@@ -238,6 +238,7 @@ shouldShowField(fieldId: string, dataVariant: any) {
 
 ### Hyperlinks
 
+- External link URLs built by the frontend are unit-tested in `frontend/components/lib/external-links.test.ts`; Cypress only keeps internal links (click and land on the page) and URLs that come from the API (e.g. CMC).
 - Build hrefs via `getUrlLink(fieldId, data)` in `pom/shared/Utils.ts` rather than hardcoding URLs in the POM. Add a new `case` to `getUrlLink` for any new link source — keep all variant-URL construction in one switch.
 - Same `fieldId` convention as `shouldShowField`: snake_case key that matches the data field.
 - Internal app routes (e.g. `/variants/entity/{locus_id}?tab=…`) are valid `getUrlLink` cases too — keeps everything URL-related in one place. Prefix them with `/${Cypress.expose('api_tenant')}`: every protected route carries a tenant segment, so the rendered `href` is `/<api_tenant>/variants/entity/…`.

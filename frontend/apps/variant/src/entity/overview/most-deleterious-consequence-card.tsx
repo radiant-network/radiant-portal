@@ -11,10 +11,10 @@ import { Separator } from '@/components/base/shadcn/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import AminoAcidChange from '@/components/base/variant/amino-acid-change';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
-import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { VariantEntityTabs } from '@/components/cores/types/variant-tabs';
 import { useI18n } from '@/components/hooks/i18n';
 import { useLocalPath } from '@/components/hooks/use-local-path';
+import { getDbSnpUrl, getGnomadVariantUrl, getOmimOrgUrl } from '@/components/lib/external-links';
 
 function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverview } & CardProps) {
   const { t } = useI18n();
@@ -120,7 +120,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
               <ConditionalField condition={!!data?.gnomad_v3_af}>
                 <a
                   data-cy="gnomad"
-                  href={`https://gnomad.broadinstitute.org/variant/${data.locus}?dataset=gnomad_r4`}
+                  href={getGnomadVariantUrl(data.locus)}
                   target="_blank"
                   rel="noreferrer"
                   className="hover:underline"
@@ -162,7 +162,7 @@ function MostDeleteriousConsequenceCard({ data, ...props }: { data: VariantOverv
             <AnchorLink
               data-cy="dbsnp"
               size="sm"
-              href={`https://www.ncbi.nlm.nih.gov/snp/${data.rsnumber}`}
+              href={getDbSnpUrl(data.rsnumber)}
               className={'hover:underline font-mono'}
               target="_blank"
               rel="noreferrer"

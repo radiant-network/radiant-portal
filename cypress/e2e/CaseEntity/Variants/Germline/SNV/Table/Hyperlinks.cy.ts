@@ -19,16 +19,6 @@ describe('Case Entity - Variants - Germline - SNV - Table - Hyperlinks', () => {
     CaseEntity_Variants_SNV_Table.germline.validations.shouldDrawerOpen(data.variantGermline);
   });
 
-  it('dbSNP', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldHaveTableCellLink(data.variantGermline, 'dbsnp');
-  });
-
-  it('Gene', () => {
-    setupTest();
-    CaseEntity_Variants_SNV_Table.germline.validations.shouldHaveTableCellLink(data.variantGermline, 'gene');
-  });
-
   it('Gene Plus', () => {
     setupTest();
     CaseEntity_Variants_SavedFilters.snv.actions.clickNewFilterButton(); // Clean Query Builder

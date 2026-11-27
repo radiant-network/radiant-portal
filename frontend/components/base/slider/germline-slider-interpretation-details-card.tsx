@@ -20,9 +20,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadc
 import { DescriptionSection } from '@/components/base/slider/description';
 import SliderCard from '@/components/base/slider/slider-card';
 import TranscriptIdLink from '@/components/base/variant/transcript-id-link';
-import { getOmimOrgUrl } from '@/components/base/variant/utils';
 import { useI18n } from '@/components/hooks/i18n';
 import { useTenant } from '@/components/hooks/use-tenant';
+import { getOmimOrgUrl } from '@/components/lib/external-links';
 import { interpretationApi } from '@/utils/api';
 
 type GermlineSliderInterpretationDetailsCardProps = {

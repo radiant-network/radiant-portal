@@ -1,6 +1,6 @@
 /// <reference types="cypress"/>
 import { CommonSelectors } from 'pom/shared/Selectors';
-import { getColumnPosition, getUrlLink, oneMinute, hasVisibleText } from 'pom/shared/Utils';
+import { getColumnPosition, oneMinute, hasVisibleText } from 'pom/shared/Utils';
 
 const selectors = {
   tableId: '[id="overlapping-genes-table"]',
@@ -175,22 +175,6 @@ export const OverlappingGenesModal = {
       cy.then(() =>
         getColumnPosition(CommonSelectors.tableHead(selectors.tableId), tableColumns, columnID, selectors.tableHeadRow).then(position => {
           cy.validateTableFirstRowContent(value, position, selectors.tableId);
-        })
-      );
-    },
-    /**
-     * Validates the link in a specific table cell for a given gene and column.
-     * @param dataGene The overlapping gene object.
-     * @param columnID The ID of the column.
-     */
-    shouldHaveTableCellLink(dataGene: any, columnID: string) {
-      cy.then(() =>
-        getColumnPosition(CommonSelectors.tableHead(selectors.tableId), tableColumns, columnID, selectors.tableHeadRow).then(position => {
-          if (position !== -1) {
-            cy.get(CommonSelectors.tableRow(selectors.tableId)).eq(0).find(CommonSelectors.tableCellData).eq(position).find(CommonSelectors.link).should('have.attr', 'href', getUrlLink(columnID, dataGene));
-          } else {
-            cy.handleColumnNotFound(columnID);
-          }
         })
       );
     },

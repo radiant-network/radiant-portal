@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { User } from 'lucide-react';
-import { fn } from 'storybook/test';
+import { expect, fn, userEvent } from 'storybook/test';
 
 import { Badge } from '@/components/base/shadcn/badge';
 
@@ -11,7 +11,14 @@ import { badgeVariants } from './utils';
 const meta = {
   title: 'Components/Badges/Badge',
   component: Badge,
+  tags: ['vitest'],
   args: {},
+  parameters: {
+    design: {
+      type: 'figma',
+      url: 'https://www.figma.com/design/IsQJi9M07hQCLhc6Vu8Wyd/shadcn-ui-kit---March-2026?node-id=23-995',
+    },
+  },
 } satisfies Meta<typeof Badge>;
 
 export default meta;
@@ -31,6 +38,11 @@ export const Variants: Story = {
       </div>
     </StorySection>
   ),
+  play: async ({ canvas }) => {
+    for (const variant of badgeVariants) {
+      await expect(canvas.getByText(variant!)).toBeVisible();
+    }
+  },
 };
 
 export const Closable: Story = {
@@ -49,6 +61,13 @@ export const Closable: Story = {
       </div>
     </StorySection>
   ),
+  play: async ({ canvas, args }) => {
+    const removeButtons = canvas.getAllByRole('button', { name: 'Remove' });
+    await expect(removeButtons).toHaveLength(badgeVariants.length);
+
+    await userEvent.click(removeButtons[0]);
+    await expect(args.onClose).toHaveBeenCalledOnce();
+  },
 };
 
 export const Clickable: Story = {
@@ -67,6 +86,10 @@ export const Clickable: Story = {
       </div>
     </StorySection>
   ),
+  play: async ({ canvas, args }) => {
+    await userEvent.click(canvas.getByText('default'));
+    await expect(args.onClick).toHaveBeenCalledOnce();
+  },
 };
 
 export const WithIcon: Story = {
@@ -84,6 +107,11 @@ export const WithIcon: Story = {
       </div>
     </StorySection>
   ),
+  play: async ({ canvas }) => {
+    for (const variant of badgeVariants) {
+      await expect(canvas.getByText(variant!).querySelector('svg')).toBeInTheDocument();
+    }
+  },
 };
 
 export const IconOnly: Story = {
@@ -102,6 +130,13 @@ export const IconOnly: Story = {
       </div>
     </StorySection>
   ),
+  play: async ({ canvasElement }) => {
+    const icons = canvasElement.querySelectorAll('svg');
+    await expect(icons).toHaveLength(badgeVariants.length);
+    for (const icon of icons) {
+      await expect(icon.parentElement?.textContent).toBe('');
+    }
+  },
 };
 
 export const WithCount: Story = {
@@ -120,4 +155,7 @@ export const WithCount: Story = {
       </div>
     </StorySection>
   ),
+  play: async ({ canvas }) => {
+    await expect(canvas.getAllByText('10')).toHaveLength(badgeVariants.length);
+  },
 };

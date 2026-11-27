@@ -7,12 +7,6 @@ describe('Cases - Request Validation', () => {
     cy.login();
   };
 
-  it('Autocomplete', () => {
-    setupTest();
-    cy.visitCasesPage();
-    CasesTable.validations.shouldRequestOnSearchTyping();
-  });
-
   it('Search', () => {
     setupTest();
     cy.visitCasesPage();

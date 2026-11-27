@@ -4,6 +4,9 @@ node_modules/
 dist/
 build/
 
+# Vitest artifacts (reports, attachments, failure screenshots)
+.vitest/
+
 # Build-time generated translations
 translations/merged/
 translations/.merge-lock-*

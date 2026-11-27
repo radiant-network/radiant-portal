@@ -1,4 +1,5 @@
 import { useI18n } from '@/components/hooks/i18n';
+import { getCohortUrl } from '@/components/lib/external-links';
 
 import AnchorLink from '../../navigation/anchor-link';
 
@@ -10,24 +11,12 @@ type CohortCellProps = {
   locusId?: string;
 };
 
-const getCohortLink = (cohort: string, locusId?: string) => {
-  if (!locusId) return undefined;
-  switch (cohort) {
-    case 'topmed_bravo':
-      return `https://bravo.sph.umich.edu/freeze8/hg38/variant/snv/${locusId}`;
-    case 'gnomad_genomes_v3':
-      return `https://gnomad.broadinstitute.org/variant/${locusId}?dataset=gnomad_r4`;
-    default:
-      return undefined;
-  }
-};
-
 function CohortCell({ cohort, locusId }: CohortCellProps) {
   const { t } = useI18n();
 
   if (!cohort) return <EmptyCell />;
 
-  const cohortLink = getCohortLink(cohort, locusId);
+  const cohortLink = getCohortUrl(cohort, locusId);
   if (!cohortLink) {
     return <TextCell>{t(`variant_entity.frequency.public_cohorts.${cohort}`)}</TextCell>;
   }

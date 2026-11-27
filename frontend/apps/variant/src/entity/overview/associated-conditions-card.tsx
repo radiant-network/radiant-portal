@@ -4,6 +4,7 @@ import { Badge } from '@/components/base/shadcn/badge';
 import { Card, CardContent, CardHeader, type CardProps } from '@/components/base/shadcn/card';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base/shadcn/tooltip';
 import { useI18n } from '@/components/hooks/i18n';
+import { getOmimEntryUrl } from '@/components/lib/external-links';
 
 function AssociatedConditionsCard({ data, ...props }: { data: VariantOverview } & CardProps) {
   const { t } = useI18n();
@@ -28,7 +29,7 @@ function AssociatedConditionsCard({ data, ...props }: { data: VariantOverview } 
             <span>
               <a
                 data-cy={`${condition.omim_phenotype_id}-link`}
-                href={`https://www.omim.org/entry/${condition.omim_phenotype_id}`}
+                href={condition.omim_phenotype_id ? getOmimEntryUrl(condition.omim_phenotype_id) : undefined}
                 target="_blank"
                 rel="noreferrer"
                 className="hover:underline"
