@@ -49,16 +49,9 @@ func init() {
 const patientViewEnabledEnv = "PATIENT_VIEW_ENABLED"
 
 func setupRouter(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled bool, igvPublicTracksPrefix string) *gin.Engine {
-	authMiddleware, err := authorization.InitAuthorizer()
-	if err != nil {
-		slog.Error("failed to initialize authorizer", slog.Any("error", err))
-		os.Exit(1)
-	}
-	return setupRouterWithAuth(dbStarrocks, dbPostgres, patientViewEnabled, igvPublicTracksPrefix, authMiddleware, utils.NewKeycloakAuth())
-}
+	// Auth service
+	auth := utils.NewKeycloakAuth()
 
-// setupRouterWithAuth takes the token check and the claim reader, so a test can serve the real routes as a given user.
-func setupRouterWithAuth(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewEnabled bool, igvPublicTracksPrefix string, authMiddleware gin.HandlerFunc, auth utils.Auth) *gin.Engine {
 	// S3 URL Presigner for IGV returned URLs
 	s3Presigner := utils.NewS3PreSigner()
 
@@ -132,6 +125,12 @@ func setupRouterWithAuth(dbStarrocks *gorm.DB, dbPostgres *gorm.DB, patientViewE
 	userAdmin := service.NewUserAdmin(repoUsers, repoOrganizationsWrite, provisioning.NewAdminDeps(postgresDB, starrocksDB))
 
 	r := newEngine()
+
+	authMiddleware, err := authorization.InitAuthorizer()
+	if err != nil {
+		slog.Error("failed to initialize authorizer", slog.Any("error", err))
+		os.Exit(1)
+	}
 
 	// Initialize public routes explicitly
 	r.GET("/status", server.StatusHandler(repoStarrocks, repoPostgres, notificationTemplates, reportTemplates))
