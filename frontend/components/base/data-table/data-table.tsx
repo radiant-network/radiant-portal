@@ -110,6 +110,10 @@ export { DEFAULT_PAGE_SIZE, DEFAULT_PAGE_SIZE_OPTIONS } from '@/components/base/
  */
 export type TableColumnMeta = {
   footerColSpan?: number;
+  /** Extra classes on each body cell of the column, computed from the row data. */
+  getCellClassName?: (rowData: any) => string | undefined;
+  /** Extra classes on the header cell of the column. */
+  headerClassName?: string;
 };
 
 /**
@@ -554,6 +558,7 @@ function getRowFlexRender<T extends RowData>({
               'overflow-hidden truncate text-nowrap',
               getColumnRowPinningExtraCN(cell.column),
               getRowPinningCellExtraCN(cell.row),
+              cell.column.columnDef.meta?.getCellClassName?.(cell.row.original),
             )}
             style={getColumnRowPinningExtraStyles(cell.column)}
           >
@@ -1206,9 +1211,14 @@ function DataTable<T extends RowData>({
                     <TableHead
                       key={header.id}
                       data-cy={getColumnHeaderPinningDataCy(header)}
-                      className={cn('group/header', getColumnHeaderPinningExtraCN(header), {
-                        'text-center': header.subHeaders.length > 0, // center header group with subheader
-                      })}
+                      className={cn(
+                        'group/header',
+                        getColumnHeaderPinningExtraCN(header),
+                        {
+                          'text-center': header.subHeaders.length > 0, // center header group with subheader
+                        },
+                        header.column.columnDef.meta?.headerClassName,
+                      )}
                       style={getColumnHeaderPinningExtraStyles(header)}
                       colSpan={header.colSpan}
                       variant={getColumnSettingsVariant(defaultColumnSettings, header.id)}
