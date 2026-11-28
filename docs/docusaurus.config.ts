@@ -31,12 +31,14 @@ const config: Config = {
 
     onBrokenLinks: 'throw',
 
-    // Even if you don't use internationalization, you can use this field to set
-    // useful metadata like html lang. For example, if your site is Chinese, you
-    // may want to replace "en" with "zh-Hans".
+    // Only the user guide is translated; untranslated French pages fall back to English.
     i18n: {
         defaultLocale: 'en',
-        locales: ['en'],
+        locales: ['en', 'fr'],
+        localeConfigs: {
+            en: {label: 'English'},
+            fr: {label: 'Français'},
+        },
     },
 
     presets: [
@@ -82,6 +84,10 @@ const config: Config = {
                     sidebarId: 'technicalGuideDoc',
                     position: 'left',
                     label: 'Technical Guide',
+                },
+                {
+                    type: 'localeDropdown',
+                    position: 'right',
                 },
                 {
                     href: 'https://github.com/radiant-network',

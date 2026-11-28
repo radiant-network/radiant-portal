@@ -2,6 +2,6 @@
 sidebar_position: 1
 ---
 
-# User Guide
+# User guide
 
-Here documentation of **User Guide**.
+This guide explains how to use the Radiant portal to explore the cases, variants and files of your genomic analyses.

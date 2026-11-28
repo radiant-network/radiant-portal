@@ -3,6 +3,14 @@ import apiSidebar from "./api/sidebar";
 import radiantApiSidebar from "./radiant-api/sidebar";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
+// Generated API pages can share a summary, and the i18n build needs a unique translation key per item.
+const withDocKeys = (items: any[]): any[] =>
+    items.map(item => {
+        if (item.type === 'doc') return {...item, key: item.id};
+        if (item.type === 'category') return {...item, items: withDocKeys(item.items)};
+        return item;
+    });
+
 /**
  * Creating a sidebar enables you to:
  - create an ordered group of docs
@@ -51,7 +59,7 @@ const sidebars: SidebarsConfig = {
                         description:
                             "This is documentation for Radiant's public API. Here you'll find all the information you need to integrate with our platform, including endpoint details, request/response formats, authentication methods, and usage examples.",
                     },
-                    items: radiantApiSidebar,
+                    items: withDocKeys(radiantApiSidebar as any[]),
                 },
             ],
         },
