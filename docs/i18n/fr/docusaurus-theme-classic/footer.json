@@ -7,6 +7,10 @@
     "message": "Guide utilisateur",
     "description": "The label of footer link with label=User Guide linking to /docs/user-guide/intro"
   },
+  "link.item.label.Methodology": {
+    "message": "Méthodologie",
+    "description": "The label of footer link with label=Methodology linking to /docs/methodology/intro"
+  },
   "link.item.label.Technical Guide": {
     "message": "Guide technique",
     "description": "The label of footer link with label=Technical Guide linking to /docs/technical-guide/intro"

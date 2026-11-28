@@ -7,6 +7,10 @@
     "message": "Guide utilisateur",
     "description": "Navbar item with label User Guide"
   },
+  "item.label.Methodology": {
+    "message": "Méthodologie",
+    "description": "Navbar item with label Methodology"
+  },
   "item.label.Technical Guide": {
     "message": "Guide technique",
     "description": "Navbar item with label Technical Guide"

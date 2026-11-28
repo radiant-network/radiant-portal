@@ -1,4 +1,5 @@
 import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
+import methodologyDoc from "./docs/methodology/sidebars";
 import technicalGuideDoc from "./docs/technical-guide/sidebars";
 import userGuideDoc from "./docs/user-guide/sidebars";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
@@ -14,6 +15,7 @@ import userGuideDoc from "./docs/user-guide/sidebars";
  Create as many sidebars as you want.
  */
 const sidebars: SidebarsConfig = {
+    methodologyDoc,
     technicalGuideDoc,
     userGuideDoc
 };

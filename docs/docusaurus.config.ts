@@ -80,6 +80,12 @@ const config: Config = {
                     position: 'left',
                 },
                 {
+                    label: 'Methodology',
+                    type: 'docSidebar',
+                    sidebarId: 'methodologyDoc',
+                    position: 'left',
+                },
+                {
                     type: 'docSidebar',
                     sidebarId: 'technicalGuideDoc',
                     position: 'left',
@@ -105,6 +111,10 @@ const config: Config = {
                         {
                             label: 'User Guide',
                             to: '/docs/user-guide/intro',
+                        },
+                        {
+                            label: 'Methodology',
+                            to: '/docs/methodology/intro',
                         },
                         {
                             label: 'Technical Guide',
