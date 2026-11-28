@@ -2,9 +2,9 @@
 sidebar_position: 1
 ---
 
-# Verbe à l'infinitif + objet {#verb-object}
+# Verbe à l'infinitif + objet
 
-<!-- Facultatif : rôle ou contexte. Supprimer si la page s'applique à tous. -->
+{/* Facultatif : rôle ou contexte. Supprimer si la page s'applique à tous. */}
 <span className="badge badge--primary">Admin</span>
 
 Une ou deux phrases : ce que l'utilisateur obtient.
@@ -21,7 +21,7 @@ Rôle requis, page de départ, données nécessaires. Supprimer s'il n'y a pas d
 
 Résultat : le message « Texte exact » s'affiche, ou l'élément visible qui confirme la réussite.
 
-## Voir aussi {#see-also}
+## Voir aussi {/* #see-also */}
 
 - [Page suivante logique](./next-page.md)
 - [Page proche](./related-page.md)

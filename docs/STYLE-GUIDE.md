@@ -58,7 +58,7 @@ No capitals for emphasis, no underlining, no meaning carried by color alone.
 
 - One action per step. Place first, then action: « Dans le champ **Nom**, saisissez… ».
 - Imperative, *vous* in French.
-- Three to nine steps; split beyond that. Optional steps start with « (Facultatif) ».
+- Nine steps at most; split beyond that. A single action is a sentence, not a list. Optional steps start with « (Facultatif) ».
 - One path per procedure; the alternatives go in a tip.
 - Verbs: cliquer sur / click (button, link, icon), sélectionner / select (option, checkbox, list item), saisir / enter (text), ouvrir / open (page, tab), activer · désactiver / turn on · off (switch).
 
@@ -86,13 +86,13 @@ No capitals for emphasis, no underlining, no meaning carried by color alone.
 - *Vous*, present tense, active voice, sentences of 25 words at most. Explain the tool, not genetics.
 - Non-breaking space (U+00A0) before `:` `;` `?` `!` and inside « », as the UI does. Docusaurus does not add it.
 - Numbers: `1 000`, `0,05`, `25 %`. A value quoted from the screen keeps the screen's format.
-- Terms come from `frontend/translations/common/fr.json`: « le variant » (masculine, never « variante »), « enregistrer » (never « sauvegarder »), « requête », « filtre », « facette », « germinal », « somatique ».
+- Terms come from `frontend/translations/common/fr.json`: « le variant » (masculine, never « variante »), « enregistrer » (never « sauvegarder »), « requête », « filtre », « facette », « germinal », « somatique », « réseau » / *network* (a private data space; never « tenant »).
 - Avoid anglicisms: « cliquer sur » (not « cliquer le »), « courriel », « charger », « prendre en charge ».
 
 ## Two languages
 
 - Same tree and same file names (in English) in `docs/user-guide/` and `i18n/fr/docusaurus-plugin-content-docs/current/user-guide/`. Docusaurus matches pages by path.
-- Explicit English heading IDs (`## Voir aussi {#see-also}`), the same in both languages, so that anchors work everywhere. `npm run write-heading-ids` generates them from the English headings; copy them into the French page.
+- Every `##` heading has an explicit English ID, the same in both languages, so that anchors work everywhere: `## Voir aussi {/* #see-also */}`. The site's `future.v4` flag rejects the `{#see-also}` and `<!-- -->` syntaxes: use `{/* */}` for comments too.
 - One screenshot set per language.
 - A change to the guide updates both languages in the same PR.
 - Copy UI labels from `fr.json` and `en.json`; never translate them yourself.
