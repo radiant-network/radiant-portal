@@ -1,9 +1,21 @@
+import {existsSync} from 'fs';
 import {themes as prismThemes} from 'prism-react-renderer';
 import type {Config} from '@docusaurus/types';
 import type * as Preset from '@docusaurus/preset-classic';
 import type * as Plugin from "@docusaurus/types/src/plugin";
 import type * as OpenApiPlugin from "docusaurus-plugin-openapi-docs";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
+
+// A function editUrl ignores editLocalizedFiles, so it picks the translated file itself, falling back
+// to the English one like the site does. `docusaurus start` runs in development and `docusaurus build`
+// forces production: locally, "Edit this page" opens the file in VS Code; on the published site, on GitHub.
+const editUrl = ({versionDocsDirPath, docPath, locale}: {versionDocsDirPath: string; docPath: string; locale: string}) => {
+    const localized = `i18n/${locale}/docusaurus-plugin-content-docs/current/${docPath}`;
+    const file = locale !== 'en' && existsSync(localized) ? localized : `${versionDocsDirPath}/${docPath}`;
+    return process.env.NODE_ENV === 'development'
+        ? `vscode://file/${process.cwd()}/${file}`
+        : `https://github.com/radiant-network/radiant-portal/tree/main/docs/${file}`;
+};
 
 const config: Config = {
     title: 'Radiant',
@@ -50,8 +62,7 @@ const config: Config = {
                     docItemComponent: "@theme/ApiItem",
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
-                    editUrl:
-                        'https://github.com/radiant-network/radiant-portal/tree/main/docs/',
+                    editUrl,
                 },
                 theme: {
                     customCss: './src/css/custom.css',
