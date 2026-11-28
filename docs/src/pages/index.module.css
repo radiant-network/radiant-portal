@@ -1,23 +1,69 @@
-/**
- * CSS files with the .module.css suffix will be treated as CSS modules
- * and scoped locally.
- */
-
-.heroBanner {
-  padding: 4rem 0;
+.hero {
+  padding: 5rem 1rem 4rem;
   text-align: center;
-  position: relative;
-  overflow: hidden;
+  color: var(--radiant-hero-fg);
+  background: linear-gradient(180deg, var(--radiant-hero-from), var(--radiant-hero-to));
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
 }
 
-@media screen and (max-width: 996px) {
-  .heroBanner {
-    padding: 2rem;
-  }
+.title {
+  font-size: clamp(2.5rem, 6vw, 3.75rem);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+  color: inherit;
+}
+
+.tagline {
+  font-size: 1.15rem;
+  max-width: 40rem;
+  margin: 0 auto 2rem;
+  opacity: 0.8;
 }
 
 .buttons {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
   justify-content: center;
+}
+
+.guides {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1.5rem;
+  max-width: 56rem;
+  margin: 3rem auto 4rem;
+}
+
+.card {
+  display: block;
+  padding: 1.5rem 1.75rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: var(--ifm-card-border-radius);
+  color: inherit;
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+.card:hover {
+  color: inherit;
+  text-decoration: none;
+  border-color: var(--ifm-color-primary);
+  box-shadow: var(--ifm-global-shadow-lw);
+}
+
+.cardTitle {
+  font-size: 1.35rem;
+  margin-bottom: 0.5rem;
+  color: var(--ifm-color-primary);
+}
+
+.cardText {
+  margin: 0;
+  color: var(--ifm-color-emphasis-700);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
 }

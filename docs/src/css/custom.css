@@ -4,29 +4,54 @@
  * work well for content-centric websites.
  */
 
-/* You can override the default Infima variables here. */
+/* Radiant palette, copied from frontend/themes/radiant/theme.css */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  --radiant-50: oklch(0.98 0.01 228.92);
+  --radiant-100: oklch(0.96 0.03 231.05);
+  --radiant-200: oklch(0.91 0.06 224.03);
+  --radiant-300: oklch(0.85 0.1 221.85);
+  --radiant-400: oklch(0.79 0.14 223.72);
+  --radiant-500: oklch(0.73 0.14 227.83);
+  --radiant-600: oklch(0.63 0.13 233.32);
+  --radiant-700: oklch(0.53 0.11 234.92);
+  --radiant-800: oklch(0.47 0.09 231.27);
+  --radiant-900: oklch(0.41 0.08 233.79);
+  --radiant-950: oklch(0.31 0.06 236.35);
+
+  --ifm-color-primary: var(--radiant-700);
+  --ifm-color-primary-dark: var(--radiant-800);
+  --ifm-color-primary-darker: var(--radiant-900);
+  --ifm-color-primary-darkest: var(--radiant-950);
+  --ifm-color-primary-light: var(--radiant-600);
+  --ifm-color-primary-lighter: var(--radiant-500);
+  --ifm-color-primary-lightest: var(--radiant-400);
+  --ifm-heading-color: var(--radiant-950);
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+
+  --radiant-hero-from: var(--radiant-50);
+  --radiant-hero-to: var(--radiant-100);
+  --radiant-hero-fg: var(--radiant-950);
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+  --ifm-color-primary: var(--radiant-400);
+  --ifm-color-primary-dark: var(--radiant-500);
+  --ifm-color-primary-darker: var(--radiant-600);
+  --ifm-color-primary-darkest: var(--radiant-700);
+  --ifm-color-primary-light: var(--radiant-300);
+  --ifm-color-primary-lighter: var(--radiant-200);
+  --ifm-color-primary-lightest: var(--radiant-100);
+  --ifm-heading-color: inherit;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+
+  --radiant-hero-from: var(--radiant-950);
+  --radiant-hero-to: oklch(0.24 0.04 238);
+  --radiant-hero-fg: var(--radiant-50);
+}
+
+.footer--dark {
+  --ifm-footer-background-color: var(--radiant-950);
 }
 
 

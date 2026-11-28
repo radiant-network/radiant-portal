@@ -1,0 +1,26 @@
+{
+  "homepage.title": {
+    "message": "Documentation Radiant"
+  },
+  "homepage.description": {
+    "message": "Documentation du portail Radiant"
+  },
+  "homepage.button.userGuide": {
+    "message": "Guide utilisateur"
+  },
+  "homepage.button.technicalGuide": {
+    "message": "Guide technique"
+  },
+  "homepage.guides.user.title": {
+    "message": "Guide utilisateur"
+  },
+  "homepage.guides.user.description": {
+    "message": "Utiliser le portail : explorer les cas, filtrer les variants et consulter les fichiers."
+  },
+  "homepage.guides.technical.title": {
+    "message": "Guide technique"
+  },
+  "homepage.guides.technical.description": {
+    "message": "Architecture, modèle de données, API, déploiement et contribution."
+  }
+}
